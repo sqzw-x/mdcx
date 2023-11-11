@@ -1,0 +1,13 @@
+<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+        "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg t="1652530616077" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7800"
+     width="200" height="200">
+    <defs>
+        <style type="text/css">@font-face { font-family: element-icons; src:
+            url("chrome-extension://moombeodfomdpjnpocobemoiaemednkg/fonts/element-icons.woff") format("woff"),
+            url("chrome-extension://moombeodfomdpjnpocobemoiaemednkg/fonts/element-icons.ttf ") format("truetype"); }
+        </style>
+    </defs>
+    <path d="M226.592 896C167.616 896 128 850.48 128 782.736V241.264C128 173.52 167.616 128 226.592 128c20.176 0 41.136 5.536 62.288 16.464l542.864 280.432C887.648 453.792 896 491.872 896 512s-8.352 58.208-64.272 87.088L288.864 879.536C267.712 890.464 246.768 896 226.592 896z m0-704.304c-31.008 0-34.368 34.656-34.368 49.568v541.472c0 14.896 3.344 49.568 34.368 49.568 9.6 0 20.88-3.2 32.608-9.248l542.864-280.432c21.904-11.328 29.712-23.232 29.712-30.608s-7.808-19.28-29.712-30.592L259.2 200.96c-11.728-6.048-23.008-9.264-32.608-9.264z"
+          p-id="7801"></path>
+</svg>

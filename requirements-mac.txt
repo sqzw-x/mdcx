@@ -1,0 +1,17 @@
+lxml==4.9.2
+pyquery==1.4.1
+cloudscraper==1.2.71
+requests==2.24.0
+beautifulsoup4==4.9.3
+Pillow==9.4.0
+PyQt5==5.15.6
+PySocks==1.7.1
+urllib3==1.25.11
+zhconv
+langid
+opencv-contrib-python-headless==4.7.0.68
+deepl-translate
+ping3
+oshash
+curl_cffi
+AppKit

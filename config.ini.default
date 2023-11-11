@@ -1,0 +1,224 @@
+[modified_time]
+modified_time = 2023-11-07 01:00:39
+version = 120231107
+
+[media]
+media_path = 
+softlink_path = softlink
+success_output_folder = JAV_output
+failed_output_folder = failed
+extrafanart_folder = extrafanart_copy
+media_type = .mp4|.avi|.rmvb|.wmv|.mov|.mkv|.flv|.ts|.webm|.iso|.mpg
+sub_type = .smi|.srt|.idx|.sub|.sup|.psb|.ssa|.ass|.usf|.xss|.ssf|.rt|.lrc|.sbv|.vtt|.ttml
+scrape_softlink_path = 
+
+[escape]
+folders = JAV_output,examples
+string = h_720,2048论坛@fun2048.com,1080p,720p,22-sht.me,-HD,bbs2048.org@,hhd800.com@,icao.me@,hhb_000,[456k.me],[ThZu.Cc]
+file_size = 100.0
+no_escape = record_success_file,
+
+[clean]
+clean_ext = .html|.url
+clean_name = uur76.mp4|uur9 3.com.mp4
+clean_contains = 直 播 盒 子|最 新 情 報|最 新 位 址|注册免费送|房间火爆|美女荷官|妹妹直播|精彩直播
+clean_size = 0.0
+clean_ignore_ext = 
+clean_ignore_contains = skip|ignore
+clean_enable = clean_ext,clean_name,clean_contains,clean_size,clean_ignore_ext,clean_ignore_contains,
+
+[common]
+thread_number = 10
+thread_time = 0
+javdb_time = 10
+main_mode = 1
+read_mode = 
+update_mode = c
+update_a_folder = actor
+update_b_folder = number actor
+update_d_folder = number actor
+soft_link = 0
+success_file_move = 1
+failed_file_move = 1
+success_file_rename = 1
+del_empty_folder = 1
+show_poster = 1
+
+[file_download]
+download_files = ,poster,thumb,fanart,nfo,ignore_wuma,ignore_fc2,ignore_guochan,
+keep_files = ,extrafanart,trailer,theme_videos,
+download_hd_pics = poster,thumb,amazon,official,google,
+google_used = m.media-amazon.com,
+google_exclude = fake,javfree,idoljp.com,qqimg.top,u9a9,picturedata,abpic,pbs.twimg.com,naiwarp
+
+[website]
+scrape_like = info
+website_single = airav_cc
+website_youma = airav_cc,iqqtv,javbus,freejavbt,jav321,dmm,javlibrary,7mmtv,hdouban,javdb,avsex,lulubar,airav,xcity,avsox
+website_wuma = iqqtv,javbus,freejavbt,jav321,avsox,7mmtv,hdouban,javdb,airav
+website_suren = mgstage,avsex,jav321,freejavbt,7mmtv,javbus,javdb
+website_fc2 = fc2,fc2club,fc2hub,freejavbt,7mmtv,hdouban,javdb,avsox,airav
+website_oumei = theporndb,javdb,javbus,hdouban
+website_guochan = madouqu,mdtv,hdouban,cnmdb
+whole_fields = outline,actor,thumb,release,tag,
+none_fields = wanted,
+website_set = official,
+title_website = theporndb,mgstage,dmm,javbus,jav321,javlibrary
+title_zh_website = airav_cc,iqqtv,avsex,lulubar
+title_website_exclude = 
+outline_website = theporndb,dmm,jav321
+outline_zh_website = airav_cc,avsex,iqqtv,lulubar
+outline_website_exclude = avsox,fc2club,javbus,javdb,javlibrary,freejavbt,hdouban
+actor_website = theporndb,javbus,javlibrary,javdb
+actor_website_exclude = 
+thumb_website = theporndb,javbus
+thumb_website_exclude = javdb
+poster_website = theporndb,avsex,javbus
+poster_website_exclude = airav,fc2club,fc2hub,iqqtv,7mmtv,javlibrary,lulubar
+extrafanart_website = javbus,freejavbt
+extrafanart_website_exclude = airav,airav_cc,avsex,avsox,iqqtv,javlibrary,lulubar
+trailer_website = freejavbt,mgstage,dmm
+trailer_website_exclude = 7mmtv,lulubar
+tag_website = javbus,freejavbt
+tag_website_exclude = 
+release_website = javbus,freejavbt,7mmtv
+release_website_exclude = fc2club,fc2hub
+runtime_website = javbus,freejavbt
+runtime_website_exclude = airav,airav_cc,fc2,fc2club,fc2hub,lulubar
+score_website = jav321,javlibrary,javdb
+score_website_exclude = airav,airav_cc,avsex,avsox,7mmtv,fc2,fc2hub,iqqtv,javbus,xcity,lulubar
+director_website = javbus,freejavbt
+director_website_exclude = airav,airav_cc,avsex,avsox,fc2,fc2hub,iqqtv,jav321,mgstage,lulubar
+series_website = javbus,freejavbt
+series_website_exclude = airav,airav_cc,avsex,iqqtv,7mmtv,javlibrary,lulubar
+studio_website = javbus,freejavbt
+studio_website_exclude = avsex
+publisher_website = javbus
+publisher_website_exclude = airav,airav_cc,avsex,iqqtv,lulubar
+wanted_website = javlibrary,javdb
+translate_by = youdao,google,deepl,
+deepl_key = 
+title_language = zh_cn
+title_sehua = on
+title_yesjav = off
+title_translate = on
+title_sehua_zh = on
+outline_language = zh_cn
+outline_translate = on
+outline_show = 
+actor_language = zh_cn
+actor_realname = on
+actor_translate = on
+tag_language = zh_cn
+tag_translate = on
+tag_include = actor,letters,series,studio,publisher,cnword,mosaic,definition,
+director_language = zh_cn
+director_translate = on
+series_language = zh_cn
+series_translate = on
+studio_language = zh_cn
+studio_translate = on
+publisher_language = zh_cn
+publisher_translate = on
+nfo_include_new = sorttitle,originaltitle,title_cd,outline,plot_,originalplot,release_,releasedate,premiered,country,mpaa,customrating,year,runtime,wanted,score,criticrating,actor,director,series,tag,genre,series_set,studio,maker,publisher,label,poster,cover,trailer,website,
+nfo_tagline = 发行日期 release
+nfo_tag_series = 系列: series
+nfo_tag_studio = 片商: studio
+nfo_tag_publisher = 发行: publisher
+
+[Name_Rule]
+folder_name = actor/number actor
+naming_file = number
+naming_media = number title
+prevent_char = 
+fields_rule = del_actor,del_char,
+suffix_sort = mosaic,cnword
+actor_no_name = 未知演员
+release_rule = YYYY-MM-DD
+folder_name_max = 60
+file_name_max = 60
+actor_name_max = 3
+actor_name_more = 等演员
+umr_style = -破解
+leak_style = -流出
+wuma_style = 
+youma_style = 
+show_moword = file,
+show_4k = folder,file,
+cd_name = 0
+cd_char = letter,underline,
+pic_name = 0
+trailer_name = 1
+hd_name = height
+hd_get = video
+
+[subtitle]
+cnword_char = -C.,-C-,ch.,字幕
+cnword_style = ^-C^
+folder_cnword = on
+file_cnword = on
+subtitle_folder = 
+subtitle_add = off
+subtitle_add_chs = on
+subtitle_add_rescrape = on
+
+[emby]
+server_type = emby
+emby_url = http://192.168.5.191:8096
+api_key = ee9a2f2419704257b1dd60b975f2d64e
+emby_on = actor_info_zh_cn,actor_info_miss,actor_photo_net,actor_photo_miss,
+use_database = 0
+info_database_path = 
+gfriends_github = https://github.com/gfriends/gfriends
+actor_photo_folder = 
+
+[mark]
+poster_mark = 1
+thumb_mark = 1
+fanart_mark = 0
+mark_size = 5
+mark_type = sub,umr,leak,uncensored,hd
+mark_fixed = off
+mark_pos = top_left
+mark_pos_corner = top_left
+mark_pos_sub = top_left
+mark_pos_mosaic = top_right
+mark_pos_hd = bottom_right
+
+[proxy]
+type = no
+proxy = 127.0.0.1:7890
+timeout = 10
+retry = 3
+javbus_website = 
+javdb_website = 
+iqqtv_website = 
+avsex_website = 
+hdouban_website = 
+mdtv_website = 
+airavcc_website = 
+lulubar_website = 
+javlibrary_website = 
+theporndb_api_token = 
+
+[Cookies]
+javdb = 
+javbus = 
+
+[other]
+show_web_log = off
+show_from_log = on
+show_data_log = on
+save_log = on
+update_check = on
+local_library = 
+actors_name = 
+netdisk_path = 
+localdisk_path = 
+window_title = hide
+switch_on = rest_scrape,remain_task,show_dialog_stop_scrape,show_logs,ipv4_only,hide_none,
+timed_interval = 00:30:00
+rest_count = 20
+rest_time = 00:01:02
+statement = 3
+
