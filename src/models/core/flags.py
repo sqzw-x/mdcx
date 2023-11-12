@@ -61,3 +61,30 @@ class Flags:
     log_txt = None  # 日志文件对象
     scrape_like_text = None
     main_mode_text = None
+
+    @classmethod
+    def reset(cls):
+        cls.failed_list = []
+        cls.failed_file_list = []
+        cls.counting_order = 0
+        cls.total_count = 0
+        cls.rest_now_begin_count = 0
+        cls.rest_sleepping = False
+        cls.scrape_starting = 0
+        cls.scrape_started = 0
+        cls.scrape_done = 0
+        cls.succ_count = 0
+        cls.fail_count = 0
+        cls.file_new_path_dic = {}
+        cls.pic_catch_set = set()
+        cls.file_done_dic = {}
+        cls.extrafanart_deal_set = set()
+        cls.extrafanart_copy_deal_set = set()
+        cls.trailer_deal_set = set()
+        cls.theme_videos_deal_set = set()
+        cls.nfo_deal_set = set()
+        cls.json_get_set = set()
+        cls.json_data_dic = {}
+        cls.img_path = ''
+        cls.deepl_result = {}
+        cls.stop_flag = False

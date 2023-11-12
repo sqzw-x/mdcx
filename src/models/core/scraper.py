@@ -446,6 +446,7 @@ def _scrape_exec_thread(task):
 
 
 def scrape(file_mode: FileMode, movie_list):
+    Flags.reset()
     if movie_list is None:
         movie_list = []
     Flags.scrape_start_time = time.time()  # 开始刮削时间
