@@ -12,6 +12,7 @@ from models.core.flags import Flags
 from models.core.utils import get_movie_path_setting
 from models.core.web import check_proxyChange
 from models.signals import signal
+from models.tools.actress_db import ActressDB
 
 
 def save_config(self):
@@ -678,6 +679,9 @@ def save_config(self):
         config.gfriends_github = 'https://' + config.gfriends_github
     if self.Ui.checkBox_actor_db.isChecked():
         config.use_database = 1
+        ActressDB.init_db()
+    else:
+        config.use_database = 0
     config.emby_on = ''
     if self.Ui.radioButton_actor_info_zh_cn.isChecked():
         config.emby_on += 'actor_info_zh_cn,'

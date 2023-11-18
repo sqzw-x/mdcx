@@ -25,6 +25,7 @@ from models.core.utils import get_movie_path_setting
 from models.core.web import download_file_with_filepath, google_translate
 from models.data_models import EMbyActressInfo
 from models.signals import signal
+from models.tools.actress_db import ActressDB
 from models.tools.emby_actor_image import _generate_server_url, _get_emby_actor_list, _get_gfriends_actor_data, \
     update_emby_actor_photo
 
@@ -85,16 +86,18 @@ def update_emby_actor_info():
 
             # 通过 wiki 及本地数据库获取演员信息
             signal.show_log_text(f"🔍 {i}/{total} 开始请求： {actor_name}\n" + '=' * 80)
-            from models.tools.actress_db import update_actor_info_from_db
             actor_info = EMbyActressInfo(name=actor_name, server_id=server_id, id=actor_id)
             exist = False
+            db_exist = False
             try:
                 if x := _search_wiki(actor_info):
                     url, url_log = x
                     if _get_wiki_detail(url, url_log, actor_info):
                         exist = True
                         wiki += 1
-                if update_actor_info_from_db(actor_info) or exist:
+                if config.use_database:
+                    db_exist = ActressDB.update_actor_info_from_db(actor_info)
+                if db_exist or exist:
                     r, res = post_html(update_url, json=actor_info.dump(), proxies=False)
                     if r:
                         signal.show_log_text(f"\n ✅ 演员信息更新成功！\n 👩🏻 点击查看 {actor_name} 的 Emby 演员主页:")

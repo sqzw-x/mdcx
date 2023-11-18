@@ -39,6 +39,7 @@ from models.core.video import add_del_extras, add_del_theme_videos
 from models.core.web import show_netstatus
 from models.entity.enums import FileMode
 from models.signals import signal
+from models.tools.actress_db import ActressDB
 from models.tools.emby_actor_image import update_emby_actor_photo
 from models.tools.emby_actor_info import creat_kodi_actors, show_emby_actor_list, update_emby_actor_info
 from models.tools.missing import check_missing_number
@@ -547,11 +548,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_check_javdb_cookie_clicked()  # 检测javdb cookie
         self.pushButton_check_javbus_cookie_clicked()  # 检测javbus cookie
         if config.use_database:
-            try:
-                db = sqlite3.connect(config.info_database_path, check_same_thread=False)
-                db.execute("select Name, Alias from Names where Alias=''")
-            except Exception as e:
-                signal.show_log_text(f" ❌ 演员信息数据库连接失败: {e}")
+            ActressDB.init_db()
         try:
             t = threading.Thread(target=check_theporndb_api_token)
             t.start()  # 启动线程,即让线程开始执行
