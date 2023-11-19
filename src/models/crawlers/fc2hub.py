@@ -64,10 +64,13 @@ def getTag(html):  # 获取标签
 
 
 def getOutline(html):  # 获取简介
-    result = str(html.xpath('//div[@class="col des"]/text()')).strip('[' ']').replace("',", '').replace('\\n',
-                                                                                                        '').replace("'",
-                                                                                                                    '').replace(
-        '・', '').strip()
+    result = (''.join(html.xpath('//div[@class="col des"]//text()'))
+              .strip('[' ']')
+              .replace("',", '')
+              .replace('\\n', '')
+              .replace("'", '')
+              .replace('・', '')
+              .strip())
     return result
 
 

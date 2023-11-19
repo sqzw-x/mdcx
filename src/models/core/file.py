@@ -964,9 +964,9 @@ def newtdisk_creat_symlink(copy_flag, netdisk_path='', local_path=''):
                                  f"Linked {link_num} , Copied {copy_num} , Skiped {skip_num} , Failed {fail_num} ")
         else:
             signal.show_log_text(f' 🔴 网盘目录和本地目录不能为空！请重新设置！({get_used_time(start_time)}s)')
-    except Exception as e:
+    except Exception:
         print(traceback.format_exc())
-        signal.show_log_text(str(e), traceback.format_exc())
+        signal.show_log_text(traceback.format_exc())
 
     signal.show_log_text('================================================================================')
     if from_tool:
