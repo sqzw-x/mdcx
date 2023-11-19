@@ -110,15 +110,18 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
-            real_url = html.xpath("//link[contains(@href, $number)]/@href", number='id' + number)
+            real_urls = html.xpath("//link[contains(@href, $number)]/@href", number='id' + number)
 
-            if not real_url:
+            if not real_urls:
                 debug_info = '搜索结果: 未匹配到番号！'
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
             else:
-                real_url = real_url[0]
-                real_url = real_url.replace(('/' + real_url.split('/')[-1]), '')
+                language_not_jp = ['/tw/', '/ko/', '/en/']
+                for url in real_urls:
+                    if all(la not in url for la in language_not_jp):
+                        real_url = url
+                        break
 
         if real_url:
             debug_info = '番号地址: %s ' % real_url
