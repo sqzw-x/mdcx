@@ -38,6 +38,42 @@ class ManualConfig:
 
     ]
 
+    # 支持的网站, 用于支持自定义域名
+    SUPPORTED_WEBSITES = [
+        '7mmtv',
+        'airav',
+        'airav_cc',
+        'avsex',
+        'avsox',
+        'cnmdb',
+        'dahlia',
+        'dmm',
+        'faleno',
+        'fantastica',
+        'fc2',
+        'fc2club',
+        'fc2hub',
+        'freejavbt',
+        'getchu',
+        'getchu_dmm',
+        'giga',
+        'hdouban',
+        'iqqtv',
+        'jav321',
+        'javbus',
+        'javdb',
+        'javlibrary',
+        'kin8',
+        'love6',
+        'lulubar',
+        'madouqu',
+        'mdtv',
+        'mgstage',
+        'mywife',
+        'prestige',
+        'theporndb',
+        'xcity']
+
     # 刮削过程所需预设值
     oumei_name = {
         'wgp': 'WhenGirlsPlay',

@@ -793,7 +793,7 @@ def save_config(self):
         config.mark_pos_mosaic = 'bottom_right'
     # endregion
 
-    # region proxy
+    # region network
     if self.Ui.radioButton_proxy_http.isChecked():  # http proxy
         config.type = 'http'
     elif self.Ui.radioButton_proxy_socks5.isChecked():  # socks5 proxy
@@ -804,15 +804,10 @@ def save_config(self):
     config.proxy = proxy.replace('https://', '').replace('http://', '')
     config.timeout = self.Ui.horizontalSlider_timeout.value()  # 超时时间
     config.retry = self.Ui.horizontalSlider_retry.value()  # 重试次数
-    config.javbus_website = self.Ui.lineEdit_javbus_website.text()  # javbus 地址
-    config.javdb_website = self.Ui.lineEdit_javdb_website.text()  # javdb 地址
-    config.iqqtv_website = self.Ui.lineEdit_iqqtv_website.text()  # iqqtv 地址
-    config.avsex_website = self.Ui.lineEdit_avsex_website.text()  # avsex 地址
-    config.hdouban_website = self.Ui.lineEdit_hdouban_website.text()  # hdouban 地址
-    config.mdtv_website = self.Ui.lineEdit_mdtv_website.text()  # mdtv 地址
-    config.airavcc_website = self.Ui.lineEdit_airavcc_website.text()  # airavcc 地址
-    config.lulubar_website = self.Ui.lineEdit_lulubar_website.text()  # lulubar 地址
-    config.javlibrary_website = self.Ui.lineEdit_javlibrary_website.text()  # javlibrary 地址
+
+    custom_website_name = self.Ui.comboBox_custom_website.currentText()
+    custom_website_url = self.Ui.lineEdit_custom_website.text()
+    setattr(config, f"{custom_website_name}_website", custom_website_url)
     config.javdb = self.Ui.plainTextEdit_cookie_javdb.toPlainText()  # javdb cookie
     config.javbus = self.Ui.plainTextEdit_cookie_javbus.toPlainText()  # javbus cookie
     config.theporndb_api_token = self.Ui.lineEdit_api_token_theporndb.text()  # api token
@@ -904,7 +899,6 @@ def save_config(self):
     config.path = convert_path(os.path.join(config_folder, config.file))
     config.version = self.localversion
     config.save_config()
-    config.read_config()  # 目的是重新运行一次 _convert_config 将配置转换为枚举值
 
     # 根据设置页是否勾选同意, 改变文件清理按钮状态
     self.checkBox_i_agree_clean_clicked()

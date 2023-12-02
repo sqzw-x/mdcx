@@ -1948,6 +1948,10 @@ class MyMAinWindow(QMainWindow):
         mark_size = self.Ui.horizontalSlider_mark_size.value()
         self.Ui.lcdNumber_mark_size.display(mark_size)
 
+    # 设置-网络-网址设置-下拉框切换
+    def switch_custom_website_change(self, new_website_name):
+        self.Ui.lineEdit_custom_website.setText(getattr(config, f"{new_website_name}_website", ''))
+
     # 切换配置
     def config_file_change(self, new_config_file):
         if new_config_file != config.file:

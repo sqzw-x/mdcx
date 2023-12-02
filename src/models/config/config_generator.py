@@ -217,15 +217,6 @@ type = {type}
 proxy = {proxy}
 timeout = {timeout}
 retry = {retry}
-javbus_website = {javbus_website}
-javdb_website = {javdb_website}
-iqqtv_website = {iqqtv_website}
-avsex_website = {avsex_website}
-hdouban_website = {hdouban_website}
-mdtv_website = {mdtv_website}
-airavcc_website = {airavcc_website}
-lulubar_website = {lulubar_website}
-javlibrary_website = {javlibrary_website}
 theporndb_api_token = {theporndb_api_token}
 # type: no, http, socks5
 

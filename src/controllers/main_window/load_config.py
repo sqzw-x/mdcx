@@ -1002,8 +1002,9 @@ def load_config(self):
             self.Ui.radioButton_bottom_right_mosaic.setChecked(True)
         else:
             self.Ui.radioButton_top_right_mosaic.setChecked(True)
+        # endregion
 
-        # region proxy
+        # region network
         proxy_type = config.type  # 代理类型
         if proxy_type == 'no':
             self.Ui.radioButton_proxy_nouse.setChecked(True)
@@ -1025,82 +1026,6 @@ def load_config(self):
         self.Ui.lcdNumber_retry.display(retry_count)
 
         self.Ui.lineEdit_api_token_theporndb.setText(convert_path(config.theporndb_api_token))  # api token
-
-        try:  # javbus网址
-            javbus_website = str(config.javbus_website).strip('/')
-            if javbus_website and 'http' not in javbus_website:
-                javbus_website = 'https://' + javbus_website
-            self.Ui.lineEdit_javbus_website.setText(javbus_website)
-        except:
-            self.Ui.lineEdit_javbus_website.setText('')
-
-        try:  # javdb网址
-            javdb_website = str(config.javdb_website).strip('/')
-            if javdb_website and 'http' not in javdb_website:
-                javdb_website = 'https://' + javdb_website
-            self.Ui.lineEdit_javdb_website.setText(javdb_website)
-        except:
-            self.Ui.lineEdit_javdb_website.setText('')
-
-        try:  # iqqtv网址
-            iqqtv_website = str(config.iqqtv_website).strip('/')
-            if iqqtv_website and 'http' not in iqqtv_website:
-                iqqtv_website = 'https://' + iqqtv_website
-            self.Ui.lineEdit_iqqtv_website.setText(iqqtv_website)
-        except:
-            self.Ui.lineEdit_iqqtv_website.setText('')
-
-        try:  # avsex网址
-            avsex_website = str(config.avsex_website).replace('/#/home', '').strip('/')
-            if avsex_website and 'http' not in avsex_website:
-                avsex_website = 'https://' + avsex_website
-            self.Ui.lineEdit_avsex_website.setText(avsex_website)
-        except:
-            self.Ui.lineEdit_avsex_website.setText('')
-
-        try:  # hdouban网址
-            hdouban_website = str(config.hdouban_website).strip('/')
-            if hdouban_website and 'http' not in hdouban_website:
-                hdouban_website = 'https://' + hdouban_website
-            self.Ui.lineEdit_hdouban_website.setText(hdouban_website)
-        except:
-            self.Ui.lineEdit_hdouban_website.setText('')
-
-        try:  # mdtv网址
-            mdtv_website = str(config.mdtv_website).strip('/')
-            if mdtv_website and 'http' not in mdtv_website:
-                mdtv_website = 'https://' + mdtv_website
-            self.Ui.lineEdit_mdtv_website.setText(mdtv_website)
-        except:
-            self.Ui.lineEdit_mdtv_website.setText('')
-
-        try:  # airav_cc网址
-            airavcc_website = str(config.airavcc_website).strip('/')
-            if airavcc_website and 'http' not in airavcc_website:
-                airavcc_website = 'https://' + airavcc_website
-            self.Ui.lineEdit_airavcc_website.setText(airavcc_website)
-        except:
-            self.Ui.lineEdit_airavcc_website.setText('')
-
-        try:  # lulubar网址
-            lulubar_website = str(config.lulubar_website).strip('/')
-            if lulubar_website and 'http' not in lulubar_website:
-                lulubar_website = 'https://' + lulubar_website
-            self.Ui.lineEdit_lulubar_website.setText(lulubar_website)
-        except:
-            self.Ui.lineEdit_lulubar_website.setText('')
-
-        try:  # javlibrary 网址
-            javlibrary_website = str(config.javlibrary_website).strip('/')
-            if javlibrary_website and 'http' not in javlibrary_website:
-                javlibrary_website = 'https://' + javlibrary_website
-            self.Ui.lineEdit_javlibrary_website.setText(javlibrary_website)
-        except:
-            self.Ui.lineEdit_javlibrary_website.setText('')
-        # endregion
-        # endregion
-
-        # region Cookies
         self.set_javdb_cookie.emit(config.javdb)  # javdb cookie
         self.set_javbus_cookie.emit(config.javbus)  # javbus cookie
         # endregion

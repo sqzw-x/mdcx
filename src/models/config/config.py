@@ -49,12 +49,16 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
                 else:
                     setattr(self, key, value)
         self._update_config()
-        self._convert_config()
 
     def save_config(self):
         with open('MDCx.config', 'w', encoding='UTF-8') as f:
             f.write(self.path)
         with open(self.path, "wt", encoding='UTF-8') as code:
+            # 使用反射保存自定义网址设置
+            custom_website_config = ''
+            for website in ManualConfig.SUPPORTED_WEBSITES:
+                if u := getattr(self, website + '_website', ''):
+                    custom_website_config += f"{website}_website = {u}\n"
             print(f'''[modified_time]
 modified_time = {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}
 version = {self.version}
@@ -252,15 +256,7 @@ type = {self.type}
 proxy = {self.proxy}
 timeout = {self.timeout}
 retry = {self.retry}
-javbus_website = {self.javbus_website}
-javdb_website = {self.javdb_website}
-iqqtv_website = {self.iqqtv_website}
-avsex_website = {self.avsex_website}
-hdouban_website = {self.hdouban_website}
-mdtv_website = {self.mdtv_website}
-airavcc_website = {self.airavcc_website}
-lulubar_website = {self.lulubar_website}
-javlibrary_website = {self.javlibrary_website}
+{custom_website_config.strip()}
 theporndb_api_token = {self.theporndb_api_token}
 # type: no, http, socks5
 
@@ -382,10 +378,6 @@ statement = {self.statement}
         new_str = ','.join(new_str_list)
         self.suffix_sort = new_str
 
-    def _convert_config(self):
-        # 将读取的配置转为枚举类型
-        pass
-
     def _get_config_path(self):
         mdcx_config = 'MDCx.config'  # 此文件用于记录当前配置文件的绝对路径, 从而实现多配置切换
         # 此文件必须存在, 且与 main.py 或打包的可执行文件在同一目录下.
@@ -422,10 +414,7 @@ config: MDCxConfig = MDCxConfig()
 
 
 def get_new_str(a: str, wanted=False):
-    all_website_list = ['airav_cc', 'iqqtv', 'avsex', 'freejavbt', 'javbus', 'javdb', 'jav321', 'dmm', 'getchu',
-                        'getchu_dmm', '7mmtv', 'avsox', 'xcity', 'mgstage', 'fc2', 'fc2club', 'fc2hub', 'airav',
-                        'javlibrary', 'mdtv', 'madouqu', 'mywife', 'giga', 'faleno', 'dahlia', 'lulubar', 'love6',
-                        'cnmdb', 'fantastica', 'theporndb', 'kin8', 'prestige']
+    all_website_list = config.SUPPORTED_WEBSITES
     if wanted:
         all_website_list = ['javlibrary', 'javdb']
     read_web_list = re.split(r'[,，]', a)

@@ -95,6 +95,7 @@ def Init_Ui(self):
     self.Ui.textBrowser_log_main_3.hide()  # 失败列表隐藏
     self.Ui.pushButton_scraper_failed_list.hide()
     self.Ui.pushButton_save_failed_list.hide()
+    self.Ui.comboBox_custom_website.addItems(config.SUPPORTED_WEBSITES)
     # self.Ui.textBrowser_log_main.document().setMaximumBlockCount(100000)     # 限制日志页最大行数rowCount
     # self.Ui.textBrowser_log_main_2.document().setMaximumBlockCount(30000)     # 限制日志页最大行数rowCount
     self.Ui.textBrowser_log_main.viewport().installEventFilter(self)  # 注册事件用于识别点击控件时隐藏失败列表面板
@@ -201,6 +202,7 @@ def Init_Singal(self):
     self.Ui.horizontalSlider_javdb_time.valueChanged.connect(self.lcdNumber_javdb_time_change)
     self.Ui.horizontalSlider_thread_time.valueChanged.connect(self.lcdNumber_thread_time_change)
     self.Ui.comboBox_change_config.activated[str].connect(self.config_file_change)
+    self.Ui.comboBox_custom_website.activated[str].connect(self.switch_custom_website_change)
     self.Ui.pushButton_right_menu.clicked.connect(self.main_open_right_menu)
     self.Ui.pushButton_play.clicked.connect(self.main_play_click)
     self.Ui.pushButton_open_folder.clicked.connect(self.main_open_folder_click)
