@@ -10,6 +10,10 @@ from PyQt5.QtCore import QCoreApplication, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
 
+current_path = os.path.dirname(os.path.abspath(__file__))
+src_path = os.path.join(current_path, "src")
+sys.path.append(src_path)
+
 from controllers.main_window.main_window import MyMAinWindow
 
 # import faulthandler
