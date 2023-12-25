@@ -318,7 +318,7 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
                 print("  <website>" + website + "</website>", file=code)
 
             # javdb id 输出, 没有时使用番号搜索页
-            if json_data_nfo['javdbid'] != '':
+            if 'javdbid' in json_data_nfo and json_data_nfo['javdbid']:
                 print("  <javdbid>" + json_data_nfo["javdbid"] + "</javdbid>", file=code)
             else:
                 print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
