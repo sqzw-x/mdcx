@@ -573,9 +573,9 @@ def save_config(self):
     release_rule = self.Ui.lineEdit_release_rule.text()  # 发行日期
     config.release_rule = re.sub(r'[\\/:*?"<>|\r\n]+', '-', release_rule).strip()
 
-    config.folder_name_max = self.Ui.lineEdit_folder_name_max.text()  # 长度命名规则-目录
-    config.file_name_max = self.Ui.lineEdit_file_name_max.text()  # 长度命名规则-文件名
-    config.actor_name_max = self.Ui.lineEdit_actor_name_max.text()  # 长度命名规则-演员数量
+    config.folder_name_max = int(self.Ui.lineEdit_folder_name_max.text())  # 长度命名规则-目录
+    config.file_name_max = int(self.Ui.lineEdit_file_name_max.text())  # 长度命名规则-文件名
+    config.actor_name_max = int(self.Ui.lineEdit_actor_name_max.text())  # 长度命名规则-演员数量
 
     config.umr_style = self.Ui.lineEdit_umr_style.text()  # 无码破解版本命名
     config.leak_style = self.Ui.lineEdit_leak_style.text()  # 无码流出版本命名
@@ -816,7 +816,7 @@ def save_config(self):
     # endregion
 
     # region other
-    config.rest_count = self.Ui.lineEdit_rest_count.text()  # 间歇刮削文件数量
+    config.rest_count = int(self.Ui.lineEdit_rest_count.text())  # 间歇刮削文件数量
     config.rest_time = self.Ui.lineEdit_rest_time.text()  # 间歇刮削休息时间
     config.timed_interval = self.Ui.lineEdit_timed_interval.text()  # 循环任务间隔时间
 
