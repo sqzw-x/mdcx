@@ -200,9 +200,8 @@ def get_file_number(filepath):
                 break
     elif re.search(r'[A-Z]+-[A-Z]\d+', filename):  # 提取类似mkbd-s120番号
         file_number = re.search(r'[A-Z]+-[A-Z]\d+', filename).group()
-    elif re.search(r'\d{2,}[-_]\d{2,}', filename):  # 提取类似 111111-000 111111_000 番号为 111111_000
-        g = re.search(r'(\d{2,})[-_](\d{2,})', filename)
-        file_number = g[1] + '_' + g[2]
+    elif re.search(r'\d{2,}[-_]\d{2,}', filename):  # 提取类似 111111-000 111111_000 番号
+        file_number = re.search(r'\d{2,}[-_]\d{2,}', filename).group()
     elif re.search(r'\d{3,}-[A-Z]{3,}', filename):  # 提取类似 111111-MMMM 番号
         file_number = re.search(r'\d+-[A-Z]+', filename).group()
     elif re.search(r'([^A-Z]|^)(N\d{4})(\D|$)', filename):  # 提取n1111
