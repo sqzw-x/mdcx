@@ -228,7 +228,7 @@ def get_actor_list():
 
 
 def get_number_list(number, appoint_number='', file_path=''):  # 处理国产番号
-    file_name = os.path.splitext(file_path)[0].upper() if file_path else ''
+    file_name = os.path.splitext(os.path.split(file_path)[1])[0].upper() if file_path else ''
     number = number.upper()
     number_list = []  # 返回一个番号列表，用来搜索
     filename_list = []

@@ -26,12 +26,14 @@ def get_actor_photo(actor):
 
 
 def get_detail_info(html, number):
-    detail_info = html.xpath('string(//div[@class="entry-content u-text-format u-clearfix"])')
+    detail_info = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]//text()')
+    if isinstance(detail_info, list):
+        detail_info = '\n'.join(detail_info)
     title_h1 = html.xpath('//div[@class="cao_entry_header"]/header/h1/text()')
     title = title_h1[0].replace(number, '').strip() if title_h1 else number
-    temp_number = re.findall(r'番號：(.+)\n', detail_info)
-    temp_title = re.findall(r'片名：(.+)\n', detail_info)
-    temp_actor = re.findall(r'女郎：(.+)\n', detail_info)
+    temp_number = re.findall(r'番號\s*：\s*(.+)\n', detail_info)
+    temp_title = re.findall(r'片名\s*：\s*(.+)\n', detail_info)
+    temp_actor = re.findall(r'女郎\s*：\s*(.+)\n', detail_info)
 
     number = temp_number[0] if temp_number else number
     title = temp_title[0] if temp_title else title.replace(number, '').strip()
