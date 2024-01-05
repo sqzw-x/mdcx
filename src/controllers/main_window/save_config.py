@@ -670,6 +670,7 @@ def save_config(self):
     if config.emby_url and '://' not in config.emby_url:
         config.emby_url = 'http://' + config.emby_url
     config.api_key = self.Ui.lineEdit_api_key.text()  # emby密钥
+    config.user_id = self.Ui.lineEdit_user_id.text()  # emby用户ID
     config.actor_photo_folder = self.Ui.lineEdit_actor_photo_folder.text()  # 头像图片目录
     config.gfriends_github = self.Ui.lineEdit_net_actor_photo.text().strip(' /')  # gfriends github 项目地址
     config.info_database_path = self.Ui.lineEdit_actor_db_path.text()  # 信息数据库

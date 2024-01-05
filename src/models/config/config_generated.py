@@ -177,6 +177,7 @@ class GeneratedConfig:
     server_type = r'emby'
     emby_url = r'http://192.168.5.191:8096'
     api_key = r'ee9a2f2419704257b1dd60b975f2d64e'
+    user_id = r''
     emby_on = r'actor_info_zh_cn,actor_info_miss,actor_photo_net,actor_photo_miss,'
     use_database = 0
     info_database_path = r''

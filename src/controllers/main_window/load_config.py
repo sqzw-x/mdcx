@@ -866,6 +866,7 @@ def load_config(self):
             self.Ui.radioButton_server_emby.setChecked(True)
         self.Ui.lineEdit_emby_url.setText(str(config.emby_url))  # emby地址
         self.Ui.lineEdit_api_key.setText(str(config.api_key))  # emby密钥
+        self.Ui.lineEdit_user_id.setText(str(config.user_id))  # emby用户ID
 
         emby_on = config.emby_on
         # region emby_on

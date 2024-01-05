@@ -20451,7 +20451,7 @@ line-height:50px</string>
             <x>30</x>
             <y>20</y>
             <width>701</width>
-            <height>291</height>
+            <height>321</height>
            </rect>
           </property>
           <property name="styleSheet">
@@ -20466,12 +20466,62 @@ line-height:50px</string>
              <x>20</x>
              <y>30</y>
              <width>661</width>
-             <height>241</height>
+             <height>268</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_25">
-            <item row="2" column="1">
-             <widget class="QLabel" name="label_121">
+            <item row="6" column="1">
+             <widget class="QLineEdit" name="lineEdit_user_id">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>300</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"> font: &quot;Courier&quot;;
+ border: 1px solid rgba(0,0,0, 50);
+ border-radius: 15px;
+</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_104">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="text">
+               <string>服务器地址：</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QLabel" name="label_105">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -20488,11 +20538,11 @@ line-height:50px</string>
                <string notr="true">color: rgb(8, 128, 128);</string>
               </property>
               <property name="text">
-               <string>指你的 Emby/Jellyfin 服务器地址，比如：http://192.168.1.5:8096</string>
+               <string>API 密钥创建方法：控制台-&gt;高级-&gt;API 密钥-&gt;添加（APP 名称任意）</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="1">
+            <item row="8" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_19">
               <item>
                <widget class="QComboBox" name="comboBox_pic_actor">
@@ -20576,27 +20626,29 @@ line-height:50px</string>
               </item>
              </layout>
             </item>
-            <item row="4" column="1">
-             <widget class="QLabel" name="label_105">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">color: rgb(8, 128, 128);</string>
-              </property>
-              <property name="text">
-               <string>API密钥创建方法：控制台-&gt;高级-&gt;API 密钥-&gt;添加（APP 名称任意）</string>
-              </property>
-             </widget>
+            <item row="0" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_103">
+              <item>
+               <widget class="QRadioButton" name="radioButton_server_emby">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Emby</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButton_server_jellyfin">
+                <property name="text">
+                 <string>Jellyfin</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item row="1" column="1">
              <widget class="QLineEdit" name="lineEdit_emby_url">
@@ -20620,7 +20672,7 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="0">
+            <item row="8" column="0">
              <widget class="QLabel" name="label_298">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -20648,36 +20700,8 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_104">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>130</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
-              </property>
-              <property name="text">
-               <string>服务器地址：</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QLineEdit" name="lineEdit_api_key">
+            <item row="2" column="1">
+             <widget class="QLabel" name="label_121">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -20686,43 +20710,15 @@ line-height:50px</string>
               </property>
               <property name="minimumSize">
                <size>
-                <width>300</width>
-                <height>30</height>
+                <width>0</width>
+                <height>0</height>
                </size>
               </property>
               <property name="styleSheet">
-               <string notr="true"> font: &quot;Courier&quot;;
- border: 1px solid rgba(0,0,0, 50);
- border-radius: 15px;
-</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_107">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>130</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <string notr="true">color: rgb(8, 128, 128);</string>
               </property>
               <property name="text">
-               <string>API密钥：</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               <string>指你的 Emby/Jellyfin 服务器地址，比如：http://192.168.1.5:8096</string>
               </property>
              </widget>
             </item>
@@ -20751,29 +20747,105 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_103">
-              <item>
-               <widget class="QRadioButton" name="radioButton_server_emby">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>Emby</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="radioButton_server_jellyfin">
-                <property name="text">
-                 <string>Jellyfin</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+            <item row="6" column="0">
+             <widget class="QLabel" name="label_108">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="text">
+               <string>用户 ID：</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_107">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="text">
+               <string>API 密钥：</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLineEdit" name="lineEdit_api_key">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>300</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"> font: &quot;Courier&quot;;
+ border: 1px solid rgba(0,0,0, 50);
+ border-radius: 15px;
+</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1">
+             <widget class="QLabel" name="label_109">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(8, 128, 128);</string>
+              </property>
+              <property name="text">
+               <string>如果设置，将仅获取指定 Emby/Jellyfin 用户媒体库中的演员</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -20782,7 +20854,7 @@ line-height:50px</string>
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>740</y>
+            <y>770</y>
             <width>701</width>
             <height>501</height>
            </rect>
@@ -21338,7 +21410,7 @@ Graphis.ne.jp 提供了演员不同时期的图片，默认请求早期的图片
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>330</y>
+            <y>360</y>
             <width>701</width>
             <height>391</height>
            </rect>
@@ -21880,7 +21952,7 @@ Graphis.ne.jp 提供了演员不同时期的图片，默认请求早期的图片
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>1260</y>
+            <y>1290</y>
             <width>701</width>
             <height>201</height>
            </rect>

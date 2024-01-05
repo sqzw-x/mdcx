@@ -43,6 +43,9 @@ def _get_emby_actor_list():
         server_name = 'Jellyfin'
         url = config.emby_url + '/Persons?api_key=' + config.api_key
 
+    if config.user_id:
+        url += f'&userid={config.user_id}'
+
     signal.show_log_text(f"⏳ 连接 {server_name} 服务器...")
 
     if config.emby_url == '':
