@@ -20442,7 +20442,7 @@ line-height:50px</string>
            <x>0</x>
            <y>0</y>
            <width>770</width>
-           <height>1460</height>
+           <height>1550</height>
           </rect>
          </property>
          <widget class="QGroupBox" name="groupBox_43">
