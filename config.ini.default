@@ -1,6 +1,6 @@
 [modified_time]
-modified_time = 2023-12-26 10:41:19
-version = 120231226
+modified_time = 2024-01-05 16:35:54
+version = 120240105
 
 [media]
 media_path = 
@@ -166,7 +166,7 @@ subtitle_add_rescrape = on
 server_type = emby
 emby_url = http://192.168.5.191:8096
 api_key = ee9a2f2419704257b1dd60b975f2d64e
-user_id =
+user_id = 
 emby_on = actor_info_zh_cn,actor_info_miss,actor_photo_net,actor_photo_miss,
 use_database = 0
 info_database_path = 
