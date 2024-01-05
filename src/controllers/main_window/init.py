@@ -235,7 +235,7 @@ def Init_Singal(self):
         'https://www.dropbox.com/sh/vkbxawm6mwmwswr/AADqZiF8aUHmK6qIc7JSlURIa'))
     self.Ui.label_get_cookie_url.mousePressEvent = lambda e: n(webbrowser.open('https://tieba.baidu.com/p/5492736764'))
     self.Ui.label_download_actor_db.mousePressEvent = lambda e: n(webbrowser.open(
-        'https://github.com/sqzw-x/mdcx/releases/download/actor_info_database/Actress.db'))
+        'https://github.com/sqzw-x/mdcx/releases/tag/actor_info_database'))
     # endregion
 
     # region 控件更新
