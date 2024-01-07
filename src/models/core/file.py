@@ -437,7 +437,7 @@ def move_movie(json_data, file_path, file_new_path):
         # 自身是软链接时，获取真实路径
         if os.path.islink(file_path):
             file_path = read_link(file_path)
-            delete_file(temp_path)
+            # delete_file(temp_path)
         # 删除目标路径存在的文件，否则会创建失败，
         delete_file(file_new_path)
         try:
