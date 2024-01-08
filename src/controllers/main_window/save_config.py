@@ -808,7 +808,9 @@ def save_config(self):
 
     custom_website_name = self.Ui.comboBox_custom_website.currentText()
     custom_website_url = self.Ui.lineEdit_custom_website.text()
-    setattr(config, f"{custom_website_name}_website", custom_website_url)
+    if custom_website_url:
+        custom_website_url = custom_website_url.strip('/ ')
+        setattr(config, f"{custom_website_name}_website", custom_website_url)
     config.javdb = self.Ui.plainTextEdit_cookie_javdb.toPlainText()  # javdb cookie
     config.javbus = self.Ui.plainTextEdit_cookie_javbus.toPlainText()  # javbus cookie
     config.theporndb_api_token = self.Ui.lineEdit_api_token_theporndb.text()  # api token

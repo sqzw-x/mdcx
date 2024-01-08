@@ -202,15 +202,6 @@ class GeneratedConfig:
     proxy = r'127.0.0.1:7890'
     timeout = 10
     retry = 3
-    javbus_website = r''
-    javdb_website = r''
-    iqqtv_website = r''
-    avsex_website = r''
-    hdouban_website = r''
-    mdtv_website = r''
-    airavcc_website = r''
-    lulubar_website = r''
-    javlibrary_website = r''
     theporndb_api_token = r''
 
     # Cookies

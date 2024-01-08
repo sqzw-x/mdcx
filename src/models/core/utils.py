@@ -164,33 +164,11 @@ def deal_url(url):
             return vlaue, url
 
     # 自定义的网址
-    avsex_website = config.avsex_website
-    if avsex_website and avsex_website in url:
-        return 'avsex', url
-    iqqtv_website = config.iqqtv_website
-    if iqqtv_website and iqqtv_website in url:
-        return 'iqqtv', url
-    hdouban_website = config.hdouban_website
-    if hdouban_website and hdouban_website in url:
-        return 'hdouban', url
-    mdtv_website = config.mdtv_website
-    if mdtv_website and mdtv_website in url:
-        return 'mdtv', url
-    airavcc_website = config.airavcc_website
-    if airavcc_website and airavcc_website in url:
-        return 'airav_cc', url
-    lulubar_website = config.lulubar_website
-    if lulubar_website and lulubar_website in url:
-        return 'lulubar', url
-    javbus_website = config.javbus_website
-    if javbus_website and javbus_website in url:
-        return 'javbus', url
-    javdb_website = config.javdb_website
-    if javdb_website and javdb_website in url:
-        return 'javdb', url
-    javlibrary_website = config.javlibrary_website
-    if javlibrary_website and javlibrary_website in url:
-        return 'javlibrary', url
+    for web_name in config.SUPPORTED_WEBSITES:
+        if hasattr(config, web_name + '_website'):
+            web_url = getattr(config, web_name + '_website')
+            if web_url in url:
+                return web_name, url
 
     return False, url
 

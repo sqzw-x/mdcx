@@ -8,6 +8,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import curl_html
+from models.config import config
 from models.signals import signal
 
 urllib3.disable_warnings()  # yapf: disable
@@ -119,12 +120,11 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     image_download = False
     url_search = ''
     mosaic = '有码'
+    airav_url = 'https://airav5.fun'
+    if hasattr(config, 'airav_cc_website'):
+        airav_url = config.airav_cc_website
     if language == 'zh_cn':
-        airav_url = 'https://airav5.fun/cn'
-    elif language == 'zh_tw':
-        airav_url = 'https://airav5.fun'
-    else:
-        airav_url = 'https://airav5.fun/jp'
+        airav_url += '/cn'
     web_info = '\n       '
     log_info += ' \n    🌐 airav[%s]' % language.replace('zh_', '')
     debug_info = ''

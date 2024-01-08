@@ -134,9 +134,8 @@ def main(number, appoint_url='', log_info='', req_web='', language=''):
     if not re.match(r'n\d{4}', number):
         number = number.upper()
     avsex_url = 'https://paycalling.com'
-    avsex_website = config.avsex_website
-    if avsex_website:
-        avsex_url = avsex_website
+    if hasattr(config, 'avsex_website'):
+        avsex_url = config.avsex_website
     if appoint_url:
         if 'http' in appoint_url:
             avsex_url = re.findall(r'(.*//[^/]*)\/', appoint_url)[0]

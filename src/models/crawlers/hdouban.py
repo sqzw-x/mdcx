@@ -204,8 +204,9 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
     score = ''
     series = ''
     trailer = ''
-    hdouban_website = config.hdouban_website
-    hdouban_url = hdouban_website if hdouban_website else 'https://ormtgu.com'
+    hdouban_url = 'https://ormtgu.com'
+    if hasattr(config, 'hdouban_website'):
+        hdouban_url = config.hdouban_website
 
     # real_url = 'https://byym21.com/moviedetail/153858'
     # real_url = 'https://byym21.com/moviedetail/2202'

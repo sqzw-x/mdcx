@@ -228,9 +228,8 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', mosaic=
     }
     headers.update(headers_o)
 
-    javbus_website = config.javbus_website
-    if javbus_website:
-        javbus_url = javbus_website
+    if hasattr(config, 'javbus_website'):
+        javbus_url = config.javbus_website
     title = ''
     cover_url = ''
     poster_url = ''

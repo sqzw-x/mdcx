@@ -164,10 +164,9 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     req_web += '-> %s[%s]' % (website_name, language)
     proxies = True
 
-    javlibrary_website = config.javlibrary_website
     domain = 'https://www.javlibrary.com'
-    if javlibrary_website:
-        domain = javlibrary_website
+    if hasattr(config, 'javlibrary_website'):
+        domain = config.javlibrary_website
         proxies = False
     real_url = appoint_url
     title = ''

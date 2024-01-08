@@ -196,10 +196,9 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
     log_info += ' \n    🌐 mdtv'
     debug_info = ''
 
-    mdtv_website = config.mdtv_website
     mdtv_url = 'https://www.mdpjzip.xyz'
-    if mdtv_website:
-        mdtv_url = mdtv_website
+    if hasattr(config, 'mdtv_website'):
+        mdtv_url = config.mdtv_website
     real_url = appoint_url
     search_url = f"{mdtv_url}/index.php/vodsearch/-------------.html"
 

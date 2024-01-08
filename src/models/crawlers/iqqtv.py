@@ -139,9 +139,8 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     real_url = appoint_url
     # iqqtv_url = 'https://iqqtv.net'
     iqqtv_url = 'https://iqq5.xyz'
-    iqqtv_website = config.iqqtv_website
-    if iqqtv_website:
-        iqqtv_url = iqqtv_website
+    if hasattr(config, 'iqqtv_website'):
+        iqqtv_url = config.iqqtv_website
     cover_url = ''
     image_cut = 'right'
     image_download = False

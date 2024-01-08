@@ -1,8 +1,6 @@
 import os
-import platform
 import re
 import shutil
-import sqlite3
 import threading
 import time
 import traceback
@@ -565,9 +563,8 @@ class MyMAinWindow(QMainWindow):
         """
         try:
             if self.label_number_url:
-                javdb_website = config.javdb_website
-                if javdb_website:
-                    self.label_number_url = self.label_number_url.replace('https://javdb.com', javdb_website)
+                if hasattr(config, 'javdb_website'):
+                    self.label_number_url = self.label_number_url.replace('https://javdb.com', config.javdb_website)
                 webbrowser.open(self.label_number_url)
         except:
             signal.show_traceback_log(traceback.format_exc())
@@ -578,9 +575,8 @@ class MyMAinWindow(QMainWindow):
         """
         try:
             if self.label_actor_url:
-                javdb_website = config.javdb_website
-                if javdb_website:
-                    self.label_actor_url = self.label_actor_url.replace('https://javdb.com', javdb_website)
+                if hasattr(config, 'javdb_website'):
+                    self.label_actor_url = self.label_actor_url.replace('https://javdb.com', config.javdb_website)
                 webbrowser.open(self.label_actor_url)
         except:
             signal.show_traceback_log(traceback.format_exc())
@@ -2044,164 +2040,136 @@ class MyMAinWindow(QMainWindow):
             # 检测网络连通性
             signal.show_net_info(' 开始检测网络连通性...')
 
-            javbus_url = 'https://www.javbus.com'
-            javdb_url = 'https://javdb.com'
-            hdouban_url = 'https://hdouban.com'
-            mdtv_url = 'https://www.mdpjzip.xyz'
-            airavcc_url = 'https://airav5.fun'
-            lulubar_url = 'https://lulubar.co'
-            iqqtv_url = 'https://iqq5.xyz'
-            avsex_url = 'https://paycalling.com'
-            javlibrary_url = 'https://www.javlibrary.com'
-            javbus_website = config.javbus_website
-            javdb_website = config.javdb_website
-            hdouban_website = config.hdouban_website
-            mdtv_website = config.mdtv_website
-            airavcc_website = config.airavcc_website
-            lulubar_website = config.lulubar_website
-            iqqtv_website = config.iqqtv_website
-            avsex_website = config.avsex_website
-            javlibrary_website = config.javlibrary_website
-            if javbus_website:
-                javbus_url = javbus_website
-            if javdb_website:
-                javdb_url = javdb_website + '/v/D16Q5?locale=zh'
-            else:
-                javdb_url = javdb_url + '/v/D16Q5?locale=zh'
-            if hdouban_website:
-                hdouban_url = hdouban_website
-            if mdtv_website:
-                mdtv_url = mdtv_website
-            if airavcc_website:
-                airavcc_url = airavcc_website
-            if lulubar_website:
-                lulubar_url = lulubar_website
-            if iqqtv_website:
-                iqqtv_url = iqqtv_website
-            if avsex_website:
-                avsex_url = avsex_website
-            if javlibrary_website:
-                javlibrary_url = javlibrary_website
-            net_info = [
-                ['github', 'https://raw.githubusercontent.com', ''],
-                ['airav_cc', airavcc_url + '/jp/playon.aspx?hid=44733', ''],
-                ['iqqtv', iqqtv_url, ''],
-                ['avsex', avsex_url, ''],
-                ['freejavbt', 'https://freejavbt.com', ''],
-                ['javbus', javbus_url, ''],
-                ['javdb', javdb_url, ''],
-                ['jav321', 'https://www.jav321.com', ''],
-                ['javlibrary', javlibrary_url + '/cn/?v=javme2j2tu', ''],
-                ['dmm', 'https://www.dmm.co.jp', ''],
-                ['mgstage', 'https://www.mgstage.com', ''],
-                ['getchu', 'http://www.getchu.com', ''],
-                ['theporndb', 'https://api.metadataapi.net', ''],
-                ['avsox', get_avsox_domain(), ''],
-                ['xcity', 'https://xcity.jp', ''],
-                ['7mmtv', 'https://7mmtv.tv', ''],
-                ['hdouban', hdouban_url, ''],
-                ['mdtv', mdtv_url, ''],
-                ['madouqu', 'https://madouqu.com', ''],
-                ['cnmdb', 'https://cnmdb.net', ''],
-                ['lulubar', lulubar_url, ''],
-                ['love6', 'https://love6.tv', ''],
-                ['yesjav', 'http://www.yesjav.info', ''],
-                ['fc2', 'https://adult.contents.fc2.com', ''],
-                ['fc2club', 'https://fc2club.top', ''],
-                ['fc2hub', 'https://fc2hub.com', ''],
-                ['airav', 'https://www.airav.wiki', ''],
-                ['av-wiki', 'https://av-wiki.net', ''],
-                ['seesaawiki', 'https://seesaawiki.jp/av_neme/d/%C9%F1%A5%EF%A5%A4%A5%D5', ''],
-                ['mywife', 'https://mywife.cc', ''],
-                ['giga', 'https://www.giga-web.jp', ''],
-                ['kin8', 'https://www.kin8tengoku.com/moviepages/3681/index.html', ''],
-                ['fantastica', 'http://fantastica-vr.com', ''],
-                ['faleno', 'https://faleno.jp', ''],
-                ['dahlia', 'https://dahlia-av.jp', ''],
-                ['prestige', 'https://www.prestige-av.com', ''],
-                ['s1s1s1', 'https://s1s1s1.com', ''],
-                ['moodyz', 'https://moodyz.com', ''],
-                ['madonna', 'https://www.madonna-av.com', ''],
-                ['wanz-factory', 'https://www.wanz-factory.com', ''],
-                ['ideapocket', 'https://ideapocket.com', ''],
-                ['kirakira', 'https://kirakira-av.com', ''],
-                ['ebody', 'https://www.av-e-body.com', ''],
-                ['bi-av', 'https://bi-av.com', ''],
-                ['premium', 'https://premium-beauty.com', ''],
-                ['miman', 'https://miman.jp', ''],
-                ['tameikegoro', 'https://tameikegoro.jp', ''],
-                ['fitch', 'https://fitch-av.com', ''],
-                ['kawaiikawaii', 'https://kawaiikawaii.jp', ''],
-                ['befreebe', 'https://befreebe.com', ''],
-                ['muku', 'https://muku.tv', ''],
-                ['attackers', 'https://attackers.net', ''],
-                ['mko-labo', 'https://mko-labo.net', ''],
-                ['dasdas', 'https://dasdas.jp', ''],
-                ['mvg', 'https://mvg.jp', ''],
-                ['opera', 'https://av-opera.jp', ''],
-                ['oppai', 'https://oppai-av.com', ''],
-                ['v-av', 'https://v-av.com', ''],
-                ['to-satsu', 'https://to-satsu.com', ''],
-                ['bibian', 'https://bibian-av.com', ''],
-                ['honnaka', 'https://honnaka.jp', ''],
-                ['rookie', 'https://rookie-av.jp', ''],
-                ['nanpa', 'https://nanpa-japan.jp', ''],
-                ['hajimekikaku', 'https://hajimekikaku.com', ''],
-                ['hhh-av', 'https://hhh-av.com', ''],
-            ]
-            for each in net_info:
-                host_address = each[1].replace('https://', '').replace('http://', '').split('/')[0]
-                if each[0] == 'javdb':
+            net_info = {'github': ['https://raw.githubusercontent.com', ''],
+                        'airav_cc': ['https://airav5.fun', ''],
+                        'iqqtv': ['https://iqq5.xyz', ''],
+                        'avsex': ['https://paycalling.com', ''],
+                        'freejavbt': ['https://freejavbt.com', ''],
+                        'javbus': ['https://www.javbus.com', ''],
+                        'javdb': ['https://javdb.com', ''],
+                        'jav321': ['https://www.jav321.com', ''],
+                        'javlibrary': ['https://www.javlibrary.com', ''],
+                        'dmm': ['https://www.dmm.co.jp', ''],
+                        'mgstage': ['https://www.mgstage.com', ''],
+                        'getchu': ['http://www.getchu.com', ''],
+                        'theporndb': ['https://api.metadataapi.net', ''],
+                        'avsox': [get_avsox_domain(), ''],
+                        'xcity': ['https://xcity.jp', ''],
+                        '7mmtv': ['https://7mmtv.tv', ''],
+                        'hdouban': ['https://ormtgu.com', ''],
+                        'mdtv': ['https://www.mdpjzip.xyz', ''],
+                        'madouqu': ['https://madouqu.com', ''],
+                        'cnmdb': ['https://cnmdb.net', ''],
+                        'lulubar': ['https://lulubar.co', ''],
+                        'love6': ['https://love6.tv', ''],
+                        'yesjav': ['http://www.yesjav.info', ''],
+                        'fc2': ['https://adult.contents.fc2.com', ''],
+                        'fc2club': ['https://fc2club.top', ''],
+                        'fc2hub': ['https://fc2hub.com', ''],
+                        'airav': ['https://www.airav.wiki', ''],
+                        'av-wiki': ['https://av-wiki.net', ''],
+                        'seesaawiki': ['https://seesaawiki.jp', ''],
+                        'mywife': ['https://mywife.cc', ''], 
+                        'giga': ['https://www.giga-web.jp', ''],
+                        'kin8': ['https://www.kin8tengoku.com', ''],
+                        'fantastica': ['http://fantastica-vr.com', ''], 
+                        'faleno': ['https://faleno.jp', ''],
+                        'dahlia': ['https://dahlia-av.jp', ''], 
+                        'prestige': ['https://www.prestige-av.com', ''],
+                        's1s1s1': ['https://s1s1s1.com', ''], 
+                        'moodyz': ['https://moodyz.com', ''],
+                        'madonna': ['https://www.madonna-av.com', ''],
+                        'wanz-factory': ['https://www.wanz-factory.com', ''],
+                        'ideapocket': ['https://ideapocket.com', ''], 
+                        'kirakira': ['https://kirakira-av.com', ''],
+                        'ebody': ['https://www.av-e-body.com', ''], 
+                        'bi-av': ['https://bi-av.com', ''],
+                        'premium': ['https://premium-beauty.com', ''], 
+                        'miman': ['https://miman.jp', ''],
+                        'tameikegoro': ['https://tameikegoro.jp', ''], 
+                        'fitch': ['https://fitch-av.com', ''],
+                        'kawaiikawaii': ['https://kawaiikawaii.jp', ''], 
+                        'befreebe': ['https://befreebe.com', ''],
+                        'muku': ['https://muku.tv', ''], 
+                        'attackers': ['https://attackers.net', ''],
+                        'mko-labo': ['https://mko-labo.net', ''], 
+                        'dasdas': ['https://dasdas.jp', ''],
+                        'mvg': ['https://mvg.jp', ''], 
+                        'opera': ['https://av-opera.jp', ''],
+                        'oppai': ['https://oppai-av.com', ''], 
+                        'v-av': ['https://v-av.com', ''],
+                        'to-satsu': ['https://to-satsu.com', ''], 
+                        'bibian': ['https://bibian-av.com', ''],
+                        'honnaka': ['https://honnaka.jp', ''], 
+                        'rookie': ['https://rookie-av.jp', ''],
+                        'nanpa': ['https://nanpa-japan.jp', ''], 
+                        'hajimekikaku': ['https://hajimekikaku.com', ''],
+                        'hhh-av': ['https://hhh-av.com', '']}
+            
+            for website in config.SUPPORTED_WEBSITES:
+                if hasattr(config, f"{website}_website"):
+                    signal.show_net_info(f"{website} 使用自定义网址：{getattr(config, f'{website}_website')}")
+                    net_info[website][0] = getattr(config, f"{website}_website")
+
+            net_info['javdb'][0] += '/v/D16Q5?locale=zh'
+            net_info['seesaawiki'][0] += '/av_neme/d/%C9%F1%A5%EF%A5%A4%A5%D5'
+            net_info['airav_cc'][0] += '/playon.aspx?hid=44733'
+            net_info['javlibrary'][0] += '/cn/?v=javme2j2tu'
+            net_info['kin8'][0] += '/moviepages/3681/index.html'
+
+            for name, each in net_info.items():
+                host_address = each[0].replace('https://', '').replace('http://', '').split('/')[0]
+                if name == 'javdb':
                     res_javdb = self._check_javdb_cookie()
-                    each[2] = res_javdb.replace('✅ 连接正常', f'✅ 连接正常{ping_host(host_address)}')
-                elif each[0] == 'javbus':
+                    each[1] = res_javdb.replace('✅ 连接正常', f'✅ 连接正常{ping_host(host_address)}')
+                elif name == 'javbus':
                     res_javbus = self._check_javbus_cookie()
-                    each[2] = res_javbus.replace('✅ 连接正常', f'✅ 连接正常{ping_host(host_address)}')
-                elif each[0] == 'theporndb':
+                    each[1] = res_javbus.replace('✅ 连接正常', f'✅ 连接正常{ping_host(host_address)}')
+                elif name == 'theporndb':
                     res_theporndb = check_theporndb_api_token()
-                    each[2] = res_theporndb.replace('✅ 连接正常', f'✅ 连接正常{ping_host(host_address)}')
-                elif each[0] == 'javlibrary':
+                    each[1] = res_theporndb.replace('✅ 连接正常', f'✅ 连接正常{ping_host(host_address)}')
+                elif name == 'javlibrary':
                     proxies = True
-                    if javlibrary_website:
+                    if hasattr(config, f"javlibrary_website"):
                         proxies = False
-                    result, html_info = scraper_html(each[1], proxies=proxies)
+                    result, html_info = scraper_html(each[0], proxies=proxies)
                     if not result:
-                        each[2] = '❌ 连接失败 请检查网络或代理设置！ ' + html_info
+                        each[1] = '❌ 连接失败 请检查网络或代理设置！ ' + html_info
                     elif 'Cloudflare' in html_info:
-                        each[2] = '❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)'
+                        each[1] = '❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)'
                     else:
-                        each[2] = f'✅ 连接正常{ping_host(host_address)}'
-                elif each[0] in ['avsex', 'freejavbt', 'airav_cc', 'airav', 'madouqu', '7mmtv']:
-                    result, html_info = scraper_html(each[1])
+                        each[1] = f'✅ 连接正常{ping_host(host_address)}'
+                elif name in ['avsex', 'freejavbt', 'airav_cc', 'airav', 'madouqu', '7mmtv']:
+                    result, html_info = scraper_html(each[0])
                     if not result:
-                        each[2] = '❌ 连接失败 请检查网络或代理设置！ ' + html_info
+                        each[1] = '❌ 连接失败 请检查网络或代理设置！ ' + html_info
                     elif 'Cloudflare' in html_info:
-                        each[2] = '❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)'
+                        each[1] = '❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)'
                     else:
-                        each[2] = f'✅ 连接正常{ping_host(host_address)}'
+                        each[1] = f'✅ 连接正常{ping_host(host_address)}'
                 else:
                     try:
-                        result, html_content = get_html(each[1])
+                        result, html_content = get_html(each[0])
                         if not result:
-                            each[2] = '❌ 连接失败 请检查网络或代理设置！ ' + str(html_content)
+                            each[1] = '❌ 连接失败 请检查网络或代理设置！ ' + str(html_content)
                         else:
-                            if each[0] == 'dmm':
+                            if name == 'dmm':
                                 if re.findall('このページはお住まいの地域からご利用になれません', html_content):
-                                    each[2] = '❌ 连接失败 地域限制, 请使用日本节点访问！'
+                                    each[1] = '❌ 连接失败 地域限制, 请使用日本节点访问！'
                                 else:
-                                    each[2] = f'✅ 连接正常{ping_host(host_address)}'
-                            elif each[0] == 'mgstage':
+                                    each[1] = f'✅ 连接正常{ping_host(host_address)}'
+                            elif name == 'mgstage':
                                 if not html_content.strip():
-                                    each[2] = '❌ 连接失败 地域限制, 请使用日本节点访问！'
+                                    each[1] = '❌ 连接失败 地域限制, 请使用日本节点访问！'
                                 else:
-                                    each[2] = f'✅ 连接正常{ping_host(host_address)}'
+                                    each[1] = f'✅ 连接正常{ping_host(host_address)}'
                             else:
-                                each[2] = f'✅ 连接正常{ping_host(host_address)}'
+                                each[1] = f'✅ 连接正常{ping_host(host_address)}'
                     except Exception as e:
-                        each[2] = '测试连接时出现异常！信息:' + str(e)
+                        each[1] = '测试连接时出现异常！信息:' + str(e)
                         signal.show_traceback_log(traceback.format_exc())
                         signal.show_net_info(traceback.format_exc())
-                signal.show_net_info('   ' + each[0].ljust(12) + each[2])
+                signal.show_net_info('   ' + name.ljust(12) + each[1])
             signal.show_net_info(f"\n🎉 网络检测已完成！用时 {get_used_time(start_time)} 秒！")
             signal.show_net_info("================================================================================\n")
         except:
@@ -2276,9 +2244,8 @@ class MyMAinWindow(QMainWindow):
         tips = '✅ 连接正常！'
         new_cookie = {'cookie': input_cookie}
         cookies = config.javdb_cookie
-        javdb_website = config.javdb_website
-        if javdb_website:
-            javdb_url = javdb_website + '/v/D16Q5?locale=zh'
+        if hasattr(config, 'javdb_website'):
+            javdb_url = config.javdb_website + '/v/D16Q5?locale=zh'
         else:
             javdb_url = 'https://javdb.com/v/D16Q5?locale=zh'
         try:
@@ -2352,9 +2319,8 @@ class MyMAinWindow(QMainWindow):
             'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6',
         }
         headers.update(headers_o)
-        javbus_website = config.javbus_website
-        if javbus_website:
-            javbus_url = javbus_website + '/FSDSS-660'
+        if hasattr(config, 'javbus_website'):
+            javbus_url = config.javbus_website + '/FSDSS-660'
         else:
             javbus_url = 'https://javbus.com/FSDSS-660'
 

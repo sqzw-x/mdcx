@@ -191,15 +191,6 @@ type = no
 proxy = 127.0.0.1:7890
 timeout = 10
 retry = 3
-javbus_website = 
-javdb_website = 
-iqqtv_website = 
-avsex_website = 
-hdouban_website = 
-mdtv_website = 
-airavcc_website = 
-lulubar_website = 
-javlibrary_website = 
 theporndb_api_token = 
 
 [Cookies]

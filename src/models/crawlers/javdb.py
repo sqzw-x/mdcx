@@ -198,10 +198,9 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', org_lan
 
     javdb_time = config.javdb_time
     cookies = config.javdb_cookie
-    javdb_website = config.javdb_website
     javdb_url = 'https://javdb.com'
-    if javdb_website:
-        javdb_url = javdb_website
+    if hasattr(config, 'javdb_website'):
+        javdb_url = config.javdb_website
     if appoint_url and '?locale' not in appoint_url:
         appoint_url += '?locale=zh'
     real_url = appoint_url
