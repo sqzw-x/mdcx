@@ -35,9 +35,10 @@ def get_detail_info(html, number):
     temp_title = re.findall(r'片名\s*：\s*(.+)\n', detail_info)
     temp_actor = re.findall(r'女郎\s*：\s*(.+)\n', detail_info)
 
-    number = temp_number[0] if temp_number else number
+    number = temp_number[0] if temp_number else ''
     title = temp_title[0] if temp_title else title.replace(number, '').strip()
     actor = temp_actor[0].replace('、', ',') if temp_actor else ''
+    number = title if not number else number
 
     studio = html.xpath('string(//span[@class="meta-category"])').strip()
     cover_url = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]/p/img/@src')
