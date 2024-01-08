@@ -1032,6 +1032,7 @@ def load_config(self):
         # endregion
 
         # region other
+        self.Ui.lineEdit_config_folder.setText(convert_path(config.folder))  # 配置文件目录
         rest_count = int(config.rest_count)  # 间歇刮削文件数量
         if rest_count == 0:
             rest_count = 1

@@ -11907,7 +11907,7 @@ class Ui_MDCx(object):
         self.pushButton_select_config_folder.setText(_translate("MDCx", "选择目录"))
         self.checkBox_remain_task.setText(_translate("MDCx", "记住未完成的刮削任务，即使退出或中止，下次仍可继续刮削未完成任务"))
         self.label_279.setText(_translate("MDCx", "保留任务："))
-        self.label_40.setText(_translate("MDCx", "将读取该目录中的配置文件、映射表、水印图片、演员头像等数据"))
+        self.label_40.setText(_translate("MDCx", "将读取该目录中的配置文件、映射表、水印图片、演员头像等数据，修改后重启程序方可生效"))
         self.checkBox_dialog_qt.setText(_translate("MDCx", "使用 QT 选择对话框"))
         self.label_421.setText(_translate("MDCx", "目录中的文件较多时，可以勾选此项以提高打开速度"))
         self.label_314.setText(_translate("MDCx", "隐藏图标："))

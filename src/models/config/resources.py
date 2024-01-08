@@ -2,8 +2,8 @@ import json
 import os
 import sys
 import traceback
-import zhconv
 
+import zhconv
 from PyQt5.QtGui import QFontDatabase
 from lxml import etree
 
@@ -137,7 +137,7 @@ class Resources:
                 signal.show_traceback_log(self._resources_base_path)
                 signal.show_traceback_log(traceback.format_exc())
                 print(self._resources_base_path, traceback.format_exc())
-        self._userdata_base_path = os.path.join(get_main_path(), 'userdata')
+        self._userdata_base_path = os.path.join(config.folder, 'userdata')
 
     def _resource_path(self, relative_path):
         if os.path.exists(os.path.join(self._resources_base_path, relative_path)):

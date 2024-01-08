@@ -23911,7 +23911,7 @@ font-weight:bold</string>
                <string notr="true">color: rgb(8, 128, 128);</string>
               </property>
               <property name="text">
-               <string>将读取该目录中的配置文件、映射表、水印图片、演员头像等数据</string>
+               <string>将读取该目录中的配置文件、映射表、水印图片、演员头像等数据，修改后重启程序方可生效</string>
               </property>
              </widget>
             </item>
