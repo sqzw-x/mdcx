@@ -76,7 +76,7 @@ class ActressDB:
             birthplace = "日本" if not birthplace else "日本·" + birthplace.replace('県', '县')
             actor_info.locations = [birthplace]
         if not actor_info.taglines:
-            actor_info.taglines = "日本AV女优"
+            actor_info.taglines = ["日本AV女优"]
         if not actor_info.overview:
             actor_info.overview = f"无维基百科信息, 从 minnano-av 数据库补全女优信息"
         return True
