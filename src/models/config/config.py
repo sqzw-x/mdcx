@@ -229,6 +229,7 @@ subtitle_add_rescrape = {self.subtitle_add_rescrape}
 server_type = {self.server_type}
 emby_url = {self.emby_url}
 api_key = {self.api_key}
+user_id = {self.user_id}
 emby_on = {self.emby_on}
 use_database = {self.use_database}
 info_database_path = {self.info_database_path}
