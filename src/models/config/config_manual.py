@@ -55,7 +55,6 @@ class ManualConfig:
         'fc2hub',
         'freejavbt',
         'getchu',
-        'getchu_dmm',
         'giga',
         'hdouban',
         'iqqtv',

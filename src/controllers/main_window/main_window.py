@@ -2108,7 +2108,7 @@ class MyMAinWindow(QMainWindow):
             
             for website in config.SUPPORTED_WEBSITES:
                 if hasattr(config, f"{website}_website"):
-                    signal.show_net_info(f"{website} 使用自定义网址：{getattr(config, f'{website}_website')}")
+                    signal.show_net_info(f"   ⚠️{website} 使用自定义网址：{getattr(config, f'{website}_website')}")
                     net_info[website][0] = getattr(config, f"{website}_website")
 
             net_info['javdb'][0] += '/v/D16Q5?locale=zh'
