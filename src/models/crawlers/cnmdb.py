@@ -3,6 +3,7 @@
 import json
 import re
 import time
+from urllib.parse import unquote
 
 import urllib3
 from lxml import etree
@@ -26,7 +27,7 @@ def get_actor_photo(actor):
 
 
 def get_detail_info(html, real_url):
-    number = real_url.split('/')[-1]
+    number = unquote(real_url.split('/')[-1])
     item_list = html.xpath('//ol[@class="breadcrumb"]//text()')
     new_item_list = []
     [new_item_list.append(i) for i in item_list if i.strip()]

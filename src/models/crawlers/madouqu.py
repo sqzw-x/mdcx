@@ -26,18 +26,21 @@ def get_actor_photo(actor):
 
 
 def get_detail_info(html, number):
-    detail_info = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]//text()')
-    if isinstance(detail_info, list):
-        detail_info = '\n'.join(detail_info)
+    detail_info = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]//p//text()')
+    # detail_info = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]//text()')
     title_h1 = html.xpath('//div[@class="cao_entry_header"]/header/h1/text()')
     title = title_h1[0].replace(number, '').strip() if title_h1 else number
-    temp_number = re.findall(r'番號\s*：\s*(.+)\n', detail_info)
-    temp_title = re.findall(r'片名\s*：\s*(.+)\n', detail_info)
-    temp_actor = re.findall(r'女郎\s*：\s*(.+)\n', detail_info)
-
-    number = temp_number[0] if temp_number else ''
-    title = temp_title[0] if temp_title else title.replace(number, '').strip()
-    actor = temp_actor[0].replace('、', ',') if temp_actor else ''
+    actor = ''
+    for i, t in enumerate(detail_info):
+        if '番號' in t:
+            temp_number = re.findall(r'番號\s*：\s*(.+)\s*', t)
+            number = temp_number[0] if temp_number else ''
+        if '片名' in t:
+            temp_title = re.findall(r'片名\s*：\s*(.+)\s*', t)
+            title = temp_title[0] if temp_title else title.replace(number, '').strip()
+        if t.endswith('女郎') and i + 1 < len(detail_info) and detail_info[i + 1].startswith('：'):
+            temp_actor = re.findall(r'：\s*(.+)\s*', detail_info[i + 1])
+            actor = temp_actor[0].replace('、', ',') if temp_actor else ''
     number = title if not number else number
 
     studio = html.xpath('string(//span[@class="meta-category"])').strip()
