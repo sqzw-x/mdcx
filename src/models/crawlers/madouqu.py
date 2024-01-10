@@ -31,6 +31,7 @@ def get_detail_info(html, number):
     title_h1 = html.xpath('//div[@class="cao_entry_header"]/header/h1/text()')
     title = title_h1[0].replace(number, '').strip() if title_h1 else number
     actor = ''
+    number = ''
     for i, t in enumerate(detail_info):
         if '番號' in t:
             temp_number = re.findall(r'番號\s*：\s*(.+)\s*', t)
