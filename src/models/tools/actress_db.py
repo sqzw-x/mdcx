@@ -53,8 +53,8 @@ class ActressDB:
         if height: tags.append(f"身高: {height}")
         if bust or waist or hip: tags.append(f"三围: {bust}/{waist}/{hip}")
         if birthday:
-            actor_info.birthday = birthday
-            actor_info.year = int(birthday[:4])
+            actor_info.birthday = birthday[:10]
+            actor_info.year = birthday[:4]
             tags.append("出生日期: " + birthday[:10])
             tags.append("年龄: " + str(datetime.datetime.now().year - int(birthday[:4])))
         if career_period: tags.append("生涯: " + career_period.replace("年", "").replace(" ", "").replace("-", "~"))
