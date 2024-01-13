@@ -24,7 +24,7 @@ on:
 
 env:
   PYTHON_VERSION: '3.10'
-  MACOS_BUNDLE_ID: com.mdcuniverse.mdcx
+  MACOS_BUNDLE_ID: com.mdcxuniverse.mdcx
 
 jobs:
   init-matrix:
@@ -72,12 +72,12 @@ jobs:
       matrix:
         include: ${{fromJson(needs.init-matrix.outputs.matrix)}}
     steps:
-      - name: Set env
-        run: |
-          # 如果是release触发的workflow，则获取release的tag，作为版本号
-          if [[ ${{ github.event_name }} == "release" ]]; then
-            echo "RELEASE_TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
-          fi
+      # - name: Set env
+      #   run: |
+      #     # 如果是release触发的workflow，则获取release的tag，作为版本号
+      #     if [[ "${{ github.event_name }}" == "release" ]]; then
+      #       echo "RELEASE_TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+      #     fi
       - name: Checkout code
         uses: actions/checkout@v2
 
