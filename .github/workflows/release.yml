@@ -1,0 +1,183 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+  workflow_dispatch:
+    inputs:
+      macos-aarch64:
+        description: 'Build macOS aarch64 app'
+        required: false
+        type: boolean
+        default: false
+      macos-x86_64:
+        description: 'Build macOS x86_64 app'
+        required: false
+        type: boolean
+        default: true
+      windows:
+        description: 'Build windows app'
+        required: false
+        type: boolean
+        default: true
+
+env:
+  PYTHON_VERSION: '3.10'
+  MACOS_BUNDLE_ID: com.mdcuniverse.mdcx
+
+jobs:
+  init-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      # https://github.com/actions/runner/issues/1985#issuecomment-1573518052
+      - name: Set matrix
+        id: set-matrix
+        run: |
+          items=()
+
+          # https://docs.github.com/zh/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners
+          if [[ ${{ github.event.inputs.macos-aarch64 }} == "true" ]]; then
+            items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64"}')
+          fi
+
+          if [[ ${{ github.event.inputs.macos-x86_64 }} == "true" ]]; then
+            items+=('{"build": "macos", "os": "macos-latest", "arch": "x86_64"}')
+          fi
+
+          if [[ ${{ github.event.inputs.windows }} == "true" ]]; then
+            items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
+          fi 
+          
+          # 合并items到json数组
+          matrix="matrix=["
+          for ((i=0; i<${#items[@]}; i++)); do
+            matrix+=" ${items[i]}"
+            if ((i != ${#items[@]}-1)); then
+              matrix+=","
+            fi
+          done
+          matrix+="]"
+
+          # 输出matrix到GITHUB_OUTPUT
+          echo $matrix >> $GITHUB_OUTPUT
+
+  build-app:
+    needs: init-matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{fromJson(needs.init-matrix.outputs.matrix)}}
+    steps:
+      - name: Set env
+        run: |
+          # 如果是release触发的workflow，则获取release的tag，作为版本号
+          if [[ ${{ github.event_name }} == "release" ]]; then
+            echo "RELEASE_TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+          fi
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install libraries
+        if: ${{ matrix.build == 'macos' }}
+        run: |
+          # FIX: No package 'gobject-introspection-1.0' found
+          # https://tutorials.technology/solved_errors/osx-gobject-introspection-1_0-found.html
+          brew install gobject-introspection
+
+      - name: Install dependencies - macOS
+        if: ${{ matrix.build == 'macos' }}
+        run: |
+          python -m pip install --upgrade pip
+          
+          python -m pip install -r requirements-mac.txt
+
+          pip install pyinstaller
+
+      - name: Install dependencies - Windows
+        if: ${{ matrix.build == 'windows' }}
+        run: |
+          python -m pip install --upgrade pip
+          
+          python -m pip install -r requirements.txt
+
+          pip install pyinstaller
+
+      - name: Create spec file - macOS
+        if: ${{ matrix.build == 'macos' }}
+        run: |
+          pyi-makespec \
+            --name MDCx \
+            --osx-bundle-identifier ${{ env.MACOS_BUNDLE_ID }} \
+            -F -w main.py \
+            -p "./src" \
+            --add-data "resources:resources" \
+            --add-data "libs:." \
+            --icon resources/Img/MDCx.icns \
+            --hidden-import socks \
+            --hidden-import urllib3 \
+            --hidden-import _cffi_backend \
+            --collect-all curl_cffi
+      
+      - name: Create spec file - Windows
+        if: ${{ matrix.build == 'windows' }}
+        run: |
+          # 默认的shell是PowerShell
+
+          pyi-makespec `
+            --name MDCx `
+            -F -w main.py `
+            -p "./src" `
+            --add-data "resources;resources" `
+            --add-data "libs;." `
+            --icon resources/Img/MDCx.ico `
+            --hidden-import socks `
+            --hidden-import urllib3 `
+            --hidden-import _cffi_backend `
+            --collect-all curl_cffi
+
+      - name: Build macOS app - macOS
+        if: ${{ matrix.build == 'macos' }}
+        run: |
+          pyinstaller MDCx.spec
+
+          cd dist
+          rm MDCx
+          
+          # `upload-artifact`会使文件丢失可执行权限。解决思路，先把`dist`打包成zip，再上传
+          zip -r ../MDCx-${{ matrix.build }}-${{ matrix.arch }}.app.zip .
+
+      - name: Build Windows app - Windows
+        if: ${{ matrix.build == 'windows' }}
+        run: |
+          pyinstaller MDCx.spec
+
+          # 创建文件夹
+          New-Item -ItemType Directory -Path "MDCx"
+
+          # 移动文件
+          Move-Item -Path dist\MDCx.exe -Destination MDCx\MDCx-${{ matrix.build }}-${{ matrix.arch }}.exe
+
+      - name: Upload artifact - macOS
+        uses: actions/upload-artifact@v3
+        if: ${{ matrix.build == 'macos' }}
+        with:
+          name: MDCx-${{ matrix.build }}-${{ matrix.arch }}
+          path: |
+            ./**.app.zip
+
+      - name: Upload artifact - Windows
+        uses: actions/upload-artifact@v3
+        if: ${{ matrix.build == 'windows' }}
+        with:
+          name: MDCx-${{ matrix.build }}-${{ matrix.arch }}
+          path: |
+            .\MDCx

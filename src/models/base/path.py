@@ -1,11 +1,13 @@
 # 主程序路径
 import os
+import platform
 import re
 import sys
 import traceback
 from os.path import abspath, dirname, realpath
 
 from models.signals import signal
+from models.config.config import config
 
 
 def get_main_path():
@@ -20,7 +22,10 @@ def get_main_path():
         # 或sys.argv[0],取的是被初始执行的脚本的所在目录，打包后路径会变成\base_libarary.zip
         # base_path = abspath(".") 取的是起始执行目录，和os.getcwd()结果一样，不太准
     if getattr(sys, 'frozen', False):  # 是否Bundle Resource，是否打包成exe运行
-        main_path = abspath("")  # 打包后，路径是准的
+        if platform.system() == 'Darwin':
+            main_path = config.get_mac_default_config_folder()
+        else:
+            main_path = abspath("")  # 打包后，路径是准的
     return main_path
 
 
