@@ -131,10 +131,14 @@ def _get_gfriends_actor_data():
             net_float = 0
             update_data = True
         else:
-            date_time = re.findall(r'committedDate":"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})', response)
-            lastest_time = time.strptime(date_time[0], '%Y-%m-%dT%H:%M:%S')
-            net_float = time.mktime(lastest_time) - time.timezone
-            net_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(net_float))
+            try:
+                date_time = re.findall(r'committedDate":"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})', response)
+                lastest_time = time.strptime(date_time[0], '%Y-%m-%dT%H:%M:%S')
+                net_float = time.mktime(lastest_time) - time.timezone
+                net_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(net_float))
+            except:
+                signal.show_log_text('🔴 Gfriends 历史页面解析失败！请向开发者报告! ')
+                return False
             signal.show_log_text(f'✅ Gfriends 连接成功！最新数据更新时间: {net_time}')
 
         # 更新：本地无文件时；更新时间过期；本地文件读取失败时，重新更新
@@ -403,3 +407,6 @@ def _get_local_actor_photo():
             signal.show_log_text("================================================================================")
             return False
         return local_actor_photo_dic
+
+if __name__ == '__main__':
+    _get_gfriends_actor_data()
