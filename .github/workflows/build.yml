@@ -1,0 +1,37 @@
+on:
+  push:
+    branches:
+      - master
+#  schedule:
+#    - cron: '15 20 * * *'  # 每天 20:15 UTC+0
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+          cache: pip
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller==5.8.0
+
+      - name: Build with PyInstaller
+        run: |
+          $COMMITSHA = "${{ github.sha }}".Substring(0, 7)
+          ./build-action
+
+      - name: Create Release
+        uses: Shopify/upload-to-release@v2.0.0
+        with:
+          name: ${{ github.sha }}
+          path: dist/MDCx-$COMMITSHA.exe
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
