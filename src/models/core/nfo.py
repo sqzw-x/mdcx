@@ -205,19 +205,26 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
             if 'country,' in nfo_include_new:
                 print(f"  <countrycode>{country}</countrycode>", file=code)
 
-            # 输出演员
+            # 输出男女演员
             if 'actor_all,' in nfo_include_new:
                 actor = all_actor
-            if actor and actor != '未知演员' and actor != '未知演員' and 'actor,' in nfo_include_new:
+            # 有演员时输出演员
+            if 'actor,' in nfo_include_new and actor and actor not in ['未知演员','未知演員']:
                 actor_list = actor.split(',')  # 字符串转列表
                 actor_list = [actor.strip() for actor in actor_list if actor.strip()]  # 去除空白
-                if actor_list:
-                    for each in actor_list:
-                        print("  <actor>", file=code)
-                        print("    <name>" + each + "</name>", file=code)
-                        print("    <type>Actor</type>", file=code)
-                        print("  </actor>", file=code)
-
+            # 无演员时输出演员 以文件命名设置中未知演员设置项为演员名，默认设置和空值不写入NFO
+            elif not actor_list and config.actor_no_name not in ["未知演员",'未知演員','']:
+                actor = config.actor_no_name
+                actor_list = actor.split(',')  # 字符串转列表
+                actor_list = [actor.strip() for actor in actor_list if actor.strip()]  # 去除空白
+                signal.add_log(f'⛑️ 无演员名, 使用手动设置项 🛠未知演员 写入NFO {config.actor_no_name}')
+            if actor_list:
+                for each in actor_list:
+                    print("  <actor>", file=code)
+                    print("    <name>" + each + "</name>", file=code)
+                    print("    <type>Actor</type>", file=code)
+                    print("  </actor>", file=code)
+               
             # 输出导演
             if director and 'director,' in nfo_include_new:
                 print("  <director>" + director + "</director>", file=code)
