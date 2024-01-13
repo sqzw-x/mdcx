@@ -339,7 +339,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', org_lan
             publisher = get_publisher(html_detail)
             extrafanart = get_extrafanart(html_detail)
             trailer = get_trailer(html_detail)
-            website = get_website(real_url, javdb_website)
+            website = get_website(real_url, javdb_url)
             wanted = get_wanted(html_info)
             title_rep = ['第一集', '第二集', ' - 上', ' - 下', ' 上集', ' 下集', ' -上', ' -下']
             for each in title_rep:
