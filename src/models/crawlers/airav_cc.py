@@ -160,6 +160,8 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
                 raise Exception(debug_info)
 
         if real_url:
+            if isinstance(real_url, list) and real_url:
+                real_url = real_url[0]
             debug_info = '番号地址: %s ' % real_url
             log_info += web_info + debug_info
             for i in range(3):
