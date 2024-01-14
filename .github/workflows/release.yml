@@ -1,30 +1,12 @@
-name: Release
+name: Build and Release
 
 on:
   release:
-    types: [published]
-
-  workflow_dispatch:
-    inputs:
-      macos-aarch64:
-        description: 'Build macOS aarch64 app'
-        required: false
-        type: boolean
-        default: false
-      macos-x86_64:
-        description: 'Build macOS x86_64 app'
-        required: false
-        type: boolean
-        default: true
-      windows:
-        description: 'Build windows app'
-        required: false
-        type: boolean
-        default: true
+    types: [ published ]
 
 env:
-  PYTHON_VERSION: '3.10'
-  MACOS_BUNDLE_ID: com.mdcxuniverse.mdcx
+  PYTHON_VERSION: '3.9'
+#  MACOS_BUNDLE_ID: com.mdcxuniverse.mdcx
 
 jobs:
   init-matrix:
@@ -39,17 +21,9 @@ jobs:
           items=()
 
           # https://docs.github.com/zh/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners
-          if [[ ${{ github.event.inputs.macos-aarch64 }} == "true" ]]; then
-            items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64"}')
-          fi
-
-          if [[ ${{ github.event.inputs.macos-x86_64 }} == "true" ]]; then
-            items+=('{"build": "macos", "os": "macos-latest", "arch": "x86_64"}')
-          fi
-
-          if [[ ${{ github.event.inputs.windows }} == "true" ]]; then
-            items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
-          fi 
+          # items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64"}')
+          items+=('{"build": "macos", "os": "macos-latest", "arch": "x86_64"}')
+          items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
           
           # 合并items到json数组
           matrix="matrix=["
@@ -72,20 +46,15 @@ jobs:
       matrix:
         include: ${{fromJson(needs.init-matrix.outputs.matrix)}}
     steps:
-      # - name: Set env
-      #   run: |
-      #     # 如果是release触发的workflow，则获取release的tag，作为版本号
-      #     if [[ "${{ github.event_name }}" == "release" ]]; then
-      #       echo "RELEASE_TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
-      #     fi
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+          cache: pip
+
       - name: Install libraries
         if: ${{ matrix.build == 'macos' }}
         run: |
@@ -97,87 +66,60 @@ jobs:
         if: ${{ matrix.build == 'macos' }}
         run: |
           python -m pip install --upgrade pip
-          
-          python -m pip install -r requirements-mac.txt
-
-          pip install pyinstaller
+          pip install -r requirements-mac.txt
+          pip install pyinstaller==5.8.0
 
       - name: Install dependencies - Windows
         if: ${{ matrix.build == 'windows' }}
         run: |
           python -m pip install --upgrade pip
-          
-          python -m pip install -r requirements.txt
-
-          pip install pyinstaller
-
-      - name: Create spec file - macOS
-        if: ${{ matrix.build == 'macos' }}
-        run: |
-          pyi-makespec \
-            --name MDCx \
-            --osx-bundle-identifier ${{ env.MACOS_BUNDLE_ID }} \
-            -F -w main.py \
-            -p "./src" \
-            --add-data "resources:resources" \
-            --add-data "libs:." \
-            --icon resources/Img/MDCx.icns \
-            --hidden-import socks \
-            --hidden-import urllib3 \
-            --hidden-import _cffi_backend \
-            --collect-all curl_cffi
-      
-      - name: Create spec file - Windows
-        if: ${{ matrix.build == 'windows' }}
-        run: |
-          # 默认的shell是PowerShell
-
-          pyi-makespec `
-            --name MDCx `
-            -F -w main.py `
-            -p "./src" `
-            --add-data "resources;resources" `
-            --add-data "libs;." `
-            --icon resources/Img/MDCx.ico `
-            --hidden-import socks `
-            --hidden-import urllib3 `
-            --hidden-import _cffi_backend `
-            --collect-all curl_cffi
+          pip install -r requirements.txt
+          pip install pyinstaller==5.8.0
 
       - name: Build macOS app - macOS
         if: ${{ matrix.build == 'macos' }}
         run: |
-          pyinstaller MDCx.spec
-
-          cd dist
-          rm MDCx
-          
+          chmod +x build-macos.sh
+          ./build-macos.sh
+          # cd dist
+          ls -al dist
+          rm dist/MDCx
           # `upload-artifact`会使文件丢失可执行权限。解决思路，先把`dist`打包成zip，再上传
-          zip -r ../MDCx-${{ matrix.build }}-${{ matrix.arch }}.app.zip .
+          zip -r MDCx.app.zip dist
+          ls -al
 
       - name: Build Windows app - Windows
         if: ${{ matrix.build == 'windows' }}
-        run: |
-          pyinstaller MDCx.spec
+        run: ./build-action
 
-          # 创建文件夹
-          New-Item -ItemType Directory -Path "MDCx"
+      #      - name: Upload artifact - macOS
+      #        uses: actions/upload-artifact@v3
+      #        if: ${{ matrix.build == 'macos' }}
+      #        with:
+      #          name: MDCx-${{ matrix.build }}-${{ matrix.arch }}
+      #          path: |
+      #            ./**.app.zip
+      #
+      #      - name: Upload artifact - Windows
+      #        uses: actions/upload-artifact@v3
+      #        if: ${{ matrix.build == 'windows' }}
+      #        with:
+      #          name: MDCx-${{ matrix.build }}-${{ matrix.arch }}
+      #          path: |
+      #            .\MDCx
 
-          # 移动文件
-          Move-Item -Path dist\MDCx.exe -Destination MDCx\MDCx-${{ matrix.build }}-${{ matrix.arch }}.exe
-
-      - name: Upload artifact - macOS
-        uses: actions/upload-artifact@v3
+      - name: Create Release - macOS
+        uses: svenstaro/upload-release-action@2.7.0
         if: ${{ matrix.build == 'macos' }}
         with:
-          name: MDCx-${{ matrix.build }}-${{ matrix.arch }}
-          path: |
-            ./**.app.zip
+          asset_name: MDCx-${{ matrix.build }}-${{ matrix.arch }}.app.zip
+          file: MDCx.app.zip
+          prerelease: true
 
-      - name: Upload artifact - Windows
-        uses: actions/upload-artifact@v3
+      - name: Create Release - Windows
+        uses: svenstaro/upload-release-action@2.7.0
         if: ${{ matrix.build == 'windows' }}
         with:
-          name: MDCx-${{ matrix.build }}-${{ matrix.arch }}
-          path: |
-            .\MDCx
+          asset_name: MDCx-${{ matrix.build }}-${{ matrix.arch }}.exe
+          file: dist/MDCx.exe
+          prerelease: true

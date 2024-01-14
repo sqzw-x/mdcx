@@ -1,9 +1,6 @@
 $env:PYTHONPATH = "$PWD\src"
 
-$FileName = "MDCx-windows-x86_64.exe"
-Write-Output "Output File: $FileName"
-
-python -m PyInstaller -n "$FileName" -F `
+python -m PyInstaller -n MDCx -F `
 -i resources/Img/MDCx.ico `
 -w main.py `
 -p "./src" `
