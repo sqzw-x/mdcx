@@ -1,9 +1,8 @@
+name: Build Release Windows
+
 on:
-  push:
-    branches:
-      - master
-#  schedule:
-#    - cron: '15 20 * * *'  # 每天 20:15 UTC+0
+  release:
+    types: [ published ]
 
 jobs:
   build-release:
@@ -25,13 +24,13 @@ jobs:
           pip install pyinstaller==5.8.0
 
       - name: Build with PyInstaller
+        id: build
         run: |
-          $COMMITSHA = "${{ github.sha }}".Substring(0, 7)
           ./build-action
 
       - name: Create Release
         uses: Shopify/upload-to-release@v2.0.0
         with:
-          name: ${{ github.sha }}
-          path: dist/MDCx-$COMMITSHA.exe
+          name: MDCx-windows-x86_64.exe
+          path: dist/MDCx-windows-x86_64.exe
           repo-token: ${{ secrets.GITHUB_TOKEN }}
