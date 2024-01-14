@@ -4,7 +4,8 @@ cloudscraper==1.2.71
 requests==2.24.0
 beautifulsoup4==4.9.3
 Pillow==9.4.0
-PyQt5==5.15.6
+# 5.15.6 stuck on m1 Ventura 13.5, 5.15.10 is fine
+PyQt5==5.15.10
 PySocks==1.7.1
 urllib3==1.25.11
 zhconv
