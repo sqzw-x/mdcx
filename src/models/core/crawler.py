@@ -124,7 +124,7 @@ def _call_crawler(json_data, website, language, file_number, short_number, mosai
     elif website == 'mgstage':
         json_data = json.loads(mgstage.main(file_number, appoint_url, log_info, req_web, language, short_number))
     elif website == '7mmtv':
-        json_data = json.loads(mmtv.main(file_number, appoint_url, log_info, req_web, language))
+        json_data = json.loads(mmtv.main(file_number, appoint_url, log_info, req_web, language, file_path))
     elif website == 'fc2':
         json_data = json.loads(fc2.main(file_number, appoint_url, log_info, req_web, language))
     elif website == 'fc2hub':
