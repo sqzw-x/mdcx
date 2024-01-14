@@ -904,9 +904,8 @@ def save_config(self):
     config.path = convert_path(os.path.join(config_folder, config.file))
     config.version = self.localversion
     config.save_config()
+    config.update_config()
 
-    # 根据设置页是否勾选同意, 改变文件清理按钮状态
-    self.checkBox_i_agree_clean_clicked()
     try:
         scrape_like_text = Flags.scrape_like_text
         if config.scrape_like == 'single':

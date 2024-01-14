@@ -79,7 +79,7 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
                     setattr(self, key, float(value))
                 else:
                     setattr(self, key, value)
-        self._update_config()
+        self.update_config()
 
     def save_config(self):
         with open(self.get_mark_file_path(), 'w', encoding='UTF-8') as f:
@@ -319,7 +319,7 @@ statement = {self.statement}
         with open(self.path, "wt", encoding='UTF-8') as code:
             print(GeneratedConfig.CONFIG_STR, file=code)
 
-    def _update_config(self):
+    def update_config(self):
         # 获取proxies
         if self.type == 'http':
             self.proxies = {
