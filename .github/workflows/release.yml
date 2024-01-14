@@ -3,6 +3,10 @@ name: Build and Release
 on:
   release:
     types: [ published ]
+  push:
+    tags:
+      - 120*
+      - pre-20*
 
 env:
   PYTHON_VERSION: '3.9'
@@ -112,14 +116,14 @@ jobs:
         uses: svenstaro/upload-release-action@2.7.0
         if: ${{ matrix.build == 'macos' }}
         with:
-          asset_name: MDCx-${{ matrix.build }}-${{ matrix.arch }}.app.zip
+          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}.app.zip
           file: MDCx.app.zip
-          prerelease: true
+          prerelease: ${{ startsWith(github.ref, 'refs/tags/pre-') }}
 
       - name: Create Release - Windows
         uses: svenstaro/upload-release-action@2.7.0
         if: ${{ matrix.build == 'windows' }}
         with:
-          asset_name: MDCx-${{ matrix.build }}-${{ matrix.arch }}.exe
+          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}.exe
           file: dist/MDCx.exe
-          prerelease: true
+          prerelease: ${{ startsWith(github.ref, 'refs/tags/pre-') }}
