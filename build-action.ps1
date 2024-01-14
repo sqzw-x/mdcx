@@ -1,6 +1,6 @@
 $env:PYTHONPATH = "$PWD\src"
 
-$FileName = "MDCx-$COMMITSHA.exe"
+$FileName = "MDCx-windows-x86_64.exe"
 Write-Output "Output File: $FileName"
 
 python -m PyInstaller -n "$FileName" -F `

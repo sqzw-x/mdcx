@@ -685,7 +685,7 @@ def check_version():
         _, res_json = get_html(url, json_data=True)
         if isinstance(res_json, dict):
             try:
-                latest_version = res_json['assets'][0]['name'].replace('MDCx-', '').replace('.exe', '')
+                latest_version = res_json['tag_name']
                 latest_version = int(latest_version)
                 return latest_version
             except:
