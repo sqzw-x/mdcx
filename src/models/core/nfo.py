@@ -329,10 +329,12 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
                 print("  <website>" + website + "</website>", file=code)
 
             # javdb id 输出, 没有时使用番号搜索页
-            if 'javdbid' in json_data_nfo and json_data_nfo['javdbid']:
-                print("  <javdbid>" + json_data_nfo["javdbid"] + "</javdbid>", file=code)
-            else:
-                print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
+            if 'javdbid' in json_data_nfo:
+                # 其他非javdb网站取消强制输出该字段
+                if json_data_nfo['javdbid']:
+                    print("  <javdbid>" + json_data_nfo["javdbid"] + "</javdbid>", file=code)
+                else:
+                    print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
             print("</movie>", file=code)
             json_data['logs'] += "\n 🍀 Nfo done! (new)(%ss)" % get_used_time(start_time)
             return True
