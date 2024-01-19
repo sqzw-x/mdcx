@@ -108,7 +108,7 @@ def get_extrafanart(html):
 
 
 def main(number, appoint_url='', log_info='', req_web='', language='jp'):
-    if 'DLID' in number.upper() or 'ITEM' in number.upper() or 'dl.getchu' in appoint_url:
+    if 'DLID' in number.upper() or 'ITEM' in number.upper() or 'GETCHU' in number.upper() or 'dl.getchu' in appoint_url:
         return getchu_dl.main(number, appoint_url, log_info, req_web, 'jp')
     start_time = time.time()
     website_name = 'getchu'

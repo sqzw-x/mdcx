@@ -85,7 +85,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
     log_info += ' \n    🌐 dl_getchu'
     debug_info = ''
     cookies = {"adult_check_flag": "1"}
-    if not real_url and ('DLID' in number.upper() or 'ITEM' in number.upper()):
+    if not real_url and ('DLID' in number.upper() or 'ITEM' in number.upper() or 'GETCHU' in number.upper()):
         id = re.findall(r'\d+', number)[0]
         real_url = f'https://dl.getchu.com/i/item{id}'
         # real_url = 'https://dl.getchu.com/i/item4024984'
