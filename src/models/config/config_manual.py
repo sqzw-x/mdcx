@@ -367,7 +367,7 @@ class ManualConfig:
         'yt': 'YoungThroats',
         'zb': 'ZoliBoy',
     }
-    official_websites = {
+    official = {
         'https://s1s1s1.com': 'sivr|ssis|ssni|snis|soe|oned|one|onsd|ofje|sps|tksoe',
         # https://s1s1s1.com/search/list?keyword=soe
         'https://moodyz.com': 'mdvr|midv|mide|midd|mibd|mimk|miid|migd|mifd|miae|miad|miaa|mdl|mdj|mdi|mdg|mdf|mde|mdld|mded|mizd|mird|mdjd|rmid|mdid|mdmd|mimu|mdpd|mivd|mdud|mdgd|mdvd|mias|miqd|mint|rmpd|mdrd|tkmide|tkmidd|kmide|tkmigd|mdfd|rmwd',

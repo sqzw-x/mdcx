@@ -394,7 +394,7 @@ statement = {self.statement}
 
         # 番号对应官网
         official_websites_dic = {}
-        for key, value in self.official_websites.items():
+        for key, value in self.official.items():
             temp_list = value.upper().split('|')
             for each in temp_list:
                 official_websites_dic[each] = key
