@@ -6,6 +6,7 @@ import re
 
 import urllib3
 import zhconv
+from models.base.number import remove_escape_string
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -73,6 +74,11 @@ def get_actor_list():
 
 
 def get_number_list(number, appoint_number='', file_path=''):  # 处理国产番号
+
+    # 国产匹配番号或标题前也可以先排除路径中多余字符
+    if file_path:
+        file_path = remove_escape_string(file_path)
+
     file_name = os.path.splitext(os.path.split(file_path)[1])[0].upper() if file_path else ''
     number = number.upper()
     number_list = []  # 返回一个番号列表，用来搜索
@@ -202,7 +208,11 @@ def get_number_list(number, appoint_number='', file_path=''):  # 处理国产番
                     number_list.extend([number_normal_4, number_has_nothing_4, number_has_space_4])
         if len(number_list):
             break
+    # 番号识别将纯数字和字母放在最前面（将长度最短的放前面即可），刮削网站一般也只取 number_list 第一项进行搜索，其他用于搜索结果页比对
+    sorted_number_list = sorted(number_list, key=lambda x: len(x))
 
+
+    # 以下处理没有番号的作品
     # 台湾第一女优吴梦梦.OL误上痴汉地铁.惨遭多人轮番奸玩.麻豆传媒映画代理出品
     # PsychoPorn色控.找来大奶姐姐帮我乳交.麻豆传媒映画
     # 國産麻豆AV 麻豆番外 大番號女優空降上海 特別篇 沈芯語
@@ -248,13 +258,23 @@ def get_number_list(number, appoint_number='', file_path=''):  # 处理国产番
     # 把文件名加到列表
     filename_list.append(real_file_name)
 
+    # 演员后面的第一句成功刮削概率较高，插入列表第一项
+    # 超级丝袜控180大长腿女神▌苹果▌我的室友 第八篇 黑丝女仆骚丁小穴湿淋淋 肉棒塞满激怼爆射
+    # 17205-最新极品天花板小萝莉▌粉色情人▌摄影师的威胁 粗屌爆艹少女白虎嫩鲍 极速刮擦蜜壶淫靡下体
+    # 潮喷淫娃御姐〖小水水〗和异地大奶女友开房，激情互舔口爆高潮喷水，黑丝美腿女神极度淫骚 潮喷不停
+    # 极品爆乳鲜嫩美穴貌美尤物▌苏美奈▌家政女仆的肉体服务 肏到羞耻喷汁 极射中出鲜嫩美穴
+    # 【小酒改头换面】，罕见大胸嫩妹，小伙今夜捡到宝了
+    if u := re.search(r'(【.+】|▌.+▌|〖.+〗|『.+』)[,，\- ]?(\S{6,18}?)[,，\-  ]', real_file_name):
+        search_char = u.group(2)
+        filename_list.insert(0, search_char)
+
     # 转繁体
     filename_list.append(zhconv.convert(filename_list[0], 'zh-hant'))
 
     # 去重去空
     new_number_list = []
     new_filename_list = []
-    [new_number_list.append(i) for i in number_list if i and i not in new_number_list]
+    [new_number_list.append(i) for i in sorted_number_list if i and i not in new_number_list]
     [new_filename_list.append(i) for i in filename_list if i and i not in new_filename_list]
     return new_number_list, new_filename_list
 
