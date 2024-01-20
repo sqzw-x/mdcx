@@ -12,7 +12,7 @@ from models.base.pool import Pool
 from models.base.utils import convert_path, get_current_time, get_real_time, get_used_time
 from models.config.config import config
 from models.config.resources import resources
-from models.core.crawler import get_json_data
+from models.core.crawler import crawl
 from models.core.file import _clean_empty_fodlers, _pic_some_deal, check_file, copy_trailer_to_theme_videos, \
     creat_folder, deal_old_files, get_file_info, get_movie_list, get_output_name, move_bif, move_file_to_failed_folder, \
     move_movie, move_other_file, move_torrent, newtdisk_creat_symlink, save_success_list
@@ -118,7 +118,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
             json_data_new['mosaic'] = json_data['mosaic']
         json_data.update(json_data_new)
     elif not json_data['nfo_update']:
-        json_data = get_json_data(json_data, file_mode)
+        json_data = crawl(json_data, file_mode)
 
     # 显示json_data结果或日志
     json_data['failed_folder'] = failed_folder

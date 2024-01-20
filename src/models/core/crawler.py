@@ -81,7 +81,7 @@ def _deal_some_list(field, website, same_list):
     return same_list
 
 
-def _get_web_data(json_data, website, language, file_number, short_number, mosaic, org_language):
+def _call_crawler(json_data, website, language, file_number, short_number, mosaic, org_language):
     """
     获取某个网站数据
     """
@@ -173,7 +173,7 @@ def _get_web_data(json_data, website, language, file_number, short_number, mosai
     return json_data
 
 
-def _get_websites_data(json_data, number_website_list):
+def _decide_websites(json_data, number_website_list):
     """
     获取一组网站的数据：按照设置的网站组，请求各字段数据，并返回最终的数据
     """
@@ -278,8 +278,8 @@ def _get_websites_data(json_data, number_website_list):
         field_name, field_cnname, field_language, website_list = each_f
         if field_name in none_fields:
             continue
-        _get_each_field(all_json_data, json_data, website_list, field_name, field_cnname, field_language, config,
-                        file_number, short_number, json_data['mosaic'])
+        _call_crawlers(all_json_data, json_data, website_list, field_name, field_cnname, field_language, config,
+                       file_number, short_number, json_data['mosaic'])
         if field_name == 'title' and not json_data['title']:
             return json_data
 
@@ -489,8 +489,8 @@ def _deal_each_field(all_json_data, json_data, website_list, field_name, field_c
             json_data['fields_info'] += '\n     ' + f"{field_name:<13}" + f': {"-----"} ({"not found"})'
 
 
-def _get_each_field(all_json_data, json_data, website_list, field_name, field_cnname, field_language, config,
-                    file_number, short_number, mosaic):
+def _call_crawlers(all_json_data, json_data, website_list, field_name, field_cnname, field_language, config,
+                    file_number, short_number, mosaic): # 4
     """
     按照设置的网站顺序获取各个字段信息
     """
@@ -517,7 +517,7 @@ def _get_each_field(all_json_data, json_data, website_list, field_name, field_cn
         try:
             web_data_json = all_json_data[website][title_language]
         except:
-            web_data = _get_web_data(json_data, website, title_language, file_number, short_number, mosaic,
+            web_data = _call_crawler(json_data, website, title_language, file_number, short_number, mosaic,
                                      config.title_language)
             all_json_data.update(web_data)
             web_data_json = all_json_data.get(website).get(title_language)
@@ -564,7 +564,7 @@ def _get_each_field(all_json_data, json_data, website_list, field_name, field_cn
             json_data['log_info'] += f'\n    🔴 {field_cnname} 获取失败！'
 
 
-def _get_single_website_data(json_data, website):
+def _call_specific_crawler(json_data, website):
     file_number = json_data['number']
     short_number = json_data['short_number']
     mosaic = json_data['mosaic']
@@ -597,7 +597,7 @@ def _get_single_website_data(json_data, website):
         studio_language = 'zh_cn'
         publisher_language = 'zh_cn'
         director_language = 'zh_cn'
-    web_data = _get_web_data(json_data, website, title_language, file_number, short_number, mosaic, org_language)
+    web_data = _call_crawler(json_data, website, title_language, file_number, short_number, mosaic, org_language)
     web_data_json = web_data.get(website).get(title_language)
     json_data.update(web_data_json)
     if not json_data['title']:
@@ -655,7 +655,7 @@ def _get_single_website_data(json_data, website):
     return json_data
 
 
-def _get_data_from_website(json_data, website_name):  # 从JSON返回元数据
+def _crawl(json_data, website_name):  # 从JSON返回元数据
     file_number = json_data['number']
     file_path = json_data['file_path']
     short_number = json_data['short_number']
@@ -688,27 +688,27 @@ def _get_data_from_website(json_data, website_name):  # 从JSON返回元数据
             r'MKY-[A-Z]+-\d{3,}', file_number):
             json_data['mosaic'] = '国产'
             website_list = config.website_guochan.split(',')
-            json_data = _get_websites_data(json_data, website_list)
+            json_data = _decide_websites(json_data, website_list)
 
         # =======================================================================kin8
         elif file_number.startswith('KIN8'):
             website_name = 'kin8'
-            json_data = _get_single_website_data(json_data, website_name)
+            json_data = _call_specific_crawler(json_data, website_name)
 
         # =======================================================================同人
         elif file_number.startswith('DLID'):
             website_name = 'getchu'
-            json_data = _get_single_website_data(json_data, website_name)
+            json_data = _call_specific_crawler(json_data, website_name)
 
         # =======================================================================里番
         elif 'getchu' in file_path.lower() or '里番' in file_path or '裏番' in file_path:
             website_name = 'getchu_dmm'
-            json_data = _get_single_website_data(json_data, website_name)
+            json_data = _call_specific_crawler(json_data, website_name)
 
         # =======================================================================Mywife No.1111
         elif 'mywife' in file_path.lower():
             website_name = 'mywife'
-            json_data = _get_single_website_data(json_data, website_name)
+            json_data = _call_specific_crawler(json_data, website_name)
 
         # =======================================================================FC2-111111
         elif 'FC2' in file_number.upper():
@@ -716,7 +716,7 @@ def _get_data_from_website(json_data, website_name):  # 从JSON返回元数据
             if file_number_1:
                 file_number_1.group()
                 website_list = config.website_fc2.split(',')
-                json_data = _get_websites_data(json_data, website_list)
+                json_data = _decide_websites(json_data, website_list)
             else:
                 json_data['error_info'] = '未识别到FC2番号：%s' % file_number
 
@@ -724,29 +724,29 @@ def _get_data_from_website(json_data, website_name):  # 从JSON返回元数据
         elif re.search(r'[^.]+\.\d{2}\.\d{2}\.\d{2}', file_number) or (
                 '欧美' in file_path and '东欧美' not in file_path):
             website_list = config.website_oumei.split(',')
-            json_data = _get_websites_data(json_data, website_list)
+            json_data = _decide_websites(json_data, website_list)
 
         # =======================================================================无码抓取:111111-111,n1111,HEYZO-1111,SMD-115
         elif mosaic == '无码' or mosaic == '無碼':
             website_list = config.website_wuma.split(',')
-            json_data = _get_websites_data(json_data, website_list)
+            json_data = _decide_websites(json_data, website_list)
 
         # =======================================================================259LUXU-1111
         elif short_number or 'SIRO' in file_number.upper():
             website_list = config.website_suren.split(',')
-            json_data = _get_websites_data(json_data, website_list)
+            json_data = _decide_websites(json_data, website_list)
 
         # =======================================================================ssni00321
         elif re.match(r'\D{2,}00\d{3,}', file_number) and '-' not in file_number and '_' not in file_number:
             website_list = ['dmm']
-            json_data = _get_websites_data(json_data, website_list)
+            json_data = _decide_websites(json_data, website_list)
 
         # =======================================================================剩下的（含匹配不了）的按有码来刮削
         else:
             website_list = config.website_youma.split(',')
-            json_data = _get_websites_data(json_data, website_list)
+            json_data = _decide_websites(json_data, website_list)
     else:
-        json_data = _get_single_website_data(json_data, website_name)
+        json_data = _call_specific_crawler(json_data, website_name)
 
     # ================================================网站请求结束================================================
     # ======================================超时或未找到返回
@@ -832,10 +832,10 @@ def _get_website_name(json_data, file_mode):
     return website_name
 
 
-def get_json_data(json_data, file_mode):
+def crawl(json_data, file_mode):
     # 从指定网站获取json_data
     website_name = _get_website_name(json_data, file_mode)
-    json_data = _get_data_from_website(json_data, website_name)
+    json_data = _crawl(json_data, website_name)
     return _deal_json_data(json_data)
 
 
