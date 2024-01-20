@@ -174,7 +174,12 @@ def get_tag(html):
 
 
 def get_extrafanart(html):
-    result = html.xpath('//a[@class="lazyload screens-item fresco"]/@href')
+    # 前几张
+    result1 = html.xpath('//span/img[contains(@class, "lazyload")]/@data-src')
+    # 其他隐藏需点击的
+    if result2 := html.xpath('//div[contains(@class, "fullvideo")]/script[@language="javascript"]/text()'):
+        result2 = re.findall(r'https?://.+?\.jpe?g', str(result2))
+    result = result1 + result2
     return result if result else ''
 
 
@@ -289,7 +294,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
                     'runtime': runtime,
                     'score': '',
                     'series': '',
-                    'country': 'JP',
+                    'country': 'CN',
                     'director': director,
                     'studio': studio,
                     'publisher': publisher,
@@ -350,7 +355,8 @@ if __name__ == '__main__':
     # print(main('H4610-ki230225'))
     # print(main('c0930-ki221218'))
     # print(main('c0930-hitozuma1407'))
-    print(main('h0930-ori1665'))
+    #print(main('h0930-ori1665'))
+    print(main('h0930-ori1665', appoint_url='https://7mm002.com/zh/amateur_content/107108/content.html'))
     # print(main('RBD-293'))
     # print(main('LUXU-728')) # 无结果
     # print(main('fc2-1050737'))  # 标题中有/
