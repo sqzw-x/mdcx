@@ -26,7 +26,7 @@ def get_some_info(title, file_path, info_type, tag='', actor='', series=''):
         tag_list = []
         all_tag = get_lable_list()
         for each in all_tag:
-            if each in all_info:
+            if each in all_info.upper():
                 tag_list.append(each)
         new_tag_list = []
         [new_tag_list.append(i) for i in tag_list if i and i not in new_tag_list]
@@ -37,7 +37,7 @@ def get_some_info(title, file_path, info_type, tag='', actor='', series=''):
         actor_list = []
         all_actor = get_actor_list()
         for each in all_actor:
-            if each in all_info:
+            if each in all_info.upper():
                 actor_list.append(each)
         new_actor_list = []
         [new_actor_list.append(i) for i in actor_list if i and i not in new_actor_list]
@@ -48,7 +48,7 @@ def get_some_info(title, file_path, info_type, tag='', actor='', series=''):
         series_list = []
         all_series = get_lable_list()
         for each in all_series:
-            if each in all_info:
+            if each in all_info.upper():
                 series_list.append(each)
         new_series_list = []
         [new_series_list.append(i) for i in series_list if i and i not in new_series_list]
@@ -94,7 +94,8 @@ def get_real_url(html, number_list):
     item_list = html.xpath('//div[@class="entry-media"]/div/a')
     for each in item_list:
         detail_url = each.get('href')
-        title = each.xpath('img[@class="lazyload"]/@alt')[0]
+        # lazyload属性容易改变，去掉也能拿到结果
+        title = each.xpath('img[@class]/@alt')[0]
         if title and detail_url:
             for n in number_list:
                 temp_n = re.sub(r'[\W_]', '', n).upper()
