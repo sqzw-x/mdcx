@@ -314,6 +314,8 @@ def translate_actor(json_data):
 
     # 未知演员，返回
     actor = json_data['actor']
+    if "actor_all," in config.nfo_include_new:
+        actor = json_data['all_actor']
     if actor == config.actor_no_name:
         return json_data
 
@@ -335,6 +337,8 @@ def translate_actor(json_data):
                 if actor_data.get('href'):
                     actor_href_list.append(actor_data.get('href'))
     json_data['actor'] = ','.join(actor_new_list)
+    if "actor_all," in config.nfo_include_new:
+        json_data['all_actor'] = ','.join(actor_new_list)
 
     # 演员主页
     if actor_href_list:
