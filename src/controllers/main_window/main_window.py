@@ -1612,7 +1612,8 @@ class MyMAinWindow(QMainWindow):
             file_name = split_path(file_path)[1]
             file_ext = os.path.splitext(file_name)[1]
             try:
-                move_file(file_path, des_path)
+                # move_file(file_path, des_path)
+                shutil.move(file_path, des_path)
                 if file_ext in movie_type:
                     signal.show_log_text('   Move movie: ' + file_name + ' to Movie_moved Success!')
                 else:
