@@ -2,24 +2,20 @@
 
 ![python](https://img.shields.io/badge/Python-3.9-3776AB.svg?style=flat&logo=python&logoColor=white)
 
-## 项目缘由
+## 上游项目
 
-* 一切的起源是 [yoshiko2/Movie_Data_Capture](https://github.com/yoshiko2/Movie_Data_Capture), 这是一个 CLI 工具,
+* [yoshiko2/Movie_Data_Capture](https://github.com/yoshiko2/Movie_Data_Capture): CLI 工具,
   开源版本现已不活跃, 新版本已闭源商业化.
+* [moyy996/AVDC](https://github.com/moyy996/AVDC): 上述项目早期的一个 Fork, 使用 PyQt 实现了图形界面, 已停止维护
+* @Hermit/MDCx: AVDC 的 Fork, 一度在 [anyabc/something](https://github.com/anyabc/something/releases) 分发源代码及可执行文件.
+* 2023-11-3 @anyabc 因未知原因销号删库, 其分发的最后一个版本号为 20231014.
 
-* [moyy996/AVDC](https://github.com/moyy996/AVDC) 是上述项目早期的一个 Fork, 使用 PyQt 实现了图形界面, 但早已无人维护.
-
-* 在 AVDC 基础上, @Hermit 开发并维护了 MDCx 项目,
-  并通过 [anyabc/something](https://github.com/anyabc/something/releases) 仓库的 release 分发源代码及可执行文件.
-
-* 2023.11.3 月, @anyabc 因未知原因销号删库, 其分发的最后一个版本号为 20231014.
-
-向以上相关开发者表示敬意.
+向相关开发者表示敬意.
 
 ## 关于本项目
 
-* 本项目基于 MDCx, 从功能而言并无变化, 不过对代码进行了大幅的重构与拆分, 以提高可维护性
-* 由于我没有 MacOS 设备, 因此无法提供相应平台的二进制构建及打包脚本
+* 本项目基于 @Hermit/MDCx, 对代码进行了大幅的重构与拆分, 以提高可维护性
+* MacOS 版本为自动构建, 不保证可用性
 * 尽管重构了大部分代码, 但由于代码耦合度仍然很高, 可维护性很差, 因此仅修复 bug, 不考虑加入新功能
 * 当然如果直接 PR 也可以
 
@@ -27,9 +23,11 @@
 
 项目环境为 Python 3.9. 以下内容可能有助于理解及修改代码.
 
-### 打包
+### 自行构建
 
-安装 `pyinstaller` 后运行 `build.ps1`, 打包文件在 `dist` 目录下
+> 一般情况请勿自行构建, 至 [Release](https://github.com/sqzw-x/mdcx/releases) 下载最新版
+
+安装 `pyinstaller` 后运行 `build-action.ps1`(powershell) 或 `build.sh`(shell)
 
 ### 如何添加新配置项
 
