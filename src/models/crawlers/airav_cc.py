@@ -18,14 +18,14 @@ urllib3.disable_warnings()  # yapf: disable
 
 
 def get_web_number(html):
-    result = html.xpath(
-        '//p/span[contains(text(), "番號") or contains(text(), "番号")]/../span[@id="ContentPlaceHolder1_Label_barcode"]/text()')
+    result = html.xpath('//p/span[contains(text(), "番號") or contains(text(), "番号")]/following-sibling::span/text()')
     return result[0].strip() if result else ''
 
 
 def get_number(html, number):
-    result = html.xpath('string(//span[@id="ContentPlaceHolder1_Label_barcode"])')
-    return number if number else result
+    result = html.xpath('//p/span[contains(text(), "番號") or contains(text(), "番号")]/following-sibling::span/text()')
+    num = result[0].strip() if result else ''
+    return number if number else num
 
 
 def get_title(html):
@@ -35,7 +35,7 @@ def get_title(html):
 
 def get_actor(html):
     try:
-        actor_list = html.xpath('//li[@class="allavgirls"]/span/span/span/a/@title')
+        actor_list = html.xpath('//li[@class="allavgirls"]//a/text()')
         result = ','.join(actor_list)
     except:
         result = ''
@@ -52,13 +52,16 @@ def get_actor_photo(actor):
 
 
 def get_studio(html):
-    result = html.xpath('//li[@class="series"]/span/span/span/a/text()')
+    result = html.xpath('//li[@class="series"]//a/text()')
     return result[0] if result else ''
 
 
 def get_release(html):
-    result = html.xpath('//li[@class="date"]/font/span/text()')
-    return result[0].replace('/', '-') if result else ''
+    result = html.xpath('//span[@itemprop="datePublished"]/text()')
+    if result:
+        s = re.search(r'\d{4}-\d{2}-\d{2}', result[0]).group()
+        return s if s else ''
+    return ''
 
 
 def get_year(release):
@@ -70,17 +73,17 @@ def get_year(release):
 
 
 def get_tag(html):
-    result = html.xpath('//li[@class="keyword"]/span/span/a/text()')
+    result = html.xpath('//li[@class="keyword"]//a/text()')
     return ','.join(result) if result else ''
 
 
 def get_cover(html):
-    result = html.xpath('//img[@id="ContentPlaceHolder1_Image_itemscope"]/@src')
+    result = html.xpath('//div[@class="front-video-cover-img"]//img/@src')
     return result[0] if result else ''
 
 
 def get_outline(html):
-    result = html.xpath('//li[@class="introduction"]/span/text()')
+    result = html.xpath('//span[@itemprop="description"]/text()')
     return result[0] if result else ''
 
 
