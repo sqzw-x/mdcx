@@ -14,9 +14,9 @@ urllib3.disable_warnings()  # yapf: disable
 
 
 def getTitle(html):  # 获取标题
-    result = html.xpath('//h3/text()')
+    result = html.xpath('//div[@data-section="userInfo"]//h3/span/../text()')
     if result:
-        result = result[0]
+        result = ' '.join(result)
     else:
         result = ''
     return result
