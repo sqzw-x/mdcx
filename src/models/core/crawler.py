@@ -490,7 +490,7 @@ def _deal_each_field(all_json_data, json_data, website_list, field_name, field_c
 
 
 def _call_crawlers(all_json_data, json_data, website_list, field_name, field_cnname, field_language, config,
-                    file_number, short_number, mosaic): # 4
+                   file_number, short_number, mosaic):  # 4
     """
     按照设置的网站顺序获取各个字段信息
     """
@@ -852,10 +852,12 @@ def _deal_json_data(json_data):
 
     # 标签
     tag = str(json_data['tag']).strip(" [ ]").replace("'", '').replace(', ', ',')  # 列表转字符串（避免个别网站刮削返回的是列表）
-    tag = re.sub(r',\d+[kKpP]', '', tag)
+    tag = re.sub(r',\d+[kKpP],', ',', tag)
     tag_rep_word = [',HD高画质', ',HD高畫質', ',高画质', ',高畫質']
     for each in tag_rep_word:
-        tag = tag.replace(each, '')
+        if tag.endswith(each):
+            tag = tag.replace(each, '')
+        tag = tag.replace(each + ",", ',')
     json_data['tag'] = tag
 
     # poster图
