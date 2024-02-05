@@ -11,48 +11,11 @@ from lxml import etree
 from models.base.web import curl_html
 from models.config.config import config
 from models.crawlers.guochan import get_number_list
-from models.crawlers.guochan import get_actor_list, get_lable_list
+from models.crawlers.guochan import get_actor_list, get_lable_list,get_extra_info
 
 urllib3.disable_warnings()  # yapf: disable
 
 # import traceback
-
-def get_some_info(title, file_path, info_type, tag='', actor='', series=''):
-
-    all_info = title + file_path + tag + actor + series
-
-    # 未找到标签时，从各种信息里匹配
-    if info_type == "tag":
-        tag_list = []
-        all_tag = get_lable_list()
-        for each in all_tag:
-            if each in all_info.upper():
-                tag_list.append(each)
-        new_tag_list = []
-        [new_tag_list.append(i) for i in tag_list if i and i not in new_tag_list]
-        return ','.join(new_tag_list)
-
-    # 未找到演员时，看热门演员是否在标题和各种信息里
-    if info_type == "actor":
-        actor_list = []
-        all_actor = get_actor_list()
-        for each in all_actor:
-            if each in all_info.upper():
-                actor_list.append(each)
-        new_actor_list = []
-        [new_actor_list.append(i) for i in actor_list if i and i not in new_actor_list]
-        return ','.join(new_actor_list)
-
-    # 未找到系列时，从各种信息里匹配
-    if info_type == "series":
-        series_list = []
-        all_series = get_lable_list()
-        for each in all_series:
-            if each in all_info.upper():
-                series_list.append(each)
-        new_series_list = []
-        [new_series_list.append(i) for i in series_list if i and i not in new_series_list]
-        return ','.join(new_series_list)
 
 def get_actor_photo(actor):
     actor = actor.split(',')
@@ -67,8 +30,8 @@ def get_detail_info(html, real_url, number, file_path):
     href = re.split(r'[/.]', real_url)[-2]
     title_h1 = html.xpath('//h3[@class="title" and not(contains(normalize-space(.), "目录")) and not(contains(normalize-space(.), "为你推荐"))]/text()')
     title = title_h1[0].replace(number + ' ', '').strip() if title_h1 else number
-    actor = get_some_info(title, file_path, info_type="actor")
-    tag = get_some_info(title, file_path, info_type="tag")
+    actor = get_extra_info(title, file_path, info_type="actor")
+    tag = get_extra_info(title, file_path, info_type="tag")
     cover_url = html.xpath(f'//a[@data-original and contains(@href,"{href}")]/@data-original')
     cover_url = cover_url[0] if cover_url else ''
 
@@ -240,11 +203,11 @@ if __name__ == '__main__':
     # print(main('MDJ001-EP3.陈美惠.淫兽寄宿家庭.我和日本父子淫乱的一天.2021麻豆最强跨国合作', file_path='MDJ001-EP3.陈美惠.淫兽寄宿家庭.我和日本父子淫乱的一天.2021麻豆最强跨国合作'))
     # print(main('MKY-TN-003.周宁.乱伦黑料流出.最喜欢爸爸的鸡巴了.麻豆传媒MKY系列', file_path='MKY-TN-003.周宁.乱伦黑料流出.最喜欢爸爸的鸡巴了.麻豆传媒MKY系列'))
     # print(main('XSJ138.养子的秘密教学EP6.薇安姐内射教学.性视界出品', file_path='XSJ138.养子的秘密教学EP6.薇安姐内射教学.性视界出品'))
-    print(main('大像传媒之淫蕩刺青女學徒', file_path='大像传媒之淫蕩刺青女學徒'))
-    # print(main('MAN麻豆女性向系列.MAN-0011.岚湘庭.当男人恋爱时.我可以带你去流浪.也知道下场不怎么样', file_path='MAN麻豆女性向系列.MAN-0011.岚湘庭.当男人恋爱时.我可以带你去流浪.也知道下场不怎么样'))
-    # print(main('MDL-0009-2.楚梦舒.苏语棠.致八零年代的我们.年少的性欲和冲动.麻豆传媒映画原创中文收藏版', file_path='MDL-0009-2.楚梦舒.苏语棠.致八零年代的我们.年少的性欲和冲动.麻豆传媒映画原创中文收藏版'))
-    # print(main('MSD-023', file_path='MSD023.袁子仪.杨柳.可爱女孩非亲妹.渴望已久的(非)近亲性爱.麻豆传媒映画.Model.Seeding系列.mp4'))
-    # print(main('', file_path='夏日回忆 贰'))
+    # print(main('大像传媒之淫蕩刺青女學徒', file_path='大像传媒之淫蕩刺青女學徒'))
+    # print(main('冠希传媒GX-017强上弟弟的巨乳姐姐', file_path='冠希传媒GX-017强上弟弟的巨乳姐姐'))
+    # print(main('[SWAG]XHX-0014宅男的公仔幻化成人', file_path='[SWAG]XHX-0014宅男的公仔幻化成人'))
+    # print(main('IDG5401'))
+    print(main('大像传媒之長腿癡女代表情慾作-米歐', file_path='大像传媒之長腿癡女代表情慾作-米歐'))
     # print(main('MDX-0016'))
     # print(main('MDSJ-0004'))
     # print(main('RS-020'))

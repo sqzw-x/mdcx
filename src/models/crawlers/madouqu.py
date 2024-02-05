@@ -10,49 +10,12 @@ from lxml import etree
 from models.base.web import curl_html
 from models.crawlers.guochan import get_number_list
 from models.config.config import config
-from models.crawlers.guochan import get_actor_list, get_lable_list
+from models.crawlers.guochan import get_actor_list, get_lable_list,get_extra_info
 
 urllib3.disable_warnings()  # yapf: disable
 
 
 # import traceback
-
-def get_some_info(title, file_path, info_type, tag='', actor='', series=''):
-
-    all_info = title + file_path + tag + actor + series
-
-    # 未找到标签时，从各种信息里匹配
-    if info_type == "tag":
-        tag_list = []
-        all_tag = get_lable_list()
-        for each in all_tag:
-            if each in all_info.upper():
-                tag_list.append(each)
-        new_tag_list = []
-        [new_tag_list.append(i) for i in tag_list if i and i not in new_tag_list]
-        return ','.join(new_tag_list)
-
-    # 未找到演员时，看热门演员是否在标题和各种信息里
-    if info_type == "actor":
-        actor_list = []
-        all_actor = get_actor_list()
-        for each in all_actor:
-            if each in all_info.upper():
-                actor_list.append(each)
-        new_actor_list = []
-        [new_actor_list.append(i) for i in actor_list if i and i not in new_actor_list]
-        return ','.join(new_actor_list)
-
-    # 未找到系列时，从各种信息里匹配
-    if info_type == "series":
-        series_list = []
-        all_series = get_lable_list()
-        for each in all_series:
-            if each in all_info.upper():
-                series_list.append(each)
-        new_series_list = []
-        [new_series_list.append(i) for i in series_list if i and i not in new_series_list]
-        return ','.join(new_series_list)
 
 def get_actor_photo(actor):
     actor = actor.split(',')
@@ -86,7 +49,7 @@ def get_detail_info(html, number, file_path):
     cover_url = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]/p/img/@src')
     cover_url = cover_url[0] if cover_url else ''
     # print(number, title, actor, cover_url, studio, detail_info)
-    actor = get_some_info(title, file_path, info_type="actor") if actor == '' else actor
+    actor = get_extra_info(title, file_path, info_type="actor") if actor == '' else actor
     return number, title, actor, cover_url, studio
 
 

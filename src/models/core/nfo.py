@@ -81,8 +81,8 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
     nfo_title = config.naming_media
     if not number:
         number = title
-    #默认emby视频标题配置为 [number title]，国产重复时需去掉一个，去重需注意空格也应一起去掉，否则国产的nfo标题中会多一个空格
-    #读取nfo title信息会去掉前面的number和空格以保留title展示出来，同时number和标题一致时，去掉number的逻辑变成去掉整个标题导致读取失败，见424行
+    # 默认emby视频标题配置为 [number title]，国产重复时需去掉一个，去重需注意空格也应一起去掉，否则国产的nfo标题中会多一个空格
+    # 读取nfo title信息会去掉前面的number和空格以保留title展示出来，同时number和标题一致时，去掉number的逻辑变成去掉整个标题导致读取失败，见426行
     if number == title and 'number' in nfo_title and 'title' in nfo_title:
         nfo_title = nfo_title.replace('originaltitle', '').replace('title', '').strip()
     first_letter = get_number_first_letter(number)
