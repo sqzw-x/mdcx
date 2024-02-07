@@ -2061,6 +2061,8 @@ class MyMAinWindow(QMainWindow):
                         'mdtv': ['https://www.mdpjzip.xyz', ''],
                         'madouqu': ['https://madouqu.com', ''],
                         'cnmdb': ['https://cnmdb.net', ''],
+                        'hscangku': ['https://hscangku.net', ''],
+                        'cableav': ['https://cableav.tv', ''],
                         'lulubar': ['https://lulubar.co', ''],
                         'love6': ['https://love6.tv', ''],
                         'yesjav': ['http://www.yesjav.info', ''],

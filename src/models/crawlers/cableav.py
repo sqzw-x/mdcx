@@ -5,15 +5,15 @@ import re
 import time
 
 import urllib3
+import zhconv
 from lxml import etree
 
 from models.base.web import curl_html
-from models.crawlers.guochan import get_number_list
 from models.config.config import config
+from models.crawlers.guochan import get_number_list
 from models.crawlers.guochan import get_actor_list, get_lable_list,get_extra_info
 
 urllib3.disable_warnings()  # yapf: disable
-
 
 # import traceback
 
@@ -27,38 +27,24 @@ def get_actor_photo(actor):
 
 
 def get_detail_info(html, number, file_path):
-    detail_info = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]//p//text()')
-    # detail_info = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]//text()')
-    title_h1 = html.xpath('//div[@class="cao_entry_header"]/header/h1/text()')
-    title = title_h1[0].replace(number, '').strip() if title_h1 else number
-    actor = ''
-    number = ''
-    for i, t in enumerate(detail_info):
-        if '番號' in t:
-            temp_number = re.findall(r'番號\s*：\s*(.+)\s*', t)
-            number = temp_number[0] if temp_number else ''
-        if '片名' in t:
-            temp_title = re.findall(r'片名\s*：\s*(.+)\s*', t)
-            title = temp_title[0] if temp_title else title.replace(number, '').strip()
-        if t.endswith('女郎') and i + 1 < len(detail_info) and detail_info[i + 1].startswith('：'):
-            temp_actor = re.findall(r'：\s*(.+)\s*', detail_info[i + 1])
-            actor = temp_actor[0].replace('、', ',') if temp_actor else ''
-    number = title if not number else number
-
-    studio = html.xpath('string(//span[@class="meta-category"])').strip()
-    cover_url = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]/p/img/@src')
+    title_h1 = html.xpath('//div[@class="entry-content "]/p/text()')
+    title = title_h1[0].replace(number + ' ', '').strip() if title_h1 else number
+    actor = get_extra_info(title, file_path, info_type="actor")
+    tmp_tag = html.xpath('//header//div[@class="categories-wrap"]/a/text()')
+    # 标签转简体
+    tag = zhconv.convert(tmp_tag[0], 'zh-cn') if tmp_tag else ''
+    cover_url = html.xpath(f'//meta[@property="og:image"]/@content')
     cover_url = cover_url[0] if cover_url else ''
-    # print(number, title, actor, cover_url, studio, detail_info)
-    actor = get_extra_info(title, file_path, info_type="actor") if actor == '' else actor
-    return number, title, actor, cover_url, studio
+
+    return number, title, actor, cover_url, tag
 
 
 def get_real_url(html, number_list):
-    item_list = html.xpath('//div[@class="entry-media"]/div/a')
+    item_list = html.xpath('//h3[contains(@class,"title")]//a[@href and @title]')
     for each in item_list:
+        #href="https://cableav.tv/Xq1Sg3SvZPk/"
         detail_url = each.get('href')
-        # lazyload属性容易改变，去掉也能拿到结果
-        title = each.xpath('img[@class]/@alt')[0]
+        title = each.xpath('text()')[0]
         if title and detail_url:
             for n in number_list:
                 temp_n = re.sub(r'[\W_]', '', n).upper()
@@ -70,15 +56,15 @@ def get_real_url(html, number_list):
 
 def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file_path='', appoint_number=''):
     start_time = time.time()
-    website_name = 'madouqu'
+    website_name = 'cableav'
     req_web += '-> %s' % website_name
     title = ''
     cover_url = ''
     web_info = '\n       '
-    log_info += ' \n    🌐 madouqu'
+    log_info += ' \n    🌐 cableav'
     debug_info = ''
     real_url = appoint_url
-    madouqu_url = getattr(config, 'madouqu_website', False)
+    cableav_url = getattr(config, 'cableav_website', 'https://cableav.tv')
 
     try:
         if not real_url:
@@ -86,25 +72,25 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             number_list, filename_list = get_number_list(number, appoint_number, file_path)
             n_list = number_list[:1] + filename_list
             for each in n_list:
-                real_url = f'{madouqu_url}/?s={each}' if madouqu_url else f'https://madouqu.com/?s={each}'
-                # real_url = 'https://madouqu.com/?s=XSJ-138.%E5%85%BB%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86%E6%95%99%E5%AD%A6EP6'
+                real_url = f'{cableav_url}/?s={each}'
+                # real_url = 'https://cableav.tv/s?s=%E6%9F%9A%E5%AD%90%E7%8C%AB'
                 debug_info = f'请求地址: {real_url} '
                 log_info += web_info + debug_info
                 result, response = curl_html(real_url)
-
                 if not result:
                     debug_info = '网络请求错误: %s' % response
                     log_info += web_info + debug_info
                     raise Exception(debug_info)
                 search_page = etree.fromstring(response, etree.HTMLParser())
                 result, number, title, real_url = get_real_url(search_page, n_list)
+                # real_url = 'https://cableav.tv/hyfaqwfjhio'
                 if result:
                     break
             else:
                 debug_info = '没有匹配的搜索结果'
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
-
+            
         debug_info = f'番号地址: {real_url} '
         log_info += web_info + debug_info
         result, response = curl_html(real_url)
@@ -115,7 +101,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             raise Exception(debug_info)
 
         detail_page = etree.fromstring(response, etree.HTMLParser())
-        number, title, actor, cover_url, studio = get_detail_info(detail_page, number, file_path)
+        number, title, actor, cover_url, tag = get_detail_info(detail_page, number, file_path)
         actor_photo = get_actor_photo(actor)
 
         try:
@@ -126,7 +112,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
                 'actor': actor,
                 'outline': '',
                 'originalplot': '',
-                'tag': '',
+                'tag': tag,
                 'release': '',
                 'year': '',
                 'runtime': '',
@@ -134,9 +120,9 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
                 'series': '',
                 'country': 'CN',
                 'director': '',
-                'studio': studio,
-                'publisher': studio,
-                'source': 'madouqu',
+                'studio': '',
+                'publisher': '',
+                'source': 'cableav',
                 'website': real_url,
                 'actor_photo': actor_photo,
                 'cover': cover_url,
@@ -197,12 +183,12 @@ if __name__ == '__main__':
     # print(main('DW-006.AV帝王作品.Roxie出演.地方妈妈的性解放.双穴双屌', file_path='DW-006.AV帝王作品.Roxie出演.地方妈妈的性解放.双穴双屌'))
     # print(main('MDJ001-EP3.陈美惠.淫兽寄宿家庭.我和日本父子淫乱的一天.2021麻豆最强跨国合作', file_path='MDJ001-EP3.陈美惠.淫兽寄宿家庭.我和日本父子淫乱的一天.2021麻豆最强跨国合作'))
     # print(main('MKY-TN-003.周宁.乱伦黑料流出.最喜欢爸爸的鸡巴了.麻豆传媒MKY系列', file_path='MKY-TN-003.周宁.乱伦黑料流出.最喜欢爸爸的鸡巴了.麻豆传媒MKY系列'))
-    print(main('XSJ138.养子的秘密教学EP6.薇安姐内射教学.性视界出品',
-               file_path='XSJ138.养子的秘密教学EP6.薇安姐内射教学.性视界出品'))
-    # print(main('MAN麻豆女性向系列.MAN-0011.岚湘庭.当男人恋爱时.我可以带你去流浪.也知道下场不怎么样', file_path='MAN麻豆女性向系列.MAN-0011.岚湘庭.当男人恋爱时.我可以带你去流浪.也知道下场不怎么样'))
-    # print(main('MDL-0009-2.楚梦舒.苏语棠.致八零年代的我们.年少的性欲和冲动.麻豆传媒映画原创中文收藏版', file_path='MDL-0009-2.楚梦舒.苏语棠.致八零年代的我们.年少的性欲和冲动.麻豆传媒映画原创中文收藏版'))
-    # print(main('MSD-023', file_path='MSD023.袁子仪.杨柳.可爱女孩非亲妹.渴望已久的(非)近亲性爱.麻豆传媒映画.Model.Seeding系列.mp4'))
-    # print(main('', file_path='夏日回忆 贰'))
+    # print(main('XSJ138.养子的秘密教学EP6.薇安姐内射教学.性视界出品', file_path='XSJ138.养子的秘密教学EP6.薇安姐内射教学.性视界出品'))
+    # print(main('SSN010'))
+    # print(main('國產AV 麻豆傳媒 MD0312 清純嫩穴賣身葬父 露露', file_path='國產AV 麻豆傳媒 MD0312 清純嫩穴賣身葬父 露露'))
+    # print(main('國產AV 大象傳媒 DA002 性感魅惑色兔兔 李娜娜', file_path='國產AV 大象傳媒 DA002 性感魅惑色兔兔 李娜娜'))
+    # print(main('韓國高端攝影頂 Yeha 私拍福利', file_path='韓國高端攝影頂 Yeha 私拍福利'))
+    print(main('EMTC-005', file_path='國產AV 愛神傳媒 EMTC005 怒操高冷社長秘書 米歐'))
     # print(main('MDX-0016'))
     # print(main('MDSJ-0004'))
     # print(main('RS-020'))

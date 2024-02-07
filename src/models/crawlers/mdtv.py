@@ -40,6 +40,8 @@ def get_some_info(html, title, file_path):
     # 未找到演员时，看热门演员是否在标题和各种信息里
     series = series_list[0] if series_list else ''
     tag = ','.join(tag_list)
+    actor_fake_name = any('未知' in item for item in actor_list)
+    actor_list = [] if actor_fake_name else actor_list
     if not actor_list:
         all_info = title + series + tag + file_path
         all_actor = get_actor_list()

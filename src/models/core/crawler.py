@@ -11,7 +11,7 @@ from models.config.config import config
 from models.core.flags import Flags
 from models.crawlers import airav_cc_new, airav_new, avsex, avsox, cnmdb, dahlia, dmm, faleno, fantastica, fc2, fc2club, \
     fc2hub, freejavbt, getchu, getchu_dmm, giga, hdouban, iqqtv_new, jav321, javbus, javdb, javlibrary_new, kin8, love6, \
-    lulubar, madouqu, mdtv, mgstage, mmtv, mywife, official, prestige, theporndb, xcity
+    lulubar, madouqu, mdtv, mgstage, mmtv, mywife, official, prestige, theporndb, xcity, hscangku, cableav
 from models.entity.enums import FileMode
 
 
@@ -124,7 +124,7 @@ def _call_crawler(json_data, website, language, file_number, short_number, mosai
     elif website == 'mgstage':
         json_data = json.loads(mgstage.main(file_number, appoint_url, log_info, req_web, language, short_number))
     elif website == '7mmtv':
-        json_data = json.loads(mmtv.main(file_number, appoint_url, log_info, req_web, language))
+        json_data = json.loads(mmtv.main(file_number, appoint_url, log_info, req_web, language, file_path))
     elif website == 'fc2':
         json_data = json.loads(fc2.main(file_number, appoint_url, log_info, req_web, language))
     elif website == 'fc2hub':
@@ -137,6 +137,12 @@ def _call_crawler(json_data, website, language, file_number, short_number, mosai
     elif website == 'madouqu':
         json_data = json.loads(
             madouqu.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number))
+    elif website == 'hscangku':
+        json_data = json.loads(
+            hscangku.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number))
+    elif website == 'cableav':
+        json_data = json.loads(
+            cableav.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number)) 
     elif website == 'getchu':
         json_data = json.loads(getchu.main(file_number, appoint_url, log_info, req_web, language))
     elif website == 'getchu_dmm':
