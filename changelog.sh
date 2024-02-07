@@ -1,5 +1,5 @@
 tags=$(git tag -l '120*' --sort=-v:refname)
-last=$(echo "$tags" | sed -n '2p')
+last=$(echo "$tags" | sed -n '1p')
 commitlog=$(git log --pretty=format:"%h %s" $last..HEAD)
 
 echo "## 新增

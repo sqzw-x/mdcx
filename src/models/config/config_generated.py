@@ -10,8 +10,8 @@ class GeneratedConfig:
     Also used as default configuration
     """
     # modified_time
-    modified_time = r'2024-01-27 20:53:38'
-    version = 120240127
+    modified_time = r'2024-02-07 10:33:32'
+    version = 120240207
 
     # media
     media_path = r''
