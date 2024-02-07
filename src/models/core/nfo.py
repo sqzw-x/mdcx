@@ -108,7 +108,7 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
         if not os.path.exists(folder_new_path):
             os.makedirs(folder_new_path)
         delete_file(nfo_new_path)  # 避免115出现重复文件
-        with open(nfo_new_path, "wt", encoding='UTF-8') as code:
+        with (open(nfo_new_path, "wt", encoding='UTF-8') as code):
             print('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', file=code)
             print("<movie>", file=code)
 
@@ -206,8 +206,8 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
             # 输出国家
             if 'country,' in nfo_include_new:
                 print(f"  <countrycode>{country}</countrycode>", file=code)
-                
-            #初始化 actor_list
+
+            # 初始化 actor_list
             actor_list = []
             # 输出男女演员
             if 'actor_all,' in nfo_include_new:
@@ -217,7 +217,7 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
                 actor_list = actor.split(',')  # 字符串转列表
                 actor_list = [actor.strip() for actor in actor_list if actor.strip()]  # 去除空白
             # 无演员时输出演员 以文件命名设置中未知演员设置项为演员名，默认设置和空值不写入NFO
-            elif 'actor,' in nfo_include_new and config.actor_no_name not in ["未知演员",'未知演員','']:
+            elif 'actor,' in nfo_include_new and config.actor_no_name not in ["未知演员", '未知演員', '']:
                 actor = config.actor_no_name
                 actor_list = actor.split(',')  # 字符串转列表
                 actor_list = [actor.strip() for actor in actor_list if actor.strip()]  # 去除空白
@@ -228,7 +228,7 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
                     print("    <name>" + each + "</name>", file=code)
                     print("    <type>Actor</type>", file=code)
                     print("  </actor>", file=code)
-               
+
             # 输出导演
             if director and 'director,' in nfo_include_new:
                 print("  <director>" + director + "</director>", file=code)
@@ -329,9 +329,8 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
                 print("  <website>" + website + "</website>", file=code)
 
             # javdb id 输出, 没有时使用番号搜索页
-            if 'javdbid' in json_data_nfo:
-                # 其他非javdb网站取消强制输出该字段
-                if json_data_nfo['javdbid']:
+            if "国产" not in json_data_nfo['mosaic'] and "國產" not in json_data_nfo['mosaic']:
+                if 'javdbid' in json_data_nfo and json_data_nfo['javdbid']:
                     print("  <javdbid>" + json_data_nfo["javdbid"] + "</javdbid>", file=code)
                 else:
                     print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
