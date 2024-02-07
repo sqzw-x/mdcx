@@ -224,11 +224,13 @@ def get_real_url(html, number, number2, file_path):
         else:
             other_list.append(i)
     dvd_list.sort(reverse=True)
-    new_url_list = tv_list + digital_list + dvd_list + prime_list + monthly_list + other_list
+    # 丢弃 tv_list, 因为获取其信息调用的后续 api 无法访问
+    new_url_list = digital_list + dvd_list + prime_list + monthly_list + other_list
     real_url = new_url_list[0] if new_url_list else ''
     return real_url, number
 
 
+# invalid API
 def get_tv_jp_data(real_url):
     cid = re.findall(r'content=([^&/]+)', real_url)[0]
     headers = {
@@ -308,6 +310,7 @@ def get_tv_jp_data(real_url):
         return False, '未找到数据', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
 
 
+# invalid API
 def get_tv_com_data(number):
     headers = {
         'Content-Type': 'application/json',
