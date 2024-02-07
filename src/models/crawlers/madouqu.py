@@ -8,9 +8,8 @@ import urllib3
 from lxml import etree
 
 from models.base.web import curl_html
-from models.crawlers.guochan import get_number_list
 from models.config.config import config
-from models.crawlers.guochan import get_actor_list, get_lable_list,get_extra_info
+from models.crawlers.guochan import get_extra_info, get_number_list
 
 urllib3.disable_warnings()  # yapf: disable
 
