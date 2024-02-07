@@ -174,7 +174,7 @@ def getTag(html):  # 获取标签
     return result
 
 
-def get_real_url(number, url_type, javbus_url, json_log, headers, cookie):              # 获取详情页链接
+def get_real_url(number, url_type, javbus_url, json_log, headers, cookie):  # 获取详情页链接
     if url_type == 'us':  # 欧美
         url_search = 'https://www.javbus.hair/search/' + number
     elif url_type == 'censored':  # 有码

@@ -9,6 +9,8 @@ from lxml import etree
 
 from models.base.number import is_uncensored
 from models.base.web import curl_html
+from models.config.config import config
+from models.crawlers.guochan import get_extra_info
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -30,13 +32,15 @@ def get_title(html, web_number):
     return result[0].replace(web_number, '').strip() if result else ''
 
 
-def get_actor(html):
+def get_actor(html, title, file_path):
     actor_list = html.xpath('//div[@class="fullvideo-idol"]/span/a/text()')
     actor = ''
     if actor_list:
         for each in actor_list:
             '''愛澄玲花,日高ゆりあ（青山ひより） 菜津子 32歳 デザイナー'''
             actor += re.sub(r'（.+）', '', each).split(' ')[0] + ','
+    else:
+        actor = get_extra_info(title, file_path, info_type="actor")
     return actor.strip(',')
 
 
@@ -134,7 +138,12 @@ def get_tag(html):
 
 
 def get_extrafanart(html):
-    result = html.xpath('//a[@class="screens-item fresco"]/@href')
+    # 前几张
+    result1 = html.xpath('//span/img[contains(@class, "lazyload")]/@data-src')
+    # 其他隐藏需点击的
+    if result2 := html.xpath('//div[contains(@class, "fullvideo")]/script[@language="javascript"]/text()'):
+        result2 = re.findall(r'https?://.+?\.jpe?g', str(result2))
+    result = result1 + result2
     return result if result else ''
 
 
@@ -166,7 +175,7 @@ def get_number(html, number):
     return number.replace('FC2-PPV ', 'FC2-'), release, runtime, number
 
 
-def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
+def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file_path=''):
     start_time = time.time()
     website_name = '7mmtv'
     req_web += '-> %s' % website_name
@@ -175,9 +184,13 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     web_info = '\n       '
     log_info += ' \n    🌐 7mmtv'
     debug_info = ''
+    mmtv_url = 'https://www.7mmtv.sx'
+    if hasattr(config, '7mmtv_website'):
+        mmtv_url = getattr(config, '7mmtv_website')
     real_url = appoint_url
     # search_url = "https://bb9711.com/zh/searchform_search/all/index.html"
-    search_url = "https://7mmtv.sx/zh/searchform_search/all/index.html"
+    # search_url = "https://7mmtv.sx/zh/searchform_search/all/index.html"
+    search_url = f"{mmtv_url}/zh/searchform_search/all/index.html"
     mosaic = ''
 
     try:
@@ -186,7 +199,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
             if number.upper().startswith('FC2'):
                 search_keyword = re.findall(r'\d{3,}', number)[0]
 
-            search_url = f'https://7mmtv.sx/zh/searchform_search/all/index.html?search_keyword={search_keyword}&search_type=searchall&op=search'
+            search_url = f'{search_url}?search_keyword={search_keyword}&search_type=searchall&op=search'
             debug_info = f'搜索地址: {search_url} '
             log_info += web_info + debug_info
             result, response = curl_html(search_url)
@@ -220,7 +233,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
                 debug_info = '数据获取失败: 未获取到title！'
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
-            actor = get_actor(html_info)
+            actor = get_actor(html_info, title, file_path)
             actor_photo = get_actor_photo(actor)
             cover_url = get_cover(html_content)
             outline, originalplot = get_outline(html_info)
@@ -245,7 +258,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
                     'runtime': runtime,
                     'score': '',
                     'series': '',
-                    'country': 'JP',
+                    'country': 'CN',
                     'director': director,
                     'studio': studio,
                     'publisher': publisher,
@@ -306,7 +319,8 @@ if __name__ == '__main__':
     # print(main('H4610-ki230225'))
     # print(main('c0930-ki221218'))
     # print(main('c0930-hitozuma1407'))
-    print(main('h0930-ori1665'))
+    # print(main('h0930-ori1665'))
+    print(main('h0930-ori1665', appoint_url='https://7mm002.com/zh/amateur_content/107108/content.html'))
     # print(main('RBD-293'))
     # print(main('LUXU-728')) # 无结果
     # print(main('fc2-1050737'))  # 标题中有/

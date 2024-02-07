@@ -8,13 +8,13 @@ import urllib3
 from lxml import etree
 
 from models.base.web import curl_html
-from models.crawlers.guochan import get_number_list
+from models.config.config import config
+from models.crawlers.guochan import get_extra_info, get_number_list
 
 urllib3.disable_warnings()  # yapf: disable
 
 
 # import traceback
-
 
 def get_actor_photo(actor):
     actor = actor.split(',')
@@ -25,7 +25,7 @@ def get_actor_photo(actor):
     return data
 
 
-def get_detail_info(html, number):
+def get_detail_info(html, number, file_path):
     detail_info = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]//p//text()')
     # detail_info = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]//text()')
     title_h1 = html.xpath('//div[@class="cao_entry_header"]/header/h1/text()')
@@ -48,6 +48,7 @@ def get_detail_info(html, number):
     cover_url = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]/p/img/@src')
     cover_url = cover_url[0] if cover_url else ''
     # print(number, title, actor, cover_url, studio, detail_info)
+    actor = get_extra_info(title, file_path, info_type="actor") if actor == '' else actor
     return number, title, actor, cover_url, studio
 
 
@@ -55,7 +56,8 @@ def get_real_url(html, number_list):
     item_list = html.xpath('//div[@class="entry-media"]/div/a')
     for each in item_list:
         detail_url = each.get('href')
-        title = each.xpath('img[@class="lazyload"]/@alt')[0]
+        # lazyload属性容易改变，去掉也能拿到结果
+        title = each.xpath('img[@class]/@alt')[0]
         if title and detail_url:
             for n in number_list:
                 temp_n = re.sub(r'[\W_]', '', n).upper()
@@ -75,6 +77,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
     log_info += ' \n    🌐 madouqu'
     debug_info = ''
     real_url = appoint_url
+    madouqu_url = getattr(config, 'madouqu_website', False)
 
     try:
         if not real_url:
@@ -82,7 +85,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             number_list, filename_list = get_number_list(number, appoint_number, file_path)
             n_list = number_list[:1] + filename_list
             for each in n_list:
-                real_url = f'https://madouqu.com/?s={each}'
+                real_url = f'{madouqu_url}/?s={each}' if madouqu_url else f'https://madouqu.com/?s={each}'
                 # real_url = 'https://madouqu.com/?s=XSJ-138.%E5%85%BB%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86%E6%95%99%E5%AD%A6EP6'
                 debug_info = f'请求地址: {real_url} '
                 log_info += web_info + debug_info
@@ -111,7 +114,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             raise Exception(debug_info)
 
         detail_page = etree.fromstring(response, etree.HTMLParser())
-        number, title, actor, cover_url, studio = get_detail_info(detail_page, number)
+        number, title, actor, cover_url, studio = get_detail_info(detail_page, number, file_path)
         actor_photo = get_actor_photo(actor)
 
         try:
