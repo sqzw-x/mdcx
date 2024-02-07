@@ -2057,7 +2057,6 @@ class MyMAinWindow(QMainWindow):
                         'avsox': [get_avsox_domain(), ''],
                         'xcity': ['https://xcity.jp', ''],
                         '7mmtv': ['https://7mmtv.tv', ''],
-                        'hdouban': ['https://ormtgu.com', ''],
                         'mdtv': ['https://www.mdpjzip.xyz', ''],
                         'madouqu': ['https://madouqu.com', ''],
                         'cnmdb': ['https://cnmdb.net', ''],

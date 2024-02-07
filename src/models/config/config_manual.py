@@ -56,7 +56,6 @@ class ManualConfig:
         'freejavbt',
         'getchu',
         'giga',
-        'hdouban',
         'iqqtv',
         'jav321',
         'javbus',
