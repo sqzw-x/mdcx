@@ -74,9 +74,9 @@ class CutWindow(QDialog):
         self.Ui.pushButton_select_cutrange.setCursor(QCursor(Qt.OpenHandCursor))
         self.Ui.pushButton_select_cutrange.setAcceptDrops(True)
         self.Ui.pushButton_select_cutrange.setStyleSheet(
-            u"background-color: rgba(200, 200, 200, 80);\n" 
-            "font-size:13px;\n" "font-weight:normal;" 
-            "color: rgba(0, 0, 0, 255);\n" 
+            u"background-color: rgba(200, 200, 200, 80);\n"
+            "font-size:13px;\n" "font-weight:normal;"
+            "color: rgba(0, 0, 0, 255);\n"
             "border:2px solid rgba(0, 55, 255, 255);\n")
         self.set_style()
         self.Ui.horizontalSlider_left.valueChanged.connect(self.change_postion_left)
@@ -85,6 +85,7 @@ class CutWindow(QDialog):
         self.Ui.pushButton_cut_close.clicked.connect(self.to_cut_and_close)
         self.Ui.pushButton_cut.clicked.connect(self.to_cut)
         self.Ui.pushButton_close.clicked.connect(self.close)
+        self.raw_img_path = ''  # 初始图片(位于影片同目录)
         self.showimage()
 
     def set_style(self):
@@ -177,13 +178,15 @@ class CutWindow(QDialog):
 
     # 打开图片选择框
     def open_image(self):
-        img_path, img_type = QFileDialog.\
+        img_path, img_type = QFileDialog. \
             getOpenFileName(None, "打开图片", "", "*.jpg *.png;;All Files(*)", options=self.parent().options)
         if img_path:
             self.showimage(img_path)
 
     # 显示要裁剪的图片
     def showimage(self, img_path='', json_data={}):
+        if not self.raw_img_path:
+            self.raw_img_path = img_path
         # self.Ui.Dialog_cut_poster.setText(' ')                                # 清空背景
         self.Ui.label_backgroud_pic.setText(' ')  # 清空背景
 
@@ -229,7 +232,7 @@ class CutWindow(QDialog):
             self.Ui.label_backgroud_pic.setPixmap(pic)  # 背景区域显示缩放后的图片
 
             # 获取nfo文件名，用来设置裁剪后图片名称和裁剪时的水印状态
-            img_folder, img_fullname = split_path(img_path)
+            img_folder, img_fullname = split_path(self.raw_img_path)
             img_name, img_ex = os.path.splitext(img_fullname)
 
             # 如果没有json_data，则通过图片文件名或nfo文件名获取，目的是用来获取水印
@@ -257,7 +260,7 @@ class CutWindow(QDialog):
             poster_path = os.path.join(img_folder, 'poster.jpg')
             if pic_name == 0:  # 文件名-poster.jpg
                 if '-' in img_name:
-                    poster_path = img_path.replace('-fanart', '').replace('-thumb', '').replace('-poster', '').replace(
+                    poster_path = self.raw_img_path.replace('-fanart', '').replace('-thumb', '').replace('-poster', '').replace(
                         img_ex, '') + '-poster.jpg'
             thumb_path = poster_path.replace('poster.', 'thumb.')
             fanart_path = poster_path.replace('poster.', 'fanart.')
@@ -473,3 +476,7 @@ class CutWindow(QDialog):
                 self.move(e.globalPos() - self.m_DragPosition)
                 e.accept()
         # self.show_traceback_log('main',e.x(),e.y())
+
+    def close(self):
+        self.raw_img_path = ''
+        super().close()
