@@ -310,7 +310,6 @@ def get_tv_jp_data(real_url):
         return False, '未找到数据', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
 
 
-# invalid API
 def get_tv_com_data(number):
     headers = {
         'Content-Type': 'application/json',
