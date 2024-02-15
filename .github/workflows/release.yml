@@ -7,10 +7,14 @@ on:
     tags:
       - 120*
       - pre-20*
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag'
+        required: false
 
 env:
   PYTHON_VERSION: '3.9'
-#  MACOS_BUNDLE_ID: com.mdcxuniverse.mdcx
 
 jobs:
   init-matrix:
@@ -24,10 +28,16 @@ jobs:
         run: |
           items=()
 
-          # https://docs.github.com/zh/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners
-          # items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64"}')
           items+=('{"build": "macos", "os": "macos-latest", "arch": "x86_64"}')
           items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
+
+          # https://docs.github.com/zh/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners
+          # 如果设置了 secrets `SELF_HOSTED_MACOS_ARM64_RUNNER`，则添加到矩阵
+          SELF_HOSTED_MACOS_ARM64_RUNNER=${{ secrets.SELF_HOSTED_MACOS_ARM64_RUNNER }}}
+          if [ -n "$SELF_HOSTED_MACOS_ARM64_RUNNER" ]; then
+            # setup-python没有aarch64的python3.9，这里指定python3.10
+            items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64", "python": "3.10"}')
+          fi
           
           # 合并items到json数组
           matrix="matrix=["
@@ -54,12 +64,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version: ${{ matrix.python || env.PYTHON_VERSION }}
           cache: pip
 
-      - name: Install libraries
+      - name: Install libraries - macOS
         if: ${{ matrix.build == 'macos' }}
         run: |
           # FIX: No package 'gobject-introspection-1.0' found
@@ -83,28 +93,16 @@ jobs:
       - name: Build macOS app - macOS
         if: ${{ matrix.build == 'macos' }}
         run: |
-          bash ./build-macos.sh --create-dmg --version "${{ github.ref_name }}"
+          version="${{ github.ref_name }}"
+          # 如果是手动触发，则使用输入的tag
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            version="${{ github.event.inputs.tag }}"
+          fi
+          bash ./build-macos.sh --create-dmg --version "$version"
 
       - name: Build Windows app - Windows
         if: ${{ matrix.build == 'windows' }}
         run: ./build-action
-
-      #      - name: Upload artifact - macOS
-      #        uses: actions/upload-artifact@v3
-      #        if: ${{ matrix.build == 'macos' }}
-      #        with:
-      #          name: MDCx-${{ matrix.build }}-${{ matrix.arch }}
-      #          path: |
-      #            ./**.app.zip
-      #
-      #      - name: Upload artifact - Windows
-      #        uses: actions/upload-artifact@v3
-      #        if: ${{ matrix.build == 'windows' }}
-      #        with:
-      #          name: MDCx-${{ matrix.build }}-${{ matrix.arch }}
-      #          path: |
-      #            .\MDCx
-
 
       - name: Get changelog
         id: get-changelog
@@ -118,6 +116,7 @@ jobs:
         uses: svenstaro/upload-release-action@2.7.0
         if: ${{ matrix.build == 'macos' }}
         with:
+          overwrite: true
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}.dmg
           file: dist/MDCx.dmg
           prerelease: ${{ startsWith(github.ref, 'refs/tags/pre-') }}
@@ -128,6 +127,7 @@ jobs:
         uses: svenstaro/upload-release-action@2.7.0
         if: ${{ matrix.build == 'windows' }}
         with:
+          overwrite: true
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}.exe
           file: dist/MDCx.exe
           prerelease: ${{ startsWith(github.ref, 'refs/tags/pre-') }}
