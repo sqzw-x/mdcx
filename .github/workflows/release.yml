@@ -83,14 +83,7 @@ jobs:
       - name: Build macOS app - macOS
         if: ${{ matrix.build == 'macos' }}
         run: |
-          chmod +x build-macos.sh
-          ./build-macos.sh
-          # cd dist
-          ls -al dist
-          rm dist/MDCx
-          # `upload-artifact`会使文件丢失可执行权限。解决思路，先把`dist`打包成zip，再上传
-          zip -r MDCx.app.zip dist
-          ls -al
+          bash ./build-macos.sh --create-dmg --version "${{ github.ref_name }}"
 
       - name: Build Windows app - Windows
         if: ${{ matrix.build == 'windows' }}
@@ -125,8 +118,8 @@ jobs:
         uses: svenstaro/upload-release-action@2.7.0
         if: ${{ matrix.build == 'macos' }}
         with:
-          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}.app.zip
-          file: MDCx.app.zip
+          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}.dmg
+          file: dist/MDCx.dmg
           prerelease: ${{ startsWith(github.ref, 'refs/tags/pre-') }}
           body: |
             ${{ steps.get-changelog.outputs.CHANGELOG }}
