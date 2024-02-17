@@ -191,11 +191,11 @@ def get_real_url(html, number, number2, file_path):
                     if cid[-2:] in file_path:
                         number = cid
     if not temp_list:  # 通过标题搜索
-        title_list = html.xpath("//p[@class='tmb']/a/span[@class='txt']/text()")
+        title_list = html.xpath("//p[@class='txt']/a//text()")
         if title_list and url_list:
             full_title = number
             for i in range(len(url_list)):
-                temp_title = title_list[i].replace('...', '')
+                temp_title = title_list[i].replace('...', '').strip()
                 if temp_title in full_title:
                     temp_url = url_list[i]
                     temp_list.append(temp_url)
@@ -656,7 +656,7 @@ if __name__ == '__main__':
     # print(main('ssni00888'))
     # print(main('ssni-288'))
     # print(main('', 'https://www.dmm.co.jp/digital/videoa/-/detail/=/cid=ssni00288/'))
-    print(main('PMAXVR-008'))  # 模糊匹配 MAXVR-008
+    print(main('俺をイジメてた地元ヤンキーの巨乳彼女を寝とって復讐を果たす話 The Motion Anime'))  # 模糊匹配 MAXVR-008
     # print(main('', 'https://www.dmm.co.jp/mono/dvd/-/detail/=/cid=h_173dhry23/'))   # 地域限制
     # print(main('ssni00288'))
     # print(main('ssni00999'))
