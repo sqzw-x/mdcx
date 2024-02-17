@@ -116,6 +116,7 @@ jobs:
         uses: svenstaro/upload-release-action@2.7.0
         if: ${{ matrix.build == 'macos' }}
         with:
+          overwrite: true
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}.dmg
           file: dist/MDCx.dmg
           prerelease: ${{ startsWith(github.ref, 'refs/tags/pre-') }}
@@ -126,6 +127,7 @@ jobs:
         uses: svenstaro/upload-release-action@2.7.0
         if: ${{ matrix.build == 'windows' }}
         with:
+          overwrite: true
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}.exe
           file: dist/MDCx.exe
           prerelease: ${{ startsWith(github.ref, 'refs/tags/pre-') }}
