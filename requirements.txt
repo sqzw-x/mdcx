@@ -1,6 +1,6 @@
 lxml==4.9.2
 pyquery==1.4.1
-cloudscraper==1.2.71
+# cloudscraper==1.2.71
 requests==2.24.0
 beautifulsoup4==4.9.3
 Pillow==9.4.0
@@ -13,4 +13,4 @@ opencv-contrib-python-headless==4.7.0.68
 deepl-translate==1.2.0
 ping3==4.0.4
 oshash==0.1.1
-curl-cffi==0.5.10
+curl-cffi==0.6.0b9
