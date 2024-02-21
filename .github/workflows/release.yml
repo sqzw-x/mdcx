@@ -36,7 +36,7 @@ jobs:
           SELF_HOSTED_MACOS_ARM64_RUNNER=${{ secrets.SELF_HOSTED_MACOS_ARM64_RUNNER }}}
           if [ -n "$SELF_HOSTED_MACOS_ARM64_RUNNER" ]; then
             # setup-python没有aarch64的python3.9，这里指定python3.10
-            items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64", "python": "3.10"}')
+            items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64", "python": "3.10", "python_cache": "none"}')
           fi
           
           # 合并items到json数组
@@ -63,11 +63,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python - cache pip
+        if : ${{ matrix.python_cache != 'none' }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python || env.PYTHON_VERSION }}
-          cache: pip
+          cache: ${{ matrix.python_cache || 'pip' }}
+
+      - name: Set up Python - no cache
+        if : ${{ matrix.python_cache == 'none' }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python || env.PYTHON_VERSION }}
 
       - name: Install libraries - macOS
         if: ${{ matrix.build == 'macos' }}
