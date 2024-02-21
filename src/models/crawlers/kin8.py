@@ -96,10 +96,13 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
         debug_info = ''
         if real_url:
             key = re.findall(r'\d{3,}', real_url)
-            number = f'KIN8-{key[0]}' if key else number
+            key = key[0] if key else ""
+            assert isinstance(key, str)
+            number = f'KIN8-{key}' if key else number
         else:
             key = re.findall(r'KIN8(TENGOKU)?-?(\d{3,})', number.upper())
             key = key[0][1] if key else ''
+            assert isinstance(key, str)
             if not key:
                 debug_info = f'番号中未识别到 KIN8 番号: {number} '
                 log_info += web_info + debug_info
@@ -201,4 +204,5 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
 
 if __name__ == '__main__':
     # yapf: disable
-    print(main('kin8-3681'))
+    # print(main('kin8-3681'))
+    print(main(number="", appoint_url="https://www.kin8tengoku.com/moviepages/1232/index.html"))
