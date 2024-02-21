@@ -1,38 +1,27 @@
+## 重要
+此版本移除了 cloudscraper, 并将 curl-cffi 升级至 0.6.0b9.  
+
+这一改动旨在解决 curl 请求出现的相关问题, 但并未经过充分测试.
+若网络请求出现问题, 可暂回退至 120240207 版本, 并提交 issue.
+
+现在代码及依赖完全兼容 python 3.8, 可以使用 python 3.8 构建以在 Windows 7 上运行.
+由于二者均已停止支持, 因此并不提供官方构建.
 ## 新增
-* 国产刮削优化 by @kikyou18
-* 网站: hscangku / cableav by @kikyou18
+* UI: hscangku & cableav 指定网站刮削
+* macos img 构建 by @
 ## 修复
-* airavcc xpath 失效
-* fc2 title 获取不完整
-* javdbid 输出逻辑
-* 停用 tv.dmm api
-* nfo 未知演员写入 by @kikyou18
-* 移除标签时仅移除部分
+* dmm 搜索页标题 xpath
+* 裁剪图片 - 打开图片 处理结果保存至影片目录
 
 <details>
 <summary>Full Changelog</summary>
 
-36927a8 Fix: tv.dmm api invalid (#80)
-2cf04d9 Merge pull request #84 from sqzw-x/guochan
-6ebe99e Merge PR #83
-e6198d8 Opt: javdbid 输出逻辑
-4c0b778 格式化
-51dd142 Merge pull request #73 from kikiyou18/master
-ba58501 Fix: PR compliance revisions
-55ecbdb Merge branch 'sqzw-x:master' into master
-a046c69 Fix: 移除标签时仅移除部分 (#78)
-edd03b7 Feat: add hscangku and cableav crawlers
-bada9e6 Fix: guochan crawlers remove useless characters; number recognition adjustment
-b97dd3b Fix: madouqu subtle parameter adjustment
-96f68ef Fix: 7mmtv get more extrafanart pics
-0da9440 Chore: guochan data collation
-9c3b28e Fix: non-javdb site writes irrelevant searchid field
-cfa96c8 Fix: madouqu custom website;more actor matching attempts
-192c7e0 Fix: not match unknown actor
-e38989d Fix: mmtv custom website;try more actor matching rules
-fc88133 Fix: nfo文件写入错误空格；手动设置演员写入nfo文件
-8d6cd7e Fix: write custom actor names to nfo file
-443d647 Fix: fc2 title (#72)
-1d359ba Fix: airav_cc xpath (#70)
+15a06ba feat(web)!: del cloudscraper; bump curl-cffi to 0.6.0b9
+ca38e46 fix(nfo): python3.8 unsupported with expression
+b314755 fix(dmm): title xpath (#90)
+edd43a4 CI: refine macos build
+5af0b14 fix(dmm): wrong comment (#80)
+9f2315a Fix: 裁剪图片保存至原目录 (#86)
+eb8207b UI: 添加新网站; 移除 hdouban
 
 </details>
