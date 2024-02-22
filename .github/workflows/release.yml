@@ -36,7 +36,7 @@ jobs:
           SELF_HOSTED_MACOS_ARM64_RUNNER=${{ vars.SELF_HOSTED_MACOS_ARM64_RUNNER }}}
           if [[ -n "$SELF_HOSTED_MACOS_ARM64_RUNNER" ]]; then
             # setup-python没有aarch64的python3.9，这里指定python3.10
-            items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64", "python": "3.10", "cache": 'none'}')
+            items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64", "python": "3.10", "cache": "none"}')
           fi
 
           # 测试构建：macOS 10.15.7, x86_64, 指定opencv版本
