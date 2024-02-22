@@ -32,11 +32,18 @@ jobs:
           items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
 
           # https://docs.github.com/zh/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners
-          # 如果设置了 secrets `SELF_HOSTED_MACOS_ARM64_RUNNER`，则添加到矩阵
-          SELF_HOSTED_MACOS_ARM64_RUNNER=${{ secrets.SELF_HOSTED_MACOS_ARM64_RUNNER }}}
-          if [ -n "$SELF_HOSTED_MACOS_ARM64_RUNNER" ]; then
+          # 如果设置了 vars `SELF_HOSTED_MACOS_ARM64_RUNNER`，则添加self-hosted runner到矩阵
+          SELF_HOSTED_MACOS_ARM64_RUNNER=${{ vars.SELF_HOSTED_MACOS_ARM64_RUNNER }}}
+          if [[ -n "$SELF_HOSTED_MACOS_ARM64_RUNNER" ]]; then
             # setup-python没有aarch64的python3.9，这里指定python3.10
-            items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64", "python": "3.10", "python_cache": "none"}')
+            items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64", "python": "3.10", "cache": 'none'}')
+          fi
+
+          # 测试构建：macOS 10.15.7, x86_64, 指定opencv版本
+          BUILD_FOR_MACOS_10_15_7=${{ vars.BUILD_FOR_MACOS_10_15_7 }}
+          MACOS_10_15_7_CV_VERSION=${{ vars.MACOS_10_15_7_CV_VERSION }}
+          if [[ -n "$BUILD_FOR_MACOS_10_15_7" && -n "$MACOS_10_15_7_CV_VERSION" ]]; then
+            items+=('{"build": "macos", "os": "macos-latest", "arch": "x86_64", "cv": "$MACOS_10_15_7_CV_VERSION", "tail": "-cv$MACOS_10_15_7_CV_VERSION"}')
           fi
           
           # 合并items到json数组
@@ -63,15 +70,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Before setup-python
+        if: ${{ matrix.build == 'macos' }}
+        run: |
+          # 如果指定了cv，则修改requirements-mac.txt里的opencv版本
+          cvVersion="${{ matrix.cv }}"
+          if [ -n "$cvVersion" ]; then
+            sed -i '' "s/opencv-contrib-python-headless==.*/opencv-contrib-python-headless==${cvVersion}/" requirements-mac.txt
+          fi
+
       - name: Set up Python - cache pip
-        if : ${{ matrix.python_cache != 'none' }}
+        if: ${{ matrix.cache != 'none' }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python || env.PYTHON_VERSION }}
-          cache: ${{ matrix.python_cache || 'pip' }}
+          cache: ${{ matrix.cache || 'pip' }}
 
       - name: Set up Python - no cache
-        if : ${{ matrix.python_cache == 'none' }}
+        if : ${{ matrix.cache == 'none' }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python || env.PYTHON_VERSION }}
@@ -124,7 +140,7 @@ jobs:
         if: ${{ matrix.build == 'macos' }}
         with:
           overwrite: true
-          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}.dmg
+          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}.dmg
           file: dist/MDCx.dmg
           prerelease: ${{ startsWith(github.ref, 'refs/tags/pre-') }}
           body: |
