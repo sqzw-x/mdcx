@@ -153,6 +153,6 @@ jobs:
         if: ${{ matrix.build == 'windows' }}
         with:
           overwrite: true
-          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}.exe
+          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}.exe
           file: dist/MDCx.exe
           prerelease: ${{ startsWith(github.ref, 'refs/tags/pre-') }}
