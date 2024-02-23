@@ -32,15 +32,20 @@ jobs:
           items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
 
           # https://docs.github.com/zh/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners
-          # 如果设置了 vars `SELF_HOSTED_MACOS_ARM64_RUNNER`，则添加self-hosted runner到矩阵
+          # self-hosted runner
           if [[ -n "${{ vars.SELF_HOSTED_MACOS_ARM64_RUNNER }}" ]]; then
             # setup-python没有aarch64的python3.9，这里指定python3.10
             items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64", "python": "3.10", "cache": "none"}')
           fi
 
-          # 测试构建：macOS 10.15.7, x86_64, 指定opencv版本
-          if [[ -n "${{ vars.BUILD_FOR_MACOS_10_15_7 }}" && -n "${{ vars.MACOS_10_15_7_CV_VERSION }}" ]]; then
-            items+=('{"build": "macos", "os": "macos-latest", "arch": "x86_64", "cv": "${{ vars.MACOS_10_15_7_CV_VERSION }}", "tail": "-cv${{ vars.MACOS_10_15_7_CV_VERSION }}"}')
+          # macOS 10.15.7, x86_64, 指定opencv版本
+          if [[ -n "${{ vars.BUILD_FOR_MACOS_LEGACY }}" && -n "${{ vars.MACOS_LEGACY_CV_VERSION }}" ]]; then
+            items+=('{"build": "macos", "os": "macos-latest", "arch": "x86_64", "cv": "${{ vars.MACOS_LEGACY_CV_VERSION }}", "tail": "-legacy"}')
+          fi
+
+          # win7, x86_64, python3.8
+          if [[ -n "${{ vars.BUILD_FOR_WINDOWS_LEGACY }}" ]]; then
+            items+=('{"build": "windows", "os": "windows-2019", "arch": "x86_64", "python": "3.8", "tail": "-legacy"}')
           fi
           
           # 合并items到json数组
