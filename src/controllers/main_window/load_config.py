@@ -1108,7 +1108,8 @@ def load_config(self):
             if 'hide_menu' in switch_on:
                 self.Ui.checkBox_hide_menu_icon.setChecked(True)
                 try:
-                    self.tray_icon.hide()
+                    if hasattr(self, 'tray_icon'):
+                        self.tray_icon.hide()
                 except:
                     signal.show_traceback_log(traceback.format_exc())
             else:
