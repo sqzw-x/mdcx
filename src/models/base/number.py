@@ -7,7 +7,7 @@ from models.config.config import config
 
 
 def is_uncensored(number):
-    if re.match(r'^\d{4,}', number) or re.match(r'n\d{4}', number) or re.search(r'[^.]+\.\d{2}\.\d{2}\.\d{2}', number):
+    if re.match(r'n\d{4}', number) or re.search(r'[^.]+\.\d{2}\.\d{2}\.\d{2}', number):
         return True
 
     # 无码车牌BT,CT,EMP,CCDV,CWP,CWPBD,DSAM,DRC,DRG,GACHI,heydouga,JAV,LAF,LAFBD,HEYZO,KTG,KP,KG,LLDV,MCDV,MKD,MKBD,MMDV,NIP,PB,PT,QE,RED,RHJ,S2M,SKY,SKYHD,SMD,SSDV,SSKP,TRG,TS,xxx-av,YKB
