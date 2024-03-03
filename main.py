@@ -25,6 +25,9 @@ if __name__ == '__main__':
         import faulthandler
 
         faulthandler.enable()
+
+        # TODO 运行pyinstaller打包的程序时，该处理不太合理
+        # 想法: 在`main.py`这里，读取config，然后判断`'hide_dock' in config.switch_on`
         if os.path.isfile('resources/Img/1'):
             try:
                 import AppKit
