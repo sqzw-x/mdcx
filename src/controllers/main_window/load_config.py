@@ -1123,14 +1123,28 @@ def load_config(self):
                                                    u'配置写入失败！所在目录没有读写权限！',
                                                    QIcon(resources.icon_ico), 3000)
 
-            if 'hide_dock' in switch_on:
-                self.Ui.checkBox_hide_dock_icon.setChecked(True)
-                if not os.path.isfile('resources/Img/1'):
-                    open('resources/Img/1', 'w').close()
-            else:
-                self.Ui.checkBox_hide_dock_icon.setChecked(False)
-                if os.path.isfile('resources/Img/1'):
-                    delete_file('resources/Img/1')
+            # TODO macOS上运行pyinstaller打包的程序，这个处理方式有问题
+            try:
+                hide_dock_flag_file = 'resources/Img/1'
+                # 在macOS上测试（普通用户），发现`hide_dock_flag_file`路径有几种情况（以下用xxx代替该相对路径）：
+                # 1.如果通过Finder进入/Applications/MDCx.app/Contents/MacOS/，然后运行MDCx，路径是/Users/username/xxx
+                # 2.如果通过终端进入/Applications/MDCx.app/Contents/MacOS/，然后运行MDCx，路径是/Applications/MDCx.app/Contents/MacOS/xxx
+                # 3.正常运行MDCx，路径是/xxx，也就是在根目录下
+                # 1和2都有权限写入文件，但不能持久化（升级后会丢失），3是没有写入权限。
+                # 暂时的处理：屏蔽异常，避免程序崩溃
+                # 考虑的处理：不使用标记文件，只使用config
+                # 相关文件：main.py
+                if 'hide_dock' in switch_on:
+                    self.Ui.checkBox_hide_dock_icon.setChecked(True)
+                    if not os.path.isfile(hide_dock_flag_file):
+                        open(hide_dock_flag_file, 'w').close()
+                else:
+                    self.Ui.checkBox_hide_dock_icon.setChecked(False)
+                    if os.path.isfile(hide_dock_flag_file):
+                        delete_file(hide_dock_flag_file)
+            except Exception as e:
+                signal.show_traceback_log(f'hide_dock_flag_file: {os.path.realpath(hide_dock_flag_file)}')
+                signal.show_traceback_log(traceback.format_exc())
             # endregion
 
         self.Ui.checkBox_show_web_log.setChecked(config.show_web_log == 'on')  # 显示字段刮削过程

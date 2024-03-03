@@ -18,7 +18,8 @@ do
     --help|-h)
       echo "Usage: build-macos.sh [options]"
       echo "Options:"
-      echo "  --version, -v       Specify the version number. Required!"
+      echo "  --version, -v       Specify the version number. \
+      The value within config.ini.default file will be usded if not specified."
       echo "  --create-dmg, -dmg  Create DMG file. Default is false."
       exit 0
       ;;
@@ -29,10 +30,28 @@ do
 done
 
 
-# Check if APP_VERSION is set
+# 从配置文件获取应用版本
+getAppVersionFromConfig () {
+  local configPath="$1"
+  if [[ -f "$configPath" ]]; then
+    local version=$(cat $configPath | grep -oi 'version\s*=\s*[0-9]\+' | grep -oi '[0-9]\+$')
+    echo $version
+  else
+    echo ''
+  fi
+}
+
+
+# Check APP_VERSION
 if [ -z "$APP_VERSION" ]; then
-  echo "❌ Please specify the version number using --version option!"
-  exit 1
+  echo "APP_VERSION is not set. Trying to get it from config.ini.default..."
+  APP_VERSION=$(getAppVersionFromConfig "config.ini.default")
+  if [ -z "$APP_VERSION" ]; then
+    echo "❌ APP_VERSION is not set and cannot be found in config.ini.default!"
+    exit 1
+  else
+    echo "APP_VERSION is set to $APP_VERSION"
+  fi
 fi
 
 

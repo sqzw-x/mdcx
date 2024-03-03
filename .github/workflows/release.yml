@@ -7,10 +7,14 @@ on:
     tags:
       - 120*
       - pre-20*
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag'
+        required: false
 
 env:
   PYTHON_VERSION: '3.9'
-#  MACOS_BUNDLE_ID: com.mdcxuniverse.mdcx
 
 jobs:
   init-matrix:
@@ -24,10 +28,25 @@ jobs:
         run: |
           items=()
 
-          # https://docs.github.com/zh/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners
-          # items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64"}')
           items+=('{"build": "macos", "os": "macos-latest", "arch": "x86_64"}')
           items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
+
+          # https://docs.github.com/zh/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners
+          # self-hosted runner
+          if [[ -n "${{ vars.SELF_HOSTED_MACOS_ARM64_RUNNER }}" ]]; then
+            # setup-python没有aarch64的python3.9，这里指定python3.10
+            items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64", "python": "3.10", "cache": "none"}')
+          fi
+
+          # macOS 10.15.7, x86_64, 指定opencv版本
+          if [[ -n "${{ vars.BUILD_FOR_MACOS_LEGACY }}" && -n "${{ vars.MACOS_LEGACY_CV_VERSION }}" ]]; then
+            items+=('{"build": "macos", "os": "macos-latest", "arch": "x86_64", "cv": "${{ vars.MACOS_LEGACY_CV_VERSION }}", "tail": "-legacy"}')
+          fi
+
+          # win7, x86_64, python3.8
+          if [[ -n "${{ vars.BUILD_FOR_WINDOWS_LEGACY }}" ]]; then
+            items+=('{"build": "windows", "os": "windows-2019", "arch": "x86_64", "python": "3.8", "tail": "-legacy"}')
+          fi
           
           # 合并items到json数组
           matrix="matrix=["
@@ -53,13 +72,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
+      - name: Before setup-python
+        if: ${{ matrix.build == 'macos' }}
+        run: |
+          # 如果指定了cv，则修改requirements-mac.txt里的opencv版本
+          cvVersion="${{ matrix.cv }}"
+          if [ -n "$cvVersion" ]; then
+            sed -i '' "s/opencv-contrib-python-headless==.*/opencv-contrib-python-headless==${cvVersion}/" requirements-mac.txt
+          fi
 
-      - name: Install libraries
+      - name: Set up Python - cache pip
+        if: ${{ matrix.cache != 'none' }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python || env.PYTHON_VERSION }}
+          cache: ${{ matrix.cache || 'pip' }}
+
+      - name: Set up Python - no cache
+        if : ${{ matrix.cache == 'none' }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python || env.PYTHON_VERSION }}
+
+      - name: Install libraries - macOS
         if: ${{ matrix.build == 'macos' }}
         run: |
           # FIX: No package 'gobject-introspection-1.0' found
@@ -83,28 +118,16 @@ jobs:
       - name: Build macOS app - macOS
         if: ${{ matrix.build == 'macos' }}
         run: |
-          bash ./build-macos.sh --create-dmg --version "${{ github.ref_name }}"
+          version="${{ github.ref_name }}"
+          # 如果是手动触发，则使用输入的tag
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            version="${{ github.event.inputs.tag }}"
+          fi
+          bash ./build-macos.sh --create-dmg --version "$version"
 
       - name: Build Windows app - Windows
         if: ${{ matrix.build == 'windows' }}
         run: ./build-action
-
-      #      - name: Upload artifact - macOS
-      #        uses: actions/upload-artifact@v3
-      #        if: ${{ matrix.build == 'macos' }}
-      #        with:
-      #          name: MDCx-${{ matrix.build }}-${{ matrix.arch }}
-      #          path: |
-      #            ./**.app.zip
-      #
-      #      - name: Upload artifact - Windows
-      #        uses: actions/upload-artifact@v3
-      #        if: ${{ matrix.build == 'windows' }}
-      #        with:
-      #          name: MDCx-${{ matrix.build }}-${{ matrix.arch }}
-      #          path: |
-      #            .\MDCx
-
 
       - name: Get changelog
         id: get-changelog
@@ -118,7 +141,8 @@ jobs:
         uses: svenstaro/upload-release-action@2.7.0
         if: ${{ matrix.build == 'macos' }}
         with:
-          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}.dmg
+          overwrite: true
+          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}.dmg
           file: dist/MDCx.dmg
           prerelease: ${{ startsWith(github.ref, 'refs/tags/pre-') }}
           body: |
@@ -128,6 +152,7 @@ jobs:
         uses: svenstaro/upload-release-action@2.7.0
         if: ${{ matrix.build == 'windows' }}
         with:
-          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}.exe
+          overwrite: true
+          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}.exe
           file: dist/MDCx.exe
           prerelease: ${{ startsWith(github.ref, 'refs/tags/pre-') }}
