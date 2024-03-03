@@ -3,6 +3,7 @@
 import json
 import re
 import time
+from datetime import datetime
 
 import urllib3
 from lxml import etree
@@ -47,9 +48,17 @@ def get_detail_info(html, number, file_path):
     studio = html.xpath('string(//span[@class="meta-category"])').strip()
     cover_url = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]/p/img/@src')
     cover_url = cover_url[0] if cover_url else ''
-    # print(number, title, actor, cover_url, studio, detail_info)
     actor = get_extra_info(title, file_path, info_type="actor") if actor == '' else actor
-    return number, title, actor, cover_url, studio
+    # 处理发行时间，年份
+    if u := html.xpath('//time[@datetime]/@datetime'):
+        try:
+            date_obj = datetime.strptime(u[0], '%Y-%m-%dT%H:%M:%S%z')
+            release = date_obj.strftime('%Y-%m-%d')
+            year = date_obj.year
+        except ValueError:
+            release = ''
+            year = ''
+    return number, title, actor, cover_url, studio, release, year
 
 
 def get_real_url(html, number_list):
@@ -114,7 +123,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             raise Exception(debug_info)
 
         detail_page = etree.fromstring(response, etree.HTMLParser())
-        number, title, actor, cover_url, studio = get_detail_info(detail_page, number, file_path)
+        number, title, actor, cover_url, studio, release, year = get_detail_info(detail_page, number, file_path)
         actor_photo = get_actor_photo(actor)
 
         try:
@@ -126,8 +135,8 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
                 'outline': '',
                 'originalplot': '',
                 'tag': '',
-                'release': '',
-                'year': '',
+                'release': release,
+                'year': year,
                 'runtime': '',
                 'score': '',
                 'series': '',
@@ -193,11 +202,9 @@ if __name__ == '__main__':
     # print(main('mini06', file_path='mini06.全裸家政.只為弟弟的學費打工.被玩弄的淫亂家政小妹.mini傳媒'))
     # print(main('mini06.全裸家政.只为弟弟的学费打工.被玩弄的淫乱家政小妹.mini传媒', file_path='mini06.全裸家政.只为弟弟的学费打工.被玩弄的淫乱家政小妹.mini传媒'))
     # print(main('XSJ138', file_path='XSJ138.养子的秘密教学EP6.薇安姐内射教学.性视界出品'))
-    # print(main('DW-006.AV帝王作品.Roxie出演.地方妈妈的性解放.双穴双屌', file_path='DW-006.AV帝王作品.Roxie出演.地方妈妈的性解放.双穴双屌'))
+    print(main('DW-006.AV帝王作品.Roxie出演.地方妈妈的性解放.双穴双屌', file_path='DW-006.AV帝王作品.Roxie出演.地方妈妈的性解放.双穴双屌'))
     # print(main('MDJ001-EP3.陈美惠.淫兽寄宿家庭.我和日本父子淫乱的一天.2021麻豆最强跨国合作', file_path='MDJ001-EP3.陈美惠.淫兽寄宿家庭.我和日本父子淫乱的一天.2021麻豆最强跨国合作'))
     # print(main('MKY-TN-003.周宁.乱伦黑料流出.最喜欢爸爸的鸡巴了.麻豆传媒MKY系列', file_path='MKY-TN-003.周宁.乱伦黑料流出.最喜欢爸爸的鸡巴了.麻豆传媒MKY系列'))
-    print(main('XSJ138.养子的秘密教学EP6.薇安姐内射教学.性视界出品',
-               file_path='XSJ138.养子的秘密教学EP6.薇安姐内射教学.性视界出品'))
     # print(main('MAN麻豆女性向系列.MAN-0011.岚湘庭.当男人恋爱时.我可以带你去流浪.也知道下场不怎么样', file_path='MAN麻豆女性向系列.MAN-0011.岚湘庭.当男人恋爱时.我可以带你去流浪.也知道下场不怎么样'))
     # print(main('MDL-0009-2.楚梦舒.苏语棠.致八零年代的我们.年少的性欲和冲动.麻豆传媒映画原创中文收藏版', file_path='MDL-0009-2.楚梦舒.苏语棠.致八零年代的我们.年少的性欲和冲动.麻豆传媒映画原创中文收藏版'))
     # print(main('MSD-023', file_path='MSD023.袁子仪.杨柳.可爱女孩非亲妹.渴望已久的(非)近亲性爱.麻豆传媒映画.Model.Seeding系列.mp4'))
