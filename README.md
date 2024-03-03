@@ -19,15 +19,28 @@
 * 尽管重构了大部分代码, 但由于代码耦合度仍然很高, 可维护性很差, 因此仅修复 bug, 不考虑加入新功能
 * 当然如果直接 PR 也可以
 
-## 开发相关
-
-项目环境为 Python 3.9. 以下内容可能有助于理解及修改代码.
-
-### 自行构建
+## 构建
 
 > 一般情况请勿自行构建, 至 [Release](https://github.com/sqzw-x/mdcx/releases) 下载最新版
 
-安装 `pyinstaller` 后运行 `build-action.ps1`(powershell) 或 `build.sh`(shell)
+#### Windows 7
+
+Windows 7 上需使用 Python 3.8 构建, 代码及依赖均兼容, 可在本地自行构建. 也可使用 GitHub Actions 构建:
+
+1. fork 本仓库, 在仓库设置中启用 Actions
+2. 参考 [为存储库创建配置变量](https://docs.github.com/zh/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository), 设置 `BUILD_FOR_WINDOWS_LEGACY` 变量, 值非空即可
+3. 在 Actions 中手动运行 `Build and Release`
+
+#### macOS
+
+低版本 macOS: 需注意 opencv 兼容性问题, 参考 [issue #82](https://github.com/sqzw-x/mdcx/issues/82#issuecomment-1947973961).
+也可使用 GitHub Actions 构建, 步骤同上, 需设置 `BUILD_FOR_MACOS_LEGACY` 变量, 值非空即可;
+以及 `MACOS_LEGACY_CV_VERSION` 变量, 值为兼容的 `opencv-contrib-python-headless` 版本
+
+ARM64(AArch64) 架构: 可本地构建. 若欲使用 GitHub Actions 构建, 需 [添加自托管的运行器](https://docs.github.com/zh/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners),
+并设置 `SELF_HOSTED_MACOS_ARM64_RUNNER` 变量
+
+## 开发
 
 ### 如何添加新配置项
 
