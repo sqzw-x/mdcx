@@ -49,7 +49,7 @@ class WebRequests:
         #     browser={'browser': 'firefox', 'platform': 'windows', 'mobile': False})  # returns a CloudScraper instance
         self.lock = Lock()
         self.pool = ThreadPoolExecutor(32)
-        self.curl_session = curl_cffi.requests.Session()
+        self.curl_session = curl_cffi.requests.Session(max_redirects=10)
 
     def get_html(self, url: str, headers=None, cookies=None, proxies=True, allow_redirects=True, json_data=False,
                  content=False,
