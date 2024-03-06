@@ -74,7 +74,7 @@ def read_data(data):
         pass
     tag = ','.join(tag_list)
     slug = data['slug']
-    real_url = f'https://metadataapi.net/movies/{slug}' if slug else ''
+    real_url = f'https://api.theporndb.net/movies/{slug}' if slug else ''
     all_actor_list = []
     actor_list = []
     try:
@@ -105,7 +105,7 @@ def get_real_url(res_search, file_path, series_ex, date):
             res_title_list = []
             res_actor_list = []
             for each in search_data:
-                res_id_url = f"https://metadataapi.net/movies/{each['slug']}"
+                res_id_url = f"https://api.theporndb.net/movies/{each['slug']}"
                 try:
                     res_series = each['site']['short_name']
                 except:
@@ -245,7 +245,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
     req_web += '-> %s' % website_name
 
     api_token = config.theporndb_api_token
-    real_url = appoint_url
+    real_url = appoint_url.replace('//theporndb', '//api.theporndb')
     title = ''
     cover_url = ''
     poster_url = ''
@@ -273,8 +273,8 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             # 通过hash搜索
             try:
                 hash = oshash.oshash(file_path)
-                url_hash = f'https://api.metadataapi.net/movies/hash/{hash}'
-                debug_info = '请求地址: %s ' % url_hash
+                url_hash = f'https://api.theporndb.net/movies/hash/{hash}'
+                debug_info = f'请求地址: {url_hash} '
                 log_info += web_info + debug_info
                 result, hash_search = get_html(url_hash, headers=headers, json_data=True)
 
@@ -299,14 +299,14 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             else:
                 search_keyword_list, series_ex, date = get_search_keyword(file_path)
                 for search_keyword in search_keyword_list:
-                    url_search = f'https://api.metadataapi.net/movies?q={search_keyword}&per_page=100'
-                    debug_info = '请求地址: %s ' % url_search.replace('//api.', '//')
+                    url_search = f'https://api.theporndb.net/movies?q={search_keyword}&per_page=100'
+                    debug_info = f'请求地址: {url_search} '
                     log_info += web_info + debug_info
                     result, res_search = get_html(url_search, headers=headers, json_data=True)
 
                     if not result:
                         # 判断返回内容是否有问题
-                        debug_info = '请求错误: %s' % url_search.replace('//api.', '//')
+                        debug_info = f'请求错误: {url_search}'
                         log_info += web_info + debug_info
                         if '401 http' in res_search:
                             debug_info = '请检查 API Token 是否正确: %s ' % api_token
@@ -317,15 +317,14 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
                     if real_url:
                         break
                 else:
-                    debug_info = '未找到匹配的内容: %s' % url_search.replace('//api.', '//')
+                    debug_info = f'未找到匹配的内容: {url_search}'
                     log_info += web_info + debug_info
                     raise Exception(debug_info)
 
         if real_url and not hash_data:
             debug_info = '番号地址: %s ' % real_url
             log_info += web_info + debug_info
-            req_url = real_url.replace('https://metadataapi.net', 'https://api.metadataapi.net')
-            result, res_real = get_html(req_url, headers=headers, json_data=True)
+            result, res_real = get_html(real_url, headers=headers, json_data=True)
             if not result:
                 # 判断返回内容是否有问题
                 debug_info = '请求错误: %s ' % res_real

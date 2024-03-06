@@ -698,7 +698,7 @@ def check_theporndb_api_token():
     proxies = config.proxies
     timeout = config.timeout
     api_token = config.theporndb_api_token
-    url = 'https://api.metadataapi.net/scenes/hash/8679fcbdd29fa735'
+    url = 'https://api.theporndb.net/scenes/hash/8679fcbdd29fa735'
     headers = {
         'Authorization': f'Bearer {api_token}',
         'Content-Type': 'application/json',

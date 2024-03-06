@@ -11878,7 +11878,7 @@ class Ui_MDCx(object):
         self.label_324.setText(_translate("MDCx", "⚠️ 修改后先点击保存再切换，否则修改将丢失"))
         self.groupBox_14.setTitle(_translate("MDCx", "API Token"))
         self.label_355.setText(_translate("MDCx", "ThePornDB："))
-        self.label_356.setText(_translate("MDCx", "<html><head/><body><p><a href=\"https://metadataapi.net/\"><span style=\" text-decoration: underline; color:#094fd1;\">https://metadataapi.net/</span></a> 注册登录后，点头像 - API Tokens - CREATE。复制生成的 API Token 填入此处。</p></body></html>"))
+        self.label_356.setText(_translate("MDCx", "<html><head/><body><p><a href=\"https://theporndb.net/\"><span style=\" text-decoration: underline; color:#094fd1;\">https://theporndb.net/</span></a> 注册登录后，点头像 - API Tokens - CREATE。复制生成的 API Token 填入此处。</p></body></html>"))
         self.checkBox_theporndb_hash.setText(_translate("MDCx", "不使用Hash值匹配数据"))
         self.label_422.setText(_translate("MDCx", "<html><head/><body><p>该网站的Hash值匹配结果可能错误</p></body></html>"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab3), _translate("MDCx", " 网络 "))

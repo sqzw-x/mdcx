@@ -534,7 +534,7 @@ class ManualConfig:
         'cnmdb': 'cnmdb',
         'kin8': 'kin8',
         'fantastica': 'fantastica',
-        'metadataapi': 'theporndb',
+        'theporndb': 'theporndb',
         'prestige': 'prestige',
     }
     char_list = [
