@@ -2056,7 +2056,7 @@ class MyMAinWindow(QMainWindow):
                         'theporndb': ['https://api.theporndb.net', ''],
                         'avsox': [get_avsox_domain(), ''],
                         'xcity': ['https://xcity.jp', ''],
-                        '7mmtv': ['https://7mmtv.tv', ''],
+                        '7mmtv': ['https://7mmtv.sx', ''],
                         'mdtv': ['https://www.mdpjzip.xyz', ''],
                         'madouqu': ['https://madouqu.com', ''],
                         'cnmdb': ['https://cnmdb.net', ''],
@@ -2246,10 +2246,7 @@ class MyMAinWindow(QMainWindow):
         tips = '✅ 连接正常！'
         new_cookie = {'cookie': input_cookie}
         cookies = config.javdb_cookie
-        if hasattr(config, 'javdb_website'):
-            javdb_url = config.javdb_website + '/v/D16Q5?locale=zh'
-        else:
-            javdb_url = 'https://javdb.com/v/D16Q5?locale=zh'
+        javdb_url = getattr(config, 'javdb_website', 'https://javdb.com') + '/v/D16Q5?locale=zh'
         try:
             result, response = scraper_html(javdb_url, cookies=new_cookie)
             if not result:
@@ -2321,10 +2318,7 @@ class MyMAinWindow(QMainWindow):
             'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6',
         }
         headers.update(headers_o)
-        if hasattr(config, 'javbus_website'):
-            javbus_url = config.javbus_website + '/FSDSS-660'
-        else:
-            javbus_url = 'https://javbus.com/FSDSS-660'
+        javbus_url = getattr(config, 'javbus_website', 'https://javbus.com') + '/FSDSS-660'
 
         try:
             result, response = get_html(javbus_url, headers=headers, cookies=new_cookie)
