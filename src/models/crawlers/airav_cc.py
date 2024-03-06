@@ -123,9 +123,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     image_download = False
     url_search = ''
     mosaic = '有码'
-    airav_url = 'https://airav5.fun'
-    if hasattr(config, 'airav_cc_website'):
-        airav_url = config.airav_cc_website
+    airav_url = getattr(config, 'airav_cc_website', 'https://airav5.fun')
     if language == 'zh_cn':
         airav_url += '/cn'
     web_info = '\n       '

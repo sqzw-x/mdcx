@@ -219,7 +219,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', mosaic=
     website_name = 'javbus'
     req_web += '-> %s' % website_name
     real_url = appoint_url
-    javbus_url = 'https://www.javbus.com'
+    javbus_url = getattr(config, 'javbus_website', 'https://www.javbus.com')
     headers = config.headers
     cookie = config.javbus
     headers_o = {
@@ -228,8 +228,6 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', mosaic=
     }
     headers.update(headers_o)
 
-    if hasattr(config, 'javbus_website'):
-        javbus_url = config.javbus_website
     title = ''
     cover_url = ''
     poster_url = ''

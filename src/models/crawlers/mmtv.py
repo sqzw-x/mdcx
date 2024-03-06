@@ -184,9 +184,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
     web_info = '\n       '
     log_info += ' \n    🌐 7mmtv'
     debug_info = ''
-    mmtv_url = 'https://www.7mmtv.sx'
-    if hasattr(config, '7mmtv_website'):
-        mmtv_url = getattr(config, '7mmtv_website')
+    mmtv_url = getattr(config, '7mmtv_website', 'https://www.7mmtv.sx')
     real_url = appoint_url
     # search_url = "https://bb9711.com/zh/searchform_search/all/index.html"
     # search_url = "https://7mmtv.sx/zh/searchform_search/all/index.html"
