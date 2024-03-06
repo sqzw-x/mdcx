@@ -1,27 +1,31 @@
-## 重要
-此版本移除了 cloudscraper, 并将 curl-cffi 升级至 0.6.0b9.  
-
-这一改动旨在解决 curl 请求出现的相关问题, 但并未经过充分测试.
-若网络请求出现问题, 可暂回退至 120240207 版本, 并提交 issue.
-
-现在代码及依赖完全兼容 python 3.8, 可以使用 python 3.8 构建以在 Windows 7 上运行.
-由于二者均已停止支持, 因此并不提供官方构建.
 ## 新增
-* UI: hscangku & cableav 指定网站刮削
-* macos img 构建 by @
+* madouqu: release 获取 by @
+* CI: 可选 Windows 7 与 macos/arm64 构建 workflow by @
 ## 修复
-* dmm 搜索页标题 xpath
-* 裁剪图片 - 打开图片 处理结果保存至影片目录
+* theporndb: url 变更
+* kin8: list 作为 str
+* 数字文件名均被识别为无码
 
 <details>
 <summary>Full Changelog</summary>
 
-15a06ba feat(web)!: del cloudscraper; bump curl-cffi to 0.6.0b9
-ca38e46 fix(nfo): python3.8 unsupported with expression
-b314755 fix(dmm): title xpath (#90)
-edd43a4 CI: refine macos build
-5af0b14 fix(dmm): wrong comment (#80)
-9f2315a Fix: 裁剪图片保存至原目录 (#86)
-eb8207b UI: 添加新网站; 移除 hdouban
+1c0d9d8 fix: theporndb url (#113)
+c4e996e fix(madouqu): add release and year fields
+0c0ea59 doc: update README.md
+987cd4a fix(ci): prerelease condition
+86a646a Merge pull request #117 from northsea4/master
+a9c9448 Merge remote-tracking branch 'upstream/master'
+929b21f UI: temp discard macos hide_dock
+f5c5ebf Fix: macos hide_menu (#105)
+28cbd69 CI: windows legacy and macos legacy
+3c3a266 Merge remote-tracking branch 'origin/master'
+f568ada fix(number): 全数字番号均被识别为无码 (#110)
+a642cd8 Merge pull request #108 from northsea4/fix_hide_menu
+810eae4 Fix: macos hide_menu (#105)
+8e2488c Merge branch 'sqzw-x:master' into master
+b0f917a CI: self-hosted runner disable setup-python cache
+828e29e fix(kin8): use list as str (#97)
+6cc0b97 Merge branch 'sqzw-x:master' into master
+9cb15e5 CI: self-hosted macos runner
 
 </details>
