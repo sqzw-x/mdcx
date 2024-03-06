@@ -1026,6 +1026,9 @@ def load_config(self):
         self.Ui.horizontalSlider_retry.setValue(retry_count)
         self.Ui.lcdNumber_retry.display(retry_count)
 
+        custom_website_name = self.Ui.comboBox_custom_website.currentText()
+        self.Ui.lineEdit_custom_website.setText(getattr(config, f"{custom_website_name}_website", ""))  # 自定义网站
+
         self.Ui.lineEdit_api_token_theporndb.setText(convert_path(config.theporndb_api_token))  # api token
         self.set_javdb_cookie.emit(config.javdb)  # javdb cookie
         self.set_javbus_cookie.emit(config.javbus)  # javbus cookie
