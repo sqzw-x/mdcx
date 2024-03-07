@@ -3,7 +3,7 @@
 * theporndb 文件 ohash 匹配
 * theporndb 标题模糊匹配
 * javdb cookie 设置失效
-* 7mmtv 网络测试 url
+* 7mmtv/airavcc 网络测试 url
 * 启动后不显示自定义网站设置
 * 重定向次数过多导致网络卡死
 
