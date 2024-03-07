@@ -147,8 +147,7 @@ def get_real_url(res_search, file_path, series_ex, date):
 
                 # 没有系列时，只判断标题
                 else:
-                    if res_title_nospace in temp_file_path_nospace:
-                        res_title_list.append([res_id_url, res_actor_title_space])
+                    res_title_list.append([res_id_url, res_actor_title_space])
 
             # 系列+日期命中时，一个结果，直接命中；多个结果，返回相似度高的
             if len(res_date_list):
@@ -431,7 +430,8 @@ if __name__ == '__main__':
     # print(main('', file_path='AdultTime.20.02.14.Angela.White.And.Courtney.Trouble.Love.Lust.Respect.XXX.1080p.MP4-KTR.mp4'))   # 系列错了
     # print(main('', file_path='AdultTime.20.02.17.Angela.White.Full.Body.Physical.Exam.XXX.1080p.MP4-KTR.mp4'))   # 无命中演员，视为失败
     # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Lexi Bloom & Malena Morgan-Stepping-Out_SexArt-1080p.mp4'))   # 多个，按相似度命中
-    print(main('', file_path='SexArt.12.04.13 Sex Art.mp4'))   # 多个，按相似度命中
+    # print(main('', file_path='SexArt.12.04.13 Sex Art.mp4'))   # 多个，按相似度命中
+    print(main('', file_path='nubilefilms-all-work-and-no-play.mp4'))
     # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Malena Morgan-Under-The-Elle-Tree_SexArt-1080p.mp4'))   # 多个，按相似度命中
     # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Rilee Marks-Whispers_SexArt-1080p.mp4'))   # 多个，按相似度命中
     # print(main('', file_path='SexArt_12.04.13-Hayden Hawkens & Malena Morgan-Golden_SexArt-1080p.mp4'))   # 多个，按相似度命中
