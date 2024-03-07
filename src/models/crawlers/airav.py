@@ -218,7 +218,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
             'error_info': debug_info,
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
-    dic = {website_name: {language: dic}}
+    dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
     js = json.dumps(
         dic,
         ensure_ascii=False,
