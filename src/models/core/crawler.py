@@ -9,9 +9,9 @@ import langid
 from models.base.number import get_number_letters, is_uncensored
 from models.config.config import config
 from models.core.flags import Flags
-from models.crawlers import airav_cc_new, airav_new, avsex, avsox, cnmdb, dahlia, dmm, faleno, fantastica, fc2, fc2club, \
-    fc2hub, freejavbt, getchu, getchu_dmm, giga, hdouban, iqqtv_new, jav321, javbus, javdb, javlibrary_new, kin8, love6, \
-    lulubar, madouqu, mdtv, mgstage, mmtv, mywife, official, prestige, theporndb, xcity, hscangku, cableav
+from models.crawlers import airav, airav_cc, avsex, avsox, cableav, cnmdb, dahlia, dmm, faleno, fantastica, fc2, \
+    fc2club, fc2hub, freejavbt, getchu, getchu_dmm, giga, hdouban, hscangku, iqqtv_new, jav321, javbus, javdb, \
+    javlibrary_new, kin8, love6, lulubar, madouqu, mdtv, mgstage, mmtv, mywife, official, prestige, theporndb, xcity
 from models.entity.enums import FileMode
 
 
@@ -102,9 +102,9 @@ def _call_crawler(json_data, website, language, file_number, short_number, mosai
     elif website == 'avsex':
         json_data = json.loads(avsex.main(file_number, appoint_url, log_info, req_web, language))
     elif website == 'airav_cc':
-        json_data = json.loads(airav_cc_new.main(file_number, appoint_url, log_info, req_web, language))
+        json_data = json.loads(airav_cc.main(file_number, appoint_url, log_info, req_web, language))
     elif website == 'airav':
-        json_data = json.loads(airav_new.main(file_number, appoint_url, log_info, req_web, language))
+        json_data = json.loads(airav.main(file_number, appoint_url, log_info, req_web, language))
     elif website == 'freejavbt':
         json_data = json.loads(freejavbt.main(file_number, appoint_url, log_info, req_web, language))
     elif website == 'javbus':
@@ -142,7 +142,7 @@ def _call_crawler(json_data, website, language, file_number, short_number, mosai
             hscangku.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number))
     elif website == 'cableav':
         json_data = json.loads(
-            cableav.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number)) 
+            cableav.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number))
     elif website == 'getchu':
         json_data = json.loads(getchu.main(file_number, appoint_url, log_info, req_web, language))
     elif website == 'getchu_dmm':

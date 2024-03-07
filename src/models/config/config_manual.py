@@ -497,7 +497,7 @@ class ManualConfig:
         '.chs',
     ]
     web_dic = {
-        'airav.cc': 'airav_cc',
+        'airav.io': 'airav_cc',
         'airav.wiki': 'airav',
         '9sex': 'avsex',
         'avsex': 'avsex',

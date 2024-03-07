@@ -113,7 +113,7 @@ def retry_request(real_url, log_info, web_info):
 def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     start_time = time.time()
     website_name = 'airav_cc'
-    req_web += '-> %s[%s]' % (website_name, language)
+    req_web += f'-> {website_name}[{language}]'
     number = number.upper()
     if re.match(r'N\d{4}', number):  # n1403
         number = number.lower()
@@ -123,11 +123,11 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     image_download = False
     url_search = ''
     mosaic = '有码'
-    airav_url = getattr(config, 'airav_cc_website', 'https://airav5.fun')
+    airav_url = getattr(config, 'airav_cc_website', 'https://airav.io')
     if language == 'zh_cn':
         airav_url += '/cn'
     web_info = '\n       '
-    log_info += ' \n    🌐 airav[%s]' % language.replace('zh_', '')
+    log_info += f' \n    🌐 airav[{language.replace("zh_", "")}]'
     debug_info = ''
 
     # real_url = 'https://airav5.fun/jp/playon.aspx?hid=44733'
@@ -258,9 +258,9 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
 
 if __name__ == '__main__':
     # yapf: disable
-    # print(main('', 'https://airav5.fun/playon.aspx?hid=99-21-46640'))
+    print(main('', 'https://airav.io/playon.aspx?hid=99-21-46640'))
     # print(main('PRED-300'))    # 马赛克破坏版
-    print(main('snis-036', language='jp'))
+    # print(main('snis-036', language='jp'))
     # print(main('snis-036'))
     # print(main('MIAE-346'))
     # print(main('STARS-1919'))    # poster图片
