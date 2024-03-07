@@ -271,7 +271,6 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             raise Exception(debug_info)
 
         if not real_url:
-
             # 通过hash搜索
             try:
                 if not theporndb_no_hash:
@@ -298,9 +297,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
                 pass
 
             # 通过文件名搜索
-            if title:
-                hash_data = True
-            else:
+            if title and not hash_data:
                 search_keyword_list, series_ex, date = get_search_keyword(file_path)
                 for search_keyword in search_keyword_list:
                     url_search = f'https://api.theporndb.net/scenes?parse={search_keyword}&per_page=100'
@@ -325,7 +322,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
                     log_info += web_info + debug_info
                     raise Exception(debug_info)
 
-        if real_url and not hash_data:
+        elif not hash_data:
             debug_info = '番号地址: %s ' % real_url
             log_info += web_info + debug_info
             result, res_real = get_html(real_url, headers=headers, json_data=True)
@@ -431,7 +428,7 @@ if __name__ == '__main__':
     # print(main('', file_path='AdultTime.20.02.17.Angela.White.Full.Body.Physical.Exam.XXX.1080p.MP4-KTR.mp4'))   # 无命中演员，视为失败
     # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Lexi Bloom & Malena Morgan-Stepping-Out_SexArt-1080p.mp4'))   # 多个，按相似度命中
     # print(main('', file_path='SexArt.12.04.13 Sex Art.mp4'))   # 多个，按相似度命中
-    print(main('', file_path='nubilefilms-all-work-and-no-play.mp4'))
+    print(main('', file_path=''))
     # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Malena Morgan-Under-The-Elle-Tree_SexArt-1080p.mp4'))   # 多个，按相似度命中
     # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Rilee Marks-Whispers_SexArt-1080p.mp4'))   # 多个，按相似度命中
     # print(main('', file_path='SexArt_12.04.13-Hayden Hawkens & Malena Morgan-Golden_SexArt-1080p.mp4'))   # 多个，按相似度命中
