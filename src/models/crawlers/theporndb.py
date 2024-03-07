@@ -247,7 +247,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
     api_token = config.theporndb_api_token
     theporndb_no_hash = config.theporndb_no_hash
     real_url = appoint_url.replace("//theporndb", "//api.theporndb")
-    title = ''
+    title = number
     cover_url = ''
     poster_url = ''
     image_download = False
@@ -322,7 +322,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
                     log_info += web_info + debug_info
                     raise Exception(debug_info)
 
-        elif not hash_data:
+        if not hash_data:
             debug_info = '番号地址: %s ' % real_url
             log_info += web_info + debug_info
             result, res_real = get_html(real_url, headers=headers, json_data=True)
@@ -428,7 +428,7 @@ if __name__ == '__main__':
     # print(main('', file_path='AdultTime.20.02.17.Angela.White.Full.Body.Physical.Exam.XXX.1080p.MP4-KTR.mp4'))   # 无命中演员，视为失败
     # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Lexi Bloom & Malena Morgan-Stepping-Out_SexArt-1080p.mp4'))   # 多个，按相似度命中
     # print(main('', file_path='SexArt.12.04.13 Sex Art.mp4'))   # 多个，按相似度命中
-    print(main('', file_path=''))
+    print(main('nubilefilms-all-work-and-no-play', file_path=''))
     # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Malena Morgan-Under-The-Elle-Tree_SexArt-1080p.mp4'))   # 多个，按相似度命中
     # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Rilee Marks-Whispers_SexArt-1080p.mp4'))   # 多个，按相似度命中
     # print(main('', file_path='SexArt_12.04.13-Hayden Hawkens & Malena Morgan-Golden_SexArt-1080p.mp4'))   # 多个，按相似度命中
