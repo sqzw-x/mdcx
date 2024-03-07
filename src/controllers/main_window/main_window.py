@@ -2244,11 +2244,11 @@ class MyMAinWindow(QMainWindow):
             return tips
         # self.Ui.pushButton_check_javdb_cookie.setEnabled(False)
         tips = '✅ 连接正常！'
-        new_cookie = {'cookie': input_cookie}
-        cookies = config.javdb_cookie
+        header = {'cookie': input_cookie}
+        cookies = config.javdb
         javdb_url = getattr(config, 'javdb_website', 'https://javdb.com') + '/v/D16Q5?locale=zh'
         try:
-            result, response = scraper_html(javdb_url, cookies=new_cookie)
+            result, response = scraper_html(javdb_url, headers=header)
             if not result:
                 if 'Cookie' in response:
                     if cookies != input_cookie:

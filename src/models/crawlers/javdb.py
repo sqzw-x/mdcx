@@ -197,10 +197,8 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', org_lan
     req_web += '-> %s' % website_name
 
     javdb_time = config.javdb_time
-    cookies = config.javdb_cookie
-    javdb_url = 'https://javdb.com'
-    if hasattr(config, 'javdb_website'):
-        javdb_url = config.javdb_website
+    header = {'cookie': config.javdb}
+    javdb_url = getattr(config, 'javdb_website', 'https://javdb.com')
     if appoint_url and '?locale' not in appoint_url:
         appoint_url += '?locale=zh'
     real_url = appoint_url
@@ -230,7 +228,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', org_lan
             log_info += web_info + debug_info
 
             # 先使用scraper方法请求，失败时再使用get请求
-            result, html_search = curl_html(url_search, cookies=cookies)
+            result, html_search = curl_html(url_search, headers=header)
             if not result:
                 # 判断返回内容是否有问题
                 if html_search.startswith('403'):
@@ -272,7 +270,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', org_lan
             debug_info = '番号地址: %s ' % real_url
             log_info += web_info + debug_info
 
-            result, html_info = curl_html(real_url, cookies=cookies)
+            result, html_info = curl_html(real_url, headers=header)
             if not result:
                 debug_info = '请求错误: %s' % html_info
                 log_info += web_info + debug_info
@@ -294,7 +292,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', org_lan
             if "/password_resets" in html_info:
                 debug_info = f'此內容需要登入才能查看或操作！点击 {real_url} 查看详情！'
                 log_info += web_info + debug_info
-                if cookies and cookies.get('cookie'):
+                if config.javdb:
                     debug_info = 'Cookie 已失效，请到设置中更新 javdb Cookie！'
                     log_info += web_info + debug_info
                 else:
