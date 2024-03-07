@@ -2032,7 +2032,7 @@ class MyMAinWindow(QMainWindow):
     # endregion
 
     # region 检测网络
-    def _netResult(self):
+    def network_check(self):
         start_time = time.time()
         try:
             # 显示代理信息
@@ -2042,7 +2042,7 @@ class MyMAinWindow(QMainWindow):
             signal.show_net_info(' 开始检测网络连通性...')
 
             net_info = {'github': ['https://raw.githubusercontent.com', ''],
-                        'airav_cc': ['https://airav5.fun', ''],
+                        'airav_cc': ['https://airav.io', ''],
                         'iqqtv': ['https://iqq5.xyz', ''],
                         'avsex': ['https://paycalling.com', ''],
                         'freejavbt': ['https://freejavbt.com', ''],
@@ -2191,7 +2191,7 @@ class MyMAinWindow(QMainWindow):
             self.Ui.pushButton_check_net.setStyleSheet(
                 'QPushButton#pushButton_check_net{color: white;background-color: rgba(230, 36, 0, 250);}QPushButton:hover#pushButton_check_net{color: white;background-color: rgba(247, 36, 0, 250);}QPushButton:pressed#pushButton_check_net{color: white;background-color: rgba(180, 0, 0, 250);}')
             try:
-                self.t_net = threading.Thread(target=self._netResult)
+                self.t_net = threading.Thread(target=self.network_check)
                 self.t_net.start()  # 启动线程,即让线程开始执行
             except:
                 signal.show_traceback_log(traceback.format_exc())
