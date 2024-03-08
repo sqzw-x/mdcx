@@ -50,14 +50,15 @@ def get_detail_info(html, number, file_path):
     cover_url = cover_url[0] if cover_url else ''
     actor = get_extra_info(title, file_path, info_type="actor") if actor == '' else actor
     # 处理发行时间，年份
-    if u := html.xpath('//time[@datetime]/@datetime'):
-        try:
-            date_obj = datetime.strptime(u[0], '%Y-%m-%dT%H:%M:%S%z')
-            release = date_obj.strftime('%Y-%m-%d')
-            year = date_obj.year
-        except ValueError:
-            release = ''
-            year = ''
+    try:
+        date_list = html.xpath('//time[@datetime]/@datetime')
+        date_obj = datetime.strptime(date_list[0], '%Y-%m-%dT%H:%M:%S%z')
+        release = date_obj.strftime('%Y-%m-%d')
+        # 该字段应为字符串，nfo_title 替换该字段时 replace 函数第二个参数仅接受字符串参数
+        year = str(date_obj.year)
+    except:
+        release = ''
+        year = ''
     return number, title, actor, cover_url, studio, release, year
 
 
