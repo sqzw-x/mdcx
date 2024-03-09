@@ -137,7 +137,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     if not re.match(r'n\d{4}', number):
         number = number.upper()
     real_url = appoint_url
-    iqqtv_url = getattr(config, "iqqtv_website", "'https://iqq5.xyz'")
+    iqqtv_url = getattr(config, "iqqtv_website", "https://iqq5.xyz")
     cover_url = ''
     image_cut = 'right'
     image_download = False
