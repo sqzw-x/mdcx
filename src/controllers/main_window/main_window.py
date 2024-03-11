@@ -1531,13 +1531,15 @@ class MyMAinWindow(QMainWindow):
             signal.show_scrape_info('💡 请填写番号网址！')  # 主界面左下角显示信息
             return
 
-        if not self.Ui.comboBox_website.currentIndex():
-            signal.show_scrape_info('💡 请选择刮削网站！')  # 主界面左下角显示信息
-            return
-
         self.pushButton_show_log_clicked()  # 点击刮削按钮后跳转到日志页面
         Flags.appoint_url = self.Ui.lineEdit_appoint_url.text().strip()
-        Flags.website_name = self.Ui.comboBox_website.currentText()
+        # 单文件刮削从用户输入的网址中识别网址名，复用现成的逻辑=>主页面输入网址刮削
+        website, url = deal_url(Flags.appoint_url)
+        if website:
+            Flags.website_name = website
+        else:
+            signal.show_scrape_info('💡 不支持的网站！%s' % get_current_time())
+            return
         start_new_scrape(FileMode.Single)
 
     def pushButton_select_file_clear_info_clicked(self):  # 点清空信息
@@ -1545,7 +1547,6 @@ class MyMAinWindow(QMainWindow):
         self.Ui.lineEdit_appoint_url.setText('')
 
         # self.Ui.lineEdit_movie_number.setText('')
-        self.Ui.comboBox_website.setCurrentIndex(0)
 
     # 工具-裁剪封面图
     def pushButton_select_thumb_clicked(self):
