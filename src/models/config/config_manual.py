@@ -490,7 +490,7 @@ class ManualConfig:
         '1280×720',
         '960×720',
         '640×480',
-        '90fps'
+        '90fps',
         '60fps',
         '30fps',
         '.cht',
