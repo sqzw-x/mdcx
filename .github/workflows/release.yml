@@ -6,7 +6,8 @@ on:
   push:
     tags:
       - 120*
-      - pre-20*
+  schedule:
+    - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
       tag:
@@ -21,7 +22,15 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      count: ${{ steps.get-new-commits.outputs.count }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get new commits
+        id: get-new-commits
+        run: echo "count=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_OUTPUT
+
       # https://github.com/actions/runner/issues/1985#issuecomment-1573518052
       - name: Set matrix
         id: set-matrix
@@ -64,6 +73,7 @@ jobs:
   build-app:
     needs: init-matrix
     runs-on: ${{ matrix.os }}
+    if: ${{ needs.init-matrix.outputs.count > 0 }}
     strategy:
       fail-fast: false
       matrix:
@@ -89,7 +99,7 @@ jobs:
           cache: ${{ matrix.cache || 'pip' }}
 
       - name: Set up Python - no cache
-        if : ${{ matrix.cache == 'none' }}
+        if: ${{ matrix.cache == 'none' }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python || env.PYTHON_VERSION }}
@@ -146,7 +156,7 @@ jobs:
           file: dist/MDCx.dmg
           prerelease: ${{ !startsWith(github.ref, 'refs/tags/120') }}
           body: |
-            ${{ steps.get-changelog.outputs.CHANGELOG }}
+            ${{ !startsWith(github.ref, 'refs/tags/120') && steps.get-changelog.outputs.CHANGELOG }}
 
       - name: Create Release - Windows
         uses: svenstaro/upload-release-action@2.7.0
