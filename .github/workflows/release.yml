@@ -158,7 +158,7 @@ jobs:
           prerelease: ${{ env.IS_DAILY }}
           body: |
             ${{ !env.IS_DAILY && steps.get-changelog.outputs.CHANGELOG || github.event.repository.updated_at }}
-          tag: ${{ !env.IS_DAILY && github.ref || "Daily release" }}
+          tag: ${{ !env.IS_DAILY && github.ref || 'Daily release' }}
 
       - name: Create Release - Windows
         uses: svenstaro/upload-release-action@2.7.0
@@ -168,4 +168,4 @@ jobs:
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}.exe
           file: dist/MDCx.exe
           prerelease: ${{ env.IS_DAILY }}
-          tag: ${{ !env.IS_DAILY && github.ref || "Daily release" }}
+          tag: ${{ !env.IS_DAILY && github.ref || 'Daily release' }}
