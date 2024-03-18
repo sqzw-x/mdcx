@@ -2150,7 +2150,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <rect>
            <x>140</x>
            <y>110</y>
-           <width>341</width>
+           <width>351</width>
            <height>40</height>
           </rect>
          </property>
@@ -2338,7 +2338,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <rect>
            <x>140</x>
            <y>250</y>
-           <width>351</width>
+           <width>241</width>
            <height>40</height>
           </rect>
          </property>
@@ -2458,6 +2458,31 @@ li.checked::marker { content: &quot;\2612&quot;; }
            </widget>
           </item>
          </layout>
+        </widget>
+        <widget class="QCheckBox" name="checkBox_create_link">
+         <property name="geometry">
+          <rect>
+           <x>410</x>
+           <y>250</y>
+           <width>191</width>
+           <height>40</height>
+          </rect>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>刮削结束后自动创建软链接</string>
+         </property>
         </widget>
        </widget>
       </widget>
@@ -11221,7 +11246,7 @@ font-weight:bold
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>0</y>
+           <y>-1212</y>
            <width>760</width>
            <height>1870</height>
           </rect>
@@ -20450,7 +20475,7 @@ line-height:50px</string>
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>0</y>
+           <y>-892</y>
            <width>770</width>
            <height>1550</height>
           </rect>
@@ -21964,7 +21989,7 @@ Graphis.ne.jp 提供了演员不同时期的图片，默认请求早期的图片
             <x>30</x>
             <y>1290</y>
             <width>701</width>
-            <height>201</height>
+            <height>191</height>
            </rect>
           </property>
           <property name="minimumSize">
@@ -21987,7 +22012,7 @@ Graphis.ne.jp 提供了演员不同时期的图片，默认请求早期的图片
             <rect>
              <x>160</x>
              <y>130</y>
-             <width>261</width>
+             <width>161</width>
              <height>40</height>
             </rect>
            </property>
@@ -22107,14 +22132,39 @@ Graphis.ne.jp 提供了演员不同时期的图片，默认请求早期的图片
           <widget class="QPushButton" name="pushButton_del_actor_folder">
            <property name="geometry">
             <rect>
-             <x>440</x>
+             <x>490</x>
              <y>130</y>
-             <width>211</width>
+             <width>171</width>
              <height>40</height>
             </rect>
            </property>
            <property name="text">
             <string>清除所有 .actors 文件夹</string>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_actor_photo_kodi">
+           <property name="geometry">
+            <rect>
+             <x>340</x>
+             <y>130</y>
+             <width>141</width>
+             <height>40</height>
+            </rect>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>刮削结束后自动创建</string>
            </property>
           </widget>
          </widget>

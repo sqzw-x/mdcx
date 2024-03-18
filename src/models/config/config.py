@@ -102,6 +102,7 @@ extrafanart_folder = {self.extrafanart_folder}
 media_type = {self.media_type}
 sub_type = {self.sub_type}
 scrape_softlink_path = {self.scrape_softlink_path}
+auto_link = {self.auto_link}
 
 [escape]
 folders = {self.folders}
@@ -265,6 +266,7 @@ use_database = {self.use_database}
 info_database_path = {self.info_database_path}
 gfriends_github = {self.gfriends_github}
 actor_photo_folder = {self.actor_photo_folder}
+actor_photo_kodi_auto = {self.actor_photo_kodi_auto}
 
 [mark]
 poster_mark = {self.poster_mark}

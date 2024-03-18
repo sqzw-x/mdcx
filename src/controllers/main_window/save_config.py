@@ -717,6 +717,11 @@ def save_config(self):
         config.emby_on += 'actor_photo_auto,'
     if self.Ui.checkBox_actor_pic_replace.isChecked():
         config.emby_on += 'actor_replace,'
+
+    if self.Ui.checkBox_actor_photo_kodi.isChecked():
+        config.actor_photo_kodi_auto = 1
+    else:
+        config.actor_photo_kodi_auto = 0
     # endregion
 
     # region mark
@@ -897,6 +902,11 @@ def save_config(self):
     else:  # 显示窗口标题栏
         config.window_title = 'show'
     # endregion
+
+    if self.Ui.checkBox_create_link.isChecked():
+        config.auto_link = 1
+    else:
+        config.auto_link = 0
 
     config_folder = self.Ui.lineEdit_config_folder.text()  # 配置文件目录
     if not os.path.exists(config_folder):

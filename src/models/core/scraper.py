@@ -26,6 +26,7 @@ from models.core.web import extrafanart_download, fanart_download, poster_downlo
 from models.entity.enums import FileMode
 from models.signals import signal
 from models.tools.emby_actor_image import update_emby_actor_photo
+from models.tools.emby_actor_info import creat_kodi_actors
 
 
 def _scrape_one_file(file_path, file_info, file_mode):
@@ -561,12 +562,16 @@ def scrape(file_mode: FileMode, movie_list):
     signal.show_log_text(' 🍕 Per time'.ljust(15) + ': %sS' % average_time)
     signal.show_log_text("================================================================================")
     signal.show_scrape_info('🎉 刮削完成 %s/%s' % (count_all, count_all))
+
+    # auto run after scrape
     if 'actor_photo_auto' in config.emby_on:
-        signal.change_buttons_status.emit()
         update_emby_actor_photo()
-        signal.reset_buttons_status.emit()
-    else:
-        signal.reset_buttons_status.emit()
+    if config.actor_photo_kodi_auto:
+        creat_kodi_actors(True)
+    if config.auto_link:
+        newtdisk_creat_symlink('copy_netdisk_nfo' in config.switch_on)
+
+    signal.reset_buttons_status.emit()
     if len(Flags.again_dic):
         Flags.new_again_dic = Flags.again_dic.copy()
         new_movie_list = list(Flags.new_again_dic.keys())

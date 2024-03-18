@@ -897,6 +897,7 @@ def load_config(self):
         self.Ui.checkBox_actor_pic_replace.setChecked('actor_replace' in emby_on)
         # endregion
 
+        self.Ui.checkBox_actor_photo_kodi.setChecked(config.actor_photo_kodi_auto)
         self.Ui.lineEdit_net_actor_photo.setText(config.gfriends_github)  # 网络头像库 gfriends 项目地址
         self.Ui.lineEdit_actor_photo_folder.setText(convert_path(config.actor_photo_folder))  # 本地头像目录
         self.Ui.lineEdit_actor_db_path.setText(convert_path(config.info_database_path))  # 演员数据库路径
@@ -1169,6 +1170,8 @@ def load_config(self):
         self.Ui.checkBox_hide_window_title.setChecked(config.window_title == 'hide')  # 窗口标题栏
         # endregion
         # endregion
+
+        self.Ui.checkBox_create_link.setChecked(config.auto_link)
 
         # ======================================================================================END
         self.checkBox_i_agree_clean_clicked()  # 根据是否同意改变清理按钮状态

@@ -30,7 +30,7 @@ from models.tools.emby_actor_image import _generate_server_url, _get_emby_actor_
     update_emby_actor_photo
 
 
-def creat_kodi_actors(add):
+def creat_kodi_actors(add: bool):
     signal.change_buttons_status.emit()
     signal.show_log_text(f"📂 待刮削目录: {get_movie_path_setting()[0]}")
     if add:

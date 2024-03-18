@@ -30,7 +30,8 @@ class ManualConfig:
         'retry',
         'rest_count',
         'statement',
-
+        'actor_photo_kodi_auto',
+        'auto_link',
     ]
     FLOAT_KEY = [
         'file_size',

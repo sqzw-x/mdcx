@@ -10,7 +10,8 @@ failed_output_folder = failed
 extrafanart_folder = extrafanart_copy
 media_type = .mp4|.avi|.rmvb|.wmv|.mov|.mkv|.flv|.ts|.webm|.iso|.mpg
 sub_type = .smi|.srt|.idx|.sub|.sup|.psb|.ssa|.ass|.usf|.xss|.ssf|.rt|.lrc|.sbv|.vtt|.ttml
-scrape_softlink_path = 
+scrape_softlink_path =
+auto_link = 0
 
 [escape]
 folders = JAV_output,examples
@@ -171,7 +172,8 @@ emby_on = actor_info_zh_cn,actor_info_miss,actor_photo_net,actor_photo_miss,
 use_database = 0
 info_database_path = 
 gfriends_github = https://github.com/gfriends/gfriends
-actor_photo_folder = 
+actor_photo_folder =
+actor_photo_kodi_auto = 0
 
 [mark]
 poster_mark = 1
