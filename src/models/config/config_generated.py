@@ -10,8 +10,8 @@ class GeneratedConfig:
     Also used as default configuration
     """
     # modified_time
-    modified_time = r'2024-03-07 20:03:00'
-    version = 120240308
+    modified_time = r'2024-03-21 00:21:00'
+    version = 120240321
 
     # media
     media_path = r''
@@ -240,6 +240,7 @@ extrafanart_folder = {extrafanart_folder}
 media_type = {media_type}
 sub_type = {sub_type}
 scrape_softlink_path = {scrape_softlink_path}
+auto_link = {auto_link}
 
 [escape]
 folders = {folders}
@@ -402,6 +403,7 @@ use_database = {use_database}
 info_database_path = {info_database_path}
 gfriends_github = {gfriends_github}
 actor_photo_folder = {actor_photo_folder}
+actor_photo_kodi_auto = {actor_photo_kodi_auto}
 
 [mark]
 poster_mark = {poster_mark}

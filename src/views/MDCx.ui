@@ -39,7 +39,7 @@
      <string/>
     </property>
     <property name="currentIndex">
-     <number>4</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="page_main">
      <property name="contextMenuPolicy">
@@ -1585,7 +1585,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <property name="geometry">
           <rect>
            <x>510</x>
-           <y>40</y>
+           <y>30</y>
            <width>151</width>
            <height>40</height>
           </rect>
@@ -1594,221 +1594,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <string>选择文件</string>
          </property>
         </widget>
-        <widget class="QComboBox" name="comboBox_website">
-         <property name="geometry">
-          <rect>
-           <x>140</x>
-           <y>80</y>
-           <width>351</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="cursor">
-          <cursorShape>ArrowCursor</cursorShape>
-         </property>
-         <property name="focusPolicy">
-          <enum>Qt::NoFocus</enum>
-         </property>
-         <property name="maxVisibleItems">
-          <number>30</number>
-         </property>
-         <item>
-          <property name="text">
-           <string>请选择刮削网站</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>airav_cc</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>airav</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>avsex</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>iqqtv</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>freejavbt</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>javdb</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>javbus</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>jav321</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>javlibrary</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>dmm</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>mgstage</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>getchu_dmm</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>getchu</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>theporndb</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>kin8</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>avsox</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>xcity</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>7mmtv</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>mdtv</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>hscangku</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>cableav</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>madouqu</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>cnmdb</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>lulubar</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>love6</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>fc2</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>fc2club</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>fc2hub</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>mywife</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>giga</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>fantastica</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>faleno</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>dahlia</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>prestige</string>
-          </property>
-         </item>
-        </widget>
-        <widget class="QLabel" name="label_2">
-         <property name="geometry">
-          <rect>
-           <x>60</x>
-           <y>80</y>
-           <width>80</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>*刮削网站：</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-         </property>
-        </widget>
         <widget class="QLineEdit" name="lineEdit_appoint_url">
          <property name="geometry">
           <rect>
            <x>140</x>
-           <y>120</y>
+           <y>100</y>
            <width>351</width>
            <height>30</height>
           </rect>
@@ -1823,7 +1613,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <property name="geometry">
           <rect>
            <x>60</x>
-           <y>120</y>
+           <y>100</y>
            <width>80</width>
            <height>30</height>
           </rect>
@@ -1902,7 +1692,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <property name="geometry">
           <rect>
            <x>510</x>
-           <y>110</y>
+           <y>100</y>
            <width>151</width>
            <height>40</height>
           </rect>
@@ -11246,7 +11036,7 @@ font-weight:bold
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-1212</y>
+           <y>0</y>
            <width>760</width>
            <height>1870</height>
           </rect>
@@ -20475,7 +20265,7 @@ line-height:50px</string>
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-892</y>
+           <y>0</y>
            <width>770</width>
            <height>1550</height>
           </rect>

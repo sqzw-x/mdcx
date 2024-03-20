@@ -11,8 +11,13 @@ body:
         required: true
       - label: 我在提问题之前至少花费了 5 分钟来思考和准备
         required: true
-      - label: 我正在使用最新版本
-        required: false
+  - type: textarea
+    id: version
+    attributes:
+      label: 你使用版本的 commit hash
+      description: 可在 mdcx 文件名最后部分获取, 若没有则可能使用的不是最新版
+    validations:
+      required: true
   - type: textarea
     id: describe
     attributes:
