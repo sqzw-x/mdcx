@@ -97,14 +97,14 @@ jobs:
 
       - name: Set up Python - cache pip
         if: ${{ matrix.cache != 'none' }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python || env.PYTHON_VERSION }}
           cache: ${{ matrix.cache || 'pip' }}
 
       - name: Set up Python - no cache
         if: ${{ matrix.cache == 'none' }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python || env.PYTHON_VERSION }}
 
@@ -152,7 +152,7 @@ jobs:
           echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Create Release - macOS
-        uses: svenstaro/upload-release-action@2.7.0
+        uses: svenstaro/upload-release-action@2.9.0
         if: ${{ matrix.build == 'macos' }}
         with:
           overwrite: true
@@ -164,7 +164,7 @@ jobs:
           tag: ${{ env.IS_DAILY=='true' && 'daily_release' || github.ref }}
 
       - name: Create Release - Windows
-        uses: svenstaro/upload-release-action@2.7.0
+        uses: svenstaro/upload-release-action@2.9.0
         if: ${{ matrix.build == 'windows' }}
         with:
           overwrite: true
