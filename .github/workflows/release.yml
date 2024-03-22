@@ -37,7 +37,7 @@ jobs:
 
       - name: Delete old release
         uses: dev-drprasad/delete-tag-and-release@v1.1
-        if: ${{ env.IS_DAILY=='true' && steps.get-new-commits.outputs.count>0  }}
+        if: ${{ env.IS_DAILY == 'true' && steps.get-new-commits.outputs.count > 0  }}
         with:
           tag_name: daily_release
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -48,15 +48,12 @@ jobs:
         run: |
           items=()
 
-          items+=('{"build": "macos", "os": "macos-latest", "arch": "x86_64"}')
-          items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
+          # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners
 
-          # https://docs.github.com/zh/actions/hosting-your-own-runners/managing-self-hosted-runners/adding-self-hosted-runners
-          # self-hosted runner
-          if [[ -n "${{ vars.SELF_HOSTED_MACOS_ARM64_RUNNER }}" ]]; then
-            # setup-python没有aarch64的python3.9，这里指定python3.10
-            items+=('{"build":"macos", "os": ["self-hosted", "macOS", "ARM64"], "arch": "aarch64", "python": "3.10", "cache": "none"}')
-          fi
+          items+=('{"build": "macos", "os": "macos-latest", "arch": "aarch64"}')
+          items+=('{"build": "macos", "os": "macos-13", "arch": "x86_64"}')
+
+          items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
 
           # macOS 10.15.7, x86_64, 指定opencv版本
           if [[ -n "${{ vars.BUILD_FOR_MACOS_LEGACY }}" && -n "${{ vars.MACOS_LEGACY_CV_VERSION }}" ]]; then
@@ -84,7 +81,8 @@ jobs:
   build-app:
     needs: init-matrix
     runs-on: ${{ matrix.os }}
-    if: ${{ needs.init-matrix.outputs.count > 0 }}
+    # 如果commit数量大于0，或者手动触发，则执行
+    if: ${{ needs.init-matrix.outputs.count > 0 || github.event_name == 'workflow_dispatch' }}
     strategy:
       fail-fast: false
       matrix:
