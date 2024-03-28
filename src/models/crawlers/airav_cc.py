@@ -3,6 +3,7 @@
 import json
 import re
 import time
+import urllib.parse
 
 import urllib3
 from lxml import etree
@@ -166,8 +167,12 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
             debug_info = '番号地址: %s ' % real_url
             log_info += web_info + debug_info
             for i in range(3):
-                html_info, title, outline, actor, cover_url, tag, studio, log_info = retry_request(real_url, log_info,
-                                                                                                   web_info)
+                html_info, title, outline, actor, cover_url, tag, studio, log_info = (
+                    retry_request(real_url, log_info, web_info))
+
+                if cover_url.startswith("/"):  # coverurl 可能是相对路径
+                    cover_url = urllib.parse.urljoin(airav_url, cover_url)
+
                 temp_str = title + outline + actor + tag + studio
                 if '�' not in temp_str:
                     break
