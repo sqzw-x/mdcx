@@ -29,6 +29,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Delete old release
+        uses: dev-drprasad/delete-tag-and-release@v1.1
+        if: ${{ env.IS_DAILY=='true' }}
+        with:
+          tag_name: daily_release
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Get new commits
         id: get-new-commits
         run: |
