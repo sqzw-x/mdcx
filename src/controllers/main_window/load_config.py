@@ -814,6 +814,9 @@ def load_config(self):
         self.Ui.checkBox_cd_part_c.setChecked('endc' in cd_char)
         self.Ui.checkBox_cd_part_01.setChecked('digital' in cd_char)  # 允许分集识别数字
         self.Ui.checkBox_cd_part_1_xxx.setChecked('middle_number' in cd_char)
+        self.Ui.checkBox_cd_part_underline.setChecked('underline' in cd_char)  # 下划线分隔符
+        self.Ui.checkBox_cd_part_space.setChecked('space' in cd_char)
+        self.Ui.checkBox_cd_part_point.setChecked('point' in cd_char)
         # endregion
 
         pic_name = int(config.pic_name)  # 图片命名规则
