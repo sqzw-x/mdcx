@@ -158,7 +158,7 @@ def show_data_result(json_data, start_time):
 def deal_url(url):
     if '://' not in url:
         url = 'https://' + url
-    url = url.strip('/ ')
+    url = url.strip()
     for key, vlaue in config.web_dic.items():
         if key.lower() in url.lower():
             return vlaue, url
