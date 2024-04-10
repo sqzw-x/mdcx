@@ -29,18 +29,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Delete old release
-        uses: dev-drprasad/delete-tag-and-release@v1.1
-        if: ${{ env.IS_DAILY=='true' }}
-        with:
-          tag_name: daily_release
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Get new commits
         id: get-new-commits
         run: |
           echo "count=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_OUTPUT
           echo "short_sha=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_OUTPUT
+
+      - name: Delete old release
+        uses: dev-drprasad/delete-tag-and-release@v1.1
+        if: ${{ env.IS_DAILY=='true' && steps.get-new-commits.outputs.count>0  }}
+        with:
+          tag_name: daily_release
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       # https://github.com/actions/runner/issues/1985#issuecomment-1573518052
       - name: Set matrix
