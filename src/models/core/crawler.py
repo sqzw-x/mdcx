@@ -11,7 +11,7 @@ from models.config.config import config
 from models.core.flags import Flags
 from models.crawlers import airav, airav_cc, avsex, avsox, cableav, cnmdb, dahlia, dmm, faleno, fantastica, fc2, \
     fc2club, fc2hub, freejavbt, getchu, getchu_dmm, giga, hdouban, hscangku, iqqtv_new, jav321, javbus, javdb, \
-    javlibrary_new, kin8, love6, lulubar, madouqu, mdtv, mgstage, mmtv, mywife, official, prestige, theporndb, xcity
+    javlibrary_new, kin8, love6, lulubar, madouqu, mdtv, mgstage, mmtv, mywife, official, prestige, theporndb, xcity , javday
 from models.entity.enums import FileMode
 
 
@@ -173,6 +173,8 @@ def _call_crawler(json_data, website, language, file_number, short_number, mosai
         json_data = json.loads(prestige.main(file_number, appoint_url, log_info, req_web, language))
     elif website == 'kin8':
         json_data = json.loads(kin8.main(file_number, appoint_url, log_info, req_web, language))
+    elif website == 'javday':
+        json_data = json.loads(javday.main(file_number, appoint_url, log_info, req_web, language))
     else:
         json_data = json.loads(javdb.main(file_number, appoint_url, log_info, req_web, language))
 

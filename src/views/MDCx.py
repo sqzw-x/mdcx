@@ -11193,6 +11193,7 @@ class Ui_MDCx(object):
         self.comboBox_website_all.setItemText(31, _translate("MDCx", "faleno"))
         self.comboBox_website_all.setItemText(32, _translate("MDCx", "dahlia"))
         self.comboBox_website_all.setItemText(33, _translate("MDCx", "prestige"))
+        self.comboBox_website_all.setItemText(33, _translate("MDCx", "javday"))
         self.label_315.setText(_translate("MDCx", "⚠️ 下载剧照、预告片，请选择「字段优先」或「指定网站」！「速度优先」信息不全！"))
         self.pushButton_scrape_note.setText(_translate("MDCx", "刮削不到？看这里！"))
         self.groupBox_54.setTitle(_translate("MDCx", "封面图"))
