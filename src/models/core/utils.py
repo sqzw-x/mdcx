@@ -60,7 +60,7 @@ def show_movie_info(json_data):
 
 
 def get_video_size(json_data, file_path):
-    # 获取本地分辨率
+    # 获取本地分辨率 同时获取视频编码格式
     definition = ''
     height = 0
     hd_get = config.hd_get
@@ -73,6 +73,10 @@ def get_video_size(json_data, file_path):
         try:
             cap = cv2.VideoCapture(file_path)
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            ##使用opencv获取编码器格式
+            codec = int(cap.get(cv2.CAP_PROP_FOURCC))
+            codec_fourcc = chr(codec & 0xFF) + chr((codec >> 8) & 0xFF) + chr((codec >> 16) & 0xFF) + chr((codec >> 24) & 0xFF)
+
         except Exception as e:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_traceback_log(str(e))
@@ -131,6 +135,7 @@ def get_video_size(json_data, file_path):
     [new_tag_list.append(i) for i in tag_list if i]
     if definition and 'definition' in config.tag_include:
         new_tag_list.insert(0, definition)
+        new_tag_list.insert(0, codec_fourcc.upper()) # 插入编码格式
     json_data['tag'] = '，'.join(new_tag_list)
     return json_data
 
