@@ -297,7 +297,16 @@ def translate_actor(json_data):
                 number.startswith('FC2') or number.startswith('SIRO') or re.search(r'\d{3,}[A-Z]{3,}-', number)):
             result, temp_actor = get_actorname(json_data['number'])
             if result:
+                actor:str = json_data['actor']
+                all_actor:str = json_data['all_actor']
+                actor_list:list = all_actor.split(',')
                 json_data['actor'] = temp_actor
+                # 从actor_list中循环查找元素是否包含字符串temp_actor，有则替换
+                for item in actor_list:
+                    if item.find(actor) != -1:
+                        actor_list[actor_list.index(item)] = temp_actor
+                json_data['all_actor'] = ','.join(actor_list)
+
                 json_data[
                     'logs'] += f"\n 👩🏻 Av-wiki done! Actor's real Japanese name is '{temp_actor}' ({get_used_time(start_time)}s)"
             else:
