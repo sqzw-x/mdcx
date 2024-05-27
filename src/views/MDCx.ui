@@ -9055,6 +9055,11 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
                 <string>prestige</string>
                </property>
               </item>
+              <item>
+                <property name="text">
+                 <string>javday</string>
+                </property>
+              </item>
              </widget>
             </item>
             <item row="2" column="1">
