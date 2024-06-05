@@ -404,7 +404,7 @@
                     <number>1</number>
                 </property>
                 <property name="value">
-                    <number>5000</number>
+                    <number>10000</number>
                 </property>
                 <property name="orientation">
                     <enum>Qt::Horizontal</enum>
@@ -420,7 +420,7 @@
                     </rect>
                 </property>
                 <property name="text">
-                    <string>裁剪框左/上位置</string>
+                    <string>裁剪框高度</string>
                 </property>
             </widget>
             <widget class="QLabel" name="label_6">
@@ -433,7 +433,7 @@
                     </rect>
                 </property>
                 <property name="text">
-                    <string>裁剪框右/下位置</string>
+                    <string>裁剪框宽度</string>
                 </property>
             </widget>
             <zorder>pushButton_to_cut_2</zorder>
