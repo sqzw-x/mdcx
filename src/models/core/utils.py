@@ -135,7 +135,8 @@ def get_video_size(json_data, file_path):
     [new_tag_list.append(i) for i in tag_list if i]
     if definition and 'definition' in config.tag_include:
         new_tag_list.insert(0, definition)
-        new_tag_list.insert(0, codec_fourcc.upper()) # 插入编码格式
+        if hd_get == 'video':
+            new_tag_list.insert(0, codec_fourcc.upper()) # 插入编码格式
     json_data['tag'] = '，'.join(new_tag_list)
     return json_data
 
