@@ -397,7 +397,7 @@ statement = {self.statement}
         self.official_websites = official_websites_dic
 
         # 字段命名规则-后缀字段顺序
-        all_str_list = ['mosaic', 'cnword']
+        all_str_list = ['mosaic', 'cnword', 'definition']
         read_str_list = re.split(r'[,，]', self.suffix_sort)
         new_str_list1 = [i1 for i1 in read_str_list if i1 in all_str_list]  # 去除不在list中的字符
         new_str_list = []
