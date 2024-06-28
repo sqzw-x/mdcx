@@ -575,16 +575,16 @@ def _get_folder_path(file_path, success_folder, json_data):
         m_word = ''
 
     # 判断后缀字段顺序
-    file_show_name = number + temp_4k
     suffix_sort_list = config.suffix_sort.split(',')
     for each in suffix_sort_list:
         if each == 'mosaic':
-            file_show_name += m_word
+            number += m_word
         elif each == 'cnword':
-            file_show_name += c_word
+            number += c_word
+        elif each == "definition":
+            number += temp_4k
 
     # 生成number
-    number = file_show_name
     first_letter = get_number_first_letter(number)
 
     # 特殊情况处理
@@ -672,7 +672,7 @@ def _get_folder_path(file_path, success_folder, json_data):
     return folder_new_path.strip().replace(' /', '/')
 
 
-def _get_naming_rule(file_path, json_data):
+def _generate_file_name(file_path, json_data):
     file_full_name = split_path(file_path)[1]
     file_name, file_ex = os.path.splitext(file_full_name)
     filename = file_name
@@ -719,16 +719,16 @@ def _get_naming_rule(file_path, json_data):
         m_word = ''
 
     # 判断后缀字段顺序
-    file_show_name = number + temp_4k
     suffix_sort_list = config.suffix_sort.split(',')
     for each in suffix_sort_list:
         if each == 'mosaic':
-            file_show_name += m_word
+            number += m_word
         elif each == 'cnword':
-            file_show_name += c_word
+            number += c_word
+        elif each == "definition":
+            number += temp_4k
 
     # 生成number
-    number = file_show_name
     first_letter = get_number_first_letter(number)
 
     # 处理异常情况
@@ -826,7 +826,7 @@ def get_output_name(json_data, file_path, success_folder, file_ex):
     folder_new_path = _get_folder_path(file_path, success_folder, json_data)
     folder_new_path = _deal_path_name(folder_new_path)
     # =====================================================================================更新实体文件命名规则
-    naming_rule = _get_naming_rule(file_path, json_data)
+    naming_rule = _generate_file_name(file_path, json_data)
     naming_rule = _deal_path_name(naming_rule)
     # =====================================================================================生成文件和nfo新路径
     file_new_name = naming_rule + file_ex.lower()

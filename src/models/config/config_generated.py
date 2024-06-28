@@ -71,7 +71,7 @@ class GeneratedConfig:
     website_suren = r'mgstage,avsex,jav321,freejavbt,7mmtv,javbus,javdb'
     website_fc2 = r'fc2,fc2club,fc2hub,freejavbt,7mmtv,hdouban,javdb,avsox,airav'
     website_oumei = r'theporndb,javdb,javbus,hdouban'
-    website_guochan = r'madouqu,mdtv,hdouban,cnmdb'
+    website_guochan = r'madouqu,mdtv,hdouban,cnmdb,javday'
     whole_fields = r'outline,actor,thumb,release,tag,'
     none_fields = r'wanted,'
     website_set = r'official,'
@@ -144,7 +144,7 @@ class GeneratedConfig:
     naming_media = r'number title'
     prevent_char = r''
     fields_rule = r'del_actor,del_char,'
-    suffix_sort = r'mosaic,cnword'
+    suffix_sort = r'mosaic,cnword,definition'
     actor_no_name = r'未知演员'
     release_rule = r'YYYY-MM-DD'
     folder_name_max = 60

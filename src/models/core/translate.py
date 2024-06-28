@@ -20,6 +20,7 @@ from models.core.web import get_actorname, get_yesjav_title, google_translate
 from models.signals import signal
 
 deepl_result = {}
+REGEX_KANA = re.compile(r"[\u3040-\u30ff]")  # 平假名/片假名
 
 
 def youdao_translate(title, outline):
@@ -337,10 +338,11 @@ def translate_actor(json_data):
         if each_actor:
             actor_data = resources.get_actor_data(each_actor)
             new_actor = actor_data.get(actor_language)
-            if actor_language == 'zh_cn':
-                new_actor = zhconv.convert(new_actor, 'zh-cn')
-            elif actor_language == 'zh_tw':
-                new_actor = zhconv.convert(new_actor, 'zh-hant')
+            if not REGEX_KANA.search(new_actor):
+                if actor_language == 'zh_cn':
+                    new_actor = zhconv.convert(new_actor, 'zh-cn')
+                elif actor_language == 'zh_tw':
+                    new_actor = zhconv.convert(new_actor, 'zh-hant')
             if new_actor not in actor_new_list:
                 actor_new_list.append(new_actor)
                 if actor_data.get('href'):
