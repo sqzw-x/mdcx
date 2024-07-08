@@ -14,29 +14,32 @@ from models.signals import signal
 
 urllib3.disable_warnings()  # yapf: disable
 
-
+#2024年7月7日16:43:00，页面改版后xpath重新定位
 # import traceback
 
 
 def get_web_number(html):
-    result = html.xpath('//p/span[contains(text(), "番號") or contains(text(), "番号")]/following-sibling::span/text()')
+    # result = html.xpath('//p/span[contains(text(), "番號") or contains(text(), "番号")]/following-sibling::span/text()')
+    result = html.xpath('//li[contains(text(), "番號") or contains(text(), "番号")]/span/text()')#更新
     return result[0].strip() if result else ''
 
 
 def get_number(html, number):
-    result = html.xpath('//p/span[contains(text(), "番號") or contains(text(), "番号")]/following-sibling::span/text()')
+    # result = html.xpath('//p/span[contains(text(), "番號") or contains(text(), "番号")]/following-sibling::span/text()')
+    result = html.xpath('//li[contains(text(), "番號") or contains(text(), "番号")]/span/text()')#更新
     num = result[0].strip() if result else ''
     return number if number else num
 
 
 def get_title(html):
-    result = html.xpath('//li[@class="vediotitle"]/h1/span/text()')
+    # result = html.xpath('//li[@class="vediotitle"]/h1/span/text()')
+    result = html.xpath('//div[@class="video-title my-3"]/h1/text()')#更新
     return result[0].strip() if result else ''
-
 
 def get_actor(html):
     try:
-        actor_list = html.xpath('//li[@class="allavgirls"]//a/text()')
+        # actor_list = html.xpath('//li[@class="allavgirls"]//a/text()')
+        actor_list = html.xpath('//li[contains(text(), "女優") or contains(text(), "女优")]/a/text()')#更新
         result = ','.join(actor_list)
     except:
         result = ''
@@ -53,16 +56,23 @@ def get_actor_photo(actor):
 
 
 def get_studio(html):
-    result = html.xpath('//li[@class="series"]//a/text()')
+    # result = html.xpath('//li[@class="series"]//a/text()')
+    result = html.xpath('//li[contains(text(), "厂商") or contains(text(), "廠商")]/a/text()')#更新
     return result[0] if result else ''
 
+def get_series(html):#获取系列，更新
+    result = html.xpath('//li[contains(text(), "系列")]/a/text()')#更新
+    print('获取到的系列为：\n',result)
+    return result[0] if result else ''#更新
 
 def get_release(html):
-    result = html.xpath('//span[@itemprop="datePublished"]/text()')
-    if result:
-        s = re.search(r'\d{4}-\d{2}-\d{2}', result[0]).group()
-        return s if s else ''
-    return ''
+    # result = html.xpath('//span[@itemprop="datePublished"]/text()')
+    result = html.xpath('//div[@class="video-item"]/div[1]/text()')#更新发行日期
+    # if result:
+    #     s = re.search(r'\d{4}-\d{2}-\d{2}', result[0]).group()
+    #     return s if s else ''
+    # return ''
+    return result[0].split(" ",1)[0].strip() if result else ''#更新
 
 
 def get_year(release):
@@ -74,17 +84,22 @@ def get_year(release):
 
 
 def get_tag(html):
-    result = html.xpath('//li[@class="keyword"]//a/text()')
+    # result = html.xpath('//li[@class="keyword"]//a/text()')
+    result = html.xpath('//li[contains(text(), "標籤") or contains(text(), "标籤")]/a/text()')#更新
     return ','.join(result) if result else ''
 
 
 def get_cover(html):
-    result = html.xpath('//div[@class="front-video-cover-img"]//img/@src')
-    return result[0] if result else ''
+    # result = html.xpath('//div[@class="front-video-cover-img"]//img/@src')
+    result = html.xpath('(//link[@rel="alternate"])[1]/@href')#更新
+    # return result[0] if result else ''
+    return '/storage/cover/big/'+result[0].split("=",1)[1]+'.jpg' if result else ''#更新
+
 
 
 def get_outline(html):
-    result = html.xpath('//span[@itemprop="description"]/text()')
+    # result = html.xpath('//span[@itemprop="description"]/text()')
+    result = html.xpath('//div[@class="video-info"]/p/text()')#更新
     return result[0] if result else ''
 
 
@@ -108,7 +123,10 @@ def retry_request(real_url, log_info, web_info):
     cover_url = get_cover(html_info)  # 获取cover
     tag = get_tag(html_info)
     studio = get_studio(html_info)
-    return html_info, title, outline, actor, cover_url, tag, studio, log_info
+    series = get_series(html_info)#获取系列，更新
+    
+    # return html_info, title, outline, actor, cover_url, tag, studio, log_info
+    return html_info, title, outline, actor, cover_url, tag, studio, series,log_info#更新
 
 
 def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
@@ -134,10 +152,11 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     # real_url = 'https://airav5.fun/jp/playon.aspx?hid=44733'
 
     try:  # 捕获主动抛出的异常
-        if not real_url:
+        if not real_url:#未指定url
 
             # 通过搜索获取real_url https://airav5.fun/cn/searchresults.aspx?Search=ssis-200&Type=0
-            url_search = airav_url + f'/searchresults.aspx?Search={number}&Type=0'
+            # url_search = airav_url + f'/searchresults.aspx?Search={number}&Type=0'
+            url_search = airav_url + f'/search_result?kw=+{number}'#更新
             debug_info = '搜索地址: %s ' % url_search
             log_info += web_info + debug_info
 
@@ -148,10 +167,21 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
-            number2 = ' ' + number.upper()
-            real_url = html.xpath(
-                "//h3[@class='one_name ga_name' and contains(text(), $number1) and not(contains(text(), '克破'))]/../@href",
-                number1=number2)
+            # number2 = ' ' + number.upper()
+            number2 =  number.upper()#更新
+            # real_url = html.xpath(
+            #     "//h3[@class='one_name ga_name' and contains(text(), $number1) and not(contains(text(), '克破'))]/../@href",
+            #     number1=number2)
+            h5_elements = html.xpath("//h5[contains(text(), {})]".format(repr(number2.strip())))
+            filtered_h5_elements = [h5 for h5 in h5_elements if '克破' not in h5.text]
+            hrefs = []  
+            for h5 in filtered_h5_elements:
+                preceding_divs = h5.xpath("../preceding-sibling::div[1]") 
+                if preceding_divs:   
+                    a_href = preceding_divs[0].xpath("a/@href")  
+                    if a_href:  
+                        hrefs.append(a_href[0]) 
+            real_url = hrefs
 
             # if real_url:
             #     real_url = airav_url + '/' + real_url[0]
@@ -163,17 +193,20 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
 
         if real_url:
             if isinstance(real_url, list) and real_url:
-                real_url = real_url[0]
+                # real_url = real_url[0]
+                real_url = 'https://airav.io' + real_url[-1]#更新
             debug_info = '番号地址: %s ' % real_url
             log_info += web_info + debug_info
             for i in range(3):
-                html_info, title, outline, actor, cover_url, tag, studio, log_info = (
+                # html_info, title, outline, actor, cover_url, tag, studio, log_info = (
+                html_info, title, outline, actor, cover_url, tag, studio, series,log_info = (#更新
                     retry_request(real_url, log_info, web_info))
 
                 if cover_url.startswith("/"):  # coverurl 可能是相对路径
                     cover_url = urllib.parse.urljoin(airav_url, cover_url)
 
-                temp_str = title + outline + actor + tag + studio
+                # temp_str = title + outline + actor + tag + studio
+                temp_str = title + outline + actor + tag + studio +series#更新
                 if '�' not in temp_str:
                     break
                 else:
@@ -191,7 +224,8 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
             year = get_year(release)
             runtime = ''
             score = ''
-            series = ''
+            # series = ''
+            series = get_series(html_info)#更新
             director = ''
             publisher = ''
             extrafanart = ''
@@ -220,7 +254,8 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
                     'source': 'airav_cc',
                     'actor_photo': actor_photo,
                     'cover': cover_url,
-                    'poster': cover_url.replace('big_pic', 'small_pic'),
+                    # 'poster': cover_url.replace('big_pic', 'small_pic'),
+                    'poster': cover_url.replace('big', 'small'),#更新
                     'extrafanart': extrafanart,
                     'trailer': '',
                     'image_download': image_download,
@@ -267,8 +302,8 @@ if __name__ == '__main__':
     # print(main('PRED-300'))    # 马赛克破坏版
     # print(main('snis-036', language='jp'))
     # print(main('snis-036'))
+    # print(main('IESP-611'))
     # print(main('MIAE-346'))
-    # print(main('STARS-1919'))    # poster图片
     # print(main('abw-157'))
     # print(main('abs-141'))
     # print(main('HYSD-00083'))
@@ -282,9 +317,6 @@ if __name__ == '__main__':
     # print(main('LUXU-1217'))
     # print(main('1101132', ''))
     # print(main('OFJE-318'))
-    # print(main('110119-001'))
-    # print(main('abs-001'))
-    # print(main('SSIS-090', ''))
     # print(main('SSIS-090', ''))
     # print(main('SNIS-016', ''))
     # print(main('HYSD-00083', ''))
