@@ -14,7 +14,8 @@ urllib3.disable_warnings()  # yapf: disable
 
 
 def get_title(html):
-    result = html.xpath('//p[@class="movie_txt_nsme"]/text()')
+    # result = html.xpath('//p[@class="movie_txt_nsme"]/text()')
+    result = html.xpath('//div[@class="d-flex px-3 py-2 name col bg-w"]//text()')#更新
     if result:
         result = result[0].strip()
     else:
@@ -42,7 +43,8 @@ def getWebNumber(title, number):
 
 def getActor(html):
     try:
-        result = str(html.xpath('//p[@class="movie_txt_av"]/a/span/text()')).strip("['']").replace("'", '')
+        # result = str(html.xpath('//p[@class="movie_txt_av"]/a/span/text()')).strip("['']").replace("'", '')
+        result = str(html.xpath('//a[@class="btn btn-ripple border-pill px-3 mr-2 my-1 bg-primary"]/span/text()')).strip("['']").replace("'", '')#更新
     except:
         result = ''
     return result
@@ -67,16 +69,23 @@ def getCover(html):
 
 
 def getOutline(html):
-    result = html.xpath('//p[@itemprop="description"]/span/text()')
+    # result = html.xpath('//p[@itemprop="description"]/span/text()')
+    result = html.xpath('//div[@class="intro  bd-light w-100 mt-1"]/p/text()')#更新
     if result:
-        result = result[0].strip()
+        # result = result[0].strip()
+        result = result[0].strip('简介：\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t')#更新
+        index = result.find('*根')#更新,去掉简介中“*根据分发方式XXX”后面的内容
+        if index !=-1:#更新
+            return result[:index].strip()#更新
+        else:#更新
+            return result.strip()#更新
     else:
-        result = ''
-    return result
+        return ''#更新
 
 
 def getRelease(html):
-    result = html.xpath('//p[@itemprop="datePublished"]/text()')
+    # result = html.xpath('//p[@itemprop="datePublished"]/text()')
+    result = html.xpath('//div[@class="date"]/text()')#更新
     if result:
         result = result[0].replace('/', '-').strip()
     else:
@@ -93,7 +102,8 @@ def getYear(release):
 
 
 def getTag(html):
-    result = html.xpath('//p[@class="movie_txt_tag"]/a/text()')
+    # result = html.xpath('//p[@class="movie_txt_tag"]/a/text()')
+    result = html.xpath('//div[@class="d-flex col px-0 tag-info flex-wrap mt-2 pt-2 bd-top bd-primary"]/a/text()')#更新
     if result:
         result = str(result).strip(" ['']").replace("'", "").replace(', ', ',')
     else:
@@ -110,7 +120,8 @@ def getMosaic(tag):
 
 
 def getStudio(html):
-    result = html.xpath('//p[@class="movie_txt_fac"]/a/span/text()')
+    # result = html.xpath('//p[@class="movie_txt_fac"]/a/span/text()')
+    result = html.xpath('//div[@class="company border-rounded btn-dark btn btn-ripple px-2 py-1 mr-2"]/text()')#更新
     if result:
         result = result[0].strip()
     else:
@@ -137,7 +148,8 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     if not re.match(r'n\d{4}', number):
         number = number.upper()
     real_url = appoint_url
-    iqqtv_url = getattr(config, "iqqtv_website", "https://iqq5.xyz")
+    # iqqtv_url = getattr(config, "iqqtv_website", "https://iqq5.xyz")
+    iqqtv_url = getattr(config, "iqqtv_website", "https://vipiqq5.cc")#更新
     cover_url = ''
     image_cut = 'right'
     image_download = False
@@ -172,10 +184,18 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
             number1 = number.replace('FC2', '').replace('-PPV', '')
             if not re.search(r'\d+[-_]\d+', number):
                 number1 = ' ' + number.replace('FC2', '').replace('-PPV', '')
-            real_url = html.xpath(
-                "//h3[@class='one_name ga_name' and (contains(text(), $number)) and not (contains(text(), '克破')) and not (contains(text(), '无码流出')) and not (contains(text(), '無碼流出')) and not (contains(text(), '無修正'))]/../@href",
-                number=number1)
-
+            # real_url = html.xpath(
+            #     # "//h3[@class='one_name ga_name' and (contains(text(), $number)) and not (contains(text(), '克破')) and not (contains(text(), '无码流出')) and not (contains(text(), '無碼流出')) and not (contains(text(), '無修正'))]/../@href",
+            #     # number=number1)
+            h5_elements = html.xpath("//a[@class='ga_name' and (contains(text(),{}))]".format(repr(number1.strip())))
+            exclude_words = ['克破', '无码流出', '無碼流出','無修正']  
+            filtered_h5_elements = [h5 for h5 in h5_elements if not any(word in h5.text for word in exclude_words)]
+            hrefs = []  
+            for h5 in filtered_h5_elements:
+                a_href = h5.xpath("@href")
+                if a_href:  
+                    hrefs.append(a_href[0]) 
+            real_url = hrefs
             if real_url:
                 real_url = iqqtv_url + real_url[0].replace('/cn/', '').replace('/jp/', '').replace('&cat=19', '')
             else:
@@ -282,12 +302,14 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
 
 if __name__ == '__main__':
     # yapf: disable
+    # print(main('PRED-300'))    # 马赛克破坏版
+    # print(main('ABP-942'))    # 无码流出版
     # print(main('mimk-095'))
     # print(main('abp-554'))
     # print(main('gs-067'))
     # print(main('110912-179'))
     # print(main('abs-141'))
-    print(main('FC2-906625'))
+    # print(main('FC2-906625'))
     # print(main('HYSD-00083'))
     # print(main('IESP-660'))
     # print(main('n1403'))
@@ -305,7 +327,7 @@ if __name__ == '__main__':
     # print(main('SSIS-090', ''))
     # print(main('SNIS-016', ''))
     # print(main('HYSD-00083', ''))
-    # print(main('IESP-660', ''))
+    print(main('IESP-660', ''))
     # print(main('n1403', ''))
     # print(main('GANA-1910', ''))
     # print(main('heyzo-1031', ''))
