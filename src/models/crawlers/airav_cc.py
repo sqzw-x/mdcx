@@ -100,6 +100,14 @@ def get_cover(html):
 def get_outline(html):
     # result = html.xpath('//span[@itemprop="description"]/text()')
     result = html.xpath('//div[@class="video-info"]/p/text()')#更新
+    if result:#更新
+        index = result[0].find('*根')#更新,去掉简介中“*根据分发方式XXX”后面的内容
+        if index !=-1:#更新
+            return result[0][:index].strip()#更新
+        else:#更新
+            return result[0].strip()#更新
+    else:#更新
+        return ''#更新
     return result[0] if result else ''
 
 
