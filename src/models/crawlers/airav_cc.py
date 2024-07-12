@@ -31,11 +31,11 @@ def get_number(html, number):
 
 def get_title(html):
     result = html.xpath('//div[@class="video-title my-3"]/h1/text()')
-    # 去除假的，无意义的标题(马赛克破坏版)，'克破'两字简繁同形
-    if result and '克破' not in str(result[0]):
-        return str(result[0]).strip()
-    else:
+    result = str(result[0]).strip() if result else ''
+    # 去掉无意义的简介(马赛克破坏版)，'克破'两字简繁同形
+    if not result or '克破' in result:
         return ''
+    return result
 
 
 def get_actor(html):
@@ -92,10 +92,13 @@ def get_cover(html):
 
 def get_outline(html):
     result = html.xpath('//div[@class="video-info"]/p/text()')
-    result = result[0] if result else ''
-    # 去除假的，无意义的简介(马赛克破坏版)，'克破'两字简繁同形
-    if '克破' in str(result):
-        result = ''
+    result = str(result[0]).strip() if result else ''
+    # 去掉无意义的简介(马赛克破坏版)，'克破'两字简繁同形
+    if not result or '克破' in result:
+        return ''
+    else:
+        # 去除简介中的无意义信息，中间和首尾的空白字符、*根据分发等
+        result = re.sub(r'[\n\t]', '', result).split('*根据分发', 1 )[0].strip()
     return result
 
 
@@ -177,7 +180,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
-            real_url = html.xpath('//div[@class="col oneVideo"]//h5[@]//a[@href]/@href')
+            real_url = html.xpath('//div[@class="col oneVideo"]//a[@href]/@href')
             # if real_url:
             #     real_url = airav_url + '/' + real_url[0]
             # else:
@@ -332,4 +335,5 @@ if __name__ == '__main__':
     # print(main('LUXU-1217', ''))
     # print(main('x-art.19.11.03', ''))
     # print(main('ssis-200', ''))     # 多个搜索结果
-    print(main('JUY-331', ''))      # 存在系列字段
+    # print(main('JUY-331', ''))      # 存在系列字段
+    print(main('SONE-248', ''))      # 简介存在无效信息  "*根据分发方式,内容可能会有所不同"

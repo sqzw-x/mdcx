@@ -15,11 +15,11 @@ urllib3.disable_warnings()  # yapf: disable
 
 def get_title(html):
     result = html.xpath('//h1[@class="h4 b"]/text()')
-    # 去除假的，无意义的标题(马赛克破坏版)，'克破'两字简繁同形
-    if result and '克破' not in str(result[0]):
-        return str(result[0]).strip()
-    else:
+    result = str(result[0]).strip() if result else ''
+    # 去掉无意义的简介(马赛克破坏版)，'克破'两字简繁同形
+    if not result or '克破' in result:
         return ''
+    return result
 
 
 def get_real_title(title):
@@ -65,15 +65,14 @@ def getCover(html):
 
 
 def getOutline(html):
-    result = html.xpath('//p[contains(., "简介")]/text()')
-    # 去除假的，无意义的简介(马赛克破坏版)，'克破'两字简繁同形
-    if result and '克破' not in str(result[0]):
-        # 去除中间和首尾的空白字符
-        result = result[0].strip().replace('\n', '').replace('\t', '')
-        # 去除简介二字
-        result = result.replace('簡介：', '').replace('简介：', '').strip()
+    result = html.xpath('//p[contains(., "简介") or contains(., "簡介")]/text()')
+    result = str(result[0]).strip() if result else ''
+    # 去掉无意义的简介(马赛克破坏版)，'克破'两字简繁同形
+    if not result or '克破' in result:
+        return ''
     else:
-        result = ''
+        # 去除简介中的无意义信息，中间和首尾的空白字符、简介两字、*根据分发等
+        result = re.sub(r'[\n\t]|(简|簡)介：', '', result).split('*根据分发', 1 )[0].strip()
     return result
 
 
@@ -343,4 +342,5 @@ if __name__ == '__main__':
     # print(main('S2M-055', ''))
     # print(main('LUXU-1217', ''))
     # print(main('aldn-334', ''))           # 存在系列字段
-    print(main('ssni-200', ''))           # 存在多个搜索结果
+    # print(main('ssni-200', ''))           # 存在多个搜索结果
+    print(main('START-104', ''))      # 简介存在无效信息  "*根据分发方式,内容可能会有所不同"
