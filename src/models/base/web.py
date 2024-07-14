@@ -84,6 +84,13 @@ class WebRequests:
                 'Referer': 'https://www.javbus.com/',
             }
             headers.update(headers_o)
+        elif 'giga' in url:
+            # 搜索时需要携带refer，获取cookies时不能携带
+            giga_refer = '' if 'cookie_set.php' in url else 'https://www.giga-web.jp/top.html'
+            headers_o = {
+                'Referer': giga_refer,
+            }
+            headers.update(headers_o)
 
         signal.add_log(f'🔎 请求 {url}')
         for i in range(int(retry_times)):
