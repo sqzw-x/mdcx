@@ -150,10 +150,10 @@ class MyMAinWindow(QMainWindow):
         show_netstatus()  # 检查网络界面显示当前网络代理信息
         self.show_net_info(
             '\n💡 说明：\n '
-            '任意代理：javbus、jav321、javlibrary、mgstage、mywife、giga、freejavbt、'
+            '任意代理：javbus、jav321、javlibrary、mywife、giga、freejavbt、'
             'mdtv、madouqu、7mmtv、faleno、dahlia、prestige、theporndb、cnmdb、fantastica、kin8\n '
             '非日本代理：javdb、airav-cc、avsex（日本代理会报错）\n '
-            '日本代理：seesaawiki\n '
+            '日本代理：seesaawiki、mgstage\n '
             '无需代理：avsex、hdouban、iqqtv、airav-wiki、love6、lulubar、fc2、fc2club、fc2hub\n\n'
             '▶️ 点击右上角 【开始检测】按钮以测试网络连通性。')  # 检查网络界面显示提示信息
         signal.add_log("🍯 你可以点击左下角的图标来 显示 / 隐藏 请求信息面板！")
@@ -608,10 +608,10 @@ class MyMAinWindow(QMainWindow):
         self.Ui.stackedWidget.setCurrentIndex(1)
         self.set_left_button_style()
         self.Ui.pushButton_log.setStyleSheet('font-weight: bold; background-color: rgba(160,160,165,60);')
-        self.Ui.textBrowser_log_main.verticalScrollBar().setValue(
-            self.Ui.textBrowser_log_main.verticalScrollBar().maximum())
-        self.Ui.textBrowser_log_main_2.verticalScrollBar().setValue(
-            self.Ui.textBrowser_log_main_2.verticalScrollBar().maximum())
+        # self.Ui.textBrowser_log_main.verticalScrollBar().setValue(
+        #     self.Ui.textBrowser_log_main.verticalScrollBar().maximum())
+        # self.Ui.textBrowser_log_main_2.verticalScrollBar().setValue(
+        #     self.Ui.textBrowser_log_main_2.verticalScrollBar().maximum())
 
     # 点左侧的工具按钮
     def pushButton_tool_clicked(self):

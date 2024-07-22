@@ -17,7 +17,7 @@ urllib3.disable_warnings()  # yapf: disable
 
 
 def get_web_number(html, number):
-    result = html.xpath('//h2[@class="text-xl font-bold py-2 break-words"]/span/text()')
+    result = html.xpath('//h2[@class]//span[@class="truncate"]/text()')
     return result[0].strip() if result else number
 
 
@@ -122,8 +122,26 @@ def get_mosaic(html, studio):
 def get_poster(html):
     result = html.xpath('//div[@class="img_box col-4 col-sm-3 col-md-3 d-lg-none"]/img/@src')
     if result:
-        return 'https://paycalling.com' + result[0] if 'http' not in result[0] else result[0]
-    return ''
+        return 'https://9sex.tv/cn' + result[0] if 'http' not in result[0] else result[0]
+
+
+def get_real_url(html, number):
+    res_list = html.xpath("//ul[@class]/li/a")
+    for each in res_list:
+        temp_title = each.xpath('div/h4[contains(@class,"truncate")]/text()')
+        temp_url = each.get('href')
+        temp_poster = each.xpath('div[@class="relative overflow-hidden rounded-t-md"]/img/@src')
+        if temp_title:
+            temp_title = temp_title[0]
+            if temp_title.upper().startswith(number.upper()) or (
+                    f'{number.upper()}-' in temp_title.upper() and temp_title[:1].isdigit()):
+                # https://9sex.tv/web/video?id=317900
+                # https://9sex.tv/#/home/video/340496
+                real_url = temp_url
+                poster_url = temp_poster[0] if temp_poster else ''
+                return real_url, poster_url
+    else:
+        return ''
 
 
 def main(number, appoint_url='', log_info='', req_web='', language=''):
@@ -133,7 +151,7 @@ def main(number, appoint_url='', log_info='', req_web='', language=''):
 
     if not re.match(r'n\d{4}', number):
         number = number.upper()
-    avsex_url = getattr(config, 'avsex_website', 'https://paycalling.com')
+    avsex_url = getattr(config, 'avsex_website', 'https://gg5.co')
     if appoint_url:
         if 'http' in appoint_url:
             avsex_url = re.findall(r'(.*//[^/]*)\/', appoint_url)[0]
@@ -149,12 +167,15 @@ def main(number, appoint_url='', log_info='', req_web='', language=''):
     poster_url = ''
     # real_url = 'https://paycalling.com/#/home/video/332642'
     # real_url = 'https://9sex.tv/web/video?id=317900'
+    # real_url = 'https://gg5.co/cn/video/detail/359635'
 
     try:  # 捕获主动抛出的异常
         if not real_url:
 
             # https://avsex.cc/web/search?page=1&keyWord=ssis
             # https://paycalling.com/tw/search?_type=films&query=CAWD-582
+            # https://gg5.co/cn/search?type=films&query=CAWD-582
+            # 获取结果后简繁之后会统一转换，这里优先繁体可能是更稳定些？
             url_search = f'{avsex_url}/tw/search?query={number.lower()}'
             debug_info = '搜索地址: %s ' % url_search
             log_info += web_info + debug_info
@@ -166,21 +187,8 @@ def main(number, appoint_url='', log_info='', req_web='', language=''):
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
-            res_list = html.xpath("//ul[@class='grid sm:grid-cols-6 grid-cols-3 gap-4']/li/a")
-            for each in res_list:
-                temp_title = each.xpath('div/h4[@class="truncate"]/text()')
-                temp_url = each.get('href')
-                temp_poster = each.xpath('div[@class="relative overflow-hidden rounded-t-md"]/img/@src')
-                if temp_title:
-                    temp_title = temp_title[0]
-                    if temp_title.upper().startswith(number.upper()) or (
-                            f'{number.upper()}-' in temp_title.upper() and temp_title[:1].isdigit()):
-                        # https://9sex.tv/web/video?id=317900
-                        # https://9sex.tv/#/home/video/340496
-                        real_url = temp_url
-                        poster_url = temp_poster[0] if temp_poster else ''
-                        break
-            else:
+            real_url, poster_url = get_real_url(html, number)
+            if not real_url:
                 debug_info = '搜索结果: 未匹配到番号！'
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
