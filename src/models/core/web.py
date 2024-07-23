@@ -948,10 +948,3 @@ def check_proxyChange():
             signal.show_net_info('\n🌈 代理设置已改变：')
             show_netstatus()
     Flags.current_proxy = new_proxy
-
-
-if __name__ == '__main__':
-    t, o, e = google_translate(
-        "誰もが憧れるバリキャリOLの週末メス犬日記 現場男の汗臭チ〇ポが生きがいとは、絶対に言えない。",
-        "主人公の楓ふうあは、大手ゼネコンに勤務する、バリバリのキャリアウーマン。内勤でも現場でも、部下や下請けに躊躇なくダメ出しをする。優秀な彼女は上司からも好かれているが、男にも立場にも媚びず、週末の誘……（略）")
-    print(t)
