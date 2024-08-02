@@ -106,7 +106,8 @@ def getTag(response):  # 获取演员
 
 
 def getOutline(detail_page):
-    return detail_page.xpath("string(/html/body/div[2]/div[1]/div[1]/div[2]/div[3]/div)")
+    # 修复路径，避免简介含有垃圾信息 "*根据分发方式，内容可能会有所不同”
+    return detail_page.xpath("string(/html/body/div[2]/div[1]/div[1]/div[2]/div[3]/div/text())")
 
 
 def main(number, appoint_url='', log_info='', req_web='', language='jp'):
@@ -244,7 +245,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
 
 if __name__ == '__main__':
     # print(main('blk-495'))
-    print(main('hkgl-004'))
+    # print(main('hkgl-004'))
     # print(main('snis-333'))
     # print(main('GERK-326'))
     # print(main('msfh-010'))
@@ -258,3 +259,4 @@ if __name__ == '__main__':
     # print(main('ABP-905'))
     # print(main('heyzo-1031', ''))
     # print(main('ymdd-173', 'https://www.jav321.com/video/ymdd00173'))
+    print(main('MIST-409'))

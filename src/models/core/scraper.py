@@ -321,7 +321,7 @@ def _scrape_exec_thread(task):
         f'正在刮削： {Flags.scrape_started}/{count_all} {progress_percentage} \n {convert_path(file_show_path)}')
     signal.label_result.emit(f' 刮削中：{Flags.scrape_started - Flags.succ_count - Flags.fail_count} '
                              f'成功：{Flags.succ_count} 失败：{Flags.fail_count}')
-    json_data['logs'] += '\n' + '=' * 80
+    json_data['logs'] += '\n' + "👆" * 50
     json_data['logs'] += "\n 🙈 [Movie] " + convert_path(file_path)
     json_data['logs'] += "\n 🚘 [Number] " + movie_number
 
@@ -379,9 +379,10 @@ def _scrape_exec_thread(task):
             progress_value = count / count_all * 100
             progress_percentage = '%.2f' % progress_value + '%'
             used_time = get_used_time(start_time)
-            scrape_info_begin = '\n%d/%d (%s) round(%s) %s' % (
+            scrape_info_begin = '%d/%d (%s) round(%s) %s    新的刮削线程' % (
                 count, count_all, progress_percentage, Flags.count_claw, split_path(file_path)[1])
-            scrape_info_after = f'\n{"=" * 80}\n ' \
+            scrape_info_begin = '\n\n\n' + '👇'*50 + '\n' + scrape_info_begin
+            scrape_info_after = f'\n ' \
                                 f'🕷 {get_current_time()} {count}/{count_all} ' \
                                 f'{split_path(file_path)[1]} 刮削完成！用时 {used_time} 秒！'
             json_data['logs'] = scrape_info_begin + json_data['logs'] + scrape_info_after
@@ -607,6 +608,7 @@ def _check_stop(file_name_temp):
             f' 🕷 {get_current_time()} 已停止刮削：{Flags.now_kill}/{Flags.total_kills} {file_name_temp}')
         signal.set_label_file_path.emit(
             f'⛔️ 正在停止刮削...\n   正在停止已在运行的任务线程（{Flags.now_kill}/{Flags.total_kills}）...')
+        # exceptions must derive from BaseException
         raise '手动停止刮削'
 
 

@@ -34,8 +34,8 @@ def get_detail_info(html, number, file_path):
     actor = ''
     number = ''
     for i, t in enumerate(detail_info):
-        if '番號' in t:
-            temp_number = re.findall(r'番號\s*：\s*(.+)\s*', t)
+        if re.search(r'番号|番號', t):
+            temp_number = re.findall(r'(?:番号|番號)\s*：\s*(.+)\s*', t)
             number = temp_number[0] if temp_number else ''
         if '片名' in t:
             temp_title = re.findall(r'片名\s*：\s*(.+)\s*', t)

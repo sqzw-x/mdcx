@@ -57,33 +57,18 @@ def get_yesjav_title(json_data, movie_number):
 
 
 def google_translate(title, outline):
-    msg = '%s\n%s' % (title, outline)
+    title, e1 = _google_translate(title)
+    outline, e2 = _google_translate(outline)
+    return title, outline, e1 or e2
+
+
+def _google_translate(msg: str) -> (str, str):
     msg_unquote = urllib.parse.unquote(msg)
     url = f'https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}'
-    # url = f'https://translate.google.com/translate_a/single?client=at&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}'
     result, response = get_html(url, json_data=True)
     if not result:
-        return title, outline, f'请求失败！可能是被封了，可尝试更换代理！错误：{response}'
-    else:
-        try:
-            result = []
-            original = []
-            for each in response[0]:
-                result.append(each[0])
-                original.append(each[1])
-            if not title:
-                outline = ''.join(result)
-            elif not outline:
-                title = ''.join(result)
-            else:
-                for i in range(len(original)):
-                    if len(''.join(original[:i + 1])) > len(title):
-                        break
-                title = ''.join(result[:i])
-                outline = ''.join(result[i:])
-            return title.strip(), outline.strip(), ''
-        except Exception as e:
-            return title, outline, f'返回数据格式异常！返回内容：{response} 错误：{e}'
+        return msg, f'请求失败！可能是被封了，可尝试更换代理！错误：{response}'
+    return "".join([sen[0] for sen in response[0]]), ""
 
 
 def download_file_with_filepath(json_data, url, file_path, folder_new_path):
