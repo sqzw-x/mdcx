@@ -42,6 +42,52 @@ ARM64(AArch64) 架构: 可本地构建. 若欲使用 GitHub Actions 构建, 需 
 
 ## 开发
 
+### 环境准备
+- python 3.9
+- Windows 10/11
+- macOS 10.15.7+
+
+### 准备源码
+- 方式1: 下载 [仓库源码](https://github.com/sqzw-x/mdcx/archive/refs/heads/master.zip) 或 [Release源码](https://github.com/sqzw-x/mdcx/archive/refs/tags/daily_release.zip)，下载后解压
+- 方式2: git克隆项目
+  ```bash
+  git clone https://github.com/sqzw-x/mdcx.git
+  ```
+
+### 运行
+#### Windows
+
+- cmd
+```batch
+cd /d D:\dev\mdcx
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+set PYTHONPATH=.\src;%PYTHONPATH%
+python main.py
+```
+
+- powershell
+```powershell
+cd D:\dev\mdcx
+python -m venv venv
+venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+$env:PYTHONPATH = "./src;$env:PYTHONPATH"
+python main.py
+```
+
+#### macOS
+
+```bash
+cd /path/to/mdcx
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements-mac.txt
+export PYTHONPATH=./src:$PYTHONPATH
+python main.py
+```
+
 ### 如何添加新配置项
 
 1. 在 `config.ini.default` 中添加配置项及其默认值, 值类型可以是字符串, 整数, 浮点数

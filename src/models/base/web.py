@@ -78,6 +78,19 @@ class WebRequests:
                 'referer': 'https://xcity.jp/result_published/?genre=%2Fresult_published%2F&q=2&sg=main&num=60',
             }
             headers.update(headers_o)
+        # javbus封面图需携带refer，refer似乎没有做强校验，但须符合格式要求，否则403
+        elif 'javbus' in url:
+            headers_o = {
+                'Referer': 'https://www.javbus.com/',
+            }
+            headers.update(headers_o)
+        elif 'giga' in url:
+            # 搜索时需要携带refer，获取cookies时不能携带
+            giga_refer = '' if 'cookie_set.php' in url else 'https://www.giga-web.jp/top.html'
+            headers_o = {
+                'Referer': giga_refer,
+            }
+            headers.update(headers_o)
 
         signal.add_log(f'🔎 请求 {url}')
         for i in range(int(retry_times)):
@@ -327,6 +340,7 @@ class WebRequests:
             except Exception as e:
                 error_info = '%s\nError: %s' % (url, e)
                 signal.add_log('[%s/%s] %s' % (i + 1, retry_times, error_info))
+                continue
         signal.add_log(f"🔴 请求失败！{error_info}")
         return False, error_info
 
@@ -367,11 +381,25 @@ def check_url(url, length=False, real_url=False):
             'Referer': 'http://www.getchu.com/top.html',
         }
         headers.update(headers_o)
+    # javbus封面图需携带refer，refer似乎没有做强校验，但须符合格式要求，否则403
+    elif 'javbus' in url:
+        headers_o = {
+            'Referer': 'https://www.javbus.com/',
+        }
+        headers.update(headers_o)
 
     for j in range(retry_times):
         try:
             r = requests.head(url, headers=headers, proxies=proxies, timeout=timeout, verify=False,
                               allow_redirects=True)
+            
+            # 不输出获取 dmm预览视频(trailer) 最高分辨率的测试结果到日志中
+            # get_dmm_trailer() 函数在多条错误的链接中找最高分辨率的链接，错误没有必要输出，避免误解为网络或软件问题
+            if r.status_code == 404 and '_w.mp4' in url:
+                if j + 1 < retry_times:
+                    continue
+                else:
+                    return 0
 
             # 状态码 > 299，表示请求失败，视为不可用
             if r.status_code > 299:
@@ -618,16 +646,16 @@ def get_imgsize(url):
     return 0, 0
 
 
-def get_dmm_trailer(trailer_url):  # 获取预览片
+def get_dmm_trailer(trailer_url):  # 如果预览片地址为 dmm ，尝试获取 dmm 预览片最高分辨率
     if '.dmm.co' not in trailer_url:
         return trailer_url
     if trailer_url.startswith('//'):
         trailer_url = 'https:' + trailer_url
     '''
-    '_sm_w.mp4': 320*180, 3.8MB
-    '_dm_w.mp4': 560*316, 10.1MB
-    '_dmb_w.mp4': 720*404, 14.6MB
-    '_mhb_w.mp4': 720*404, 27.9MB
+    '_sm_w.mp4': 320*180, 3.8MB     # 最低分辨率
+    '_dm_w.mp4': 560*316, 10.1MB    # 中等分辨率
+    '_dmb_w.mp4': 720*404, 14.6MB   # 次高分辨率
+    '_mhb_w.mp4': 720*404, 27.9MB   # 最高分辨率
     https://cc3001.dmm.co.jp/litevideo/freepv/s/ssi/ssis00090/ssis00090_sm_w.mp4
     https://cc3001.dmm.co.jp/litevideo/freepv/s/ssi/ssis00090/ssis00090_dm_w.mp4
     https://cc3001.dmm.co.jp/litevideo/freepv/s/ssi/ssis00090/ssis00090_dmb_w.mp4
@@ -642,6 +670,7 @@ def get_dmm_trailer(trailer_url):  # 获取预览片
             mhb_w = s + '_mhb_w.mp4'
             dmb_w = s + '_dmb_w.mp4'
             dm_w = s + '_dm_w.mp4'
+            # 次高分辨率只需检查最高
             if e == '_dmb_w.mp4':
                 if check_url(mhb_w):
                     trailer_url = mhb_w
@@ -650,6 +679,7 @@ def get_dmm_trailer(trailer_url):  # 获取预览片
                     trailer_url = mhb_w
                 elif check_url(dmb_w):
                     trailer_url = dmb_w
+            # 最差分辨率则依次检查最高，次高，中等
             elif e == '_sm_w.mp4':
                 if check_url(mhb_w):
                     trailer_url = mhb_w
