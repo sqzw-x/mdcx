@@ -209,8 +209,9 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
             if len(real_url) == 1:
                 real_url = iqqtv_url + real_url[0].replace('/cn/', '').replace('/jp/', '').replace('&cat=19', '')
             else:
-                real_url_tmp =  get_real_url(html, number)
-                real_url = iqqtv_url + real_url_tmp.replace('/cn/', '').replace('/jp/', '').replace('&cat=19', '')
+                # real_url_tmp = get_real_url(html, number)
+                real_url_tmp = real_url.replace('/cn/', '').replace('/jp/', '').replace('&cat=19', '')
+                real_url = iqqtv_url + re.sub(r'.*player', 'player', real_url_tmp)
             debug_info = '番号地址: %s ' % real_url
             log_info += web_info + debug_info
             result, html_content = get_html(real_url)
@@ -343,4 +344,4 @@ if __name__ == '__main__':
     # print(main('LUXU-1217', ''))
     # print(main('aldn-334', ''))           # 存在系列字段
     # print(main('ssni-200', ''))           # 存在多个搜索结果
-    print(main('START-104', ''))      # 简介存在无效信息  "*根据分发方式,内容可能会有所不同"
+    print(main('START-104', language='zh_tw'))      # 简介存在无效信息  "*根据分发方式,内容可能会有所不同"
