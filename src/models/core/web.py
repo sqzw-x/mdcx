@@ -57,18 +57,33 @@ def get_yesjav_title(json_data, movie_number):
 
 
 def google_translate(title, outline):
-    title, e1 = _google_translate(title)
-    outline, e2 = _google_translate(outline)
-    return title, outline, e1 or e2
-
-
-def _google_translate(msg: str) -> (str, str):
+    msg = '%s\n%s' % (title, outline)
     msg_unquote = urllib.parse.unquote(msg)
     url = f'https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}'
+    # url = f'https://translate.google.com/translate_a/single?client=at&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}'
     result, response = get_html(url, json_data=True)
     if not result:
-        return msg, f'请求失败！可能是被封了，可尝试更换代理！错误：{response}'
-    return "".join([sen[0] for sen in response[0]]), ""
+        return title, outline, f'请求失败！可能是被封了，可尝试更换代理！错误：{response}'
+    else:
+        try:
+            result = []
+            original = []
+            for each in response[0]:
+                result.append(each[0])
+                original.append(each[1])
+            if not title:
+                outline = ''.join(result)
+            elif not outline:
+                title = ''.join(result)
+            else:
+                for i in range(len(original)):
+                    if len(''.join(original[:i + 1])) > len(title) + 1:
+                        break
+                title = ''.join(result[:i])
+                outline = ''.join(result[i:])
+            return title.strip(), outline.strip(), ''
+        except Exception as e:
+            return title, outline, f'返回数据格式异常！返回内容：{response} 错误：{e}'
 
 
 def download_file_with_filepath(json_data, url, file_path, folder_new_path):
@@ -948,3 +963,16 @@ def check_proxyChange():
             signal.show_net_info('\n🌈 代理设置已改变：')
             show_netstatus()
     Flags.current_proxy = new_proxy
+
+
+if __name__ == '__main__':
+    # import warnings
+    # from requests.packages.urllib3.exceptions import InsecureRequestWarning
+    #
+    # warnings.simplefilter('ignore', InsecureRequestWarning)
+
+    t, o, e = google_translate(
+        "コンドームが破れてまさかの生ハメ！超加速するピストンで何度も中出し！",
+        "主人公の楓ふうあは、大手ゼネコンに勤務する、バリバリのキャリアウーマン。内勤でも現場でも、部下や下請けに躊躇なくダメ出しをする。優秀な彼女は上司からも好かれているが、男にも立場にも媚びず、週末の誘……（略）")
+    print(t)
+    print(o)
