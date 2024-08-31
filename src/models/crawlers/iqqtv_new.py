@@ -51,7 +51,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
 
 
 if __name__ == '__main__':
-    print(main('abs-141', language='zh_cn'))
+    print(main('abs-141'))
     # print(main('HYSD-00083'))
     # print(main('IESP-660'))
     # print(main('n1403'))
