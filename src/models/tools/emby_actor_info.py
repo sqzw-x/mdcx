@@ -309,7 +309,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
     actor_profile = actor_output.find(name='table', class_=['infobox', 'infobox vcard plainlist'])
     if actor_profile:
         att_keys = actor_profile.find_all(scope=["row"])
-        att_values = actor_profile.find_all(name='td', style=[''])
+        att_values = actor_profile.find_all(name='td', style=[''], class_=['infobox-data', 'infobox-data org'])
         bday = actor_output.find(class_='bday')
         bday = '(%s)' % bday.get_text('', strip=True) if bday else ''
         if att_keys and att_values:
