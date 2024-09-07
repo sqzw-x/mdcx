@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QDialog, QFileDialog, QPushButton
 import models.core.file
 import models.core.image
 import models.core.scraper
-from models.base.file import copy_file, delete_file, split_path
+from models.base.file import delete_file, split_path
 from models.config.config import config
 from views.posterCutTool import Ui_Dialog_cut_poster
 
@@ -397,7 +397,6 @@ class CutWindow(QDialog):
             self.parent().show_log_text(" 🔴 Failed to remove old poster!\n    " + str(e))
             return False
         img_new_png.save(poster_path, quality=95, subsampling=0)
-        img.close()
         # poster加水印
         if poster_mark == 1:
             models.core.image.add_mark_thread(poster_path, mark_list)
@@ -407,7 +406,7 @@ class CutWindow(QDialog):
             if thumb_path != img_path:
                 if os.path.exists(thumb_path):
                     delete_file(thumb_path)
-                copy_file(img_path, thumb_path)
+                img.save(thumb_path, quality=95, subsampling=0)
             # thumb加水印
             if thumb_mark == 1:
                 models.core.image.add_mark_thread(thumb_path, mark_list)
@@ -419,10 +418,13 @@ class CutWindow(QDialog):
             if fanart_path != img_path:
                 if os.path.exists(fanart_path):
                     delete_file(fanart_path)
-                copy_file(img_path, fanart_path)
+                img.save(fanart_path, quality=95, subsampling=0)
             # fanart加水印
             if fanart_mark == 1:
                 models.core.image.add_mark_thread(fanart_path, mark_list)
+
+        img.close()
+        img_new_png.close()
 
         # 在主界面显示预览
         self.parent().set_pixmap_thread(poster_path, thumb_path, poster_from='cut', cover_from='local')
