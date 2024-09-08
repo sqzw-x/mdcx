@@ -325,11 +325,11 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
                 print("  <website>" + website + "</website>", file=code)
 
             # javdb id 输出, 没有时使用番号搜索页
-            if "国产" not in json_data_nfo['mosaic'] and "國產" not in json_data_nfo['mosaic']:
-                if 'javdbid' in json_data_nfo and json_data_nfo['javdbid']:
-                    print("  <javdbid>" + json_data_nfo["javdbid"] + "</javdbid>", file=code)
-                else:
-                    print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
+            # if "国产" not in json_data_nfo['mosaic'] and "國產" not in json_data_nfo['mosaic']:
+            #     if 'javdbid' in json_data_nfo and json_data_nfo['javdbid']:
+            #         print("  <javdbid>" + json_data_nfo["javdbid"] + "</javdbid>", file=code)
+            #     else:
+            #         print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
             print("</movie>", file=code)
             json_data['logs'] += "\n 🍀 Nfo done! (new)(%ss)" % get_used_time(start_time)
             return True
