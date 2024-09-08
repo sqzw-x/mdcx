@@ -133,15 +133,18 @@ def get_director(html):
 
 def get_score(html):
     result = str(html.xpath("//span[@class='score-stars']/../text()")).strip(" ['']")
+    scal_score = ''
     try:
         score = re.findall(r'(\d{1}\..+)分', result)
         if score:
             score = score[0]
+            scal_score = "{:.2f}".format(float(score)*2)
         else:
             score = ''
     except:
         score = ''
-    return score
+    
+    return scal_score
 
 
 def get_mosaic(title):
