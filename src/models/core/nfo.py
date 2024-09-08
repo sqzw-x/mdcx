@@ -222,7 +222,6 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
                 for each in actor_list:
                     print("  <actor>", file=code)
                     print("    <name>" + each + "</name>", file=code)
-                    print("    <type>Actor</type>", file=code)
                     print("  </actor>", file=code)
 
             # 输出导演
