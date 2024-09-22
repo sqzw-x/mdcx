@@ -1260,7 +1260,7 @@ class MyMAinWindow(QMainWindow):
     def show_scrape_info(self, before_info=''):
         try:
             if Flags.file_mode == FileMode.Single:
-                scrape_info = '💡 单文件刮削\n💠 %s · %s' % (Flags.main_mode_text, self.Ui.comboBox_website.currentText())
+                scrape_info = '💡 单文件刮削\n💠 %s · %s' % (Flags.main_mode_text, self.Ui.comboBox_website_all.currentText())
             else:
                 scrape_info = '💠 %s · %s' % (Flags.main_mode_text, Flags.scrape_like_text)
                 if config.scrape_like == 'single':
