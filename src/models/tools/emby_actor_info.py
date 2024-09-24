@@ -292,7 +292,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
         signal.show_log_text(" 🔴 页面内容未命中关键词，识别为非女优或导演！")
         return False
 
-    res = re.sub(r'\[\d+\]', '', res)  # 替换[1],[2]等注释
+    res = re.sub(r'<a href=\"#cite_note.*?</a>', '', res)  # 替换[1],[2]等注释
     soup = bs4.BeautifulSoup(res, 'lxml')
     actor_output = soup.find(class_='mw-parser-output')
 
@@ -309,7 +309,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
     actor_profile = actor_output.find(name='table', class_=['infobox', 'infobox vcard plainlist'])
     if actor_profile:
         att_keys = actor_profile.find_all(scope=["row"])
-        att_values = actor_profile.find_all(name='td', style=[''], class_=['infobox-data', 'infobox-data org'])
+        att_values = actor_profile.find_all(name='td', style=[''], colspan=False)
         bday = actor_output.find(class_='bday')
         bday = '(%s)' % bday.get_text('', strip=True) if bday else ''
         if att_keys and att_values:
