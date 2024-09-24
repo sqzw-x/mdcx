@@ -24,7 +24,7 @@ REGEX_KANA = re.compile(r"[\u3040-\u30ff]")  # 平假名/片假名
 
 
 def youdao_translate(title, outline):
-    url = 'https://fanyi.youdao.com/translate_o?smartresult=dict&smartresult=rule'
+    url = 'https://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule'
     msg = '%s\n%s' % (title, outline)
     lts = str(int(time.time() * 1000))
     salt = lts + str(random.randint(0, 10))
