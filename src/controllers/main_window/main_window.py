@@ -80,7 +80,7 @@ class MyMAinWindow(QMainWindow):
 
         # region 初始化需要的变量
         self.localversion = config.local_version  # 当前版本号
-        self.new_version = ''  # 有版本更新时在左下角显示的新版本信息
+        self.new_version = '\n🔍 点击检查最新版本'  # 有版本更新时在左下角显示的新版本信息
         self.json_data = {}  # 当前树状图选中文件的json_data
         self.img_path = ''  # 当前树状图选中文件的图片地址
         self.m_drag = False  # 允许鼠标拖动的标识
@@ -583,7 +583,9 @@ class MyMAinWindow(QMainWindow):
 
     def label_version_clicked(self, test):
         try:
-            if self.new_version:
+            if "🔍" in self.new_version:
+                webbrowser.open("https://github.com/sqzw-x/mdcx/releases/tag/daily_release")
+            else:
                 webbrowser.open('https://github.com/sqzw-x/mdcx/releases')
         except:
             signal.show_traceback_log(traceback.format_exc())

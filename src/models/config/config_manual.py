@@ -1,6 +1,6 @@
 class ManualConfig:
     # 设置软件版本
-    local_version = 120240321
+    local_version = 120240924
 
     # 定义配置值类型
     INT_KEY = [
