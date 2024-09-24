@@ -138,7 +138,7 @@ def get_real_url(html, number):
         detail_url = each.xpath('.//a/@href')[0]
         title = each.xpath('.//h5/text()')[0]
         # 注意去除马赛克破坏版这种几乎没有有效字段的条目
-        if number.upper() in title and '克破' not in title:
+        if number.upper() in title and all(keyword not in title for keyword in ['克破', '无码破解', '無碼破解']):
             return detail_url
     return ''
 
@@ -336,4 +336,5 @@ if __name__ == '__main__':
     # print(main('x-art.19.11.03', ''))
     # print(main('ssis-200', ''))     # 多个搜索结果
     # print(main('JUY-331', ''))      # 存在系列字段
-    print(main('SONE-248', ''))      # 简介存在无效信息  "*根据分发方式,内容可能会有所不同"
+    # print(main('SONE-248', ''))      # 简介存在无效信息  "*根据分发方式,内容可能会有所不同"
+    print('CAWD-688','')     # 无码破解
