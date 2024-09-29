@@ -87,19 +87,18 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
     website_name = 'fc2hub'
     req_web += '-> %s' % website_name
     real_url = appoint_url
-    title = ''
-    cover_url = ''
+    root_url = getattr(config, 'fc2hub_website', 'https://javten.com')
+
     number = number.upper().replace('FC2PPV', '').replace('FC2-PPV-', '').replace('FC2-', '').replace('-', '').strip()
     dic = {}
     web_info = '\n       '
     log_info += ' \n    🌐 fc2hub'
-    debug_info = ''
 
     try:  # 捕获主动抛出的异常
         if not real_url:
 
             # 通过搜索获取real_url
-            url_search = 'https://fc2hub.com/search?kw=' + number
+            url_search = root_url + '/search?kw=' + number
             debug_info = '搜索地址: %s ' % url_search
             log_info += web_info + debug_info
 

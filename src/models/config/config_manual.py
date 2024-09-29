@@ -59,6 +59,7 @@ class ManualConfig:
         'giga',
         'iqqtv',
         'jav321',
+        'javday',
         'javbus',
         'javdb',
         'javlibrary',

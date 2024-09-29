@@ -2070,7 +2070,7 @@ class MyMAinWindow(QMainWindow):
                         'yesjav': ['http://www.yesjav.info', ''],
                         'fc2': ['https://adult.contents.fc2.com', ''],
                         'fc2club': ['https://fc2club.top', ''],
-                        'fc2hub': ['https://fc2hub.com', ''],
+                        'fc2hub': ['https://javten.com', ''],
                         'airav': ['https://www.airav.wiki', ''],
                         'av-wiki': ['https://av-wiki.net', ''],
                         'seesaawiki': ['https://seesaawiki.jp', ''],

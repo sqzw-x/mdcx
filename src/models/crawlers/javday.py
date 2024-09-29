@@ -7,7 +7,7 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web import get_html, post_html
+from models.base.web import get_html
 from models.config.config import config
 from models.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
 
@@ -192,13 +192,11 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
     start_time = time.time()
     website_name = 'javday'
     req_web += '-> %s' % website_name
-    title = ''
-    cover_url = ''
     web_info = '\n       '
     log_info += ' \n    🌐 javday'
     debug_info = ''
 
-    javday_url = getattr(config, "javday_website", 'https://javday.tv/')
+    javday_url = getattr(config, "javday_website", 'https://javday.tv')
     real_url = appoint_url
     real_html_content = ''
     try:
@@ -209,7 +207,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             number_list_new = list(set(total_number_list))
             number_list_new.sort(key=total_number_list.index)
             for number in number_list_new:
-                testNumberUrl = 'https://javday.tv/videos/%s/' % number
+                testNumberUrl = javday_url + f'/videos/{number}/'
                 debug_info = '搜索地址: %s {"wd": %s}' % (testNumberUrl, number)
                 log_info += web_info + debug_info
                 result, html_content = get_html(testNumberUrl)
@@ -224,7 +222,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
                     debug_info = '找到网页: %s' % testNumberUrl
                     real_url = testNumberUrl
                     real_html_content = html_content
-                    break    
+                    break
             else:
                 raise Exception(debug_info)
 
