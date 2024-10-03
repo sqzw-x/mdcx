@@ -57,8 +57,12 @@ def get_yesjav_title(json_data, movie_number):
 
 
 def google_translate(title, outline):
-    title, e1 = _google_translate(title)
-    outline, e2 = _google_translate(outline)
+    e1 = None
+    e2 = None
+    if title:
+        title, e1 = _google_translate(title)
+    if outline:
+        outline, e2 = _google_translate(outline)
     return title, outline, e1 or e2
 
 

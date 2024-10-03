@@ -561,8 +561,8 @@ def get_amazon_data(req_url):
             mid_url = 'https://www.amazon.co.jp/portal-migration/hz/glow/get-rendered-toaster' \
                       '?pageType=Search&aisTransitionState=in&rancorLocationSource=REALM_DEFAULT&_='
             result, html = curl_html(mid_url, headers=headers)
-            anti_csrftoken_a2z = re.findall(r'csrfToken="([^"]+)', html)[0]
             try:
+                anti_csrftoken_a2z = re.findall(r'csrfToken="([^"]+)', html)[0]
                 ubid_acbjp = re.findall(r'ubid-acbjp=([^ ]+)', str(result))[0]
             except:
                 pass
