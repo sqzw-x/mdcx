@@ -76,7 +76,6 @@ class CutWindow(QDialog):
         self.Ui.pushButton_cut_close.clicked.connect(self.to_cut_and_close)
         self.Ui.pushButton_cut.clicked.connect(self.to_cut)
         self.Ui.pushButton_close.clicked.connect(self.close)
-        self.raw_img_path = ''  # 初始图片(位于影片同目录)
         self.showimage()
 
     def set_style(self):
@@ -154,8 +153,6 @@ class CutWindow(QDialog):
 
     # 显示要裁剪的图片
     def showimage(self, img_path='', json_data={}):
-        if not self.raw_img_path:
-            self.raw_img_path = img_path
         # self.Ui.Dialog_cut_poster.setText(' ')                                # 清空背景
         self.Ui.label_backgroud_pic.setText(' ')  # 清空背景
 
@@ -201,7 +198,7 @@ class CutWindow(QDialog):
             self.Ui.label_backgroud_pic.setPixmap(pic)  # 背景区域显示缩放后的图片
 
             # 获取nfo文件名，用来设置裁剪后图片名称和裁剪时的水印状态
-            img_folder, img_fullname = split_path(self.raw_img_path)
+            img_folder, img_fullname = split_path(img_path)
             img_name, img_ex = os.path.splitext(img_fullname)
 
             # 如果没有json_data，则通过图片文件名或nfo文件名获取，目的是用来获取水印
@@ -229,8 +226,8 @@ class CutWindow(QDialog):
             poster_path = os.path.join(img_folder, 'poster.jpg')
             if pic_name == 0:  # 文件名-poster.jpg
                 if '-' in img_name:
-                    poster_path = self.raw_img_path.replace('-fanart', '').replace('-thumb', '').replace('-poster',
-                                                                                                         '').replace(
+                    poster_path = img_path.replace('-fanart', '').replace('-thumb', '').replace('-poster',
+                                                                                                '').replace(
                         img_ex, '') + '-poster.jpg'
             thumb_path = poster_path.replace('poster.', 'thumb.')
             fanart_path = poster_path.replace('poster.', 'fanart.')
@@ -357,16 +354,10 @@ class CutWindow(QDialog):
         if not img_path or not os.path.exists(img_path):
             return
         thumb_path = self.cut_thumb_path  # 裁剪后的thumb路径
-        poster_path = self.cut_poster_path  # 裁剪后的poster路径
-        fanart_path = self.cut_fanart_path  # 裁剪后的fanart路径
         self.parent().img_path = img_path  # 裁剪后更新图片url，这样再次点击时才可以重新加载并裁剪
 
         # 读取配置信息
         mark_list = []
-        download_files = config.download_files
-        poster_mark = config.poster_mark
-        thumb_mark = config.thumb_mark
-        fanart_mark = config.fanart_mark
         if self.Ui.radioButton_add_4k.isChecked():
             mark_list.append('4K')
         elif self.Ui.radioButton_add_8k.isChecked():
@@ -391,43 +382,43 @@ class CutWindow(QDialog):
         img = img.convert('RGB')
         img_new_png = img.crop((self.c_x, self.c_y, self.c_x2, self.c_y2))
         try:
-            if os.path.exists(poster_path):
-                delete_file(poster_path)
+            if os.path.exists(self.cut_poster_path):
+                delete_file(self.cut_poster_path)
         except Exception as e:
             self.parent().show_log_text(" 🔴 Failed to remove old poster!\n    " + str(e))
             return False
-        img_new_png.save(poster_path, quality=95, subsampling=0)
+        img_new_png.save(self.cut_poster_path, quality=95, subsampling=0)
         # poster加水印
-        if poster_mark == 1:
-            models.core.image.add_mark_thread(poster_path, mark_list)
+        if config.poster_mark == 1:
+            models.core.image.add_mark_thread(self.cut_poster_path, mark_list)
 
         # 清理旧的thumb
-        if 'thumb' in download_files:
+        if 'thumb' in config.download_files:
             if thumb_path != img_path:
                 if os.path.exists(thumb_path):
                     delete_file(thumb_path)
                 img.save(thumb_path, quality=95, subsampling=0)
             # thumb加水印
-            if thumb_mark == 1:
+            if config.thumb_mark == 1:
                 models.core.image.add_mark_thread(thumb_path, mark_list)
         else:
             thumb_path = img_path
 
         # 清理旧的fanart
-        if ',fanart' in download_files:
-            if fanart_path != img_path:
-                if os.path.exists(fanart_path):
-                    delete_file(fanart_path)
-                img.save(fanart_path, quality=95, subsampling=0)
+        if ',fanart' in config.download_files:
+            if self.cut_fanart_path != img_path:
+                if os.path.exists(self.cut_fanart_path):
+                    delete_file(self.cut_fanart_path)
+                img.save(self.cut_fanart_path, quality=95, subsampling=0)
             # fanart加水印
-            if fanart_mark == 1:
-                models.core.image.add_mark_thread(fanart_path, mark_list)
+            if config.fanart_mark == 1:
+                models.core.image.add_mark_thread(self.cut_fanart_path, mark_list)
 
         img.close()
         img_new_png.close()
 
         # 在主界面显示预览
-        self.parent().set_pixmap_thread(poster_path, thumb_path, poster_from='cut', cover_from='local')
+        self.parent().set_pixmap_thread(self.cut_poster_path, thumb_path, poster_from='cut', cover_from='local')
         self.parent().change_to_mainpage.emit('')
         return True
 
@@ -448,7 +439,3 @@ class CutWindow(QDialog):
                 self.move(e.globalPos() - self.m_DragPosition)
                 e.accept()
         # self.show_traceback_log('main',e.x(),e.y())
-
-    def close(self):
-        self.raw_img_path = ''
-        super().close()
