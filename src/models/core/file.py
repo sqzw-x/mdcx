@@ -858,7 +858,6 @@ def get_output_name(json_data, file_path, success_folder, file_ex):
 
 
 def newtdisk_creat_symlink(copy_flag, netdisk_path='', local_path=''):
-    real_path_list = []
     from_tool = False
     if not netdisk_path:
         from_tool = True
@@ -873,92 +872,73 @@ def newtdisk_creat_symlink(copy_flag, netdisk_path='', local_path=''):
     signal.show_log_text(f' 📁 Source path: {netdisk_path} \n 📁 Softlink path: {local_path} \n')
     try:
         if netdisk_path and local_path:
-            nfo_type_list = ['.nfo', '.jpg', '.png'] + config.sub_type.split('|')
-            file_type_list = config.media_type.lower().split('|') + nfo_type_list + config.sub_type.split('|')
+            copy_exts = ['.nfo', '.jpg', '.png'] + config.sub_type.split('|')
+            file_exts = config.media_type.lower().split('|') + copy_exts + config.sub_type.split('|')
             total = 0
             copy_num = 0
             link_num = 0
             fail_num = 0
             skip_num = 0
-            for root, dirs, files in os.walk(netdisk_path, topdown=True):
+            done = set()
+            for root, _, files in os.walk(netdisk_path, topdown=True):
                 if convert_path(root) == convert_path(local_path):
-                    dirs[:] = []  # 忽略当前文件夹子目录
                     continue
+
+                local_dir = convert_path(os.path.join(local_path, root.replace(netdisk_path, '', 1).strip('/\\')))
+                local_dir = re.sub(r"\s", ' ', local_dir).replace(' \\', "\\").replace('\\ ', "\\").strip().replace('■', '')
+                if not os.path.isdir(local_dir):
+                    os.makedirs(local_dir)
                 for f in files:
                     # 跳过隐藏文件、预告片、主题视频
-                    if re.search(r'^\..+', f):
+                    if f.startswith('.'):
                         continue
                     if 'trailer.' in f or 'trailers.' in f:
                         continue
                     if 'theme_video.' in f:
                         continue
+                    # 跳过未知扩展名
+                    ext = os.path.splitext(f)[1].lower()
+                    if ext not in file_exts:
+                        continue
 
-                    net_folder_path = convert_path(root)
-                    local_folder_path = convert_path(
-                        os.path.join(local_path, net_folder_path.replace(netdisk_path, '', 1).strip('/\\')))
-                    local_folder_path = re.sub(r"\s", ' ', local_folder_path) \
-                        .replace(' \\', "\\").replace('\\ ', "\\").strip().replace('■', '')
-                    file_type_current = os.path.splitext(f)[1].lower()
-                    if file_type_current in file_type_list:
-                        total += 1
-                        net_file_path = convert_path(os.path.join(root, f))
-                        local_file_path = convert_path(os.path.join(local_folder_path, f.strip()))
-                        local_file_path = re.sub(r"\s", ' ', local_file_path).strip().replace('■', '')
-                        if file_type_current in nfo_type_list:
-                            if copy_flag:
-                                if not os.path.isfile(local_file_path):
-                                    if not os.path.isdir(local_folder_path):
-                                        os.makedirs(local_folder_path)
-                                    copy_file(net_file_path, local_file_path)
-                                    signal.show_log_text(f' {total} 🍀 Copy done!\n {net_file_path} ')
-                                    copy_num += 1
-                                    continue
-                                else:
-                                    signal.show_log_text(f' {total} 🟠 Copy skip! '
-                                                         f'Softlink path already exists this file!\n'
-                                                         f' {net_file_path} ')
-                                    skip_num += 1
-                        else:
-                            if os.path.islink(net_file_path):
-                                net_file_path = read_link(net_file_path)
-                            if not os.path.exists(net_file_path):
-                                signal.show_log_text(
-                                    f' {total} 🟠 Link skip! Source file doesnot exist!\n {net_file_path} ')
-                                skip_num += 1
-                                continue
-                            elif net_file_path in real_path_list:
-                                signal.show_log_text(f' {total} 🟠 Link skip! Source file already linked, '
-                                                     f'this file is duplicate!\n {net_file_path} ')
-                                skip_num += 1
-                                continue
-                            else:
-                                real_path_list.append(net_file_path)
+                    total += 1
+                    net_file = convert_path(os.path.join(root, f))
+                    local_file = convert_path(os.path.join(local_dir, f.strip()))
+                    local_file = re.sub(r"\s", ' ', local_file).strip().replace('■', '')
 
-                            if os.path.islink(local_file_path) and not os.path.exists(local_file_path):
-                                # islink 无法判断该符号链接是否有效, 只能判断该符号链接是否存在
-                                delete_file(local_file_path)  # 删除无效的符号链接
-                            elif os.path.exists(local_file_path):
-                                # exists 可以判断链接是否有效, 无效时即使链接确实存在也返回 False
-                                signal.show_log_text(f' {total} 🟠 Link skip! '
-                                                     f'Softlink path already exists a real file!\n {net_file_path} ')
-                                skip_num += 1
-                                continue
-                            elif not os.path.isdir(local_folder_path):
-                                os.makedirs(local_folder_path)
+                    if os.path.exists(local_file):
+                        signal.show_log_text(f' {total} 🟠 Skip: a file or valid symlink already exists\n {net_file} ')
+                        skip_num += 1
+                        continue
+                    if os.path.islink(local_file):  # invalid symlink
+                        os.remove(local_file)
 
-                            try:
-                                os.symlink(net_file_path, local_file_path)
-                                signal.show_log_text(f' {total} 🍀 Link done!\n {net_file_path} ')
-                                link_num += 1
-                            except Exception as e:
-                                print(traceback.format_exc())
-                                error_info = ''
-                                if 'symbolic link privilege not held' in str(e):
-                                    error_info = '   \n没有创建权限，请尝试管理员权限！' \
-                                                 '或按照教程开启用户权限： https://www.jianshu.com/p/0e307bfe8770'
-                                signal.show_log_text(f' {total} 🔴 Link failed!{error_info} \n {net_file_path} ')
-                                signal.show_log_text(traceback.format_exc())
-                                fail_num += 1
+                    if ext in copy_exts:  # 直接复制的文件
+                        if not copy_flag:
+                            continue
+                        copy_file(net_file, local_file)
+                        signal.show_log_text(f' {total} 🍀 Copy done!\n {net_file} ')
+                        copy_num += 1
+                    else:
+                        # 不对原文件进行有效性检查以减小可能的网络 IO 开销
+                        if net_file in done:
+                            signal.show_log_text(f' {total} 🟠 Link skip! Source file already linked, this file is duplicate!\n {net_file} ')
+                            skip_num += 1
+                            continue
+                        done.add(net_file)
+
+                        try:
+                            os.symlink(net_file, local_file)
+                            signal.show_log_text(f' {total} 🍀 Link done!\n {net_file} ')
+                            link_num += 1
+                        except Exception as e:
+                            print(traceback.format_exc())
+                            error_info = ''
+                            if 'symbolic link privilege not held' in str(e):
+                                error_info = '   \n没有创建权限，请尝试管理员权限！或按照教程开启用户权限： https://www.jianshu.com/p/0e307bfe8770'
+                            signal.show_log_text(f' {total} 🔴 Link failed!{error_info} \n {net_file} ')
+                            signal.show_log_text(traceback.format_exc())
+                            fail_num += 1
 
             signal.show_log_text(f"\n 🎉🎉🎉 All finished!!!({get_used_time(start_time)}s) Total {total} , "
                                  f"Linked {link_num} , Copied {copy_num} , Skiped {skip_num} , Failed {fail_num} ")
@@ -1851,7 +1831,7 @@ def save_success_list(old_path='', new_path=''):
 def save_remain_list():
     if Flags.can_save_remain and 'remain_task' in config.switch_on:
         try:
-            with open(resources.userdata_path('remain.txt'), 'w', encoding='utf-8',errors='ignore') as f:
+            with open(resources.userdata_path('remain.txt'), 'w', encoding='utf-8', errors='ignore') as f:
                 f.write('\n'.join(Flags.remain_list))
                 Flags.can_save_remain = False
         except Exception as e:
