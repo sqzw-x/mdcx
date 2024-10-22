@@ -259,23 +259,11 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
 if __name__ == '__main__':
     # yapf: disable
     # print(main('TRE-82'))   # 没有背景图，封面图查找路径变了
-    print(main('gsad-18'))  # 没有背景图，封面图查找路径变了
-    # print(main('GHOV-21'))
-    # print(main('GHOV-28'))
-    # print(main('MIAE-346'))
-    # print(main('STARS-1919'))    # poster图片
-    # print(main('abw-157'))
-    # print(main('abs-141'))
+    print(main('gsad-18'))  # 没有背景图，封面图查找路径变了  # print(main('GHOV-21'))  # print(main('GHOV-28'))  # print(main('MIAE-346'))  # print(main('STARS-1919'))    # poster图片  # print(main('abw-157'))  # print(main('abs-141'))

@@ -64,11 +64,10 @@ class CutWindow(QDialog):
         self.Ui.pushButton_select_cutrange.setGeometry(QRect(420, 0, 379, 539))
         self.Ui.pushButton_select_cutrange.setCursor(QCursor(Qt.OpenHandCursor))
         self.Ui.pushButton_select_cutrange.setAcceptDrops(True)
-        self.Ui.pushButton_select_cutrange.setStyleSheet(
-            u"background-color: rgba(200, 200, 200, 80);\n"
-            "font-size:13px;\n" "font-weight:normal;"
-            "color: rgba(0, 0, 0, 255);\n"
-            "border:2px solid rgba(0, 55, 255, 255);\n")
+        self.Ui.pushButton_select_cutrange.setStyleSheet(u"background-color: rgba(200, 200, 200, 80);\n"
+                                                         "font-size:13px;\n" "font-weight:normal;"
+                                                         "color: rgba(0, 0, 0, 255);\n"
+                                                         "border:2px solid rgba(0, 55, 255, 255);\n")
         self.set_style()
         self.Ui.horizontalSlider_left.valueChanged.connect(self.change_postion_left)
         self.Ui.horizontalSlider_right.valueChanged.connect(self.change_postion_right)
@@ -80,8 +79,7 @@ class CutWindow(QDialog):
 
     def set_style(self):
         # 控件美化 裁剪弹窗
-        self.Ui.widget.setStyleSheet(
-            '''
+        self.Ui.widget.setStyleSheet('''
             * {
                 font-family: Consolas, 'PingFang SC', 'Microsoft YaHei UI', 'Noto Color Emoji', 'Segoe UI Emoji';
             }
@@ -121,8 +119,7 @@ class CutWindow(QDialog):
                 border-width:14px;
                 font-weight:bold;
             }
-            '''
-        )
+            ''')
 
     def change_postion_left(self):
         # abc: 0-10000
@@ -146,8 +143,7 @@ class CutWindow(QDialog):
 
     # 打开图片选择框
     def open_image(self):
-        img_path, img_type = QFileDialog. \
-            getOpenFileName(None, "打开图片", "", "*.jpg *.png;;All Files(*)", options=self.parent().options)
+        img_path, img_type = QFileDialog.getOpenFileName(None, "打开图片", "", "*.jpg *.png;;All Files(*)", options=self.parent().options)
         if img_path:
             self.showimage(img_path)
 
@@ -212,8 +208,8 @@ class CutWindow(QDialog):
                         if '.nfo' in each:
                             temp_path = os.path.join(img_folder, each)
                             break
-                json_data, movie_number, folder_old_path, file_name, file_ex, \
-                    sub_list, file_show_name, file_show_path = models.core.file.get_file_info(temp_path, copy_sub=False)
+                json_data, movie_number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = models.core.file.get_file_info(temp_path,
+                                                                                                                                                        copy_sub=False)
 
             self.setWindowTitle(json_data.get('number') + ' 封面图片裁剪')  # 设置窗口标题
 
@@ -226,9 +222,7 @@ class CutWindow(QDialog):
             poster_path = os.path.join(img_folder, 'poster.jpg')
             if pic_name == 0:  # 文件名-poster.jpg
                 if '-' in img_name:
-                    poster_path = img_path.replace('-fanart', '').replace('-thumb', '').replace('-poster',
-                                                                                                '').replace(
-                        img_ex, '') + '-poster.jpg'
+                    poster_path = img_path.replace('-fanart', '').replace('-thumb', '').replace('-poster', '').replace(img_ex, '') + '-poster.jpg'
             thumb_path = poster_path.replace('poster.', 'thumb.')
             fanart_path = poster_path.replace('poster.', 'fanart.')
             self.cut_thumb_path = thumb_path  # 裁剪后的thumb路径
@@ -273,8 +267,7 @@ class CutWindow(QDialog):
             self.rect_h = int(self.rect_w * self.rect_h_w_ratio)  # 计算裁剪框的高度
             self.rect_x = 0  # 裁剪框左上角的x值
             self.rect_y = int((self.pic_new_h - self.rect_h) / 2)  # 裁剪框左上角的y值（默认垂直居中）
-        self.Ui.pushButton_select_cutrange.setGeometry(
-            QRect(self.rect_x, self.rect_y, self.rect_w, self.rect_h))  # 显示裁剪框
+        self.Ui.pushButton_select_cutrange.setGeometry(QRect(self.rect_x, self.rect_y, self.rect_w, self.rect_h))  # 显示裁剪框
         self.getRealPos()  # 显示裁剪框实际位置
 
     # 计算在原图的裁剪位置
@@ -333,8 +326,7 @@ class CutWindow(QDialog):
         self.c_y = int(self.c_y)
 
         # 显示实际裁剪位置
-        self.Ui.label_cut_postion.setText(
-            '%s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
+        self.Ui.label_cut_postion.setText('%s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
 
         # self.show_traceback_log('选择位置： %s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
         # 显示实际裁剪尺寸

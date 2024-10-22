@@ -23,8 +23,7 @@ def get_title(html):
 
 
 def get_actor(html):
-    actor_result = html.xpath(
-        '//div[@class="box_works01_list clearfix"]//span[text()="出演女優"]/following-sibling::p[1]/text()')
+    actor_result = html.xpath('//div[@class="box_works01_list clearfix"]//span[text()="出演女優"]/following-sibling::p[1]/text()')
     return ','.join(actor_result)
 
 
@@ -54,8 +53,7 @@ def get_series(html):
 
 
 def get_director(html):
-    result = html.xpath(
-        '//span[contains(text(), "导演") or contains(text(), "導演") or contains(text(), "監督")]/following-sibling::*//text()')
+    result = html.xpath('//span[contains(text(), "导演") or contains(text(), "導演") or contains(text(), "監督")]/following-sibling::*//text()')
     return result[0] if result else ''
 
 
@@ -122,14 +120,12 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
     number_lo = number.lower()
     number_lo_noline = number_lo.replace('-', '')
     number_lo_space = number_lo.replace('-', ' ')
-    search_url_list = [f'https://faleno.jp/top/?s={number_lo_space}',
-                       f'https://falenogroup.com/top/?s={number_lo_space}']
+    search_url_list = [f'https://faleno.jp/top/?s={number_lo_space}', f'https://falenogroup.com/top/?s={number_lo_space}']
     real_url_list = []
     if real_url:
         real_url_list = [real_url]
     elif number.upper().startswith('FLN'):
-        real_url_list = [f"https://faleno.jp/top/works/{number_lo_noline}/",
-                         f"https://faleno.jp/top/works/{number_lo}/", f"https://falenogroup.com/works/{number_lo}/",
+        real_url_list = [f"https://faleno.jp/top/works/{number_lo_noline}/", f"https://faleno.jp/top/works/{number_lo}/", f"https://falenogroup.com/works/{number_lo}/",
                          f"https://falenogroup.com/works/{number_lo_noline}/"]
     log_info += '\n    🌐 faleno'
     mosaic = '有码'
@@ -179,8 +175,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
                 title = title.replace(' ' + each, '')
             cover_url = get_cover(html_detail)  # 获取cover
             if not poster_url:
-                poster_url = cover_url.replace('_1200.jpg', '_2125.jpg').replace('_tsp.jpg', '_actor.jpg').replace(
-                    '1200_re', '2125').replace('_1200-1', '_2125-1')
+                poster_url = cover_url.replace('_1200.jpg', '_2125.jpg').replace('_tsp.jpg', '_actor.jpg').replace('1200_re', '2125').replace('_1200-1', '_2125-1')
             outline = get_outline(html_detail)
             tag = ''
             release = get_release(html_detail)
@@ -240,24 +235,19 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
     except Exception as e:
         # print(traceback.format_exc())
         debug_info = str(e)
-        dic = {'title': '', 'cover': '', 'website': '', 'log_info': log_info, 'error_info': debug_info,
-               'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), ))}
+        dic = {
+            'title': '',
+            'cover': '',
+            'website': '',
+            'log_info': log_info,
+            'error_info': debug_info,
+            'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), ))
+        }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
 if __name__ == '__main__':
     # yapf: disable
-    print(main('fsdss-564'))
-    # print(main('mgold-017'))    # 地址带 -
-    # print(main('votan-034'))    # falenogroup.com 番号和数字加空格才能搜到
-    # print(main('fcdss-001'))    # 页面地址 flnc001
-    # print(main('FSDSS-037'))    # poster .replace('_1200-1', '_2125-1')
-    # print(main('flns-072'))       # outline 换行
+    print(main('fsdss-564'))  # print(main('mgold-017'))    # 地址带 -  # print(main('votan-034'))    # falenogroup.com 番号和数字加空格才能搜到  # print(main('fcdss-001'))    # 页面地址 flnc001  # print(main('FSDSS-037'))    # poster .replace('_1200-1', '_2125-1')  # print(main('flns-072'))       # outline 换行

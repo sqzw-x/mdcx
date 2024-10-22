@@ -227,15 +227,11 @@ def Init_Singal(self):
 
     def n(a): ...  # mousePressEvent 的返回值必须是 None, 用这个包装一下
 
-    self.Ui.label_download_actor_zip.mousePressEvent = lambda e: n(webbrowser.open(
-        'https://github.com/moyy996/AVDC/releases/tag/%E5%A4%B4%E5%83%8F%E5%8C%85-2'))
-    self.Ui.label_download_sub_zip.mousePressEvent = lambda e: n(webbrowser.open(
-        'https://www.dropbox.com/sh/vkbxawm6mwmwswr/AADqZiF8aUHmK6qIc7JSlURIa'))
-    self.Ui.label_download_mark_zip.mousePressEvent = lambda e: n(webbrowser.open(
-        'https://www.dropbox.com/sh/vkbxawm6mwmwswr/AADqZiF8aUHmK6qIc7JSlURIa'))
+    self.Ui.label_download_actor_zip.mousePressEvent = lambda e: n(webbrowser.open('https://github.com/moyy996/AVDC/releases/tag/%E5%A4%B4%E5%83%8F%E5%8C%85-2'))
+    self.Ui.label_download_sub_zip.mousePressEvent = lambda e: n(webbrowser.open('https://www.dropbox.com/sh/vkbxawm6mwmwswr/AADqZiF8aUHmK6qIc7JSlURIa'))
+    self.Ui.label_download_mark_zip.mousePressEvent = lambda e: n(webbrowser.open('https://www.dropbox.com/sh/vkbxawm6mwmwswr/AADqZiF8aUHmK6qIc7JSlURIa'))
     self.Ui.label_get_cookie_url.mousePressEvent = lambda e: n(webbrowser.open('https://tieba.baidu.com/p/5492736764'))
-    self.Ui.label_download_actor_db.mousePressEvent = lambda e: n(webbrowser.open(
-        'https://github.com/sqzw-x/mdcx/releases/tag/actor_info_database'))
+    self.Ui.label_download_actor_db.mousePressEvent = lambda e: n(webbrowser.open('https://github.com/sqzw-x/mdcx/releases/tag/actor_info_database'))
     # endregion
 
     # region 控件更新
@@ -267,8 +263,7 @@ def Init_Singal(self):
     self.pushButton_move_mp4.connect(self.Ui.pushButton_move_mp4.setText)
     self.pushButton_find_missing_number.connect(self.Ui.pushButton_find_missing_number.setText)
     self.label_result.connect(self.Ui.label_result.setText)
-    self.label_show_version.connect(self.Ui.label_show_version.setText)
-    # endregion
+    self.label_show_version.connect(self.Ui.label_show_version.setText)  # endregion
 
 
 def Init_QSystemTrayIcon(self):
@@ -289,7 +284,8 @@ def Init_QSystemTrayIcon(self):
     tray_menu.addAction(quit_action)
     self.tray_icon.setContextMenu(tray_menu)
     self.tray_icon.show()
-    # self.tray_icon.showMessage(f"MDCx {self.localversion}", u'已启动！欢迎使用!', QIcon(self.icon_ico), 3000) # icon的值  0没有图标  1是提示  2是警告  3是错误
+    # self.tray_icon.showMessage(f"MDCx {self.localversion}", u'已启动！欢迎使用!', QIcon(self.icon_ico), 3000)
+    # icon的值  0没有图标  1是提示  2是警告  3是错误
 
 
 def init_QTreeWidget(self):

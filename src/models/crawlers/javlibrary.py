@@ -304,13 +304,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {language: dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
@@ -321,29 +315,4 @@ if __name__ == '__main__':
     # print(main('SSNI-994'))
     # print(main('SSNI-795'))
     # print(main(' IPX-071'))
-    print(main('SNIS-003'))
-    # print(main('SSIS-118'))
-    # print(main('AA-007'))
-    # print(main('abs-141'))
-    # print(main('HYSD-00083'))
-    # print(main('IESP-660'))
-    # print(main('n1403'))
-    # print(main('GANA-1910'))
-    # print(main('heyzo-1031'))
-    # print(main_us('x-art.19.11.03'))
-    # print(main('032020-001'))
-    # print(main('S2M-055'))
-    # print(main('LUXU-1217'))
-    # print(main('SSIS-001', ''))
-    # print(main('SSIS-090', ''))
-    # print(main('SNIS-016', ''))
-    # print(main('HYSD-00083', ''))
-    # print(main('IESP-660', ''))
-    # print(main('n1403', ''))
-    # print(main('GANA-1910', ''))
-    # print(main('heyzo-1031', ''))
-    # print(main_us('x-art.19.11.03'))
-    # print(main('032020-001', ''))
-    # print(main('S2M-055', ''))
-    # print(main('LUXU-1217', ''))
-    # print(main_us('x-art.19.11.03', ''))
+    print(main('SNIS-003'))  # print(main('SSIS-118'))  # print(main('AA-007'))  # print(main('abs-141'))  # print(main('HYSD-00083'))  # print(main('IESP-660'))  # print(main('n1403'))  # print(main('GANA-1910'))  # print(main('heyzo-1031'))  # print(main_us('x-art.19.11.03'))  # print(main('032020-001'))  # print(main('S2M-055'))  # print(main('LUXU-1217'))  # print(main('SSIS-001', ''))  # print(main('SSIS-090', ''))  # print(main('SNIS-016', ''))  # print(main('HYSD-00083', ''))  # print(main('IESP-660', ''))  # print(main('n1403', ''))  # print(main('GANA-1910', ''))  # print(main('heyzo-1031', ''))  # print(main_us('x-art.19.11.03'))  # print(main('032020-001', ''))  # print(main('S2M-055', ''))  # print(main('LUXU-1217', ''))  # print(main_us('x-art.19.11.03', ''))

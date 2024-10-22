@@ -87,8 +87,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
     cookies = {"adult_check_flag": "1"}
     if not real_url and ('DLID' in number.upper() or 'ITEM' in number.upper() or 'GETCHU' in number.upper()):
         id = re.findall(r'\d+', number)[0]
-        real_url = f'https://dl.getchu.com/i/item{id}'
-        # real_url = 'https://dl.getchu.com/i/item4024984'
+        real_url = f'https://dl.getchu.com/i/item{id}'  # real_url = 'https://dl.getchu.com/i/item4024984'
 
     try:  # 捕获主动抛出的异常
         if not real_url:
@@ -98,8 +97,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
                 keyword = keyword.encode('cp932').decode('shift_jis')  # 转换为常见日文，比如～ 转换成 〜
             except:
                 pass
-            keyword2 = urllib.parse.quote_plus(keyword,
-                                               encoding="EUC-JP")  # quote() 不编码斜线，空格‘ ’编码为‘%20’；quote_plus() 会编码斜线为‘%2F’; 空格‘ ’编码为‘+’
+            keyword2 = urllib.parse.quote_plus(keyword, encoding="EUC-JP")  # quote() 不编码斜线，空格‘ ’编码为‘%20’；quote_plus() 会编码斜线为‘%2F’; 空格‘ ’编码为‘+’
             url_search = f'https://dl.getchu.com/search/search_list.php?dojin=1&search_category_id=&search_keyword={keyword2}&btnWordSearch=%B8%A1%BA%F7&action=search&set_category_flag=1'
             debug_info = f'搜索地址: {url_search} '
             log_info += web_info + debug_info
@@ -206,13 +204,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )
     return js
 
 
@@ -222,6 +214,4 @@ if __name__ == '__main__':
     # print(main('[PoRO]エロコンビニ店長 泣きべそ蓮っ葉・栞～お仕置きじぇらしぃナマ逸機～'))
     # print(main('母ちゃんの友達にシコってるところ見られた。'))
     # print(main('DLID4024984'))
-    print(
-        main('【姫始めセックス流出】人気Y●u●berリアル彼女とのプライベートハメ撮り映像流出!!初詣帰りに振袖姿のまま彼女にしゃぶらせ生中出し！生々しい映像データ'))
-    # print(main('好きにしやがれ GOTcomics'))    # 書籍，没有番号
+    print(main('【姫始めセックス流出】人気Y●u●berリアル彼女とのプライベートハメ撮り映像流出!!初詣帰りに振袖姿のまま彼女にしゃぶらせ生中出し！生々しい映像データ'))  # print(main('好きにしやがれ GOTcomics'))    # 書籍，没有番号

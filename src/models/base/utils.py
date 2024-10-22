@@ -79,11 +79,10 @@ def kill_a_thread(t):
 
 
 def get_user_agent():
-    temp_l = random.randint(109, 111)
+    temp_l = random.randint(109, 129)
     temp_m = random.randint(1, 5563)
     temp_n = random.randint(1, 180)
-    return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s.0.%s.%s Safari/537.36' % (
-        temp_l, temp_m, temp_n)
+    return f'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{temp_l}.0.{temp_m}.{temp_n} Safari/537.36'
 
 
 def convert_path(path):

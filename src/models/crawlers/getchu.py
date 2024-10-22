@@ -136,8 +136,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
                 keyword = keyword.encode('cp932').decode('shift_jis')  # 转换为常见日文，比如～ 转换成 〜
             except:
                 pass
-            keyword2 = urllib.parse.quote_plus(keyword,
-                                               encoding="EUC-JP")  # quote() 不编码斜线，空格‘ ’编码为‘%20’；quote_plus() 会编码斜线为‘%2F’; 空格‘ ’编码为‘+’
+            keyword2 = urllib.parse.quote_plus(keyword, encoding="EUC-JP")  # quote() 不编码斜线，空格‘ ’编码为‘%20’；quote_plus() 会编码斜线为‘%2F’; 空格‘ ’编码为‘+’
             url_search = f'http://www.getchu.com/php/search.phtml?genre=all&search_keyword={keyword2}&gc=gc'
             # http://www.getchu.com/php/search.phtml?genre=anime_dvd&search_keyword=_WORD_&check_key_dtl=1&submit=&genre=anime_dvd&gc=gc
             debug_info = f'搜索地址: {url_search} '
@@ -252,13 +251,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )
     return js
 
 
@@ -267,15 +260,4 @@ if __name__ == '__main__':
     # print(main('コンビニ○○Z 第三話 あなた、ヤンクレママですよね。旦那に万引きがバレていいんですか？'))
     # print(main('dokidokiりとる大家さん お家賃6突き目 妖しい踊りで悪霊祓い！『婦警』さんのきわどいオシオキ'))
     # print(main('[PoRO]エロコンビニ店長 泣きべそ蓮っ葉・栞～お仕置きじぇらしぃナマ逸機～'))
-    print(main('4562215333534'))
-    # print(main('人妻、蜜と肉 第二巻［月野定規］'))
-    # print(main('ACHDL-1159'))
-    # print(main('好きにしやがれ GOTcomics'))    # 書籍，没有番号
-    # print(main('あまあまロ●ータ女装男子レズ キス・フェラ・69からの3P介入'))
-    # print(main('DLID4033023'))
-    # print(main('', appoint_url='https://dl.getchu.com/i/item4033023'))
-    # print(main('ACMDP-1005')) # 有时间、导演，上下集ACMDP-1005B
-    # print(main('ISTU-5391'))
-    # print(main('INH-392'))
-    # print(main('ISTU-5391', appoint_url='http://www.getchu.com/soft.phtml?id=1180483'))
-    # print(main('SPY×FAMILY Vol.1 Blu-ray Disc＜初回生産限定版＞'))    # dmm 没有
+    print(main('4562215333534'))  # print(main('人妻、蜜と肉 第二巻［月野定規］'))  # print(main('ACHDL-1159'))  # print(main('好きにしやがれ GOTcomics'))    # 書籍，没有番号  # print(main('あまあまロ●ータ女装男子レズ キス・フェラ・69からの3P介入'))  # print(main('DLID4033023'))  # print(main('', appoint_url='https://dl.getchu.com/i/item4033023'))  # print(main('ACMDP-1005')) # 有时间、导演，上下集ACMDP-1005B  # print(main('ISTU-5391'))  # print(main('INH-392'))  # print(main('ISTU-5391', appoint_url='http://www.getchu.com/soft.phtml?id=1180483'))  # print(main('SPY×FAMILY Vol.1 Blu-ray Disc＜初回生産限定版＞'))    # dmm 没有

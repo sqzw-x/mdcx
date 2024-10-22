@@ -64,13 +64,7 @@ def getTag(html):  # 获取标签
 
 
 def getOutline(html):  # 获取简介
-    result = (''.join(html.xpath('//div[@class="col des"]//text()'))
-              .strip('[' ']')
-              .replace("',", '')
-              .replace('\\n', '')
-              .replace("'", '')
-              .replace('・', '')
-              .strip())
+    result = (''.join(html.xpath('//div[@class="col des"]//text()')).strip('[' ']').replace("',", '').replace('\\n', '').replace("'", '').replace('・', '').strip())
     return result
 
 
@@ -167,9 +161,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
                     'publisher': studio,
                     'source': 'fc2hub.main',
                     'website': str(real_url).strip('[]'),
-                    'actor_photo': {
-                        actor: ''
-                    },
+                    'actor_photo': {actor: ''},
                     'cover': str(cover_url),
                     'poster': '',
                     'extrafanart': extrafanart,
@@ -202,29 +194,11 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )
     return js
 
 
 if __name__ == '__main__':
     # yapf: disable
     # print(main('FC2-424646'))
-    print(main('1940476'))  # 无码
-    # print(main('1860858', ''))  #有码
-    # print(main('1599412', ''))
-    # print(main('1131214', ''))  # 未找到
-    # print(main('1837553', ''))
-    # print(main('1613618', ''))
-    # print(main('1837553', ''))
-    # print(main('1837589', ""))
-    # print(main('1760182', ''))
-    # print(main('1251689', ''))
-    # print(main('674239', ""))
-    # print(main('674239', "))
-    # print(main('1924003', ''))   # 无图
+    print(main('1940476'))  # 无码  # print(main('1860858', ''))  #有码  # print(main('1599412', ''))  # print(main('1131214', ''))  # 未找到  # print(main('1837553', ''))  # print(main('1613618', ''))  # print(main('1837553', ''))  # print(main('1837589', ""))  # print(main('1760182', ''))  # print(main('1251689', ''))  # print(main('674239', ""))  # print(main('674239', "))  # print(main('1924003', ''))   # 无图

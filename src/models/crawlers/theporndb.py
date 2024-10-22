@@ -392,17 +392,16 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
     except:
         # print(traceback.format_exc())
         req_web = req_web + '(%ss) ' % (round((time.time() - start_time), ))
-        return theporndb_movies.main(number, appoint_url=appoint_url, log_info=log_info, req_web=req_web,
-                                     language='zh_cn', file_path=file_path, appoint_number=appoint_number)
+        return theporndb_movies.main(number,
+                                     appoint_url=appoint_url,
+                                     log_info=log_info,
+                                     req_web=req_web,
+                                     language='zh_cn',
+                                     file_path=file_path,
+                                     appoint_number=appoint_number)
 
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
@@ -428,26 +427,5 @@ if __name__ == '__main__':
     # print(main('', file_path='AdultTime.20.02.17.Angela.White.Full.Body.Physical.Exam.XXX.1080p.MP4-KTR.mp4'))   # 无命中演员，视为失败
     # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Lexi Bloom & Malena Morgan-Stepping-Out_SexArt-1080p.mp4'))   # 多个，按相似度命中
     # print(main('', file_path='SexArt.12.04.13 Sex Art.mp4'))   # 多个，按相似度命中
-    print(main('nubilefilms-all-work-and-no-play', file_path=''))
-    # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Malena Morgan-Under-The-Elle-Tree_SexArt-1080p.mp4'))   # 多个，按相似度命中
-    # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Rilee Marks-Whispers_SexArt-1080p.mp4'))   # 多个，按相似度命中
-    # print(main('', file_path='SexArt_12.04.13-Hayden Hawkens & Malena Morgan-Golden_SexArt-1080p.mp4'))   # 多个，按相似度命中
-    # print(main('', file_path='SexArt_12.04.13-Hayden Hawkens-Butterfly-Blue_SexArt-1080p.mp4'))   # 多个，按相似度命中
-    # print(main('', file_path='SexArt_12.04.13-Lexi Bloom & Logan Pierce-My-First_SexArt-1080p.mp4'))   # 多个，按相似度命中
-    # print(main('', file_path='LittleCaprice-Dreams.23.02.18.sky.pierce.and.little.caprice.nasstyx.4k.mp4'))   # 日期不对，缺失演员，标题名顺序不匹配，待调研方案
-    # print(main('', file_path='LittleCaprice-Dreams.23.02.18.nasstyx.little.caprice.sky.pierce.max.4k.mp4'))   # 缺失演员
-    # print(main('', file_path='ClubSeventeen.18.09.24.Alecia.Fox.Hardcore.XXX.2160p.MP4-KTR[rarbg].mp4'))   # 系列转换
-    # print(main('', file_path='ClubSeventeen.18.06.11.Alecia.Fox.And.Gia.Mulino.Lesbian.XXX.2160p.MP4-KTR[rarbg].mp4'))   # 系列转换
-    # print(main('', file_path='ClubSeventeen.18.07.23.Alecia.Fox.And.Angela.Allison.Lesbian.XXX.2160p.MP4-KTR[rarbg].mp4'))   # 系列转换
-    # print(main('', file_path='ClubSeventeen.18.10.09.Alecia.Fox.Solo.XXX.2160p.MP4-KTR[rarbg].mp4')) # 多个，按相似度命中
-    # print(main('', file_path='WhiteTeensBlackCocks.17.07.09.Alecia.Fox.XXX.2160p.MP4-KTR[rarbg].mp4'))   # 缺失资源
-    # print(main('', file_path='Z:\\分类\\A-日本系列-1080P\\working2\\问题\\blacked.23.02.04.agatha.vega.lika.star.and.jazlyn.ray.mp4'))   # 缺失资源
-    # print(main('', file_path='brazzersexxtra.23.02.09.aria.lee.and.lulu.chu.pervy.practices.part.1.mp4'))
-    # print(main('', file_path='brazzersexxtra.23.02.09.lulu.chu.pervy.practices.part.2..mp4'))
-    # print(main('blacked-2015-03-22-karla-kush', file_path='blacked-2015-03-22-karla-kush.ts'))
-    # print(main('', file_path='tft-2019-01-14-rachael-cavalli-my-teachers-secrets.ts'))
-    # print(main('', file_path='hussie-pass-bts-new-boobies-a-brand-new-girl.ts'))    # 演员没有性别
-    # print(main('SWhores.23.02.14', file_path='SWhores.23.02.14..Anal Girl with No Extras.1080P.ts'))    # 未获取到演员
-    # print(main('', file_path='/test/work/CzechStreets.2019-01-01.18 Y O Virtuoso with Ddd Tits.Nada.mp4'))    # 未获取到演员
-    # print(main('Evolvedfights.20.10.30',
-    #            file_path='AARM-018 - 2021-09-28 - 未知演员 - アロマ企画，アロマ企画/evolvedfights.20.10.30.kay.carter.vs.nathan.bronson.mp4'))
+    print(main('nubilefilms-all-work-and-no-play',
+               file_path=''))  # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Malena Morgan-Under-The-Elle-Tree_SexArt-1080p.mp4'))   # 多个，按相似度命中  # print(main('', file_path='SexArt_12.04.13-Elle Alexandra & Rilee Marks-Whispers_SexArt-1080p.mp4'))   # 多个，按相似度命中  # print(main('', file_path='SexArt_12.04.13-Hayden Hawkens & Malena Morgan-Golden_SexArt-1080p.mp4'))   # 多个，按相似度命中  # print(main('', file_path='SexArt_12.04.13-Hayden Hawkens-Butterfly-Blue_SexArt-1080p.mp4'))   # 多个，按相似度命中  # print(main('', file_path='SexArt_12.04.13-Lexi Bloom & Logan Pierce-My-First_SexArt-1080p.mp4'))   # 多个，按相似度命中  # print(main('', file_path='LittleCaprice-Dreams.23.02.18.sky.pierce.and.little.caprice.nasstyx.4k.mp4'))   # 日期不对，缺失演员，标题名顺序不匹配，待调研方案  # print(main('', file_path='LittleCaprice-Dreams.23.02.18.nasstyx.little.caprice.sky.pierce.max.4k.mp4'))   # 缺失演员  # print(main('', file_path='ClubSeventeen.18.09.24.Alecia.Fox.Hardcore.XXX.2160p.MP4-KTR[rarbg].mp4'))   # 系列转换  # print(main('', file_path='ClubSeventeen.18.06.11.Alecia.Fox.And.Gia.Mulino.Lesbian.XXX.2160p.MP4-KTR[rarbg].mp4'))   # 系列转换  # print(main('', file_path='ClubSeventeen.18.07.23.Alecia.Fox.And.Angela.Allison.Lesbian.XXX.2160p.MP4-KTR[rarbg].mp4'))   # 系列转换  # print(main('', file_path='ClubSeventeen.18.10.09.Alecia.Fox.Solo.XXX.2160p.MP4-KTR[rarbg].mp4')) # 多个，按相似度命中  # print(main('', file_path='WhiteTeensBlackCocks.17.07.09.Alecia.Fox.XXX.2160p.MP4-KTR[rarbg].mp4'))   # 缺失资源  # print(main('', file_path='Z:\\分类\\A-日本系列-1080P\\working2\\问题\\blacked.23.02.04.agatha.vega.lika.star.and.jazlyn.ray.mp4'))   # 缺失资源  # print(main('', file_path='brazzersexxtra.23.02.09.aria.lee.and.lulu.chu.pervy.practices.part.1.mp4'))  # print(main('', file_path='brazzersexxtra.23.02.09.lulu.chu.pervy.practices.part.2..mp4'))  # print(main('blacked-2015-03-22-karla-kush', file_path='blacked-2015-03-22-karla-kush.ts'))  # print(main('', file_path='tft-2019-01-14-rachael-cavalli-my-teachers-secrets.ts'))  # print(main('', file_path='hussie-pass-bts-new-boobies-a-brand-new-girl.ts'))    # 演员没有性别  # print(main('SWhores.23.02.14', file_path='SWhores.23.02.14..Anal Girl with No Extras.1080P.ts'))    # 未获取到演员  # print(main('', file_path='/test/work/CzechStreets.2019-01-01.18 Y O Virtuoso with Ddd Tits.Nada.mp4'))    # 未获取到演员  # print(main('Evolvedfights.20.10.30',  #            file_path='AARM-018 - 2021-09-28 - 未知演员 - アロマ企画，アロマ企画/evolvedfights.20.10.30.kay.carter.vs.nathan.bronson.mp4'))

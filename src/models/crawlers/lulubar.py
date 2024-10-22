@@ -89,8 +89,7 @@ def get_mosaic(html):
 
 
 def get_tag(html):
-    result = html.xpath(
-        '//div[@class="tag_box d-flex flex-wrap p-1 col-12 mb-1"]/a[@class="tag" and contains(@href,"bytagdetail")]/text()')
+    result = html.xpath('//div[@class="tag_box d-flex flex-wrap p-1 col-12 mb-1"]/a[@class="tag" and contains(@href,"bytagdetail")]/text()')
     new_list = []
     for a in result:
         new_list.append(a.strip())
@@ -241,13 +240,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
@@ -255,12 +248,4 @@ if __name__ == '__main__':
     # yapf: disable
     # print(main('TRE-82'))   # 没有背景图，封面图查找路径变了
     # print(main('gsad-18'))   # 没有结果
-    print(main('SSIS-463'))
-    # print(main('ebod-900'))         # 双人
-    # print(main('MDHT-0009'))    # 国产
-    # print(main('GHOV-21'))
-    # print(main('GHOV-28'))
-    # print(main('MIAE-346'))
-    # print(main('STARS-1919'))    # poster图片
-    # print(main('abw-157'))
-    # print(main('abs-141'))
+    print(main('SSIS-463'))  # print(main('ebod-900'))         # 双人  # print(main('MDHT-0009'))    # 国产  # print(main('GHOV-21'))  # print(main('GHOV-28'))  # print(main('MIAE-346'))  # print(main('STARS-1919'))    # poster图片  # print(main('abw-157'))  # print(main('abs-141'))

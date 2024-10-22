@@ -156,9 +156,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
                 'publisher': studio,
                 'source': 'fc2',
                 'website': real_url,
-                'actor_photo': {
-                    actor: ''
-                },
+                'actor_photo': {actor: ''},
                 'cover': cover_url,
                 'poster': poster_url,
                 'extrafanart': extrafanart,
@@ -190,28 +188,11 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )
     return js
 
 
 if __name__ == '__main__':
     # yapf: disable
-    print(main('1723984', ''))  # 有码
-    # print(main('1924776', ''))
-    # print(main('1860858', ''))
-    # print(main('1599412', ''))    # fc2hub有，fc2/fc2club没有
-    # print(main('1131214', ''))    # fc2club有，fc2/fc2hub没有
-    # print(main('1837553', ''))  # 无码
-    # print(main('1613618', ''))
-    # print(main('1837553', ''))
-    # print(main('1837589', ""))
-    # print(main('1760182', ''))
-    # print(main('1251689', ''))
-    # print(main('674239', ""))
-    # print(main('674239', "))
+    print(main('1723984',
+               ''))  # 有码  # print(main('1924776', ''))  # print(main('1860858', ''))  # print(main('1599412', ''))    # fc2hub有，fc2/fc2club没有  # print(main('1131214', ''))    # fc2club有，fc2/fc2hub没有  # print(main('1837553', ''))  # 无码  # print(main('1613618', ''))  # print(main('1837553', ''))  # print(main('1837589', ""))  # print(main('1760182', ''))  # print(main('1251689', ''))  # print(main('674239', ""))  # print(main('674239', "))

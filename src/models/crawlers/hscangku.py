@@ -27,8 +27,7 @@ def get_actor_photo(actor):
 
 def get_detail_info(html, real_url, number, file_path):
     href = re.split(r'[/.]', real_url)[-2]
-    title_h1 = html.xpath(
-        '//h3[@class="title" and not(contains(normalize-space(.), "目录")) and not(contains(normalize-space(.), "为你推荐"))]/text()')
+    title_h1 = html.xpath('//h3[@class="title" and not(contains(normalize-space(.), "目录")) and not(contains(normalize-space(.), "为你推荐"))]/text()')
     title = title_h1[0].replace(number + ' ', '').strip() if title_h1 else number
     actor = get_extra_info(title, file_path, info_type="actor")
     tag = get_extra_info(title, file_path, info_type="tag")
@@ -177,13 +176,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )
     return js
 
 

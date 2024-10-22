@@ -136,7 +136,7 @@ def get_video_size(json_data, file_path):
     if definition and 'definition' in config.tag_include:
         new_tag_list.insert(0, definition)
         if hd_get == 'video':
-            new_tag_list.insert(0, codec_fourcc.upper()) # 插入编码格式
+            new_tag_list.insert(0, codec_fourcc.upper())  # 插入编码格式
     json_data['tag'] = '，'.join(new_tag_list)
     return json_data
 
@@ -181,8 +181,7 @@ def deal_url(url):
 
 def replace_special_word(json_data):
     # 常见字段替换的字符
-    all_key_word = ['title', 'originaltitle', 'outline', 'originalplot', 'series', 'director', 'studio',
-                    'publisher', 'tag']
+    all_key_word = ['title', 'originaltitle', 'outline', 'originalplot', 'series', 'director', 'studio', 'publisher', 'tag']
     for key, value in config.special_word.items():
         for each in all_key_word:
             json_data[each] = json_data[each].replace(key, value)
@@ -292,17 +291,13 @@ def get_movie_path_setting(file_path=''):
     movie_path = nfd2c(movie_path)
     end_folder_name = split_path(movie_path)[1]
     # 用户设置的软链接输出目录
-    softlink_path = config.softlink_path \
-        .replace('\\', '/').replace('end_folder_name', end_folder_name)
+    softlink_path = config.softlink_path.replace('\\', '/').replace('end_folder_name', end_folder_name)
     # 用户设置的成功输出目录
-    success_folder = config.success_output_folder \
-        .replace('\\', '/').replace('end_folder_name', end_folder_name)
+    success_folder = config.success_output_folder.replace('\\', '/').replace('end_folder_name', end_folder_name)
     # 用户设置的失败输出目录
-    failed_folder = config.failed_output_folder \
-        .replace('\\', '/').replace('end_folder_name', end_folder_name)
+    failed_folder = config.failed_output_folder.replace('\\', '/').replace('end_folder_name', end_folder_name)
     # 用户设置的排除目录
-    escape_folder_list = config.folders \
-        .replace('\\', '/').replace('end_folder_name', end_folder_name).replace('，', ',').split(',')
+    escape_folder_list = config.folders.replace('\\', '/').replace('end_folder_name', end_folder_name).replace('，', ',').split(',')
     # 用户设置的剧照副本目录
     extrafanart_folder = config.extrafanart_folder.replace('\\', '/')
 
@@ -336,5 +331,4 @@ def get_movie_path_setting(file_path=''):
             success_folder = success_folder.replace('first_folder_name', first_folder_name)
             failed_folder = failed_folder.replace('first_folder_name', first_folder_name)
 
-    return convert_path(movie_path), success_folder, failed_folder, \
-        escape_folder_new_list, extrafanart_folder, softlink_path
+    return convert_path(movie_path), success_folder, failed_folder, escape_folder_new_list, extrafanart_folder, softlink_path

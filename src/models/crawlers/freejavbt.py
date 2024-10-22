@@ -23,8 +23,8 @@ def get_title(html):
         number = result[0]
         title = result[1].replace(number, '').strip()
         number = number.strip()
-        title = title.replace('中文字幕', '').replace('無碼', '').replace("\\n", '').replace('_', '-').replace(
-            number.upper(), '').replace(number, '').replace('--', '-').strip()
+        title = title.replace('中文字幕', '').replace('無碼', '').replace("\\n", '').replace('_', '-').replace(number.upper(), '').replace(number, '').replace('--',
+                                                                                                                                                               '-').strip()
         if not title or '翻译错误' in title or '每日更新' in str(result):
             return '', ''
         return title, number
@@ -34,39 +34,21 @@ def get_title(html):
 
 def get_actor(html):
     actor_result = html.xpath('//a[@class="actress"]/text()')
-    av_man = [
-        '貞松大輔', '鮫島', '森林原人', '黒田悠斗', '主観', '吉村卓', '野島誠', '小田切ジュン', 'しみけん',
-        'セツネヒデユキ',
-        '大島丈', '玉木玲', 'ウルフ田中', 'ジャイアント廣田', 'イセドン内村', '西島雄介', '平田司', '杉浦ボッ樹',
-        '大沢真司', 'ピエール剣',
-        '羽田', '田淵正浩', 'タツ', '南佳也', '吉野篤史', '今井勇太', 'マッスル澤野', '井口', '松山伸也', '花岡じった',
-        '佐川銀次', 'およよ中野', '小沢とおる', '橋本誠吾', '阿部智広', '沢井亮', '武田大樹', '市川哲也', '???',
-        '浅野あたる',
-        '梅田吉雄', '阿川陽志', '素人', '結城結弦', '畑中哲也', '堀尾', '上田昌宏', 'えりぐち', '市川潤', '沢木和也',
-        'トニー大木', '横山大輔', '一条真斗', '真田京', 'イタリアン高橋', '中田一平', '完全主観', 'イェーイ高島',
-        '山田万次郎',
-        '澤地真人', '杉山', 'ゴロー', '細田あつし', '藍井優太', '奥村友真', 'ザーメン二郎', '桜井ちんたろう',
-        '冴山トシキ', '久保田裕也',
-        '戸川夏也', '北こうじ', '柏木純吉', 'ゆうき', 'トルティーヤ鈴木', '神けんたろう', '堀内ハジメ', 'ナルシス小林',
-        'アーミー', '池田径',
-        '吉村文孝', '優生', '久道実', '一馬', '辻隼人', '片山邦生', 'Qべぇ', '志良玉弾吾', '今岡爽紫郎', '工藤健太',
-        '原口', 'アベ', '染島貢', '岩下たろう', '小野晃', 'たむらあゆむ', '川越将護', '桜木駿', '瀧口',
-        'TJ本田', '園田', '宮崎', '鈴木一徹', '黒人', 'カルロス', '天河', 'ぷーてゃん', '左曲かおる', '富田', 'TECH',
-        'ムールかいせ',
-        '健太', '山田裕二', '池沼ミキオ', 'ウサミ', '押井敬之', '浅見草太', 'ムータン', 'フランクフルト林', '石橋豊彦',
-        '矢野慎二',
-        '芦田陽', 'くりぼ', 'ダイ', 'ハッピー池田', '山形健', '忍野雅一', '渋谷優太', '服部義', 'たこにゃん',
-        '北山シロ', 'つよぽん',
-        '山本いくお', '学万次郎', '平井シンジ', '望月', 'ゆーきゅん', '頭田光', '向理来', 'かめじろう', '高橋しんと',
-        '栗原良', 'テツ神山',
-        'タラオ', '真琴', '滝本', '金田たかお', '平ボンド', '春風ドギー', '桐島達也', '中堀健二', '徳田重男',
-        '三浦屋助六',
-        '志戸哲也', 'ヒロシ', 'オクレ', '羽目白武', 'ジョニー岡本', '幸野賀一', 'インフィニティ', 'ジャック天野',
-        '覆面', '安大吉',
-        '井上亮太', '笹木良一', '艦長', '軍曹', 'タッキー', '阿部ノボル', 'ダウ兄', 'まーくん', '梁井一',
-        'カンパニー松尾', '大塚玉堂',
-        '日比野達郎', '小梅', 'ダイナマイト幸男', 'タケル', 'くるみ太郎', '山田伸夫', '氷崎健人'
-    ]
+    av_man = ['貞松大輔', '鮫島', '森林原人', '黒田悠斗', '主観', '吉村卓', '野島誠', '小田切ジュン', 'しみけん', 'セツネヒデユキ', '大島丈', '玉木玲', 'ウルフ田中',
+              'ジャイアント廣田', 'イセドン内村', '西島雄介', '平田司', '杉浦ボッ樹', '大沢真司', 'ピエール剣', '羽田', '田淵正浩', 'タツ', '南佳也', '吉野篤史',
+              '今井勇太', 'マッスル澤野', '井口', '松山伸也', '花岡じった', '佐川銀次', 'およよ中野', '小沢とおる', '橋本誠吾', '阿部智広', '沢井亮', '武田大樹',
+              '市川哲也', '???', '浅野あたる', '梅田吉雄', '阿川陽志', '素人', '結城結弦', '畑中哲也', '堀尾', '上田昌宏', 'えりぐち', '市川潤', '沢木和也', 'トニー大木',
+              '横山大輔', '一条真斗', '真田京', 'イタリアン高橋', '中田一平', '完全主観', 'イェーイ高島', '山田万次郎', '澤地真人', '杉山', 'ゴロー', '細田あつし',
+              '藍井優太', '奥村友真', 'ザーメン二郎', '桜井ちんたろう', '冴山トシキ', '久保田裕也', '戸川夏也', '北こうじ', '柏木純吉', 'ゆうき', 'トルティーヤ鈴木',
+              '神けんたろう', '堀内ハジメ', 'ナルシス小林', 'アーミー', '池田径', '吉村文孝', '優生', '久道実', '一馬', '辻隼人', '片山邦生', 'Qべぇ', '志良玉弾吾',
+              '今岡爽紫郎', '工藤健太', '原口', 'アベ', '染島貢', '岩下たろう', '小野晃', 'たむらあゆむ', '川越将護', '桜木駿', '瀧口', 'TJ本田', '園田', '宮崎',
+              '鈴木一徹', '黒人', 'カルロス', '天河', 'ぷーてゃん', '左曲かおる', '富田', 'TECH', 'ムールかいせ', '健太', '山田裕二', '池沼ミキオ', 'ウサミ', '押井敬之',
+              '浅見草太', 'ムータン', 'フランクフルト林', '石橋豊彦', '矢野慎二', '芦田陽', 'くりぼ', 'ダイ', 'ハッピー池田', '山形健', '忍野雅一', '渋谷優太', '服部義',
+              'たこにゃん', '北山シロ', 'つよぽん', '山本いくお', '学万次郎', '平井シンジ', '望月', 'ゆーきゅん', '頭田光', '向理来', 'かめじろう', '高橋しんと',
+              '栗原良', 'テツ神山', 'タラオ', '真琴', '滝本', '金田たかお', '平ボンド', '春風ドギー', '桐島達也', '中堀健二', '徳田重男', '三浦屋助六', '志戸哲也',
+              'ヒロシ', 'オクレ', '羽目白武', 'ジョニー岡本', '幸野賀一', 'インフィニティ', 'ジャック天野', '覆面', '安大吉', '井上亮太', '笹木良一', '艦長', '軍曹',
+              'タッキー', '阿部ノボル', 'ダウ兄', 'まーくん', '梁井一', 'カンパニー松尾', '大塚玉堂', '日比野達郎', '小梅', 'ダイナマイト幸男', 'タケル', 'くるみ太郎',
+              '山田伸夫', '氷崎健人']
     actor_list = [i.strip() for i in actor_result if i.replace('?', '')]
     all_actor_list = actor_list.copy()
     for each in all_actor_list:
@@ -89,8 +71,7 @@ def get_actor_photo(actor):
 
 
 def get_runtime(html):
-    result = html.xpath(
-        '//span[contains(text(), "时长") or contains(text(), "時長") or contains(text(), "収録時間")]/following-sibling::*//text()')
+    result = html.xpath('//span[contains(text(), "时长") or contains(text(), "時長") or contains(text(), "収録時間")]/following-sibling::*//text()')
     if result:
         result = re.findall(r'\d+', result[0])
     return result[0] if result else ''
@@ -102,14 +83,12 @@ def get_series(html):
 
 
 def get_director(html):
-    result = html.xpath(
-        '//span[contains(text(), "导演") or contains(text(), "導演") or contains(text(), "監督")]/following-sibling::*//text()')
+    result = html.xpath('//span[contains(text(), "导演") or contains(text(), "導演") or contains(text(), "監督")]/following-sibling::*//text()')
     return result[0] if result else ''
 
 
 def get_studio(html):
-    result = html.xpath(
-        '//span[contains(text(), "制作") or contains(text(), "製作") or contains(text(), "メーカー")]/following-sibling::*//text()')
+    result = html.xpath('//span[contains(text(), "制作") or contains(text(), "製作") or contains(text(), "メーカー")]/following-sibling::*//text()')
     return result[0] if result else ''
 
 
@@ -138,9 +117,7 @@ def get_tag(html):
 
 def get_cover(html):
     try:
-        result = html.xpath(
-            "//img[@class='video-cover rounded lazyload' or @class='col-lg-2 col-md-2 col-sm-6 col-12 lazyload']/@data-src")[
-            0]
+        result = html.xpath("//img[@class='video-cover rounded lazyload' or @class='col-lg-2 col-md-2 col-sm-6 col-12 lazyload']/@data-src")[0]
         if 'no_preview_lg' in result or 'http' not in result:
             return ''
     except:
@@ -276,16 +253,16 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
     except Exception as e:
         # print(traceback.format_exc())
         debug_info = str(e)
-        dic = {'title': '', 'cover': '', 'website': '', 'log_info': log_info, 'error_info': debug_info,
-               'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), ))}
+        dic = {
+            'title': '',
+            'cover': '',
+            'website': '',
+            'log_info': log_info,
+            'error_info': debug_info,
+            'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), ))
+        }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
@@ -296,65 +273,4 @@ if __name__ == '__main__':
     # print(main('ssis-118'))
     # print(main('DANDY-520', ''))    # 预告片默认低品质dm，改成高品质dmb
     # print(main('PPPD-653'))
-    print(main('SSNI-531'))
-    # print(main('ssis-330')) # 预告片
-    # print(main('n1403'))
-    # print(main('SKYHD-014'))       # 无预览图
-    # print(main('FC2-424646'))     # 无番号
-    # print(main('CWPBD-168'))
-    # print(main('BadMilfs.22.04.02'))
-    # print(main('vixen.19.12.10'))
-    # print(main('CEMD-133'))
-    # print(main('FC2-880652')) # 无番号
-    # print(main('PLA-018'))
-    # print(main('SIVR-060'))
-    # print(main('STCV-067'))
-    # print(main('ALDN-107'))
-    # print(main('DSVR-1205'))    # 无标题
-    # print(main('SIVR-100'))
-    # print(main('FC2-2787433'))
-    # print(main('MIDV-018'))
-    # print(main('MIDV-018', appoint_url='https://javdb.com/v/BnMY9'))
-    # print(main('SVSS-003'))
-    # print(main('SIVR-008'))
-    # print(main('blacked.21.07.03'))
-    # print(main('FC2-1262472'))  # 需要登录
-    # print(main('HUNTB-107'))  # 预告片返回url错误，只有https
-    # print(main('FC2-2392657'))                                                  # 需要登录
-    # print(main('GS-067'))                                                       # 两个同名番号
-    # print(main('MIDE-022'))
-    # print(main('KRAY-001'))
-    # print(main('ssis-243'))
-    # print(main('MIDE-900', 'https://javdb.com/v/MZp24?locale=en'))
-    # print(main('TD-011'))
-    # print(main('stars-011'))    # 发行商SOD star，下载封面
-    # print(main('stars-198'))  # 发行商SOD star，下载封面
-    # print(main('mium-748'))
-    # print(main('KMHRS-050'))    # 剧照第一张作为poster
-    # print(main('SIRO-4042'))
-    # print(main('snis-035'))
-    # print(main('vixen.18.07.18', ''))
-    # print(main('vixen.16.08.02', ''))
-    # print(main('SNIS-016', ''))
-    # print(main('bangbros18.19.09.17'))
-    # print(main('x-art.19.11.03'))
-    # print(main('abs-141'))
-    # print(main('HYSD-00083'))
-    # print(main('IESP-660'))
-    # print(main('GANA-1910'))
-    # print(main('heyzo-1031'))
-    # print(main('032020-001'))
-    # print(main('S2M-055'))
-    # print(main('LUXU-1217'))
-    # print(main('SSIS-001', ''))
-    # print(main('SSIS-090', ''))
-    # print(main('HYSD-00083', ''))
-    # print(main('IESP-660', ''))
-    # print(main('n1403', ''))
-    # print(main('GANA-1910', ''))
-    # print(main('heyzo-1031', ''))
-    # print(main_us('x-art.19.11.03'))
-    # print(main('032020-001', ''))
-    # print(main('S2M-055', ''))
-    # print(main('LUXU-1217', ''))
-    # print(main_us('x-art.19.11.03', ''))
+    print(main('SSNI-531'))  # print(main('ssis-330')) # 预告片  # print(main('n1403'))  # print(main('SKYHD-014'))       # 无预览图  # print(main('FC2-424646'))     # 无番号  # print(main('CWPBD-168'))  # print(main('BadMilfs.22.04.02'))  # print(main('vixen.19.12.10'))  # print(main('CEMD-133'))  # print(main('FC2-880652')) # 无番号  # print(main('PLA-018'))  # print(main('SIVR-060'))  # print(main('STCV-067'))  # print(main('ALDN-107'))  # print(main('DSVR-1205'))    # 无标题  # print(main('SIVR-100'))  # print(main('FC2-2787433'))  # print(main('MIDV-018'))  # print(main('MIDV-018', appoint_url='https://javdb.com/v/BnMY9'))  # print(main('SVSS-003'))  # print(main('SIVR-008'))  # print(main('blacked.21.07.03'))  # print(main('FC2-1262472'))  # 需要登录  # print(main('HUNTB-107'))  # 预告片返回url错误，只有https  # print(main('FC2-2392657'))                                                  # 需要登录  # print(main('GS-067'))                                                       # 两个同名番号  # print(main('MIDE-022'))  # print(main('KRAY-001'))  # print(main('ssis-243'))  # print(main('MIDE-900', 'https://javdb.com/v/MZp24?locale=en'))  # print(main('TD-011'))  # print(main('stars-011'))    # 发行商SOD star，下载封面  # print(main('stars-198'))  # 发行商SOD star，下载封面  # print(main('mium-748'))  # print(main('KMHRS-050'))    # 剧照第一张作为poster  # print(main('SIRO-4042'))  # print(main('snis-035'))  # print(main('vixen.18.07.18', ''))  # print(main('vixen.16.08.02', ''))  # print(main('SNIS-016', ''))  # print(main('bangbros18.19.09.17'))  # print(main('x-art.19.11.03'))  # print(main('abs-141'))  # print(main('HYSD-00083'))  # print(main('IESP-660'))  # print(main('GANA-1910'))  # print(main('heyzo-1031'))  # print(main('032020-001'))  # print(main('S2M-055'))  # print(main('LUXU-1217'))  # print(main('SSIS-001', ''))  # print(main('SSIS-090', ''))  # print(main('HYSD-00083', ''))  # print(main('IESP-660', ''))  # print(main('n1403', ''))  # print(main('GANA-1910', ''))  # print(main('heyzo-1031', ''))  # print(main_us('x-art.19.11.03'))  # print(main('032020-001', ''))  # print(main('S2M-055', ''))  # print(main('LUXU-1217', ''))  # print(main_us('x-art.19.11.03', ''))

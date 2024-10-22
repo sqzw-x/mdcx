@@ -130,9 +130,7 @@ def getDirector(html):
 def getExtrafanart(html):
     result = html.xpath('//a[contains(@class, "thumb")]/@href')
     if result:
-        result = str(result).replace('//faws.xcity.jp/scene/small/', 'https://faws.xcity.jp/').strip(' []').replace("'",
-                                                                                                                    '').replace(
-            ', ', ',')
+        result = str(result).replace('//faws.xcity.jp/scene/small/', 'https://faws.xcity.jp/').strip(' []').replace("'", '').replace(', ', ',')
         result = result.split(',')
     else:
         result = ''
@@ -175,8 +173,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
 
     try:
         if not real_url:
-            url_search = 'https://xcity.jp/result_published/?q=' + \
-                         number.replace('-', '')
+            url_search = 'https://xcity.jp/result_published/?q=' + number.replace('-', '')
             debug_info = '搜索地址: %s ' % url_search
             log_info += web_info + debug_info
 
@@ -287,13 +284,4 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
 
 
 if __name__ == '__main__':
-    print(main('STVF010'))
-    # print(main('MXGS563'))
-    # print(main('xc-1280'))
-    # print(main('xv-163'))
-    # print(main('sea-081'))
-    # print(main('IA-28'))
-    # print(main('xc-1298'))
-    # print(main('DMOW185'))
-    # print(main('EMOT007'))
-    # print(main('EMOT007', "https://xcity.jp/avod/detail/?id=147036"))
+    print(main('STVF010'))  # print(main('MXGS563'))  # print(main('xc-1280'))  # print(main('xv-163'))  # print(main('sea-081'))  # print(main('IA-28'))  # print(main('xc-1298'))  # print(main('DMOW185'))  # print(main('EMOT007'))  # print(main('EMOT007', "https://xcity.jp/avod/detail/?id=147036"))

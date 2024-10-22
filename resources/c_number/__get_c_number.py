@@ -105,7 +105,7 @@ def get_c_number():
         )
 
     while i:
-        url = ('https://www.sehuatang.org/forum-103-%s.html' % i)
+        url = (f'https://www.sehuatang.org/forum-103-{i}.html')
         # 获取当前页面信息
         try:
             res = requests.get(url, headers=headers)
@@ -119,9 +119,9 @@ def get_c_number():
             html = etree.HTML(res.text.replace('encoding="utf-8"', ''))
             if i == 1:
                 page_total = html.xpath('//a[@class="last"]/text()')[0][-3:]
-                print('当前共 %s 页数据！' % page_total)
+                print('当前共 {} 页数据！'.format(page_total))
             print('\n' + '**' * 20)
-            print('开始下载第 %s 页数据...\n页面地址：%s' % (i, url))
+            print(f'开始下载第 {i} 页数据...\n页面地址：{url}')
             # 获取当前页面帖子列表
             try:
                 post_info = html.xpath('//tbody[contains(@id, "normal")]/tr/th/a[2]')
@@ -131,7 +131,7 @@ def get_c_number():
                 save_log(error_info)
             else:
                 post_number = len(post_info)
-                print('帖子数量：%s' % post_number)
+                print(f'帖子数量：{post_number}')
                 j = 0
                 for each in post_info:
                     j += 1
@@ -183,7 +183,7 @@ def get_c_number():
                     print(j)
                     print(post_title)
                     print(number + ' : ' + title)
-            print('\n当前第 %s 页数据...\n页面地址：%s' % (i, url))
+            print(f'\n当前第 {i} 页数据...\n页面地址：{url}')
             print('**' * 20)
             with open(json_filename, 'w', encoding='utf-8') as f:
                 json.dump(

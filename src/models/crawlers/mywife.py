@@ -33,8 +33,7 @@ def get_first_url(html, key):
 
 
 def get_second_url(html):
-    result = html.xpath(
-        '//a[@class="wp-block-button__link has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background has-background"]/@href')
+    result = html.xpath('//a[@class="wp-block-button__link has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background has-background"]/@href')
     return result[0] if result else ''
 
 
@@ -96,12 +95,7 @@ def get_wiki_data():
                 actor = each.xpath("div[@class='wiki-section-body-3']/a[@rel='nofollow']/text()")
             if actor:
                 actor = actor[0]
-            mywife_dic[number_id] = {
-                'number': number_id,
-                'actor': actor,
-                'poster': poster,
-                'website': website,
-            }
+            mywife_dic[number_id] = {'number': number_id, 'actor': actor, 'poster': poster, 'website': website, }
         return mywife_dic
     except:
         # print(traceback.format_exc())
@@ -305,13 +299,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
@@ -323,10 +311,4 @@ if __name__ == '__main__':
     # print(main('mywife-1525'))    # 无 No.
     # print(main('mywife-1578'))    # 无 No.
     # print(main('mywife-1370'))    # 无 No.
-    print(main('mywife-1307'))  # 无 No.
-    # print(main('mywife-1161'))      # 无 No. 其实是 No
-    # print(main('mywife No.1161'))
-    # print(main('mywife No.1164'))
-    # print(main('mywife No.1167'))
-    # print(main('mywife No.1171'))
-    # print(main('mywife No.1229'))
+    print(main('mywife-1307'))  # 无 No.  # print(main('mywife-1161'))      # 无 No. 其实是 No  # print(main('mywife No.1161'))  # print(main('mywife No.1164'))  # print(main('mywife No.1167'))  # print(main('mywife No.1171'))  # print(main('mywife No.1229'))

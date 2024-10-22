@@ -35,9 +35,7 @@ def getWebNumber(title, number):
         result = result[-1]
     else:
         result = number.upper()
-    return result.replace('_1pondo_', '').replace('1pondo_', '').replace('caribbeancom-', '').replace('caribbeancom',
-                                                                                                      '').replace(
-        '-PPV', '').strip(' _-')
+    return result.replace('_1pondo_', '').replace('1pondo_', '').replace('caribbeancom-', '').replace('caribbeancom', '').replace('-PPV', '').strip(' _-')
 
 
 def getActor(html):
@@ -72,7 +70,7 @@ def getOutline(html):
         return ''
     else:
         # 去除简介中的无意义信息，中间和首尾的空白字符、简介两字、*根据分发等
-        result = re.sub(r'[\n\t]|(简|簡)介：', '', result).split('*根据分发', 1 )[0].strip()
+        result = re.sub(r'[\n\t]|(简|簡)介：', '', result).split('*根据分发', 1)[0].strip()
     return result
 
 
@@ -151,7 +149,7 @@ def get_real_url(html, number):
         detail_url = each.xpath('./a/@href')[0]
         title = each.xpath('./a/@title')[0]
         # 注意去除马赛克破坏版等几乎没有有效字段的条目
-        if number.upper() in title and all(keyword not in title for keyword in ['克破', '无码破解', '無碼破解', '无码流出','無碼流出']):
+        if number.upper() in title and all(keyword not in title for keyword in ['克破', '无码破解', '無碼破解', '无码流出', '無碼流出']):
             return detail_url
     return ''
 
@@ -297,13 +295,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {language: dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
