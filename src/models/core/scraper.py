@@ -265,6 +265,11 @@ def _scrape_one_file(file_path, file_info, file_mode):
         return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
     save_success_list(file_path, file_new_path)  # 保存成功列表
 
+    # 创建软链接及复制文件
+    if config.auto_link:
+        target_dir = os.path.join(config.localdisk_path, os.path.relpath(folder_new_path, success_folder))
+        newtdisk_creat_symlink('copy_netdisk_nfo' in config.switch_on, folder_new_path, target_dir)
+
     # json添加封面缩略图路径
     # json_data['number'] = movie_number
     json_data['poster_path'] = poster_final_path
