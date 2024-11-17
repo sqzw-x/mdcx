@@ -297,13 +297,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
@@ -318,12 +312,5 @@ if __name__ == '__main__':
     # print(main('c0930-ki221218'))
     # print(main('c0930-hitozuma1407'))
     # print(main('h0930-ori1665'))
-    print(main('h0930-ori1665', appoint_url='https://7mm002.com/zh/amateur_content/107108/content.html'))
-    # print(main('RBD-293'))
-    # print(main('LUXU-728')) # 无结果
-    # print(main('fc2-1050737'))  # 标题中有/
-    # print(main('fc2-2724807'))
-    # print(main('luxu-1257'))
-    # print(main('heyzo-1031'))
-    # print(main('ABP-905'))
-    # print(main('heyzo-1031', ''))
+    print(main('h0930-ori1665',
+               appoint_url='https://7mm002.com/zh/amateur_content/107108/content.html'))  # print(main('RBD-293'))  # print(main('LUXU-728')) # 无结果  # print(main('fc2-1050737'))  # 标题中有/  # print(main('fc2-2724807'))  # print(main('luxu-1257'))  # print(main('heyzo-1031'))  # print(main('ABP-905'))  # print(main('heyzo-1031', ''))

@@ -13,15 +13,13 @@ from models.base.utils import convert_path, get_current_time, get_real_time, get
 from models.config.config import config
 from models.config.resources import resources
 from models.core.crawler import crawl
-from models.core.file import _clean_empty_fodlers, _pic_some_deal, check_file, copy_trailer_to_theme_videos, \
-    creat_folder, deal_old_files, get_file_info, get_movie_list, get_output_name, move_bif, move_file_to_failed_folder, \
-    move_movie, move_other_file, move_torrent, newtdisk_creat_symlink, save_success_list
+from models.core.file import _clean_empty_fodlers, _pic_some_deal, check_file, copy_trailer_to_theme_videos, creat_folder, deal_old_files, get_file_info, get_movie_list, \
+    get_output_name, move_bif, move_file_to_failed_folder, move_movie, move_other_file, move_torrent, newtdisk_creat_symlink, save_success_list
 from models.core.flags import Flags
 from models.core.image import add_mark, extrafanart_copy2, extrafanart_extras_copy
 from models.core.nfo import get_nfo_data, write_nfo
 from models.core.translate import translate_actor, translate_info, translate_title_outline
-from models.core.utils import deal_some_field, get_movie_path_setting, get_video_size, \
-    replace_special_word, replace_word, show_data_result, show_movie_info
+from models.core.utils import deal_some_field, get_movie_path_setting, get_video_size, replace_special_word, replace_word, show_data_result, show_movie_info
 from models.core.web import extrafanart_download, fanart_download, poster_download, thumb_download, trailer_download
 from models.entity.enums import FileMode
 from models.signals import signal
@@ -41,8 +39,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
     json_data, movie_number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = file_info
 
     # 获取设置的媒体目录、失败目录、成功目录
-    movie_path, success_folder, failed_folder, escape_folder_list, \
-        extrafanart_folder, softlink_path = get_movie_path_setting(file_path)
+    movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = get_movie_path_setting(file_path)
     json_data['failed_folder'] = failed_folder
 
     # 检查文件大小
@@ -62,7 +59,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
             if 'has_nfo_update' not in read_mode:  # 不更新并返回
                 show_data_result(json_data, start_time)
                 show_movie_info(json_data)
-                json_data['logs'] += "\n 🙉 [Movie] %s" % file_path
+                json_data['logs'] += f"\n 🙉 [Movie] {file_path}"
                 save_success_list(file_path, file_path)  # 保存成功列表
                 return True, json_data
 
@@ -104,8 +101,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
         json_data_new['4K'] = ''
 
         def deal_tag_data(tag):
-            for each in ['中文字幕', '无码流出', '無碼流出', '无码破解', '無碼破解', '无码', '無碼', '有码', '有碼',
-                         '国产', '國產', '里番', '裏番', '动漫', '動漫']:
+            for each in ['中文字幕', '无码流出', '無碼流出', '无码破解', '無碼破解', '无码', '無碼', '有码', '有碼', '国产', '國產', '里番', '裏番', '动漫', '動漫']:
                 tag = tag.replace(each, '')
             return tag.replace(',,', ',')
 
@@ -144,9 +140,11 @@ def _scrape_one_file(file_path, file_info, file_mode):
     show_movie_info(json_data)
 
     # 生成输出文件夹和输出文件的路径
-    folder_new_path, file_new_path, nfo_new_path, poster_new_path_with_filename, \
-        thumb_new_path_with_filename, fanart_new_path_with_filename, naming_rule, poster_final_path, \
-        thumb_final_path, fanart_final_path = get_output_name(json_data, file_path, success_folder, file_ex)
+    folder_new_path, file_new_path, nfo_new_path, poster_new_path_with_filename, thumb_new_path_with_filename, fanart_new_path_with_filename, naming_rule, poster_final_path, thumb_final_path, fanart_final_path = get_output_name(
+        json_data,
+        file_path,
+        success_folder,
+        file_ex)
 
     # 判断输出文件的路径是否重复
     if config.soft_link == 0:
@@ -156,8 +154,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
         else:
             done_file_new_path_list.append(file_path)  # 已存在时，添加到列表，停止刮削
             done_file_new_path_list.sort(reverse=True)
-            json_data['error_info'] = '存在重复文件（指刮削后的文件路径相同！），请检查:\n    🍁 %s' % '\n    🍁 '.join(
-                done_file_new_path_list)
+            json_data['error_info'] = '存在重复文件（指刮削后的文件路径相同！），请检查:\n    🍁 ' + '\n    🍁 '.join(done_file_new_path_list)
             # json_data['req_web'] = 'do_not_update_json_data_dic'
             # do_not_update_json_data_dic 是不要更新json_data的标识，表示这个文件的数据有问题
             json_data['outline'] = split_path(file_path)[1]
@@ -165,8 +162,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
             return False, json_data
 
     # 判断输出文件夹和文件是否已存在，如无则创建输出文件夹
-    if not creat_folder(json_data, folder_new_path, file_path, file_new_path, thumb_new_path_with_filename,
-                        poster_new_path_with_filename):
+    if not creat_folder(json_data, folder_new_path, file_path, file_new_path, thumb_new_path_with_filename, poster_new_path_with_filename):
         return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
 
     # 初始化图片已下载地址的字典
@@ -188,10 +184,19 @@ def _scrape_one_file(file_path, file_info, file_mode):
         # 移动文件
         if move_movie(json_data, file_path, file_new_path):
             if 'sort_del' in config.switch_on:
-                deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_new_path,
-                               thumb_new_path_with_filename, poster_new_path_with_filename,
-                               fanart_new_path_with_filename, nfo_new_path, file_ex, poster_final_path,
-                               thumb_final_path, fanart_final_path)  # 清理旧的thumb、poster、fanart、nfo
+                deal_old_files(json_data,
+                               folder_old_path,
+                               folder_new_path,
+                               file_path,
+                               file_new_path,
+                               thumb_new_path_with_filename,
+                               poster_new_path_with_filename,
+                               fanart_new_path_with_filename,
+                               nfo_new_path,
+                               file_ex,
+                               poster_final_path,
+                               thumb_final_path,
+                               fanart_final_path)  # 清理旧的thumb、poster、fanart、nfo
             save_success_list(file_path, file_new_path)  # 保存成功列表
             return True, json_data
         else:
@@ -200,10 +205,19 @@ def _scrape_one_file(file_path, file_info, file_mode):
             return False, json_data
 
     # 清理旧的thumb、poster、fanart、extrafanart、nfo
-    pic_final_catched, single_folder_catched = \
-        deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_new_path,
-                       thumb_new_path_with_filename, poster_new_path_with_filename, fanart_new_path_with_filename,
-                       nfo_new_path, file_ex, poster_final_path, thumb_final_path, fanart_final_path)
+    pic_final_catched, single_folder_catched = deal_old_files(json_data,
+                                                              folder_old_path,
+                                                              folder_new_path,
+                                                              file_path,
+                                                              file_new_path,
+                                                              thumb_new_path_with_filename,
+                                                              poster_new_path_with_filename,
+                                                              fanart_new_path_with_filename,
+                                                              nfo_new_path,
+                                                              file_ex,
+                                                              poster_final_path,
+                                                              thumb_final_path,
+                                                              fanart_final_path)
 
     # 如果 final_pic_path 没处理过，这时才需要下载和加水印
     if pic_final_catched:
@@ -223,8 +237,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
             _pic_some_deal(json_data, thumb_final_path, fanart_final_path)
 
             # 加水印
-            add_mark(json_data, json_data['poster_marked'], json_data['thumb_marked'],
-                     json_data['fanart_marked'])
+            add_mark(json_data, json_data['poster_marked'], json_data['thumb_marked'], json_data['fanart_marked'])
 
             # 下载剧照和剧照副本
             if single_folder_catched:
@@ -252,6 +265,11 @@ def _scrape_one_file(file_path, file_info, file_mode):
         return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
     save_success_list(file_path, file_new_path)  # 保存成功列表
 
+    # 创建软链接及复制文件
+    if config.auto_link:
+        target_dir = os.path.join(config.localdisk_path, os.path.relpath(folder_new_path, success_folder))
+        newtdisk_creat_symlink('copy_netdisk_nfo' in config.switch_on, folder_new_path, target_dir)
+
     # json添加封面缩略图路径
     # json_data['number'] = movie_number
     json_data['poster_path'] = poster_final_path
@@ -276,8 +294,7 @@ def _scrape_exec_thread(task):
         file_name_temp = file_name_temp[:40] + '...'
 
     # 处理间歇任务
-    while config.main_mode != 4 and 'rest_scrape' in config.switch_on \
-            and count - Flags.rest_now_begin_count > config.rest_count:
+    while config.main_mode != 4 and 'rest_scrape' in config.switch_on and count - Flags.rest_now_begin_count > config.rest_count:
         _check_stop(file_name_temp)
         time.sleep(1)
 
@@ -287,8 +304,7 @@ def _scrape_exec_thread(task):
     thread_time = config.thread_time
     if count == 1 or thread_time == 0 or config.main_mode == 4:
         Flags.next_start_time = time.time()
-        signal.show_log_text(
-            f' 🕷 {get_current_time()} 开始刮削：{Flags.scrape_starting}/{count_all} {file_name_temp}')
+        signal.show_log_text(f' 🕷 {get_current_time()} 开始刮削：{Flags.scrape_starting}/{count_all} {file_name_temp}')
         thread_time = 0
     else:
         Flags.next_start_time += thread_time
@@ -303,8 +319,7 @@ def _scrape_exec_thread(task):
 
     Flags.scrape_started += 1
     if count > 1 and thread_time != 0:
-        signal.show_log_text(
-            f' 🕷 {get_current_time()} 开始刮削：{Flags.scrape_started}/{count_all} {file_name_temp}')
+        signal.show_log_text(f' 🕷 {get_current_time()} 开始刮削：{Flags.scrape_started}/{count_all} {file_name_temp}')
 
     start_time = time.time()
     file_mode = Flags.file_mode
@@ -315,12 +330,10 @@ def _scrape_exec_thread(task):
 
     # 显示刮削信息
     progress_value = Flags.scrape_started / count_all * 100
-    progress_percentage = '%.2f' % progress_value + '%'
+    progress_percentage = f'{progress_value:.2f}%'
     signal.exec_set_processbar.emit(int(progress_value))
-    signal.set_label_file_path.emit(
-        f'正在刮削： {Flags.scrape_started}/{count_all} {progress_percentage} \n {convert_path(file_show_path)}')
-    signal.label_result.emit(f' 刮削中：{Flags.scrape_started - Flags.succ_count - Flags.fail_count} '
-                             f'成功：{Flags.succ_count} 失败：{Flags.fail_count}')
+    signal.set_label_file_path.emit(f'正在刮削： {Flags.scrape_started}/{count_all} {progress_percentage} \n {convert_path(file_show_path)}')
+    signal.label_result.emit(f' 刮削中：{Flags.scrape_started - Flags.succ_count - Flags.fail_count} 成功：{Flags.succ_count} 失败：{Flags.fail_count}')
     json_data['logs'] += '\n' + "👆" * 50
     json_data['logs'] += "\n 🙈 [Movie] " + convert_path(file_path)
     json_data['logs'] += "\n 🚘 [Number] " + movie_number
@@ -328,8 +341,7 @@ def _scrape_exec_thread(task):
     # 如果指定了单一网站，进行提示
     website_single = config.website_single
     if config.scrape_like == 'single' and file_mode != FileMode.Single and config.main_mode != 4:
-        json_data['logs'] += \
-            "\n 😸 [Note] You specified 「 %s 」, some videos may not have results! " % website_single
+        json_data['logs'] += f"\n 😸 [Note] You specified 「 {website_single} 」, some videos may not have results! "
 
     # 获取刮削数据
     try:
@@ -348,13 +360,11 @@ def _scrape_exec_thread(task):
     try:
         if result:
             Flags.succ_count += 1
-            succ_show_name = str(Flags.count_claw) + '-' + str(Flags.succ_count) + '.' + file_show_name.replace(
-                movie_number, json_data['number']) + json_data['4K']
+            succ_show_name = str(Flags.count_claw) + '-' + str(Flags.succ_count) + '.' + file_show_name.replace(movie_number, json_data['number']) + json_data['4K']
             signal.show_list_name(succ_show_name, 'succ', json_data, movie_number)
         else:
             Flags.fail_count += 1
-            fail_show_name = str(Flags.count_claw) + '-' + str(Flags.fail_count) + '.' + file_show_name.replace(
-                movie_number, json_data['number']) + json_data['4K']
+            fail_show_name = str(Flags.count_claw) + '-' + str(Flags.fail_count) + '.' + file_show_name.replace(movie_number, json_data['number']) + json_data['4K']
             signal.show_list_name(fail_show_name, 'fail', json_data, movie_number)
             if json_data['error_info']:
                 json_data['logs'] += f'\n 🔴 [Failed] Reason: {json_data["error_info"]}'
@@ -377,14 +387,11 @@ def _scrape_exec_thread(task):
             Flags.scrape_done += 1
             count = Flags.scrape_done
             progress_value = count / count_all * 100
-            progress_percentage = '%.2f' % progress_value + '%'
+            progress_percentage = f'{progress_value:.2f}%'
             used_time = get_used_time(start_time)
-            scrape_info_begin = '%d/%d (%s) round(%s) %s    新的刮削线程' % (
-                count, count_all, progress_percentage, Flags.count_claw, split_path(file_path)[1])
-            scrape_info_begin = '\n\n\n' + '👇'*50 + '\n' + scrape_info_begin
-            scrape_info_after = f'\n ' \
-                                f'🕷 {get_current_time()} {count}/{count_all} ' \
-                                f'{split_path(file_path)[1]} 刮削完成！用时 {used_time} 秒！'
+            scrape_info_begin = f'{count:d}/{count_all:d} ({progress_percentage}) round({Flags.count_claw}) {split_path(file_path)[1]}    新的刮削线程'
+            scrape_info_begin = '\n\n\n' + '👇' * 50 + '\n' + scrape_info_begin
+            scrape_info_after = f'\n 🕷 {get_current_time()} {count}/{count_all} {split_path(file_path)[1]} 刮削完成！用时 {used_time} 秒！'
             json_data['logs'] = scrape_info_begin + json_data['logs'] + scrape_info_after
             signal.show_log_text(json_data['logs'])
             remain_count = Flags.scrape_started - count
@@ -459,7 +466,7 @@ def scrape(file_mode: FileMode, movie_list):
     signal.add_label_info({})  # 清空主界面显示信息
     thread_number = config.thread_number  # 线程数量
     thread_time = config.thread_time  # 线程延时
-    signal.label_result.emit(' 刮削中：%s 成功：%s 失败：%s' % (0, Flags.succ_count, Flags.fail_count))
+    signal.label_result.emit(f' 刮削中：{0} 成功：{Flags.succ_count} 失败：{Flags.fail_count}')
     signal.logs_failed_settext.emit('\n\n\n')
 
     # 日志页面显示开始时间
@@ -477,8 +484,7 @@ def scrape(file_mode: FileMode, movie_list):
                 signal.show_log_text(f'{n} 🖥 File path: {each_f}\n 🌐 File url: {each_i[1]}')
 
     # 获取设置的媒体目录、失败目录、成功目录
-    movie_path, success_folder, failed_folder, escape_folder_list, \
-        extrafanart_folder, softlink_path = get_movie_path_setting()
+    movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = get_movie_path_setting()
 
     # 获取待刮削文件列表的相关信息
     if not movie_list:
@@ -510,9 +516,7 @@ def scrape(file_mode: FileMode, movie_list):
                 thread_number = count_all
             signal.show_log_text(f' 🕷 开启多线程，线程数量（{thread_number}），线程延时（{thread_time}）秒...')
         if 'rest_scrape' in config.switch_on and config.main_mode != 4:
-            signal.show_log_text(
-                f'<font color=\"brown\"> 🍯 间歇刮削 已启用，连续刮削 {config.rest_count} 个文件后，'
-                f'将自动休息 {Flags.rest_time_convert} 秒...</font>')
+            signal.show_log_text(f'<font color=\"brown\"> 🍯 间歇刮削 已启用，连续刮削 {config.rest_count} 个文件后，将自动休息 {Flags.rest_time_convert} 秒...</font>')
 
         # 在启动前点了停止按钮
         if Flags.stop_flag:
@@ -528,7 +532,7 @@ def scrape(file_mode: FileMode, movie_list):
 
         # self.extrafanart_pool.shutdown(wait=True)
         Flags.pool.shutdown(wait=True)
-        signal.label_result.emit(' 刮削中：%s 成功：%s 失败：%s' % (0, Flags.succ_count, Flags.fail_count))
+        signal.label_result.emit(f' 刮削中：0 成功：{Flags.succ_count} 失败：{Flags.fail_count}')
         save_success_list()  # 保存成功列表
         if signal.stop:
             return
@@ -542,35 +546,29 @@ def scrape(file_mode: FileMode, movie_list):
     else:
         average_time = used_time
     signal.exec_set_processbar.emit(0)
-    signal.set_label_file_path.emit('🎉 恭喜！全部刮削完成！共 %s 个文件！用时 %s 秒' % (count_all, used_time))
-    signal.show_traceback_log(
-        "🎉 All finished!!! Total %s , Success %s , Failed %s " % (count_all, Flags.succ_count, Flags.fail_count))
-    signal.show_log_text(
-        " 🎉🎉🎉 All finished!!! Total %s , Success %s , Failed %s " % (count_all, Flags.succ_count, Flags.fail_count))
+    signal.set_label_file_path.emit(f'🎉 恭喜！全部刮削完成！共 {count_all} 个文件！用时 {used_time} 秒')
+    signal.show_traceback_log(f"🎉 All finished!!! Total {count_all} , Success {Flags.succ_count} , Failed {Flags.fail_count} ")
+    signal.show_log_text(f" 🎉🎉🎉 All finished!!! Total {count_all} , Success {Flags.succ_count} , Failed {Flags.fail_count} ")
     signal.show_log_text("================================================================================")
     if Flags.failed_list:
         signal.show_log_text("    *** Failed results ****")
         for i in range(len(Flags.failed_list)):
             fail_path, fail_reson = Flags.failed_list[i]
-            signal.show_log_text(" 🔴 %s %s\n    %s" % (i + 1, fail_path, fail_reson))
+            signal.show_log_text(f" 🔴 {i + 1} {fail_path}\n    {fail_reson}")
             signal.show_log_text("================================================================================")
-    signal.show_log_text(
-        ' ⏰ Start time'.ljust(15) + ': ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(Flags.start_time)))
-    signal.show_log_text(
-        ' 🏁 End time'.ljust(15) + ': ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time)))
-    signal.show_log_text(' ⏱ Used time'.ljust(15) + ': %sS' % used_time)
-    signal.show_log_text(' 📺 Movies num'.ljust(15) + ': %s' % count_all)
-    signal.show_log_text(' 🍕 Per time'.ljust(15) + ': %sS' % average_time)
+    signal.show_log_text(' ⏰ Start time'.ljust(15) + ': ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(Flags.start_time)))
+    signal.show_log_text(' 🏁 End time'.ljust(15) + ': ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time)))
+    signal.show_log_text(' ⏱ Used time'.ljust(15) + f': {used_time}S')
+    signal.show_log_text(' 📺 Movies num'.ljust(15) + f': {count_all}')
+    signal.show_log_text(' 🍕 Per time'.ljust(15) + f': {average_time}S')
     signal.show_log_text("================================================================================")
-    signal.show_scrape_info('🎉 刮削完成 %s/%s' % (count_all, count_all))
+    signal.show_scrape_info(f'🎉 刮削完成 {count_all}/{count_all}')
 
     # auto run after scrape
     if 'actor_photo_auto' in config.emby_on:
         update_emby_actor_photo()
     if config.actor_photo_kodi_auto:
         creat_kodi_actors(True)
-    if config.auto_link:
-        newtdisk_creat_symlink('copy_netdisk_nfo' in config.switch_on)
 
     signal.reset_buttons_status.emit()
     if len(Flags.again_dic):
@@ -604,10 +602,8 @@ def start_new_scrape(file_mode: FileMode, movie_list=None):
 def _check_stop(file_name_temp):
     if signal.stop:
         Flags.now_kill += 1
-        signal.show_log_text(
-            f' 🕷 {get_current_time()} 已停止刮削：{Flags.now_kill}/{Flags.total_kills} {file_name_temp}')
-        signal.set_label_file_path.emit(
-            f'⛔️ 正在停止刮削...\n   正在停止已在运行的任务线程（{Flags.now_kill}/{Flags.total_kills}）...')
+        signal.show_log_text(f' 🕷 {get_current_time()} 已停止刮削：{Flags.now_kill}/{Flags.total_kills} {file_name_temp}')
+        signal.set_label_file_path.emit(f'⛔️ 正在停止刮削...\n   正在停止已在运行的任务线程（{Flags.now_kill}/{Flags.total_kills}）...')
         # exceptions must derive from BaseException
         raise '手动停止刮削'
 
@@ -649,7 +645,8 @@ def get_remain_list():
                     movie_path = convert_path(movie_path)
                     temp_remain_path = convert_path(Flags.remain_list[0])
                     if movie_path not in temp_remain_path:
-                        box = QMessageBox(QMessageBox.Warning, '提醒',
+                        box = QMessageBox(QMessageBox.Warning,
+                                          '提醒',
                                           f'很重要！！请注意：\n当前待刮削目录：{movie_path}\n剩余任务文件路径：{temp_remain_path}\n剩余任务的文件路径，并不在当前待刮削目录中！\n剩余任务很可能是使用其他配置扫描的！\n请确认成功输出目录和失败目录是否正确！如果配置不正确，继续刮削可能会导致文件被移动到新配置的输出位置！\n是否继续刮削？')
                         box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
                         box.button(QMessageBox.Yes).setText('继续')
@@ -658,8 +655,7 @@ def get_remain_list():
                         reply = box.exec()
                         if reply == QMessageBox.No:
                             return True
-                    signal.show_log_text(
-                        f'🍯 🍯 🍯 NOTE: 继续刮削未完成任务！！！ 剩余未刮削文件数量（{len(Flags.remain_list)})')
+                    signal.show_log_text(f'🍯 🍯 🍯 NOTE: 继续刮削未完成任务！！！ 剩余未刮削文件数量（{len(Flags.remain_list)})')
                     start_new_scrape(FileMode.Default, Flags.remain_list)
                     return True
     return False

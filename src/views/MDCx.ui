@@ -2271,7 +2271,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
           </size>
          </property>
          <property name="text">
-          <string>刮削结束后自动创建软链接</string>
+          <string>刮削过程中自动创建软链接</string>
          </property>
         </widget>
        </widget>

@@ -209,31 +209,12 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
             'error_info': debug_info,
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
-    dic = {
-        'official': {
-            'zh_cn': dic,
-            'zh_tw': dic,
-            'jp': dic
-        },
-        website_name: {
-            'zh_cn': dic,
-            'zh_tw': dic,
-            'jp': dic
-        },
-    }
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    dic = {'official': {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}, website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}, }
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
 if __name__ == '__main__':
     # yapf: disable
     # print(main('abw-130'))
-    print(main('FCP-150'))
-    # print(main('fakwm-064', appoint_url='https://www.prestige-av.com/goods/dcb86b74-195b-46c4-8ced-71f5f3ce5c3c?skuId=ABW-344'))  # 有导演
-    # print(main('ABW-343'))  # 无图
+    print(main('FCP-150'))  # print(main('fakwm-064', appoint_url='https://www.prestige-av.com/goods/dcb86b74-195b-46c4-8ced-71f5f3ce5c3c?skuId=ABW-344'))  # 有导演  # print(main('ABW-343'))  # 无图

@@ -25,11 +25,9 @@ def getTitle(html):
 
 
 def getActor(html):
-    result = str(html.xpath('//th[contains(text(),"出演")]/../td/a/text()')).replace('\\n', '').strip(" ['']").replace(
-        '/', ',').replace('\'', '').replace(' ', '')
+    result = str(html.xpath('//th[contains(text(),"出演")]/../td/a/text()')).replace('\\n', '').strip(" ['']").replace('/', ',').replace('\'', '').replace(' ', '')
     if not result:
-        result = str(html.xpath('//th[contains(text(),"出演")]/../td/text()')).replace('\\n', '').strip(
-            " ['']").replace('/', ',').replace('\'', '').replace(' ', '')
+        result = str(html.xpath('//th[contains(text(),"出演")]/../td/text()')).replace('\\n', '').strip(" ['']").replace('/', ',').replace('\'', '').replace(' ', '')
     return result
 
 
@@ -247,13 +245,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', short_n
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 

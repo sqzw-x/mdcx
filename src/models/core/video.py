@@ -14,8 +14,7 @@ def add_del_extras(mode):
     """
     signal.show_log_text(f'Start {mode} extrafanart extras! \n')
 
-    movie_path, success_folder, failed_folder, escape_folder_list, \
-        extrafanart_folder, softlink_path = get_movie_path_setting()
+    movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = get_movie_path_setting()
     signal.show_log_text(f' 🖥 Movie path: {movie_path} \n 🔎 Checking all videos, Please wait...')
     movie_type = config.media_type
     movie_list = movie_lists('', movie_type, movie_path)  # 获取所有需要刮削的影片列表
@@ -61,8 +60,7 @@ def add_del_extras(mode):
 def add_del_theme_videos(mode):
     signal.show_log_text(f'Start {mode} theme videos! \n')
 
-    movie_path, success_folder, failed_folder, escape_folder_list, \
-        extrafanart_folder, softlink_path = get_movie_path_setting()
+    movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = get_movie_path_setting()
     signal.show_log_text(f' 🖥 Movie path: {movie_path} \n 🔎 Checking all videos, Please wait...')
     movie_type = config.media_type
     movie_list = movie_lists('', movie_type, movie_path)  # 获取所有需要刮削的影片列表

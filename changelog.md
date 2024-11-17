@@ -1,40 +1,53 @@
-## 重要
-
-### [每日构建](https://github.com/sqzw-x/mdcx/releases/tag/daily_release)
-
-在此版本后, mdcx 将**降低**版本号变化频率, 版本号基本只用来处理会破坏配置文件兼容性的变更.
-一般的功能更新与 bug 修复均通过 Github actions 每日构建, 可在上述链接下载.
-发布页将显示最后一次提交时间, 时区为 UTC+0, 对应北京时间 +8h 即可.
-
-得益于此, 任何代码提交均将在 24h 内被发布, 因此总是可以获取到最新版本.
-代价是每日构建 **_不会在软件内提示更新_**, 需要手动前往上述页面查看.
-
-除此之外, 请注意此后 **任何 issue 报告均需要包含提交 hash**, 这基本上取代了原来版本号的功能, 文件名中将自动包含提交 hash
-
 ## 新增
 
-* 单文件刮削自动选择网站 by @
-* 可设置刮削完成后自动创建 kodi actor 目录及自动创建软链接
+* 点击左下角可直接查看 daily_release
+* 添加网站 javday
+* 更灵活的图片裁剪工具
 
 ## 修复
 
-* madouqu year 获取
-* iqqtv url
-* 未知演员写入 nfo
+* iqqtv, airav_cc
+* 有道翻译
+* Google Translate 混合标题和简介
+* wiki 演员信息
+* 日文演员名不进行繁简转换
+* 其他错误修复
+
+## 其他
+
+由于本人最近较为繁忙, issue 和 PR 可能无法及时回应.
+
+此外重申: 原则上不考虑加入新功能, 因此添加新网站等 issue 将被直接关闭, 请谅解.
+
 
 <details>
 <summary>Full Changelog</summary>
 
-26af362 fix: write unknown actor to nfo (close #151)
-a175c97 CI: fix daily release tag
-bab46d7 CI: fix release.yml
-96ee83b feat: 刮削完成后 自动创建actor目录 及 自动创建软链接 (close #142)
-761db21 CI: daily release time
-7ed3531 CI: daily release tag and log
-7099844 feat: single file scraping without site selection
-60122f1 CI: daily build
-5b60511 chore
-e4d7c7a fix: iqqtv default url (close #134)
-e70294b fix(madouqu): year字段类型；处理失败时返回空值 (#129)
+7cd1fbe fix: iqqtv ( #246), airav_cc (#251) (#264)
+3950f99 fix: 有道翻译 (#261)
+19ecef6 fix: wiki字段 (#260)
+677884b fix: wiki fields (fix #255)
+1cc1a88 fix: 图片裁剪同名时无法生成
+928724b fix: close #237
+9704c1d remove test
+39c358a fix: google translate 混合多行文本
+3c9638f fix: numpy 2.0 incompatibility(close #234)
+1649b55 修复madouqu番号获取
+cc3bf58 修复madouqu番号获取
+7efda28 docs: 源码运行
+b63509c fix: crawlers; logging; add referer header (#221)
+daff178 fix: 番号后缀顺序允许设置分辨率 (close #204)
+dff05d3 feat: 图片裁剪工具允许任意大小及位置 (close #203)
+e89dc18 fix: 当演员名包含假名时不进行繁简转换; 更新 zhcdict.json (close #194)
+58af476 CI: macos aarch64; allow workflow_disspatch (#199)
+fb4262c Fix Issue 197 (#202)
+e345697 chore: 完善番号官网映射 (#192)
+8940684 feat: add website javday (#172)
+f49516a fix: dont remove slash (close #165)
+28432b1 CI: only delete before build
+57ce07f CI: delete old daily build
+ff818b9 fix: UI not set from config (#164)
+5c9fcc9 fix: airavcc cover url relative path (close #157)
+b39b85f CI: commit sha
 
 </details>

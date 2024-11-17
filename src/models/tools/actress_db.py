@@ -43,8 +43,7 @@ class ActressDB:
                 return False
             name, alias = s
         show_log_text(f" ✅ 数据库中存在姓名: {alias}")
-        res = cur.execute(
-            f"select Href,Cup,Height,Bust,Waist,Hip,Birthday,Birthplace,Account,CareerPeriod from Info where Name = '{name}'")
+        res = cur.execute(f"select Href,Cup,Height,Bust,Waist,Hip,Birthday,Birthplace,Account,CareerPeriod from Info where Name = '{name}'")
         href, cup, height, bust, waist, hip, birthday, birthplace, account, career_period = res.fetchone()
         cur.close()
         # 添加标签

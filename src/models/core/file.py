@@ -8,8 +8,7 @@ import time
 import traceback
 
 from models.base.file import copy_file, delete_file, move_file, read_link, split_path
-from models.base.number import deal_actor_more, get_file_number, get_info, get_number_first_letter, \
-    get_number_letters, is_uncensored, remove_escape_string
+from models.base.number import deal_actor_more, get_file_number, get_info, get_number_first_letter, get_number_letters, is_uncensored, remove_escape_string
 from models.base.path import showFilePath
 from models.base.utils import convert_path, get_current_time, get_used_time
 from models.config.config import config
@@ -59,8 +58,7 @@ def _need_clean(file_path, file_name, file_ext):
     return False
 
 
-def creat_folder(json_data, folder_new_path, file_path, file_new_path, thumb_new_path_with_filename,
-                 poster_new_path_with_filename):
+def creat_folder(json_data, folder_new_path, file_path, file_new_path, thumb_new_path_with_filename, poster_new_path_with_filename):
     """判断是否创建文件夹，目标文件是否有重复文件。file_new_path是最终路径"""
 
     json_data['dont_move_movie'] = False  # 不需要移动和重命名视频
@@ -223,14 +221,12 @@ def move_torrent(json_data, folder_old_path, folder_new_path, file_name, movie_n
     torrent_file2 = os.path.join(folder_old_path, (movie_number + '.torrent'))
     torrent_file1_new_path = os.path.join(folder_new_path, (naming_rule + '.torrent'))
     torrent_file2_new_path = os.path.join(folder_new_path, (movie_number + '.torrent'))
-    if os.path.exists(torrent_file1) and torrent_file1 != torrent_file1_new_path and not os.path.exists(
-            torrent_file1_new_path):
+    if os.path.exists(torrent_file1) and torrent_file1 != torrent_file1_new_path and not os.path.exists(torrent_file1_new_path):
         move_file(torrent_file1, torrent_file1_new_path)
         json_data['logs'] += "\n 🍀 Torrent done!"
 
     if torrent_file2 != torrent_file1:
-        if os.path.exists(torrent_file2) and torrent_file2 != torrent_file2_new_path and not os.path.exists(
-                torrent_file2_new_path):
+        if os.path.exists(torrent_file2) and torrent_file2 != torrent_file2_new_path and not os.path.exists(torrent_file2_new_path):
             move_file(torrent_file2, torrent_file2_new_path)
             json_data['logs'] += "\n 🍀 Torrent done!"
 
@@ -250,8 +246,7 @@ def check_file(json_data, file_path, file_escape_size):
     if 'no_skip_small_file' not in config.no_escape:
         file_size = os.path.getsize(file_path) / float(1024 * 1024)
         if file_size < file_escape_size:
-            json_data['error_info'] = '文件小于 %s MB 被过滤!（实际大小 %s MB）已跳过刮削！' % (
-                file_escape_size, round(file_size, 2))
+            json_data['error_info'] = '文件小于 %s MB 被过滤!（实际大小 %s MB）已跳过刮削！' % (file_escape_size, round(file_size, 2))
             json_data['req_web'] = 'do_not_update_json_data_dic'
             json_data['outline'] = split_path(file_path)[1]
             json_data['tag'] = file_path
@@ -332,8 +327,7 @@ def move_other_file(json_data, folder_old_path, folder_new_path, file_name, nami
             if '-cd' not in old_file.lower():  # 避免多分集时，其他分级的内容被移走
                 old_file_old_path = os.path.join(folder_old_path, old_file)
                 old_file_new_path = os.path.join(folder_new_path, old_file)
-                if old_file_old_path != old_file_new_path and os.path.exists(
-                        old_file_old_path) and not os.path.exists(old_file_new_path):
+                if old_file_old_path != old_file_new_path and os.path.exists(old_file_old_path) and not os.path.exists(old_file_new_path):
                     move_file(old_file_old_path, old_file_new_path)
                     json_data['logs'] += "\n 🍀 Move %s done!" % old_file
 
@@ -436,8 +430,7 @@ def move_movie(json_data, file_path, file_new_path):
         temp_path = file_path
         # 自身是软链接时，获取真实路径
         if os.path.islink(file_path):
-            file_path = read_link(file_path)
-            # delete_file(temp_path)
+            file_path = read_link(file_path)  # delete_file(temp_path)
         # 删除目标路径存在的文件，否则会创建失败，
         delete_file(file_new_path)
         try:
@@ -488,8 +481,7 @@ def move_movie(json_data, file_path, file_new_path):
     if result:
         json_data['logs'] += f"\n 🍀 Movie done! \n 🙉 [Movie] {file_new_path}"
         if os.path.islink(file_new_path):
-            json_data['logs'] += f"\n    It's a symlink file! Source file: \n    {read_link(file_new_path)}"
-            # win 不能用os.path.realpath()，返回的结果不准
+            json_data['logs'] += f"\n    It's a symlink file! Source file: \n    {read_link(file_new_path)}"  # win 不能用os.path.realpath()，返回的结果不准
         json_data['file_path'] = file_new_path
         return True
     else:
@@ -615,12 +607,10 @@ def _get_folder_path(file_path, success_folder, json_data):
         temp_4k = definition.replace('UHD8', 'UHD')
 
     # 替换文件夹名称
-    repl_list = [['4K', temp_4k.strip('-')], ['originaltitle', originaltitle], ['title', title],
-                 ['outline', outline], ['number', number], ['first_actor', first_actor], ['all_actor', all_actor],
-                 ['actor', actor], ['release', release], ['year', str(year)], ['runtime', str(runtime)],
-                 ['director', director], ['series', series], ['studio', studio], ['publisher', publisher],
-                 ['mosaic', mosaic], ['definition', definition.replace('UHD8', 'UHD')], ['cnword', cnword],
-                 ['moword', moword], ['first_letter', first_letter], ['letters', letters], ['filename', filename],
+    repl_list = [['4K', temp_4k.strip('-')], ['originaltitle', originaltitle], ['title', title], ['outline', outline], ['number', number], ['first_actor', first_actor],
+                 ['all_actor', all_actor], ['actor', actor], ['release', release], ['year', str(year)], ['runtime', str(runtime)], ['director', director],
+                 ['series', series], ['studio', studio], ['publisher', publisher], ['mosaic', mosaic], ['definition', definition.replace('UHD8', 'UHD')],
+                 ['cnword', cnword], ['moword', moword], ['first_letter', first_letter], ['letters', letters], ['filename', filename],
                  ['wanted', str(json_data['wanted'])], ['score', str(score)]]
     folder_new_name = folder_name
     for each_key in repl_list:
@@ -637,16 +627,13 @@ def _get_folder_path(file_path, success_folder, json_data):
     if len(folder_new_name) > folder_name_max:
         cut_index = folder_name_max - len(folder_new_name)
         if 'originaltitle' in folder_name:
-            json_data['logs'] += '\n 💡 当前目录名长度：%s，最大允许长度：%s，目录命名时将去除原标题后%s个字符!' % (
-                len(folder_new_name), folder_name_max, abs(cut_index))
+            json_data['logs'] += '\n 💡 当前目录名长度：%s，最大允许长度：%s，目录命名时将去除原标题后%s个字符!' % (len(folder_new_name), folder_name_max, abs(cut_index))
             folder_new_name = folder_new_name.replace(originaltitle, originaltitle[0:cut_index])
         elif 'title' in folder_name:
-            json_data['logs'] += '\n 💡 当前目录名长度：%s，最大允许长度：%s，目录命名时将去除标题后%s个字符!' % (
-                len(folder_new_name), folder_name_max, abs(cut_index))
+            json_data['logs'] += '\n 💡 当前目录名长度：%s，最大允许长度：%s，目录命名时将去除标题后%s个字符!' % (len(folder_new_name), folder_name_max, abs(cut_index))
             folder_new_name = folder_new_name.replace(title, title[0:cut_index])
         elif 'outline' in folder_name:
-            json_data['logs'] += '\n 💡 当前目录名长度：%s，最大允许长度：%s，目录命名时将去除简介后%s个字符!' % (
-                len(folder_new_name), folder_name_max, abs(cut_index))
+            json_data['logs'] += '\n 💡 当前目录名长度：%s，最大允许长度：%s，目录命名时将去除简介后%s个字符!' % (len(folder_new_name), folder_name_max, abs(cut_index))
             folder_new_name = folder_new_name.replace(outline, outline[0:cut_index])
 
     # 替换一些字符
@@ -656,8 +643,7 @@ def _get_folder_path(file_path, success_folder, json_data):
     folder_new_name = re.sub(r'[\\:*?"<>|\r\n]+', '', folder_new_name).strip(' /')
 
     # 过滤文件夹名字前后的空格
-    folder_new_name = folder_new_name.replace(' /', '/').replace(' \\', '\\').replace('/ ', '/').replace('\\ ',
-                                                                                                         '\\')
+    folder_new_name = folder_new_name.replace(' /', '/').replace(' \\', '\\').replace('/ ', '/').replace('\\ ', '\\')
 
     # 日文浊音转换（mac的坑,osx10.12以下使用nfd）
     folder_new_name = nfd2c(folder_new_name)
@@ -759,12 +745,10 @@ def _generate_file_name(file_path, json_data):
         temp_4k = definition.replace('UHD8', 'UHD')
 
     # 替换文件名
-    repl_list = [['4K', temp_4k.strip('-')], ['originaltitle', originaltitle], ['title', title],
-                 ['outline', outline], ['number', number], ['first_actor', first_actor], ['all_actor', all_actor],
-                 ['actor', actor], ['release', release], ['year', str(year)], ['runtime', str(runtime)],
-                 ['director', director], ['series', series], ['studio', studio], ['publisher', publisher],
-                 ['mosaic', mosaic], ['definition', definition.replace('UHD8', 'UHD')], ['cnword', cnword],
-                 ['moword', moword], ['first_letter', first_letter], ['letters', letters], ['filename', filename],
+    repl_list = [['4K', temp_4k.strip('-')], ['originaltitle', originaltitle], ['title', title], ['outline', outline], ['number', number], ['first_actor', first_actor],
+                 ['all_actor', all_actor], ['actor', actor], ['release', release], ['year', str(year)], ['runtime', str(runtime)], ['director', director],
+                 ['series', series], ['studio', studio], ['publisher', publisher], ['mosaic', mosaic], ['definition', definition.replace('UHD8', 'UHD')],
+                 ['cnword', cnword], ['moword', moword], ['first_letter', first_letter], ['letters', letters], ['filename', filename],
                  ['wanted', str(json_data['wanted'])], ['score', str(score)]]
     for each_key in repl_list:
         file_name = file_name.replace(each_key[0], each_key[1])
@@ -858,7 +842,6 @@ def get_output_name(json_data, file_path, success_folder, file_ex):
 
 
 def newtdisk_creat_symlink(copy_flag, netdisk_path='', local_path=''):
-    real_path_list = []
     from_tool = False
     if not netdisk_path:
         from_tool = True
@@ -873,92 +856,73 @@ def newtdisk_creat_symlink(copy_flag, netdisk_path='', local_path=''):
     signal.show_log_text(f' 📁 Source path: {netdisk_path} \n 📁 Softlink path: {local_path} \n')
     try:
         if netdisk_path and local_path:
-            nfo_type_list = ['.nfo', '.jpg', '.png'] + config.sub_type.split('|')
-            file_type_list = config.media_type.lower().split('|') + nfo_type_list + config.sub_type.split('|')
+            copy_exts = ['.nfo', '.jpg', '.png'] + config.sub_type.split('|')
+            file_exts = config.media_type.lower().split('|') + copy_exts + config.sub_type.split('|')
             total = 0
             copy_num = 0
             link_num = 0
             fail_num = 0
             skip_num = 0
-            for root, dirs, files in os.walk(netdisk_path, topdown=True):
+            done = set()
+            for root, _, files in os.walk(netdisk_path, topdown=True):
                 if convert_path(root) == convert_path(local_path):
-                    dirs[:] = []  # 忽略当前文件夹子目录
                     continue
+
+                local_dir = convert_path(os.path.join(local_path, root.replace(netdisk_path, '', 1).strip('/\\')))
+                local_dir = re.sub(r"\s", ' ', local_dir).replace(' \\', "\\").replace('\\ ', "\\").strip().replace('■', '')
+                if not os.path.isdir(local_dir):
+                    os.makedirs(local_dir)
                 for f in files:
                     # 跳过隐藏文件、预告片、主题视频
-                    if re.search(r'^\..+', f):
+                    if f.startswith('.'):
                         continue
                     if 'trailer.' in f or 'trailers.' in f:
                         continue
                     if 'theme_video.' in f:
                         continue
+                    # 跳过未知扩展名
+                    ext = os.path.splitext(f)[1].lower()
+                    if ext not in file_exts:
+                        continue
 
-                    net_folder_path = convert_path(root)
-                    local_folder_path = convert_path(
-                        os.path.join(local_path, net_folder_path.replace(netdisk_path, '', 1).strip('/\\')))
-                    local_folder_path = re.sub(r"\s", ' ', local_folder_path) \
-                        .replace(' \\', "\\").replace('\\ ', "\\").strip().replace('■', '')
-                    file_type_current = os.path.splitext(f)[1].lower()
-                    if file_type_current in file_type_list:
-                        total += 1
-                        net_file_path = convert_path(os.path.join(root, f))
-                        local_file_path = convert_path(os.path.join(local_folder_path, f.strip()))
-                        local_file_path = re.sub(r"\s", ' ', local_file_path).strip().replace('■', '')
-                        if file_type_current in nfo_type_list:
-                            if copy_flag:
-                                if not os.path.isfile(local_file_path):
-                                    if not os.path.isdir(local_folder_path):
-                                        os.makedirs(local_folder_path)
-                                    copy_file(net_file_path, local_file_path)
-                                    signal.show_log_text(f' {total} 🍀 Copy done!\n {net_file_path} ')
-                                    copy_num += 1
-                                    continue
-                                else:
-                                    signal.show_log_text(f' {total} 🟠 Copy skip! '
-                                                         f'Softlink path already exists this file!\n'
-                                                         f' {net_file_path} ')
-                                    skip_num += 1
-                        else:
-                            if os.path.islink(net_file_path):
-                                net_file_path = read_link(net_file_path)
-                            if not os.path.exists(net_file_path):
-                                signal.show_log_text(
-                                    f' {total} 🟠 Link skip! Source file doesnot exist!\n {net_file_path} ')
-                                skip_num += 1
-                                continue
-                            elif net_file_path in real_path_list:
-                                signal.show_log_text(f' {total} 🟠 Link skip! Source file already linked, '
-                                                     f'this file is duplicate!\n {net_file_path} ')
-                                skip_num += 1
-                                continue
-                            else:
-                                real_path_list.append(net_file_path)
+                    total += 1
+                    net_file = convert_path(os.path.join(root, f))
+                    local_file = convert_path(os.path.join(local_dir, f.strip()))
+                    local_file = re.sub(r"\s", ' ', local_file).strip().replace('■', '')
 
-                            if os.path.islink(local_file_path) and not os.path.exists(local_file_path):
-                                # islink 无法判断该符号链接是否有效, 只能判断该符号链接是否存在
-                                delete_file(local_file_path)  # 删除无效的符号链接
-                            elif os.path.exists(local_file_path):
-                                # exists 可以判断链接是否有效, 无效时即使链接确实存在也返回 False
-                                signal.show_log_text(f' {total} 🟠 Link skip! '
-                                                     f'Softlink path already exists a real file!\n {net_file_path} ')
-                                skip_num += 1
-                                continue
-                            elif not os.path.isdir(local_folder_path):
-                                os.makedirs(local_folder_path)
+                    if os.path.exists(local_file):
+                        signal.show_log_text(f' {total} 🟠 Skip: a file or valid symlink already exists\n {net_file} ')
+                        skip_num += 1
+                        continue
+                    if os.path.islink(local_file):  # invalid symlink
+                        os.remove(local_file)
 
-                            try:
-                                os.symlink(net_file_path, local_file_path)
-                                signal.show_log_text(f' {total} 🍀 Link done!\n {net_file_path} ')
-                                link_num += 1
-                            except Exception as e:
-                                print(traceback.format_exc())
-                                error_info = ''
-                                if 'symbolic link privilege not held' in str(e):
-                                    error_info = '   \n没有创建权限，请尝试管理员权限！' \
-                                                 '或按照教程开启用户权限： https://www.jianshu.com/p/0e307bfe8770'
-                                signal.show_log_text(f' {total} 🔴 Link failed!{error_info} \n {net_file_path} ')
-                                signal.show_log_text(traceback.format_exc())
-                                fail_num += 1
+                    if ext in copy_exts:  # 直接复制的文件
+                        if not copy_flag:
+                            continue
+                        copy_file(net_file, local_file)
+                        signal.show_log_text(f' {total} 🍀 Copy done!\n {net_file} ')
+                        copy_num += 1
+                    else:
+                        # 不对原文件进行有效性检查以减小可能的网络 IO 开销
+                        if net_file in done:
+                            signal.show_log_text(f' {total} 🟠 Link skip! Source file already linked, this file is duplicate!\n {net_file} ')
+                            skip_num += 1
+                            continue
+                        done.add(net_file)
+
+                        try:
+                            os.symlink(net_file, local_file)
+                            signal.show_log_text(f' {total} 🍀 Link done!\n {net_file} ')
+                            link_num += 1
+                        except Exception as e:
+                            print(traceback.format_exc())
+                            error_info = ''
+                            if 'symbolic link privilege not held' in str(e):
+                                error_info = '   \n没有创建权限，请尝试管理员权限！或按照教程开启用户权限： https://www.jianshu.com/p/0e307bfe8770'
+                            signal.show_log_text(f' {total} 🔴 Link failed!{error_info} \n {net_file} ')
+                            signal.show_log_text(traceback.format_exc())
+                            fail_num += 1
 
             signal.show_log_text(f"\n 🎉🎉🎉 All finished!!!({get_used_time(start_time)}s) Total {total} , "
                                  f"Linked {link_num} , Copied {copy_num} , Skiped {skip_num} , Failed {fail_num} ")
@@ -1056,32 +1020,44 @@ def movie_lists(escape_folder_list, movie_type, movie_path):
         found_count = len(total)
         if found_count >= i:
             i = found_count + 100
-            signal.show_traceback_log(
-                f"✅ Found ({found_count})! "
-                f"Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! "
-                f"({get_used_time(start_time)}s)... Still searching, please wait... \u3000")
-            signal.show_log_text(
-                f'    {get_current_time()} Found ({found_count})! '
-                f'Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! '
-                f'({get_used_time(start_time)}s)... Still searching, please wait... \u3000')
+            signal.show_traceback_log(f"✅ Found ({found_count})! "
+                                      f"Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! "
+                                      f"({get_used_time(start_time)}s)... Still searching, please wait... \u3000")
+            signal.show_log_text(f'    {get_current_time()} Found ({found_count})! '
+                                 f'Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! '
+                                 f'({get_used_time(start_time)}s)... Still searching, please wait... \u3000')
 
     total.sort()
-    signal.show_traceback_log(
-        f"🎉 Done!!! Found ({len(total)})! "
-        f"Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! "
-        f"({get_used_time(start_time)}s) \u3000")
-    signal.show_log_text(
-        f'    Done!!! Found ({len(total)})! '
-        f'Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! '
-        f'({get_used_time(start_time)}s) \u3000')
+    signal.show_traceback_log(f"🎉 Done!!! Found ({len(total)})! "
+                              f"Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! "
+                              f"({get_used_time(start_time)}s) \u3000")
+    signal.show_log_text(f'    Done!!! Found ({len(total)})! '
+                         f'Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! '
+                         f'({get_used_time(start_time)}s) \u3000')
     return total
 
 
 def get_file_info(file_path, copy_sub=True):
-    json_data = {'version': config.version, 'logs': '', 'req_web': '', 'image_download': '', 'outline_from': '',
-                 'cover_from': '', 'poster_from': '', 'extrafanart_from': '', 'trailer_from': '',
-                 'short_number': '', 'appoint_number': '', 'appoint_url': '', 'website_name': '', 'fields_info': '',
-                 'poster_path': '', 'thumb_path': '', 'fanart_path': '', 'cover_list': []}
+    json_data = {
+        'version': config.version,
+        'logs': '',
+        'req_web': '',
+        'image_download': '',
+        'outline_from': '',
+        'cover_from': '',
+        'poster_from': '',
+        'extrafanart_from': '',
+        'trailer_from': '',
+        'short_number': '',
+        'appoint_number': '',
+        'appoint_url': '',
+        'website_name': '',
+        'fields_info': '',
+        'poster_path': '',
+        'thumb_path': '',
+        'fanart_path': '',
+        'cover_list': []
+    }
     movie_number = ''
     has_sub = False
     c_word = ''
@@ -1170,8 +1146,7 @@ def get_file_info(file_path, copy_sub=True):
             if len(cd_path_2[0]) == 1 or 'digital' in cd_char:
                 cd_part = str(int(cd_path_2[0]))
         elif cd_path_3 and 'letter' in cd_char:
-            letter_list = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
-                           'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+            letter_list = ['', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
             if cd_path_3[0][1] != 'c' or 'endc' in cd_char:
                 cd_part = letter_list.index(cd_path_3[0][1])
         elif cd_path_4 and 'middle_number' in cd_char:
@@ -1201,9 +1176,8 @@ def get_file_info(file_path, copy_sub=True):
             if '国产' in file_path or '麻豆' in file_path or '國產' in file_path:
                 mosaic = '国产'
             else:
-                md_list = ['国产', '國產', '麻豆', '传媒', '傳媒', '皇家华人', '皇家華人', '精东', '精東',
-                           '猫爪影像', '貓爪影像', '91CM', '91MS', '导演系列', '導演系列', 'MDWP', 'MMZ', 'MLT',
-                           'MSM', 'LAA', 'MXJ', 'SWAG']
+                md_list = ['国产', '國產', '麻豆', '传媒', '傳媒', '皇家华人', '皇家華人', '精东', '精東', '猫爪影像', '貓爪影像', '91CM', '91MS', '导演系列', '導演系列',
+                           'MDWP', 'MMZ', 'MLT', 'MSM', 'LAA', 'MXJ', 'SWAG']
                 for each in md_list:
                     if each in file_path:
                         mosaic = '国产'
@@ -1218,8 +1192,7 @@ def get_file_info(file_path, copy_sub=True):
         # 判断是否无码
         wuma_style = str(config.wuma_style)
         if not mosaic:
-            if '无码' in file_path or '無碼' in file_path or '無修正' in file_path or 'uncensored' in file_path.lower() or is_uncensored(
-                    movie_number):
+            if '无码' in file_path or '無碼' in file_path or '無修正' in file_path or 'uncensored' in file_path.lower() or is_uncensored(movie_number):
                 wuma = wuma_style
                 mosaic = '无码'
 
@@ -1455,8 +1428,7 @@ def _clean_empty_fodlers(path, file_mode):
 def get_success_list():
     Flags.success_save_time = time.time()
     if os.path.isfile(resources.userdata_path('success.txt')):
-        with open(resources.userdata_path('success.txt'), 'r', encoding='utf-8',
-                  errors='ignore') as f:
+        with open(resources.userdata_path('success.txt'), 'r', encoding='utf-8', errors='ignore') as f:
             temp = f.read()
             Flags.success_list = set(temp.split('\n')) if temp.strip() else set()
             if '' in Flags.success_list:
@@ -1465,9 +1437,19 @@ def get_success_list():
     signal.view_success_file_settext.emit(f'查看 ({len(Flags.success_list)})')
 
 
-def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_new_path,
-                   thumb_new_path_with_filename, poster_new_path_with_filename, fanart_new_path_with_filename,
-                   nfo_new_path, file_ex, poster_final_path, thumb_final_path, fanart_final_path):
+def deal_old_files(json_data,
+                   folder_old_path,
+                   folder_new_path,
+                   file_path,
+                   file_new_path,
+                   thumb_new_path_with_filename,
+                   poster_new_path_with_filename,
+                   fanart_new_path_with_filename,
+                   nfo_new_path,
+                   file_ex,
+                   poster_final_path,
+                   thumb_final_path,
+                   fanart_final_path):
     """
     处理本地已存在的thumb、poster、fanart、nfo
     """
@@ -1501,15 +1483,12 @@ def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_
     poster_old_path_no_filename = convert_path(os.path.join(folder_old_path, 'poster.jpg'))
     thumb_old_path_no_filename = convert_path(os.path.join(folder_old_path, 'thumb.jpg'))
     fanart_old_path_no_filename = convert_path(os.path.join(folder_old_path, 'fanart.jpg'))
-    file_path_list = {nfo_old_path, nfo_new_path, thumb_old_path_with_filename, thumb_old_path_no_filename,
-                      thumb_new_path_with_filename, thumb_final_path, poster_old_path_with_filename,
-                      poster_old_path_no_filename, poster_new_path_with_filename, poster_final_path,
-                      fanart_old_path_with_filename, fanart_old_path_no_filename, fanart_new_path_with_filename,
-                      fanart_final_path, trailer_old_file_path_with_filename, trailer_new_file_path_with_filename}
-    folder_path_list = {extrafanart_old_path, extrafanart_new_path, extrafanart_copy_old_path,
-                        extrafanart_copy_new_path, trailer_old_folder_path, trailer_new_folder_path,
-                        theme_videos_old_path, theme_videos_new_path, extrafanart_extra_old_path,
-                        extrafanart_extra_new_path}
+    file_path_list = {nfo_old_path, nfo_new_path, thumb_old_path_with_filename, thumb_old_path_no_filename, thumb_new_path_with_filename, thumb_final_path,
+                      poster_old_path_with_filename, poster_old_path_no_filename, poster_new_path_with_filename, poster_final_path, fanart_old_path_with_filename,
+                      fanart_old_path_no_filename, fanart_new_path_with_filename, fanart_final_path, trailer_old_file_path_with_filename,
+                      trailer_new_file_path_with_filename}
+    folder_path_list = {extrafanart_old_path, extrafanart_new_path, extrafanart_copy_old_path, extrafanart_copy_new_path, trailer_old_folder_path,
+                        trailer_new_folder_path, theme_videos_old_path, theme_videos_new_path, extrafanart_extra_old_path, extrafanart_extra_new_path}
 
     # 视频模式进行清理
     main_mode = config.main_mode
@@ -1573,8 +1552,7 @@ def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_
     done_poster_path_copy = True
     try:
         # 图片最终路径等于已下载路径时，图片是已下载的，不需要处理
-        if done_poster_path and os.path.exists(done_poster_path) and split_path(done_poster_path)[0] == \
-                split_path(poster_final_path)[0]:  # 如果存在已下载完成的文件，尝试复制
+        if done_poster_path and os.path.exists(done_poster_path) and split_path(done_poster_path)[0] == split_path(poster_final_path)[0]:  # 如果存在已下载完成的文件，尝试复制
             done_poster_path_copy = False  # 标记未复制！此处不复制，在poster download中复制
         elif os.path.exists(poster_final_path):
             pass  # windows、mac大小写不敏感，暂不解决
@@ -1590,14 +1568,11 @@ def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_
         if poster_exists:
             Flags.file_done_dic[json_data['number']].update({'local_poster': poster_final_path})
             # 清理旧图片
-            if poster_old_path_with_filename.lower() != poster_final_path.lower() and os.path.exists(
-                    poster_old_path_with_filename):
+            if poster_old_path_with_filename.lower() != poster_final_path.lower() and os.path.exists(poster_old_path_with_filename):
                 delete_file(poster_old_path_with_filename)
-            if poster_old_path_no_filename.lower() != poster_final_path.lower() and os.path.exists(
-                    poster_old_path_no_filename):
+            if poster_old_path_no_filename.lower() != poster_final_path.lower() and os.path.exists(poster_old_path_no_filename):
                 delete_file(poster_old_path_no_filename)
-            if poster_new_path_with_filename.lower() != poster_final_path.lower() and os.path.exists(
-                    poster_new_path_with_filename):
+            if poster_new_path_with_filename.lower() != poster_final_path.lower() and os.path.exists(poster_new_path_with_filename):
                 delete_file(poster_new_path_with_filename)
         elif Flags.file_done_dic[json_data['number']]['local_poster']:
             copy_file(Flags.file_done_dic[json_data['number']]['local_poster'], poster_final_path)
@@ -1610,8 +1585,7 @@ def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_
     done_thumb_path_copy = True
     try:
         # 图片最终路径等于已下载路径时，图片是已下载的，不需要处理
-        if done_thumb_path and os.path.exists(done_thumb_path) and split_path(done_thumb_path)[0] == \
-                split_path(thumb_final_path)[0]:
+        if done_thumb_path and os.path.exists(done_thumb_path) and split_path(done_thumb_path)[0] == split_path(thumb_final_path)[0]:
             done_thumb_path_copy = False  # 标记未复制！此处不复制，在 thumb download中复制
         elif os.path.exists(thumb_final_path):
             pass
@@ -1627,14 +1601,11 @@ def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_
         if thumb_exists:
             Flags.file_done_dic[json_data['number']].update({'local_thumb': thumb_final_path})
             # 清理旧图片
-            if thumb_old_path_with_filename.lower() != thumb_final_path.lower() and os.path.exists(
-                    thumb_old_path_with_filename):
+            if thumb_old_path_with_filename.lower() != thumb_final_path.lower() and os.path.exists(thumb_old_path_with_filename):
                 delete_file(thumb_old_path_with_filename)
-            if thumb_old_path_no_filename.lower() != thumb_final_path.lower() and os.path.exists(
-                    thumb_old_path_no_filename):
+            if thumb_old_path_no_filename.lower() != thumb_final_path.lower() and os.path.exists(thumb_old_path_no_filename):
                 delete_file(thumb_old_path_no_filename)
-            if thumb_new_path_with_filename.lower() != thumb_final_path.lower() and os.path.exists(
-                    thumb_new_path_with_filename):
+            if thumb_new_path_with_filename.lower() != thumb_final_path.lower() and os.path.exists(thumb_new_path_with_filename):
                 delete_file(thumb_new_path_with_filename)
         elif Flags.file_done_dic[json_data['number']]['local_thumb']:
             copy_file(Flags.file_done_dic[json_data['number']]['local_thumb'], thumb_final_path)
@@ -1647,8 +1618,7 @@ def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_
     done_fanart_path_copy = True
     try:
         # 图片最终路径等于已下载路径时，图片是已下载的，不需要处理
-        if done_fanart_path and os.path.exists(done_fanart_path) and split_path(done_fanart_path)[0] == \
-                split_path(fanart_final_path)[0]:
+        if done_fanart_path and os.path.exists(done_fanart_path) and split_path(done_fanart_path)[0] == split_path(fanart_final_path)[0]:
             done_fanart_path_copy = False  # 标记未复制！此处不复制，在 fanart download中复制
         elif os.path.exists(fanart_final_path):
             pass
@@ -1664,14 +1634,11 @@ def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_
         if fanart_exists:
             Flags.file_done_dic[json_data['number']].update({'local_fanart': fanart_final_path})
             # 清理旧图片
-            if fanart_old_path_with_filename.lower() != fanart_final_path.lower() and os.path.exists(
-                    fanart_old_path_with_filename):
+            if fanart_old_path_with_filename.lower() != fanart_final_path.lower() and os.path.exists(fanart_old_path_with_filename):
                 delete_file(fanart_old_path_with_filename)
-            if fanart_old_path_no_filename.lower() != fanart_final_path.lower() and os.path.exists(
-                    fanart_old_path_no_filename):
+            if fanart_old_path_no_filename.lower() != fanart_final_path.lower() and os.path.exists(fanart_old_path_no_filename):
                 delete_file(fanart_old_path_no_filename)
-            if fanart_new_path_with_filename.lower() != fanart_final_path.lower() and os.path.exists(
-                    fanart_new_path_with_filename):
+            if fanart_new_path_with_filename.lower() != fanart_final_path.lower() and os.path.exists(fanart_new_path_with_filename):
                 delete_file(fanart_new_path_with_filename)
         elif Flags.file_done_dic[json_data['number']]['local_fanart']:
             copy_file(Flags.file_done_dic[json_data['number']]['local_fanart'], fanart_final_path)
@@ -1721,17 +1688,14 @@ def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_
         # 删除带文件名文件，用不到了
         if os.path.exists(trailer_old_file_path_with_filename):
             delete_file(trailer_old_file_path_with_filename)
-        if trailer_new_file_path_with_filename != trailer_old_file_path_with_filename and os.path.exists(
-                trailer_new_file_path_with_filename):
+        if trailer_new_file_path_with_filename != trailer_old_file_path_with_filename and os.path.exists(trailer_new_file_path_with_filename):
             delete_file(trailer_new_file_path_with_filename)
     else:
         # 目标文件带文件名
         if os.path.exists(trailer_new_file_path_with_filename):
-            if trailer_old_file_path_with_filename != trailer_new_file_path_with_filename and os.path.exists(
-                    trailer_old_file_path_with_filename):
+            if trailer_old_file_path_with_filename != trailer_new_file_path_with_filename and os.path.exists(trailer_old_file_path_with_filename):
                 delete_file(trailer_old_file_path_with_filename)
-        elif trailer_old_file_path_with_filename != trailer_new_file_path_with_filename and os.path.exists(
-                trailer_old_file_path_with_filename):
+        elif trailer_old_file_path_with_filename != trailer_new_file_path_with_filename and os.path.exists(trailer_old_file_path_with_filename):
             move_file(trailer_old_file_path_with_filename, trailer_new_file_path_with_filename)
         elif os.path.exists(trailer_old_file_path):
             move_file(trailer_old_file_path, trailer_new_file_path_with_filename)
@@ -1748,8 +1712,7 @@ def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_
             if trailer_new_folder_path != trailer_old_folder_path and os.path.exists(trailer_new_folder_path):
                 shutil.rmtree(trailer_new_folder_path, ignore_errors=True)
             # 删除带文件名旧文件，用不到了
-            if trailer_old_file_path_with_filename != trailer_new_file_path_with_filename and os.path.exists(
-                    trailer_old_file_path_with_filename):
+            if trailer_old_file_path_with_filename != trailer_new_file_path_with_filename and os.path.exists(trailer_old_file_path_with_filename):
                 delete_file(trailer_old_file_path_with_filename)
         else:
             local_trailer = Flags.file_done_dic.get(json_data['number']).get('local_trailer')
@@ -1761,8 +1724,7 @@ def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_
         # 处理 extrafanart
         try:
             if os.path.exists(extrafanart_new_path):
-                if extrafanart_old_path.lower() != extrafanart_new_path.lower() and os.path.exists(
-                        extrafanart_old_path):
+                if extrafanart_old_path.lower() != extrafanart_new_path.lower() and os.path.exists(extrafanart_old_path):
                     shutil.rmtree(extrafanart_old_path, ignore_errors=True)
             elif os.path.exists(extrafanart_old_path):
                 move_file(extrafanart_old_path, extrafanart_new_path)
@@ -1772,8 +1734,7 @@ def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_
         # extrafanart副本
         try:
             if os.path.exists(extrafanart_copy_new_path):
-                if extrafanart_copy_old_path.lower() != extrafanart_copy_new_path.lower() and os.path.exists(
-                        extrafanart_copy_old_path):
+                if extrafanart_copy_old_path.lower() != extrafanart_copy_new_path.lower() and os.path.exists(extrafanart_copy_old_path):
                     shutil.rmtree(extrafanart_copy_old_path, ignore_errors=True)
             elif os.path.exists(extrafanart_copy_old_path):
                 move_file(extrafanart_copy_old_path, extrafanart_copy_new_path)
@@ -1782,16 +1743,14 @@ def deal_old_files(json_data, folder_old_path, folder_new_path, file_path, file_
 
         # 主题视频
         if os.path.exists(theme_videos_new_path):
-            if theme_videos_old_path.lower() != theme_videos_new_path.lower() and os.path.exists(
-                    theme_videos_old_path):
+            if theme_videos_old_path.lower() != theme_videos_new_path.lower() and os.path.exists(theme_videos_old_path):
                 shutil.rmtree(theme_videos_old_path, ignore_errors=True)
         elif os.path.exists(theme_videos_old_path):
             move_file(theme_videos_old_path, theme_videos_new_path)
 
         # 附加视频
         if os.path.exists(extrafanart_extra_new_path):
-            if extrafanart_extra_old_path.lower() != extrafanart_extra_new_path.lower() and os.path.exists(
-                    extrafanart_extra_old_path):
+            if extrafanart_extra_old_path.lower() != extrafanart_extra_new_path.lower() and os.path.exists(extrafanart_extra_old_path):
                 shutil.rmtree(extrafanart_extra_old_path, ignore_errors=True)
         elif os.path.exists(extrafanart_extra_old_path):
             move_file(extrafanart_extra_old_path, extrafanart_extra_new_path)
@@ -1851,7 +1810,7 @@ def save_success_list(old_path='', new_path=''):
 def save_remain_list():
     if Flags.can_save_remain and 'remain_task' in config.switch_on:
         try:
-            with open(resources.userdata_path('remain.txt'), 'w', encoding='utf-8',errors='ignore') as f:
+            with open(resources.userdata_path('remain.txt'), 'w', encoding='utf-8', errors='ignore') as f:
                 f.write('\n'.join(Flags.remain_list))
                 Flags.can_save_remain = False
         except Exception as e:
@@ -1886,7 +1845,6 @@ def check_and_clean_files():
     signal.show_log_text('================================================================================')
     _clean_empty_fodlers(movie_path, '')
     signal.set_label_file_path.emit('🗑 清理完成！')
-    signal.show_log_text(
-        f" 🎉🎉🎉 All finished!!!({get_used_time(start_time)}s) Total {total} , Success {succ} , Failed {fail} ")
+    signal.show_log_text(f" 🎉🎉🎉 All finished!!!({get_used_time(start_time)}s) Total {total} , Success {succ} , Failed {fail} ")
     signal.show_log_text('================================================================================')
     signal.reset_buttons_status.emit()

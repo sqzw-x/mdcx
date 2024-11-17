@@ -1,12 +1,11 @@
 import os
 import os.path
 import platform
-import random
 import re
 import time
 from configparser import RawConfigParser
 
-from models.base.utils import singleton
+from models.base.utils import get_user_agent, singleton
 from models.config.config_generated import GeneratedConfig
 from models.config.config_manual import ManualConfig
 
@@ -323,15 +322,9 @@ statement = {self.statement}
     def update_config(self):
         # 获取proxies
         if self.type == 'http':
-            self.proxies = {
-                "http": "http://" + self.proxy,
-                "https": "http://" + self.proxy,
-            }
+            self.proxies = {"http": "http://" + self.proxy, "https": "http://" + self.proxy, }
         elif self.type == 'socks5':
-            self.proxies = {
-                "http": "socks5h://" + self.proxy,
-                "https": "socks5h://" + self.proxy,
-            }
+            self.proxies = {"http": "socks5h://" + self.proxy, "https": "socks5h://" + self.proxy, }
         else:
             self.proxies = None
 
@@ -339,13 +332,7 @@ statement = {self.statement}
         self.theporndb_no_hash = 'theporndb_no_hash' in self.switch_on
 
         # 获取User-Agent
-        temp_l = random.randint(110, 117)
-        temp_m = random.randint(1, 5563)
-        temp_n = random.randint(1, 180)
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s.0.%s.%s Safari/537.36' % (
-                temp_l, temp_m, temp_n),
-        }
+        self.headers = {'User-Agent': get_user_agent(), }
 
         # 去掉^符号！！！
         self.cnword_style = self.cnword_style.strip('^')
@@ -363,17 +350,13 @@ statement = {self.statement}
         # 是否清理文件以及清理列表
         can_clean = True if 'i_know' in self.clean_enable and 'i_agree' in self.clean_enable else False
         can_clean_auto = True if can_clean and 'clean_auto' in self.clean_enable else False
-        clean_ext_list = re.split(r'[|｜，,]', self.clean_ext) \
-            if can_clean and self.clean_ext and 'clean_ext' in self.clean_enable else []
-        clean_name_list = re.split(r'[|｜，,]', self.clean_name) \
-            if can_clean and self.clean_name and 'clean_name' in self.clean_enable else []
-        clean_contains_list = re.split(r'[|｜，,]', self.clean_contains) \
-            if can_clean and self.clean_contains and 'clean_contains' in self.clean_enable else []
+        clean_ext_list = re.split(r'[|｜，,]', self.clean_ext) if can_clean and self.clean_ext and 'clean_ext' in self.clean_enable else []
+        clean_name_list = re.split(r'[|｜，,]', self.clean_name) if can_clean and self.clean_name and 'clean_name' in self.clean_enable else []
+        clean_contains_list = re.split(r'[|｜，,]', self.clean_contains) if can_clean and self.clean_contains and 'clean_contains' in self.clean_enable else []
         clean_size_list = self.clean_size if can_clean and 'clean_size' in self.clean_enable else ''
-        clean_ignore_ext_list = re.split(r'[|｜，,]', self.clean_ignore_ext) \
-            if can_clean and self.clean_ignore_ext and 'clean_ignore_ext' in self.clean_enable else []
-        clean_ignore_contains_list = re.split(r'[|｜，,]', self.clean_ignore_contains) \
-            if can_clean and self.clean_ignore_contains and 'clean_ignore_contains' in self.clean_enable else []
+        clean_ignore_ext_list = re.split(r'[|｜，,]', self.clean_ignore_ext) if can_clean and self.clean_ignore_ext and 'clean_ignore_ext' in self.clean_enable else []
+        clean_ignore_contains_list = re.split(r'[|｜，,]',
+                                              self.clean_ignore_contains) if can_clean and self.clean_ignore_contains and 'clean_ignore_contains' in self.clean_enable else []
         self.can_clean = can_clean
         self.can_clean_auto = can_clean_auto
         self.clean_ext_list = clean_ext_list

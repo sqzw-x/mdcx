@@ -253,8 +253,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             release = get_release(cover_url)
             year = get_year(release)
             studio = get_studio(series, tag, lable_list)
-            number, title = get_real_number_title(number, title, number_list, appoint_number, appoint_url, lable_list,
-                                                  tag, actor, series)
+            number, title = get_real_number_title(number, title, number_list, appoint_number, appoint_url, lable_list, tag, actor, series)
 
             try:
                 dic = {
@@ -309,13 +308,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )
     return js
 
 
@@ -372,18 +365,5 @@ if __name__ == '__main__':
     # print(main('', file_path='WTB-075 酒店妹包养软饭男 为了让他振作只好以身相许 乌托邦.ts'))    # 标题里有\t
     # print(main('', file_path='杏吧八戒1 - 3000约操18岁大一新生，苗条身材白嫩紧致.ts'))  # 分词匹配，带标点或者整个标题去匹配
     # print(main('', file_path='萝莉社 女大学生找模特兼职 被要求裸露拍摄 被套路内射.ts'))  # 分词匹配，带标点或者整个标题去匹配
-    print(main('', file_path='/sp/sp6/国产测试/RS-023 AV1.mp4'))
-    # print(main('MDM-002')) # 去掉标题最后的发行商
-    # print(main('MDS-0007')) # 数字要四位才能搜索到，即 MDS-0007 MDJ001 EP1 我的女优物语陈美惠.TS
-    # print(main('MDS-007', file_path='MDJ001 EP1 我的女优物语陈美惠.TS')) # 数字要四位才能搜索到，即 MDJ-0001.EP1
-    # print(main('91CM-090')) # 带横线才能搜到
-    # print(main('台湾SWAG chloebabe 剩蛋特辑 干爆小鹿'))   # 带空格才能搜到
-    # print(main('淫欲游戏王EP2'))  # 不带空格才能搜到
-    # print(main('台湾SWAG-chloebabe-剩蛋特輯-幹爆小鹿'))
-    # print(main('MD-0020'))
-    # print(main('mds009'))
-    # print(main('女王的SM调教'))
-    # print(main('91CM202'))
-    # print(main('必射客 没钱买披萨只好帮外送员解决问题 大象传媒.ts', file_path='必射客 没钱买披萨只好帮外送员解决问题 大象传媒.ts'))
-    # print(main('', file_path='素人自制舒舒 富婆偷情被偷拍 亏大了！50W买个视频还被操.ts'))
-    # print(main('', file_path='/sp/sp3/国产/2021年10月份 國產原創原版合集/20211003 91CM-191 你好同学ep5 MSD011/[c0e0.com]实战现场 .TS'))
+    print(main('',
+               file_path='/sp/sp6/国产测试/RS-023 AV1.mp4'))  # print(main('MDM-002')) # 去掉标题最后的发行商  # print(main('MDS-0007')) # 数字要四位才能搜索到，即 MDS-0007 MDJ001 EP1 我的女优物语陈美惠.TS  # print(main('MDS-007', file_path='MDJ001 EP1 我的女优物语陈美惠.TS')) # 数字要四位才能搜索到，即 MDJ-0001.EP1  # print(main('91CM-090')) # 带横线才能搜到  # print(main('台湾SWAG chloebabe 剩蛋特辑 干爆小鹿'))   # 带空格才能搜到  # print(main('淫欲游戏王EP2'))  # 不带空格才能搜到  # print(main('台湾SWAG-chloebabe-剩蛋特輯-幹爆小鹿'))  # print(main('MD-0020'))  # print(main('mds009'))  # print(main('女王的SM调教'))  # print(main('91CM202'))  # print(main('必射客 没钱买披萨只好帮外送员解决问题 大象传媒.ts', file_path='必射客 没钱买披萨只好帮外送员解决问题 大象传媒.ts'))  # print(main('', file_path='素人自制舒舒 富婆偷情被偷拍 亏大了！50W买个视频还被操.ts'))  # print(main('', file_path='/sp/sp3/国产/2021年10月份 國產原創原版合集/20211003 91CM-191 你好同学ep5 MSD011/[c0e0.com]实战现场 .TS'))

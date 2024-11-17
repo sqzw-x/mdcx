@@ -35,9 +35,7 @@ def getWebNumber(title, number):
         result = result[-1]
     else:
         result = number.upper()
-    return result.replace('_1pondo_', '').replace('1pondo_', '').replace('caribbeancom-', '').replace('caribbeancom',
-                                                                                                      '').replace(
-        '-PPV', '').strip(' _-')
+    return result.replace('_1pondo_', '').replace('1pondo_', '').replace('caribbeancom-', '').replace('caribbeancom', '').replace('-PPV', '').strip(' _-')
 
 
 def getActor(html):
@@ -72,7 +70,7 @@ def getOutline(html):
         return ''
     else:
         # 去除简介中的无意义信息，中间和首尾的空白字符、简介两字、*根据分发等
-        result = re.sub(r'[\n\t]|(简|簡)介：', '', result).split('*根据分发', 1 )[0].strip()
+        result = re.sub(r'[\n\t]|(简|簡)介：', '', result).split('*根据分发', 1)[0].strip()
     return result
 
 
@@ -151,9 +149,8 @@ def get_real_url(html, number):
         detail_url = each.xpath('./a/@href')[0]
         title = each.xpath('./a/@title')[0]
         # 注意去除马赛克破坏版等几乎没有有效字段的条目
-        for i in ['克破', '无码流出', '無碼流出']:
-            if number.upper() in title and i not in title:
-                return detail_url
+        if number.upper() in title and all(keyword not in title for keyword in ['克破', '无码破解', '無碼破解', '无码流出', '無碼流出']):
+            return detail_url
     return ''
 
 
@@ -164,7 +161,10 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
 
     if not re.match(r'n\d{4}', number):
         number = number.upper()
-    real_url = appoint_url
+    if appoint_url:
+        real_url = appoint_url
+    else:
+        real_url = ''
     iqqtv_url = getattr(config, "iqqtv_website", "https://iqq5.xyz")
     cover_url = ''
     image_cut = 'right'
@@ -199,93 +199,90 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
             html = etree.fromstring(html_search, etree.HTMLParser())
             real_url = html.xpath('//a[@class="ga_click"]/@href')
             if real_url:
-                real_url = iqqtv_url + real_url[0].replace('/cn/', '').replace('/jp/', '').replace('&cat=19', '')
+                real_url_tmp = get_real_url(html, number)
+                real_url = iqqtv_url + real_url_tmp.replace('/cn/', '').replace('/jp/', '').replace('&cat=19', '')
             else:
                 debug_info = '搜索结果: 未匹配到番号！'
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
-        if real_url:
-            # 只有一个搜索结果时直接取值 多个则进入判断
-            if len(real_url) == 1:
-                real_url = iqqtv_url + real_url[0].replace('/cn/', '').replace('/jp/', '').replace('&cat=19', '')
-            else:
-                real_url_tmp =  get_real_url(html, number)
-                real_url = iqqtv_url + real_url_tmp.replace('/cn/', '').replace('/jp/', '').replace('&cat=19', '')
-            debug_info = '番号地址: %s ' % real_url
+        else:
+            real_url = iqqtv_url + re.sub(r'.*player', 'player', appoint_url)
+
+        debug_info = '番号地址: %s ' % real_url
+        log_info += web_info + debug_info
+        result, html_content = get_html(real_url)
+        if not result:
+            debug_info = '网络请求错误: %s' % html_content
             log_info += web_info + debug_info
-            result, html_content = get_html(real_url)
-            if not result:
-                debug_info = '网络请求错误: %s' % html_content
-                log_info += web_info + debug_info
-                raise Exception(debug_info)
-            html_info = etree.fromstring(html_content, etree.HTMLParser())
+            raise Exception(debug_info)
+        html_info = etree.fromstring(html_content, etree.HTMLParser())
 
-            title = get_title(html_info)  # 获取标题
-            if not title:
-                debug_info = '数据获取失败: 未获取到title！'
-                log_info += web_info + debug_info
-                raise Exception(debug_info)
-            web_number = getWebNumber(title, number)  # 获取番号，用来替换标题里的番号
-            title = title.replace(' %s' % web_number, '').strip()
-            actor = getActor(html_info)  # 获取actor
-            actor_photo = getActorPhoto(actor)
-            title = get_real_title(title)
-            cover_url = getCover(html_info)  # 获取cover
-            outline = getOutline(html_info)
-            release = getRelease(html_info)
-            year = getYear(release)
-            tag = getTag(html_info)
-            mosaic = getMosaic(tag)
-            if mosaic == '无码':
-                image_cut = 'center'
-            studio = getStudio(html_info)
-            runtime = ''
-            score = ''
-            series = get_series(html_info)
-            director = ''
-            publisher = studio
-            extrafanart = get_extrafanart(html_info)
-            tag = tag.replace('无码片', '').replace('無碼片', '').replace('無修正', '')
-            try:
-                dic = {
-                    'number': web_number,
-                    'title': title,
-                    'originaltitle': title,
-                    'actor': actor,
-                    'outline': outline,
-                    'originalplot': outline,
-                    'tag': tag,
-                    'release': release,
-                    'year': year,
-                    'runtime': runtime,
-                    'score': score,
-                    'series': series,
-                    'director': director,
-                    'studio': studio,
-                    'publisher': publisher,
-                    'source': 'iqqtv',
-                    'website': real_url,
-                    'actor_photo': actor_photo,
-                    'cover': cover_url,
-                    'poster': '',
-                    'extrafanart': extrafanart,
-                    'trailer': '',
-                    'image_download': image_download,
-                    'image_cut': image_cut,
-                    'log_info': log_info,
-                    'error_info': '',
-                    'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
-                    'mosaic': mosaic,
-                    'wanted': '',
-                }
+        title = get_title(html_info)  # 获取标题
+        if not title:
+            debug_info = '数据获取失败: 未获取到title！'
+            log_info += web_info + debug_info
+            raise Exception(debug_info)
+        web_number = getWebNumber(title, number)  # 获取番号，用来替换标题里的番号
+        title = title.replace(' %s' % web_number, '').strip()
+        actor = getActor(html_info)  # 获取actor
+        actor_photo = getActorPhoto(actor)
+        title = get_real_title(title)
+        cover_url = getCover(html_info)  # 获取cover
+        outline = getOutline(html_info)
+        release = getRelease(html_info)
+        year = getYear(release)
+        tag = getTag(html_info)
+        mosaic = getMosaic(tag)
+        if mosaic == '无码':
+            image_cut = 'center'
+        studio = getStudio(html_info)
+        runtime = ''
+        score = ''
+        series = get_series(html_info)
+        director = ''
+        publisher = studio
+        extrafanart = get_extrafanart(html_info)
+        tag = tag.replace('无码片', '').replace('無碼片', '').replace('無修正', '')
+        try:
+            dic = {
+                'number': web_number,
+                'title': title,
+                'originaltitle': title,
+                'actor': actor,
+                'outline': outline,
+                'originalplot': outline,
+                'tag': tag,
+                'release': release,
+                'year': year,
+                'runtime': runtime,
+                'score': score,
+                'series': series,
+                'director': director,
+                'studio': studio,
+                'publisher': publisher,
+                'source': 'iqqtv',
+                'website': real_url,
+                'actor_photo': actor_photo,
+                'cover': cover_url,
+                'poster': '',
+                'extrafanart': extrafanart,
+                'trailer': '',
+                'image_download': image_download,
+                'image_cut': image_cut,
+                'log_info': log_info,
+                'error_info': '',
+                'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
+                'mosaic': mosaic,
+                'wanted': '',
+            }
 
-                debug_info = '数据获取成功！'
-                log_info += web_info + debug_info
-                dic['log_info'] = log_info
-            except Exception as e:
-                debug_info = '数据生成出错: %s' % str(e)
-                log_info += web_info + debug_info
-                raise Exception(debug_info)
+            debug_info = '数据获取成功！'
+            log_info += web_info + debug_info
+            dic['log_info'] = log_info
+        except Exception as e:
+            debug_info = '数据生成出错: %s' % str(e)
+            log_info += web_info + debug_info
+            raise Exception(debug_info)
 
     except Exception as e:
         debug_info = str(e)
@@ -298,13 +295,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {language: dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
@@ -343,4 +334,7 @@ if __name__ == '__main__':
     # print(main('LUXU-1217', ''))
     # print(main('aldn-334', ''))           # 存在系列字段
     # print(main('ssni-200', ''))           # 存在多个搜索结果
-    print(main('START-104', ''))      # 简介存在无效信息  "*根据分发方式,内容可能会有所不同"
+    # print(main('START-104', language='zh_tw'))      # 简介存在无效信息  "*根据分发方式,内容可能会有所不同"
+    print(main('abs-141'))  # 一个搜索结果
+    print(main('MIAB-204'))  # 多个搜索结果
+    print(main('ABF-131', ''))  # 无码破解

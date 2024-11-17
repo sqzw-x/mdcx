@@ -32,8 +32,7 @@ def getWebNumber(html, number):
 
 def getActor(html):
     try:
-        result = str(html.xpath('//div[@class="star-name"]/a/text()')).strip(" ['']").replace("'", '').replace(', ',
-                                                                                                               ',')
+        result = str(html.xpath('//div[@class="star-name"]/a/text()')).strip(" ['']").replace("'", '').replace(', ', ',')
     except:
         result = ''
     return result
@@ -222,10 +221,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', mosaic=
     javbus_url = getattr(config, 'javbus_website', 'https://www.javbus.com')
     headers = config.headers
     cookie = config.javbus
-    headers_o = {
-        'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6',
-        'cookie': cookie,
-    }
+    headers_o = {'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6', 'cookie': cookie, }
     headers.update(headers_o)
 
     title = ''
@@ -380,43 +376,11 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', mosaic=
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
 if __name__ == '__main__':
     # yapf: disable
     # print(main('LAFBD-034'))    # cwp,cwpbd 数字为2位时不带0
-    print(main('PMAXVR-008'))
-    # print(main('cwpbd-034'))    # cwp,cwpbd 数字为2位时不带0
-    # print(main('FC2-1262472'))    # 无结果
-    # print(main('STARS-199'))    # 禁止
-    # print(main('EDVR-043'))    # 无结果
-    # print(main('SSIS-243'))
-    # print(main('ABW-015'))
-    # print(main('DASD-972'))
-    # print(main('ss-036'))    # 无结果
-    # print(main('KMHRS-050'))
-    # print(main('KV-115'))    # 无结果
-    # print(main('070621_001'))
-    # print(main('heyzo-1031'))
-    # print(main('heyzo-0811'))
-    # print(main('heyzo-1673'))
-    # print(main('dv-1175'))    # 无结果，通过搜索有结果
-    # print(main('dv1175'))
-    # print(main('ssni-644'))
-    # print(main('010115-001'))
-    # print(main('ssni644'))
-    # print(main('BigTitsatWork-17-09-26'))
-    # print(main('BrazzersExxtra.21.02.01'))
-    # print(main('KA-001'))   # 无结果
-    # print(main('012715-793'))
-    # print(main('ssni-644', "https://www.javbus.com/SSNI-644"))
-    # print(main('ssni-802', ""))
-    # print(main('DirtyMasseur.20.07.26', "https://www.javbus.hair/DirtyMasseur-21-01-31"))
+    print(main('PMAXVR-008'))  # print(main('cwpbd-034'))    # cwp,cwpbd 数字为2位时不带0  # print(main('FC2-1262472'))    # 无结果  # print(main('STARS-199'))    # 禁止  # print(main('EDVR-043'))    # 无结果  # print(main('SSIS-243'))  # print(main('ABW-015'))  # print(main('DASD-972'))  # print(main('ss-036'))    # 无结果  # print(main('KMHRS-050'))  # print(main('KV-115'))    # 无结果  # print(main('070621_001'))  # print(main('heyzo-1031'))  # print(main('heyzo-0811'))  # print(main('heyzo-1673'))  # print(main('dv-1175'))    # 无结果，通过搜索有结果  # print(main('dv1175'))  # print(main('ssni-644'))  # print(main('010115-001'))  # print(main('ssni644'))  # print(main('BigTitsatWork-17-09-26'))  # print(main('BrazzersExxtra.21.02.01'))  # print(main('KA-001'))   # 无结果  # print(main('012715-793'))  # print(main('ssni-644', "https://www.javbus.com/SSNI-644"))  # print(main('ssni-802', ""))  # print(main('DirtyMasseur.20.07.26', "https://www.javbus.hair/DirtyMasseur-21-01-31"))

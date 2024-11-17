@@ -18,8 +18,7 @@ def add_sub_for_all_video():
         signal.show_log_text("字幕文件夹不存在！\n只能检查无字幕视频，无法添加字幕！")
         signal.show_log_text("================================================================================")
 
-    movie_path, success_folder, failed_folder, escape_folder_list, \
-        extrafanart_folder, softlink_path = get_movie_path_setting()
+    movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = get_movie_path_setting()
     signal.show_log_text(f' 🖥 Movie path: {movie_path} \n 🔎 正在检查所有视频，请稍候...')
     if config.subtitle_add_chs == 'on':
         signal.show_log_text(" 如果字幕文件名不以 .chs 结尾，则会自动添加！\n")
@@ -63,14 +62,12 @@ def add_sub_for_all_video():
                 if config.subtitle_add_chs == 'on':
                     if '.chs' not in sub_old_path and not os.path.exists(sub_new_path):
                         move_file(sub_old_path, sub_new_path)
-                        signal.show_log_text(
-                            f" 🍀 字幕文件: '{file_name + sub_type}' 已被重命名为: '{file_name + '.chs' + sub_type}' ")
+                        signal.show_log_text(f" 🍀 字幕文件: '{file_name + sub_type}' 已被重命名为: '{file_name + '.chs' + sub_type}' ")
                 else:
                     sub_old_path_no_chs = sub_old_path.replace('.chs', '')
                     if '.chs' in sub_old_path and not os.path.exists(sub_old_path_no_chs):
                         move_file(sub_old_path, sub_old_path_no_chs)
-                        signal.show_log_text(
-                            f" 🍀 字幕文件: '{file_name + sub_type}' 已被重命名为: '{split_path(sub_old_path_no_chs)[1]}' ")
+                        signal.show_log_text(f" 🍀 字幕文件: '{file_name + sub_type}' 已被重命名为: '{split_path(sub_old_path_no_chs)[1]}' ")
 
                 cnword_style = config.cnword_style
                 if cnword_style and cnword_style not in sub_new_path:
@@ -78,12 +75,10 @@ def add_sub_for_all_video():
                     file_cnword = config.file_cnword
                     folder_name = config.folder_name
                     naming_file = config.naming_file
-                    if folder_cnword == 'on' or file_cnword == 'on' \
-                            or 'cnword' in folder_name or 'cnword' in naming_file:
+                    if folder_cnword == 'on' or file_cnword == 'on' or 'cnword' in folder_name or 'cnword' in naming_file:
                         new_sub_movie_list.append(movie)
 
-    signal.show_log_text(
-        f'\nDone! \n成功添加字幕影片数量: {add_count} \n仍无字幕影片数量: {no_sub_count - add_count} ')
+    signal.show_log_text(f'\nDone! \n成功添加字幕影片数量: {add_count} \n仍无字幕影片数量: {no_sub_count - add_count} ')
     signal.show_log_text("================================================================================")
     # 重新刮削新添加字幕的影片
     list2 = list(set(new_sub_movie_list))  # 去重
@@ -93,5 +88,3 @@ def add_sub_for_all_video():
         signal.show_log_text('开始对新添加字幕的视频重新刮削...')
         start_new_scrape(FileMode.Default, movie_list=list3)
     signal.reset_buttons_status.emit()
-
-

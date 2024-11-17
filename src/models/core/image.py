@@ -127,41 +127,17 @@ def _add_to_pic(pic_path, img_pic, mark_size, count, mark_name):
         # 固定一个位置
         if mark_fixed == 'corner':
             corner_top_left = [(0, 0), (scroll_width, 0), (scroll_width * 2, 0)]
-            corner_bottom_left = [(0, img_pic.height - scroll_high), (scroll_width, img_pic.height - scroll_high),
-                                  (scroll_width * 2, img_pic.height - scroll_high)]
-            corner_top_right = [(img_pic.width - scroll_width * 4, 0), (img_pic.width - scroll_width * 2, 0),
-                                (img_pic.width - scroll_width, 0)]
-            corner_bottom_right = [(img_pic.width - scroll_width * 4, img_pic.height - scroll_high),
-                                   (img_pic.width - scroll_width * 2, img_pic.height - scroll_high),
+            corner_bottom_left = [(0, img_pic.height - scroll_high), (scroll_width, img_pic.height - scroll_high), (scroll_width * 2, img_pic.height - scroll_high)]
+            corner_top_right = [(img_pic.width - scroll_width * 4, 0), (img_pic.width - scroll_width * 2, 0), (img_pic.width - scroll_width, 0)]
+            corner_bottom_right = [(img_pic.width - scroll_width * 4, img_pic.height - scroll_high), (img_pic.width - scroll_width * 2, img_pic.height - scroll_high),
                                    (img_pic.width - scroll_width, img_pic.height - scroll_high)]
-            corner_dic = {
-                'top_left': corner_top_left,
-                'bottom_left': corner_bottom_left,
-                'top_right': corner_top_right,
-                'bottom_right': corner_bottom_right,
-            }
+            corner_dic = {'top_left': corner_top_left, 'bottom_left': corner_bottom_left, 'top_right': corner_top_right, 'bottom_right': corner_bottom_right, }
             mark_postion = corner_dic[mark_pos_corner][count]
 
         # 封面四个角的位置
         else:
-            pos = [
-                {
-                    'x': 0,
-                    'y': 0
-                },
-                {
-                    'x': img_pic.width - scroll_width,
-                    'y': 0
-                },
-                {
-                    'x': img_pic.width - scroll_width,
-                    'y': img_pic.height - scroll_high
-                },
-                {
-                    'x': 0,
-                    'y': img_pic.height - scroll_high
-                },
-            ]
+            pos = [{'x': 0, 'y': 0}, {'x': img_pic.width - scroll_width, 'y': 0}, {'x': img_pic.width - scroll_width, 'y': img_pic.height - scroll_high},
+                   {'x': 0, 'y': img_pic.height - scroll_high}, ]
             mark_postion = (pos[count]['x'], pos[count]['y'])
         try:  # 图片如果下载不完整时，这里会崩溃，跳过
             img_pic.paste(img_subt, mark_postion, mask=a)
@@ -201,12 +177,7 @@ def add_mark_thread(pic_path, mark_list):
             _add_to_pic(pic_path, img_pic, mark_size, count, mark_name)
             count += 1
     else:
-        pos = {
-            'top_left': 0,
-            'top_right': 1,
-            'bottom_right': 2,
-            'bottom_left': 3,
-        }
+        pos = {'top_left': 0, 'top_right': 1, 'bottom_right': 2, 'bottom_left': 3, }
         mark_pos_count = pos.get(mark_pos)  # 获取自定义位置, 取余配合pos达到顺时针添加的效果
         count_hd = ''
         for mark_name in mark_list:

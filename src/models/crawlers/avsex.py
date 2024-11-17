@@ -47,14 +47,11 @@ def get_actor_photo(actor):
 
 def get_outline(html):
     result = html.xpath('string(//h2[contains(text(), "劇情簡介")]/following-sibling::p)')
-    rep_list = [
-        '(中文字幕1280x720)', '(日本同步最新‧中文字幕1280x720)', '(日本同步最新‧中文字幕)',
-        '(日本同步最新‧完整激薄版‧中文字幕1280x720)', '＊日本女優＊ 劇情做愛影片 ＊完整日本版＊',
-        '＊日本女優＊ 剧情做爱影片 ＊完整日本版＊', '&nbsp;', '<br/>', '<p>', '</p>',
-        '<style type=\"text/css\"><!--td {border: 1px solid #ccc;}br {mso-data-placement:same-cell;}-->\n</style>\n',
-        '<table style=\"border-collapse:collapse; width:54pt; border:none\" width=\"72\">\n\t<colgroup>\n\t\t<col style=\"width:54pt\" width=\"72\" />\n\t</colgroup>\n\t<tbody>\n\t\t<tr height=\"22\" style=\"height:16.5pt\">\n\t\t\t<td height=\"22\" style=\"border:none; height:16.5pt; width:54pt; padding-top:1px; padding-right:1px; padding-left:1px; vertical-align:middle; white-space:nowrap\" width=\"72\"><span style=\"font-size:12pt\"><span style=\"color:black\"><span style=\"font-weight:400\"><span style=\"font-style:normal\"><span style=\"text-decoration:none\"><span style=\"font-family:新細明體,serif\">',
-        '</span></span></span></span></span></span></td>\n\t\t</tr>\n\t</tbody>\n</table>', '★ (请到免费赠片区观赏)'
-    ]
+    rep_list = ['(中文字幕1280x720)', '(日本同步最新‧中文字幕1280x720)', '(日本同步最新‧中文字幕)', '(日本同步最新‧完整激薄版‧中文字幕1280x720)',
+                '＊日本女優＊ 劇情做愛影片 ＊完整日本版＊', '＊日本女優＊ 剧情做爱影片 ＊完整日本版＊', '&nbsp;', '<br/>', '<p>', '</p>',
+                '<style type=\"text/css\"><!--td {border: 1px solid #ccc;}br {mso-data-placement:same-cell;}-->\n</style>\n',
+                '<table style=\"border-collapse:collapse; width:54pt; border:none\" width=\"72\">\n\t<colgroup>\n\t\t<col style=\"width:54pt\" width=\"72\" />\n\t</colgroup>\n\t<tbody>\n\t\t<tr height=\"22\" style=\"height:16.5pt\">\n\t\t\t<td height=\"22\" style=\"border:none; height:16.5pt; width:54pt; padding-top:1px; padding-right:1px; padding-left:1px; vertical-align:middle; white-space:nowrap\" width=\"72\"><span style=\"font-size:12pt\"><span style=\"color:black\"><span style=\"font-weight:400\"><span style=\"font-style:normal\"><span style=\"text-decoration:none\"><span style=\"font-family:新細明體,serif\">',
+                '</span></span></span></span></span></span></td>\n\t\t</tr>\n\t</tbody>\n</table>', '★ (请到免费赠片区观赏)']
     for each in rep_list:
         result = result.replace(each, '').strip()
     return result
@@ -108,8 +105,7 @@ def get_cover(html):
 
 
 def get_extrafanart(html):
-    ex_list = html.xpath(
-        '//h2[contains(text(), "精彩劇照")]/following-sibling::ul/li/div[@class="relative overflow-hidden rounded-md"]/img/@src')
+    ex_list = html.xpath('//h2[contains(text(), "精彩劇照")]/following-sibling::ul/li/div[@class="relative overflow-hidden rounded-md"]/img/@src')
     return ex_list
 
 
@@ -133,8 +129,7 @@ def get_real_url(html, number):
         temp_poster = each.xpath('div[@class="relative overflow-hidden rounded-t-md"]/img/@src')
         if temp_title:
             temp_title = temp_title[0]
-            if temp_title.upper().startswith(number.upper()) or (
-                    f'{number.upper()}-' in temp_title.upper() and temp_title[:1].isdigit()):
+            if temp_title.upper().startswith(number.upper()) or (f'{number.upper()}-' in temp_title.upper() and temp_title[:1].isdigit()):
                 # https://9sex.tv/web/video?id=317900
                 # https://9sex.tv/#/home/video/340496
                 real_url = temp_url
@@ -282,13 +277,7 @@ def main(number, appoint_url='', log_info='', req_web='', language=''):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
@@ -299,47 +288,4 @@ if __name__ == '__main__':
     # print(main('', 'https://9sex.tv/#/home/video/332642'))
     # print(main('EVA-088'))
     # print(main('SNIS-216'))
-    print(main('CAWD-582'))
-    # print(main('ALDN-107'))
-    # print(main('ten-024'))
-    # print(main('459ten-024'))
-    # print(main('IPX-729'))
-    # print(main('STARS-199'))    # 无结果
-    # print(main('SIVR-160'))
-    # print(main('', 'https://avsex.club/web/video?id=333778'))
-    # print(main('', 'avsex.club/web/video?id=333778'))
-    # print(main('ssni-700'))
-    # print(main('ssis-200'))
-    # print(main('heyzo-2026'))
-    # print(main('110219-001'))
-    # print(main('abw-157'))
-    # print(main('010520-001'))
-    # print(main('hbad-599', 'https://avsex.club/web/video?id=333777'))
-    # print(main('hbad-599', 'https://avsex.club/web/video?id=oo'))
-    # print(main('abs-141'))
-    # print(main('HYSD-00083'))
-    # print(main('IESP-660'))
-    # print(main('n1403'))
-    # print(main('GANA-1910'))
-    # print(main('heyzo-1031'))
-    # print(main_us('x-art.19.11.03'))
-    # print(main('032020-001'))
-    # print(main('S2M-055'))
-    # print(main('LUXU-1217'))
-    # print(main('1101132', ''))
-    # print(main('OFJE-318'))
-    # print(main('110119-001'))
-    # print(main('abs-001'))
-    # print(main('SSIS-090', ''))
-    # print(main('SSIS-090', ''))
-    # print(main('SNIS-016', ''))
-    # print(main('HYSD-00083', ''))
-    # print(main('IESP-660', ''))
-    # print(main('n1403', ''))
-    # print(main('GANA-1910', ''))
-    # print(main('heyzo-1031', ''))
-    # print(main_us('x-art.19.11.03'))
-    # print(main('032020-001', ''))
-    # print(main('S2M-055', ''))
-    # print(main('LUXU-1217', ''))
-    # print(main_us('x-art.19.11.03', ''))
+    print(main('CAWD-582'))  # print(main('ALDN-107'))  # print(main('ten-024'))  # print(main('459ten-024'))  # print(main('IPX-729'))  # print(main('STARS-199'))    # 无结果  # print(main('SIVR-160'))  # print(main('', 'https://avsex.club/web/video?id=333778'))  # print(main('', 'avsex.club/web/video?id=333778'))  # print(main('ssni-700'))  # print(main('ssis-200'))  # print(main('heyzo-2026'))  # print(main('110219-001'))  # print(main('abw-157'))  # print(main('010520-001'))  # print(main('hbad-599', 'https://avsex.club/web/video?id=333777'))  # print(main('hbad-599', 'https://avsex.club/web/video?id=oo'))  # print(main('abs-141'))  # print(main('HYSD-00083'))  # print(main('IESP-660'))  # print(main('n1403'))  # print(main('GANA-1910'))  # print(main('heyzo-1031'))  # print(main_us('x-art.19.11.03'))  # print(main('032020-001'))  # print(main('S2M-055'))  # print(main('LUXU-1217'))  # print(main('1101132', ''))  # print(main('OFJE-318'))  # print(main('110119-001'))  # print(main('abs-001'))  # print(main('SSIS-090', ''))  # print(main('SSIS-090', ''))  # print(main('SNIS-016', ''))  # print(main('HYSD-00083', ''))  # print(main('IESP-660', ''))  # print(main('n1403', ''))  # print(main('GANA-1910', ''))  # print(main('heyzo-1031', ''))  # print(main_us('x-art.19.11.03'))  # print(main('032020-001', ''))  # print(main('S2M-055', ''))  # print(main('LUXU-1217', ''))  # print(main_us('x-art.19.11.03', ''))

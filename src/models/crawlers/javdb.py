@@ -39,10 +39,8 @@ def get_title(html, org_language):
 
 
 def get_actor(html):
-    actor_result = html.xpath(
-        '//div[@class="panel-block"]/strong[contains(text(), "演員:") or contains(text(), "Actor(s):")]/../span[@class="value"]/a/text()')
-    gender_result = html.xpath(
-        '//div[@class="panel-block"]/strong[contains(text(), "演員:") or contains(text(), "Actor(s):")]/../span[@class="value"]/strong/@class')
+    actor_result = html.xpath('//div[@class="panel-block"]/strong[contains(text(), "演員:") or contains(text(), "Actor(s):")]/../span[@class="value"]/a/text()')
+    gender_result = html.xpath('//div[@class="panel-block"]/strong[contains(text(), "演員:") or contains(text(), "Actor(s):")]/../span[@class="value"]/strong/@class')
     i = 0
     actor_list = []
     for gender in gender_result:
@@ -102,9 +100,7 @@ def get_year(get_release):
 def get_tag(html):
     result1 = str(html.xpath('//strong[contains(text(),"類別:")]/../span/a/text()')).strip(" ['']")
     result2 = str(html.xpath('//strong[contains(text(),"Tags:")]/../span/a/text()')).strip(" ['']")
-    return str(result1 + result2).strip('+').replace(",\\xa0", "").replace("'", "").replace(' ', '').replace(',,',
-                                                                                                             '').lstrip(
-        ',')
+    return str(result1 + result2).strip('+').replace(",\\xa0", "").replace("'", "").replace(' ', '').replace(',,', '').lstrip(',')
 
 
 def get_cover(html):
@@ -173,9 +169,7 @@ def get_real_url(html, number):  # 获取详情页链接
         if number.upper() in each[1].upper():
             return each[0]
     for each in info_list:  # 再从所有结果模糊匹配
-        if number.upper().replace('.', '').replace('-', '').replace(' ', '') in (each[1] + each[2]).upper().replace('-',
-                                                                                                                    '').replace(
-            '.', '').replace(' ', ''):
+        if number.upper().replace('.', '').replace('-', '').replace(' ', '') in (each[1] + each[2]).upper().replace('-', '').replace('.', '').replace(' ', ''):
             return each[0]
     return False
 
@@ -318,11 +312,12 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', org_lan
             actor_photo = get_actor_photo(actor)
             all_actor_photo = get_actor_photo(all_actor)
             number = get_number(html_detail, number)
-            title = title.replace('中文字幕', '').replace('無碼', '').replace("\\n", '').replace('_', '-').replace(
-                number.upper(), '').replace(number, '').replace('--', '-').strip()
-            originaltitle = originaltitle.replace('中文字幕', '').replace('無碼', '').replace("\\n", '').replace('_',
-                                                                                                                 '-').replace(
-                number.upper(), '').replace(number, '').replace('--', '-').strip()
+            title = title.replace('中文字幕', '').replace('無碼', '').replace("\\n", '').replace('_', '-').replace(number.upper(), '').replace(number, '').replace('--',
+                                                                                                                                                                   '-').strip()
+            originaltitle = originaltitle.replace('中文字幕', '').replace('無碼', '').replace("\\n", '').replace('_', '-').replace(number.upper(), '').replace(number,
+                                                                                                                                                               '').replace(
+                '--',
+                '-').strip()
             cover_url = get_cover(html_detail)  # 获取cover
             poster_url = cover_url.replace('/covers/', '/thumbs/')
             outline = ''
@@ -398,13 +393,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', org_lan
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
@@ -431,47 +420,4 @@ if __name__ == '__main__':
     # print(main('', 'https://javdb.com/v/GAO75'))
     # print(main('SIRO-4770 '))
     # print(main('4030-2405'))  # 需要登录
-    print(main('FC2-1262472'))  # 需要登录
-    # print(main('HUNTB-107'))  # 预告片返回url错误，只有https
-    # print(main('FC2-2392657'))                                                  # 需要登录
-    # print(main('GS-067'))                                                       # 两个同名番号
-    # print(main('MIDE-022'))
-    # print(main('KRAY-001'))
-    # print(main('ssis-243'))
-    # print(main('MIDE-900', 'https://javdb.com/v/MZp24?locale=en'))
-    # print(main('TD-011'))
-    # print(main('stars-011'))    # 发行商SOD star，下载封面
-    # print(main('stars-198'))  # 发行商SOD star，下载封面
-    # print(main('mium-748'))
-    # print(main('KMHRS-050'))    # 剧照第一张作为poster
-    # print(main('SIRO-4042'))
-    # print(main('snis-035'))
-    # print(main('snis-036'))
-    # print(main('vixen.18.07.18', ''))
-    # print(main('vixen.16.08.02', ''))
-    # print(main('SNIS-016', ''))
-    # print(main('bangbros18.19.09.17'))
-    # print(main('x-art.19.11.03'))
-    # print(main('abs-141'))
-    # print(main('HYSD-00083'))
-    # print(main('IESP-660'))
-    # print(main('n1403'))
-    # print(main('GANA-1910'))
-    # print(main('heyzo-1031'))
-    # print(main('032020-001'))
-    # print(main('S2M-055'))
-    # print(main('LUXU-1217'))
-    # print(main('SSIS-001', ''))
-    # print(main('SSIS-090', ''))
-    # print(main('DANDY-520', ''))
-    # print(main('teenslovehugecocks.22.09.14'))
-    # print(main('HYSD-00083', ''))
-    # print(main('IESP-660', ''))
-    # print(main('n1403', ''))
-    # print(main('GANA-1910', ''))
-    # print(main('heyzo-1031', ''))
-    # print(main_us('x-art.19.11.03'))
-    # print(main('032020-001', ''))
-    # print(main('S2M-055', ''))
-    # print(main('LUXU-1217', ''))
-    # print(main_us('x-art.19.11.03', ''))
+    print(main('FC2-1262472'))  # 需要登录  # print(main('HUNTB-107'))  # 预告片返回url错误，只有https  # print(main('FC2-2392657'))                                                  # 需要登录  # print(main('GS-067'))                                                       # 两个同名番号  # print(main('MIDE-022'))  # print(main('KRAY-001'))  # print(main('ssis-243'))  # print(main('MIDE-900', 'https://javdb.com/v/MZp24?locale=en'))  # print(main('TD-011'))  # print(main('stars-011'))    # 发行商SOD star，下载封面  # print(main('stars-198'))  # 发行商SOD star，下载封面  # print(main('mium-748'))  # print(main('KMHRS-050'))    # 剧照第一张作为poster  # print(main('SIRO-4042'))  # print(main('snis-035'))  # print(main('snis-036'))  # print(main('vixen.18.07.18', ''))  # print(main('vixen.16.08.02', ''))  # print(main('SNIS-016', ''))  # print(main('bangbros18.19.09.17'))  # print(main('x-art.19.11.03'))  # print(main('abs-141'))  # print(main('HYSD-00083'))  # print(main('IESP-660'))  # print(main('n1403'))  # print(main('GANA-1910'))  # print(main('heyzo-1031'))  # print(main('032020-001'))  # print(main('S2M-055'))  # print(main('LUXU-1217'))  # print(main('SSIS-001', ''))  # print(main('SSIS-090', ''))  # print(main('DANDY-520', ''))  # print(main('teenslovehugecocks.22.09.14'))  # print(main('HYSD-00083', ''))  # print(main('IESP-660', ''))  # print(main('n1403', ''))  # print(main('GANA-1910', ''))  # print(main('heyzo-1031', ''))  # print(main_us('x-art.19.11.03'))  # print(main('032020-001', ''))  # print(main('S2M-055', ''))  # print(main('LUXU-1217', ''))  # print(main_us('x-art.19.11.03', ''))

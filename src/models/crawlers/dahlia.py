@@ -23,8 +23,7 @@ def get_title(html):
 
 
 def get_actor(html):
-    actor_result = html.xpath(
-        '//div[@class="box_works01_list clearfix"]//span[text()="出演女優"]/following-sibling::p[1]/text()')
+    actor_result = html.xpath('//div[@class="box_works01_list clearfix"]//span[text()="出演女優"]/following-sibling::p[1]/text()')
     return ','.join(actor_result)
 
 
@@ -55,8 +54,7 @@ def get_series(html):
 
 
 def get_director(html):
-    result = html.xpath(
-        '//span[contains(text(), "导演") or contains(text(), "導演") or contains(text(), "監督")]/following-sibling::*//text()')
+    result = html.xpath('//span[contains(text(), "导演") or contains(text(), "導演") or contains(text(), "監督")]/following-sibling::*//text()')
     return result[0] if result else ''
 
 
@@ -149,8 +147,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
         for each in actor_photo.keys():
             title = title.replace(' ' + each, '')
         cover_url = get_cover(html_detail)  # 获取cover
-        poster_url = cover_url.replace('_web_h4', '_h1').replace('_1200.jpg', '_2125.jpg').replace('_tsp.jpg',
-                                                                                                   '_actor.jpg')
+        poster_url = cover_url.replace('_web_h4', '_h1').replace('_1200.jpg', '_2125.jpg').replace('_tsp.jpg', '_actor.jpg')
         outline = get_outline(html_detail)
         tag = ''
         release = get_release(html_detail)
@@ -207,16 +204,16 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
     except Exception as e:
         # print(traceback.format_exc())
         debug_info = str(e)
-        dic = {'title': '', 'cover': '', 'website': '', 'log_info': log_info, 'error_info': debug_info,
-               'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), ))}
+        dic = {
+            'title': '',
+            'cover': '',
+            'website': '',
+            'log_info': log_info,
+            'error_info': debug_info,
+            'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), ))
+        }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
