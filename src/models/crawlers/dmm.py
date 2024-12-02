@@ -99,12 +99,17 @@ def get_tag(html):
 
 def get_cover(html):
     result = html.xpath('//a[@name="package-image"]/@href')
-    return result[0] if result else ''
+    result = re.sub(r'pics.dmm.co.jp', r'awsimgsrc.dmm.co.jp/pics_dig',result[0])
+    return result if result else ''
 
 
 def get_poster(html, cover):
     result = html.xpath('//img[@class="tdmm"]/@src')
-    return result[0] if result else cover.replace('pt.jpg', 'ps.jpg')
+    if result:
+        result = re.sub(r'pics.dmm.co.jp', r'awsimgsrc.dmm.co.jp/pics_dig', result[0])
+        return result
+    else:
+        return cover.replace('pt.jpg', 'ps.jpg')
 
 
 def get_extrafanart(html):
@@ -656,7 +661,7 @@ if __name__ == '__main__':
     # print(main('ssni00888'))
     # print(main('ssni-288'))
     # print(main('', 'https://www.dmm.co.jp/digital/videoa/-/detail/=/cid=ssni00288/'))
-    print(main('俺をイジメてた地元ヤンキーの巨乳彼女を寝とって復讐を果たす話 The Motion Anime'))  # 模糊匹配 MAXVR-008
+    # print(main('俺をイジメてた地元ヤンキーの巨乳彼女を寝とって復讐を果たす話 The Motion Anime'))  # 模糊匹配 MAXVR-008
     # print(main('', 'https://www.dmm.co.jp/mono/dvd/-/detail/=/cid=h_173dhry23/'))   # 地域限制
     # print(main('ssni00288'))
     # print(main('ssni00999'))
