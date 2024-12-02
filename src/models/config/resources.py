@@ -70,14 +70,7 @@ class Resources:
 
     def get_actor_data(self, actor):
         # 初始化数据
-        actor_data = {
-            'zh_cn': actor,
-            'zh_tw': actor,
-            'jp': actor,
-            'keyword': [actor],
-            'href': '',
-            'has_name': False,
-        }
+        actor_data = {'zh_cn': actor, 'zh_tw': actor, 'jp': actor, 'keyword': [actor], 'href': '', 'has_name': False, }
 
         # 查询映射表
         xml_actor = self.actor_mapping_data
@@ -100,13 +93,7 @@ class Resources:
 
     def get_info_data(self, info):
         # 初始化数据
-        info_data = {
-            'zh_cn': info,
-            'zh_tw': info,
-            'jp': info,
-            'keyword': [info],
-            'has_name': False,
-        }
+        info_data = {'zh_cn': info, 'zh_tw': info, 'jp': info, 'keyword': [info], 'has_name': False, }
 
         # 查询映射表
         xml_info = self.info_mapping_data
@@ -114,11 +101,9 @@ class Resources:
             info_name = ',%s,' % info.upper()
             for each in config.full_half_char:
                 info_name = info_name.replace(each[0], each[1])
-            info_ob = xml_info.xpath(
-                '//a[contains(translate(@keyword, '
-                '"abcdefghijklmnopqrstuvwxyzａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ・", '
-                '"ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ·"), $name)]',
-                name=info_name)
+            info_ob = xml_info.xpath('//a[contains(translate(@keyword, '
+                                     '"abcdefghijklmnopqrstuvwxyzａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ・", '
+                                     '"ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ·"), $name)]', name=info_name)
             if info_ob:
                 info_ob = info_ob[0]
                 info_data['zh_cn'] = info_ob.get('zh_cn').replace('删除', '')
@@ -186,8 +171,7 @@ class Resources:
                 content = f.read()
             self.info_mapping_data = etree.HTML(content.encode('utf-8'), parser=parser)
         except Exception as e:
-            signal.show_log_text(' %s 读取失败！请检查该文件是否存在问题！如需重置请删除该文件！错误信息：\n%s' % (
-                actor_map_local_path, str(e)))
+            signal.show_log_text(f' {actor_map_local_path} 读取失败！请检查该文件是否存在问题！如需重置请删除该文件！错误信息：\n{str(e)}')
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
             self.actor_mapping_data = {}

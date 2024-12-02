@@ -95,8 +95,7 @@ def _get_actor_numbers(actor_url, actor_single_url):
             else:
                 video_date = '%s/%s/%s' % (time_list[0], time_list[1], time_list[2])
             # self.show_log_text('{}  {:<10}{:\u3000>5}   {}'.format(video_date, video_number, download_info, video_url))
-            Flags.actor_numbers_dic[actor_url].update(
-                {video_number: [video_number, video_date, video_url, download_info, video_title, single_info]})
+            Flags.actor_numbers_dic[actor_url].update({video_number: [video_number, video_date, video_url, download_info, video_title, single_info]})
         i += 1
 
 
@@ -116,8 +115,7 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
     # 演员信息排版和显示
     actor_info = Flags.actor_numbers_dic.get(actor_url)
     len_single = len(Flags.actor_numbers_dic.get(actor_single_url))
-    signal.show_log_text('🎉 获取完毕！共找到 [ %s ] 番号数量（%s）单体数量（%s）(%ss)' % (
-        actor_name, len(actor_info), len_single, get_used_time(start_time)))
+    signal.show_log_text('🎉 获取完毕！共找到 [ %s ] 番号数量（%s）单体数量（%s）(%ss)' % (actor_name, len(actor_info), len_single, get_used_time(start_time)))
     if actor_info:
         actor_numbers = actor_info.keys()
         all_list = set()
@@ -125,13 +123,10 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
         not_download_magnet_list = set()
         not_download_cnword_list = set()
         for actor_number in actor_numbers:
-            video_number, video_date, video_url, download_info, video_title, single_info = actor_info.get(
-                actor_number)
+            video_number, video_date, video_url, download_info, video_title, single_info = actor_info.get(actor_number)
             if actor_flag:
                 video_url = video_title[:30]
-            number_str = (
-                '{:>13}  {:<10} {}  {:\u3000>5}   {}'.format(video_date, video_number, single_info, download_info,
-                                                             video_url))
+            number_str = ('{:>13}  {:<10} {}  {:\u3000>5}   {}'.format(video_date, video_number, single_info, download_info, video_url))
             all_list.add(number_str)
             if actor_number not in Flags.local_number_set:
                 not_download_list.add(number_str)
@@ -148,31 +143,28 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
         not_download_magnet_list = sorted(not_download_magnet_list, reverse=True)
         not_download_cnword_list = sorted(not_download_cnword_list, reverse=True)
 
-        signal.show_log_text('\n👩 [ %s ] 的全部网络番号(%s)...\n%s' % (actor_name, len(all_list), ('=' * 97)))
+        signal.show_log_text(f'\n👩 [ {actor_name} ] 的全部网络番号({len(all_list)})...\n{("=" * 97)}')
         if all_list:
             for each in all_list:
                 signal.show_log_text(each)
         else:
             signal.show_log_text('🎉 没有缺少的番号...\n')
 
-        signal.show_log_text(
-            '\n👩 [ %s ] 本地缺失的番号(%s)...\n%s' % (actor_name, len(not_download_list), ('=' * 97)))
+        signal.show_log_text(f"\n👩 [ {actor_name} ] 本地缺失的番号({len(not_download_list)})...\n{('=' * 97)}")
         if not_download_list:
             for each in not_download_list:
                 signal.show_log_text(each)
         else:
             signal.show_log_text('🎉 没有缺少的番号...\n')
 
-        signal.show_log_text('\n👩 [ %s ] 本地缺失的有磁力的番号(%s)...\n%s' % (
-            actor_name, len(not_download_magnet_list), ('=' * 97)))
+        signal.show_log_text(f'\n👩 [ {actor_name} ] 本地缺失的有磁力的番号({len(not_download_magnet_list)})...\n{("=" * 97)}')
         if not_download_magnet_list:
             for each in not_download_magnet_list:
                 signal.show_log_text(each)
         else:
             signal.show_log_text('🎉 没有缺少的番号...\n')
 
-        signal.show_log_text('\n👩 [ %s ] 本地缺失的有字幕的番号(%s)...\n%s' % (
-            actor_name, len(not_download_cnword_list), ('=' * 97)))
+        signal.show_log_text(f'\n👩 [ {actor_name} ] 本地缺失的有字幕的番号({len(not_download_cnword_list)})...\n{("=" * 97)}')
         if not_download_cnword_list:
             for each in not_download_cnword_list:
                 signal.show_log_text(each)
@@ -209,17 +201,14 @@ def check_missing_number(actor_flag):
         for i in new_movie_path_list:
             movie_list = movie_lists('', movie_type, i)  # 获取所有需要刮削的影片列表
             all_movie_list.extend(movie_list)
-        signal.show_log_text(
-            '🎉 获取完毕！共找到视频数量（%s）(%ss)' % (len(all_movie_list), get_used_time(start_time)))
+        signal.show_log_text(f'🎉 获取完毕！共找到视频数量（{len(all_movie_list)}）({get_used_time(start_time)}s)')
 
         # 获取本地番号
         start_time_local = time.time()
-        signal.show_log_text(
-            '\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 开始获取本地视频的番号信息...')
+        signal.show_log_text('\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 开始获取本地视频的番号信息...')
         local_number_list = resources.userdata_path('number_list.json')
         if not os.path.exists(local_number_list):
-            signal.show_log_text(
-                '   提示：正在生成本地视频的番号信息数据...（第一次较慢，请耐心等待，以后只需要查找新视频，速度很快）')
+            signal.show_log_text('   提示：正在生成本地视频的番号信息数据...（第一次较慢，请耐心等待，以后只需要查找新视频，速度很快）')
             with open(local_number_list, 'w', encoding='utf-8') as f:
                 f.write('{}')
         with open(local_number_list, 'r', encoding='utf-8') as data:
@@ -244,8 +233,7 @@ def check_missing_number(actor_flag):
                         else:
                             has_sub = False
                 if not number:
-                    json_data_temp, number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = get_file_info(
-                        movie_path, copy_sub=False)
+                    json_data_temp, number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = get_file_info(movie_path, copy_sub=False)
                     has_sub = json_data_temp['has_sub']  # 视频中文字幕标识
                 cn_word_icon = '🀄️' if has_sub else ''
                 signal.show_log_text('   发现新番号：{:<10} {}'.format(number, cn_word_icon))
@@ -257,24 +245,14 @@ def check_missing_number(actor_flag):
                 Flags.local_number_cnword_set.add(number)  # 添加到本地有字幕的番号集合
 
         with open(local_number_list, 'w', encoding='utf-8') as f:
-            json.dump(
-                json_data_new,
-                f,
-                ensure_ascii=False,
-                sort_keys=True,
-                indent=4,
-                separators=(',', ': '),
-            )
+            json.dump(json_data_new, f, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '), )
         Flags.local_number_flag = new_movie_path_list
-        signal.show_log_text(
-            '🎉 获取完毕！共获取番号数量（%s）(%ss)' % (len(json_data_new), get_used_time(start_time_local)))
+        signal.show_log_text(f'🎉 获取完毕！共获取番号数量（{len(json_data_new)}）({get_used_time(start_time_local)}s)')
 
     # 查询演员番号
     if config.actors_name:
         actor_list = re.split(r'[,，]', config.actors_name)
-        signal.show_log_text(
-            '\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n🔍 需要查询的演员：\n   %s' % (
-                ', '.join(actor_list)))
+        signal.show_log_text(f'\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n🔍 需要查询的演员：\n   {", ".join(actor_list)}')
         for actor_name in actor_list:
             if not actor_name:
                 continue
@@ -283,14 +261,12 @@ def check_missing_number(actor_flag):
             else:
                 actor_url = resources.get_actor_data(actor_name).get('href')
             if actor_url:
-                signal.show_log_text(
-                    '\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 从 JAVDB 获取 [ %s ] 的所有番号列表...' % actor_name)
+                signal.show_log_text(f'\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 从 JAVDB 获取 [ {actor_name} ] 的所有番号列表...')
                 _get_actor_missing_numbers(actor_name, actor_url, actor_flag)
             else:
-                signal.show_log_text(
-                    '\n🔴 未找到 [ %s ] 的主页地址，你可以填写演员的 JAVDB 主页地址替换演员名称...' % actor_name)
+                signal.show_log_text(f'\n🔴 未找到 [ {actor_name} ] 的主页地址，你可以填写演员的 JAVDB 主页地址替换演员名称...')
     else:
         signal.show_log_text('\n🔴 没有要查询的演员！')
 
-    signal.show_log_text('\n🎉 查询完毕！共用时(%ss)' % (get_used_time(start_time)))
+    signal.show_log_text(f'\n🎉 查询完毕！共用时({get_used_time(start_time)}s)')
     signal.reset_buttons_status.emit()

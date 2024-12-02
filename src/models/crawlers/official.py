@@ -24,8 +24,7 @@ def get_title(html):
 
 
 def get_actor(html):
-    actor_list = html.xpath(
-        '//a[@class="c-tag c-main-bg-hover c-main-font c-main-bd" and contains(@href, "/actress/")]/text()')
+    actor_list = html.xpath('//a[@class="c-tag c-main-bg-hover c-main-font c-main-bd" and contains(@href, "/actress/")]/text()')
     new_list = [each.strip() for each in actor_list]
     return ','.join(new_list)
 
@@ -225,33 +224,9 @@ def main(number, appoint_url='', log_info='', req_web='', language=''):
     except Exception as e:
         # print(traceback.format_exc())
         debug_info = str(e)
-        dic = {
-            'title': '',
-            'cover': '',
-            'website': '',
-            'log_info': log_info,
-            'error_info': debug_info,
-            'req_web': req_web,
-        }
-    dic = {
-        'official': {
-            'zh_cn': dic,
-            'zh_tw': dic,
-            'jp': dic
-        },
-        website_name: {
-            'zh_cn': dic,
-            'zh_tw': dic,
-            'jp': dic
-        },
-    }
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+        dic = {'title': '', 'cover': '', 'website': '', 'log_info': log_info, 'error_info': debug_info, 'req_web': req_web, }
+    dic = {'official': {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}, website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}, }
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
@@ -283,6 +258,4 @@ if __name__ == '__main__':
     # print(main('SSIS-623', ''))
     # print(main('MIDV-002', ''))
     # print(main('MIDV256', ''))
-    print(main('SSNI-531'))
-    # print(main('SSIS-090', ''))
-    # print(main('SNIS-016', ''))
+    print(main('SSNI-531'))  # print(main('SSIS-090', ''))  # print(main('SNIS-016', ''))

@@ -39,8 +39,7 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
 
     # 字符转义，避免emby无法解析
     json_data_nfo = json_data.copy()
-    key_word = ['title', 'originaltitle', 'outline', 'originalplot', 'actor', 'series', 'director', 'studio',
-                'publisher', 'tag', 'website', 'cover', 'poster', 'trailer']
+    key_word = ['title', 'originaltitle', 'outline', 'originalplot', 'actor', 'series', 'director', 'studio', 'publisher', 'tag', 'website', 'cover', 'poster', 'trailer']
     rep_word = {
         '&amp;': '&',
         '&lt;': '<',
@@ -92,13 +91,10 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
     temp_all_actor = deal_actor_more(json_data['all_actor'])
     temp_actor = deal_actor_more(actor)
 
-    repl_list = [['4K', temp_4k], ['originaltitle', originaltitle], ['title', title], ['outline', outline],
-                 ['number', number], ['first_actor', first_actor], ['all_actor', temp_all_actor],
-                 ['actor', temp_actor], ['release', temp_release], ['year', year], ['runtime', runtime],
-                 ['director', director], ['series', series], ['studio', studio], ['publisher', publisher],
-                 ['mosaic', mosaic], ['definition', definition.replace('UHD8', 'UHD')], ['cnword', c_word],
-                 ['first_letter', first_letter], ['letters', letters], ['filename', filename],
-                 ['wanted', json_data['wanted']]]
+    repl_list = [['4K', temp_4k], ['originaltitle', originaltitle], ['title', title], ['outline', outline], ['number', number], ['first_actor', first_actor],
+                 ['all_actor', temp_all_actor], ['actor', temp_actor], ['release', temp_release], ['year', year], ['runtime', runtime], ['director', director],
+                 ['series', series], ['studio', studio], ['publisher', publisher], ['mosaic', mosaic], ['definition', definition.replace('UHD8', 'UHD')],
+                 ['cnword', c_word], ['first_letter', first_letter], ['letters', letters], ['filename', filename], ['wanted', json_data['wanted']]]
     for each_key in repl_list:
         nfo_title = nfo_title.replace(each_key[0], each_key[1])
 

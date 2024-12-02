@@ -4,6 +4,7 @@ commitlog=$(git log --pretty=format:"%h %s" $last..HEAD)
 
 echo "## 新增
 *
+
 ## 修复
 *
 

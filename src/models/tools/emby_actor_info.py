@@ -26,8 +26,7 @@ from models.core.web import download_file_with_filepath, google_translate
 from models.data_models import EMbyActressInfo
 from models.signals import signal
 from models.tools.actress_db import ActressDB
-from models.tools.emby_actor_image import _generate_server_url, _get_emby_actor_list, _get_gfriends_actor_data, \
-    update_emby_actor_photo
+from models.tools.emby_actor_image import _generate_server_url, _get_emby_actor_list, _get_gfriends_actor_data, update_emby_actor_photo
 
 
 def creat_kodi_actors(add: bool):
@@ -73,12 +72,10 @@ def update_emby_actor_info():
 
             # 已有资料时跳过
             # http://192.168.5.191:8096/emby/Persons/梦乃爱华?api_key=ee9a2f2419704257b1dd60b975f2d64e
-            actor_homepage, actor_person, pic_url, backdrop_url, backdrop_url_0, update_url = _generate_server_url(
-                actor)
+            actor_homepage, actor_person, pic_url, backdrop_url, backdrop_url_0, update_url = _generate_server_url(actor)
             result, res = get_html(actor_person, proxies=False, json_data=True)
             if not result:
-                signal.show_log_text(
-                    f"🔴 {i}/{total} {actor_name}: {server_name} 获取演员信息错误！\n    错误信息: {res}")
+                signal.show_log_text(f"🔴 {i}/{total} {actor_name}: {server_name} 获取演员信息错误！\n    错误信息: {res}")
                 continue
             if res.get('Overview') and 'actor_info_miss' in emby_on:
                 signal.show_log_text(f"✅ {i}/{total} {actor_name}: {server_name} 已有演员信息！跳过！")
@@ -168,8 +165,7 @@ def show_emby_actor_list(mode):
         for actor_js in actor_list:
             actor_name = actor_js['Name']
             actor_imagetages = actor_js["ImageTags"]
-            actor_homepage, actor_person, pic_url, backdrop_url, backdrop_url_0, update_url = _generate_server_url(
-                actor_js)
+            actor_homepage, actor_person, pic_url, backdrop_url, backdrop_url_0, update_url = _generate_server_url(actor_js)
             # http://192.168.5.191:8096/web/index.html#!/item?id=2146&serverId=57cdfb2560294a359d7778e7587cdc98
 
             if actor_imagetages:
@@ -195,8 +191,7 @@ def show_emby_actor_list(mode):
                 # http://192.168.5.191:8096/emby/Persons/梦乃爱华?api_key=ee9a2f2419704257b1dd60b975f2d64e
                 result, res = get_html(actor_person, proxies=False, json_data=True)
                 if not result:
-                    signal.show_log_text(
-                        f"\n🔴 {count}/{total} Emby 获取演员信息错误！👩🏻 {actor_name} \n    错误信息: {res}")
+                    signal.show_log_text(f"\n🔴 {count}/{total} Emby 获取演员信息错误！👩🏻 {actor_name} \n    错误信息: {res}")
                     continue
                 overview = res.get('Overview')
 
@@ -207,40 +202,32 @@ def show_emby_actor_list(mode):
 
                 if mode == 1:
                     if actor_imagetages and overview:
-                        signal.show_log_text(
-                            f"\n✅ {count}/{total} 已有信息！已有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
+                        signal.show_log_text(f"\n✅ {count}/{total} 已有信息！已有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
                         succ += 1
                     elif actor_imagetages:
-                        signal.show_log_text(
-                            f"\n🔴 {count}/{total} 没有信息！已有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
+                        signal.show_log_text(f"\n🔴 {count}/{total} 没有信息！已有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
                         fail_noinfo += 1
                     elif overview:
-                        signal.show_log_text(
-                            f"\n🔴 {count}/{total} 已有信息！没有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
+                        signal.show_log_text(f"\n🔴 {count}/{total} 已有信息！没有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
                         fail_nopic += 1
                     else:
-                        signal.show_log_text(
-                            f"\n🔴 {count}/{total} 没有信息！没有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
+                        signal.show_log_text(f"\n🔴 {count}/{total} 没有信息！没有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
                         fail += 1
                     count += 1
                 elif mode == 2 and actor_imagetages and overview:
-                    signal.show_log_text(
-                        f"\n✅ {count}/{total} 已有信息！已有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
+                    signal.show_log_text(f"\n✅ {count}/{total} 已有信息！已有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
                     count += 1
                     succ += 1
                 elif mode == 3 and not actor_imagetages and overview:
-                    signal.show_log_text(
-                        f"\n🔴 {count}/{total} 已有信息！没有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
+                    signal.show_log_text(f"\n🔴 {count}/{total} 已有信息！没有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
                     count += 1
                     fail_nopic += 1
                 elif mode == 4 and actor_imagetages and not overview:
-                    signal.show_log_text(
-                        f"\n🔴 {count}/{total} 没有信息！已有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
+                    signal.show_log_text(f"\n🔴 {count}/{total} 没有信息！已有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
                     count += 1
                     fail_noinfo += 1
                 elif mode == 5 and not actor_imagetages and not overview:
-                    signal.show_log_text(
-                        f"\n🔴 {count}/{total} 没有信息！没有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
+                    signal.show_log_text(f"\n🔴 {count}/{total} 没有信息！没有头像！ 👩🏻 {actor_name} \n{actor_homepage}")
                     count += 1
                     fail += 1
                 elif mode == 6 and overview:
@@ -252,8 +239,7 @@ def show_emby_actor_list(mode):
 
         signal.show_log_text(f'\n\n🎉🎉🎉 查询完成！ 用时: {get_used_time(start_time)}秒')
         if mode == 1:
-            signal.show_log_text(
-                f'👩🏻 演员数量: {total} ✅ 有头像有信息: {succ} 🔴 有头像没信息: {fail_noinfo} 🔴 没头像有信息: {fail_nopic} 🔴 没头像没信息: {fail}\n')
+            signal.show_log_text(f'👩🏻 演员数量: {total} ✅ 有头像有信息: {succ} 🔴 有头像没信息: {fail_noinfo} 🔴 没头像有信息: {fail_nopic} 🔴 没头像没信息: {fail}\n')
         elif mode == 2:
             other = total - succ
             signal.show_log_text(f'👩🏻 演员数量: {total} ✅ 有头像有信息: {succ} 🔴 其他: {other}\n')
@@ -282,8 +268,8 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
         signal.show_log_text(" 🔴 维基百科演员页没有该词条！")
         return False
 
-    av_key = ['女优', '女優', '男优', '男優', '（AV）导演', 'AV导演', 'AV監督', '成人电影', '成人影片', '映画監督',
-              'アダルトビデオ監督', '电影导演', '配音員', '配音员', '声優', '声优', 'グラビアアイドル', 'モデル']
+    av_key = ['女优', '女優', '男优', '男優', '（AV）导演', 'AV导演', 'AV監督', '成人电影', '成人影片', '映画監督', 'アダルトビデオ監督', '电影导演', '配音員', '配音员',
+              '声優', '声优', 'グラビアアイドル', 'モデル']
     for key in av_key:
         if key in res:
             signal.show_log_text(f" 🎉 页面内容命中关键词: {key}，识别为女优或写真偶像或导演！\n")
@@ -292,7 +278,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
         signal.show_log_text(" 🔴 页面内容未命中关键词，识别为非女优或导演！")
         return False
 
-    res = re.sub(r'\[\d+\]', '', res)  # 替换[1],[2]等注释
+    res = re.sub(r'<a href=\"#cite_note.*?</a>', '', res)  # 替换[1],[2]等注释
     soup = bs4.BeautifulSoup(res, 'lxml')
     actor_output = soup.find(class_='mw-parser-output')
 
@@ -309,7 +295,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
     actor_profile = actor_output.find(name='table', class_=['infobox', 'infobox vcard plainlist'])
     if actor_profile:
         att_keys = actor_profile.find_all(scope=["row"])
-        att_values = actor_profile.find_all(name='td', style=[''])
+        att_values = actor_profile.find_all(name='td', style=[''], colspan=False)
         bday = actor_output.find(class_='bday')
         bday = '(%s)' % bday.get_text('', strip=True) if bday else ''
         if att_keys and att_values:
@@ -324,8 +310,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
                     result = re.findall(r'(\d+)年(\d+)月(\d+)日', info_right)
                     if result:
                         result = result[0]
-                        year = str(result[0]) if len(result[0]) == 4 else '19' + str(result[0]) if len(
-                            result[0]) == 2 else '1970'
+                        year = str(result[0]) if len(result[0]) == 4 else '19' + str(result[0]) if len(result[0]) == 2 else '1970'
                         month = str(result[1]) if len(result[1]) == 2 else '0' + str(result[1])
                         day = str(result[2]) if len(result[2]) == 2 else '0' + str(result[2])
                         brithday = f"{year}-{month}-{day}"
@@ -363,8 +348,8 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
     # 简历
     try:
         s = actor_introduce_0.find(class_='toctext',
-                                   text=['简历', '簡歷', '个人简历', '個人簡歷', '略歴', '経歴', '来歴', '生平',
-                                         '生平与职业生涯', '略歴・人物']).find_previous_sibling().string
+                                   text=['简历', '簡歷', '个人简历', '個人簡歷', '略歴', '経歴', '来歴', '生平', '生平与职业生涯',
+                                         '略歴・人物']).find_previous_sibling().string
         if s:
             ff = actor_output.find(id=f'mf-section-{s}')
             if ff:
@@ -392,8 +377,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
                 # 为英文时要单独进行翻译
                 if tag_req and langid.classify(tag_req)[0] == 'en' and translate_by_list:
                     for each in translate_by_list:
-                        signal.show_log_text(
-                            f" 🐙 识别到演员描述信息为英文({tag_req})，请求 {each.capitalize()} 进行翻译...")
+                        signal.show_log_text(f" 🐙 识别到演员描述信息为英文({tag_req})，请求 {each.capitalize()} 进行翻译...")
                         if each == 'youdao':  # 使用有道翻译
                             t, o, r = youdao_translate(tag_req, '')
                         elif each == 'google':  # 使用 google 翻译
@@ -425,11 +409,9 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
                             actor_info.taglines = [t]
                         if overview_req:
                             overview = o
-                            overview = overview.replace('\n= = = = = = = = = =个人资料\n',
-                                                        '\n===== 个人资料 =====\n')
+                            overview = overview.replace('\n= = = = = = = = = =个人资料\n', '\n===== 个人资料 =====\n')
                             overview = overview.replace('\n=====人物介绍\n', '\n===== 人物介绍 =====\n')
-                            overview = overview.replace('\n= = = = =个人鉴定= = = = =\n',
-                                                        '\n===== 个人经历 =====\n')
+                            overview = overview.replace('\n= = = = =个人鉴定= = = = =\n', '\n===== 个人经历 =====\n')
                             overview = overview.replace('\n=====个人日历=====\n', '\n===== 个人经历 =====\n')
                             overview = overview.replace('\n=====个人费用=====\n', '\n===== 个人资料 =====\n')
                             overview = overview.replace('\n===== 个人协助 =====\n', '\n===== 人物介绍 =====\n')
@@ -447,8 +429,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
 
         # 外部链接
         overview += f'\n===== 外部链接 =====\n{url_log}'
-        overview = overview.replace('\n', '<br>').replace('这篇报道有多个问题。请协助改善和在笔记页上的讨论。',
-                                                          '').strip()
+        overview = overview.replace('\n', '<br>').replace('这篇报道有多个问题。请协助改善和在笔记页上的讨论。', '').strip()
 
         # 语言替换和转换
         taglines = actor_info.taglines
@@ -783,11 +764,8 @@ def _deal_kodi_actors(gfriends_actor_data, add):
                                             net_file_name = re.findall(r'^[^?]+', net_file_name)[0]
                                             local_file_path = os.path.join(actor_folder, net_file_name)
                                             if not os.path.isfile(local_file_path):
-                                                if not download_file_with_filepath({'logs': ''}, net_pic_path,
-                                                                                   local_file_path,
-                                                                                   actor_folder):
-                                                    signal.show_log_text(
-                                                        f'🔴 {actor_name} 头像下载失败！{net_pic_path}')
+                                                if not download_file_with_filepath({'logs': ''}, net_pic_path, local_file_path, actor_folder):
+                                                    signal.show_log_text(f'🔴 {actor_name} 头像下载失败！{net_pic_path}')
                                                     failed.add(each)
                                                     download_failed.add(each)
                                                     continue
@@ -806,8 +784,7 @@ def _deal_kodi_actors(gfriends_actor_data, add):
                     except:
                         signal.show_traceback_log(traceback.format_exc())
         if add:
-            signal.show_log_text(
-                f'\n🎉 操作已完成! 共有演员: {len(all_actor)}, 已有头像: {len(success)}, 没有头像: {len(failed)}, 下载失败: {len(download_failed)}, 没有资源: {len(no_pic)}')
+            signal.show_log_text(f'\n🎉 操作已完成! 共有演员: {len(all_actor)}, 已有头像: {len(success)}, 没有头像: {len(failed)}, 下载失败: {len(download_failed)}, 没有资源: {len(no_pic)}')
         else:
             signal.show_log_text(f'\n🎉 操作已完成! 共清理了 {len(actor_clear)} 个 .actors 文件夹!')
         return

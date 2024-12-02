@@ -36,7 +36,7 @@ def get_pixmap(pic_path, poster=True, pic_from=''):
                     else:
                         w = int(220 * pic_width / pic_height)
                         h = 220
-                msg = '%s: %s*%s/%sKB' % (pic_from.title(), pic_width, pic_height, pic_file_size)
+                msg = f'{pic_from.title()}: {pic_width}*{pic_height}/{pic_file_size}KB'
                 return [True, pix, msg, w, h]
         delete_file(pic_path)
         if poster:
@@ -126,14 +126,11 @@ def cut_thumb_to_poster(json_data, thumb_path, poster_path, image_cut=''):
         img_new_png.save(poster_path, quality=95, subsampling=0)
         img.close()
         if check_pic(poster_path):
-            json_data['logs'] += "\n 🍀 Poster done! (%s)(%ss)" % (
-                json_data['poster_from'], get_used_time(start_time))
+            json_data['logs'] += f"\n 🍀 Poster done! ({json_data['poster_from']})({get_used_time(start_time)}s)"
             return True
-        json_data['logs'] += '\n 🥺 Poster cut failed! (%s)(%ss)' % (
-            json_data['poster_from'], get_used_time(start_time))
+        json_data['logs'] += f'\n 🥺 Poster cut failed! ({json_data["poster_from"]})({get_used_time(start_time)}s)'
     except Exception as e:
-        json_data['logs'] += '\n 🥺 Poster failed! (%s)(%ss)\n    %s' % (
-            json_data['poster_from'], get_used_time(start_time), str(e))
+        json_data['logs'] += f'\n 🥺 Poster failed! ({json_data["poster_from"]})({get_used_time(start_time)}s)\n    {str(e)}'
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
     return False

@@ -15,9 +15,8 @@ import requests
 import urllib3.util.connection as urllib3_cn
 from PIL import Image
 from ping3 import ping
-from requests.exceptions import ChunkedEncodingError, ConnectTimeout, ConnectionError, ContentDecodingError, HTTPError, \
-    InvalidHeader, InvalidProxyURL, InvalidURL, ProxyError, ReadTimeout, SSLError, StreamConsumedError, Timeout, \
-    TooManyRedirects, URLRequired
+from requests.exceptions import ChunkedEncodingError, ConnectTimeout, ConnectionError, ContentDecodingError, HTTPError, InvalidHeader, InvalidProxyURL, InvalidURL, \
+    ProxyError, ReadTimeout, SSLError, StreamConsumedError, Timeout, TooManyRedirects, URLRequired
 
 from models.base.utils import get_user_agent, singleton
 from models.config.config import config
@@ -51,57 +50,53 @@ class WebRequests:
         self.pool = ThreadPoolExecutor(32)
         self.curl_session = curl_cffi.requests.Session(max_redirects=10)
 
-    def get_html(self, url: str, headers=None, cookies=None, proxies=True, allow_redirects=True, json_data=False,
+    def get_html(self,
+                 url: str,
+                 headers=None,
+                 cookies=None,
+                 proxies=True,
+                 allow_redirects=True,
+                 json_data=False,
                  content=False,
-                 res=False, keep=True, timeout=False, encoding='utf-8', back_cookie=False):
+                 res=False,
+                 keep=True,
+                 timeout=False,
+                 encoding='utf-8',
+                 back_cookie=False):
         # 获取代理信息
         retry_times = config.retry
         if proxies:
             proxies = config.proxies
         else:
-            proxies = {
-                "http": None,
-                "https": None,
-            }
+            proxies = {"http": None, "https": None, }
 
         if not headers:
             headers = config.headers
         if not timeout:
             timeout = config.timeout
         if 'getchu' in url:
-            headers_o = {
-                'Referer': 'http://www.getchu.com/top.html',
-            }
+            headers_o = {'Referer': 'http://www.getchu.com/top.html', }
             headers.update(headers_o)
         elif 'xcity' in url:
-            headers_o = {
-                'referer': 'https://xcity.jp/result_published/?genre=%2Fresult_published%2F&q=2&sg=main&num=60',
-            }
+            headers_o = {'referer': 'https://xcity.jp/result_published/?genre=%2Fresult_published%2F&q=2&sg=main&num=60', }
             headers.update(headers_o)
         # javbus封面图需携带refer，refer似乎没有做强校验，但须符合格式要求，否则403
         elif 'javbus' in url:
-            headers_o = {
-                'Referer': 'https://www.javbus.com/',
-            }
+            headers_o = {'Referer': 'https://www.javbus.com/', }
             headers.update(headers_o)
         elif 'giga' in url:
             # 搜索时需要携带refer，获取cookies时不能携带
             giga_refer = '' if 'cookie_set.php' in url else 'https://www.giga-web.jp/top.html'
-            headers_o = {
-                'Referer': giga_refer,
-            }
+            headers_o = {'Referer': giga_refer, }
             headers.update(headers_o)
 
         signal.add_log(f'🔎 请求 {url}')
         for i in range(int(retry_times)):
             try:
                 if keep:
-                    response = self.session_g.get(url, headers=headers, cookies=cookies, proxies=proxies,
-                                                  timeout=timeout,
-                                                  verify=False, allow_redirects=allow_redirects)
+                    response = self.session_g.get(url, headers=headers, cookies=cookies, proxies=proxies, timeout=timeout, verify=False, allow_redirects=allow_redirects)
                 else:
-                    response = requests.get(url, headers=headers, cookies=cookies, proxies=proxies, timeout=timeout,
-                                            verify=False, allow_redirects=allow_redirects)
+                    response = requests.get(url, headers=headers, cookies=cookies, proxies=proxies, timeout=timeout, verify=False, allow_redirects=allow_redirects)
                 # print(response.headers.items())
                 # print(response.status_code, url)
                 _header = response.headers
@@ -130,8 +125,7 @@ class WebRequests:
         signal.add_log(f"🔴 请求失败！{error_info}")
         return False, error_info
 
-    def post_html(self, url: str, data=None, json=None, headers=None, cookies=None, proxies=True, json_data=False,
-                  keep=True):
+    def post_html(self, url: str, data=None, json=None, headers=None, cookies=None, proxies=True, json_data=False, keep=True):
         # 获取代理信息
         timeout = config.timeout
         retry_times = config.retry
@@ -140,20 +134,15 @@ class WebRequests:
         if proxies:
             proxies = config.proxies
         else:
-            proxies = {
-                "http": None,
-                "https": None,
-            }
+            proxies = {"http": None, "https": None, }
 
         signal.add_log(f'🔎 POST请求 {url}')
         for i in range(int(retry_times)):
             try:
                 if keep:
-                    response = self.session_g.post(url=url, data=data, json=json, headers=headers, cookies=cookies,
-                                                   proxies=proxies, timeout=timeout, verify=False)
+                    response = self.session_g.post(url=url, data=data, json=json, headers=headers, cookies=cookies, proxies=proxies, timeout=timeout, verify=False)
                 else:
-                    response = requests.post(url=url, data=data, json=json, headers=headers, cookies=cookies,
-                                             proxies=proxies, timeout=timeout, verify=False)
+                    response = requests.post(url=url, data=data, json=json, headers=headers, cookies=cookies, proxies=proxies, timeout=timeout, verify=False)
                 if response.status_code > 299:
                     error_info = f"{response.status_code} {url}"
                     signal.add_log('🔴 重试 [%s/%s] %s' % (i + 1, retry_times, error_info))
@@ -287,20 +276,17 @@ class WebRequests:
         _headers['Range'] = f'bytes={start}-{end}'
         for _ in range(int(retry_times)):
             try:
-                response = self.session_g.get(url, headers=_headers, proxies=proxies, timeout=timeout, verify=False,
-                                              stream=True)
+                response = self.session_g.get(url, headers=_headers, proxies=proxies, timeout=timeout, verify=False, stream=True)
                 chunk_size = 128
                 chunks = []
                 for chunk in response.iter_content(chunk_size=chunk_size):
-                    chunks.append(chunk)
-                    # bar.update(chunk_size)
+                    chunks.append(chunk)  # bar.update(chunk_size)
                 self.lock.acquire()
                 with open(file_path, "rb+") as fp:
                     fp.seek(start)
                     for chunk in chunks:
                         fp.write(chunk)
                     self.lock.release()
-                    # 释放锁
                 del chunks
                 return True
             except:
@@ -316,16 +302,12 @@ class WebRequests:
         if proxies:
             proxies = config.proxies
         else:
-            proxies = {
-                "http": None,
-                "https": None,
-            }
+            proxies = {"http": None, "https": None, }
 
         signal.add_log(f'🔎 请求 {url}')
         for i in range(int(retry_times)):
             try:
-                response = self.curl_session.get(url_encode(url), headers=headers, cookies=cookies, proxies=proxies,
-                                                 impersonate="chrome120")
+                response = self.curl_session.get(url_encode(url), headers=headers, cookies=cookies, proxies=proxies, impersonate="chrome120")
                 if 'amazon' in url:
                     response.encoding = 'Shift_JIS'
                 else:
@@ -377,22 +359,17 @@ def check_url(url, length=False, real_url=False):
         return 0
 
     if 'getchu' in url:
-        headers_o = {
-            'Referer': 'http://www.getchu.com/top.html',
-        }
+        headers_o = {'Referer': 'http://www.getchu.com/top.html', }
         headers.update(headers_o)
     # javbus封面图需携带refer，refer似乎没有做强校验，但须符合格式要求，否则403
     elif 'javbus' in url:
-        headers_o = {
-            'Referer': 'https://www.javbus.com/',
-        }
+        headers_o = {'Referer': 'https://www.javbus.com/', }
         headers.update(headers_o)
 
     for j in range(retry_times):
         try:
-            r = requests.head(url, headers=headers, proxies=proxies, timeout=timeout, verify=False,
-                              allow_redirects=True)
-            
+            r = requests.head(url, headers=headers, proxies=proxies, timeout=timeout, verify=False, allow_redirects=True)
+
             # 不输出获取 dmm预览视频(trailer) 最高分辨率的测试结果到日志中
             # get_dmm_trailer() 函数在多条错误的链接中找最高分辨率的链接，错误没有必要输出，避免误解为网络或软件问题
             if r.status_code == 404 and '_w.mp4' in url:
@@ -435,8 +412,7 @@ def check_url(url, length=False, real_url=False):
             # 获取文件大小。如果没有获取到文件大小，尝试下载15k数据，如果失败，视为不可用
             content_length = r.headers.get('Content-Length')
             if not content_length:
-                response = requests.get(true_url, headers=headers, proxies=proxies, timeout=timeout, verify=False,
-                                        stream=True)
+                response = requests.get(true_url, headers=headers, proxies=proxies, timeout=timeout, verify=False, stream=True)
                 i = 0
                 chunk_size = 5120
                 for _ in response.iter_content(chunk_size):
@@ -507,11 +483,7 @@ def get_amazon_data(req_url):
     """
     获取 Amazon 数据，修改地区为540-0002
     """
-    headers = {
-        "accept-encoding": "gzip, deflate, br",
-        'Host': 'www.amazon.co.jp',
-        'User-Agent': get_user_agent(),
-    }
+    headers = {"accept-encoding": "gzip, deflate, br", 'Host': 'www.amazon.co.jp', 'User-Agent': get_user_agent(), }
     try:
         result, html_info = curl_html(req_url)
     except:
@@ -522,18 +494,13 @@ def get_amazon_data(req_url):
             session_id = x[0]
         if x := re.findall(r'ubid-acbjp=([^ ]+)', html_info):
             ubid_acbjp = x[0]
-        headers_o = {
-            'cookie': f'session-id={session_id}; ubid_acbjp={ubid_acbjp}',
-        }
+        headers_o = {'cookie': f'session-id={session_id}; ubid_acbjp={ubid_acbjp}', }
         headers.update(headers_o)
         result, html_info = curl_html(req_url, headers=headers)
 
     if not result:
         if '503 http' in html_info:
-            headers = {
-                'Host': 'www.amazon.co.jp',
-                'User-Agent': get_user_agent(),
-            }
+            headers = {'Host': 'www.amazon.co.jp', 'User-Agent': get_user_agent(), }
             result, html_info = get_html(req_url, headers=headers, keep=False, back_cookie=True)
 
         if not result:
@@ -553,16 +520,13 @@ def get_amazon_data(req_url):
                         ubid_acbjp = re.findall(r'ubid-acbjp=([^ ]+)', str(result))[0]
                     except:
                         pass
-            headers_o = {
-                'Anti-csrftoken-a2z': anti_csrftoken_a2z,
-                'cookie': f'session-id={session_id}; ubid_acbjp={ubid_acbjp}',
-            }
+            headers_o = {'Anti-csrftoken-a2z': anti_csrftoken_a2z, 'cookie': f'session-id={session_id}; ubid_acbjp={ubid_acbjp}', }
             headers.update(headers_o)
             mid_url = 'https://www.amazon.co.jp/portal-migration/hz/glow/get-rendered-toaster' \
                       '?pageType=Search&aisTransitionState=in&rancorLocationSource=REALM_DEFAULT&_='
             result, html = curl_html(mid_url, headers=headers)
-            anti_csrftoken_a2z = re.findall(r'csrfToken="([^"]+)', html)[0]
             try:
+                anti_csrftoken_a2z = re.findall(r'csrfToken="([^"]+)', html)[0]
                 ubid_acbjp = re.findall(r'ubid-acbjp=([^ ]+)', str(result))[0]
             except:
                 pass
@@ -576,15 +540,11 @@ def get_amazon_data(req_url):
             }
             headers.update(headers_o)
             post_url = 'https://www.amazon.co.jp/portal-migration/hz/glow/address-change?actionSource=glow'
-            data = {"locationType": "LOCATION_INPUT", "zipCode": "540-0002", "storeContext": "generic",
-                    "deviceType": "web", "pageType": "Search", "actionSource": "glow"}
+            data = {"locationType": "LOCATION_INPUT", "zipCode": "540-0002", "storeContext": "generic", "deviceType": "web", "pageType": "Search", "actionSource": "glow"}
             result, html = post_html(post_url, json=data, headers=headers)
             if result:
                 if '540-0002' in str(html):
-                    headers = {
-                        'Host': 'www.amazon.co.jp',
-                        'User-Agent': get_user_agent(),
-                    }
+                    headers = {'Host': 'www.amazon.co.jp', 'User-Agent': get_user_agent(), }
                     result, html_info = curl_html(req_url, headers=headers)
                 else:
                     print('Amazon 修改地区失败: ', req_url, str(result), str(html))
@@ -600,16 +560,13 @@ def get_amazon_data(req_url):
 
 if "__main__" == __name__:
     # 测试下载文件
-    list1 = [
-        'https://issuecdn.baidupcs.com/issue/netdisk/yunguanjia/BaiduNetdisk_7.2.8.9.exe',
-        'https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw015/118abw015_mhb_w.mp4',
-        'https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00016/118abw00016_mhb_w.mp4',
-        'https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00017/118abw00017_mhb_w.mp4',
-        'https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00018/118abw00018_mhb_w.mp4',
-        'https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00019/118abw00019_mhb_w.mp4',
-        'https://www.prestige-av.com/images/corner/goods/prestige/tktabw/018/pb_tktabw-018.jpg',
-        'https://iqq1.one/preview/80/b/3SBqI8OjheI-800.jpg?v=1636404497',
-    ]
+    list1 = ['https://issuecdn.baidupcs.com/issue/netdisk/yunguanjia/BaiduNetdisk_7.2.8.9.exe',
+             'https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw015/118abw015_mhb_w.mp4',
+             'https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00016/118abw00016_mhb_w.mp4',
+             'https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00017/118abw00017_mhb_w.mp4',
+             'https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00018/118abw00018_mhb_w.mp4',
+             'https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00019/118abw00019_mhb_w.mp4',
+             'https://www.prestige-av.com/images/corner/goods/prestige/tktabw/018/pb_tktabw-018.jpg', 'https://iqq1.one/preview/80/b/3SBqI8OjheI-800.jpg?v=1636404497', ]
     for each in list1:
         url = each
         file_path = each.split('/')[-1]
@@ -705,8 +662,7 @@ def ping_host(host_address):
     for i in range(count):
         thread_list[i].join()
     new_list = [each for each in result_list if each]
-    return f'  ⏱ Ping {int(sum(new_list) / len(new_list))} ms ({len(new_list)}/{count})' \
-        if new_list else f'  🔴 Ping - ms (0/{count})'
+    return f'  ⏱ Ping {int(sum(new_list) / len(new_list))} ms ({len(new_list)}/{count})' if new_list else f'  🔴 Ping - ms (0/{count})'
 
 
 def check_version():
@@ -729,12 +685,7 @@ def check_theporndb_api_token():
     timeout = config.timeout
     api_token = config.theporndb_api_token
     url = 'https://api.theporndb.net/scenes/hash/8679fcbdd29fa735'
-    headers = {
-        'Authorization': f'Bearer {api_token}',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': get_user_agent(),
-    }
+    headers = {'Authorization': f'Bearer {api_token}', 'Content-Type': 'application/json', 'Accept': 'application/json', 'User-Agent': get_user_agent(), }
     if not api_token:
         tips = '❌ 未填写 API Token，影响欧美刮削！可在「设置」-「网络」添加！'
     else:
@@ -816,14 +767,12 @@ def _get_pic_by_google(pic_url):
 def get_big_pic_by_google(pic_url, poster=False):
     url, pic_size, big_pic = _get_pic_by_google(pic_url)
     if not poster:
-        if big_pic or (
-                pic_size and int(pic_size[0]) > 800 and int(pic_size[1]) > 539):  # cover 有大图时或者图片高度 > 800 时使用该图片
+        if big_pic or (pic_size and int(pic_size[0]) > 800 and int(pic_size[1]) > 539):  # cover 有大图时或者图片高度 > 800 时使用该图片
             return url, pic_size
         return '', ''
     if url and int(pic_size[1]) < 1000:  # poster，图片高度小于 1500，重新搜索一次
         url, pic_size, big_pic = _get_pic_by_google(url)
-    if pic_size and (big_pic or 'blogger.googleusercontent.com' in url or int(
-            pic_size[1]) > 560):  # poster，大图或高度 > 560 时，使用该图片
+    if pic_size and (big_pic or 'blogger.googleusercontent.com' in url or int(pic_size[1]) > 560):  # poster，大图或高度 > 560 时，使用该图片
         return url, pic_size
     else:
         return '', ''

@@ -89,15 +89,13 @@ def getOutline(html, language, real_url):
 def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     start_time = time.time()
     website_name = 'airav'
-    req_web += '-> %s[%s]' % (website_name, language)
+    req_web += f'-> {website_name}[{language}]'
     number = number.upper()
     if re.match(r'N\d{4}', number):  # n1403
         number = number.lower()
     real_url = appoint_url
-    cover_url = ''
     image_cut = 'right'
     image_download = False
-    url_search = ''
     mosaic = '有码'
     if language == 'zh_cn':
         airav_url = 'https://cn.airav.wiki'
@@ -106,7 +104,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     else:
         airav_url = 'https://jp.airav.wiki'
     web_info = '\n       '
-    log_info += ' \n    🌐 airav[%s]' % language.replace('zh_', '')
+    log_info += f' \n    🌐 airav[{language.replace("zh_", "")}]'
     debug_info = ''
 
     try:  # 捕获主动抛出的异常
@@ -114,13 +112,13 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
 
             # 通过搜索获取real_url
             url_search = airav_url + '/?search=' + number
-            debug_info = '搜索地址: %s ' % url_search
+            debug_info = f'搜索地址: {url_search} '
             log_info += web_info + debug_info
 
             # ========================================================================搜索番号
             result, html_search = curl_html(url_search)
             if not result:
-                debug_info = '网络请求错误: %s' % html_search
+                debug_info = f'网络请求错误: {html_search}'
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
@@ -136,11 +134,11 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
                 raise Exception(debug_info)
 
         if real_url:
-            debug_info = '番号地址: %s ' % real_url
+            debug_info = f'番号地址: {real_url} '
             log_info += web_info + debug_info
             result, html_content = curl_html(real_url)
             if not result:
-                debug_info = '网络请求错误: %s' % html_content
+                debug_info = f'网络请求错误: {html_content}'
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
 
@@ -196,7 +194,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
                     'image_cut': image_cut,
                     'log_info': log_info,
                     'error_info': '',
-                    'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
+                    'req_web': req_web + f'({round((time.time() - start_time), )}s) ',
                     'mosaic': mosaic,
                     'website': real_url,
                     'wanted': '',
@@ -205,7 +203,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
                 log_info += web_info + debug_info
                 dic['log_info'] = log_info
             except Exception as e:
-                debug_info = '数据生成出错: %s' % str(e)
+                debug_info = f'数据生成出错: {str(e)}'
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
     except Exception as e:
@@ -216,16 +214,10 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
             'website': '',
             'log_info': log_info,
             'error_info': debug_info,
-            'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
+            'req_web': req_web + f'({round((time.time() - start_time), )}s) ',
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
@@ -236,30 +228,4 @@ if __name__ == '__main__':
     # print(main('STARS-199'))                                                    # poster图片
     # print(main('APNS-259', language='zh_cn'))
     # print(main('PRED-300')) # 马赛克破坏版
-    print(main('abs-141'))
-    # print(main('HYSD-00083'))
-    # print(main('IESP-660'))
-    # print(main('n1403'))
-    # print(main('GANA-1910'))
-    # print(main('heyzo-1031'))
-    # print(main('x-art.19.11.03'))
-    # print(main('032020-001'))
-    # print(main('S2M-055'))
-    # print(main('LUXU-1217'))
-    # print(main('1101132', ''))
-    # print(main('OFJE-318'))
-    # print(main('110119-001'))
-    # print(main('abs-001'))
-    # print(main('SSIS-090', ''))
-    # print(main('SSIS-090', ''))
-    # print(main('SNIS-016', ''))
-    # print(main('HYSD-00083', ''))
-    # print(main('IESP-660', ''))
-    # print(main('n1403', ''))
-    # print(main('GANA-1910', ''))
-    # print(main('heyzo-1031', ''))
-    # print(main('x-art.19.11.03'))
-    # print(main('032020-001', ''))
-    # print(main('S2M-055', ''))
-    # print(main('LUXU-1217', ''))
-    # print(main('x-art.19.11.03', ''))
+    print(main('abs-141'))  # print(main('HYSD-00083'))  # print(main('IESP-660'))  # print(main('n1403'))  # print(main('GANA-1910'))  # print(main('heyzo-1031'))  # print(main('x-art.19.11.03'))  # print(main('032020-001'))  # print(main('S2M-055'))  # print(main('LUXU-1217'))  # print(main('1101132', ''))  # print(main('OFJE-318'))  # print(main('110119-001'))  # print(main('abs-001'))  # print(main('SSIS-090', ''))  # print(main('SSIS-090', ''))  # print(main('SNIS-016', ''))  # print(main('HYSD-00083', ''))  # print(main('IESP-660', ''))  # print(main('n1403', ''))  # print(main('GANA-1910', ''))  # print(main('heyzo-1031', ''))  # print(main('x-art.19.11.03'))  # print(main('032020-001', ''))  # print(main('S2M-055', ''))  # print(main('LUXU-1217', ''))  # print(main('x-art.19.11.03', ''))

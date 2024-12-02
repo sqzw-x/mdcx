@@ -1057,10 +1057,29 @@ def load_config(self):
         self.timer_scrape.stop()
         self.statement = int(config.statement)  # 间歇刮削间隔时间
 
+        self.Ui.checkBox_show_web_log.setChecked(config.show_web_log == 'on')  # 显示字段刮削过程
+        self.Ui.checkBox_show_from_log.setChecked(config.show_from_log == 'on')  # 显示字段来源信息
+        self.Ui.checkBox_show_data_log.setChecked(config.show_data_log == 'on')  # 显示字段内容信息
+        if config.save_log == 'off':  # 保存日志
+            self.Ui.radioButton_log_off.setChecked(True)
+        else:
+            self.Ui.radioButton_log_on.setChecked(True)
+        if config.update_check == 'off':  # 检查更新
+            self.Ui.radioButton_update_off.setChecked(True)
+        else:
+            self.Ui.radioButton_update_on.setChecked(True)
+
+        self.Ui.lineEdit_local_library_path.setText(convert_path(config.local_library))  # 本地资源库
+        self.Ui.lineEdit_actors_name.setText(str(config.actors_name))  # 演员名
+        self.Ui.lineEdit_netdisk_path.setText(convert_path(config.netdisk_path))  # 网盘目录
+        self.Ui.lineEdit_localdisk_path.setText(convert_path(config.localdisk_path))  # 本地磁盘目录
+        self.Ui.checkBox_hide_window_title.setChecked(config.window_title == 'hide')  # 窗口标题栏
+        # endregion
+
+        # region switch_on
         switch_on = config.switch_on
         if read_version < 20230404:
             switch_on += 'ipv4_only,'
-        # region switch_on
         self.Ui.checkBox_auto_start.setChecked('auto_start' in switch_on)
         self.Ui.checkBox_auto_exit.setChecked('auto_exit' in switch_on)
         self.Ui.checkBox_rest_scrape.setChecked('rest_scrape' in switch_on)
@@ -1100,8 +1119,7 @@ def load_config(self):
             except:
                 self.Init_QSystemTrayIcon()
                 if not mdcx_config:
-                    self.tray_icon.showMessage(f"MDCx {self.localversion}", u'配置写入失败！所在目录没有读写权限！',
-                                               QIcon(resources.icon_ico), 3000)
+                    self.tray_icon.showMessage(f"MDCx {self.localversion}", u'配置写入失败！所在目录没有读写权限！', QIcon(resources.icon_ico), 3000)
             if 'passthrough' in switch_on:
                 self.Ui.checkBox_highdpi_passthrough.setChecked(True)
                 if not os.path.isfile('highdpi_passthrough'):
@@ -1126,9 +1144,7 @@ def load_config(self):
                 except:
                     self.Init_QSystemTrayIcon()
                     if not mdcx_config:
-                        self.tray_icon.showMessage(f"MDCx {self.localversion}",
-                                                   u'配置写入失败！所在目录没有读写权限！',
-                                                   QIcon(resources.icon_ico), 3000)
+                        self.tray_icon.showMessage(f"MDCx {self.localversion}", u'配置写入失败！所在目录没有读写权限！', QIcon(resources.icon_ico), 3000)
 
             # TODO macOS上运行pyinstaller打包的程序，这个处理方式有问题
             try:
@@ -1152,26 +1168,6 @@ def load_config(self):
             except Exception as e:
                 signal.show_traceback_log(f'hide_dock_flag_file: {os.path.realpath(hide_dock_flag_file)}')
                 signal.show_traceback_log(traceback.format_exc())
-            # endregion
-
-        self.Ui.checkBox_show_web_log.setChecked(config.show_web_log == 'on')  # 显示字段刮削过程
-        self.Ui.checkBox_show_from_log.setChecked(config.show_from_log == 'on')  # 显示字段来源信息
-        self.Ui.checkBox_show_data_log.setChecked(config.show_data_log == 'on')  # 显示字段内容信息
-        if config.save_log == 'off':  # 保存日志
-            self.Ui.radioButton_log_off.setChecked(True)
-        else:
-            self.Ui.radioButton_log_on.setChecked(True)
-        if config.update_check == 'off':  # 检查更新
-            self.Ui.radioButton_update_off.setChecked(True)
-        else:
-            self.Ui.radioButton_update_on.setChecked(True)
-
-        self.Ui.lineEdit_local_library_path.setText(convert_path(config.local_library))  # 本地资源库
-        self.Ui.lineEdit_actors_name.setText(str(config.actors_name))  # 演员名
-        self.Ui.lineEdit_netdisk_path.setText(convert_path(config.netdisk_path))  # 网盘目录
-        self.Ui.lineEdit_localdisk_path.setText(convert_path(config.localdisk_path))  # 本地磁盘目录
-        self.Ui.checkBox_hide_window_title.setChecked(config.window_title == 'hide')  # 窗口标题栏
-        # endregion
         # endregion
 
         self.Ui.checkBox_create_link.setChecked(config.auto_link)
@@ -1186,13 +1182,12 @@ def load_config(self):
                 scrape_like_text += " · 软连接开"
             elif config.soft_link == 2:
                 scrape_like_text += " · 硬连接开"
-            signal.show_log_text(
-                f' 🛠 当前配置：{config.path} 加载完成！\n '
-                f'📂 程序目录：{get_main_path()} \n '
-                f'📂 刮削目录：{get_movie_path_setting()[0]} \n '
-                f'💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n '
-                f'🖥️ 系统信息：{platform.platform()} \n '
-                f'🐰 软件版本：{self.localversion} \n')
+            signal.show_log_text(f' 🛠 当前配置：{config.path} 加载完成！\n '
+                                 f'📂 程序目录：{get_main_path()} \n '
+                                 f'📂 刮削目录：{get_movie_path_setting()[0]} \n '
+                                 f'💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n '
+                                 f'🖥️ 系统信息：{platform.platform()} \n '
+                                 f'🐰 软件版本：{self.localversion} \n')
         except:
             signal.show_traceback_log(traceback.format_exc())
         try:

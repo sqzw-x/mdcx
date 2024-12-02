@@ -10946,7 +10946,7 @@ class Ui_MDCx(object):
         self.pushButton_select_localdisk_path.setText(_translate("MDCx", "选择目录"))
         self.checkBox_copy_netdisk_nfo.setText(_translate("MDCx", "同时复制网盘目录的nfo、图片、字幕文件到软链接目录"))
         self.label_341.setText(_translate("MDCx", "勾选后将同时复制网盘中刮削好的nfo等文件到本地，或者你也可以重新刮削这些软链接"))
-        self.checkBox_create_link.setText(_translate("MDCx", "刮削结束后自动创建软链接"))
+        self.checkBox_create_link.setText(_translate("MDCx", "刮削过程中自动创建软链接"))
         self.groupBox_16.setTitle(_translate("MDCx", "刮削目录"))
         self.pushButton_select_softlink_folder.setText(_translate("MDCx", "选择目录"))
         self.label_58.setText(_translate("MDCx", "指不想要刮削的目录，可以填写多个目录，以逗号分开（中英文逗号都可以）"))

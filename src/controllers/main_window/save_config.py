@@ -924,13 +924,12 @@ def save_config(self):
             scrape_like_text += " · 软连接开"
         elif config.soft_link == 2:
             scrape_like_text += " · 硬连接开"
-        signal.show_log_text(
-            f' 🛠 当前配置：{config.path} 保存完成！\n '
-            f'📂 程序目录：{get_main_path()} \n '
-            f'📂 刮削目录：{get_movie_path_setting()[0]} \n '
-            f'💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n '
-            f'🖥️ 系统信息：{platform.platform()} \n '
-            f'🐰 软件版本：{self.localversion} \n')
+        signal.show_log_text(f' 🛠 当前配置：{config.path} 保存完成！\n '
+                             f'📂 程序目录：{get_main_path()} \n '
+                             f'📂 刮削目录：{get_movie_path_setting()[0]} \n '
+                             f'💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n '
+                             f'🖥️ 系统信息：{platform.platform()} \n '
+                             f'🐰 软件版本：{self.localversion} \n')
     except:
         signal.show_traceback_log(traceback.format_exc())
     try:

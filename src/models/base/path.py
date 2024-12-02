@@ -6,8 +6,8 @@ import sys
 import traceback
 from os.path import abspath, dirname, realpath
 
-from models.signals import signal
 from models.config.config import config
+from models.signals import signal
 
 
 def get_main_path():

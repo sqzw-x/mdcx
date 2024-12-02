@@ -24,7 +24,7 @@ REGEX_KANA = re.compile(r"[\u3040-\u30ff]")  # 平假名/片假名
 
 
 def youdao_translate(title, outline):
-    url = 'https://fanyi.youdao.com/translate_o?smartresult=dict&smartresult=rule'
+    url = 'https://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule'
     msg = '%s\n%s' % (title, outline)
     lts = str(int(time.time() * 1000))
     salt = lts + str(random.randint(0, 10))
@@ -48,14 +48,9 @@ def youdao_translate(title, outline):
         'action': 'FY_BY_CLICKBUTTION',
     }
     headers = {
-        'Cookie': random.choice([
-            "OUTFOX_SEARCH_USER_ID=833904829@10.169.0.84",
-            "OUTFOX_SEARCH_USER_ID=-10218418@11.136.67.24;",
-            "OUTFOX_SEARCH_USER_ID=1989505748@10.108.160.19;",
-            "OUTFOX_SEARCH_USER_ID=2072418438@218.82.240.196;",
-            "OUTFOX_SEARCH_USER_ID=1768574849@220.181.76.83;",
-            "OUTFOX_SEARCH_USER_ID=-2153895048@10.168.8.76;",
-        ]),
+        'Cookie': random.choice(["OUTFOX_SEARCH_USER_ID=833904829@10.169.0.84", "OUTFOX_SEARCH_USER_ID=-10218418@11.136.67.24;",
+                                 "OUTFOX_SEARCH_USER_ID=1989505748@10.108.160.19;", "OUTFOX_SEARCH_USER_ID=2072418438@218.82.240.196;",
+                                 "OUTFOX_SEARCH_USER_ID=1768574849@220.181.76.83;", "OUTFOX_SEARCH_USER_ID=-2153895048@10.168.8.76;", ]),
         'Referer': 'https://fanyi.youdao.com/?keyfrom=dict2.top',
     }
     headers_o = config.headers
@@ -129,14 +124,8 @@ def deepl_translate(title, outline, ls='JA', json_data=None):
 
     deepl_url = 'https://api-free.deepl.com' if ':fx' in deepl_key else 'https://api.deepl.com'
     url = f'{deepl_url}/v2/translate?auth_key={deepl_key}&source_lang={ls}&target_lang=ZH'
-    params_title = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'text': title,
-    }
-    params_outline = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'text': outline,
-    }
+    params_title = {'Content-Type': 'application/x-www-form-urlencoded', 'text': title, }
+    params_outline = {'Content-Type': 'application/x-www-form-urlencoded', 'text': outline, }
 
     if title:
         result, res = post_html(url, data=params_title, json_data=True)
@@ -177,8 +166,8 @@ def translate_info(json_data):
 
     tag_include = config.tag_include
     tag = json_data['tag']
-    remove_key = ['HD高画质', 'HD高畫質', '高画质', '高畫質', '無碼流出', '无码流出', '無碼破解', '无码破解',
-                  '無碼片', '无码片', '有碼片', '有码片', '無碼', '无码', '有碼', '有码', '流出', '国产', '國產']
+    remove_key = ['HD高画质', 'HD高畫質', '高画质', '高畫質', '無碼流出', '无码流出', '無碼破解', '无码破解', '無碼片', '无码片', '有碼片', '有码片', '無碼', '无码',
+                  '有碼', '有码', '流出', '国产', '國產']
     for each_key in remove_key:
         tag = tag.replace(each_key, '')
 
@@ -294,13 +283,12 @@ def translate_actor(json_data):
     # 非读取模式，勾选了使用真实名字时; 读取模式，勾选了允许更新真实名字时
     if actor_realname == 'on':
         start_time = time.time()
-        if mosaic != '国产' and (
-                number.startswith('FC2') or number.startswith('SIRO') or re.search(r'\d{3,}[A-Z]{3,}-', number)):
+        if mosaic != '国产' and (number.startswith('FC2') or number.startswith('SIRO') or re.search(r'\d{3,}[A-Z]{3,}-', number)):
             result, temp_actor = get_actorname(json_data['number'])
             if result:
-                actor:str = json_data['actor']
-                all_actor:str = json_data['all_actor']
-                actor_list:list = all_actor.split(',')
+                actor: str = json_data['actor']
+                all_actor: str = json_data['all_actor']
+                actor_list: list = all_actor.split(',')
                 json_data['actor'] = temp_actor
                 # 从actor_list中循环查找元素是否包含字符串temp_actor，有则替换
                 for item in actor_list:
@@ -308,8 +296,7 @@ def translate_actor(json_data):
                         actor_list[actor_list.index(item)] = temp_actor
                 json_data['all_actor'] = ','.join(actor_list)
 
-                json_data[
-                    'logs'] += f"\n 👩🏻 Av-wiki done! Actor's real Japanese name is '{temp_actor}' ({get_used_time(start_time)}s)"
+                json_data['logs'] += f"\n 👩🏻 Av-wiki done! Actor's real Japanese name is '{temp_actor}' ({get_used_time(start_time)}s)"
             else:
                 json_data['logs'] += f"\n 🔴 Av-wiki failed! {temp_actor} ({get_used_time(start_time)}s)"
 
@@ -355,9 +342,7 @@ def translate_actor(json_data):
     if actor_href_list:
         json_data['actor_href'] = actor_href_list[0]
     elif json_data['actor']:
-        json_data['actor_href'] = 'https://javdb.com/search?f=actor&q=' + \
-                                  urllib.parse.quote(
-                                      json_data['actor'].split(',')[0])  # url转码，避免乱码
+        json_data['actor_href'] = 'https://javdb.com/search?f=actor&q=' + urllib.parse.quote(json_data['actor'].split(',')[0])  # url转码，避免乱码
 
     return json_data
 
@@ -389,8 +374,7 @@ def _get_youdao_key_thread():
     # 请求 js url ，获取 youdao key
     result, req = get_html(js_url)
     try:
-        youdaokey = re.search(r'(?<="fanyideskweb" \+ e \+ i \+ ")[^"]+', req).group(0)
-        # sign: n.md5("fanyideskweb" + e + i + "Ygy_4c=r#e#4EX^NUGUc5")
+        youdaokey = re.search(r'(?<="fanyideskweb" \+ e \+ i \+ ")[^"]+', req).group(0)  # sign: n.md5("fanyideskweb" + e + i + "Ygy_4c=r#e#4EX^NUGUc5")
     except:
         try:
             youdaokey = re.search(r'(?<="fanyideskweb"\+e\+i\+")[^"]+', req).group(0)
@@ -466,21 +450,18 @@ def translate_title_outline(json_data, movie_number):
                 else:  # 使用deepl翻译
                     t, o, r = deepl_translate(trans_title, trans_outline, 'JA', json_data)
                 if r:
-                    json_data[
-                        'logs'] += f'\n 🔴 Translation failed!({each.capitalize()})({get_used_time(start_time)}s) Error: {r}'
+                    json_data['logs'] += f'\n 🔴 Translation failed!({each.capitalize()})({get_used_time(start_time)}s) Error: {r}'
                 else:
                     if t:
                         json_data['title'] = t
                     if o:
                         json_data['outline'] = o
-                    json_data[
-                        'logs'] += f'\n 🍀 Translation done!({each.capitalize()})({get_used_time(start_time)}s)'
+                    json_data['logs'] += f'\n 🍀 Translation done!({each.capitalize()})({get_used_time(start_time)}s)'
                     json_data['outline_from'] = each
                     break
             else:
                 translate_by = translate_by.strip(',').capitalize()
-                json_data[
-                    'logs'] += f'\n 🔴 Translation failed! {translate_by} 不可用！({get_used_time(start_time)}s)'
+                json_data['logs'] += f'\n 🔴 Translation failed! {translate_by} 不可用！({get_used_time(start_time)}s)'
 
     # 简繁转换
     if title_language == 'zh_cn':

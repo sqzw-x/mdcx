@@ -11,10 +11,9 @@ def is_uncensored(number):
         return True
 
     # 无码车牌BT,CT,EMP,CCDV,CWP,CWPBD,DSAM,DRC,DRG,GACHI,heydouga,JAV,LAF,LAFBD,HEYZO,KTG,KP,KG,LLDV,MCDV,MKD,MKBD,MMDV,NIP,PB,PT,QE,RED,RHJ,S2M,SKY,SKYHD,SMD,SSDV,SSKP,TRG,TS,xxx-av,YKB
-    key_start_word = ['BT-', 'CT-', 'EMP-', 'CCDV-', 'CWP-', 'CWPBD-', 'DSAM-', 'DRC-', 'DRG-', 'GACHI-', 'heydouga',
-                      'JAV-', 'LAF-', 'LAFBD-', 'HEYZO-', 'KTG-', 'KP-', 'KG-', 'LLDV-', 'MCDV-', 'MKD-', 'MKBD-',
-                      'MMDV-', 'NIP-', 'PB-', 'PT-', 'QE-', 'RED-', 'RHJ-', 'S2M-', 'SKY-', 'SKYHD-', 'SMD-', 'SSDV-',
-                      'SSKP-', 'TRG-', 'TS-', 'xxx-av-', 'YKB-', 'bird', 'bouga']
+    key_start_word = ['BT-', 'CT-', 'EMP-', 'CCDV-', 'CWP-', 'CWPBD-', 'DSAM-', 'DRC-', 'DRG-', 'GACHI-', 'heydouga', 'JAV-', 'LAF-', 'LAFBD-', 'HEYZO-', 'KTG-', 'KP-',
+                      'KG-', 'LLDV-', 'MCDV-', 'MKD-', 'MKBD-', 'MMDV-', 'NIP-', 'PB-', 'PT-', 'QE-', 'RED-', 'RHJ-', 'S2M-', 'SKY-', 'SKYHD-', 'SMD-', 'SSDV-', 'SSKP-',
+                      'TRG-', 'TS-', 'xxx-av-', 'YKB-', 'bird', 'bouga']
     for each in key_start_word:
         if number.upper().startswith(each.upper()):
             return True
@@ -33,8 +32,8 @@ def is_suren(number):
 
 def get_number_letters(number):
     number_upper = number.upper()
-    if re.search(r'([A-Za-z0-9-\.]{3,})[-_\. ]{1}\d{2}\.\d{2}\.\d{2}', number):
-        return re.search(r'([A-Za-z0-9-\.]{3,})[-_\. ]{1}\d{2}\.\d{2}\.\d{2}', number)[1]
+    if re.search(r'([A-Za-z0-9-.]{3,})[-_. ]\d{2}\.\d{2}\.\d{2}', number):
+        return re.search(r'([A-Za-z0-9-.]{3,})[-_. ]\d{2}\.\d{2}\.\d{2}', number)[1]
     if number_upper.startswith('FC2'):
         return 'FC2'
     if number_upper.startswith('MYWIFE'):
@@ -106,10 +105,9 @@ def remove_escape_string(filename, replace_char=''):
     for string in config.escape_string_list:
         if string:
             filename = filename.replace(string.upper(), replace_char)
-    short_strings = ['4K', '4KS', '8K', 'HD', 'LR', 'VR', 'DVD', 'FULL', 'HEVC', 'H264', 'H265', 'X264', 'X265', 'AAC',
-                     'XXX', 'PRT']
+    short_strings = ['4K', '4KS', '8K', 'HD', 'LR', 'VR', 'DVD', 'FULL', 'HEVC', 'H264', 'H265', 'X264', 'X265', 'AAC', 'XXX', 'PRT']
     for each in short_strings:
-        filename = re.sub(r'[-_ \.\[]%s[-_ \.\]]' % each.upper(), '-', filename)
+        filename = re.sub(r'[-_ .\[]%s[-_ .\]]' % each.upper(), '-', filename)
     return filename.replace('--', '-').strip('-_ .')
 
 
@@ -120,12 +118,7 @@ def get_file_number(filepath):
     file_name = remove_escape_string(real_name) + '.'
 
     # 替换cd_part、EP、-C
-    filename = (file_name.
-                replace('-C.', '.').
-                replace('.PART', '-CD').
-                replace('-PART', '-CD').
-                replace(' EP.', '.EP').
-                replace('-CD-', ''))
+    filename = (file_name.replace('-C.', '.').replace('.PART', '-CD').replace('-PART', '-CD').replace(' EP.', '.EP').replace('-CD-', ''))
 
     # 去除分集
     filename = re.sub(r'[-_ .]CD\d{1,2}', '', filename)  # xxx-CD1.mp4
@@ -138,10 +131,7 @@ def get_file_number(filepath):
     filename = re.sub(r"[-\[]\d{2}[-_.]\d{2}[-_.]\d{2}]?", "", filename)  # 去除文件名中时间
 
     # 转换番号
-    filename = (filename.replace('FC2-PPV', 'FC2-').
-                replace('FC2PPV', 'FC2-').
-                replace('--', '-').
-                replace('GACHIPPV', 'GACHI'))
+    filename = (filename.replace('FC2-PPV', 'FC2-').replace('FC2PPV', 'FC2-').replace('--', '-').replace('GACHIPPV', 'GACHI'))
 
     # 提取番号
     if 'MYWIFE' in filename and re.search(r'NO\.\d*', filename):  # 提取 mywife No.1111
@@ -156,13 +146,12 @@ def get_file_number(filepath):
         file_number = re.search(r'MMR-?[A-Z]{2,}-?\d+[A-Z]*', filename).group()
         return file_number.replace('MMR-', 'MMR')
 
-    elif re.search(r'([^A-Z]|^)(MD[A-Z-]*\d{4,}(-\d{1})?)', file_name) and 'MDVR' not in file_name:  # 提取番号 md-0165-1
-        file_number = re.search(r'([^A-Z]|^)(MD[A-Z-]*\d{4,}(-\d{1})?)', file_name).group(2)
+    elif re.search(r'([^A-Z]|^)(MD[A-Z-]*\d{4,}(-\d)?)', file_name) and 'MDVR' not in file_name:  # 提取番号 md-0165-1
+        file_number = re.search(r'([^A-Z]|^)(MD[A-Z-]*\d{4,}(-\d)?)', file_name).group(2)
         return file_number
 
-    elif re.findall(r'([A-Z0-9_]{2,})[-\.]{1}2?0?(\d{2}[-\.]\d{2}[-\.]\d{2})',
-                    oumei_filename):  # 提取欧美番号 sexart.11.11.11
-        result = re.findall(r'([A-Z0-9-]{2,})[-_\.]{1}2?0?(\d{2}[-\.]\d{2}[-\.]\d{2})', oumei_filename)
+    elif re.findall(r'([A-Z0-9_]{2,})[-.]2?0?(\d{2}[-.]\d{2}[-.]\d{2})', oumei_filename):  # 提取欧美番号 sexart.11.11.11
+        result = re.findall(r'([A-Z0-9-]{2,})[-_.]2?0?(\d{2}[-.]\d{2}[-.]\d{2})', oumei_filename)
         return (long_name(result[0][0].strip('-')) + '.' + result[0][1].replace('-', '.')).capitalize()
 
     elif re.search(r'XXX-AV-\d{4,}', filename):  # 提取xxx-av-11111
@@ -246,7 +235,7 @@ def get_file_number(filepath):
         file_number = temp[0] + '-' + temp[1]
 
     else:
-        temp_name = re.sub(r'[【(（\[].+?[\]）)】]', '', file_name).strip('@. ')  # 去除[]
+        temp_name = re.sub(r'[【(（\[].+?[]）)】]', '', file_name).strip('@. ')  # 去除[]
         temp_name = unicodedata.normalize('NFC', temp_name)  # Mac 把会拆成两个字符，即 NFD，而网页请求使用的是 NFC
         try:
             temp_name = temp_name.encode('cp932').decode('shift_jis')  # 转换为常见日文，比如～ 转换成 〜

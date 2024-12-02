@@ -57,8 +57,7 @@ def _get_emby_actor_list():
 
     result, response = get_html(url, proxies=False, json_data=True)
     if not result:
-        signal.show_log_text(
-            f'🔴 {server_name} 连接失败！请检查 {server_name} 地址 和 API 密钥是否正确填写！ {response}')
+        signal.show_log_text(f'🔴 {server_name} 连接失败！请检查 {server_name} 地址 和 API 密钥是否正确填写！ {response}')
         signal.show_log_text(traceback.format_exc())
 
     actor_list = response['Items']
@@ -74,13 +73,9 @@ def _upload_actor_photo(url, pic_path):
             b6_pic = base64.b64encode(f.read())  # 读取文件内容, 转换为base64编码
 
         if pic_path.endswith('jpg'):
-            header = {
-                "Content-Type": 'image/jpeg',
-            }
+            header = {"Content-Type": 'image/jpeg', }
         else:
-            header = {
-                "Content-Type": 'image/png',
-            }
+            header = {"Content-Type": 'image/png', }
         requests.post(url=url, data=b6_pic, headers=header)
         return True
     except:
@@ -191,14 +186,7 @@ def _get_gfriends_actor_data():
                             actor_url = f'{raw_url}/master/Content/{each_key}/{value}'
                             new_gfriends_actor_data[key] = actor_url
                 with open(gfriends_json_path, 'w', encoding='utf-8') as f:
-                    json.dump(
-                        new_gfriends_actor_data,
-                        f,
-                        ensure_ascii=False,
-                        sort_keys=True,
-                        indent=4,
-                        separators=(',', ': '),
-                    )
+                    json.dump(new_gfriends_actor_data, f, ensure_ascii=False, sort_keys=True, indent=4, separators=(',', ': '), )
                 return new_gfriends_actor_data
     else:
         return _get_local_actor_photo()
@@ -226,8 +214,7 @@ def _get_graphis_pic(actor_name):
         backdrop_path = big_old
         if 'graphis_backgrop' not in emby_on:
             backdrop_path = fix_old
-        url = f'https://graphis.ne.jp/monthly/?S=1&K={actor_name}'
-        # https://graphis.ne.jp/monthly/?S=1&K=夢乃あいか
+        url = f'https://graphis.ne.jp/monthly/?S=1&K={actor_name}'  # https://graphis.ne.jp/monthly/?S=1&K=夢乃あいか
 
     # 查看本地有没有缓存
     logs = ''
@@ -330,12 +317,10 @@ def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
                 pic_path = gfriends_actor_data.get(f'{jp_name}.png')
                 if not pic_path:
                     if actor_imagetages:
-                        signal.show_log_text(
-                            f'\n{deal_percent} ✅ {i}/{count_all} 没有找到头像！继续使用原有头像！ 👩🏻 {actor_name} {logs}\n{actor_homepage}')
+                        signal.show_log_text(f'\n{deal_percent} ✅ {i}/{count_all} 没有找到头像！继续使用原有头像！ 👩🏻 {actor_name} {logs}\n{actor_homepage}')
                         succ += 1
                         continue
-                    signal.show_log_text(
-                        f'\n{deal_percent} 🔴 {i}/{count_all} 没有找到头像！ 👩🏻 {actor_name}  {logs}\n{actor_homepage}')
+                    signal.show_log_text(f'\n{deal_percent} 🔴 {i}/{count_all} 没有找到头像！ 👩🏻 {actor_name}  {logs}\n{actor_homepage}')
                     fail += 1
                     continue
         else:
@@ -348,8 +333,7 @@ def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
             file_path = os.path.join(actor_folder, file_name)
             if not os.path.isfile(file_path):
                 if not download_file_with_filepath({'logs': ''}, pic_path, file_path, actor_folder):
-                    signal.show_log_text(
-                        f'\n{deal_percent} 🔴 {i}/{count_all} 头像下载失败！ 👩🏻 {actor_name}  {logs}\n{actor_homepage}')
+                    signal.show_log_text(f'\n{deal_percent} 🔴 {i}/{count_all} 头像下载失败！ 👩🏻 {actor_name}  {logs}\n{actor_homepage}')
                     fail += 1
                     continue
             pic_path = file_path
@@ -375,15 +359,12 @@ def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
                     logs += ' ✅ 使用 Gfriends 头像和背景！'
                 else:
                     logs += ' ✅ 使用本地头像库头像和背景！'
-            signal.show_log_text(
-                f'\n{deal_percent} ✅ {i}/{count_all} 头像更新成功！ 👩🏻 {actor_name}  {logs}\n{actor_homepage}')
+            signal.show_log_text(f'\n{deal_percent} ✅ {i}/{count_all} 头像更新成功！ 👩🏻 {actor_name}  {logs}\n{actor_homepage}')
             succ += 1
         else:
-            signal.show_log_text(
-                f'\n{deal_percent} 🔴 {i}/{count_all} 头像上传失败！ 👩🏻 {actor_name}  {logs}\n{actor_homepage}')
+            signal.show_log_text(f'\n{deal_percent} 🔴 {i}/{count_all} 头像上传失败！ 👩🏻 {actor_name}  {logs}\n{actor_homepage}')
             fail += 1
-    signal.show_log_text(
-        f'\n\n 🎉🎉🎉 演员头像补全完成！用时: {get_used_time(start_time)}秒 成功: {succ} 失败: {fail} 跳过: {skip}\n')
+    signal.show_log_text(f'\n\n 🎉🎉🎉 演员头像补全完成！用时: {get_used_time(start_time)}秒 成功: {succ} 失败: {fail} 跳过: {skip}\n')
 
 
 def _get_local_actor_photo():
@@ -407,6 +388,7 @@ def _get_local_actor_photo():
             signal.show_log_text("================================================================================")
             return False
         return local_actor_photo_dic
+
 
 if __name__ == '__main__':
     _get_gfriends_actor_data()

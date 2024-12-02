@@ -88,10 +88,7 @@ def getTag(html):  # 获取标签
 
 
 def getOutline(html):  # 获取简介
-    result = str(html.xpath('//div[@class="col des"]/text()')).strip('[' ']').replace("',", '').replace('\\n',
-                                                                                                        '').replace("'",
-                                                                                                                    '').replace(
-        '・', '').strip()
+    result = str(html.xpath('//div[@class="col des"]/text()')).strip('[' ']').replace("',", '').replace('\\n', '').replace("'", '').replace('・', '').strip()
     return result
 
 
@@ -197,30 +194,11 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )
     return js
 
 
 if __name__ == '__main__':
     # print(main('1470588', ''))
-    print(main('743423', ''))
-    # print(main('674261', ''))
-    # print(main('406570', ''))
-    # print(main('1474843', ''))
-    # print(main('1860858', ''))
-    # print(main('1599412', ''))
-    # print(main('1131214', ''))
-    # print(main('1837553', ''))
-    # print(main('1613618', ''))
-    # print(main('1837553', ''))
-    # print(main('1837589', ""))
-    # print(main('1760182', ''))
-    # print(main('1251689', ''))
-    # print(main('674239', ""))
-    # print(main('674239', "))
+    print(main('743423',
+               ''))  # print(main('674261', ''))  # print(main('406570', ''))  # print(main('1474843', ''))  # print(main('1860858', ''))  # print(main('1599412', ''))  # print(main('1131214', ''))  # print(main('1837553', ''))  # print(main('1613618', ''))  # print(main('1837553', ''))  # print(main('1837589', ""))  # print(main('1760182', ''))  # print(main('1251689', ''))  # print(main('674239', ""))  # print(main('674239', "))

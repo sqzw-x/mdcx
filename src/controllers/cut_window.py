@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QDialog, QFileDialog, QPushButton
 import models.core.file
 import models.core.image
 import models.core.scraper
-from models.base.file import copy_file, delete_file, split_path
+from models.base.file import delete_file, split_path
 from models.config.config import config
 from views.posterCutTool import Ui_Dialog_cut_poster
 
@@ -64,11 +64,10 @@ class CutWindow(QDialog):
         self.Ui.pushButton_select_cutrange.setGeometry(QRect(420, 0, 379, 539))
         self.Ui.pushButton_select_cutrange.setCursor(QCursor(Qt.OpenHandCursor))
         self.Ui.pushButton_select_cutrange.setAcceptDrops(True)
-        self.Ui.pushButton_select_cutrange.setStyleSheet(
-            u"background-color: rgba(200, 200, 200, 80);\n"
-            "font-size:13px;\n" "font-weight:normal;"
-            "color: rgba(0, 0, 0, 255);\n"
-            "border:2px solid rgba(0, 55, 255, 255);\n")
+        self.Ui.pushButton_select_cutrange.setStyleSheet(u"background-color: rgba(200, 200, 200, 80);\n"
+                                                         "font-size:13px;\n" "font-weight:normal;"
+                                                         "color: rgba(0, 0, 0, 255);\n"
+                                                         "border:2px solid rgba(0, 55, 255, 255);\n")
         self.set_style()
         self.Ui.horizontalSlider_left.valueChanged.connect(self.change_postion_left)
         self.Ui.horizontalSlider_right.valueChanged.connect(self.change_postion_right)
@@ -76,13 +75,11 @@ class CutWindow(QDialog):
         self.Ui.pushButton_cut_close.clicked.connect(self.to_cut_and_close)
         self.Ui.pushButton_cut.clicked.connect(self.to_cut)
         self.Ui.pushButton_close.clicked.connect(self.close)
-        self.raw_img_path = ''  # 初始图片(位于影片同目录)
         self.showimage()
 
     def set_style(self):
         # 控件美化 裁剪弹窗
-        self.Ui.widget.setStyleSheet(
-            '''
+        self.Ui.widget.setStyleSheet('''
             * {
                 font-family: Consolas, 'PingFang SC', 'Microsoft YaHei UI', 'Noto Color Emoji', 'Segoe UI Emoji';
             }
@@ -122,8 +119,7 @@ class CutWindow(QDialog):
                 border-width:14px;
                 font-weight:bold;
             }
-            '''
-        )
+            ''')
 
     def change_postion_left(self):
         # abc: 0-10000
@@ -147,15 +143,12 @@ class CutWindow(QDialog):
 
     # 打开图片选择框
     def open_image(self):
-        img_path, img_type = QFileDialog. \
-            getOpenFileName(None, "打开图片", "", "*.jpg *.png;;All Files(*)", options=self.parent().options)
+        img_path, img_type = QFileDialog.getOpenFileName(None, "打开图片", "", "*.jpg *.png;;All Files(*)", options=self.parent().options)
         if img_path:
             self.showimage(img_path)
 
     # 显示要裁剪的图片
     def showimage(self, img_path='', json_data={}):
-        if not self.raw_img_path:
-            self.raw_img_path = img_path
         # self.Ui.Dialog_cut_poster.setText(' ')                                # 清空背景
         self.Ui.label_backgroud_pic.setText(' ')  # 清空背景
 
@@ -201,7 +194,7 @@ class CutWindow(QDialog):
             self.Ui.label_backgroud_pic.setPixmap(pic)  # 背景区域显示缩放后的图片
 
             # 获取nfo文件名，用来设置裁剪后图片名称和裁剪时的水印状态
-            img_folder, img_fullname = split_path(self.raw_img_path)
+            img_folder, img_fullname = split_path(img_path)
             img_name, img_ex = os.path.splitext(img_fullname)
 
             # 如果没有json_data，则通过图片文件名或nfo文件名获取，目的是用来获取水印
@@ -215,8 +208,8 @@ class CutWindow(QDialog):
                         if '.nfo' in each:
                             temp_path = os.path.join(img_folder, each)
                             break
-                json_data, movie_number, folder_old_path, file_name, file_ex, \
-                    sub_list, file_show_name, file_show_path = models.core.file.get_file_info(temp_path, copy_sub=False)
+                json_data, movie_number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = models.core.file.get_file_info(temp_path,
+                                                                                                                                                        copy_sub=False)
 
             self.setWindowTitle(json_data.get('number') + ' 封面图片裁剪')  # 设置窗口标题
 
@@ -229,9 +222,7 @@ class CutWindow(QDialog):
             poster_path = os.path.join(img_folder, 'poster.jpg')
             if pic_name == 0:  # 文件名-poster.jpg
                 if '-' in img_name:
-                    poster_path = self.raw_img_path.replace('-fanart', '').replace('-thumb', '').replace('-poster',
-                                                                                                         '').replace(
-                        img_ex, '') + '-poster.jpg'
+                    poster_path = img_path.replace('-fanart', '').replace('-thumb', '').replace('-poster', '').replace(img_ex, '') + '-poster.jpg'
             thumb_path = poster_path.replace('poster.', 'thumb.')
             fanart_path = poster_path.replace('poster.', 'fanart.')
             self.cut_thumb_path = thumb_path  # 裁剪后的thumb路径
@@ -276,8 +267,7 @@ class CutWindow(QDialog):
             self.rect_h = int(self.rect_w * self.rect_h_w_ratio)  # 计算裁剪框的高度
             self.rect_x = 0  # 裁剪框左上角的x值
             self.rect_y = int((self.pic_new_h - self.rect_h) / 2)  # 裁剪框左上角的y值（默认垂直居中）
-        self.Ui.pushButton_select_cutrange.setGeometry(
-            QRect(self.rect_x, self.rect_y, self.rect_w, self.rect_h))  # 显示裁剪框
+        self.Ui.pushButton_select_cutrange.setGeometry(QRect(self.rect_x, self.rect_y, self.rect_w, self.rect_h))  # 显示裁剪框
         self.getRealPos()  # 显示裁剪框实际位置
 
     # 计算在原图的裁剪位置
@@ -336,8 +326,7 @@ class CutWindow(QDialog):
         self.c_y = int(self.c_y)
 
         # 显示实际裁剪位置
-        self.Ui.label_cut_postion.setText(
-            '%s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
+        self.Ui.label_cut_postion.setText('%s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
 
         # self.show_traceback_log('选择位置： %s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
         # 显示实际裁剪尺寸
@@ -357,16 +346,10 @@ class CutWindow(QDialog):
         if not img_path or not os.path.exists(img_path):
             return
         thumb_path = self.cut_thumb_path  # 裁剪后的thumb路径
-        poster_path = self.cut_poster_path  # 裁剪后的poster路径
-        fanart_path = self.cut_fanart_path  # 裁剪后的fanart路径
         self.parent().img_path = img_path  # 裁剪后更新图片url，这样再次点击时才可以重新加载并裁剪
 
         # 读取配置信息
         mark_list = []
-        download_files = config.download_files
-        poster_mark = config.poster_mark
-        thumb_mark = config.thumb_mark
-        fanart_mark = config.fanart_mark
         if self.Ui.radioButton_add_4k.isChecked():
             mark_list.append('4K')
         elif self.Ui.radioButton_add_8k.isChecked():
@@ -391,41 +374,43 @@ class CutWindow(QDialog):
         img = img.convert('RGB')
         img_new_png = img.crop((self.c_x, self.c_y, self.c_x2, self.c_y2))
         try:
-            if os.path.exists(poster_path):
-                delete_file(poster_path)
+            if os.path.exists(self.cut_poster_path):
+                delete_file(self.cut_poster_path)
         except Exception as e:
             self.parent().show_log_text(" 🔴 Failed to remove old poster!\n    " + str(e))
             return False
-        img_new_png.save(poster_path, quality=95, subsampling=0)
-        img.close()
+        img_new_png.save(self.cut_poster_path, quality=95, subsampling=0)
         # poster加水印
-        if poster_mark == 1:
-            models.core.image.add_mark_thread(poster_path, mark_list)
+        if config.poster_mark == 1:
+            models.core.image.add_mark_thread(self.cut_poster_path, mark_list)
 
         # 清理旧的thumb
-        if 'thumb' in download_files:
+        if 'thumb' in config.download_files:
             if thumb_path != img_path:
                 if os.path.exists(thumb_path):
                     delete_file(thumb_path)
-                copy_file(img_path, thumb_path)
+                img.save(thumb_path, quality=95, subsampling=0)
             # thumb加水印
-            if thumb_mark == 1:
+            if config.thumb_mark == 1:
                 models.core.image.add_mark_thread(thumb_path, mark_list)
         else:
             thumb_path = img_path
 
         # 清理旧的fanart
-        if ',fanart' in download_files:
-            if fanart_path != img_path:
-                if os.path.exists(fanart_path):
-                    delete_file(fanart_path)
-                copy_file(img_path, fanart_path)
+        if ',fanart' in config.download_files:
+            if self.cut_fanart_path != img_path:
+                if os.path.exists(self.cut_fanart_path):
+                    delete_file(self.cut_fanart_path)
+                img.save(self.cut_fanart_path, quality=95, subsampling=0)
             # fanart加水印
-            if fanart_mark == 1:
-                models.core.image.add_mark_thread(fanart_path, mark_list)
+            if config.fanart_mark == 1:
+                models.core.image.add_mark_thread(self.cut_fanart_path, mark_list)
+
+        img.close()
+        img_new_png.close()
 
         # 在主界面显示预览
-        self.parent().set_pixmap_thread(poster_path, thumb_path, poster_from='cut', cover_from='local')
+        self.parent().set_pixmap_thread(self.cut_poster_path, thumb_path, poster_from='cut', cover_from='local')
         self.parent().change_to_mainpage.emit('')
         return True
 
@@ -446,7 +431,3 @@ class CutWindow(QDialog):
                 self.move(e.globalPos() - self.m_DragPosition)
                 e.accept()
         # self.show_traceback_log('main',e.x(),e.y())
-
-    def close(self):
-        self.raw_img_path = ''
-        super().close()

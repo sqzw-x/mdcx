@@ -56,8 +56,7 @@ def get_tag(html):
 
 
 def get_release(html):
-    result = html.xpath(
-        '//span[contains(text(),"发行时间:") or contains(text(),"發行日期:") or contains(text(),"発売日:")]/../text()')
+    result = html.xpath('//span[contains(text(),"发行时间:") or contains(text(),"發行日期:") or contains(text(),"発売日:")]/../text()')
     return result[0].strip() if result else ''
 
 
@@ -66,8 +65,7 @@ def get_year(release):
 
 
 def get_runtime(html):
-    result = html.xpath(
-        '//span[contains(text(),"长度:") or contains(text(),"長度:") or contains(text(),"収録時間:")]/../text()')
+    result = html.xpath('//span[contains(text(),"长度:") or contains(text(),"長度:") or contains(text(),"収録時間:")]/../text()')
     return re.findall(r'(\d+)', result[0])[0] if result else ''
 
 
@@ -87,9 +85,7 @@ def get_real_url(number, html):
     i = 0
     if url_list:
         for i in range(1, len(url_list) + 1):
-            number_get = str(html.xpath(
-                '//*[@id="waterfall"]/div[' + str(i) + ']/a/div[@class="photo-info"]/span/date[1]/text()')).strip(
-                " ['']")
+            number_get = str(html.xpath('//*[@id="waterfall"]/div[' + str(i) + ']/a/div[@class="photo-info"]/span/date[1]/text()')).strip(" ['']")
             if number.upper().replace('-PPV', '') == number_get.upper().replace('-PPV', ''):
                 page_url = 'https:' + url_list[i - 1]
                 break
@@ -207,13 +203,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
             'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
         }
     dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(',', ': '),
-    )  # .encode('UTF-8')
+    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
     return js
 
 
@@ -221,6 +211,4 @@ if __name__ == '__main__':
     # print(main('051119-917'))
     # print(main('EDVR-063 '))
     # print(main('032620_001'))
-    print(main('FC2-2101993'))
-    # print(main('032620_001', 'https://avsox.click/cn/movie/cb8d28437cff4e90'))
-    # print(main('', 'https://avsox.click/cn/movie/0b4e42a270b9871b'))
+    print(main('FC2-2101993'))  # print(main('032620_001', 'https://avsox.click/cn/movie/cb8d28437cff4e90'))  # print(main('', 'https://avsox.click/cn/movie/0b4e42a270b9871b'))
