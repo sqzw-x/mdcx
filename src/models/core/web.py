@@ -153,7 +153,7 @@ def get_big_pic_by_amazon(json_data, originaltitle_amazon, actor_amazon):
             pic_card = html.xpath('//div[@class="a-section a-spacing-base"]')
             for each in pic_card:  # tek-077
                 pic_ver_list = each.xpath('div//a[@class="a-size-base a-link-normal s-underline-text s-underline-link-text s-link-style a-text-bold"]/text()')
-                pic_title_list = each.xpath('div//span[@class="a-size-base-plus a-color-base a-text-normal"]/text()')
+                pic_title_list = each.xpath('div//h2[@class="a-size-base-plus a-spacing-none a-color-base a-text-normal"]/span/text()')
                 pic_url_list = each.xpath('div//div[@class="a-section aok-relative s-image-square-aspect"]/img/@src')
                 detail_url_list = each.xpath('div//a[@class="a-link-normal s-no-outline"]/@href')
                 if len(pic_ver_list) and len(pic_url_list) and (len(pic_title_list) and len(detail_url_list)):
