@@ -676,3 +676,4 @@ if __name__ == '__main__':
     # print(main('stars-779'))
     # print(main('FAKWM-001', 'https://tv.dmm.com/vod/detail/?season=5497fakwm00001'))
     # print(main('FAKWM-064', 'https://tv.dmm.com/vod/detail/?season=5497fakwm00064'))
+    pass
