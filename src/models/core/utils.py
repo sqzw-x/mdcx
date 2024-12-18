@@ -4,11 +4,11 @@
     此模块不应依赖 models.core 中除 flags 外的任何其他模块
 """
 
+import json
 import os
 import re
+import subprocess
 import traceback
-
-import cv2
 import unicodedata
 from typing import Optional
 
@@ -74,19 +74,27 @@ def get_video_size(json_data: JsonData, file_path: str):
             hd_get = "path"
     if hd_get == "video":
         try:
-            cap = cv2.VideoCapture(file_path)
-            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            ##使用opencv获取编码器格式
-            codec = int(cap.get(cv2.CAP_PROP_FOURCC))
-            codec_fourcc = (
-                chr(codec & 0xFF) + chr((codec >> 8) & 0xFF) + chr((codec >> 16) & 0xFF) + chr((codec >> 24) & 0xFF)
-            )
+            # Use ffprobe to get video information
+            cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", file_path]
+
+            result = subprocess.run(cmd, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            data = json.loads(result.stdout)
+
+            # Find video stream
+            video_stream = next((stream for stream in data["streams"] if stream["codec_type"] == "video"), None)
+
+            if video_stream:
+                height = int(video_stream["height"])
+                codec_fourcc = video_stream["codec_name"].upper()
+            else:
+                height = 0
+                codec_fourcc = ""
 
         except Exception as e:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_traceback_log(str(e))
             signal.show_log_text(traceback.format_exc())
-            signal.show_log_text(f" 🔴 无法获取视频分辨率！ 文件地址: {file_path}  错误信息: {e}")
+            signal.show_log_text(f" 🔴 无法获取视频分辨率! 文件地址: {file_path}  错误信息: {e}")
     elif hd_get == "path":
         file_path_temp = file_path.upper()
         if "8K" in file_path_temp:
