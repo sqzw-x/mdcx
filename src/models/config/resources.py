@@ -150,7 +150,7 @@ class Resources:
 
     def _get_or_generate_local_data(self):
         # 载入 c_numuber.json 数据
-        with open(self.sehua_title_path, 'r', encoding='UTF-8') as data:
+        with open(self.sehua_title_path, encoding='UTF-8') as data:
             self.sehua_title_data = json.load(data)
 
         # 载入 mapping_actor.xml mapping_info.xml 数据
@@ -164,10 +164,10 @@ class Resources:
                 info_map_local_path = self.info_map_backup_path
         try:
             parser = etree.HTMLParser(encoding="utf-8")
-            with open(actor_map_local_path, 'r', encoding='utf-8') as f:
+            with open(actor_map_local_path, encoding='utf-8') as f:
                 content = f.read()
             self.actor_mapping_data = etree.HTML(content.encode('utf-8'), parser=parser)
-            with open(info_map_local_path, 'r', encoding='utf-8') as f:
+            with open(info_map_local_path, encoding='utf-8') as f:
                 content = f.read()
             self.info_mapping_data = etree.HTML(content.encode('utf-8'), parser=parser)
         except Exception as e:

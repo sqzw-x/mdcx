@@ -47,7 +47,7 @@ class DraggableButton(QPushButton):
 
 class CutWindow(QDialog):
     def __init__(self, parent=None):
-        super(CutWindow, self).__init__(parent)
+        super().__init__(parent)
         self.Ui = Ui_Dialog_cut_poster()  # 实例化 Ui
         self.Ui.setupUi(self)  # 初始化Ui
         self.m_drag = True  # 允许拖动
@@ -60,11 +60,11 @@ class CutWindow(QDialog):
         self.pic_w = self.show_w
         self.pic_h = self.show_h
         self.Ui.pushButton_select_cutrange = DraggableButton('拖动选择裁剪范围', self.Ui.label_backgroud_pic, self)
-        self.Ui.pushButton_select_cutrange.setObjectName(u"pushButton_select_cutrange")
+        self.Ui.pushButton_select_cutrange.setObjectName("pushButton_select_cutrange")
         self.Ui.pushButton_select_cutrange.setGeometry(QRect(420, 0, 379, 539))
         self.Ui.pushButton_select_cutrange.setCursor(QCursor(Qt.OpenHandCursor))
         self.Ui.pushButton_select_cutrange.setAcceptDrops(True)
-        self.Ui.pushButton_select_cutrange.setStyleSheet(u"background-color: rgba(200, 200, 200, 80);\n"
+        self.Ui.pushButton_select_cutrange.setStyleSheet("background-color: rgba(200, 200, 200, 80);\n"
                                                          "font-size:13px;\n" "font-weight:normal;"
                                                          "color: rgba(0, 0, 0, 255);\n"
                                                          "border:2px solid rgba(0, 55, 255, 255);\n")
@@ -162,7 +162,7 @@ class CutWindow(QDialog):
         self.cut_thumb_path = ''  # 裁剪后的thumb路径
         self.cut_poster_path = ''  # 裁剪后的poster路径
         self.cut_fanart_path = ''  # 裁剪后的fanart路径
-        self.Ui.label_origin_size.setText(str('%s, %s' % (str(self.pic_w), str(self.pic_h))))  # 显示原图尺寸
+        self.Ui.label_origin_size.setText(str(f'{str(self.pic_w)}, {str(self.pic_h)}'))  # 显示原图尺寸
 
         # 获取水印设置
         poster_mark = config.poster_mark
@@ -175,7 +175,7 @@ class CutWindow(QDialog):
             pic = QPixmap(img_path)
             self.pic_w = pic.width()
             self.pic_h = pic.height()
-            self.Ui.label_origin_size.setText(str('%s, %s' % (str(self.pic_w), str(self.pic_h))))  # 显示原图尺寸
+            self.Ui.label_origin_size.setText(str(f'{str(self.pic_w)}, {str(self.pic_h)}'))  # 显示原图尺寸
             self.pic_h_w_ratio = self.pic_h / self.pic_w  # 原图高宽比
             # abc = int((self.rect_h_w_ratio - 1) * 10000)
             # self.Ui.horizontalSlider_left.setValue(abc)  # 裁剪框左侧调整条的值（最大10000）
@@ -326,11 +326,11 @@ class CutWindow(QDialog):
         self.c_y = int(self.c_y)
 
         # 显示实际裁剪位置
-        self.Ui.label_cut_postion.setText('%s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
+        self.Ui.label_cut_postion.setText(f'{str(self.c_x)}, {str(self.c_y)}, {str(self.c_x2)}, {str(self.c_y2)}')
 
         # self.show_traceback_log('选择位置： %s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
         # 显示实际裁剪尺寸
-        self.Ui.label_cut_size.setText('%s, %s' % (str(self.c_w), str(self.c_h)))
+        self.Ui.label_cut_size.setText(f'{str(self.c_w)}, {str(self.c_h)}')
 
         return self.c_x, self.c_y, self.c_x2, self.c_y2
 

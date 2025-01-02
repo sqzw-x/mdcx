@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import json
 import os
 import re
@@ -85,7 +84,7 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     if re.search(r'(91[A-Z]{2,})-?(\d{3,})', file_name):
         result = re.search(r'(91[A-Z]{2,})-?(\d{3,})', file_name)
         if result:
-            number_normal = '%s-%s' % (result[1], result[2])
+            number_normal = f'{result[1]}-{result[2]}'
             number_list.append(number_normal)
 
     # MDX-0236-02.沈娜娜.青梅竹马淫乱3P.麻豆传媒映画x逼哩逼哩blibli
@@ -93,7 +92,7 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     elif re.search(r'([A-Z]{2,})-?(\d{3,})-(\d+)', file_name):
         result = re.search(r'([A-Z]{2,})-?(\d{3,})-(\d+)', file_name)
         if result:
-            number_normal = '%s-%s-%s' % (result[1], result[2], result[3])
+            number_normal = f'{result[1]}-{result[2]}-{result[3]}'
             number_list.append(number_normal)
 
     # MXJ-0005.EP1.弥生美月.小恶魔高校生.与老师共度的放浪补课.麻豆传媒映画
@@ -104,13 +103,13 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     elif 'EP' in file_name:
         result = re.search(r'([A-Z]{2,})-?(\d{3,})(.*)(EP[\d]+)', file_name)
         if result:
-            number_normal = '%s-%s.%s%s' % (result[1], result[2], result[3], result[4])
+            number_normal = f'{result[1]}-{result[2]}.{result[3]}{result[4]}'
             number_normal = number_normal.replace('..', '.').replace(' ', '')
             number_list.append(number_normal)
             number_list.append(number_normal.replace('.', ' '))
 
             if len(result[2]) == 3:
-                number_normal = '%s-0%s.%s%s' % (result[1], result[2], result[3], result[4])
+                number_normal = f'{result[1]}-0{result[2]}.{result[3]}{result[4]}'
                 number_list.append(number_normal.replace('..', '.').replace(' ', ''))
         else:
             result = re.findall(r'([^. ]+\.EP[\d]+)\.', file_name)
@@ -123,14 +122,14 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     elif re.search(r'([A-Z]{2,})-([A-Z]{2,})-(\d+)', file_name):
         result = re.search(r'([A-Z]{2,})-([A-Z]{2,})-(\d+)', file_name)
         if result:
-            number_normal = '%s-%s-%s' % (result[1], result[2], result[3])
+            number_normal = f'{result[1]}-{result[2]}-{result[3]}'
             number_list.append(number_normal)
 
     # MDUS系列[中文字幕].LAX0025.性感尤物渴望激情猛操.RUCK ME LIKE A SEX DOLL.麻豆传媒映画
     elif 'MDUS系列' in file_name:
         result = re.search(r'([A-Z]{3,})-?(\d{3,})', file_name.replace('MDUS系列', ''))
         if result:
-            number_normal = '%s-%s' % (result[1], result[2])
+            number_normal = f'{result[1]}-{result[2]}'
             number_list.append(number_normal)
 
     # REAL野性派001-朋友的女友讓我最上火
@@ -144,7 +143,7 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     elif re.search(r'([A-Z]{3,})-?(\d{2,})', file_name):
         result = re.search(r'([A-Z]{3,})-?(\d{2,})', file_name)
         if result:
-            number_normal = '%s-%s' % (result[1], result[2])
+            number_normal = f'{result[1]}-{result[2]}'
             number_list.append(number_normal)
 
     # MDS-009.张芸熙.巨乳旗袍诱惑.搔首弄姿色气满点.麻豆传媒映画
@@ -161,7 +160,7 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     elif re.search(r'([A-Z]{2,})-?(\d{3,})', file_name):
         result = re.search(r'([A-Z]{2,})-?(\d{3,})', file_name)
         if result:
-            number_normal = '%s-%s' % (result[1], result[2])
+            number_normal = f'{result[1]}-{result[2]}'
             number_list.append(number_normal)
 
     # 台湾第一女优吴梦梦.OL误上痴汉地铁.惨遭多人轮番奸玩.麻豆传媒映画代理出品

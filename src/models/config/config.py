@@ -82,7 +82,7 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
     def save_config(self):
         with open(self.get_mark_file_path(), 'w', encoding='UTF-8') as f:
             f.write(self.path)
-        with open(self.path, "wt", encoding='UTF-8') as code:
+        with open(self.path, "w", encoding='UTF-8') as code:
             # 使用反射保存自定义网址设置
             custom_website_config = ''
             for website in ManualConfig.SUPPORTED_WEBSITES:
@@ -316,7 +316,7 @@ statement = {self.statement}
 ''', file=code)
 
     def init_config(self):
-        with open(self.path, "wt", encoding='UTF-8') as code:
+        with open(self.path, "w", encoding='UTF-8') as code:
             print(GeneratedConfig.CONFIG_STR, file=code)
 
     def update_config(self):
@@ -403,7 +403,7 @@ statement = {self.statement}
             if not os.path.exists(self.path):
                 self.init_config()
         else:
-            with open(mdcx_config, 'r', encoding='UTF-8') as f:
+            with open(mdcx_config, encoding='UTF-8') as f:
                 self.path = f.read()
 
     def _get_platform_info(self):

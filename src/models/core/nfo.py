@@ -104,7 +104,7 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
         if not os.path.exists(folder_new_path):
             os.makedirs(folder_new_path)
         delete_file(nfo_new_path)  # 避免115出现重复文件
-        with open(nfo_new_path, "wt", encoding='UTF-8') as code:
+        with open(nfo_new_path, "w", encoding='UTF-8') as code:
             print('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', file=code)
             print("<movie>", file=code)
 
@@ -389,7 +389,7 @@ def get_nfo_data(json_data, file_path, movie_number):
         json_data['tag'] = file_path
         return False, json_data
 
-    with open(local_nfo_path, 'r', encoding='utf-8') as f:
+    with open(local_nfo_path, encoding='utf-8') as f:
         content = f.read().replace('<![CDATA[', '').replace(']]>', '')
 
     parser = etree.HTMLParser(encoding="utf-8")

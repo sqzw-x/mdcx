@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import os.path
 import re
@@ -110,9 +109,9 @@ def get_number_list(number, appoint_number='', file_path=''):  # 处理国产番
         if re.search(r'(91[A-Z]{2,})-?(\d{3,})', file_name):
             result = re.search(r'(91[A-Z]{2,})-?(\d{3,})', file_name)
             if result:
-                number_normal = '%s-%s' % (result[1], result[2])
-                number_has_nothing = '%s%s' % (result[1], result[2])
-                number_has_space = '%s %s' % (result[1], result[2])
+                number_normal = f'{result[1]}-{result[2]}'
+                number_has_nothing = f'{result[1]}{result[2]}'
+                number_has_space = f'{result[1]} {result[2]}'
                 number_list.extend([number_normal, number_has_nothing, number_has_space])
 
         # MDX-0236-02.沈娜娜.青梅竹马淫乱3P.麻豆传媒映画x逼哩逼哩blibli
@@ -120,7 +119,7 @@ def get_number_list(number, appoint_number='', file_path=''):  # 处理国产番
         elif re.search(r'([A-Z]{2,})-?(\d{3,})-(\d+)', file_name):
             result = re.search(r'([A-Z]{2,})-?(\d{3,})-(\d+)', file_name)
             if result:
-                number_normal = '%s-%s-%s' % (result[1], result[2], result[3])
+                number_normal = f'{result[1]}-{result[2]}-{result[3]}'
                 number_list.append(number_normal)
 
         # MXJ-0005.EP1.弥生美月.小恶魔高校生.与老师共度的放浪补课.麻豆传媒映画
@@ -131,7 +130,7 @@ def get_number_list(number, appoint_number='', file_path=''):  # 处理国产番
         elif 'EP' in file_name:
             result = re.search(r'([A-Z]{2,})-?(\d{3,})(.*)(EP[\d]+)', file_name)
             if result:
-                number_normal = '%s-%s.%s%s' % (result[1], result[2], result[3], result[4])
+                number_normal = f'{result[1]}-{result[2]}.{result[3]}{result[4]}'
                 number_normal = number_normal.replace('..', '.').replace(' ', '')
                 number_1 = result[1] + result[2]
                 number_list.append(number_normal)
@@ -139,7 +138,7 @@ def get_number_list(number, appoint_number='', file_path=''):  # 处理国产番
                 number_list.append(number_1)
 
                 if len(result[2]) == 3:
-                    number_normal = '%s-0%s.%s%s' % (result[1], result[2], result[3], result[4])
+                    number_normal = f'{result[1]}-0{result[2]}.{result[3]}{result[4]}'
                     number_list.append(number_normal.replace('..', '.').replace(' ', ''))
             else:
                 result = re.findall(r'([^. ]+\.EP[\d]+)\.', file_name)
@@ -152,15 +151,15 @@ def get_number_list(number, appoint_number='', file_path=''):  # 处理国产番
         elif re.search(r'([A-Z]{2,})-([A-Z]{2,})-(\d+)', file_name):
             result = re.search(r'([A-Z]{2,})-([A-Z]{2,})-(\d+)', file_name)
             if result:
-                number_normal = '%s-%s-%s' % (result[1], result[2], result[3])
+                number_normal = f'{result[1]}-{result[2]}-{result[3]}'
                 number_list.append(number_normal)
 
         # MDUS系列[中文字幕].LAX0025.性感尤物渴望激情猛操.RUCK ME LIKE A SEX DOLL.麻豆传媒映画
         elif 'MDUS系列' in file_name:
             result = re.search(r'([A-Z]{3,})-?(\d{3,})', file_name.replace('MDUS系列', ''))
             if result:
-                number_normal = '%s-%s' % (result[1], result[2])
-                number_no_line = '%s%s' % (result[1], result[2])
+                number_normal = f'{result[1]}-{result[2]}'
+                number_no_line = f'{result[1]}{result[2]}'
                 number_list.extend([number_no_line, number_normal])
 
         # REAL野性派001-朋友的女友讓我最上火
@@ -175,10 +174,10 @@ def get_number_list(number, appoint_number='', file_path=''):  # 处理国产番
         elif re.search(r'([A-Z]{3,})-?(\d{2,})', file_name):
             result = re.search(r'([A-Z]{3,})-?(\d{2,})', file_name)
             if result:
-                number_normal = '%s-%s' % (result[1], result[2])
-                number_no_line = '%s%s' % (result[1], result[2])
-                number_0_normal = '%s-0%s' % (result[1], result[2])
-                number_0_no_line = '%s0%s' % (result[1], result[2])
+                number_normal = f'{result[1]}-{result[2]}'
+                number_no_line = f'{result[1]}{result[2]}'
+                number_0_normal = f'{result[1]}-0{result[2]}'
+                number_0_no_line = f'{result[1]}0{result[2]}'
                 number_list.extend([number_normal, number_no_line, number_0_normal, number_0_no_line])
 
         # MDS-009.张芸熙.巨乳旗袍诱惑.搔首弄姿色气满点.麻豆传媒映画
@@ -195,16 +194,16 @@ def get_number_list(number, appoint_number='', file_path=''):  # 处理国产番
         elif re.search(r'([A-Z]{2,})-?(\d{3,})', file_name):
             result = re.search(r'([A-Z]{2,})-?(\d{3,})', file_name)
             if result:
-                number_normal = '%s-%s' % (result[1], result[2])
-                number_has_nothing = '%s%s' % (result[1], result[2])
-                number_has_space = '%s %s' % (result[1], result[2])
+                number_normal = f'{result[1]}-{result[2]}'
+                number_has_nothing = f'{result[1]}{result[2]}'
+                number_has_space = f'{result[1]} {result[2]}'
                 number_list.extend([number_normal, number_has_nothing, number_has_space])
 
                 # 三位数改成四位数字的番号
                 if len(result[2]) == 3:
-                    number_normal_4 = '%s-0%s' % (result[1], result[2])
-                    number_has_nothing_4 = '%s0%s' % (result[1], result[2])
-                    number_has_space_4 = '%s 0%s' % (result[1], result[2])
+                    number_normal_4 = f'{result[1]}-0{result[2]}'
+                    number_has_nothing_4 = f'{result[1]}0{result[2]}'
+                    number_has_space_4 = f'{result[1]} 0{result[2]}'
                     number_list.extend([number_normal_4, number_has_nothing_4, number_has_space_4])
         if len(number_list):
             break

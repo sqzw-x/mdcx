@@ -1119,7 +1119,7 @@ def load_config(self):
             except:
                 self.Init_QSystemTrayIcon()
                 if not mdcx_config:
-                    self.tray_icon.showMessage(f"MDCx {self.localversion}", u'配置写入失败！所在目录没有读写权限！', QIcon(resources.icon_ico), 3000)
+                    self.tray_icon.showMessage(f"MDCx {self.localversion}", '配置写入失败！所在目录没有读写权限！', QIcon(resources.icon_ico), 3000)
             if 'passthrough' in switch_on:
                 self.Ui.checkBox_highdpi_passthrough.setChecked(True)
                 if not os.path.isfile('highdpi_passthrough'):
@@ -1144,7 +1144,7 @@ def load_config(self):
                 except:
                     self.Init_QSystemTrayIcon()
                     if not mdcx_config:
-                        self.tray_icon.showMessage(f"MDCx {self.localversion}", u'配置写入失败！所在目录没有读写权限！', QIcon(resources.icon_ico), 3000)
+                        self.tray_icon.showMessage(f"MDCx {self.localversion}", '配置写入失败！所在目录没有读写权限！', QIcon(resources.icon_ico), 3000)
 
             # TODO macOS上运行pyinstaller打包的程序，这个处理方式有问题
             try:

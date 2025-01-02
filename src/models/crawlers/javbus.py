@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import json
 import re
 import time  # yapf: disable # NOQA: E402
@@ -267,7 +266,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', mosaic=
 
             # 有404时尝试再次搜索 DV-1175
             if '404' not in htmlcode:
-                debug_info = '番号地址:%s \n       网络请求错误: %s ' % (real_url, htmlcode)
+                debug_info = f'番号地址:{real_url} \n       网络请求错误: {htmlcode} '
                 json_log['log_info_javbus'] += web_info + debug_info
                 raise Exception(debug_info)
 

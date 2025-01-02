@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import json
 import re
 import time  # yapf: disable # NOQA: E402
@@ -161,7 +160,7 @@ def get_wanted(html):
 def main(number, appoint_url='', log_info='', req_web='', language='zh_cn'):
     start_time = time.time()
     website_name = 'javlibrary'
-    req_web += '-> %s[%s]' % (website_name, language)
+    req_web += f'-> {website_name}[{language}]'
     proxies = True
 
     domain = 'https://www.javlibrary.com'

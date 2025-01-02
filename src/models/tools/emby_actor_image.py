@@ -142,7 +142,7 @@ def _get_gfriends_actor_data():
             update_data = True
         else:
             try:
-                with open(gfriends_json_path, 'r', encoding='utf-8') as f:
+                with open(gfriends_json_path, encoding='utf-8') as f:
                     gfriends_actor_data = json.load(f)
             except:
                 signal.show_log_text('🔴 本地缓存数据读取失败！需重新缓存！')
@@ -169,7 +169,7 @@ def _get_gfriends_actor_data():
                 f.write(response)
             signal.show_log_text('✅ Gfriends 数据表已缓存！')
             try:
-                with open(gfriends_json_path, 'r', encoding='utf-8') as f:
+                with open(gfriends_json_path, encoding='utf-8') as f:
                     gfriends_actor_data = json.load(f)
             except:
                 signal.show_log_text('🔴 本地缓存数据读取失败！补全已停止！')
@@ -283,7 +283,7 @@ def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
     count_all = len(actor_list)
     for actor_js in actor_list:
         i += 1
-        deal_percent = '{:.2%}'.format(i / count_all)
+        deal_percent = f'{i / count_all:.2%}'
         # Emby 有头像时处理
         actor_name = actor_js['Name']
         actor_imagetages = actor_js["ImageTags"]

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import json
 import re
 import time  # yapf: disable # NOQA: E402
@@ -128,7 +127,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
             debug_info = '番号地址: %s' % result_url
             log_info += web_info + debug_info
         else:
-            debug_info = '搜索地址: %s {"sn": %s}' % (result_url, number)
+            debug_info = f'搜索地址: {result_url} {{"sn": {number}}}'
             log_info += web_info + debug_info
         result, response = post_html(result_url, data={"sn": number})
         if not result:

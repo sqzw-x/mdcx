@@ -91,9 +91,9 @@ def _get_actor_numbers(actor_url, actor_single_url):
                 single_info = '\u3000\u3000'
             time_list = re.split(r'[./-]', video_date)
             if len(time_list[0]) == 2:
-                video_date = '%s/%s/%s' % (time_list[2], time_list[0], time_list[1])
+                video_date = f'{time_list[2]}/{time_list[0]}/{time_list[1]}'
             else:
-                video_date = '%s/%s/%s' % (time_list[0], time_list[1], time_list[2])
+                video_date = f'{time_list[0]}/{time_list[1]}/{time_list[2]}'
             # self.show_log_text('{}  {:<10}{:\u3000>5}   {}'.format(video_date, video_number, download_info, video_url))
             Flags.actor_numbers_dic[actor_url].update({video_number: [video_number, video_date, video_url, download_info, video_title, single_info]})
         i += 1
@@ -115,7 +115,7 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
     # 演员信息排版和显示
     actor_info = Flags.actor_numbers_dic.get(actor_url)
     len_single = len(Flags.actor_numbers_dic.get(actor_single_url))
-    signal.show_log_text('🎉 获取完毕！共找到 [ %s ] 番号数量（%s）单体数量（%s）(%ss)' % (actor_name, len(actor_info), len_single, get_used_time(start_time)))
+    signal.show_log_text(f'🎉 获取完毕！共找到 [ {actor_name} ] 番号数量（{len(actor_info)}）单体数量（{len_single}）({get_used_time(start_time)}s)')
     if actor_info:
         actor_numbers = actor_info.keys()
         all_list = set()
@@ -126,7 +126,7 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
             video_number, video_date, video_url, download_info, video_title, single_info = actor_info.get(actor_number)
             if actor_flag:
                 video_url = video_title[:30]
-            number_str = ('{:>13}  {:<10} {}  {:\u3000>5}   {}'.format(video_date, video_number, single_info, download_info, video_url))
+            number_str = (f'{video_date:>13}  {video_number:<10} {single_info}  {download_info:\u3000>5}   {video_url}')
             all_list.add(number_str)
             if actor_number not in Flags.local_number_set:
                 not_download_list.add(number_str)
@@ -211,7 +211,7 @@ def check_missing_number(actor_flag):
             signal.show_log_text('   提示：正在生成本地视频的番号信息数据...（第一次较慢，请耐心等待，以后只需要查找新视频，速度很快）')
             with open(local_number_list, 'w', encoding='utf-8') as f:
                 f.write('{}')
-        with open(local_number_list, 'r', encoding='utf-8') as data:
+        with open(local_number_list, encoding='utf-8') as data:
             json_data = json.load(data)
         for movie_path in all_movie_list:
             nfo_path = os.path.splitext(movie_path)[0] + '.nfo'
@@ -222,7 +222,7 @@ def check_missing_number(actor_flag):
 
             else:
                 if os.path.exists(nfo_path):
-                    with open(nfo_path, 'r', encoding='utf-8') as f:
+                    with open(nfo_path, encoding='utf-8') as f:
                         nfo_content = f.read()
                     number_result = re.findall(r'<num>(.+)</num>', nfo_content)
                     if number_result:
@@ -236,7 +236,7 @@ def check_missing_number(actor_flag):
                     json_data_temp, number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = get_file_info(movie_path, copy_sub=False)
                     has_sub = json_data_temp['has_sub']  # 视频中文字幕标识
                 cn_word_icon = '🀄️' if has_sub else ''
-                signal.show_log_text('   发现新番号：{:<10} {}'.format(number, cn_word_icon))
+                signal.show_log_text(f'   发现新番号：{number:<10} {cn_word_icon}')
             temp_number = re.findall(r'\d{3,}([a-zA-Z]+-\d+)', number)  # 去除前缀，因为 javdb 不带前缀
             number = temp_number[0] if temp_number else number
             json_data_new[movie_path] = [number, has_sub]  # 用新表，更新完重新写入到本地文件中

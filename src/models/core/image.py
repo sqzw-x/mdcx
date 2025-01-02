@@ -277,15 +277,15 @@ def add_del_extrafanart_copy(mode):
         if mode == 'add':
             if not os.path.exists(extrafanart_copy_folder_path):
                 shutil.copytree(extrafanart_folder_path, extrafanart_copy_folder_path)
-                signal.show_log_text(" %s new copy: \n  %s" % (count, extrafanart_copy_folder_path))
+                signal.show_log_text(f" {count} new copy: \n  {extrafanart_copy_folder_path}")
                 new_count += 1
             else:
-                signal.show_log_text(" %s old copy: \n  %s" % (count, extrafanart_copy_folder_path))
+                signal.show_log_text(f" {count} old copy: \n  {extrafanart_copy_folder_path}")
         else:
             if os.path.exists(extrafanart_copy_folder_path):
                 shutil.rmtree(extrafanart_copy_folder_path, ignore_errors=True)
-                signal.show_log_text(" %s del copy: \n  %s" % (count, extrafanart_copy_folder_path))
+                signal.show_log_text(f" {count} del copy: \n  {extrafanart_copy_folder_path}")
                 new_count += 1
 
-    signal.show_log_text('\nDone! \n Total: %s  %s copy: %s ' % (total_count, mode, new_count))
+    signal.show_log_text(f'\nDone! \n Total: {total_count}  {mode} copy: {new_count} ')
     signal.show_log_text("================================================================================")

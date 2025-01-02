@@ -89,14 +89,14 @@ def add_del_theme_videos(mode):
                 if not os.path.exists(theme_videos_folder_path):
                     os.mkdir(theme_videos_folder_path)
                 copy_file(trailer_file_path, theme_videos_file_path)
-                signal.show_log_text(" %s new theme video: \n  %s" % (count, theme_videos_file_path))
+                signal.show_log_text(f" {count} new theme video: \n  {theme_videos_file_path}")
                 new_count += 1
             else:
-                signal.show_log_text(" %s old theme video: \n  %s" % (count, theme_videos_file_path))
+                signal.show_log_text(f" {count} old theme video: \n  {theme_videos_file_path}")
         else:
             if os.path.exists(theme_videos_folder_path):
                 shutil.rmtree(theme_videos_folder_path, ignore_errors=True)
-                signal.show_log_text(" %s del theme video: \n  %s" % (count, theme_videos_folder_path))
+                signal.show_log_text(f" {count} del theme video: \n  {theme_videos_folder_path}")
                 new_count += 1
 
     signal.show_log_text(f'\nDone! \n Total: {total_count}  {mode} copy: {new_count} ')

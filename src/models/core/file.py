@@ -246,7 +246,7 @@ def check_file(json_data, file_path, file_escape_size):
     if 'no_skip_small_file' not in config.no_escape:
         file_size = os.path.getsize(file_path) / float(1024 * 1024)
         if file_size < file_escape_size:
-            json_data['error_info'] = '文件小于 %s MB 被过滤!（实际大小 %s MB）已跳过刮削！' % (file_escape_size, round(file_size, 2))
+            json_data['error_info'] = f'文件小于 {file_escape_size} MB 被过滤!（实际大小 {round(file_size, 2)} MB）已跳过刮削！'
             json_data['req_web'] = 'do_not_update_json_data_dic'
             json_data['outline'] = split_path(file_path)[1]
             json_data['tag'] = file_path
@@ -627,13 +627,13 @@ def _get_folder_path(file_path, success_folder, json_data):
     if len(folder_new_name) > folder_name_max:
         cut_index = folder_name_max - len(folder_new_name)
         if 'originaltitle' in folder_name:
-            json_data['logs'] += '\n 💡 当前目录名长度：%s，最大允许长度：%s，目录命名时将去除原标题后%s个字符!' % (len(folder_new_name), folder_name_max, abs(cut_index))
+            json_data['logs'] += f'\n 💡 当前目录名长度：{len(folder_new_name)}，最大允许长度：{folder_name_max}，目录命名时将去除原标题后{abs(cut_index)}个字符!'
             folder_new_name = folder_new_name.replace(originaltitle, originaltitle[0:cut_index])
         elif 'title' in folder_name:
-            json_data['logs'] += '\n 💡 当前目录名长度：%s，最大允许长度：%s，目录命名时将去除标题后%s个字符!' % (len(folder_new_name), folder_name_max, abs(cut_index))
+            json_data['logs'] += f'\n 💡 当前目录名长度：{len(folder_new_name)}，最大允许长度：{folder_name_max}，目录命名时将去除标题后{abs(cut_index)}个字符!'
             folder_new_name = folder_new_name.replace(title, title[0:cut_index])
         elif 'outline' in folder_name:
-            json_data['logs'] += '\n 💡 当前目录名长度：%s，最大允许长度：%s，目录命名时将去除简介后%s个字符!' % (len(folder_new_name), folder_name_max, abs(cut_index))
+            json_data['logs'] += f'\n 💡 当前目录名长度：{len(folder_new_name)}，最大允许长度：{folder_name_max}，目录命名时将去除简介后{abs(cut_index)}个字符!'
             folder_new_name = folder_new_name.replace(outline, outline[0:cut_index])
 
     # 替换一些字符
@@ -1243,7 +1243,7 @@ def get_file_info(file_path, copy_sub=True):
         # 判断nfo中是否有中文字幕、马赛克
         if (not has_sub or not mosaic) and os.path.exists(nfo_old_path):
             try:
-                with open(nfo_old_path, 'r', encoding='utf-8') as f:
+                with open(nfo_old_path, encoding='utf-8') as f:
                     nfo_content = f.read()
                 if not has_sub:
                     if '>中文字幕</' in nfo_content:
@@ -1276,7 +1276,7 @@ def get_file_info(file_path, copy_sub=True):
 
         if not has_sub and os.path.exists(nfo_old_path):
             try:
-                with open(nfo_old_path, 'r', encoding='utf-8') as f:
+                with open(nfo_old_path, encoding='utf-8') as f:
                     nfo_content = f.read()
                 if '<genre>中文字幕</genre>' in nfo_content or '<tag>中文字幕</tag>' in nfo_content:
                     c_word = cnword_style  # 中文字幕影片后缀
@@ -1428,7 +1428,7 @@ def _clean_empty_fodlers(path, file_mode):
 def get_success_list():
     Flags.success_save_time = time.time()
     if os.path.isfile(resources.userdata_path('success.txt')):
-        with open(resources.userdata_path('success.txt'), 'r', encoding='utf-8', errors='ignore') as f:
+        with open(resources.userdata_path('success.txt'), encoding='utf-8', errors='ignore') as f:
             temp = f.read()
             Flags.success_list = set(temp.split('\n')) if temp.strip() else set()
             if '' in Flags.success_list:

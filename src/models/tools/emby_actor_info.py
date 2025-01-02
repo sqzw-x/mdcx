@@ -742,7 +742,7 @@ def _deal_kodi_actors(gfriends_actor_data, add):
                     nfo_path = os.path.join(root, file)
                     vedio_actor_folder = os.path.join(root, '.actors')
                     try:
-                        with open(nfo_path, 'r', encoding='utf-8') as f:
+                        with open(nfo_path, encoding='utf-8') as f:
                             content = f.read()
                         parser = etree.HTMLParser(encoding="utf-8")
                         xml_nfo = etree.HTML(content.encode('utf-8'), parser)

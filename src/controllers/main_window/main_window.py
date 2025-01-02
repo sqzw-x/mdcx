@@ -73,7 +73,7 @@ class MyMAinWindow(QMainWindow):
     # endregion
 
     def __init__(self, parent=None):
-        super(MyMAinWindow, self).__init__(parent)
+        super().__init__(parent)
 
         # region 初始化需要的变量
         self.localversion = config.local_version  # 当前版本号
@@ -177,16 +177,16 @@ class MyMAinWindow(QMainWindow):
         ...
 
     def creat_right_menu(self):
-        self.menu_start = QAction(QIcon(resources.start_icon), u'  开始刮削\tS', self)
-        self.menu_stop = QAction(QIcon(resources.stop_icon), u'  停止刮削\tS', self)
-        self.menu_number = QAction(QIcon(resources.input_number_icon), u'  重新刮削\tN', self)
-        self.menu_website = QAction(QIcon(resources.input_website_icon), u'  输入网址重新刮削\tU', self)
-        self.menu_del_file = QAction(QIcon(resources.del_file_icon), u'  删除文件\tD', self)
-        self.menu_del_folder = QAction(QIcon(resources.del_folder_icon), u'  删除文件和文件夹\tA', self)
-        self.menu_folder = QAction(QIcon(resources.open_folder_icon), u'  打开文件夹\tF', self)
-        self.menu_nfo = QAction(QIcon(resources.open_nfo_icon), u'  编辑 NFO\tE', self)
-        self.menu_play = QAction(QIcon(resources.play_icon), u'  播放\tP', self)
-        self.menu_hide = QAction(QIcon(resources.hide_boss_icon), u'  隐藏\tQ', self)
+        self.menu_start = QAction(QIcon(resources.start_icon), '  开始刮削\tS', self)
+        self.menu_stop = QAction(QIcon(resources.stop_icon), '  停止刮削\tS', self)
+        self.menu_number = QAction(QIcon(resources.input_number_icon), '  重新刮削\tN', self)
+        self.menu_website = QAction(QIcon(resources.input_website_icon), '  输入网址重新刮削\tU', self)
+        self.menu_del_file = QAction(QIcon(resources.del_file_icon), '  删除文件\tD', self)
+        self.menu_del_folder = QAction(QIcon(resources.del_folder_icon), '  删除文件和文件夹\tA', self)
+        self.menu_folder = QAction(QIcon(resources.open_folder_icon), '  打开文件夹\tF', self)
+        self.menu_nfo = QAction(QIcon(resources.open_nfo_icon), '  编辑 NFO\tE', self)
+        self.menu_play = QAction(QIcon(resources.play_icon), '  播放\tP', self)
+        self.menu_hide = QAction(QIcon(resources.hide_boss_icon), '  隐藏\tQ', self)
 
         self.menu_start.triggered.connect(self.pushButton_start_scrape_clicked)
         self.menu_stop.triggered.connect(self.pushButton_start_scrape_clicked)
@@ -681,9 +681,9 @@ class MyMAinWindow(QMainWindow):
             else:
                 average_time = used_time
             signal.show_scrape_info('⛔️ 刮削已手动停止！')
-            self.set_label_file_path.emit('⛔️ 刮削已手动停止！\n   已刮削 %s 个视频，还剩余 %s 个！刮削用时 %s 秒' % (
+            self.set_label_file_path.emit('⛔️ 刮削已手动停止！\n   已刮削 {} 个视频，还剩余 {} 个！刮削用时 {} 秒'.format(
                 Flags.scrape_done, (Flags.total_count - Flags.scrape_done), used_time))
-            signal.show_log_text('\n ⛔️ 刮削已手动停止！\n 😊 已刮削 %s 个视频，还剩余 %s 个！刮削用时 %s 秒，停止用时 %s 秒' % (
+            signal.show_log_text('\n ⛔️ 刮削已手动停止！\n 😊 已刮削 {} 个视频，还剩余 {} 个！刮削用时 {} 秒，停止用时 {} 秒'.format(
                 Flags.scrape_done, (Flags.total_count - Flags.scrape_done), used_time, self.stop_used_time))
             signal.show_log_text("================================================================================")
             signal.show_log_text(' ⏰ Start time'.ljust(13) + ': ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(Flags.start_time)))
@@ -728,7 +728,7 @@ class MyMAinWindow(QMainWindow):
 
         signal.stop = False
         self.stop_used_time = get_used_time(start_time)
-        signal.show_log_text(' 🕷 %s 已停止线程：%s/%s %s' % (get_current_time(), Flags.total_kills, Flags.total_kills, other_name))
+        signal.show_log_text(f' 🕷 {get_current_time()} 已停止线程：{Flags.total_kills}/{Flags.total_kills} {other_name}')
         signal.show_traceback_log(f'所有线程已停止！！！({self.stop_used_time}s)\n ⛔️ 刮削已手动停止！\n')
         signal.show_log_text(f' ⛔️ {get_current_time()} 所有线程已停止！({self.stop_used_time}s)')
         thread_remain_list = []
@@ -1212,16 +1212,16 @@ class MyMAinWindow(QMainWindow):
     def show_scrape_info(self, before_info=''):
         try:
             if Flags.file_mode == FileMode.Single:
-                scrape_info = '💡 单文件刮削\n💠 %s · %s' % (Flags.main_mode_text, self.Ui.comboBox_website_all.currentText())
+                scrape_info = f'💡 单文件刮削\n💠 {Flags.main_mode_text} · {self.Ui.comboBox_website_all.currentText()}'
             else:
-                scrape_info = '💠 %s · %s' % (Flags.main_mode_text, Flags.scrape_like_text)
+                scrape_info = f'💠 {Flags.main_mode_text} · {Flags.scrape_like_text}'
                 if config.scrape_like == 'single':
                     scrape_info = f"💡 {config.website_single} 刮削\n" + scrape_info
             if config.soft_link == 1:
                 scrape_info = '🍯 软链接 · 开\n' + scrape_info
             elif config.soft_link == 2:
                 scrape_info = '🍯 硬链接 · 开\n' + scrape_info
-            after_info = '\n%s\n🛠 %s\n🐰 MDCx %s' % (scrape_info, config.file, self.localversion)
+            after_info = f'\n{scrape_info}\n🛠 {config.file}\n🐰 MDCx {self.localversion}'
             self.label_show_version.emit(before_info + after_info + self.new_version)
         except:
             signal.show_traceback_log(traceback.format_exc())
@@ -1570,7 +1570,7 @@ class MyMAinWindow(QMainWindow):
             i = 0
             for info in skip_list:
                 i += 1
-                signal.show_log_text("[%s] %s\n file path: %s\n %s\n" % (i, info[0], info[1], info[2]))
+                signal.show_log_text(f"[{i}] {info[0]}\n file path: {info[1]}\n {info[2]}\n")
         signal.show_log_text("Move movies finished!")
         signal.show_log_text("================================================================================")
         signal.reset_buttons_status.emit()

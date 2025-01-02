@@ -97,7 +97,7 @@ def _mutil_extrafanart_download_thread(task):
         if check_pic(extrafanart_file_path):
             return True
     else:
-        json_data['logs'] += "\n 💡 %s download failed! ( %s )" % (extrafanart_name, extrafanart_url)
+        json_data['logs'] += f"\n 💡 {extrafanart_name} download failed! ( {extrafanart_url} )"
         return False
 
 
@@ -326,7 +326,7 @@ def trailer_download(json_data, folder_new_path, folder_old_path, naming_rule):
         if download_file_with_filepath(json_data, trailer_url, trailer_file_path_temp, trailer_folder_path):
             file_size = os.path.getsize(trailer_file_path_temp)
             if file_size >= content_length or 'ignore_size' in download_files:
-                json_data['logs'] += "\n 🍀 Trailer done! (%s %s/%s)(%ss) " % (json_data['trailer_from'], file_size, content_length, get_used_time(start_time))
+                json_data['logs'] += "\n 🍀 Trailer done! ({} {}/{})({}s) ".format(json_data['trailer_from'], file_size, content_length, get_used_time(start_time))
                 signal.show_traceback_log(f"✅ {json_data['number']} trailer done!")
                 if trailer_file_path_temp != trailer_file_path:
                     move_file(trailer_file_path_temp, trailer_file_path)
@@ -341,7 +341,7 @@ def trailer_download(json_data, folder_new_path, folder_old_path, naming_rule):
                             shutil.rmtree(trailer_new_folder_path, ignore_errors=True)
                 return True
             else:
-                json_data['logs'] += "\n 🟠 Trailer size is incorrect! delete it! (%s %s/%s) " % (json_data['trailer_from'], file_size, content_length)
+                json_data['logs'] += "\n 🟠 Trailer size is incorrect! delete it! ({} {}/{}) ".format(json_data['trailer_from'], file_size, content_length)
         # 删除下载失败的文件
         delete_file(trailer_file_path_temp)
         json_data['logs'] += "\n 🟠 Trailer download failed! (%s) " % trailer_url
@@ -379,7 +379,7 @@ def _get_big_thumb(json_data):
     # faleno.jp 番号检查，都是大图，返回即可
     if json_data['cover_from'] in ['faleno', 'dahlia']:
         if json_data['cover']:
-            json_data['logs'] += "\n 🖼 HD Thumb found! (%s)(%ss)" % (json_data['cover_from'], get_used_time(start_time))
+            json_data['logs'] += "\n 🖼 HD Thumb found! ({})({}s)".format(json_data['cover_from'], get_used_time(start_time))
         json_data['poster_big'] = True
         return json_data
 
@@ -450,7 +450,7 @@ def _get_big_thumb(json_data):
                 pic_domain = re.findall(r'://([^/]+)', thumb_url)[0]
                 json_data['cover_from'] = f'Google({pic_domain})'
                 json_data['cover'] = thumb_url
-                json_data['logs'] += "\n 🖼 HD Thumb found! (%s)(%ss)" % (json_data['cover_from'], get_used_time(start_time))
+                json_data['logs'] += "\n 🖼 HD Thumb found! ({})({}s)".format(json_data['cover_from'], get_used_time(start_time))
 
     return json_data
 
@@ -517,7 +517,7 @@ def _get_big_poster(json_data):
     # 如果找到了高清链接，则替换
     if hd_pic_url:
         json_data['image_download'] = True
-        json_data['logs'] += "\n 🖼 HD Poster found! (%s)(%ss)" % (json_data['poster_from'], get_used_time(start_time))
+        json_data['logs'] += "\n 🖼 HD Poster found! ({})({}s)".format(json_data['poster_from'], get_used_time(start_time))
 
     return json_data
 
@@ -573,7 +573,7 @@ def thumb_download(json_data, folder_new_path, thumb_final_path):
             cover_from, cover_url = each
             cover_url = check_url(cover_url)
             if not cover_url:
-                json_data['logs'] += "\n 🟠 检测到 Thumb 图片失效! 跳过！(%s)(%ss) " % (cover_from, get_used_time(start_time)) + each[1]
+                json_data['logs'] += f"\n 🟠 检测到 Thumb 图片失效! 跳过！({cover_from})({get_used_time(start_time)}s) " + each[1]
                 continue
             json_data['cover_from'] = cover_from
             if download_file_with_filepath(json_data, cover_url, thumb_final_path_temp, folder_new_path):
@@ -589,12 +589,12 @@ def thumb_download(json_data, folder_new_path, thumb_final_path):
                             dic = {'thumb': thumb_final_path}
                             Flags.file_done_dic[json_data['number']].update(dic)
                         json_data['thumb_marked'] = False  # 表示还没有走加水印流程
-                        json_data['logs'] += "\n 🍀 Thumb done! (%s)(%ss) " % (json_data['cover_from'], get_used_time(start_time))
+                        json_data['logs'] += "\n 🍀 Thumb done! ({})({}s) ".format(json_data['cover_from'], get_used_time(start_time))
                         json_data['thumb_path'] = thumb_final_path
                         return True
                     else:
                         delete_file(thumb_final_path_temp)
-                        json_data['logs'] += "\n 🟠 检测到 Thumb 分辨率不对%s! 已删除 (%s)(%ss)" % (str(cover_size), cover_from, get_used_time(start_time))
+                        json_data['logs'] += f"\n 🟠 检测到 Thumb 分辨率不对{str(cover_size)}! 已删除 ({cover_from})({get_used_time(start_time)}s)"
                         continue
                 json_data['logs'] += f"\n 🟠 Thumb download failed! {cover_from}: {cover_url} "
     else:
@@ -701,11 +701,11 @@ def poster_download(json_data, folder_new_path, poster_final_path):
                         Flags.file_done_dic[json_data['number']].update(dic)
                     json_data['poster_marked'] = False  # 下载的图，还没加水印
                     json_data['poster_path'] = poster_final_path
-                    json_data['logs'] += "\n 🍀 Poster done! (%s)(%ss)" % (poster_from, get_used_time(start_time))
+                    json_data['logs'] += f"\n 🍀 Poster done! ({poster_from})({get_used_time(start_time)}s)"
                     return True
                 else:
                     delete_file(poster_final_path_temp)
-                    json_data['logs'] += "\n 🟠 检测到 Poster 分辨率不对%s! 已删除 (%s)" % (str(poster_size), poster_from)
+                    json_data['logs'] += f"\n 🟠 检测到 Poster 分辨率不对{str(poster_size)}! 已删除 ({poster_from})"
 
     # 判断之前有没有 poster 和 thumb
     if not poster_path and not thumb_path:
@@ -866,11 +866,11 @@ def extrafanart_download(json_data, folder_new_path):
             if extrafanart_folder_path_temp != extrafanart_folder_path:
                 shutil.rmtree(extrafanart_folder_path)
                 os.rename(extrafanart_folder_path_temp, extrafanart_folder_path)
-            json_data['logs'] += "\n 🍀 ExtraFanart done! (%s %s/%s)(%ss)" % (
+            json_data['logs'] += "\n 🍀 ExtraFanart done! ({} {}/{})({}s)".format(
                 json_data['extrafanart_from'], extrafanart_count_succ, extrafanart_count, get_used_time(start_time))
             return True
         else:
-            json_data['logs'] += "\n 🟠  ExtraFanart download failed! (%s %s/%s)(%ss)" % (
+            json_data['logs'] += "\n 🟠  ExtraFanart download failed! ({} {}/{})({}s)".format(
                 json_data['extrafanart_from'], extrafanart_count_succ, extrafanart_count, get_used_time(start_time))
             if extrafanart_folder_path_temp != extrafanart_folder_path:
                 shutil.rmtree(extrafanart_folder_path_temp)

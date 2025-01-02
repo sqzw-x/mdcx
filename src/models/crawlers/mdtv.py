@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import json
 import re
 import time
@@ -109,7 +108,7 @@ def get_year(release):
 
 def get_release(cover_url):
     a = re.search(r'\/(\d{4})(\d{2})(\d{2})-', cover_url)
-    return '%s-%s-%s' % (a[1], a[2], a[3]) if a else ''
+    return f'{a[1]}-{a[2]}-{a[3]}' if a else ''
 
 
 def get_tag(html):  # 获取演员
@@ -210,7 +209,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             number_list_new = list(set(total_number_list))
             number_list_new.sort(key=total_number_list.index)
             for number in number_list_new:
-                debug_info = '搜索地址: %s {"wd": %s}' % (search_url, number)
+                debug_info = f'搜索地址: {search_url} {{"wd": {number}}}'
                 log_info += web_info + debug_info
                 result, response = post_html(search_url, data={"wd": number}, keep=False)
                 if not result:

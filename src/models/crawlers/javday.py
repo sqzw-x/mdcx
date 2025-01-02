@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import json
 import re
 import time
@@ -208,7 +207,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             number_list_new.sort(key=total_number_list.index)
             for number in number_list_new:
                 testNumberUrl = javday_url + f'/videos/{number}/'
-                debug_info = '搜索地址: %s {"wd": %s}' % (testNumberUrl, number)
+                debug_info = f'搜索地址: {testNumberUrl} {{"wd": {number}}}'
                 log_info += web_info + debug_info
                 result, html_content = get_html(testNumberUrl)
                 if not result:

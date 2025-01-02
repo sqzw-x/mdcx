@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import re
 import socket
 import threading
@@ -107,7 +106,7 @@ class WebRequests:
                         pass
                     else:
                         error_info = f"{response.status_code} {url}"
-                        signal.add_log('🔴 重试 [%s/%s] %s' % (i + 1, retry_times, error_info))
+                        signal.add_log(f'🔴 重试 [{i + 1}/{retry_times}] {error_info}')
                         continue
                 else:
                     signal.add_log(f'✅ 成功 {url}')
@@ -120,8 +119,8 @@ class WebRequests:
                     return _header, response.json()
                 return _header, response.text
             except Exception as e:
-                error_info = '%s\nError: %s' % (url, e)
-                signal.add_log('[%s/%s] %s' % (i + 1, retry_times, error_info))
+                error_info = f'{url}\nError: {e}'
+                signal.add_log(f'[{i + 1}/{retry_times}] {error_info}')
         signal.add_log(f"🔴 请求失败！{error_info}")
         return False, error_info
 
@@ -145,7 +144,7 @@ class WebRequests:
                     response = requests.post(url=url, data=data, json=json, headers=headers, cookies=cookies, proxies=proxies, timeout=timeout, verify=False)
                 if response.status_code > 299:
                     error_info = f"{response.status_code} {url}"
-                    signal.add_log('🔴 重试 [%s/%s] %s' % (i + 1, retry_times, error_info))
+                    signal.add_log(f'🔴 重试 [{i + 1}/{retry_times}] {error_info}')
                     continue
                 else:
                     signal.add_log(f'✅ POST成功 {url}')
@@ -154,8 +153,8 @@ class WebRequests:
                     return True, response.json()
                 return True, response.text
             except Exception as e:
-                error_info = '%s\nError: %s' % (url, e)
-                signal.add_log('[%s/%s] %s' % (i + 1, retry_times, error_info))
+                error_info = f'{url}\nError: {e}'
+                signal.add_log(f'[{i + 1}/{retry_times}] {error_info}')
         signal.add_log(f"🔴 请求失败！{error_info}")
         return False, error_info
 
@@ -317,11 +316,11 @@ class WebRequests:
                     return response.headers, response.text
                 else:
                     error_info = f"{response.status_code} {url}"
-                    signal.add_log('🔴 重试 [%s/%s] %s' % (i + 1, retry_times, error_info))
+                    signal.add_log(f'🔴 重试 [{i + 1}/{retry_times}] {error_info}')
                     continue
             except Exception as e:
-                error_info = '%s\nError: %s' % (url, e)
-                signal.add_log('[%s/%s] %s' % (i + 1, retry_times, error_info))
+                error_info = f'{url}\nError: {e}'
+                signal.add_log(f'[{i + 1}/{retry_times}] {error_info}')
                 continue
         signal.add_log(f"🔴 请求失败！{error_info}")
         return False, error_info
@@ -381,7 +380,7 @@ def check_url(url, length=False, real_url=False):
             # 状态码 > 299，表示请求失败，视为不可用
             if r.status_code > 299:
                 error_info = f"{r.status_code} {url}"
-                signal.add_log('🔴 请求失败！ 重试: [%s/%s] %s' % (j + 1, retry_times, error_info))
+                signal.add_log(f'🔴 请求失败！ 重试: [{j + 1}/{retry_times}] {error_info}')
                 continue
 
             # 返回重定向的url
@@ -462,7 +461,7 @@ def check_url(url, length=False, real_url=False):
             error_info = f' 该响应的内容已被占用 ({e}) {url}'
         except Exception as e:
             error_info = f' Error ({e}) {url}'
-        signal.add_log('🔴 重试 [%s/%s] %s' % (j + 1, retry_times, error_info))
+        signal.add_log(f'🔴 重试 [{j + 1}/{retry_times}] {error_info}')
     signal.add_log(f'🔴 检测未通过！ {url}')
     return 0
 

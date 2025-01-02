@@ -622,7 +622,7 @@ def _failed_file_info_show(count, path, error_info):
 def get_remain_list():
     remain_list_path = resources.userdata_path('remain.txt')
     if os.path.isfile(remain_list_path):
-        with open(remain_list_path, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(remain_list_path, encoding='utf-8', errors='ignore') as f:
             temp = f.read()
             Flags.remain_list = temp.split('\n') if temp.strip() else []
             if 'remain_task' in config.switch_on and len(Flags.remain_list):

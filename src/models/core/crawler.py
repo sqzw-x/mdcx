@@ -370,7 +370,7 @@ def _deal_each_field(all_json_data, json_data, website_list, field_name, field_c
         return
 
     backup_data = ''
-    json_data['log_info'] += '\n\n    🙋🏻‍ %s \n    ====================================\n    🌐 来源优先级：%s' % (field_cnname, ' -> '.join(website_list))
+    json_data['log_info'] += '\n\n    🙋🏻‍ {} \n    ====================================\n    🌐 来源优先级：{}'.format(field_cnname, ' -> '.join(website_list))
     for website in website_list:
         title_language = getattr(config, field_language)
         if website not in ['airav_cc', 'iqqtv', 'airav', 'avsex', 'javlibrary', 'mdtv', 'madouqu', 'lulubar']:
@@ -415,7 +415,7 @@ def _deal_each_field(all_json_data, json_data, website_list, field_name, field_c
                 if web_data_json['actor']:
                     json_data['amazon_orginaltitle_actor'] = web_data_json['actor'].split(',')[0]
             json_data[field_name] = web_data_json[field_name]
-            json_data['fields_info'] += '\n     ' + "%-13s" % field_name + ': %s (%s)' % (website, title_language)
+            json_data['fields_info'] += '\n     ' + "%-13s" % field_name + f': {website} ({title_language})'
             json_data['log_info'] += f'\n    🟢 {website} (成功)\n     ↳ {json_data[field_name]}'
             break
         else:
@@ -864,9 +864,9 @@ def _deal_json_data(json_data):
         '“': '「',
         '”': '」',
         '...': '…',
-        u'\xa0': '',
-        u'\u3000': '',
-        u'\u2800': '',
+        '\xa0': '',
+        '\u3000': '',
+        '\u2800': '',
     }
     for each in key_word:
         for key, value in rep_word.items():
