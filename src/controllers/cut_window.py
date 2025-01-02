@@ -54,20 +54,23 @@ class CutWindow(QDialog):
         self.m_DragPosition = 0  # 拖动位置
         self.show_w = self.Ui.label_backgroud_pic.width()  # 图片显示区域的宽高
         self.show_h = self.Ui.label_backgroud_pic.height()  # 图片显示区域的宽高
-        self.keep_side = 'height'
+        self.keep_side = "height"
         self.pic_new_w = self.show_w
         self.pic_new_h = self.show_h
         self.pic_w = self.show_w
         self.pic_h = self.show_h
-        self.Ui.pushButton_select_cutrange = DraggableButton('拖动选择裁剪范围', self.Ui.label_backgroud_pic, self)
+        self.Ui.pushButton_select_cutrange = DraggableButton("拖动选择裁剪范围", self.Ui.label_backgroud_pic, self)
         self.Ui.pushButton_select_cutrange.setObjectName("pushButton_select_cutrange")
         self.Ui.pushButton_select_cutrange.setGeometry(QRect(420, 0, 379, 539))
         self.Ui.pushButton_select_cutrange.setCursor(QCursor(Qt.OpenHandCursor))
         self.Ui.pushButton_select_cutrange.setAcceptDrops(True)
-        self.Ui.pushButton_select_cutrange.setStyleSheet("background-color: rgba(200, 200, 200, 80);\n"
-                                                         "font-size:13px;\n" "font-weight:normal;"
-                                                         "color: rgba(0, 0, 0, 255);\n"
-                                                         "border:2px solid rgba(0, 55, 255, 255);\n")
+        self.Ui.pushButton_select_cutrange.setStyleSheet(
+            "background-color: rgba(200, 200, 200, 80);\n"
+            "font-size:13px;\n"
+            "font-weight:normal;"
+            "color: rgba(0, 0, 0, 255);\n"
+            "border:2px solid rgba(0, 55, 255, 255);\n"
+        )
         self.set_style()
         self.Ui.horizontalSlider_left.valueChanged.connect(self.change_postion_left)
         self.Ui.horizontalSlider_right.valueChanged.connect(self.change_postion_right)
@@ -79,7 +82,7 @@ class CutWindow(QDialog):
 
     def set_style(self):
         # 控件美化 裁剪弹窗
-        self.Ui.widget.setStyleSheet('''
+        self.Ui.widget.setStyleSheet("""
             * {
                 font-family: Consolas, 'PingFang SC', 'Microsoft YaHei UI', 'Noto Color Emoji', 'Segoe UI Emoji';
             }
@@ -119,7 +122,7 @@ class CutWindow(QDialog):
                 border-width:14px;
                 font-weight:bold;
             }
-            ''')
+            """)
 
     def change_postion_left(self):
         # abc: 0-10000
@@ -128,7 +131,7 @@ class CutWindow(QDialog):
         x, y, width, height = self.Ui.pushButton_select_cutrange.geometry().getRect()
         height = (abc + 1) / 10000 * self.pic_h
         self.rect_h_w_ratio = height / width  # 更新高宽比
-        self.Ui.label_cut_ratio.setText(str('%.2f' % self.rect_h_w_ratio))
+        self.Ui.label_cut_ratio.setText(str("%.2f" % self.rect_h_w_ratio))
         self.Ui.pushButton_select_cutrange.setGeometry(x, y, width, height)  # 显示裁剪框
         self.getRealPos()  # 显示裁剪框实际位置
 
@@ -137,20 +140,22 @@ class CutWindow(QDialog):
         x, y, width, height = self.Ui.pushButton_select_cutrange.geometry().getRect()
         width = (abc + 1) / 10000 * self.pic_w
         self.rect_h_w_ratio = height / width  # 更新高宽比
-        self.Ui.label_cut_ratio.setText(str('%.2f' % self.rect_h_w_ratio))
+        self.Ui.label_cut_ratio.setText(str("%.2f" % self.rect_h_w_ratio))
         self.Ui.pushButton_select_cutrange.setGeometry(x, y, width, height)  # 显示裁剪框
         self.getRealPos()  # 显示裁剪框实际位置
 
     # 打开图片选择框
     def open_image(self):
-        img_path, img_type = QFileDialog.getOpenFileName(None, "打开图片", "", "*.jpg *.png;;All Files(*)", options=self.parent().options)
+        img_path, img_type = QFileDialog.getOpenFileName(
+            None, "打开图片", "", "*.jpg *.png;;All Files(*)", options=self.parent().options
+        )
         if img_path:
             self.showimage(img_path)
 
     # 显示要裁剪的图片
-    def showimage(self, img_path='', json_data={}):
+    def showimage(self, img_path="", json_data={}):
         # self.Ui.Dialog_cut_poster.setText(' ')                                # 清空背景
-        self.Ui.label_backgroud_pic.setText(' ')  # 清空背景
+        self.Ui.label_backgroud_pic.setText(" ")  # 清空背景
 
         # 初始化数据
         self.Ui.checkBox_add_sub.setChecked(False)
@@ -159,10 +164,10 @@ class CutWindow(QDialog):
         self.pic_h_w_ratio = 1.5
         self.rect_h_w_ratio = 536.6 / 379  # 裁剪框默认高宽比
         self.show_image_path = img_path
-        self.cut_thumb_path = ''  # 裁剪后的thumb路径
-        self.cut_poster_path = ''  # 裁剪后的poster路径
-        self.cut_fanart_path = ''  # 裁剪后的fanart路径
-        self.Ui.label_origin_size.setText(str(f'{str(self.pic_w)}, {str(self.pic_h)}'))  # 显示原图尺寸
+        self.cut_thumb_path = ""  # 裁剪后的thumb路径
+        self.cut_poster_path = ""  # 裁剪后的poster路径
+        self.cut_fanart_path = ""  # 裁剪后的fanart路径
+        self.Ui.label_origin_size.setText(str(f"{str(self.pic_w)}, {str(self.pic_h)}"))  # 显示原图尺寸
 
         # 获取水印设置
         poster_mark = config.poster_mark
@@ -175,7 +180,7 @@ class CutWindow(QDialog):
             pic = QPixmap(img_path)
             self.pic_w = pic.width()
             self.pic_h = pic.height()
-            self.Ui.label_origin_size.setText(str(f'{str(self.pic_w)}, {str(self.pic_h)}'))  # 显示原图尺寸
+            self.Ui.label_origin_size.setText(str(f"{str(self.pic_w)}, {str(self.pic_h)}"))  # 显示原图尺寸
             self.pic_h_w_ratio = self.pic_h / self.pic_w  # 原图高宽比
             # abc = int((self.rect_h_w_ratio - 1) * 10000)
             # self.Ui.horizontalSlider_left.setValue(abc)  # 裁剪框左侧调整条的值（最大10000）
@@ -202,72 +207,85 @@ class CutWindow(QDialog):
                 # 根据图片文件名获取获取水印情况
                 temp_path = img_path
                 # 如果图片没有番号信息，则根据nfo文件名获取水印情况
-                if '-' not in img_name:
+                if "-" not in img_name:
                     file_list = os.listdir(img_folder)
                     for each in file_list:
-                        if '.nfo' in each:
+                        if ".nfo" in each:
                             temp_path = os.path.join(img_folder, each)
                             break
-                json_data, movie_number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = models.core.file.get_file_info(temp_path,
-                                                                                                                                                        copy_sub=False)
+                (
+                    json_data,
+                    movie_number,
+                    folder_old_path,
+                    file_name,
+                    file_ex,
+                    sub_list,
+                    file_show_name,
+                    file_show_path,
+                ) = models.core.file.get_file_info(temp_path, copy_sub=False)
 
-            self.setWindowTitle(json_data.get('number') + ' 封面图片裁剪')  # 设置窗口标题
+            self.setWindowTitle(json_data.get("number") + " 封面图片裁剪")  # 设置窗口标题
 
             # 获取水印信息
-            has_sub = json_data['has_sub']
-            mosaic = json_data['mosaic']
-            definition = json_data['definition']
+            has_sub = json_data["has_sub"]
+            mosaic = json_data["mosaic"]
+            definition = json_data["definition"]
 
             # 获取裁剪后的的poster和thumb路径
-            poster_path = os.path.join(img_folder, 'poster.jpg')
+            poster_path = os.path.join(img_folder, "poster.jpg")
             if pic_name == 0:  # 文件名-poster.jpg
-                if '-' in img_name:
-                    poster_path = img_path.replace('-fanart', '').replace('-thumb', '').replace('-poster', '').replace(img_ex, '') + '-poster.jpg'
-            thumb_path = poster_path.replace('poster.', 'thumb.')
-            fanart_path = poster_path.replace('poster.', 'fanart.')
+                if "-" in img_name:
+                    poster_path = (
+                        img_path.replace("-fanart", "").replace("-thumb", "").replace("-poster", "").replace(img_ex, "")
+                        + "-poster.jpg"
+                    )
+            thumb_path = poster_path.replace("poster.", "thumb.")
+            fanart_path = poster_path.replace("poster.", "fanart.")
             self.cut_thumb_path = thumb_path  # 裁剪后的thumb路径
             self.cut_poster_path = poster_path  # 裁剪后的poster路径
             self.cut_fanart_path = fanart_path  # 裁剪后的fanart路径
 
             # poster添加水印
             if poster_mark:
-                if definition and 'hd' in mark_type:
-                    if definition == '4K' or definition == 'UHD':
+                if definition and "hd" in mark_type:
+                    if definition == "4K" or definition == "UHD":
                         self.Ui.radioButton_add_4k.setChecked(True)
-                    elif definition == '8K' or definition == 'UHD8':
+                    elif definition == "8K" or definition == "UHD8":
                         self.Ui.radioButton_add_8k.setChecked(True)
-                if has_sub and 'sub' in mark_type:
+                if has_sub and "sub" in mark_type:
                     self.Ui.checkBox_add_sub.setChecked(True)
-                if mosaic == '有码' or mosaic == '有碼':
-                    if 'youma' in mark_type:
+                if mosaic == "有码" or mosaic == "有碼":
+                    if "youma" in mark_type:
                         self.Ui.radioButton_add_censored.setChecked(True)
-                elif '破解' in mosaic:
-                    if 'umr' in mark_type:
+                elif "破解" in mosaic:
+                    if "umr" in mark_type:
                         self.Ui.radioButton_add_umr.setChecked(True)
-                    elif 'uncensored' in mark_type:
+                    elif "uncensored" in mark_type:
                         self.Ui.radioButton_add_uncensored.setChecked(True)
-                elif '流出' in mosaic:
-                    if 'leak' in mark_type:
+                elif "流出" in mosaic:
+                    if "leak" in mark_type:
                         self.Ui.radioButton_add_leak.setChecked(True)
-                    elif 'uncensored' in mark_type:
+                    elif "uncensored" in mark_type:
                         self.Ui.radioButton_add_uncensored.setChecked(True)
-                elif mosaic == '无码' or mosaic == '無碼':
+                elif mosaic == "无码" or mosaic == "無碼":
                     self.Ui.radioButton_add_uncensored.setChecked(True)
         # 显示裁剪框
         # 计算裁剪框大小
         if self.pic_h_w_ratio <= 1.5:  # 高宽比小时，固定高度，水平移动
-            self.keep_side = 'height'
+            self.keep_side = "height"
             self.rect_h = self.pic_new_h  # 裁剪框的高度 = 图片缩放显示的高度
             self.rect_w = int(self.rect_h / self.rect_h_w_ratio)  # 计算裁剪框的宽度
             self.rect_x = self.pic_new_w - self.rect_w  # 裁剪框左上角位置的x值
             self.rect_y = 0  # 裁剪框左上角位置的y值
         else:  # 高宽比大时，固定宽度，竖向移动
-            self.keep_side = 'width'
+            self.keep_side = "width"
             self.rect_w = self.pic_new_w  # 裁剪框的宽度 = 图片缩放显示的宽度
             self.rect_h = int(self.rect_w * self.rect_h_w_ratio)  # 计算裁剪框的高度
             self.rect_x = 0  # 裁剪框左上角的x值
             self.rect_y = int((self.pic_new_h - self.rect_h) / 2)  # 裁剪框左上角的y值（默认垂直居中）
-        self.Ui.pushButton_select_cutrange.setGeometry(QRect(self.rect_x, self.rect_y, self.rect_w, self.rect_h))  # 显示裁剪框
+        self.Ui.pushButton_select_cutrange.setGeometry(
+            QRect(self.rect_x, self.rect_y, self.rect_w, self.rect_h)
+        )  # 显示裁剪框
         self.getRealPos()  # 显示裁剪框实际位置
 
     # 计算在原图的裁剪位置
@@ -291,7 +309,7 @@ class CutWindow(QDialog):
         self.Ui.pushButton_select_cutrange.setGeometry(px, py, pw, ph)
 
         # 计算实际裁剪位置(裁剪时用的是左上角和右下角的坐标)
-        if self.keep_side == 'height':
+        if self.keep_side == "height":
             self.c_h = self.pic_h
             self.c_w = self.pic_w * pw / self.pic_new_w
             self.c_x = self.pic_w * px / self.pic_new_w  # 左上角坐标x
@@ -326,11 +344,11 @@ class CutWindow(QDialog):
         self.c_y = int(self.c_y)
 
         # 显示实际裁剪位置
-        self.Ui.label_cut_postion.setText(f'{str(self.c_x)}, {str(self.c_y)}, {str(self.c_x2)}, {str(self.c_y2)}')
+        self.Ui.label_cut_postion.setText(f"{str(self.c_x)}, {str(self.c_y)}, {str(self.c_x2)}, {str(self.c_y2)}")
 
         # self.show_traceback_log('选择位置： %s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
         # 显示实际裁剪尺寸
-        self.Ui.label_cut_size.setText(f'{str(self.c_w)}, {str(self.c_h)}')
+        self.Ui.label_cut_size.setText(f"{str(self.c_w)}, {str(self.c_h)}")
 
         return self.c_x, self.c_y, self.c_x2, self.c_y2
 
@@ -351,19 +369,19 @@ class CutWindow(QDialog):
         # 读取配置信息
         mark_list = []
         if self.Ui.radioButton_add_4k.isChecked():
-            mark_list.append('4K')
+            mark_list.append("4K")
         elif self.Ui.radioButton_add_8k.isChecked():
-            mark_list.append('8K')
+            mark_list.append("8K")
         if self.Ui.checkBox_add_sub.isChecked():
-            mark_list.append('字幕')
+            mark_list.append("字幕")
         if self.Ui.radioButton_add_censored.isChecked():
-            mark_list.append('有码')
+            mark_list.append("有码")
         elif self.Ui.radioButton_add_umr.isChecked():
-            mark_list.append('破解')
+            mark_list.append("破解")
         elif self.Ui.radioButton_add_leak.isChecked():
-            mark_list.append('流出')
+            mark_list.append("流出")
         elif self.Ui.radioButton_add_uncensored.isChecked():
-            mark_list.append('无码')
+            mark_list.append("无码")
 
         # 裁剪poster
         try:
@@ -371,7 +389,7 @@ class CutWindow(QDialog):
         except:
             self.parent().show_log_text(f"{traceback.format_exc()}\n Open Pic: {img_path}")
             return False
-        img = img.convert('RGB')
+        img = img.convert("RGB")
         img_new_png = img.crop((self.c_x, self.c_y, self.c_x2, self.c_y2))
         try:
             if os.path.exists(self.cut_poster_path):
@@ -385,7 +403,7 @@ class CutWindow(QDialog):
             models.core.image.add_mark_thread(self.cut_poster_path, mark_list)
 
         # 清理旧的thumb
-        if 'thumb' in config.download_files:
+        if "thumb" in config.download_files:
             if thumb_path != img_path:
                 if os.path.exists(thumb_path):
                     delete_file(thumb_path)
@@ -397,7 +415,7 @@ class CutWindow(QDialog):
             thumb_path = img_path
 
         # 清理旧的fanart
-        if ',fanart' in config.download_files:
+        if ",fanart" in config.download_files:
             if self.cut_fanart_path != img_path:
                 if os.path.exists(self.cut_fanart_path):
                     delete_file(self.cut_fanart_path)
@@ -410,8 +428,8 @@ class CutWindow(QDialog):
         img_new_png.close()
 
         # 在主界面显示预览
-        self.parent().set_pixmap_thread(self.cut_poster_path, thumb_path, poster_from='cut', cover_from='local')
-        self.parent().change_to_mainpage.emit('')
+        self.parent().set_pixmap_thread(self.cut_poster_path, thumb_path, poster_from="cut", cover_from="local")
+        self.parent().change_to_mainpage.emit("")
         return True
 
     def mousePressEvent(self, e):

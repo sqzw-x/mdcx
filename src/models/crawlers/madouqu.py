@@ -16,11 +16,12 @@ urllib3.disable_warnings()  # yapf: disable
 
 # import traceback
 
+
 def get_actor_photo(actor):
-    actor = actor.split(',')
+    actor = actor.split(",")
     data = {}
     for i in actor:
-        actor_photo = {i: ''}
+        actor_photo = {i: ""}
         data.update(actor_photo)
     return data
 
@@ -29,64 +30,64 @@ def get_detail_info(html, number, file_path):
     detail_info = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]//p//text()')
     # detail_info = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]//text()')
     title_h1 = html.xpath('//div[@class="cao_entry_header"]/header/h1/text()')
-    title = title_h1[0].replace(number, '').strip() if title_h1 else number
-    actor = ''
-    number = ''
+    title = title_h1[0].replace(number, "").strip() if title_h1 else number
+    actor = ""
+    number = ""
     for i, t in enumerate(detail_info):
-        if re.search(r'番号|番號', t):
-            temp_number = re.findall(r'(?:番号|番號)\s*：\s*(.+)\s*', t)
-            number = temp_number[0] if temp_number else ''
-        if '片名' in t:
-            temp_title = re.findall(r'片名\s*：\s*(.+)\s*', t)
-            title = temp_title[0] if temp_title else title.replace(number, '').strip()
-        if t.endswith('女郎') and i + 1 < len(detail_info) and detail_info[i + 1].startswith('：'):
-            temp_actor = re.findall(r'：\s*(.+)\s*', detail_info[i + 1])
-            actor = temp_actor[0].replace('、', ',') if temp_actor else ''
+        if re.search(r"番号|番號", t):
+            temp_number = re.findall(r"(?:番号|番號)\s*：\s*(.+)\s*", t)
+            number = temp_number[0] if temp_number else ""
+        if "片名" in t:
+            temp_title = re.findall(r"片名\s*：\s*(.+)\s*", t)
+            title = temp_title[0] if temp_title else title.replace(number, "").strip()
+        if t.endswith("女郎") and i + 1 < len(detail_info) and detail_info[i + 1].startswith("："):
+            temp_actor = re.findall(r"：\s*(.+)\s*", detail_info[i + 1])
+            actor = temp_actor[0].replace("、", ",") if temp_actor else ""
     number = title if not number else number
 
     studio = html.xpath('string(//span[@class="meta-category"])').strip()
     cover_url = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]/p/img/@src')
-    cover_url = cover_url[0] if cover_url else ''
-    actor = get_extra_info(title, file_path, info_type="actor") if actor == '' else actor
+    cover_url = cover_url[0] if cover_url else ""
+    actor = get_extra_info(title, file_path, info_type="actor") if actor == "" else actor
     # 处理发行时间，年份
     try:
-        date_list = html.xpath('//time[@datetime]/@datetime')
-        date_obj = datetime.strptime(date_list[0], '%Y-%m-%dT%H:%M:%S%z')
-        release = date_obj.strftime('%Y-%m-%d')
+        date_list = html.xpath("//time[@datetime]/@datetime")
+        date_obj = datetime.strptime(date_list[0], "%Y-%m-%dT%H:%M:%S%z")
+        release = date_obj.strftime("%Y-%m-%d")
         # 该字段应为字符串，nfo_title 替换该字段时 replace 函数第二个参数仅接受字符串参数
         year = str(date_obj.year)
     except:
-        release = ''
-        year = ''
+        release = ""
+        year = ""
     return number, title, actor, cover_url, studio, release, year
 
 
 def get_real_url(html, number_list):
     item_list = html.xpath('//div[@class="entry-media"]/div/a')
     for each in item_list:
-        detail_url = each.get('href')
+        detail_url = each.get("href")
         # lazyload属性容易改变，去掉也能拿到结果
-        title = each.xpath('img[@class]/@alt')[0]
+        title = each.xpath("img[@class]/@alt")[0]
         if title and detail_url:
             for n in number_list:
-                temp_n = re.sub(r'[\W_]', '', n).upper()
-                temp_title = re.sub(r'[\W_]', '', title).upper()
+                temp_n = re.sub(r"[\W_]", "", n).upper()
+                temp_title = re.sub(r"[\W_]", "", title).upper()
                 if temp_n in temp_title:
                     return True, n, title, detail_url
-    return False, '', '', ''
+    return False, "", "", ""
 
 
-def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file_path='', appoint_number=''):
+def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number=""):
     start_time = time.time()
-    website_name = 'madouqu'
-    req_web += '-> %s' % website_name
-    title = ''
-    cover_url = ''
-    web_info = '\n       '
-    log_info += ' \n    🌐 madouqu'
-    debug_info = ''
+    website_name = "madouqu"
+    req_web += "-> %s" % website_name
+    title = ""
+    cover_url = ""
+    web_info = "\n       "
+    log_info += " \n    🌐 madouqu"
+    debug_info = ""
     real_url = appoint_url
-    madouqu_url = getattr(config, 'madouqu_website', False)
+    madouqu_url = getattr(config, "madouqu_website", False)
 
     try:
         if not real_url:
@@ -94,14 +95,14 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             number_list, filename_list = get_number_list(number, appoint_number, file_path)
             n_list = number_list[:1] + filename_list
             for each in n_list:
-                real_url = f'{madouqu_url}/?s={each}' if madouqu_url else f'https://madouqu.com/?s={each}'
+                real_url = f"{madouqu_url}/?s={each}" if madouqu_url else f"https://madouqu.com/?s={each}"
                 # real_url = 'https://madouqu.com/?s=XSJ-138.%E5%85%BB%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86%E6%95%99%E5%AD%A6EP6'
-                debug_info = f'请求地址: {real_url} '
+                debug_info = f"请求地址: {real_url} "
                 log_info += web_info + debug_info
                 result, response = curl_html(real_url)
 
                 if not result:
-                    debug_info = '网络请求错误: %s' % response
+                    debug_info = "网络请求错误: %s" % response
                     log_info += web_info + debug_info
                     raise Exception(debug_info)
                 search_page = etree.fromstring(response, etree.HTMLParser())
@@ -109,16 +110,16 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
                 if result:
                     break
             else:
-                debug_info = '没有匹配的搜索结果'
+                debug_info = "没有匹配的搜索结果"
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
 
-        debug_info = f'番号地址: {real_url} '
+        debug_info = f"番号地址: {real_url} "
         log_info += web_info + debug_info
         result, response = curl_html(real_url)
 
         if not result:
-            debug_info = '没有找到数据 %s ' % response
+            debug_info = "没有找到数据 %s " % response
             log_info += web_info + debug_info
             raise Exception(debug_info)
 
@@ -128,42 +129,48 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
 
         try:
             dic = {
-                'number': number,
-                'title': title,
-                'originaltitle': title,
-                'actor': actor,
-                'outline': '',
-                'originalplot': '',
-                'tag': '',
-                'release': release,
-                'year': year,
-                'runtime': '',
-                'score': '',
-                'series': '',
-                'country': 'CN',
-                'director': '',
-                'studio': studio,
-                'publisher': studio,
-                'source': 'madouqu',
-                'website': real_url,
-                'actor_photo': actor_photo,
-                'cover': cover_url,
-                'poster': '',
-                'extrafanart': '',
-                'trailer': '',
-                'image_download': False,
-                'image_cut': 'no',
-                'log_info': log_info,
-                'error_info': '',
-                'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
-                'mosaic': '国产',
-                'wanted': '',
+                "number": number,
+                "title": title,
+                "originaltitle": title,
+                "actor": actor,
+                "outline": "",
+                "originalplot": "",
+                "tag": "",
+                "release": release,
+                "year": year,
+                "runtime": "",
+                "score": "",
+                "series": "",
+                "country": "CN",
+                "director": "",
+                "studio": studio,
+                "publisher": studio,
+                "source": "madouqu",
+                "website": real_url,
+                "actor_photo": actor_photo,
+                "cover": cover_url,
+                "poster": "",
+                "extrafanart": "",
+                "trailer": "",
+                "image_download": False,
+                "image_cut": "no",
+                "log_info": log_info,
+                "error_info": "",
+                "req_web": req_web
+                + "(%ss) "
+                % (
+                    round(
+                        (time.time() - start_time),
+                    )
+                ),
+                "mosaic": "国产",
+                "wanted": "",
             }
-            debug_info = '数据获取成功！'
+            debug_info = "数据获取成功！"
             log_info += web_info + debug_info
-            dic['log_info'] = log_info
+            dic["log_info"] = log_info
         except Exception as e:
-            debug_info = '数据生成出错: %s' % str(e)
+            debug_info = "数据生成出错: %s" % str(e)
             log_info += web_info + debug_info
             raise Exception(debug_info)
 
@@ -171,19 +178,31 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
         # print(traceback.format_exc())
         debug_info = str(e)
         dic = {
-            'title': '',
-            'cover': '',
-            'website': '',
-            'log_info': log_info,
-            'error_info': debug_info,
-            'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
+            "title": "",
+            "cover": "",
+            "website": "",
+            "log_info": log_info,
+            "error_info": debug_info,
+            "req_web": req_web
+            + "(%ss) "
+            % (
+                round(
+                    (time.time() - start_time),
+                )
+            ),
         }
-    dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )
+    dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
+    js = json.dumps(
+        dic,
+        ensure_ascii=False,
+        sort_keys=False,
+        indent=4,
+        separators=(",", ": "),
+    )
     return js
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # yapf: disable
     # print(main('GDCM-018'))
     # print(main('国产一姐裸替演员沈樵Qualla作品.七旬老农的女鬼诱惑.国语原创爱片新高度', file_path='国产一姐裸替演员沈樵Qualla作品.七旬老农的女鬼诱惑.国语原创爱片新高度'))

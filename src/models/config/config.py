@@ -12,7 +12,7 @@ from models.config.config_manual import ManualConfig
 
 @singleton
 class MDCxConfig(GeneratedConfig, ManualConfig):
-    mark_file_name = 'MDCx.config'
+    mark_file_name = "MDCx.config"
 
     def __init__(self):
         self.file = None
@@ -20,7 +20,7 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
         self._path = None
         self._get_platform_info()
         self.read_config()
-        self.youdaokey = 'Ygy_4c=r#e#4EX^NUGUc5'
+        self.youdaokey = "Ygy_4c=r#e#4EX^NUGUc5"
 
     @property
     def path(self):
@@ -44,8 +44,8 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
         :return: 配置文件夹路径
         """
 
-        home = os.path.expanduser('~')
-        folder_name = '.mdcx'
+        home = os.path.expanduser("~")
+        folder_name = ".mdcx"
         config_folder = os.path.join(home, folder_name)
         if not os.path.exists(config_folder):
             os.makedirs(config_folder, exist_ok=True, mode=0o755)
@@ -58,7 +58,7 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
         其他平台，该文件跟应用程序在同一目录下。
         """
 
-        if platform.system() == 'Darwin':
+        if platform.system() == "Darwin":
             return os.path.join(self.get_mac_default_config_folder(), self.mark_file_name)
         else:
             return self.mark_file_name
@@ -66,7 +66,7 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
     def read_config(self):
         self._get_config_path()
         reader = RawConfigParser()
-        reader.read(self.path, encoding='UTF-8')
+        reader.read(self.path, encoding="UTF-8")
         for section in reader.sections():
             for key, value in reader.items(section):
                 #  此处使用反射直接设置读取的配置, 缺少对键合法性的检测,
@@ -80,15 +80,16 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
         self.update_config()
 
     def save_config(self):
-        with open(self.get_mark_file_path(), 'w', encoding='UTF-8') as f:
+        with open(self.get_mark_file_path(), "w", encoding="UTF-8") as f:
             f.write(self.path)
-        with open(self.path, "w", encoding='UTF-8') as code:
+        with open(self.path, "w", encoding="UTF-8") as code:
             # 使用反射保存自定义网址设置
-            custom_website_config = ''
+            custom_website_config = ""
             for website in ManualConfig.SUPPORTED_WEBSITES:
-                if u := getattr(self, website + '_website', ''):
+                if u := getattr(self, website + "_website", ""):
                     custom_website_config += f"{website}_website = {u}\n"
-            print(f'''[modified_time]
+            print(
+                f"""[modified_time]
 modified_time = {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}
 version = {self.version}
 
@@ -313,50 +314,79 @@ timed_interval = {self.timed_interval}
 rest_count = {self.rest_count}
 rest_time = {self.rest_time}
 statement = {self.statement}
-''', file=code)
+""",
+                file=code,
+            )
 
     def init_config(self):
-        with open(self.path, "w", encoding='UTF-8') as code:
+        with open(self.path, "w", encoding="UTF-8") as code:
             print(GeneratedConfig.CONFIG_STR, file=code)
 
     def update_config(self):
         # 获取proxies
-        if self.type == 'http':
-            self.proxies = {"http": "http://" + self.proxy, "https": "http://" + self.proxy, }
-        elif self.type == 'socks5':
-            self.proxies = {"http": "socks5h://" + self.proxy, "https": "socks5h://" + self.proxy, }
+        if self.type == "http":
+            self.proxies = {
+                "http": "http://" + self.proxy,
+                "https": "http://" + self.proxy,
+            }
+        elif self.type == "socks5":
+            self.proxies = {
+                "http": "socks5h://" + self.proxy,
+                "https": "socks5h://" + self.proxy,
+            }
         else:
             self.proxies = None
 
-        self.ipv4_only = 'ipv4_only' in self.switch_on
-        self.theporndb_no_hash = 'theporndb_no_hash' in self.switch_on
+        self.ipv4_only = "ipv4_only" in self.switch_on
+        self.theporndb_no_hash = "theporndb_no_hash" in self.switch_on
 
         # 获取User-Agent
-        self.headers = {'User-Agent': get_user_agent(), }
+        self.headers = {
+            "User-Agent": get_user_agent(),
+        }
 
         # 去掉^符号！！！
-        self.cnword_style = self.cnword_style.strip('^')
+        self.cnword_style = self.cnword_style.strip("^")
 
         # 获取 Google 下载关键词列表
-        temp_list = re.split(r'[,，]', self.google_used)
+        temp_list = re.split(r"[,，]", self.google_used)
         self.google_keyused = [each for each in temp_list if each.strip()]  # 去空
         # 获取 Google 过滤关键词列表
-        temp_list = re.split(r'[,，]', self.google_exclude)
+        temp_list = re.split(r"[,，]", self.google_exclude)
         self.google_keyword = [each for each in temp_list if each.strip()]  # 去空
 
         # 是否记录刮削成功列表
-        self.record_success_file = 'record_success_file' in self.no_escape
+        self.record_success_file = "record_success_file" in self.no_escape
 
         # 是否清理文件以及清理列表
-        can_clean = True if 'i_know' in self.clean_enable and 'i_agree' in self.clean_enable else False
-        can_clean_auto = True if can_clean and 'clean_auto' in self.clean_enable else False
-        clean_ext_list = re.split(r'[|｜，,]', self.clean_ext) if can_clean and self.clean_ext and 'clean_ext' in self.clean_enable else []
-        clean_name_list = re.split(r'[|｜，,]', self.clean_name) if can_clean and self.clean_name and 'clean_name' in self.clean_enable else []
-        clean_contains_list = re.split(r'[|｜，,]', self.clean_contains) if can_clean and self.clean_contains and 'clean_contains' in self.clean_enable else []
-        clean_size_list = self.clean_size if can_clean and 'clean_size' in self.clean_enable else ''
-        clean_ignore_ext_list = re.split(r'[|｜，,]', self.clean_ignore_ext) if can_clean and self.clean_ignore_ext and 'clean_ignore_ext' in self.clean_enable else []
-        clean_ignore_contains_list = re.split(r'[|｜，,]',
-                                              self.clean_ignore_contains) if can_clean and self.clean_ignore_contains and 'clean_ignore_contains' in self.clean_enable else []
+        can_clean = True if "i_know" in self.clean_enable and "i_agree" in self.clean_enable else False
+        can_clean_auto = True if can_clean and "clean_auto" in self.clean_enable else False
+        clean_ext_list = (
+            re.split(r"[|｜，,]", self.clean_ext)
+            if can_clean and self.clean_ext and "clean_ext" in self.clean_enable
+            else []
+        )
+        clean_name_list = (
+            re.split(r"[|｜，,]", self.clean_name)
+            if can_clean and self.clean_name and "clean_name" in self.clean_enable
+            else []
+        )
+        clean_contains_list = (
+            re.split(r"[|｜，,]", self.clean_contains)
+            if can_clean and self.clean_contains and "clean_contains" in self.clean_enable
+            else []
+        )
+        clean_size_list = self.clean_size if can_clean and "clean_size" in self.clean_enable else ""
+        clean_ignore_ext_list = (
+            re.split(r"[|｜，,]", self.clean_ignore_ext)
+            if can_clean and self.clean_ignore_ext and "clean_ignore_ext" in self.clean_enable
+            else []
+        )
+        clean_ignore_contains_list = (
+            re.split(r"[|｜，,]", self.clean_ignore_contains)
+            if can_clean and self.clean_ignore_contains and "clean_ignore_contains" in self.clean_enable
+            else []
+        )
         self.can_clean = can_clean
         self.can_clean_auto = can_clean_auto
         self.clean_ext_list = clean_ext_list
@@ -367,43 +397,45 @@ statement = {self.statement}
         self.clean_ignore_contains_list = clean_ignore_contains_list
 
         # 获取排除字符列表
-        temp_list = re.split('[,，]', self.string) + self.repl_list
+        temp_list = re.split("[,，]", self.string) + self.repl_list
         self.escape_string_list = []
         [self.escape_string_list.append(i) for i in temp_list if i.strip() and i not in self.escape_string_list]
 
         # 番号对应官网
         official_websites_dic = {}
         for key, value in self.official.items():
-            temp_list = value.upper().split('|')
+            temp_list = value.upper().split("|")
             for each in temp_list:
                 official_websites_dic[each] = key
         self.official_websites = official_websites_dic
 
         # 字段命名规则-后缀字段顺序
-        all_str_list = ['mosaic', 'cnword', 'definition']
-        read_str_list = re.split(r'[,，]', self.suffix_sort)
+        all_str_list = ["mosaic", "cnword", "definition"]
+        read_str_list = re.split(r"[,，]", self.suffix_sort)
         new_str_list1 = [i1 for i1 in read_str_list if i1 in all_str_list]  # 去除不在list中的字符
         new_str_list = []
         [new_str_list.append(i1) for i1 in new_str_list1 if i1 not in new_str_list]  # 去重
         [new_str_list.append(i1) for i1 in all_str_list if i1 not in new_str_list]  # 补全
-        new_str = ','.join(new_str_list)
+        new_str = ",".join(new_str_list)
         self.suffix_sort = new_str
 
     def _get_config_path(self):
         mdcx_config = self.get_mark_file_path()  # 此文件用于记录当前配置文件的绝对路径, 从而实现多配置切换
         # 此文件必须存在, 且与 main.py 或打包的可执行文件在同一目录下.
         if not os.path.exists(mdcx_config):  # 不存在时, 创建
-            if platform.system() == 'Darwin':
-                self.path = os.path.join(self.get_mac_default_config_folder(), 'config.ini')  # macOS下默认配置文件: ~/.mdcx/config.ini
+            if platform.system() == "Darwin":
+                self.path = os.path.join(
+                    self.get_mac_default_config_folder(), "config.ini"
+                )  # macOS下默认配置文件: ~/.mdcx/config.ini
             else:
-                self.path = os.path.realpath('config.ini')  # 默认配置文件: 同目录下的 config.ini
+                self.path = os.path.realpath("config.ini")  # 默认配置文件: 同目录下的 config.ini
             # 设置默认配置文件路径, 若存在则可读取, 否则生成默认配置文件
-            with open(mdcx_config, 'w', encoding='UTF-8') as f:
+            with open(mdcx_config, "w", encoding="UTF-8") as f:
                 f.write(self.path)
             if not os.path.exists(self.path):
                 self.init_config()
         else:
-            with open(mdcx_config, encoding='UTF-8') as f:
+            with open(mdcx_config, encoding="UTF-8") as f:
                 self.path = f.read()
 
     def _get_platform_info(self):
@@ -412,15 +444,15 @@ statement = {self.statement}
         self.is_nfc = True
         self.is_docker = False
         os_name = platform.system()
-        if os_name != 'Windows':
+        if os_name != "Windows":
             self.is_windows = False
         mac_ver = platform.mac_ver()[0]
-        if os_name == 'Darwin' and mac_ver:
+        if os_name == "Darwin" and mac_ver:
             self.is_mac = True
-            ver_list = mac_ver.split('.')
-            if float(ver_list[0] + '.' + ver_list[1]) < 10.12:
+            ver_list = mac_ver.split(".")
+            if float(ver_list[0] + "." + ver_list[1]) < 10.12:
                 self.is_nfc = False
-        if os_name == 'Linux' or os_name == 'Java':
+        if os_name == "Linux" or os_name == "Java":
             self.is_docker = True
 
 
@@ -430,11 +462,11 @@ config: MDCxConfig = MDCxConfig()
 def get_new_str(a: str, wanted=False):
     all_website_list = config.SUPPORTED_WEBSITES
     if wanted:
-        all_website_list = ['javlibrary', 'javdb']
-    read_web_list = re.split(r'[,，]', a)
+        all_website_list = ["javlibrary", "javdb"]
+    read_web_list = re.split(r"[,，]", a)
     new_website_list1 = [i for i in read_web_list if i in all_website_list]  # 去除错误网站
     new_website_list = []
     # 此处配置包含优先级, 因此必须按顺序去重
     [new_website_list.append(i) for i in new_website_list1 if i not in new_website_list]  # 去重
-    new_str = ','.join(new_website_list)
+    new_str = ",".join(new_website_list)
     return new_str

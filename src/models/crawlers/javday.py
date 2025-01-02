@@ -18,17 +18,17 @@ urllib3.disable_warnings()  # yapf: disable
 
 
 def get_actor_photo(actor):
-    actor = actor.split(',')
+    actor = actor.split(",")
     data = {}
     for i in actor:
-        actor_photo = {i: ''}
+        actor_photo = {i: ""}
         data.update(actor_photo)
     return data
 
 
 def get_title(html):
     result = html.xpath('//*[@id="videoInfo"]/div/h1')
-    return result[0].text if result else ''
+    return result[0].text if result else ""
 
 
 def get_some_info(html, title, file_path):
@@ -37,9 +37,9 @@ def get_some_info(html, title, file_path):
     actor_list = html.xpath('//*[@id="videoInfo"]/div/div/p[1]/span[2]/a/text()')
 
     # 未找到演员时，看热门演员是否在标题和各种信息里
-    series = series_list[0] if series_list else ''
-    tag = ','.join(tag_list)
-    actor_fake_name = any('未知' in item for item in actor_list)
+    series = series_list[0] if series_list else ""
+    tag = ",".join(tag_list)
+    actor_fake_name = any("未知" in item for item in actor_list)
     actor_list = [] if actor_fake_name else actor_list
     if not actor_list:
         all_info = title + series + tag + file_path
@@ -57,16 +57,16 @@ def get_some_info(html, title, file_path):
     # new_tag_list = []
     # [new_tag_list.append(i) for i in tag_list if i and i not in new_tag_list]
 
-    return series, ','.join(tag_list), ','.join(new_actor_list)
+    return series, ",".join(tag_list), ",".join(new_actor_list)
 
 
 def get_studio(series, tag, lable_list):
     word_list = [series]
-    word_list.extend(tag.split(','))
+    word_list.extend(tag.split(","))
     for word in word_list:
         if word in lable_list:
             return word
-    return ''
+    return ""
 
 
 # def get_real_url(html, number, javday_url, file_path):
@@ -93,12 +93,12 @@ def get_studio(series, tag, lable_list):
 
 
 def get_cover(html, javday_url):
-    result = html.xpath('/html/head/meta[8]')
+    result = html.xpath("/html/head/meta[8]")
     if result:
         result = result[0].get("content")
-        if 'http' not in result:
+        if "http" not in result:
             result = javday_url + result
-    return result if result else ''
+    return result if result else ""
 
 
 # def get_year(release):
@@ -113,14 +113,14 @@ def get_cover(html, javday_url):
 
 def get_tag(html):  # 获取演员
     result = html.xpath('//div[@class="category"]/a[contains(@href, "/class/")]/text()')
-    return ','.join(result)
+    return ",".join(result)
 
 
 def get_real_number_title(number, title, number_list, appoint_number, appoint_url, lable_list, tag, actor, series):
     # 指定番号时，使用指定番号
     if appoint_number:
         number = appoint_number
-        temp_title = title.replace(number, '')
+        temp_title = title.replace(number, "")
         if len(temp_title) > 4:
             title = temp_title
     else:
@@ -134,17 +134,17 @@ def get_real_number_title(number, title, number_list, appoint_number, appoint_ur
         # 从文件名或标题中获取到番号时，对番号进行处理：番号里面没有横线时加横线
         if number in number_list:
             if number != title:
-                title = title.replace(number, '').replace(number.lower(), '')
-            if '-' not in number:
-                if re.search(r'[A-Z]{4,}\d{2,}', number):
-                    result = re.search(r'([A-Z]{4,})(\d{2,})', number)
-                    number = result[1] + '-' + result[2]
+                title = title.replace(number, "").replace(number.lower(), "")
+            if "-" not in number:
+                if re.search(r"[A-Z]{4,}\d{2,}", number):
+                    result = re.search(r"([A-Z]{4,})(\d{2,})", number)
+                    number = result[1] + "-" + result[2]
                 else:
-                    result = re.search(r'\d{3,}', number)
+                    result = re.search(r"\d{3,}", number)
                     if result:
-                        number = number.replace(result[0], '-' + result[0])
+                        number = number.replace(result[0], "-" + result[0])
             if number != title:
-                title = title.replace(number, '')
+                title = title.replace(number, "")
         # 否则使用标题作为番号
         else:
             number = title
@@ -153,9 +153,9 @@ def get_real_number_title(number, title, number_list, appoint_number, appoint_ur
         number = temp_title
 
     # 添加分集标识
-    cd = re.findall(r'((AV|EP)\d{1})', title.upper())
+    cd = re.findall(r"((AV|EP)\d{1})", title.upper())
     if cd and cd[0][0] not in number:
-        number = number + ' ' + cd[0][0]
+        number = number + " " + cd[0][0]
 
     return number, temp_title
 
@@ -163,41 +163,41 @@ def get_real_number_title(number, title, number_list, appoint_number, appoint_ur
 def get_real_title(title, number_list, lable_list, tag, actor, series):
     # 去除标题里的番号
     for number in number_list:
-        title = title.replace(number, '')
+        title = title.replace(number, "")
 
     # 去除标题后的发行商
-    title_list = re.split('[. ]', title)
+    title_list = re.split("[. ]", title)
     if len(title_list) > 1:
         for key in lable_list:
             for each in title_list:
                 if key in each:
                     title_list.remove(each)
-        if title_list[-1].lower() == 'x':
+        if title_list[-1].lower() == "x":
             title_list.pop()
-        title = ' '.join(title_list)
-    for each in tag.split(','):
+        title = " ".join(title_list)
+    for each in tag.split(","):
         if each:
-            title = title.replace('' + each, '')
-    for each in actor.split(','):
+            title = title.replace("" + each, "")
+    for each in actor.split(","):
         if each:
-            title = title.replace(' ' + each, '')
-    title = title.lstrip(series + ' ').replace('..', '.').replace('  ', ' ')
+            title = title.replace(" " + each, "")
+    title = title.lstrip(series + " ").replace("..", ".").replace("  ", " ")
 
-    return title.replace(' x ', '').replace(' X ', '').strip(' -.')
+    return title.replace(" x ", "").replace(" X ", "").strip(" -.")
 
 
-def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file_path='', appoint_number=''):
+def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number=""):
     lable_list = get_lable_list()
     start_time = time.time()
-    website_name = 'javday'
-    req_web += '-> %s' % website_name
-    web_info = '\n       '
-    log_info += ' \n    🌐 javday'
-    debug_info = ''
+    website_name = "javday"
+    req_web += "-> %s" % website_name
+    web_info = "\n       "
+    log_info += " \n    🌐 javday"
+    debug_info = ""
 
-    javday_url = getattr(config, "javday_website", 'https://javday.tv')
+    javday_url = getattr(config, "javday_website", "https://javday.tv")
     real_url = appoint_url
-    real_html_content = ''
+    real_html_content = ""
     try:
         # 处理番号
         number_list, filename_list = get_number_list(number, appoint_number, file_path)
@@ -206,19 +206,19 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             number_list_new = list(set(total_number_list))
             number_list_new.sort(key=total_number_list.index)
             for number in number_list_new:
-                testNumberUrl = javday_url + f'/videos/{number}/'
+                testNumberUrl = javday_url + f"/videos/{number}/"
                 debug_info = f'搜索地址: {testNumberUrl} {{"wd": {number}}}'
                 log_info += web_info + debug_info
                 result, html_content = get_html(testNumberUrl)
                 if not result:
-                    debug_info = '网络请求错误: %s' % html_content
+                    debug_info = "网络请求错误: %s" % html_content
                     log_info += web_info + debug_info
                 else:
-                    if '你似乎來到了沒有視頻存在的荒原' in html_content:
-                        debug_info = '找不到番号: %s' % number
+                    if "你似乎來到了沒有視頻存在的荒原" in html_content:
+                        debug_info = "找不到番号: %s" % number
                         log_info += web_info + debug_info
                         continue
-                    debug_info = '找到网页: %s' % testNumberUrl
+                    debug_info = "找到网页: %s" % testNumberUrl
                     real_url = testNumberUrl
                     real_html_content = html_content
                     break
@@ -229,55 +229,63 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
             html_info = etree.fromstring(real_html_content, etree.HTMLParser())
             title = get_title(html_info)  # 获取标题
             if not title:
-                debug_info = '数据获取失败: 未获取到title！'
+                debug_info = "数据获取失败: 未获取到title！"
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
             series, tag, actor = get_some_info(html_info, title, file_path)
             actor_photo = get_actor_photo(actor)
             cover_url = get_cover(html_info, javday_url)  # 获取cover
-            release = ''
-            year = ''
+            release = ""
+            year = ""
             studio = get_studio(series, tag, lable_list)
-            number, title = get_real_number_title(number, title, number_list, appoint_number, appoint_url, lable_list, tag, actor, series)
+            number, title = get_real_number_title(
+                number, title, number_list, appoint_number, appoint_url, lable_list, tag, actor, series
+            )
 
             try:
                 dic = {
-                    'number': number,
-                    'title': title,
-                    'originaltitle': title,
-                    'actor': actor,
-                    'outline': '',
-                    'originalplot': '',
-                    'tag': tag,
-                    'release': release,
-                    'year': year,
-                    'runtime': '',
-                    'score': '',
-                    'series': series,
-                    'country': 'CN',
-                    'director': '',
-                    'studio': studio,
-                    'publisher': studio,
-                    'source': 'javday',
-                    'website': real_url,
-                    'actor_photo': actor_photo,
-                    'cover': cover_url,
-                    'poster': '',
-                    'extrafanart': '',
-                    'trailer': '',
-                    'image_download': False,
-                    'image_cut': 'no',
-                    'log_info': log_info,
-                    'error_info': '',
-                    'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
-                    'mosaic': '国产',
-                    'wanted': '',
+                    "number": number,
+                    "title": title,
+                    "originaltitle": title,
+                    "actor": actor,
+                    "outline": "",
+                    "originalplot": "",
+                    "tag": tag,
+                    "release": release,
+                    "year": year,
+                    "runtime": "",
+                    "score": "",
+                    "series": series,
+                    "country": "CN",
+                    "director": "",
+                    "studio": studio,
+                    "publisher": studio,
+                    "source": "javday",
+                    "website": real_url,
+                    "actor_photo": actor_photo,
+                    "cover": cover_url,
+                    "poster": "",
+                    "extrafanart": "",
+                    "trailer": "",
+                    "image_download": False,
+                    "image_cut": "no",
+                    "log_info": log_info,
+                    "error_info": "",
+                    "req_web": req_web
+                    + "(%ss) "
+                    % (
+                        round(
+                            (time.time() - start_time),
+                        )
+                    ),
+                    "mosaic": "国产",
+                    "wanted": "",
                 }
-                debug_info = '数据获取成功！'
+                debug_info = "数据获取成功！"
                 log_info += web_info + debug_info
-                dic['log_info'] = log_info
+                dic["log_info"] = log_info
             except Exception as e:
-                debug_info = '数据生成出错: %s' % str(e)
+                debug_info = "数据生成出错: %s" % str(e)
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
 
@@ -285,19 +293,31 @@ def main(number, appoint_url='', log_info='', req_web='', language='zh_cn', file
         # print(traceback.format_exc())
         debug_info = str(e)
         dic = {
-            'title': '',
-            'cover': '',
-            'website': '',
-            'log_info': log_info,
-            'error_info': debug_info,
-            'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
+            "title": "",
+            "cover": "",
+            "website": "",
+            "log_info": log_info,
+            "error_info": debug_info,
+            "req_web": req_web
+            + "(%ss) "
+            % (
+                round(
+                    (time.time() - start_time),
+                )
+            ),
         }
-    dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )
+    dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
+    js = json.dumps(
+        dic,
+        ensure_ascii=False,
+        sort_keys=False,
+        indent=4,
+        separators=(",", ": "),
+    )
     return js
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # yapf: disable
     # print(main('Md0165-4'))
     # print(main('GDCM-018'))

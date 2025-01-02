@@ -16,32 +16,32 @@ urllib3.disable_warnings()  # yapf: disable
 
 
 def get_actor_photo(actor):
-    actor = actor.split(',')
+    actor = actor.split(",")
     data = {}
     for i in actor:
-        actor_photo = {i: ''}
+        actor_photo = {i: ""}
         data.update(actor_photo)
     return data
 
 
 def get_actor(html):
-    result = ','.join(html.xpath("//div[@id='avatar-waterfall']/a/span/text()"))
+    result = ",".join(html.xpath("//div[@id='avatar-waterfall']/a/span/text()"))
     return result
 
 
 def get_web_number(html):
     result = html.xpath('//div[@class="col-md-3 info"]/p/span[@style="color:#CC0000;"]/text()')
-    return result[0] if result else ''
+    return result[0] if result else ""
 
 
 def get_title(html):
     result = html.xpath('//div[@class="container"]/h3/text()')
-    return result[0] if result else ''
+    return result[0] if result else ""
 
 
 def get_cover(html):
     result = html.xpath('//a[@class="bigImage"]/@href')
-    return result[0] if result else ''
+    return result[0] if result else ""
 
 
 def get_poster(html, count):
@@ -51,12 +51,14 @@ def get_poster(html, count):
 
 def get_tag(html):
     result = html.xpath('//span[@class="genre"]/a/text()')
-    return ','.join(result)
+    return ",".join(result)
 
 
 def get_release(html):
-    result = html.xpath('//span[contains(text(),"发行时间:") or contains(text(),"發行日期:") or contains(text(),"発売日:")]/../text()')
-    return result[0].strip() if result else ''
+    result = html.xpath(
+        '//span[contains(text(),"发行时间:") or contains(text(),"發行日期:") or contains(text(),"発売日:")]/../text()'
+    )
+    return result[0].strip() if result else ""
 
 
 def get_year(release):
@@ -64,83 +66,87 @@ def get_year(release):
 
 
 def get_runtime(html):
-    result = html.xpath('//span[contains(text(),"长度:") or contains(text(),"長度:") or contains(text(),"収録時間:")]/../text()')
-    return re.findall(r'(\d+)', result[0])[0] if result else ''
+    result = html.xpath(
+        '//span[contains(text(),"长度:") or contains(text(),"長度:") or contains(text(),"収録時間:")]/../text()'
+    )
+    return re.findall(r"(\d+)", result[0])[0] if result else ""
 
 
 def get_series(html):
     result = html.xpath('//p/a[contains(@href,"/series/")]/text()')
-    return result[0].strip() if result else ''
+    return result[0].strip() if result else ""
 
 
 def get_studio(html):
     result = html.xpath('//p/a[contains(@href,"/studio/")]/text()')
-    return result[0].strip() if result else ''
+    return result[0].strip() if result else ""
 
 
 def get_real_url(number, html):
-    page_url = ''
+    page_url = ""
     url_list = html.xpath('//*[@id="waterfall"]/div/a/@href')
     i = 0
     if url_list:
         for i in range(1, len(url_list) + 1):
-            number_get = str(html.xpath('//*[@id="waterfall"]/div[' + str(i) + ']/a/div[@class="photo-info"]/span/date[1]/text()')).strip(" ['']")
-            if number.upper().replace('-PPV', '') == number_get.upper().replace('-PPV', ''):
-                page_url = 'https:' + url_list[i - 1]
+            number_get = str(
+                html.xpath('//*[@id="waterfall"]/div[' + str(i) + ']/a/div[@class="photo-info"]/span/date[1]/text()')
+            ).strip(" ['']")
+            if number.upper().replace("-PPV", "") == number_get.upper().replace("-PPV", ""):
+                page_url = "https:" + url_list[i - 1]
                 break
     return page_url, i
 
 
-def main(number, appoint_url='', log_info='', req_web='', language='jp'):
+def main(number, appoint_url="", log_info="", req_web="", language="jp"):
     start_time = time.time()
-    website_name = 'avsox'
-    req_web += '-> %s' % website_name
+    website_name = "avsox"
+    req_web += "-> %s" % website_name
     real_url = appoint_url
-    title = ''
-    cover_url = ''
-    poster_url = ''
+    title = ""
+    cover_url = ""
+    poster_url = ""
     image_download = False
-    image_cut = 'center'
+    image_cut = "center"
     dic = {}
-    web_info = '\n       '
-    log_info += ' \n    🌐 avsox'
-    debug_info = ''
+    web_info = "\n       "
+    log_info += " \n    🌐 avsox"
+    debug_info = ""
 
     try:
         if not real_url:
             avsox_url = get_avsox_domain()
-            url_search = f'{avsox_url}/cn/search/{number}'
-            debug_info = '搜索地址: %s ' % url_search
+            url_search = f"{avsox_url}/cn/search/{number}"
+            debug_info = "搜索地址: %s " % url_search
             log_info += web_info + debug_info
             result, response = get_html(url_search)
             if not result:
-                debug_info = '网络请求错误: %s' % response
+                debug_info = "网络请求错误: %s" % response
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
             html_search = etree.fromstring(response, etree.HTMLParser())
             real_url, count = get_real_url(number, html_search)
             if not real_url:
-                debug_info = '搜索结果: 未匹配到番号！'
+                debug_info = "搜索结果: 未匹配到番号！"
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
             poster_url = get_poster(html_search, count)
             if poster_url:
                 image_download = True
 
-        debug_info = '番号地址: %s ' % real_url
+        debug_info = "番号地址: %s " % real_url
         log_info += web_info + debug_info
         result, htmlcode = get_html(real_url)
         if not result:
-            debug_info = '网络请求错误: %s' % htmlcode
+            debug_info = "网络请求错误: %s" % htmlcode
             log_info += web_info + debug_info
             raise Exception(debug_info)
         html = etree.fromstring(htmlcode, etree.HTMLParser())
         actor = get_actor(html)
         actor_photo = get_actor_photo(actor)
         web_number = get_web_number(html)
-        title = get_title(html).replace(web_number + ' ', '').strip()
+        title = get_title(html).replace(web_number + " ", "").strip()
         if not title:
-            debug_info = '数据获取失败: 未获取到title！'
+            debug_info = "数据获取失败: 未获取到title！"
             log_info += web_info + debug_info
             raise Exception(debug_info)
         cover_url = get_cover(html)
@@ -152,41 +158,47 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
         studio = get_studio(html)
         try:
             dic = {
-                'number': number,
-                'title': title,
-                'originaltitle': title,
-                'actor': actor,
-                'actor_photo': actor_photo,
-                'outline': '',
-                'originalplot': '',
-                'tag': tag,
-                'release': release,
-                'year': year,
-                'runtime': runtime,
-                'score': '',
-                'series': series,
-                'director': '',
-                'studio': studio,
-                'publisher': studio,
-                'source': 'avsox',
-                'website': real_url,
-                'cover': cover_url,
-                'poster': poster_url,
-                'extrafanart': '',
-                'trailer': '',
-                'image_download': image_download,
-                'image_cut': image_cut,
-                'log_info': log_info,
-                'error_info': '',
-                'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
-                'mosaic': '无码',
-                'wanted': '',
+                "number": number,
+                "title": title,
+                "originaltitle": title,
+                "actor": actor,
+                "actor_photo": actor_photo,
+                "outline": "",
+                "originalplot": "",
+                "tag": tag,
+                "release": release,
+                "year": year,
+                "runtime": runtime,
+                "score": "",
+                "series": series,
+                "director": "",
+                "studio": studio,
+                "publisher": studio,
+                "source": "avsox",
+                "website": real_url,
+                "cover": cover_url,
+                "poster": poster_url,
+                "extrafanart": "",
+                "trailer": "",
+                "image_download": image_download,
+                "image_cut": image_cut,
+                "log_info": log_info,
+                "error_info": "",
+                "req_web": req_web
+                + "(%ss) "
+                % (
+                    round(
+                        (time.time() - start_time),
+                    )
+                ),
+                "mosaic": "无码",
+                "wanted": "",
             }
-            debug_info = '数据获取成功！'
+            debug_info = "数据获取成功！"
             log_info += web_info + debug_info
-            dic['log_info'] = log_info
+            dic["log_info"] = log_info
         except Exception as e:
-            debug_info = '数据生成出错: %s' % str(e)
+            debug_info = "数据生成出错: %s" % str(e)
             log_info += web_info + debug_info
             raise Exception(debug_info)
 
@@ -194,20 +206,34 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
         # cf.add_log(traceback.format_exc())
         debug_info = str(e)
         dic = {
-            'title': '',
-            'cover': '',
-            'website': '',
-            'log_info': log_info,
-            'error_info': debug_info,
-            'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
+            "title": "",
+            "cover": "",
+            "website": "",
+            "log_info": log_info,
+            "error_info": debug_info,
+            "req_web": req_web
+            + "(%ss) "
+            % (
+                round(
+                    (time.time() - start_time),
+                )
+            ),
         }
-    dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
+    dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
+    js = json.dumps(
+        dic,
+        ensure_ascii=False,
+        sort_keys=False,
+        indent=4,
+        separators=(",", ": "),
+    )  # .encode('UTF-8')
     return js
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # print(main('051119-917'))
     # print(main('EDVR-063 '))
     # print(main('032620_001'))
-    print(main('FC2-2101993'))  # print(main('032620_001', 'https://avsox.click/cn/movie/cb8d28437cff4e90'))  # print(main('', 'https://avsox.click/cn/movie/0b4e42a270b9871b'))
+    print(
+        main("FC2-2101993")
+    )  # print(main('032620_001', 'https://avsox.click/cn/movie/cb8d28437cff4e90'))  # print(main('', 'https://avsox.click/cn/movie/0b4e42a270b9871b'))

@@ -1,6 +1,7 @@
 """
 基本工具函数, 此模块不应依赖任何项目代码
 """
+
 import ctypes
 import inspect
 import platform
@@ -15,7 +16,9 @@ def get_current_time():
 
 
 def get_used_time(start_time):
-    return round((time.time() - start_time), )
+    return round(
+        (time.time() - start_time),
+    )
 
 
 def get_real_time(t):
@@ -24,17 +27,17 @@ def get_real_time(t):
 
 def add_html(text):
     # 特殊字符转义
-    text = text.replace('=http', '🔮🧿⚔️')  # 例外不转换的
+    text = text.replace("=http", "🔮🧿⚔️")  # 例外不转换的
 
     # 替换链接为超链接
-    url_list = re.findall(r'http[s]?://\S+', text)
+    url_list = re.findall(r"http[s]?://\S+", text)
     if url_list:
         url_list = list(set(url_list))
         url_list.sort(key=lambda i: len(i), reverse=True)
         for each_url in url_list:
             new_url = f'<a href="{each_url}">{each_url}</a>'
             text = text.replace(each_url, new_url)
-    text = text.replace('🔮🧿⚔️', '=http')  # 还原不转换的
+    text = text.replace("🔮🧿⚔️", "=http")  # 还原不转换的
 
     # 链接放在span里，避免点击后普通文本变超链接，设置样式为pre-wrap（保留空格换行）
     return '<span style="white-space: pre-wrap;">%s</span>' % text
@@ -42,11 +45,11 @@ def add_html(text):
 
 def remove_repeat(a: str):
     if a:  # 转列表去空去重
-        list1 = a.split(',')  # 转列表
+        list1 = a.split(",")  # 转列表
         list2 = list(set(list1))  # 去重
         list3 = [each for each in list2 if each.strip()]  # 去空
         list3.sort(key=list1.index)  # 排序（保持原顺序）
-        a = ','.join(map(str, list3))  # 转字符串
+        a = ",".join(map(str, list3))  # 转字符串
     return a
 
 
@@ -82,15 +85,15 @@ def get_user_agent():
     temp_l = random.randint(109, 129)
     temp_m = random.randint(1, 5563)
     temp_n = random.randint(1, 180)
-    return f'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{temp_l}.0.{temp_m}.{temp_n} Safari/537.36'
+    return f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{temp_l}.0.{temp_m}.{temp_n} Safari/537.36"
 
 
 def convert_path(path):
-    is_windows = platform.system() == 'Windows'
+    is_windows = platform.system() == "Windows"
     if is_windows:
-        path = path.replace('/', '\\')
+        path = path.replace("/", "\\")
     else:
-        path = path.replace('\\', '/')
+        path = path.replace("\\", "/")
     return path
 
 

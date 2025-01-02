@@ -7,6 +7,7 @@
 依赖:
     此模块不应依赖除 models.base.utils 外的任何项目代码
 """
+
 import threading
 import time
 
@@ -43,7 +44,7 @@ class Signals(QObject):
 
     def add_log(self, *text):
         if self.stop:
-            raise '手动停止刮削'
+            raise "手动停止刮削"
         try:
             with self.log_lock:
                 self.detail_log_list.append(f" ⏰ {time.strftime('%H:%M:%S', time.localtime())} {' '.join(text)}")
@@ -52,7 +53,7 @@ class Signals(QObject):
 
     def get_log(self):
         with self.log_lock:
-            text = '\n'.join(self.detail_log_list)
+            text = "\n".join(self.detail_log_list)
             self.detail_log_list = []
         return text
 
@@ -63,7 +64,7 @@ class Signals(QObject):
     def show_log_text(self, text):
         self.log_text.emit(text)
 
-    def show_scrape_info(self, before_info=''):
+    def show_scrape_info(self, before_info=""):
         self.scrape_info.emit(before_info)
 
     def show_net_info(self, text):
@@ -72,7 +73,7 @@ class Signals(QObject):
     def add_label_info(self, json_data):
         self.set_main_info.emit(json_data)
 
-    def show_list_name(self, filename, result, json_data, real_number=''):
+    def show_list_name(self, filename, result, json_data, real_number=""):
         self.exec_show_list_name.emit(filename, result, json_data, real_number)
 
 
