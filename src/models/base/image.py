@@ -10,7 +10,7 @@ from models.base.utils import get_used_time
 from models.signals import signal
 
 
-def get_pixmap(pic_path, poster=True, pic_from=''):
+def get_pixmap(pic_path, poster=True, pic_from=""):
     try:
         # 使用 QImageReader 加载，适合加载大文件，pixmap适合显示
         # 判断是否可读取
@@ -36,20 +36,20 @@ def get_pixmap(pic_path, poster=True, pic_from=''):
                     else:
                         w = int(220 * pic_width / pic_height)
                         h = 220
-                msg = f'{pic_from.title()}: {pic_width}*{pic_height}/{pic_file_size}KB'
+                msg = f"{pic_from.title()}: {pic_width}*{pic_height}/{pic_file_size}KB"
                 return [True, pix, msg, w, h]
         delete_file(pic_path)
         if poster:
-            return [False, '', '封面图损坏', 156, 220]
-        return [False, '', '缩略图损坏', 328, 220]
+            return [False, "", "封面图损坏", 156, 220]
+        return [False, "", "缩略图损坏", 328, 220]
     except:
         signal.show_log_text(traceback.format_exc())
-        return [False, '', '加载失败', 156, 220]
+        return [False, "", "加载失败", 156, 220]
 
 
 def fix_size(path, naming_rule):
     try:
-        poster_path = os.path.join(path, (naming_rule + '-poster.jpg'))
+        poster_path = os.path.join(path, (naming_rule + "-poster.jpg"))
         if os.path.exists(poster_path):
             pic = Image.open(poster_path)
             (width, height) = pic.size
@@ -63,7 +63,7 @@ def fix_size(path, naming_rule):
         signal.show_log_text(f"{traceback.format_exc()}\n Pic: {poster_path}")
 
 
-def cut_thumb_to_poster(json_data, thumb_path, poster_path, image_cut=''):
+def cut_thumb_to_poster(json_data, thumb_path, poster_path, image_cut=""):
     start_time = time.time()
     if os.path.exists(poster_path):
         delete_file(poster_path)
@@ -81,24 +81,24 @@ def cut_thumb_to_poster(json_data, thumb_path, poster_path, image_cut=''):
     # 判断裁剪方式
     if not image_cut:
         if prop >= 1.4:
-            image_cut = 'no'
+            image_cut = "no"
         elif prop >= 1:
-            image_cut = 'center'
+            image_cut = "center"
         else:
-            image_cut = 'right'
-        json_data['image_cut'] = image_cut
+            image_cut = "right"
+        json_data["image_cut"] = image_cut
 
     # 不裁剪
-    if image_cut == 'no':
+    if image_cut == "no":
         copy_file(thumb_path, poster_path)
-        json_data['logs'] += "\n 🍀 Poster done! (copy thumb)(%ss)" % get_used_time(start_time)
-        json_data['poster_from'] = 'copy thumb'
+        json_data["logs"] += "\n 🍀 Poster done! (copy thumb)(%ss)" % get_used_time(start_time)
+        json_data["poster_from"] = "copy thumb"
         img.close()
         return True
 
     # 中间裁剪
-    elif image_cut == 'center':
-        json_data['poster_from'] = 'thumb center'
+    elif image_cut == "center":
+        json_data["poster_from"] = "thumb center"
         ax = int((w - h / 1.5) / 2)
         ay = 0
         bx = ax + int(h / 1.5)
@@ -106,7 +106,7 @@ def cut_thumb_to_poster(json_data, thumb_path, poster_path, image_cut=''):
 
     # 右边裁剪
     else:
-        json_data['poster_from'] = 'thumb right'
+        json_data["poster_from"] = "thumb right"
         ax, ay, bx, by = w / 1.9, 0, w, h
         if w == 800:
             if h == 439:
@@ -121,16 +121,18 @@ def cut_thumb_to_poster(json_data, thumb_path, poster_path, image_cut=''):
 
     # 裁剪并保存
     try:
-        img_new = img.convert('RGB')
+        img_new = img.convert("RGB")
         img_new_png = img_new.crop((ax, ay, bx, by))
         img_new_png.save(poster_path, quality=95, subsampling=0)
         img.close()
         if check_pic(poster_path):
-            json_data['logs'] += f"\n 🍀 Poster done! ({json_data['poster_from']})({get_used_time(start_time)}s)"
+            json_data["logs"] += f"\n 🍀 Poster done! ({json_data['poster_from']})({get_used_time(start_time)}s)"
             return True
-        json_data['logs'] += f'\n 🥺 Poster cut failed! ({json_data["poster_from"]})({get_used_time(start_time)}s)'
+        json_data["logs"] += f'\n 🥺 Poster cut failed! ({json_data["poster_from"]})({get_used_time(start_time)}s)'
     except Exception as e:
-        json_data['logs'] += f'\n 🥺 Poster failed! ({json_data["poster_from"]})({get_used_time(start_time)}s)\n    {str(e)}'
+        json_data["logs"] += (
+            f'\n 🥺 Poster failed! ({json_data["poster_from"]})({get_used_time(start_time)}s)\n    {str(e)}'
+        )
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
     return False
@@ -164,7 +166,7 @@ def cut_pic(pic_path):
 
     # 裁剪并保存
     try:
-        img_new = img.convert('RGB')
+        img_new = img.convert("RGB")
         img_new_png = img_new.crop((ax, ay, bx, by))
         img_new_png.save(pic_path, quality=95, subsampling=0)
         img.close()
@@ -185,7 +187,7 @@ def fix_pic(pic_path, new_path):
             foreground_y = 0  # 前景y点
         else:  # 下面对齐
             ax, ay, bx, by = int(w * 0.0155), int(h * 0.0888), int(w * 0.9833), int(h * 0.9955)
-            pic_new = pic.convert('RGB')
+            pic_new = pic.convert("RGB")
             pic = pic_new.crop((ax, ay, bx, by))
             backdrop_w = bx - ax
             backdrop_h = int((bx - ax) / 1.156)
@@ -194,7 +196,7 @@ def fix_pic(pic_path, new_path):
         fixed_pic = pic.resize((backdrop_w, backdrop_h))  # 背景拉伸
         fixed_pic = fixed_pic.filter(ImageFilter.GaussianBlur(radius=50))  # 背景高斯模糊
         fixed_pic.paste(pic, (foreground_x, foreground_y))  # 粘贴原图
-        fixed_pic = fixed_pic.convert('RGB')
+        fixed_pic = fixed_pic.convert("RGB")
         fixed_pic.save(new_path, quality=95, subsampling=0)
         pic.close()
     except:

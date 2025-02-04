@@ -1,41 +1,48 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import json
 
 from models.crawlers import dmm, getchu
 
 
-def main(number, appoint_url='', log_info='', req_web='', language='jp'):
-    json_data_getchu = json.loads(getchu.main(number, appoint_url, log_info, req_web, 'jp'))
-    json_data_new = json_data_getchu['getchu']['jp']
-    log_info = json_data_new['log_info']
-    req_web = json_data_new['req_web']
-    poster = json_data_new.get('poster')
-    outline = json_data_new.get('outline')
-    if json_data_new['title']:
-        number = json_data_new['number']
-        if number.startswith('DLID') or 'dl.getchu' in appoint_url:
+def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+    json_data_getchu = json.loads(getchu.main(number, appoint_url, log_info, req_web, "jp"))
+    json_data_new = json_data_getchu["getchu"]["jp"]
+    log_info = json_data_new["log_info"]
+    req_web = json_data_new["req_web"]
+    poster = json_data_new.get("poster")
+    outline = json_data_new.get("outline")
+    if json_data_new["title"]:
+        number = json_data_new["number"]
+        if number.startswith("DLID") or "dl.getchu" in appoint_url:
             return json_data_getchu
-    json_data_dmm = json.loads(dmm.main(number, appoint_url, log_info, req_web, 'jp'))
-    if json_data_dmm['dmm']['jp']['title']:
-        json_data_new.update(json_data_dmm['dmm']['jp'])
+    json_data_dmm = json.loads(dmm.main(number, appoint_url, log_info, req_web, "jp"))
+    if json_data_dmm["dmm"]["jp"]["title"]:
+        json_data_new.update(json_data_dmm["dmm"]["jp"])
         if poster:  # 使用 getchu 封面
-            json_data_new['poster'] = poster
+            json_data_new["poster"] = poster
         if outline:  # 使用 getchu 简介
-            json_data_new['outline'] = outline
-            json_data_new['originalplot'] = outline
+            json_data_new["outline"] = outline
+            json_data_new["originalplot"] = outline
     else:
-        json_data_new['log_info'] = json_data_dmm['dmm']['jp']['log_info']
-        json_data_new['req_web'] = json_data_dmm['dmm']['jp']['req_web']
-    return json.dumps({'getchu_dmm': {'zh_cn': json_data_new, 'zh_tw': json_data_new, 'jp': json_data_new, }},
-                      ensure_ascii=False,
-                      sort_keys=False,
-                      indent=4,
-                      separators=(',', ': '), )
+        json_data_new["log_info"] = json_data_dmm["dmm"]["jp"]["log_info"]
+        json_data_new["req_web"] = json_data_dmm["dmm"]["jp"]["req_web"]
+    return json.dumps(
+        {
+            "getchu_dmm": {
+                "zh_cn": json_data_new,
+                "zh_tw": json_data_new,
+                "jp": json_data_new,
+            }
+        },
+        ensure_ascii=False,
+        sort_keys=False,
+        indent=4,
+        separators=(",", ": "),
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # yapf: disable
     # print(main('コンビニ○○Z 第三話 あなた、ヤンクレママですよね。旦那に万引きがバレていいんですか？'))
     # print(main('[PoRO]エロコンビニ店長 泣きべそ蓮っ葉・栞～お仕置きじぇらしぃナマ逸機～'))

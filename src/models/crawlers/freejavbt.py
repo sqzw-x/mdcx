@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import json
 import re
@@ -19,164 +18,347 @@ urllib3.disable_warnings()  # yapf: disable
 
 def get_title(html):
     try:
-        result = html.xpath('//title/text()')[0].split('|')
+        result = html.xpath("//title/text()")[0].split("|")
         number = result[0]
-        title = result[1].replace(number, '').strip()
+        title = result[1].replace(number, "").strip()
         number = number.strip()
-        title = title.replace('中文字幕', '').replace('無碼', '').replace("\\n", '').replace('_', '-').replace(number.upper(), '').replace(number, '').replace('--',
-                                                                                                                                                               '-').strip()
-        if not title or '翻译错误' in title or '每日更新' in str(result):
-            return '', ''
+        title = (
+            title.replace("中文字幕", "")
+            .replace("無碼", "")
+            .replace("\\n", "")
+            .replace("_", "-")
+            .replace(number.upper(), "")
+            .replace(number, "")
+            .replace("--", "-")
+            .strip()
+        )
+        if not title or "翻译错误" in title or "每日更新" in str(result):
+            return "", ""
         return title, number
     except:
-        return '', ''
+        return "", ""
 
 
 def get_actor(html):
     actor_result = html.xpath('//a[@class="actress"]/text()')
-    av_man = ['貞松大輔', '鮫島', '森林原人', '黒田悠斗', '主観', '吉村卓', '野島誠', '小田切ジュン', 'しみけん', 'セツネヒデユキ', '大島丈', '玉木玲', 'ウルフ田中',
-              'ジャイアント廣田', 'イセドン内村', '西島雄介', '平田司', '杉浦ボッ樹', '大沢真司', 'ピエール剣', '羽田', '田淵正浩', 'タツ', '南佳也', '吉野篤史',
-              '今井勇太', 'マッスル澤野', '井口', '松山伸也', '花岡じった', '佐川銀次', 'およよ中野', '小沢とおる', '橋本誠吾', '阿部智広', '沢井亮', '武田大樹',
-              '市川哲也', '???', '浅野あたる', '梅田吉雄', '阿川陽志', '素人', '結城結弦', '畑中哲也', '堀尾', '上田昌宏', 'えりぐち', '市川潤', '沢木和也', 'トニー大木',
-              '横山大輔', '一条真斗', '真田京', 'イタリアン高橋', '中田一平', '完全主観', 'イェーイ高島', '山田万次郎', '澤地真人', '杉山', 'ゴロー', '細田あつし',
-              '藍井優太', '奥村友真', 'ザーメン二郎', '桜井ちんたろう', '冴山トシキ', '久保田裕也', '戸川夏也', '北こうじ', '柏木純吉', 'ゆうき', 'トルティーヤ鈴木',
-              '神けんたろう', '堀内ハジメ', 'ナルシス小林', 'アーミー', '池田径', '吉村文孝', '優生', '久道実', '一馬', '辻隼人', '片山邦生', 'Qべぇ', '志良玉弾吾',
-              '今岡爽紫郎', '工藤健太', '原口', 'アベ', '染島貢', '岩下たろう', '小野晃', 'たむらあゆむ', '川越将護', '桜木駿', '瀧口', 'TJ本田', '園田', '宮崎',
-              '鈴木一徹', '黒人', 'カルロス', '天河', 'ぷーてゃん', '左曲かおる', '富田', 'TECH', 'ムールかいせ', '健太', '山田裕二', '池沼ミキオ', 'ウサミ', '押井敬之',
-              '浅見草太', 'ムータン', 'フランクフルト林', '石橋豊彦', '矢野慎二', '芦田陽', 'くりぼ', 'ダイ', 'ハッピー池田', '山形健', '忍野雅一', '渋谷優太', '服部義',
-              'たこにゃん', '北山シロ', 'つよぽん', '山本いくお', '学万次郎', '平井シンジ', '望月', 'ゆーきゅん', '頭田光', '向理来', 'かめじろう', '高橋しんと',
-              '栗原良', 'テツ神山', 'タラオ', '真琴', '滝本', '金田たかお', '平ボンド', '春風ドギー', '桐島達也', '中堀健二', '徳田重男', '三浦屋助六', '志戸哲也',
-              'ヒロシ', 'オクレ', '羽目白武', 'ジョニー岡本', '幸野賀一', 'インフィニティ', 'ジャック天野', '覆面', '安大吉', '井上亮太', '笹木良一', '艦長', '軍曹',
-              'タッキー', '阿部ノボル', 'ダウ兄', 'まーくん', '梁井一', 'カンパニー松尾', '大塚玉堂', '日比野達郎', '小梅', 'ダイナマイト幸男', 'タケル', 'くるみ太郎',
-              '山田伸夫', '氷崎健人']
-    actor_list = [i.strip() for i in actor_result if i.replace('?', '')]
+    av_man = [
+        "貞松大輔",
+        "鮫島",
+        "森林原人",
+        "黒田悠斗",
+        "主観",
+        "吉村卓",
+        "野島誠",
+        "小田切ジュン",
+        "しみけん",
+        "セツネヒデユキ",
+        "大島丈",
+        "玉木玲",
+        "ウルフ田中",
+        "ジャイアント廣田",
+        "イセドン内村",
+        "西島雄介",
+        "平田司",
+        "杉浦ボッ樹",
+        "大沢真司",
+        "ピエール剣",
+        "羽田",
+        "田淵正浩",
+        "タツ",
+        "南佳也",
+        "吉野篤史",
+        "今井勇太",
+        "マッスル澤野",
+        "井口",
+        "松山伸也",
+        "花岡じった",
+        "佐川銀次",
+        "およよ中野",
+        "小沢とおる",
+        "橋本誠吾",
+        "阿部智広",
+        "沢井亮",
+        "武田大樹",
+        "市川哲也",
+        "???",
+        "浅野あたる",
+        "梅田吉雄",
+        "阿川陽志",
+        "素人",
+        "結城結弦",
+        "畑中哲也",
+        "堀尾",
+        "上田昌宏",
+        "えりぐち",
+        "市川潤",
+        "沢木和也",
+        "トニー大木",
+        "横山大輔",
+        "一条真斗",
+        "真田京",
+        "イタリアン高橋",
+        "中田一平",
+        "完全主観",
+        "イェーイ高島",
+        "山田万次郎",
+        "澤地真人",
+        "杉山",
+        "ゴロー",
+        "細田あつし",
+        "藍井優太",
+        "奥村友真",
+        "ザーメン二郎",
+        "桜井ちんたろう",
+        "冴山トシキ",
+        "久保田裕也",
+        "戸川夏也",
+        "北こうじ",
+        "柏木純吉",
+        "ゆうき",
+        "トルティーヤ鈴木",
+        "神けんたろう",
+        "堀内ハジメ",
+        "ナルシス小林",
+        "アーミー",
+        "池田径",
+        "吉村文孝",
+        "優生",
+        "久道実",
+        "一馬",
+        "辻隼人",
+        "片山邦生",
+        "Qべぇ",
+        "志良玉弾吾",
+        "今岡爽紫郎",
+        "工藤健太",
+        "原口",
+        "アベ",
+        "染島貢",
+        "岩下たろう",
+        "小野晃",
+        "たむらあゆむ",
+        "川越将護",
+        "桜木駿",
+        "瀧口",
+        "TJ本田",
+        "園田",
+        "宮崎",
+        "鈴木一徹",
+        "黒人",
+        "カルロス",
+        "天河",
+        "ぷーてゃん",
+        "左曲かおる",
+        "富田",
+        "TECH",
+        "ムールかいせ",
+        "健太",
+        "山田裕二",
+        "池沼ミキオ",
+        "ウサミ",
+        "押井敬之",
+        "浅見草太",
+        "ムータン",
+        "フランクフルト林",
+        "石橋豊彦",
+        "矢野慎二",
+        "芦田陽",
+        "くりぼ",
+        "ダイ",
+        "ハッピー池田",
+        "山形健",
+        "忍野雅一",
+        "渋谷優太",
+        "服部義",
+        "たこにゃん",
+        "北山シロ",
+        "つよぽん",
+        "山本いくお",
+        "学万次郎",
+        "平井シンジ",
+        "望月",
+        "ゆーきゅん",
+        "頭田光",
+        "向理来",
+        "かめじろう",
+        "高橋しんと",
+        "栗原良",
+        "テツ神山",
+        "タラオ",
+        "真琴",
+        "滝本",
+        "金田たかお",
+        "平ボンド",
+        "春風ドギー",
+        "桐島達也",
+        "中堀健二",
+        "徳田重男",
+        "三浦屋助六",
+        "志戸哲也",
+        "ヒロシ",
+        "オクレ",
+        "羽目白武",
+        "ジョニー岡本",
+        "幸野賀一",
+        "インフィニティ",
+        "ジャック天野",
+        "覆面",
+        "安大吉",
+        "井上亮太",
+        "笹木良一",
+        "艦長",
+        "軍曹",
+        "タッキー",
+        "阿部ノボル",
+        "ダウ兄",
+        "まーくん",
+        "梁井一",
+        "カンパニー松尾",
+        "大塚玉堂",
+        "日比野達郎",
+        "小梅",
+        "ダイナマイト幸男",
+        "タケル",
+        "くるみ太郎",
+        "山田伸夫",
+        "氷崎健人",
+    ]
+    actor_list = [i.strip() for i in actor_result if i.replace("?", "")]
     all_actor_list = actor_list.copy()
     for each in all_actor_list:
         if each in av_man:
             actor_list.remove(each)
-    actor = ','.join(actor_list)
-    all_actor = ','.join(all_actor_list)
-    actor = actor if '暫無' not in actor else ''
-    all_actor = all_actor if '暫無' not in all_actor else ''
+    actor = ",".join(actor_list)
+    all_actor = ",".join(all_actor_list)
+    actor = actor if "暫無" not in actor else ""
+    all_actor = all_actor if "暫無" not in all_actor else ""
     return actor, all_actor
 
 
 def get_actor_photo(actor):
-    actor = actor.split(',')
+    actor = actor.split(",")
     data = {}
     for i in actor:
-        actor_photo = {i: ''}
+        actor_photo = {i: ""}
         data.update(actor_photo)
     return data
 
 
 def get_runtime(html):
-    result = html.xpath('//span[contains(text(), "时长") or contains(text(), "時長") or contains(text(), "収録時間")]/following-sibling::*//text()')
+    result = html.xpath(
+        '//span[contains(text(), "时长") or contains(text(), "時長") or contains(text(), "収録時間")]/following-sibling::*//text()'
+    )
     if result:
-        result = re.findall(r'\d+', result[0])
-    return result[0] if result else ''
+        result = re.findall(r"\d+", result[0])
+    return result[0] if result else ""
 
 
 def get_series(html):
     result = html.xpath('//span[contains(text(), "系列")]/following-sibling::*//text()')
-    return ''.join(result).strip() if result else ''
+    return "".join(result).strip() if result else ""
 
 
 def get_director(html):
-    result = html.xpath('//span[contains(text(), "导演") or contains(text(), "導演") or contains(text(), "監督")]/following-sibling::*//text()')
-    return result[0] if result else ''
+    result = html.xpath(
+        '//span[contains(text(), "导演") or contains(text(), "導演") or contains(text(), "監督")]/following-sibling::*//text()'
+    )
+    return result[0] if result else ""
 
 
 def get_studio(html):
-    result = html.xpath('//span[contains(text(), "制作") or contains(text(), "製作") or contains(text(), "メーカー")]/following-sibling::*//text()')
-    return result[0] if result else ''
+    result = html.xpath(
+        '//span[contains(text(), "制作") or contains(text(), "製作") or contains(text(), "メーカー")]/following-sibling::*//text()'
+    )
+    return result[0] if result else ""
 
 
 def get_publisher(html):
     result = html.xpath('//span[contains(text(), "发行") or contains(text(), "發行")]/following-sibling::*//text()')
-    return result[0] if result else ''
+    return result[0] if result else ""
 
 
 def get_release(html):
     result = html.xpath('//span[contains(text(), "日期") or contains(text(), "発売日")]/following-sibling::*//text()')
-    return result[0] if result else ''
+    return result[0] if result else ""
 
 
 def get_year(release):
-    result = re.findall(r'\d{4}', release)
-    return result[0] if result else ''
+    result = re.findall(r"\d{4}", release)
+    return result[0] if result else ""
 
 
 def get_tag(html):
     result = html.xpath('//a[@class="genre"]//text()')
-    tag = ''
+    tag = ""
     for each in result:
-        tag += each.strip().replace('，', '') + ','
-    return tag.strip(',')
+        tag += each.strip().replace("，", "") + ","
+    return tag.strip(",")
 
 
 def get_cover(html):
     try:
-        result = html.xpath("//img[@class='video-cover rounded lazyload' or @class='col-lg-2 col-md-2 col-sm-6 col-12 lazyload']/@data-src")[0]
-        if 'no_preview_lg' in result or 'http' not in result:
-            return ''
+        result = html.xpath(
+            "//img[@class='video-cover rounded lazyload' or @class='col-lg-2 col-md-2 col-sm-6 col-12 lazyload']/@data-src"
+        )[0]
+        if "no_preview_lg" in result or "http" not in result:
+            return ""
     except:
-        result = ''
+        result = ""
     return result
 
 
 def get_extrafanart(html):  # 获取封面链接
     extrafanart_list = html.xpath("//a[@class='tile-item']/@href")
-    if '#preview-video' in str(extrafanart_list):
+    if "#preview-video" in str(extrafanart_list):
         extrafanart_list.pop(0)
     return extrafanart_list
 
 
 def get_trailer(html):  # 获取预览片
     trailer_url_list = html.xpath("//video[@id='preview-video']/source/@src")
-    return get_dmm_trailer(trailer_url_list[0]) if trailer_url_list else ''
+    return get_dmm_trailer(trailer_url_list[0]) if trailer_url_list else ""
 
 
 def get_mosaic(title, actor):
     title += actor
-    if '無碼' in title or '無修正' in title or 'Uncensored' in title:
-        mosaic = '无码'
+    if "無碼" in title or "無修正" in title or "Uncensored" in title:
+        mosaic = "无码"
     else:
-        mosaic = ''
+        mosaic = ""
     return mosaic
 
 
-def main(number, appoint_url='', log_info='', req_web='', language='jp'):
+def main(number, appoint_url="", log_info="", req_web="", language="jp"):
     # https://freejavbt.com/VRKM-565
     start_time = time.time()
-    website_name = 'freejavbt'
-    req_web += '-> %s' % website_name
+    website_name = "freejavbt"
+    req_web += "-> %s" % website_name
     real_url = appoint_url
-    title = ''
-    cover_url = ''
-    poster_url = ''
+    title = ""
+    cover_url = ""
+    poster_url = ""
     image_download = False
-    image_cut = 'right'
-    web_info = '\n       '
-    debug_info = ''
+    image_cut = "right"
+    web_info = "\n       "
+    debug_info = ""
     real_url = f"https://freejavbt.com/{number}"
-    log_info += '\n    🌐 freejavbt'
+    log_info += "\n    🌐 freejavbt"
     if appoint_url:
-        real_url = appoint_url.replace('/zh/', '/').replace('/en/', '/').replace('/ja/', '/')
+        real_url = appoint_url.replace("/zh/", "/").replace("/en/", "/").replace("/ja/", "/")
 
     try:  # 捕获主动抛出的异常
-        debug_info = '番号地址: %s ' % real_url
+        debug_info = "番号地址: %s " % real_url
         log_info += web_info + debug_info
 
         result, html_info = curl_html(real_url)
         if not result:
-            debug_info = '请求错误: %s' % html_info
+            debug_info = "请求错误: %s" % html_info
             log_info += web_info + debug_info
             raise Exception(debug_info)
 
         # 判断返回内容是否有问题
         if not html_info:
-            debug_info = '未匹配到番号！'
+            debug_info = "未匹配到番号！"
             log_info += web_info + debug_info
             raise Exception(debug_info)
 
@@ -184,8 +366,8 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
 
         # ========================================================================收集信息
         title, number = get_title(html_detail)  # 获取标题并去掉头尾歌手名
-        if not title or 'single-video-info col-12' not in html_info:
-            debug_info = '数据获取失败: 番号标题不存在！'
+        if not title or "single-video-info col-12" not in html_info:
+            debug_info = "数据获取失败: 番号标题不存在！"
             log_info += web_info + debug_info
             raise Exception(debug_info)
         actor, all_actor = get_actor(html_detail)  # 获取actor
@@ -194,12 +376,12 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
         cover_url = get_cover(html_detail)  # 获取cover
 
         # poster_url = cover_url.replace('/covers/', '/thumbs/')
-        outline = ''
+        outline = ""
         tag = get_tag(html_detail)
         release = get_release(html_detail)
         year = get_year(release)
         runtime = get_runtime(html_detail)
-        score = ''
+        score = ""
         series = get_series(html_detail)
         director = get_director(html_detail)
         studio = get_studio(html_detail)
@@ -210,43 +392,49 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
         mosaic = get_mosaic(title, actor)
         try:
             dic = {
-                'number': number,
-                'title': title,
-                'originaltitle': title,
-                'actor': actor,
-                'all_actor': all_actor,
-                'outline': outline,
-                'originalplot': outline,
-                'tag': tag,
-                'release': release,
-                'year': year,
-                'runtime': runtime,
-                'score': score,
-                'series': series,
-                'director': director,
-                'studio': studio,
-                'publisher': publisher,
-                'source': 'freejavbt',
-                'actor_photo': actor_photo,
-                'all_actor_photo': all_actor_photo,
-                'cover': cover_url,
-                'poster': poster_url,
-                'extrafanart': extrafanart,
-                'trailer': trailer,
-                'image_download': image_download,
-                'image_cut': image_cut,
-                'log_info': log_info,
-                'error_info': '',
-                'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), )),
-                'mosaic': mosaic,
-                'website': website,
-                'wanted': '',
+                "number": number,
+                "title": title,
+                "originaltitle": title,
+                "actor": actor,
+                "all_actor": all_actor,
+                "outline": outline,
+                "originalplot": outline,
+                "tag": tag,
+                "release": release,
+                "year": year,
+                "runtime": runtime,
+                "score": score,
+                "series": series,
+                "director": director,
+                "studio": studio,
+                "publisher": publisher,
+                "source": "freejavbt",
+                "actor_photo": actor_photo,
+                "all_actor_photo": all_actor_photo,
+                "cover": cover_url,
+                "poster": poster_url,
+                "extrafanart": extrafanart,
+                "trailer": trailer,
+                "image_download": image_download,
+                "image_cut": image_cut,
+                "log_info": log_info,
+                "error_info": "",
+                "req_web": req_web
+                + "(%ss) "
+                % (
+                    round(
+                        (time.time() - start_time),
+                    )
+                ),
+                "mosaic": mosaic,
+                "website": website,
+                "wanted": "",
             }
-            debug_info = '数据获取成功！'
+            debug_info = "数据获取成功！"
             log_info += web_info + debug_info
-            dic['log_info'] = log_info
+            dic["log_info"] = log_info
         except Exception as e:
-            debug_info = '数据生成出错: %s' % str(e)
+            debug_info = "数据生成出错: %s" % str(e)
             log_info += web_info + debug_info
             raise Exception(debug_info)
 
@@ -254,19 +442,31 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp'):
         # print(traceback.format_exc())
         debug_info = str(e)
         dic = {
-            'title': '',
-            'cover': '',
-            'website': '',
-            'log_info': log_info,
-            'error_info': debug_info,
-            'req_web': req_web + '(%ss) ' % (round((time.time() - start_time), ))
+            "title": "",
+            "cover": "",
+            "website": "",
+            "log_info": log_info,
+            "error_info": debug_info,
+            "req_web": req_web
+            + "(%ss) "
+            % (
+                round(
+                    (time.time() - start_time),
+                )
+            ),
         }
-    dic = {website_name: {'zh_cn': dic, 'zh_tw': dic, 'jp': dic}}
-    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(',', ': '), )  # .encode('UTF-8')
+    dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
+    js = json.dumps(
+        dic,
+        ensure_ascii=False,
+        sort_keys=False,
+        indent=4,
+        separators=(",", ": "),
+    )  # .encode('UTF-8')
     return js
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # yapf: disable
     # print(main('080815_130'))   # trailer url is http, not https
     # print(main('', 'https://javdb.com/v/dWmGB'))

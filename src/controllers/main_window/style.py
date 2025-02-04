@@ -4,7 +4,7 @@ def set_style(self):
         return
 
     # 控件美化 左侧栏样式
-    self.Ui.widget_setting.setStyleSheet(f'''
+    self.Ui.widget_setting.setStyleSheet(f"""
         QWidget#widget_setting{{
             background: #F5F5F6;
             border-top-left-radius: {self.window_radius}px;
@@ -25,9 +25,9 @@ def set_style(self):
             color: rgba(20, 20, 20, 250);
             border: 0px solid rgba(255, 255, 255, 80);
         }}
-        ''')
+        """)
     # 主界面
-    self.Ui.page_main.setStyleSheet('''
+    self.Ui.page_main.setStyleSheet("""
         QLabel#label_number1,#label_actor1,#label_title1,#label_poster1,#label_number,#label_actor,#label_title,#label_poster1{
             font-size: 16px;
             font-weight: bold;
@@ -50,9 +50,9 @@ def set_style(self):
         QGroupBox{
             background-color: rgba(246, 246, 246, 0);
         }
-        ''')
+        """)
     # 工具页
-    self.Ui.page_tool.setStyleSheet('''
+    self.Ui.page_tool.setStyleSheet("""
         * {
             font-size: 13px;
         }
@@ -82,9 +82,9 @@ def set_style(self):
             background-color: rgba(245,245,246,220);
             border-radius: 10px;
         }
-        ''')
+        """)
     # 使用帮助页
-    self.Ui.page_about.setStyleSheet('''
+    self.Ui.page_about.setStyleSheet("""
         * {
             font-size: 13px;
         }
@@ -95,9 +95,9 @@ def set_style(self):
             background-color: rgba(246,246,246,0);
             padding: 2px, 2px;
         }
-        ''')
+        """)
     # 设置页
-    self.Ui.page_setting.setStyleSheet('''
+    self.Ui.page_setting.setStyleSheet("""
         * {
             font-size:13px;
         }
@@ -163,9 +163,9 @@ def set_style(self):
             background-color: rgba(245,245,246,220);
             border-radius: 10px;
         }
-        ''')
+        """)
     # 整个页面
-    self.Ui.centralwidget.setStyleSheet(f'''
+    self.Ui.centralwidget.setStyleSheet(f"""
         * {{
             font-family: Consolas, 'PingFang SC', 'Microsoft YaHei UI', 'Noto Color Emoji', 'Segoe UI Emoji';
             font-size:13px;
@@ -303,12 +303,12 @@ def set_style(self):
             width: 3px; /*区块宽度*/
             margin: 0px;
         }}
-        ''')
+        """)
 
 
 def set_dark_style(self):
     # 控件美化 左侧栏样式 暗黑模式
-    self.Ui.widget_setting.setStyleSheet(f'''
+    self.Ui.widget_setting.setStyleSheet(f"""
         QWidget#widget_setting{{
             background: #1F272F;
             border-top-left-radius: {self.window_radius}px;
@@ -329,9 +329,9 @@ def set_dark_style(self):
             color: rgba(210, 210, 210, 250);
             border: 0px solid rgba(255, 255, 255, 80);
         }}
-        ''')
+        """)
     # 主界面
-    self.Ui.page_main.setStyleSheet('''
+    self.Ui.page_main.setStyleSheet("""
         QLabel#label_number1,#label_actor1,#label_title1,#label_poster1,#label_number,#label_actor,#label_title,#label_poster1{
             font-size: 16px;
             font-weight: bold;
@@ -354,9 +354,9 @@ def set_dark_style(self):
         QGroupBox{
             background-color: rgba(246, 246, 246, 0);
         }
-        ''')
+        """)
     # 工具页
-    self.Ui.page_tool.setStyleSheet('''
+    self.Ui.page_tool.setStyleSheet("""
         * {
             font-size: 13px;
         }
@@ -378,9 +378,9 @@ def set_dark_style(self):
             background-color: rgba(180, 180, 180, 20);
             border-radius: 10px;
         }
-        ''')
+        """)
     # 使用帮助页
-    self.Ui.page_about.setStyleSheet('''
+    self.Ui.page_about.setStyleSheet("""
         * {
             font-size: 13px;
         }
@@ -391,9 +391,9 @@ def set_dark_style(self):
             background-color: rgba(246,246,246,0);
             padding: 2px, 2px;
         }
-        ''')
+        """)
     # 设置页
-    self.Ui.page_setting.setStyleSheet('''
+    self.Ui.page_setting.setStyleSheet("""
         * {
             font-size:13px;
         }
@@ -458,9 +458,9 @@ def set_dark_style(self):
         QPushButton#pushButton_scrape_note,#pushButton_field_tips_website,#pushButton_field_tips_nfo,#pushButton_check_javdb_cookie{
             color: black;
         }
-        ''')
+        """)
     # 整个页面
-    self.Ui.centralwidget.setStyleSheet(f'''
+    self.Ui.centralwidget.setStyleSheet(f"""
         * {{
             font-family: Consolas, 'PingFang SC', 'Microsoft YaHei UI', 'Noto Color Emoji', 'Segoe UI Emoji';
             font-size:13px;
@@ -639,4 +639,4 @@ def set_dark_style(self):
             width: 3px; /*区块宽度*/
             margin: 0px;
         }}
-        ''')
+        """)

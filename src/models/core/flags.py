@@ -2,6 +2,7 @@
 用于刮削过程控制的标志位
 此模块不应依赖任何项目代码
 """
+
 from models.entity.enums import FileMode
 
 
@@ -42,18 +43,18 @@ class Flags:
     nfo_deal_set = set()  # 当前文件nfo已处理的标识（如已存在，视为剧照已处理过）
     json_get_set = set()  # 去获取json的番号列表
     json_data_dic = {}  # 获取成功的json
-    img_path = ''
+    img_path = ""
     deepl_result = {}  # deep 翻译结果（当没有填写api时，使用第三方翻译模块，作用是实现超时自动退出，避免卡死）
     failed_list = []  # 失败文件和错误原因记录
     failed_file_list = []  # 失败文件记录
     stop_flag = False  # 线程停止标识
-    single_file_path = ''  # 工具单文件刮削的文件路径
-    website_name = ''
+    single_file_path = ""  # 工具单文件刮削的文件路径
+    website_name = ""
     scrape_start_time = None
     success_list = set()
     threads_list = []  # 开启的线程列表
     stop_other = True  # 非刮削线程停止标识
-    local_number_flag = ''  # 启动后本地数据库是否扫描过
+    local_number_flag = ""  # 启动后本地数据库是否扫描过
     actor_numbers_dic = {}  # 每个演员所有番号的字典
     local_number_set = set()  # 本地所有番号的集合
     local_number_cnword_set = set()  # 本地所有有字幕的番号的集合
@@ -85,6 +86,6 @@ class Flags:
         cls.nfo_deal_set = set()
         cls.json_get_set = set()
         cls.json_data_dic = {}
-        cls.img_path = ''
+        cls.img_path = ""
         cls.deepl_result = {}
         cls.stop_flag = False

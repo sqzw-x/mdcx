@@ -5,7 +5,8 @@ from configparser import RawConfigParser
 from models.base.path import get_main_path
 from models.config.config_manual import ManualConfig
 
-CONFIG_IMPORT = ['''
+CONFIG_IMPORT = [
+    '''
 import time
 
 
@@ -17,9 +18,11 @@ class GeneratedConfig:
     Auto generated configuration
     Also used as default configuration
     """
-'''.strip()]
+'''.strip()
+]
 
-CONFIG_STR = ['''    CONFIG_STR = f"""
+CONFIG_STR = [
+    '''    CONFIG_STR = f"""
 [modified_time]
 modified_time = {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}
 version = {version}
@@ -243,22 +246,23 @@ timed_interval = {timed_interval}
 rest_count = {rest_count}
 rest_time = {rest_time}
 statement = {statement}"""
-''']
+'''
+]
 
 
 def generate_config():
     # 1. update version in config.ini.default
     # 2. config.ini.default -> config_generated.py
-    config_default_path = os.path.join(get_main_path(), 'config.ini.default')
+    config_default_path = os.path.join(get_main_path(), "config.ini.default")
     reader = RawConfigParser()
-    reader.read(config_default_path, encoding='UTF-8')
-    if reader.get('modified_time', 'version') != str(ManualConfig.local_version):  # 设置软件版本
-        reader.set('modified_time', 'version', ManualConfig.local_version)
-        reader.set('modified_time', 'modified_time', datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        with open(config_default_path, 'w', encoding='UTF-8') as f:
+    reader.read(config_default_path, encoding="UTF-8")
+    if reader.get("modified_time", "version") != str(ManualConfig.local_version):  # 设置软件版本
+        reader.set("modified_time", "version", ManualConfig.local_version)
+        reader.set("modified_time", "modified_time", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        with open(config_default_path, "w", encoding="UTF-8") as f:
             reader.write(f)
     for section in reader.sections():
-        CONFIG_IMPORT.append(f'\n    # {section}')
+        CONFIG_IMPORT.append(f"\n    # {section}")
         for key, value in reader.items(section):
             if key in ManualConfig.INT_KEY or key in ManualConfig.FLOAT_KEY:
                 CONFIG_IMPORT.append(f"""
@@ -266,11 +270,11 @@ def generate_config():
             else:
                 CONFIG_IMPORT.append(f"""
     {key} = r'{value}'""")
-        CONFIG_IMPORT.append('\n')
-    with open('config_generated.py', 'w', encoding='UTF-8') as f:
+        CONFIG_IMPORT.append("\n")
+    with open("config_generated.py", "w", encoding="UTF-8") as f:
         f.writelines(CONFIG_IMPORT)
         f.writelines(CONFIG_STR)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     generate_config()
