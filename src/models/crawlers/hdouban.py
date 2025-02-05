@@ -55,7 +55,12 @@ def get_year(release):
         return release
 
 
-def get_mosaic(title, studio, tag, mosaic):
+def get_mosaic(
+    title,
+    studio,
+    tag,
+    mosaic,
+):
     all_info = title + studio + tag
     if "国产" in all_info or "國產" in all_info:
         mosaic = "国产"
@@ -177,7 +182,16 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     return number_list, filename_list
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number="", mosaic=""):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="zh_cn",
+    file_path="",
+    appoint_number="",
+    mosaic="",
+):
     start_time = time.time()
     number = number.strip()
     website_name = "hdouban"

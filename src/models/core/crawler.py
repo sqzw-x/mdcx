@@ -4,12 +4,14 @@
 
 import json
 import re
+from typing import Any, Callable, Dict, List
 
 import langid
 
 from models.base.number import get_number_letters, is_uncensored
 from models.config.config import config
 from models.core.flags import Flags
+from models.core.types import JsonData
 from models.crawlers import (
     airav,
     airav_cc,
@@ -52,7 +54,14 @@ from models.crawlers import (
 from models.entity.enums import FileMode
 
 
-def _get_new_website_list(field_website_list, number_website_list, file_number, short_number, field, all=False):
+def _get_new_website_list(
+    field_website_list: List[str],
+    number_website_list: List[str],
+    file_number: str,
+    short_number: str,
+    field: str,
+    all: bool = False,
+) -> List[str]:
     whole_fields = config.whole_fields  # 继续补全的字段
     field_website_list = [i for i in field_website_list if i.strip()]  # 去空
     number_website_list = [i for i in number_website_list if i.strip()]  # 去空
@@ -114,7 +123,7 @@ def _get_new_website_list(field_website_list, number_website_list, file_number, 
     return same_list
 
 
-def _deal_some_list(field, website, same_list):
+def _deal_some_list(field: str, website: str, same_list: List[str]) -> List[str]:
     if website not in same_list:
         same_list.append(website)
     if field in ["title", "outline", "thumb", "poster", "trailer", "extrafanart"]:
@@ -125,7 +134,15 @@ def _deal_some_list(field, website, same_list):
     return same_list
 
 
-def _call_crawler(json_data, website, language, file_number, short_number, mosaic, org_language):
+def _call_crawler(
+    json_data: JsonData,
+    website: str,
+    language: str,
+    file_number: str,
+    short_number: str,
+    mosaic: str,
+    org_language: str,
+) -> Dict[str, Any]:
     """
     获取某个网站数据
     """
@@ -138,100 +155,133 @@ def _call_crawler(json_data, website, language, file_number, short_number, mosai
     # 259LUXU-1111， mgstage 和 avsex 之外使用 LUXU-1111（素人番号时，short_number有值，不带前缀数字；反之，short_number为空)
     if short_number and website != "mgstage" and website != "avsex":
         file_number = short_number
-
+    _: dict[str, Callable] = {
+        "official": official.main,
+        "iqqtv": iqqtv_new.main,
+        "avsex": avsex.main,
+        "airav_cc": airav_cc.main,
+        "airav": airav.main,
+        "freejavbt": freejavbt.main,
+        "javbus": javbus.main,
+        "javdb": javdb.main,
+        "jav321": jav321.main,
+        "dmm": dmm.main,
+        "javlibrary": javlibrary_new.main,
+        "xcity": xcity.main,
+        "avsox": avsox.main,
+        "mgstage": mgstage.main,
+        "7mmtv": mmtv.main,
+        "fc2": fc2.main,
+        "fc2hub": fc2hub.main,
+        "fc2club": fc2club.main,
+        "mdtv": mdtv.main,
+        "madouqu": madouqu.main,
+        "hscangku": hscangku.main,
+        "cableav": cableav.main,
+        "getchu": getchu.main,
+        "getchu_dmm": getchu_dmm.main,
+        "mywife": mywife.main,
+        "giga": giga.main,
+        "hdouban": hdouban.main,
+        "lulubar": lulubar.main,
+        "love6": love6.main,
+        "cnmdb": cnmdb.main,
+        "faleno": faleno.main,
+        "fantastica": fantastica.main,
+        "theporndb": theporndb.main,
+        "dahlia": dahlia.main,
+        "prestige": prestige.main,
+        "kin8": kin8.main,
+        "javday": javday.main,
+    }
     if website == "official":
-        json_data = json.loads(official.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(official.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "iqqtv":
-        json_data = json.loads(iqqtv_new.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(iqqtv_new.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "avsex":
-        json_data = json.loads(avsex.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(avsex.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "airav_cc":
-        json_data = json.loads(airav_cc.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(airav_cc.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "airav":
-        json_data = json.loads(airav.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(airav.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "freejavbt":
-        json_data = json.loads(freejavbt.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(freejavbt.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "javbus":
-        json_data = json.loads(javbus.main(file_number, appoint_url, log_info, req_web, language, mosaic))
+        res = json.loads(javbus.main(file_number, appoint_url, log_info, req_web, language, mosaic))
     elif website == "javdb":
-        json_data = json.loads(javdb.main(file_number, appoint_url, log_info, req_web, language, org_language))
+        res = json.loads(javdb.main(file_number, appoint_url, log_info, req_web, language, org_language))
     elif website == "jav321":
-        json_data = json.loads(jav321.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(jav321.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "dmm":
-        json_data = json.loads(dmm.main(file_number, appoint_url, log_info, req_web, language, file_path))
+        res = json.loads(dmm.main(file_number, appoint_url, log_info, req_web, language, file_path))
     elif website == "javlibrary":
-        json_data = json.loads(javlibrary_new.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(javlibrary_new.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "xcity":
-        json_data = json.loads(xcity.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(xcity.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "avsox":
-        json_data = json.loads(avsox.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(avsox.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "mgstage":
-        json_data = json.loads(mgstage.main(file_number, appoint_url, log_info, req_web, language, short_number))
+        res = json.loads(mgstage.main(file_number, appoint_url, log_info, req_web, language, short_number))
     elif website == "7mmtv":
-        json_data = json.loads(mmtv.main(file_number, appoint_url, log_info, req_web, language, file_path))
+        res = json.loads(mmtv.main(file_number, appoint_url, log_info, req_web, language, file_path))
     elif website == "fc2":
-        json_data = json.loads(fc2.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(fc2.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "fc2hub":
-        json_data = json.loads(fc2hub.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(fc2hub.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "fc2club":
-        json_data = json.loads(fc2club.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(fc2club.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "mdtv":
-        json_data = json.loads(
-            mdtv.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number)
-        )
+        res = json.loads(mdtv.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number))
     elif website == "madouqu":
-        json_data = json.loads(
-            madouqu.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number)
-        )
+        res = json.loads(madouqu.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number))
     elif website == "hscangku":
-        json_data = json.loads(
+        res = json.loads(
             hscangku.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number)
         )
     elif website == "cableav":
-        json_data = json.loads(
-            cableav.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number)
-        )
+        res = json.loads(cableav.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number))
     elif website == "getchu":
-        json_data = json.loads(getchu.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(getchu.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "getchu_dmm":
-        json_data = json.loads(getchu_dmm.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(getchu_dmm.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "mywife":
-        json_data = json.loads(mywife.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(mywife.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "giga":
-        json_data = json.loads(giga.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(giga.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "hdouban":
-        json_data = json.loads(
+        res = json.loads(
             hdouban.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number, mosaic)
         )
     elif website == "lulubar":
-        json_data = json.loads(lulubar.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(lulubar.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "love6":
-        json_data = json.loads(love6.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(love6.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "cnmdb":
-        json_data = json.loads(
-            cnmdb.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number)
-        )
+        res = json.loads(cnmdb.main(file_number, appoint_url, log_info, req_web, language, file_path, appoint_number))
     elif website == "faleno":
-        json_data = json.loads(faleno.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(faleno.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "fantastica":
-        json_data = json.loads(fantastica.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(fantastica.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "theporndb":
-        json_data = json.loads(theporndb.main(file_number, appoint_url, log_info, req_web, language, file_path))
+        res = json.loads(theporndb.main(file_number, appoint_url, log_info, req_web, language, file_path))
     elif website == "dahlia":
-        json_data = json.loads(dahlia.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(dahlia.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "prestige":
-        json_data = json.loads(prestige.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(prestige.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "kin8":
-        json_data = json.loads(kin8.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(kin8.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "javday":
-        json_data = json.loads(javday.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(javday.main(file_number, appoint_url, log_info, req_web, language))
     else:
-        json_data = json.loads(javdb.main(file_number, appoint_url, log_info, req_web, language))
+        res = json.loads(javdb.main(file_number, appoint_url, log_info, req_web, language))
 
-    return json_data
+    return res
 
 
-def _decide_websites(json_data, number_website_list):
+def _decide_websites(
+    json_data: JsonData,
+    number_website_list: List[str],
+) -> JsonData:
     """
     获取一组网站的数据：按照设置的网站组，请求各字段数据，并返回最终的数据
     """
@@ -319,29 +369,29 @@ def _decide_websites(json_data, number_website_list):
 
     # 生成各字段及请求网站列表，并请求数据
     if scrape_like == "speed":
-        request_field_list = [["title", "标题", "title_language", number_website_list]]
+        request_field_list = [("title", "标题", "title_language", number_website_list)]
     else:
         if "official" in config.website_set:
             title_jp_website_new_list.insert(0, "official")
         request_field_list = [
-            ["title", "标题", "title_language", title_jp_website_new_list],
-            ["title_zh", "中文标题", "title_language", title_zh_website_new_list],
-            ["outline", "简介", "outline_language", outline_jp_website_new_list],
-            ["outline_zh", "中文简介", "outline_language", outline_zh_website_new_list],
-            ["actor", "演员", "actor_language", actor_website_new_list],
-            ["cover", "背景图", "title_language", thumb_website_new_list],
-            ["poster", "封面图", "title_language", poster_website_new_list],
-            ["extrafanart", "剧照", "title_language", extrafanart_website_new_list],
-            ["tag", "标签", "tag_language", tag_website_new_list],
-            ["release", "发行日期", "title_language", release_website_new_list],
-            ["runtime", "时长", "title_language", runtime_website_new_list],
-            ["score", "评分", "title_language", score_website_new_list],
-            ["director", "导演", "director_language", director_website_new_list],
-            ["series", "系列", "series_language", series_website_new_list],
-            ["studio", "片商", "studio_language", studio_website_new_list],
-            ["publisher", "发行商", "publisher_language", publisher_website_new_list],
-            ["trailer", "预告片", "title_language", trailer_website_new_list],
-            ["wanted", "想看人数", "title_language", wanted_website_new_list],
+            ("title", "标题", "title_language", title_jp_website_new_list),
+            ("title_zh", "中文标题", "title_language", title_zh_website_new_list),
+            ("outline", "简介", "outline_language", outline_jp_website_new_list),
+            ("outline_zh", "中文简介", "outline_language", outline_zh_website_new_list),
+            ("actor", "演员", "actor_language", actor_website_new_list),
+            ("cover", "背景图", "title_language", thumb_website_new_list),
+            ("poster", "封面图", "title_language", poster_website_new_list),
+            ("extrafanart", "剧照", "title_language", extrafanart_website_new_list),
+            ("tag", "标签", "tag_language", tag_website_new_list),
+            ("release", "发行日期", "title_language", release_website_new_list),
+            ("runtime", "时长", "title_language", runtime_website_new_list),
+            ("score", "评分", "title_language", score_website_new_list),
+            ("director", "导演", "director_language", director_website_new_list),
+            ("series", "系列", "series_language", series_website_new_list),
+            ("studio", "片商", "studio_language", studio_website_new_list),
+            ("publisher", "发行商", "publisher_language", publisher_website_new_list),
+            ("trailer", "预告片", "title_language", trailer_website_new_list),
+            ("wanted", "想看人数", "title_language", wanted_website_new_list),
         ]
         if config.outline_language == "jp":
             request_field_list.pop(3)
@@ -350,8 +400,7 @@ def _decide_websites(json_data, number_website_list):
         if not wanted_website_new_list:
             request_field_list.pop()
 
-    for each_f in request_field_list:
-        field_name, field_cnname, field_language, website_list = each_f
+    for field_name, field_cnname, field_language, website_list in request_field_list:
         if field_name in none_fields:
             continue
         _call_crawlers(
@@ -438,30 +487,29 @@ def _decide_websites(json_data, number_website_list):
         wanted_website_list, number_website_list, file_number, short_number, "wanted"
     )
     deal_field_list = [
-        ["title", "标题", "title_language", title_website_new_list],
-        ["originaltitle", "原标题", "outline_language", title_jp_website_new_list],
-        ["outline", "简介", "outline_language", outline_website_new_list],
-        ["originalplot", "原简介", "outline_language", outline_jp_website_new_list],
-        ["actor", "演员", "actor_language", actor_website_new_list],
-        ["cover", "背景图", "title_language", thumb_website_new_list],
-        ["poster", "封面图", "title_language", poster_website_new_list],
-        ["extrafanart", "剧照", "title_language", extrafanart_website_new_list],
-        ["tag", "标签", "tag_language", tag_website_new_list],
-        ["release", "发行日期", "title_language", release_website_new_list],
-        ["runtime", "时长", "title_language", runtime_website_new_list],
-        ["score", "评分", "title_language", score_website_new_list],
-        ["director", "导演", "director_language", director_website_new_list],
-        ["series", "系列", "series_language", series_website_new_list],
-        ["studio", "片商", "studio_language", studio_website_new_list],
-        ["publisher", "发行商", "publisher_language", publisher_website_new_list],
-        ["trailer", "预告片", "title_language", trailer_website_new_list],
-        ["wanted", "想看人数", "title_language", wanted_website_list],
+        ("title", "标题", "title_language", title_website_new_list),
+        ("originaltitle", "原标题", "outline_language", title_jp_website_new_list),
+        ("outline", "简介", "outline_language", outline_website_new_list),
+        ("originalplot", "原简介", "outline_language", outline_jp_website_new_list),
+        ("actor", "演员", "actor_language", actor_website_new_list),
+        ("cover", "背景图", "title_language", thumb_website_new_list),
+        ("poster", "封面图", "title_language", poster_website_new_list),
+        ("extrafanart", "剧照", "title_language", extrafanart_website_new_list),
+        ("tag", "标签", "tag_language", tag_website_new_list),
+        ("release", "发行日期", "title_language", release_website_new_list),
+        ("runtime", "时长", "title_language", runtime_website_new_list),
+        ("score", "评分", "title_language", score_website_new_list),
+        ("director", "导演", "director_language", director_website_new_list),
+        ("series", "系列", "series_language", series_website_new_list),
+        ("studio", "片商", "studio_language", studio_website_new_list),
+        ("publisher", "发行商", "publisher_language", publisher_website_new_list),
+        ("trailer", "预告片", "title_language", trailer_website_new_list),
+        ("wanted", "想看人数", "title_language", wanted_website_list),
     ]
     if not wanted_website_new_list or (scrape_like == "speed" and json_data["source"] not in wanted_website_new_list):
         deal_field_list.pop()
 
-    for each_f in deal_field_list:
-        field_name, field_cnname, field_language, website_list = each_f
+    for field_name, field_cnname, field_language, website_list in deal_field_list:
         _deal_each_field(all_json_data, json_data, website_list, field_name, field_cnname, field_language, config)
 
     # 把已刮削成功网站的 cover url 按照 cover 网站优先级，保存为一个列表，第一个图片下载失败时，可以使用其他图片下载
@@ -503,8 +551,8 @@ def _decide_websites(json_data, number_website_list):
 
     # 处理 year
     release = json_data["release"]
-    if release and re.search(r"\d{4}", release):
-        json_data["year"] = str(re.search(r"\d{4}", release).group())
+    if release and (r := re.search(r"\d{4}", release)):
+        json_data["year"] = r.group()
 
     # 处理 number：素人影片时使用有数字前缀的number
     if short_number:
@@ -518,7 +566,15 @@ def _decide_websites(json_data, number_website_list):
     return json_data
 
 
-def _deal_each_field(all_json_data, json_data, website_list, field_name, field_cnname, field_language, config):
+def _deal_each_field(
+    all_json_data: Dict[str, Dict[str, Any]],
+    json_data: JsonData,
+    website_list: List[str],
+    field_name: str,
+    field_cnname: str,
+    field_language: str,
+    config: Any,
+) -> None:
     """
     按照设置的网站顺序处理字段
     """
@@ -537,8 +593,9 @@ def _deal_each_field(all_json_data, json_data, website_list, field_name, field_c
     json_data["log_info"] += "\n\n    🙋🏻‍ {} \n    ====================================\n    🌐 来源优先级：{}".format(
         field_cnname, " -> ".join(website_list)
     )
+    backup_website = ""
+    title_language = getattr(config, field_language, "jp")
     for website in website_list:
-        title_language = getattr(config, field_language)
         if website not in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "mdtv", "madouqu", "lulubar"]:
             title_language = "jp"
         elif (
@@ -601,21 +658,21 @@ def _deal_each_field(all_json_data, json_data, website_list, field_name, field_c
             json_data["fields_info"] += "\n     " + f"{field_name:<13}" + f": {backup_website} ({title_language})"
             json_data["log_info"] += f"\n    🟢 {backup_website} (使用备用数据)\n     ↳ {backup_data}"
         else:
-            json_data["fields_info"] += "\n     " + f"{field_name:<13}" + f': {"-----"} ({"not found"})'
+            json_data["fields_info"] += "\n     " + f"{field_name:<13}" + f": {'-----'} ({'not found'})"
 
 
 def _call_crawlers(
-    all_json_data,
-    json_data,
-    website_list,
-    field_name,
-    field_cnname,
-    field_language,
-    config,
-    file_number,
-    short_number,
-    mosaic,
-):  # 4
+    all_json_data: Dict[str, Dict[str, Any]],
+    json_data: JsonData,
+    website_list: List[str],
+    field_name: str,
+    field_cnname: str,
+    field_language: str,
+    config: Any,
+    file_number: str,
+    short_number: str,
+    mosaic: str,
+) -> None:  # 4
     """
     按照设置的网站顺序获取各个字段信息
     """
@@ -624,6 +681,7 @@ def _call_crawlers(
             website_list.insert(0, "official")
 
     backup_jsondata = {}
+    backup_website = ""
     for website in website_list:
         if (website in ["avsox", "mdtv"] and mosaic in ["有码", "无码破解", "流出", "里番", "动漫"]) or (
             website == "mdtv" and mosaic == "无码"
@@ -647,7 +705,7 @@ def _call_crawlers(
                 json_data, website, title_language, file_number, short_number, mosaic, config.title_language
             )
             all_json_data.update(web_data)
-            web_data_json = all_json_data.get(website).get(title_language)
+            web_data_json: dict = all_json_data.get(website, {}).get(title_language, {})
             json_data["req_web"] = web_data_json["req_web"]
             json_data["log_info"] = web_data_json["log_info"]
 
@@ -696,7 +754,7 @@ def _call_crawlers(
             json_data["log_info"] += f"\n    🔴 {field_cnname} 获取失败！"
 
 
-def _call_specific_crawler(json_data, website):
+def _call_specific_crawler(json_data: JsonData, website: str) -> JsonData:
     file_number = json_data["number"]
     short_number = json_data["short_number"]
     mosaic = json_data["mosaic"]
@@ -730,7 +788,7 @@ def _call_specific_crawler(json_data, website):
         publisher_language = "zh_cn"
         director_language = "zh_cn"
     web_data = _call_crawler(json_data, website, title_language, file_number, short_number, mosaic, org_language)
-    web_data_json = web_data.get(website).get(title_language)
+    web_data_json = web_data.get(website, {}).get(title_language)
     json_data.update(web_data_json)
     if not json_data["title"]:
         return json_data
@@ -763,7 +821,7 @@ def _call_specific_crawler(json_data, website):
         if web_data_json["director"]:
             json_data["director"] = web_data_json["director"]
     if json_data["cover"]:
-        json_data["cover_list"] = [[website, json_data["cover"]]]
+        json_data["cover_list"] = [(website, json_data["cover"])]
 
     # 加入来源信息
     json_data["outline_from"] = website
@@ -793,7 +851,7 @@ def _call_specific_crawler(json_data, website):
     return json_data
 
 
-def _crawl(json_data, website_name):  # 从JSON返回元数据
+def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回元数据
     file_number = json_data["number"]
     file_path = json_data["file_path"]
     short_number = json_data["short_number"]
@@ -814,8 +872,7 @@ def _crawl(json_data, website_name):  # 从JSON返回元数据
     json_data["log_info"] = ""
     json_data["fields_info"] = ""
     json_data["all_actor"] = ""
-    json_data["all_actor_photo"] = ""
-
+    json_data["all_actor_photo"] = {}
     # ================================================网站规则添加开始================================================
 
     if website_name == "all":  # 从全部网站刮削
@@ -941,24 +998,18 @@ def _crawl(json_data, website_name):  # 从JSON返回元数据
     json_data["leak"] = leak
     json_data["wuma"] = wuma
     json_data["youma"] = youma
-    json_data["4k"] = ""
     json_data["cd_part"] = cd_part
     json_data["destroyed"] = destroyed
-    json_data["actor_href"] = ""
     json_data["version"] = version
     json_data["logs"] = logs
     json_data["file_path"] = file_path
     json_data["appoint_number"] = appoint_number
     json_data["appoint_url"] = appoint_url
-    json_data["poster_path"] = ""
-    json_data["thumb_path"] = ""
-    json_data["fanart_path"] = ""
-    json_data["error_info"] = ""
 
     return json_data
 
 
-def _get_website_name(json_data, file_mode):
+def _get_website_name(json_data: JsonData, file_mode: FileMode) -> str:
     # 获取刮削网站
     website_name = "all"
     if file_mode == FileMode.Single:  # 刮削单文件（工具页面）
@@ -973,14 +1024,14 @@ def _get_website_name(json_data, file_mode):
     return website_name
 
 
-def crawl(json_data, file_mode):
+def crawl(json_data: JsonData, file_mode: FileMode) -> JsonData:
     # 从指定网站获取json_data
     website_name = _get_website_name(json_data, file_mode)
     json_data = _crawl(json_data, website_name)
     return _deal_json_data(json_data)
 
 
-def _deal_json_data(json_data):
+def _deal_json_data(json_data: JsonData) -> JsonData:
     # 标题为空返回
     title = json_data["title"]
     if not title:
@@ -1027,46 +1078,12 @@ def _deal_json_data(json_data):
     json_data["release"] = release
 
     # 评分
-    if json_data.get("score"):
+    if json_data["score"]:
         json_data["score"] = "%.1f" % float(json_data.get("score"))
-    else:
-        json_data["score"] = ""
-
-    # originaltitle
-    if not json_data.get("originaltitle"):
-        json_data["originaltitle"] = ""
-
-    # outline
-    if not json_data.get("outline"):
-        json_data["outline"] = ""
-
-    # originalplot
-    if not json_data.get("originalplot"):
-        json_data["originalplot"] = ""
-
-    # series
-    if not json_data.get("series"):
-        json_data["series"] = ""
-
-    # series
-    if not json_data.get("director"):
-        json_data["director"] = ""
-
-    # studio
-    if not json_data.get("studio"):
-        json_data["studio"] = ""
 
     # publisher
     if not json_data.get("publisher"):
         json_data["publisher"] = json_data["studio"]
-
-    # trailer
-    if not json_data.get("trailer"):
-        json_data["trailer"] = ""
-
-    # wanted
-    if not json_data.get("wanted"):
-        json_data["wanted"] = ""
 
     # 字符转义，避免显示问题
     key_word = [

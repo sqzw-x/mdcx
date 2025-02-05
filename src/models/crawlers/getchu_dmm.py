@@ -5,7 +5,13 @@ import json
 from models.crawlers import dmm, getchu
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+):
     json_data_getchu = json.loads(getchu.main(number, appoint_url, log_info, req_web, "jp"))
     json_data_new = json_data_getchu["getchu"]["jp"]
     log_info = json_data_new["log_info"]

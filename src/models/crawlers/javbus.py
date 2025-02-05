@@ -174,7 +174,14 @@ def getTag(html):  # 获取标签
     return result
 
 
-def get_real_url(number, url_type, javbus_url, json_log, headers, cookie):  # 获取详情页链接
+def get_real_url(
+    number,
+    url_type,
+    javbus_url,
+    json_log,
+    headers,
+    cookie,
+):  # 获取详情页链接
     if url_type == "us":  # 欧美
         url_search = "https://www.javbus.hair/search/" + number
     elif url_type == "censored":  # 有码
@@ -214,7 +221,14 @@ def get_real_url(number, url_type, javbus_url, json_log, headers, cookie):  # �
     raise Exception(debug_info)
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp", mosaic=""):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+    mosaic="",
+):
     start_time = time.time()
     website_name = "javbus"
     req_web += "-> %s" % website_name

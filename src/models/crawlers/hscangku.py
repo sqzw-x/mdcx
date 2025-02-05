@@ -25,7 +25,12 @@ def get_actor_photo(actor):
     return data
 
 
-def get_detail_info(html, real_url, number, file_path):
+def get_detail_info(
+    html,
+    real_url,
+    number,
+    file_path,
+):
     href = re.split(r"[/.]", real_url)[-2]
     title_h1 = html.xpath(
         '//h3[@class="title" and not(contains(normalize-space(.), "目录")) and not(contains(normalize-space(.), "为你推荐"))]/text()'
@@ -68,7 +73,15 @@ def get_redirected_url(url):
         return None
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number=""):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="zh_cn",
+    file_path="",
+    appoint_number="",
+):
     start_time = time.time()
     website_name = "hscangku"
     req_web += "-> %s" % website_name

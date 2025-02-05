@@ -7,14 +7,21 @@ import langid
 from lxml import etree
 
 from models.base.file import delete_file, split_path
-from models.base.number import deal_actor_more, get_info, get_number_first_letter, get_number_letters
+from models.base.number import deal_actor_more, get_number_first_letter, get_number_letters
 from models.base.utils import convert_path, get_used_time
 from models.config.config import config
+from models.core.types import JsonData
 from models.core.utils import get_new_release
 from models.signals import signal
 
 
-def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=False):
+def write_nfo(
+    json_data: JsonData,
+    nfo_new_path: str,
+    folder_new_path: str,
+    file_path: str,
+    edit_mode=False,
+) -> bool:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -79,29 +86,26 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
     cd_part = json_data_nfo["cd_part"]
     originaltitle = json_data_nfo["originaltitle"]
     originalplot = json_data_nfo["originalplot"]
-    (
-        title,
-        originaltitle,
-        studio,
-        publisher,
-        year,
-        outline,
-        runtime,
-        director,
-        actor_photo,
-        actor,
-        release,
-        tag,
-        number,
-        cover,
-        poster,
-        website,
-        series,
-        mosaic,
-        definition,
-        trailer,
-        letters,
-    ) = get_info(json_data_nfo)
+    title = json_data_nfo["title"]
+    originaltitle = json_data_nfo["originaltitle"]
+    studio = json_data_nfo["studio"]
+    publisher = json_data_nfo["publisher"]
+    year = json_data_nfo["year"]
+    outline = json_data_nfo["outline"]
+    runtime = json_data_nfo["runtime"]
+    director = json_data_nfo["director"]
+    actor = json_data_nfo["actor"]
+    release = json_data_nfo["release"]
+    tag = json_data_nfo["tag"]
+    number = json_data_nfo["number"]
+    cover = json_data_nfo["cover"]
+    poster = json_data_nfo["poster"]
+    website = json_data_nfo["website"]
+    series = json_data_nfo["series"]
+    mosaic = json_data_nfo["mosaic"]
+    definition = json_data_nfo["definition"]
+    trailer = json_data_nfo["trailer"]
+    letters = json_data_nfo["letters"]
     all_actor = json_data["all_actor"]
     temp_release = get_new_release(release)
     file_full_name = split_path(file_path)[1]
@@ -392,51 +396,21 @@ def write_nfo(json_data, nfo_new_path, folder_new_path, file_path, edit_mode=Fal
         return False
 
 
-def get_nfo_data(json_data, file_path, movie_number):
+def get_nfo_data(
+    json_data: JsonData,
+    file_path: str,
+    movie_number: str,
+):
     local_nfo_path = os.path.splitext(file_path)[0] + ".nfo"
     local_nfo_name = split_path(local_nfo_path)[1]
     file_folder = split_path(file_path)[0]
-    json_data["title"] = ""
-    json_data["originaltitle"] = ""
-    json_data["originaltitle_amazon"] = ""
-    # json_data['number'] = ''
-    json_data["actor"] = ""
-    json_data["actor_amazon"] = []
-    json_data["outline"] = ""
-    json_data["originalplot"] = ""
-    json_data["tag"] = ""
-    json_data["release"] = ""
-    json_data["year"] = ""
-    json_data["runtime"] = ""
-    json_data["score"] = ""
-    json_data["series"] = ""
-    json_data["director"] = ""
-    json_data["publisher"] = ""
-    json_data["studio"] = ""
     json_data["source"] = "nfo"
-    json_data["website"] = ""
-    json_data["cover"] = ""
-    json_data["poster"] = ""
-    json_data["extrafanart"] = ""
-    json_data["trailer"] = ""
-    json_data["image_download"] = ""
-    json_data["image_cut"] = ""
-    json_data["log_info"] = ""
-    json_data["error_info"] = ""
     json_data["req_web"] = local_nfo_path
-    json_data["fields_info"] = ""
     json_data["poster_from"] = "local"
     json_data["cover_from"] = "local"
     json_data["fanart_from"] = "local"
     json_data["extrafanart_from"] = "local"
     json_data["trailer_from"] = "local"
-    # json_data['mosaic'] = ''
-    json_data["poster_path"] = ""
-    json_data["thumb_path"] = ""
-    json_data["fanart_path"] = ""
-    json_data["only_tag_list"] = ""
-    json_data["wanted"] = ""
-    json_data["cover_list"] = []
 
     if not os.path.exists(local_nfo_path):
         json_data["error_info"] = "nfo文件不存在"
@@ -588,7 +562,7 @@ def get_nfo_data(json_data, file_path, movie_number):
     if originaltitle and langid.classify(originaltitle)[0] == "ja":
         json_data["originaltitle_amazon"] = originaltitle
         if actor:
-            json_data["actor_amazon"] = json_data["actor"].split(",")
+            json_data["actor_amazon"] = actor.split(",")
     json_data["number"] = number
     json_data["letters"] = letters
     json_data["actor"] = actor
@@ -609,7 +583,7 @@ def get_nfo_data(json_data, file_path, movie_number):
     json_data["website"] = website
     json_data["cover"] = cover
     if cover:
-        json_data["cover_list"].append(["local", cover])
+        json_data["cover_list"].append(("local", cover))
     json_data["poster"] = poster
     json_data["trailer"] = trailer
     json_data["wanted"] = wanted

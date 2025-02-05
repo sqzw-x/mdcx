@@ -148,7 +148,7 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
         not_download_magnet_list = sorted(not_download_magnet_list, reverse=True)
         not_download_cnword_list = sorted(not_download_cnword_list, reverse=True)
 
-        signal.show_log_text(f'\n👩 [ {actor_name} ] 的全部网络番号({len(all_list)})...\n{("=" * 97)}')
+        signal.show_log_text(f"\n👩 [ {actor_name} ] 的全部网络番号({len(all_list)})...\n{('=' * 97)}")
         if all_list:
             for each in all_list:
                 signal.show_log_text(each)
@@ -163,7 +163,7 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
             signal.show_log_text("🎉 没有缺少的番号...\n")
 
         signal.show_log_text(
-            f'\n👩 [ {actor_name} ] 本地缺失的有磁力的番号({len(not_download_magnet_list)})...\n{("=" * 97)}'
+            f"\n👩 [ {actor_name} ] 本地缺失的有磁力的番号({len(not_download_magnet_list)})...\n{('=' * 97)}"
         )
         if not_download_magnet_list:
             for each in not_download_magnet_list:
@@ -172,7 +172,7 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
             signal.show_log_text("🎉 没有缺少的番号...\n")
 
         signal.show_log_text(
-            f'\n👩 [ {actor_name} ] 本地缺失的有字幕的番号({len(not_download_cnword_list)})...\n{("=" * 97)}'
+            f"\n👩 [ {actor_name} ] 本地缺失的有字幕的番号({len(not_download_cnword_list)})...\n{('=' * 97)}"
         )
         if not_download_cnword_list:
             for each in not_download_cnword_list:
@@ -283,7 +283,7 @@ def check_missing_number(actor_flag):
     if config.actors_name:
         actor_list = re.split(r"[,，]", config.actors_name)
         signal.show_log_text(
-            f'\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n🔍 需要查询的演员：\n   {", ".join(actor_list)}'
+            f"\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n🔍 需要查询的演员：\n   {', '.join(actor_list)}"
         )
         for actor_name in actor_list:
             if not actor_name:

@@ -910,7 +910,7 @@ def save_config(self):
     else:
         config.auto_link = 0
 
-    config_folder = self.Ui.lineEdit_config_folder.text()  # 配置文件目录
+    config_folder: str = self.Ui.lineEdit_config_folder.text()  # 配置文件目录
     if not os.path.exists(config_folder):
         config_folder = config.folder
     config.path = convert_path(os.path.join(config_folder, config.file))

@@ -19,7 +19,12 @@ def get_web_number(html, number):
     return result[0].strip() if result else number
 
 
-def get_title(html, title, number, actor_photo):
+def get_title(
+    html,
+    title,
+    number,
+    actor_photo,
+):
     if not title:
         result = html.xpath("//title/text()")
         if result:
@@ -129,7 +134,13 @@ def get_webnumber(html, number):
     return number_list[0].replace("番號 : ", "").strip() if number_list else number
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+):
     start_time = time.time()
     website_name = "love6"
     req_web += "-> %s" % website_name

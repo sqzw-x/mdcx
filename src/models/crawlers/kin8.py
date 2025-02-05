@@ -86,7 +86,13 @@ def get_extrafanart(html):
     return new_result
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+):
     try:  # 捕获主动抛出的异常
         start_time = time.time()
         website_name = "kin8"

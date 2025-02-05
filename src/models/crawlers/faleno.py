@@ -106,7 +106,13 @@ def get_real_url(html):
     return "", ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+):
     # https://faleno.jp/top/works/fsdss564/
     # https://falenogroup.com/works/votan-034/
     start_time = time.time()

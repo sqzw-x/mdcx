@@ -113,7 +113,13 @@ def get_cover(html):
     return (result.pop(0), result) if result else ("", [])
 
 
-def main(number, appoint_url="", log_info="", req_web="", language=""):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="",
+):
     start_time = time.time()
 
     website_name = "offical_failed"

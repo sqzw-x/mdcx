@@ -157,7 +157,13 @@ def get_wanted(html):
     return str(result[0]) if result else ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="zh_cn",
+):
     start_time = time.time()
     website_name = "javlibrary"
     req_web += f"-> {website_name}[{language}]"

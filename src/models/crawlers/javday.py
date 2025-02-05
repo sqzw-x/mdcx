@@ -69,7 +69,7 @@ def get_studio(series, tag, lable_list):
     return ""
 
 
-# def get_real_url(html, number, javday_url, file_path):
+# def get_real_url(html, number, javday_url, file_path,):
 #     real_url = ''
 #     a = re.search(r'(\d*[A-Z]{2,})\s*(\d{3,})', number)
 #     real_number = number
@@ -116,7 +116,17 @@ def get_tag(html):  # 获取演员
     return ",".join(result)
 
 
-def get_real_number_title(number, title, number_list, appoint_number, appoint_url, lable_list, tag, actor, series):
+def get_real_number_title(
+    number,
+    title,
+    number_list,
+    appoint_number,
+    appoint_url,
+    lable_list,
+    tag,
+    actor,
+    series,
+):
     # 指定番号时，使用指定番号
     if appoint_number:
         number = appoint_number
@@ -160,7 +170,14 @@ def get_real_number_title(number, title, number_list, appoint_number, appoint_ur
     return number, temp_title
 
 
-def get_real_title(title, number_list, lable_list, tag, actor, series):
+def get_real_title(
+    title,
+    number_list,
+    lable_list,
+    tag,
+    actor,
+    series,
+):
     # 去除标题里的番号
     for number in number_list:
         title = title.replace(number, "")
@@ -186,7 +203,15 @@ def get_real_title(title, number_list, lable_list, tag, actor, series):
     return title.replace(" x ", "").replace(" X ", "").strip(" -.")
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number=""):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="zh_cn",
+    file_path="",
+    appoint_number="",
+):
     lable_list = get_lable_list()
     start_time = time.time()
     website_name = "javday"

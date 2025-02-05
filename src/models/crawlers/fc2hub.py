@@ -56,7 +56,7 @@ def getStudio(html):  # 使用卖家作为厂家
 def getTag(html):  # 获取标签
     result = html.xpath('//p[@class="card-text"]/a[contains(@href, "/tag/")]/text()')
     if result:
-        result = str(result).strip(" [" "]").replace(", ", ",").replace("'", "").strip()
+        result = str(result).strip(" []").replace(", ", ",").replace("'", "").strip()
     else:
         result = ""
     return result
@@ -65,7 +65,7 @@ def getTag(html):  # 获取标签
 def getOutline(html):  # 获取简介
     result = (
         "".join(html.xpath('//div[@class="col des"]//text()'))
-        .strip("[" "]")
+        .strip("[]")
         .replace("',", "")
         .replace("\\n", "")
         .replace("'", "")
@@ -83,7 +83,13 @@ def getMosaic(tag, title):  # 获取马赛克
     return result
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+):
     start_time = time.time()
     website_name = "fc2hub"
     req_web += "-> %s" % website_name

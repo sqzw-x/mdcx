@@ -3,6 +3,7 @@ import re
 import threading
 import time
 import traceback
+from typing import Optional, Tuple, List, Dict
 
 from PyQt5.QtWidgets import QMessageBox
 
@@ -35,6 +36,7 @@ from models.core.flags import Flags
 from models.core.image import add_mark, extrafanart_copy2, extrafanart_extras_copy
 from models.core.nfo import get_nfo_data, write_nfo
 from models.core.translate import translate_actor, translate_info, translate_title_outline
+from models.core.types import JsonData
 from models.core.utils import (
     deal_some_field,
     get_movie_path_setting,
@@ -51,7 +53,7 @@ from models.tools.emby_actor_image import update_emby_actor_photo
 from models.tools.emby_actor_info import creat_kodi_actors
 
 
-def _scrape_one_file(file_path, file_info, file_mode):
+def _scrape_one_file(file_path: str, file_info: Tuple, file_mode: FileMode) -> Tuple[bool, JsonData]:
     # 处理单个文件刮削
     # 初始化所需变量
     start_time = time.time()
@@ -63,9 +65,14 @@ def _scrape_one_file(file_path, file_info, file_mode):
     json_data, movie_number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = file_info
 
     # 获取设置的媒体目录、失败目录、成功目录
-    movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = (
-        get_movie_path_setting(file_path)
-    )
+    (
+        _,
+        success_folder,
+        failed_folder,
+        _,
+        _,
+        _,
+    ) = get_movie_path_setting(file_path)
     json_data["failed_folder"] = failed_folder
 
     # 检查文件大小
@@ -126,7 +133,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
         json_data_new["leak"] = json_data["leak"]
         json_data_new["wuma"] = json_data["wuma"]
         json_data_new["youma"] = json_data["youma"]
-        json_data_new["4K"] = ""
+        json_data_new["_4K"] = ""
 
         def deal_tag_data(tag):
             for each in [
@@ -344,7 +351,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
     return True, json_data
 
 
-def _scrape_exec_thread(task):
+def _scrape_exec_thread(task: Tuple[str, int, int]) -> None:
     # 获取顺序
     with Flags.lock:
         file_path, count, count_all = task
@@ -439,7 +446,7 @@ def _scrape_exec_thread(task):
                 + str(Flags.succ_count)
                 + "."
                 + file_show_name.replace(movie_number, json_data["number"])
-                + json_data["4K"]
+                + json_data["_4K"]
             )
             signal.show_list_name(succ_show_name, "succ", json_data, movie_number)
         else:
@@ -450,16 +457,16 @@ def _scrape_exec_thread(task):
                 + str(Flags.fail_count)
                 + "."
                 + file_show_name.replace(movie_number, json_data["number"])
-                + json_data["4K"]
+                + json_data["_4K"]
             )
             signal.show_list_name(fail_show_name, "fail", json_data, movie_number)
             if json_data["error_info"]:
-                json_data["logs"] += f'\n 🔴 [Failed] Reason: {json_data["error_info"]}'
+                json_data["logs"] += f"\n 🔴 [Failed] Reason: {json_data['error_info']}"
                 if "WinError 5" in json_data["error_info"]:
                     json_data["logs"] += (
                         "\n 🔴 该问题为权限问题：请尝试以管理员身份运行，同时关闭其他正在运行的Python脚本！"
                     )
-            fail_file_path = move_file_to_failed_folder(json_data, file_path, folder_old_path, file_ex)
+            fail_file_path = move_file_to_failed_folder(json_data, file_path, folder_old_path)
             Flags.failed_list.append([fail_file_path, json_data["error_info"]])
             Flags.failed_file_list.append(fail_file_path)
             _failed_file_info_show(str(Flags.fail_count), fail_file_path, json_data["error_info"])
@@ -546,7 +553,7 @@ def _scrape_exec_thread(task):
         signal.show_log_text(str(e))
 
 
-def scrape(file_mode: FileMode, movie_list):
+def scrape(file_mode: FileMode, movie_list: Optional[List[str]]) -> None:
     Flags.reset()
     if movie_list is None:
         movie_list = []
@@ -687,7 +694,7 @@ def scrape(file_mode: FileMode, movie_list):
         signal.exec_exit_app.emit()
 
 
-def start_new_scrape(file_mode: FileMode, movie_list=None):
+def start_new_scrape(file_mode: FileMode, movie_list: Optional[List[str]] = None) -> None:
     signal.change_buttons_status.emit()
     signal.exec_set_processbar.emit(0)
     try:
@@ -701,7 +708,7 @@ def start_new_scrape(file_mode: FileMode, movie_list=None):
         signal.show_log_text(traceback.format_exc())
 
 
-def _check_stop(file_name_temp):
+def _check_stop(file_name_temp: str) -> None:
     if signal.stop:
         Flags.now_kill += 1
         signal.show_log_text(
@@ -711,10 +718,10 @@ def _check_stop(file_name_temp):
             f"⛔️ 正在停止刮削...\n   正在停止已在运行的任务线程（{Flags.now_kill}/{Flags.total_kills}）..."
         )
         # exceptions must derive from BaseException
-        raise "手动停止刮削"
+        raise Exception("手动停止刮削")
 
 
-def _failed_file_info_show(count, path, error_info):
+def _failed_file_info_show(count: str, path: str, error_info: str) -> None:
     folder = os.path.dirname(path)
     info_str = f"{'🔴 ' + count + '.':<3} {path} \n    所在目录: {folder} \n    失败原因: {error_info} \n"
     if os.path.islink(path):
@@ -727,7 +734,7 @@ def _failed_file_info_show(count, path, error_info):
     signal.logs_failed_show.emit(info_str)
 
 
-def get_remain_list():
+def get_remain_list() -> bool:
     remain_list_path = resources.userdata_path("remain.txt")
     if os.path.isfile(remain_list_path):
         with open(remain_list_path, encoding="utf-8", errors="ignore") as f:
@@ -773,14 +780,21 @@ def get_remain_list():
     return False
 
 
-def again_search():
+def again_search() -> None:
     Flags.new_again_dic = Flags.again_dic.copy()
     new_movie_list = list(Flags.new_again_dic.keys())
     Flags.again_dic.clear()
     start_new_scrape(FileMode.Again, new_movie_list)
 
 
-def move_sub(json_data, folder_old_path, folder_new_path, file_name, sub_list, naming_rule):
+def move_sub(
+    json_data: JsonData,
+    folder_old_path: str,
+    folder_new_path: str,
+    file_name: str,
+    sub_list: List[str],
+    naming_rule: str,
+) -> None:
     copy_flag = False
 
     # 没有字幕，返回

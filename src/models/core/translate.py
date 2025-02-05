@@ -5,6 +5,7 @@ import threading
 import time
 import traceback
 import urllib
+from typing import Optional
 
 import deepl
 import langid
@@ -16,6 +17,7 @@ from models.base.web import get_html, post_html
 from models.config.config import config
 from models.config.resources import resources
 from models.core.flags import Flags
+from models.core.types import JsonData
 from models.core.web import get_actorname, get_yesjav_title, google_translate
 from models.signals import signal
 
@@ -23,7 +25,7 @@ deepl_result = {}
 REGEX_KANA = re.compile(r"[\u3040-\u30ff]")  # 平假名/片假名
 
 
-def youdao_translate(title, outline):
+def youdao_translate(title: str, outline: str):
     url = "https://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule"
     msg = f"{title}\n{outline}"
     lts = str(int(time.time() * 1000))
@@ -66,6 +68,7 @@ def youdao_translate(title, outline):
     if not result:
         return title, outline, f"请求失败！可能是被封了，可尝试更换代理！错误：{res}"
     else:
+        assert not isinstance(res, str)
         translateResult = res.get("translateResult")
         if not translateResult:
             return title, outline, f"返回数据未找到翻译结果！返回内容：{res}"
@@ -92,7 +95,12 @@ def youdao_translate(title, outline):
     return title, outline.strip("\n"), ""
 
 
-def _deepl_trans_thread(ls, title, outline, json_data):
+def _deepl_trans_thread(
+    ls: str,
+    title: str,
+    outline: str,
+    json_data: JsonData,
+):
     global deepl_result
     result = ""
     try:
@@ -106,7 +114,12 @@ def _deepl_trans_thread(ls, title, outline, json_data):
     deepl_result[json_data["file_path"]] = (title, outline, result)
 
 
-def deepl_translate(title, outline, ls="JA", json_data=None):
+def deepl_translate(
+    title: str,
+    outline: str,
+    ls="JA",
+    json_data: Optional[JsonData] = None,
+):
     global deepl_result
     deepl_key = config.deepl_key
     if not deepl_key:
@@ -161,7 +174,7 @@ def deepl_translate(title, outline, ls="JA", json_data=None):
     return title, outline, ""
 
 
-def translate_info(json_data):
+def translate_info(json_data: JsonData):
     xml_info = resources.info_mapping_data
     if len(xml_info) == 0:
         return json_data
@@ -306,7 +319,7 @@ def translate_info(json_data):
     return json_data
 
 
-def translate_actor(json_data):
+def translate_actor(json_data: JsonData):
     # 网络请求真实的演员名字
     actor_realname = config.actor_realname
     mosaic = json_data["mosaic"]
@@ -427,7 +440,7 @@ def _get_youdao_key_thread():
     return youdaokey
 
 
-def translate_title_outline(json_data, movie_number):
+def translate_title_outline(json_data: JsonData, movie_number: str):
     title_language = config.title_language
     title_translate = config.title_translate
     outline_language = config.outline_language
@@ -461,7 +474,7 @@ def translate_title_outline(json_data, movie_number):
         # 匹配网络高质量标题（yesjav， 可在线更新）
         if not movie_title and title_yesjav == "on" and json_data_title_language == "ja":
             start_time = time.time()
-            movie_title = get_yesjav_title(json_data, movie_number)
+            movie_title = get_yesjav_title(movie_number)
             if movie_title and langid.classify(movie_title)[0] != "ja":
                 json_data["title"] = movie_title
                 json_data["logs"] += "\n 🆈 Yesjav title done!(%ss)" % (get_used_time(start_time))

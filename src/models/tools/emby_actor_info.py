@@ -105,7 +105,7 @@ def update_emby_actor_info():
                 if config.use_database:
                     db_exist = ActressDB.update_actor_info_from_db(actor_info)
                 if db_exist or exist:
-                    r, res = post_html(update_url, json=actor_info.dump(), proxies=False)
+                    r, res = post_html(update_url, json=actor_info.dump(), use_proxy=False)
                     if r:
                         signal.show_log_text(f"\n ✅ 演员信息更新成功！\n 👩🏻 点击查看 {actor_name} 的 Emby 演员主页:")
                         signal.show_log_text(f" {actor_homepage}")

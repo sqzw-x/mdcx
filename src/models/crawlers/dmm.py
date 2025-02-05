@@ -176,7 +176,12 @@ def get_trailer(htmlcode, real_url):
     return trailer_url
 
 
-def get_real_url(html, number, number2, file_path):
+def get_real_url(
+    html,
+    number,
+    number2,
+    file_path,
+):
     number_temp = number2.lower().replace("-", "")
     url_list = html.xpath("//p[@class='tmb']/a/@href")
 
@@ -426,7 +431,14 @@ def get_tv_com_data(number):
         return False, "未找到数据", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp", file_path=""):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+    file_path="",
+):
     start_time = time.time()
     website_name = "dmm"
     req_web += "-> %s" % website_name

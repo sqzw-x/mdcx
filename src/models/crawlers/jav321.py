@@ -112,7 +112,13 @@ def getOutline(detail_page):
     return detail_page.xpath("string(/html/body/div[2]/div[1]/div[1]/div[2]/div[3]/div/text())")
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+):
     start_time = time.time()
     website_name = "jav321"
     req_web += "-> %s" % website_name

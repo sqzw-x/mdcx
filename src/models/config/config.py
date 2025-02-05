@@ -15,27 +15,27 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
     mark_file_name = "MDCx.config"
 
     def __init__(self):
-        self.file = None
-        self.folder = None
-        self._path = None
+        self.file = ""
+        self.folder = ""
+        self._path = ""
         self._get_platform_info()
         self.read_config()
         self.youdaokey = "Ygy_4c=r#e#4EX^NUGUc5"
 
     @property
-    def path(self):
+    def path(self) -> str:
         return self._path
 
     @path.setter
-    def path(self, path):
+    def path(self, path: str):
         self.folder, self.file = os.path.split(path)
         self._path = path
 
     @path.getter
-    def path(self):
+    def path(self) -> str:
         return self._path
 
-    def get_mac_default_config_folder(self):
+    def get_mac_default_config_folder(self) -> str:
         """
         获取macOS下默认的配置文件夹路径
 
@@ -51,7 +51,7 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
             os.makedirs(config_folder, exist_ok=True, mode=0o755)
         return config_folder
 
-    def get_mark_file_path(self):
+    def get_mark_file_path(self) -> str:
         """
         获取`记录了配置文件路径`的文件的路径。
         对于macOS，该文件位于`~/.mdcx/MDCx.config`。
@@ -376,7 +376,7 @@ statement = {self.statement}
             if can_clean and self.clean_contains and "clean_contains" in self.clean_enable
             else []
         )
-        clean_size_list = self.clean_size if can_clean and "clean_size" in self.clean_enable else ""
+        clean_size_list = self.clean_size if can_clean and "clean_size" in self.clean_enable else 0.0
         clean_ignore_ext_list = (
             re.split(r"[|｜，,]", self.clean_ignore_ext)
             if can_clean and self.clean_ignore_ext and "clean_ignore_ext" in self.clean_enable

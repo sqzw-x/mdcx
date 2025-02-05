@@ -94,7 +94,15 @@ def get_actor_title(title, number, studio):
     return title.strip("."), number, ",".join(actor_list), series
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number=""):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="zh_cn",
+    file_path="",
+    appoint_number="",
+):
     start_time = time.time()
     website_name = "cnmdb"
     req_web += "-> %s" % website_name
@@ -110,14 +118,14 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
         if real_url:
             debug_info = f"番号地址: {real_url} "
             log_info += web_info + debug_info
-            result, response = get_html(real_url)
-            if result:
+            _, response = get_html(real_url)
+            if response:
                 detail_page = etree.fromstring(response, etree.HTMLParser())
                 result, number, title, actor, real_url, cover_url, studio, series = get_detail_info(
                     detail_page, real_url
                 )
             else:
-                debug_info = "没有找到数据 %s " % response
+                debug_info = "没有找到数据"
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
 

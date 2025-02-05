@@ -160,7 +160,13 @@ def getSeries(html):
     return result
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+):
     start_time = time.time()
     website_name = "xcity"
     req_web += "-> %s" % website_name

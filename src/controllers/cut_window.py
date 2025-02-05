@@ -16,7 +16,12 @@ from views.posterCutTool import Ui_Dialog_cut_poster
 
 
 class DraggableButton(QPushButton):
-    def __init__(self, title, parent, cutwindow):
+    def __init__(
+        self,
+        title,
+        parent,
+        cutwindow,
+    ):
         super().__init__(title, parent)
         self.iniDragCor = [0, 0]
         self.cutwindow = cutwindow

@@ -122,7 +122,13 @@ def get_number_data(number):
     return mywife_data.get(str(number))
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+):
     global seesaawiki_request_fail_flag
     try:  # 捕获主动抛出的异常
         start_time = time.time()

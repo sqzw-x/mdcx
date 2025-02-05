@@ -153,7 +153,13 @@ def get_real_url(html, number):
         return ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language=""):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="",
+):
     start_time = time.time()
     website_name = "avsex"
     req_web += "-> %s" % website_name

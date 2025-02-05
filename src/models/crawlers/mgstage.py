@@ -146,7 +146,14 @@ def getScore(html):
     return str(result)
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp", short_number=""):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+    short_number="",
+):
     start_time = time.time()
     website_name = "mgstage"
     req_web += "-> %s" % website_name

@@ -8,6 +8,7 @@ import shutil
 import time
 import traceback
 import urllib
+from typing import Optional, Tuple, cast
 
 from lxml import etree
 
@@ -18,11 +19,12 @@ from models.base.utils import get_used_time
 from models.base.web import check_url, get_amazon_data, get_big_pic_by_google, get_html, get_imgsize, multi_download
 from models.config.config import config
 from models.core.flags import Flags
+from models.core.types import JsonData
 from models.core.utils import convert_half
 from models.signals import signal
 
 
-def get_actorname(number):
+def get_actorname(number: str) -> Tuple[bool, str]:
     # 获取真实演员名字
     url = f"https://av-wiki.net/?s={number}"
     result, res = get_html(url)
@@ -39,7 +41,7 @@ def get_actorname(number):
     return False, "No Result!"
 
 
-def get_yesjav_title(json_data, movie_number):
+def get_yesjav_title(movie_number: str) -> str:
     yesjav_url = "http://www.yesjav.info/search.asp?q=%s&" % movie_number
     movie_title = ""
     result, response = get_html(yesjav_url)
@@ -58,7 +60,7 @@ def get_yesjav_title(json_data, movie_number):
     return movie_title
 
 
-def google_translate(title, outline):
+def google_translate(title: str, outline: str) -> Tuple[str, str, Optional[str]]:
     e1 = None
     e2 = None
     if title:
@@ -68,7 +70,7 @@ def google_translate(title, outline):
     return title, outline, e1 or e2
 
 
-def _google_translate(msg: str) -> (str, str):
+def _google_translate(msg: str) -> Tuple[str, str]:
     try:
         msg_unquote = urllib.parse.unquote(msg)
         url = f"https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}"
@@ -80,7 +82,12 @@ def _google_translate(msg: str) -> (str, str):
         return msg, str(e)
 
 
-def download_file_with_filepath(json_data, url, file_path, folder_new_path):
+def download_file_with_filepath(
+    json_data: JsonData,
+    url: str,
+    file_path: str,
+    folder_new_path: str,
+) -> bool:
     if not url:
         return False
 
@@ -95,17 +102,21 @@ def download_file_with_filepath(json_data, url, file_path, folder_new_path):
     return False
 
 
-def _mutil_extrafanart_download_thread(task):
+def _mutil_extrafanart_download_thread(task: tuple[JsonData, str, str, str, str]) -> bool:
     json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path, extrafanart_name = task
     if download_file_with_filepath(json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path):
         if check_pic(extrafanart_file_path):
             return True
     else:
         json_data["logs"] += f"\n 💡 {extrafanart_name} download failed! ( {extrafanart_url} )"
-        return False
+    return False
 
 
-def get_big_pic_by_amazon(json_data, originaltitle_amazon, actor_amazon):
+def get_big_pic_by_amazon(
+    json_data: JsonData,
+    originaltitle_amazon: str,
+    actor_amazon: str,
+) -> str:
     if not originaltitle_amazon or not actor_amazon:
         return ""
     hd_pic_url = ""
@@ -278,7 +289,12 @@ def get_big_pic_by_amazon(json_data, originaltitle_amazon, actor_amazon):
     return hd_pic_url
 
 
-def trailer_download(json_data, folder_new_path, folder_old_path, naming_rule):
+def trailer_download(
+    json_data: JsonData,
+    folder_new_path: str,
+    folder_old_path: str,
+    naming_rule: str,
+) -> Optional[bool]:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -405,7 +421,7 @@ def trailer_download(json_data, folder_new_path, folder_old_path, naming_rule):
         return True
 
 
-def _get_big_thumb(json_data):
+def _get_big_thumb(json_data: JsonData) -> JsonData:
     """
     获取背景大图：
     1，官网图片
@@ -506,7 +522,7 @@ def _get_big_thumb(json_data):
     return json_data
 
 
-def _get_big_poster(json_data):
+def _get_big_poster(json_data: JsonData) -> JsonData:
     start_time = time.time()
 
     # 未勾选下载高清图poster时，返回
@@ -595,7 +611,7 @@ def _get_big_poster(json_data):
     return json_data
 
 
-def thumb_download(json_data, folder_new_path, thumb_final_path):
+def thumb_download(json_data: JsonData, folder_new_path: str, thumb_final_path: str) -> bool:
     start_time = time.time()
     poster_path = json_data["poster_path"]
     thumb_path = json_data["thumb_path"]
@@ -712,7 +728,7 @@ def thumb_download(json_data, folder_new_path, thumb_final_path):
             return False
 
 
-def poster_download(json_data, folder_new_path, poster_final_path):
+def poster_download(json_data: JsonData, folder_new_path: str, poster_final_path: str) -> bool:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -859,7 +875,7 @@ def poster_download(json_data, folder_new_path, poster_final_path):
             return False
 
 
-def fanart_download(json_data, fanart_final_path):
+def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
     """
     复制thumb为fanart
     """
@@ -935,7 +951,7 @@ def fanart_download(json_data, fanart_final_path):
                 return False
 
 
-def extrafanart_download(json_data, folder_new_path):
+def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Optional[bool]:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -975,8 +991,9 @@ def extrafanart_download(json_data, folder_new_path):
             extrafanart_name = "fanart" + str(extrafanart_count) + ".jpg"
             extrafanart_file_path = os.path.join(extrafanart_folder_path_temp, extrafanart_name)
             task_list.append(
-                [json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path_temp, extrafanart_name]
+                (json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path_temp, extrafanart_name)
             )
+            task_list = cast(list[tuple[JsonData, str, str, str, str]], task_list)
         extrafanart_pool = Pool(20)  # 剧照下载线程池
         result = extrafanart_pool.map(_mutil_extrafanart_download_thread, task_list)
         for res in result:
@@ -1005,7 +1022,7 @@ def extrafanart_download(json_data, folder_new_path):
         return True
 
 
-def show_netstatus():
+def show_netstatus() -> None:
     signal.show_net_info(time.strftime("%Y-%m-%d %H:%M:%S").center(80, "="))
     proxy_type = ""
     retry_count = 0
@@ -1041,7 +1058,7 @@ def show_netstatus():
     signal.show_net_info("=" * 80)
 
 
-def check_proxyChange():
+def check_proxyChange() -> None:
     new_proxy = (config.type, config.proxy, config.timeout, config.retry)
     if Flags.current_proxy:
         if new_proxy != Flags.current_proxy:

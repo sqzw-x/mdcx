@@ -162,7 +162,13 @@ def get_real_url(html, number):
     return ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="zh_cn",
+):
     start_time = time.time()
     website_name = "iqqtv"
     req_web += f"-> {website_name}[{language}]"

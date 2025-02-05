@@ -44,7 +44,7 @@ class Signals(QObject):
 
     def add_log(self, *text):
         if self.stop:
-            raise "手动停止刮削"
+            raise Exception("手动停止刮削")
         try:
             with self.log_lock:
                 self.detail_log_list.append(f" ⏰ {time.strftime('%H:%M:%S', time.localtime())} {' '.join(text)}")
@@ -73,7 +73,13 @@ class Signals(QObject):
     def add_label_info(self, json_data):
         self.set_main_info.emit(json_data)
 
-    def show_list_name(self, filename, result, json_data, real_number=""):
+    def show_list_name(
+        self,
+        filename,
+        result,
+        json_data,
+        real_number="",
+    ):
         self.exec_show_list_name.emit(filename, result, json_data, real_number)
 
 

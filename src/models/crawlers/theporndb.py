@@ -109,7 +109,12 @@ def read_data(data):
     )
 
 
-def get_real_url(res_search, file_path, series_ex, date):
+def get_real_url(
+    res_search,
+    file_path,
+    series_ex,
+    date,
+):
     search_data = res_search.get("data")
     file_name = os.path.split(file_path)[1].lower()
     new_file_name = re.findall(r"[\.-_]\d{2}\.\d{2}\.\d{2}(.+)", file_name)
@@ -254,7 +259,15 @@ def get_year(release):
         return ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number=""):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="zh_cn",
+    file_path="",
+    appoint_number="",
+):
     if not file_path:
         file_path = number + ".mp4"
     start_time = time.time()

@@ -85,7 +85,13 @@ def getOutline(html, language, real_url):
     return result
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="zh_cn",
+):
     start_time = time.time()
     website_name = "airav"
     req_web += f"-> {website_name}[{language}]"
@@ -103,7 +109,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
     else:
         airav_url = "https://jp.airav.wiki"
     web_info = "\n       "
-    log_info += f' \n    🌐 airav[{language.replace("zh_", "")}]'
+    log_info += f" \n    🌐 airav[{language.replace('zh_', '')}]"
     debug_info = ""
 
     try:  # 捕获主动抛出的异常
@@ -193,7 +199,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
                     "image_cut": image_cut,
                     "log_info": log_info,
                     "error_info": "",
-                    "req_web": req_web + f"({round((time.time() - start_time), )}s) ",
+                    "req_web": req_web + f"({round((time.time() - start_time))}s) ",
                     "mosaic": mosaic,
                     "website": real_url,
                     "wanted": "",
@@ -213,7 +219,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
             "website": "",
             "log_info": log_info,
             "error_info": debug_info,
-            "req_web": req_web + f"({round((time.time() - start_time), )}s) ",
+            "req_web": req_web + f"({round((time.time() - start_time))}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

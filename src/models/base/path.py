@@ -10,7 +10,7 @@ from models.config.config import config
 from models.signals import signal
 
 
-def get_main_path():
+def get_main_path() -> str:
     try:
         main_path = realpath(__file__)
         for _ in range(4):  # 根据此文件路径确定根目录, 若移动此文件可能需要修改
@@ -29,7 +29,7 @@ def get_main_path():
     return main_path
 
 
-def get_path(movie_path, path):
+def get_path(movie_path: str, path: str) -> str:
     # 如果没有:并且首字母没有/，这样的目录视为包含在媒体目录下，需要拼接
     if ":" not in path and not re.search(
         "^/", path
@@ -48,7 +48,7 @@ def get_path(movie_path, path):
     return path  # path是路径的情况有 路径包含: 或者开头是//，或者非windows平台开头是/
 
 
-def showFilePath(file_path):
+def showFilePath(file_path: str) -> str:
     if len(file_path) > 55:
         show_file_path = file_path[-50:]
         show_file_path = ".." + show_file_path[show_file_path.find("/") :]

@@ -9,23 +9,24 @@ import random
 import re
 import time
 import traceback
+from threading import Thread
 
 
-def get_current_time():
+def get_current_time() -> str:
     return time.strftime("%H:%M:%S", time.localtime())
 
 
-def get_used_time(start_time):
+def get_used_time(start_time: float) -> int:
     return round(
         (time.time() - start_time),
     )
 
 
-def get_real_time(t):
+def get_real_time(t) -> str:
     return time.strftime("%H:%M:%S", time.localtime(t))
 
 
-def add_html(text):
+def add_html(text: str) -> str:
     # 特殊字符转义
     text = text.replace("=http", "🔮🧿⚔️")  # 例外不转换的
 
@@ -43,7 +44,7 @@ def add_html(text):
     return '<span style="white-space: pre-wrap;">%s</span>' % text
 
 
-def remove_repeat(a: str):
+def remove_repeat(a: str) -> str:
     if a:  # 转列表去空去重
         list1 = a.split(",")  # 转列表
         list2 = list(set(list1))  # 去重
@@ -72,7 +73,7 @@ def _async_raise(tid, exctype):
         raise SystemError("PyThreadState_SetAsyncExc failed")
 
 
-def kill_a_thread(t):
+def kill_a_thread(t: Thread):
     try:
         while t.is_alive():
             _async_raise(t.ident, SystemExit)
@@ -81,14 +82,14 @@ def kill_a_thread(t):
         _async_raise(t.ident, SystemExit)
 
 
-def get_user_agent():
+def get_user_agent() -> str:
     temp_l = random.randint(109, 129)
     temp_m = random.randint(1, 5563)
     temp_n = random.randint(1, 180)
     return f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{temp_l}.0.{temp_m}.{temp_n} Safari/537.36"
 
 
-def convert_path(path):
+def convert_path(path: str) -> str:
     is_windows = platform.system() == "Windows"
     if is_windows:
         path = path.replace("/", "\\")

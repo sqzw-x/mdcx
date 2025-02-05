@@ -6,7 +6,7 @@ import time
 import traceback
 import webbrowser
 
-from PyQt5.QtCore import QEvent, QPoint, QTimer, Qt, pyqtSignal
+from PyQt5.QtCore import QEvent, QPoint, Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QCursor, QHoverEvent, QIcon, QKeySequence
 from PyQt5.QtWidgets import (
     QAction,
@@ -27,14 +27,12 @@ from controllers.main_window.save_config import save_config
 from controllers.main_window.style import set_dark_style, set_style
 from models.base.file import _open_file_thread, delete_file, split_path
 from models.base.image import get_pixmap
-from models.base.number import get_info
 from models.base.path import get_main_path, get_path
 from models.base.utils import _async_raise, add_html, convert_path, get_current_time, get_used_time, kill_a_thread
 from models.base.web import (
     check_theporndb_api_token,
     check_version,
     get_avsox_domain,
-    get_html,
     ping_host,
     scraper_html,
 )
@@ -833,7 +831,13 @@ class MyMAinWindow(QMainWindow):
         # self.Ui.treeWidget_number.setCurrentItem(node)
         # self.Ui.treeWidget_number.scrollToItem(node)
 
-    def show_list_name(self, filename, result, json_data, real_number=""):
+    def show_list_name(
+        self,
+        filename,
+        result,
+        json_data,
+        real_number="",
+    ):
         # 添加树状节点
         self._addTreeChild(result, filename)
 
@@ -1003,7 +1007,13 @@ class MyMAinWindow(QMainWindow):
             if not signal.stop:
                 signal.show_traceback_log(traceback.format_exc())
 
-    def set_pixmap_thread(self, poster_path="", thumb_path="", poster_from="", cover_from=""):
+    def set_pixmap_thread(
+        self,
+        poster_path="",
+        thumb_path="",
+        poster_from="",
+        cover_from="",
+    ):
         t = threading.Thread(
             target=self._set_pixmap,
             args=(
@@ -1015,7 +1025,13 @@ class MyMAinWindow(QMainWindow):
         )
         t.start()
 
-    def _set_pixmap(self, poster_path="", thumb_path="", poster_from="", cover_from=""):
+    def _set_pixmap(
+        self,
+        poster_path="",
+        thumb_path="",
+        poster_from="",
+        cover_from="",
+    ):
         poster_pix = [False, "", "暂无封面图", 156, 220]
         thumb_pix = [False, "", "暂无缩略图", 328, 220]
         if os.path.exists(poster_path):
@@ -1220,29 +1236,23 @@ class MyMAinWindow(QMainWindow):
         try:
             json_data = self.json_array[self.show_name]
             self.now_show_name = json_data["show_name"]
-            (
-                title,
-                originaltitle,
-                studio,
-                publisher,
-                year,
-                outline,
-                runtime,
-                director,
-                actor_photo,
-                actor,
-                release,
-                tag,
-                number,
-                cover,
-                poster,
-                website,
-                series,
-                mosaic,
-                definition,
-                trailer,
-                letters,
-            ) = get_info(json_data)
+            title = json_data.get("title")
+            originaltitle = json_data.get("originaltitle")
+            studio = json_data.get("studio")
+            publisher = json_data.get("publisher")
+            year = json_data.get("year")
+            outline = json_data.get("outline")
+            runtime = json_data.get("runtime")
+            director = json_data.get("director")
+            actor = json_data.get("actor")
+            release = json_data.get("release")
+            tag = json_data.get("tag")
+            number = json_data.get("number")
+            cover = json_data.get("cover")
+            poster = json_data.get("poster")
+            website = json_data.get("website")
+            series = json_data.get("series")
+            trailer = json_data.get("trailer")
             file_path = json_data.get("file_path")
             number = json_data.get("number")
             originalplot = json_data.get("originalplot")

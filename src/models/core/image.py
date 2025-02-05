@@ -14,11 +14,12 @@ from models.base.utils import convert_path, get_used_time
 from models.config.config import config
 from models.config.resources import resources
 from models.core.file import movie_lists
+from models.core.types import JsonData
 from models.core.utils import get_movie_path_setting
 from models.signals import signal
 
 
-def extrafanart_copy2(json_data, folder_new_path):
+def extrafanart_copy2(json_data: JsonData, folder_new_path: str):
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -57,7 +58,7 @@ def extrafanart_copy2(json_data, folder_new_path):
     json_data["logs"] += "\n 🍀 ExtraFanart_copy done! (copy extrafanart)(%ss)" % (get_used_time(start_time))
 
 
-def extrafanart_extras_copy(json_data, folder_new_path):
+def extrafanart_extras_copy(json_data: JsonData, folder_new_path: str):
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -92,7 +93,13 @@ def extrafanart_extras_copy(json_data, folder_new_path):
     return True
 
 
-def _add_to_pic(pic_path, img_pic, mark_size, count, mark_name):
+def _add_to_pic(
+    pic_path: str,
+    img_pic: Image.Image,
+    mark_size: int,
+    count: int,
+    mark_name: str,
+):
     # 获取水印图片，生成水印
     mark_fixed = config.mark_fixed
     mark_pos_corner = config.mark_pos_corner
@@ -176,7 +183,7 @@ def _add_to_pic(pic_path, img_pic, mark_size, count, mark_name):
             move_file(temp_pic_path, pic_path)
 
 
-def add_mark_thread(pic_path, mark_list):
+def add_mark_thread(pic_path: str, mark_list: list[str]):
     mark_size = config.mark_size
     mark_fixed = config.mark_fixed
     mark_pos = config.mark_pos
@@ -204,7 +211,7 @@ def add_mark_thread(pic_path, mark_list):
             "bottom_right": 2,
             "bottom_left": 3,
         }
-        mark_pos_count = pos.get(mark_pos)  # 获取自定义位置, 取余配合pos达到顺时针添加的效果
+        mark_pos_count = pos.get(mark_pos, 0)  # 获取自定义位置, 取余配合pos达到顺时针添加的效果
         count_hd = ""
         for mark_name in mark_list:
             if mark_name == "4K" or mark_name == "8K":  # 4K/8K使用固定位置
@@ -227,7 +234,12 @@ def add_mark_thread(pic_path, mark_list):
     img_pic.close()
 
 
-def add_mark(json_data, poster_marked=False, thumb_marked=False, fanart_marked=False):
+def add_mark(
+    json_data: JsonData,
+    poster_marked=False,
+    thumb_marked=False,
+    fanart_marked=False,
+):
     download_files = config.download_files
     mark_type = config.mark_type.lower()
     has_sub = json_data["has_sub"]
@@ -277,7 +289,7 @@ def add_mark(json_data, poster_marked=False, thumb_marked=False, fanart_marked=F
             json_data["logs"] += "\n 🍀 Fanart add watermark: %s!" % mark_show_type
 
 
-def add_del_extrafanart_copy(mode):
+def add_del_extrafanart_copy(mode: str):
     signal.show_log_text("Start %s extrafanart copy! \n" % mode)
 
     movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = (
@@ -285,7 +297,7 @@ def add_del_extrafanart_copy(mode):
     )
     signal.show_log_text(" 🖥 Movie path: %s \n 🔎 Checking all videos, Please wait..." % movie_path)
     movie_type = config.media_type
-    movie_list = movie_lists("", movie_type, movie_path)  # 获取所有需要刮削的影片列表
+    movie_list = movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
 
     extrafanart_folder_path_list = []
     for movie in movie_list:

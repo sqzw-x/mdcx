@@ -328,7 +328,13 @@ def get_mosaic(title, actor):
     return mosaic
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+):
     # https://freejavbt.com/VRKM-565
     start_time = time.time()
     website_name = "freejavbt"

@@ -197,7 +197,14 @@ def get_wanted(html):
     return str(result[0]) if result else ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp", org_language="zh_cn"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+    org_language="zh_cn",
+):
     global sleep
     start_time = time.time()
     website_name = "javdb"

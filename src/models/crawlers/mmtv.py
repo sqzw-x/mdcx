@@ -174,7 +174,14 @@ def get_number(html, number):
     return number.replace("FC2-PPV ", "FC2-"), release, runtime, number
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path=""):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="zh_cn",
+    file_path="",
+):
     start_time = time.time()
     website_name = "7mmtv"
     req_web += "-> %s" % website_name

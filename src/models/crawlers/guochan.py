@@ -1006,7 +1006,14 @@ def get_number_list(number, appoint_number="", file_path=""):  # 处理国产番
     return new_number_list, new_filename_list
 
 
-def get_extra_info(title, file_path, info_type, tag="", actor="", series=""):
+def get_extra_info(
+    title,
+    file_path,
+    info_type,
+    tag="",
+    actor="",
+    series="",
+):
     all_info = title + file_path + tag + actor + series
 
     # 未找到标签时，从各种信息里匹配，忽略大小写

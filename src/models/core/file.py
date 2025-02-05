@@ -12,7 +12,6 @@ from models.base.file import copy_file, delete_file, move_file, read_link, split
 from models.base.number import (
     deal_actor_more,
     get_file_number,
-    get_info,
     get_number_first_letter,
     get_number_letters,
     is_uncensored,
@@ -23,12 +22,13 @@ from models.base.utils import convert_path, get_current_time, get_used_time
 from models.config.config import config
 from models.config.resources import resources
 from models.core.flags import Flags
+from models.core.types import JsonData, new_json_data
 from models.core.utils import get_movie_path_setting, get_new_release, nfd2c
 from models.entity.enums import FileMode
 from models.signals import signal
 
 
-def _need_clean(file_path, file_name, file_ext):
+def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
     # 判断文件是否需清理
     if not config.can_clean:
         return False
@@ -68,8 +68,13 @@ def _need_clean(file_path, file_name, file_ext):
 
 
 def creat_folder(
-    json_data, folder_new_path, file_path, file_new_path, thumb_new_path_with_filename, poster_new_path_with_filename
-):
+    json_data: JsonData,
+    folder_new_path: str,
+    file_path: str,
+    file_new_path: str,
+    thumb_new_path_with_filename: str,
+    poster_new_path_with_filename: str,
+) -> bool:
     """判断是否创建文件夹，目标文件是否有重复文件。file_new_path是最终路径"""
 
     json_data["dont_move_movie"] = False  # 不需要移动和重命名视频
@@ -186,7 +191,9 @@ def creat_folder(
     return True
 
 
-def move_trailer_video(json_data, folder_old_path, folder_new_path, file_name, naming_rule):
+def move_trailer_video(
+    json_data: JsonData, folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str
+) -> None:
     if config.main_mode < 2:
         if config.success_file_move == 0 and config.success_file_rename == 0:
             return
@@ -204,7 +211,7 @@ def move_trailer_video(json_data, folder_old_path, folder_new_path, file_name, n
             json_data["logs"] += "\n 🍀 Trailer done!"
 
 
-def move_bif(json_data, folder_old_path, folder_new_path, file_name, naming_rule):
+def move_bif(json_data: JsonData, folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str) -> None:
     # 更新模式 或 读取模式
     if config.main_mode == 3 or config.main_mode == 4:
         if config.update_mode == "c" and config.success_file_rename == 0:
@@ -219,7 +226,9 @@ def move_bif(json_data, folder_old_path, folder_new_path, file_name, naming_rule
         json_data["logs"] += "\n 🍀 Bif done!"
 
 
-def move_torrent(json_data, folder_old_path, folder_new_path, file_name, movie_number, naming_rule):
+def move_torrent(
+    json_data: JsonData, folder_old_path: str, folder_new_path: str, file_name: str, movie_number: str, naming_rule: str
+) -> None:
     # 更新模式 或 读取模式
     if config.main_mode == 3 or config.main_mode == 4:
         if config.update_mode == "c" and config.success_file_rename == 0:
@@ -253,7 +262,7 @@ def move_torrent(json_data, folder_old_path, folder_new_path, file_name, movie_n
             json_data["logs"] += "\n 🍀 Torrent done!"
 
 
-def check_file(json_data, file_path, file_escape_size):
+def check_file(json_data: JsonData, file_path: str, file_escape_size: float) -> tuple[bool, JsonData]:
     if os.path.islink(file_path):
         file_path = read_link(file_path)
         if "check_symlink" not in config.no_escape:
@@ -278,7 +287,7 @@ def check_file(json_data, file_path, file_escape_size):
     return True, json_data
 
 
-def copy_trailer_to_theme_videos(json_data, folder_new_path, naming_rule):
+def copy_trailer_to_theme_videos(json_data: JsonData, folder_new_path: str, naming_rule: str) -> None:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -302,6 +311,7 @@ def copy_trailer_to_theme_videos(json_data, folder_new_path, naming_rule):
 
     # 不存在预告片时返回
     trailer_name = config.trailer_name
+    trailer_folder = ""
     if trailer_name == 1:
         trailer_folder = os.path.join(folder_new_path, "trailers")
         trailer_file_path = os.path.join(trailer_folder, "trailer.mp4")
@@ -326,7 +336,9 @@ def copy_trailer_to_theme_videos(json_data, folder_new_path, naming_rule):
         json_data["logs"] += "\n 🍀 Trailer delete done!"
 
 
-def move_other_file(json_data, folder_old_path, folder_new_path, file_name, naming_rule):
+def move_other_file(
+    json_data: JsonData, folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str
+) -> None:
     # 软硬链接模式不移动
     if config.soft_link != 0:
         return
@@ -360,7 +372,11 @@ def move_other_file(json_data, folder_old_path, folder_new_path, file_name, nami
                     json_data["logs"] += "\n 🍀 Move %s done!" % old_file
 
 
-def move_file_to_failed_folder(json_data, file_path, folder_old_path, file_ex):
+def move_file_to_failed_folder(
+    json_data: JsonData,
+    file_path: str,
+    folder_old_path: str,
+) -> str:
     failed_folder = json_data["failed_folder"]
 
     # 更新模式、读取模式，不移动失败文件；不移动文件-关时，不移动； 软硬链接开时，不移动
@@ -438,9 +454,10 @@ def move_file_to_failed_folder(json_data, file_path, folder_old_path, file_ex):
         return file_new_path
     except Exception as e:
         json_data["logs"] += "\n 🔴 Failed to move the file to the failed folder! \n    " + str(e)
+        return file_path
 
 
-def move_movie(json_data, file_path, file_new_path):
+def move_movie(json_data: JsonData, file_path: str, file_new_path: str) -> bool:
     # 明确不需要移动的，直接返回
     if json_data["dont_move_movie"]:
         json_data["logs"] += "\n 🍀 Movie done! \n 🙉 [Movie] %s" % file_path
@@ -465,7 +482,7 @@ def move_movie(json_data, file_path, file_new_path):
             os.symlink(file_path, file_new_path)
             json_data["file_path"] = file_new_path
             json_data["logs"] += (
-                f"\n 🍀 Softlink done! \n" f"    Softlink file: {file_new_path} \n" f"    Source file: {file_path}"
+                f"\n 🍀 Softlink done! \n    Softlink file: {file_new_path} \n    Source file: {file_path}"
             )
             return True
         except Exception as e:
@@ -488,7 +505,7 @@ def move_movie(json_data, file_path, file_new_path):
             os.link(file_path, file_new_path)
             json_data["file_path"] = file_new_path
             json_data["logs"] += (
-                f"\n 🍀 HardLink done! \n" f"    HadrLink file: {file_new_path} \n" f"    Source file: {file_path}"
+                f"\n 🍀 HardLink done! \n    HadrLink file: {file_new_path} \n    Source file: {file_path}"
             )
             return True
         except Exception as e:
@@ -534,7 +551,7 @@ def move_movie(json_data, file_path, file_new_path):
         return False
 
 
-def _get_folder_path(file_path, success_folder, json_data):
+def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -> str:
     folder_name = config.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
     folder_path, file_name = split_path(file_path)  # 当前文件的目录和文件名
     filename = os.path.splitext(file_name)[0]
@@ -575,29 +592,21 @@ def _get_folder_path(file_path, success_folder, json_data):
     youma = json_data["youma"]
     m_word = destroyed + leak + wuma + youma
     c_word = json_data["c_word"]
-    (
-        title,
-        originaltitle,
-        studio,
-        publisher,
-        year,
-        outline,
-        runtime,
-        director,
-        actor_photo,
-        actor,
-        release,
-        tag,
-        number,
-        cover,
-        poster,
-        website,
-        series,
-        mosaic,
-        definition,
-        trailer,
-        letters,
-    ) = get_info(json_data)
+    title = json_data["title"]
+    originaltitle = json_data["originaltitle"]
+    studio = json_data["studio"]
+    publisher = json_data["publisher"]
+    year = json_data["year"]
+    outline = json_data["outline"]
+    runtime = json_data["runtime"]
+    director = json_data["director"]
+    actor = json_data["actor"]
+    release = json_data["release"]
+    number = json_data["number"]
+    series = json_data["series"]
+    mosaic = json_data["mosaic"]
+    definition = json_data["definition"]
+    letters = json_data["letters"]
 
     # 国产使用title作为number会出现重复，此处去除title，避免重复(需要注意titile繁体情况)
     if not number:
@@ -742,7 +751,7 @@ def _get_folder_path(file_path, success_folder, json_data):
     return folder_new_path.strip().replace(" /", "/")
 
 
-def _generate_file_name(file_path, json_data):
+def _generate_file_name(file_path: str, json_data: JsonData) -> str:
     file_full_name = split_path(file_path)[1]
     file_name, file_ex = os.path.splitext(file_full_name)
     filename = file_name
@@ -759,29 +768,21 @@ def _generate_file_name(file_path, json_data):
     youma = json_data["youma"]
     m_word = destroyed + leak + wuma + youma
     c_word = json_data["c_word"]
-    (
-        title,
-        originaltitle,
-        studio,
-        publisher,
-        year,
-        outline,
-        runtime,
-        director,
-        actor_photo,
-        actor,
-        release,
-        tag,
-        number,
-        cover,
-        poster,
-        website,
-        series,
-        mosaic,
-        definition,
-        trailer,
-        letters,
-    ) = get_info(json_data)
+    title = json_data["title"]
+    originaltitle = json_data["originaltitle"]
+    studio = json_data["studio"]
+    publisher = json_data["publisher"]
+    year = json_data["year"]
+    outline = json_data["outline"]
+    runtime = json_data["runtime"]
+    director = json_data["director"]
+    actor = json_data["actor"]
+    release = json_data["release"]
+    number = json_data["number"]
+    series = json_data["series"]
+    mosaic = json_data["mosaic"]
+    definition = json_data["definition"]
+    letters = json_data["letters"]
 
     # 国产使用title作为number会出现重复，此处去除title，避免重复(需要注意titile繁体情况)
     naming_file = config.naming_file
@@ -937,7 +938,9 @@ def _generate_file_name(file_path, json_data):
     return file_name
 
 
-def get_output_name(json_data, file_path, success_folder, file_ex):
+def get_output_name(
+    json_data: JsonData, file_path: str, success_folder: str, file_ex: str
+) -> tuple[str, str, str, str, str, str, str, str, str, str]:
     # =====================================================================================更新输出文件夹名
     folder_new_path = _get_folder_path(file_path, success_folder, json_data)
     folder_new_path = _deal_path_name(folder_new_path)
@@ -984,7 +987,7 @@ def get_output_name(json_data, file_path, success_folder, file_ex):
     )
 
 
-def newtdisk_creat_symlink(copy_flag, netdisk_path="", local_path=""):
+def newtdisk_creat_symlink(copy_flag: bool, netdisk_path: str = "", local_path: str = "") -> None:
     from_tool = False
     if not netdisk_path:
         from_tool = True
@@ -1086,7 +1089,7 @@ def newtdisk_creat_symlink(copy_flag, netdisk_path="", local_path=""):
         signal.reset_buttons_status.emit()
 
 
-def movie_lists(escape_folder_list, movie_type, movie_path):
+def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path: str) -> list[str]:
     start_time = time.time()
     total = []
     file_type = movie_type.split("|")
@@ -1193,27 +1196,9 @@ def movie_lists(escape_folder_list, movie_type, movie_path):
     return total
 
 
-def get_file_info(file_path, copy_sub=True):
-    json_data = {
-        "version": config.version,
-        "logs": "",
-        "req_web": "",
-        "image_download": "",
-        "outline_from": "",
-        "cover_from": "",
-        "poster_from": "",
-        "extrafanart_from": "",
-        "trailer_from": "",
-        "short_number": "",
-        "appoint_number": "",
-        "appoint_url": "",
-        "website_name": "",
-        "fields_info": "",
-        "poster_path": "",
-        "thumb_path": "",
-        "fanart_path": "",
-        "cover_list": [],
-    }
+def get_file_info(file_path: str, copy_sub: bool = True) -> tuple[JsonData, str, str, str, str, list[str], str, str]:
+    json_data = new_json_data()
+    json_data["version"] = config.version
     movie_number = ""
     has_sub = False
     c_word = ""
@@ -1225,8 +1210,8 @@ def get_file_info(file_path, copy_sub=True):
     mosaic = ""
     sub_list = []
     cnword_style = config.cnword_style
-    if Flags.file_mode == FileMode.Again:
-        temp_number, temp_url, temp_website = Flags.new_again_dic.get(file_path)
+    if Flags.file_mode == FileMode.Again and file_path in Flags.new_again_dic:
+        temp_number, temp_url, temp_website = Flags.new_again_dic[file_path]
         if temp_number:  # 如果指定了番号，则使用指定番号
             movie_number = temp_number
             json_data["appoint_number"] = temp_number
@@ -1332,7 +1317,7 @@ def get_file_info(file_path, copy_sub=True):
                 "z",
             ]
             if cd_path_3[0][1] != "c" or "endc" in cd_char:
-                cd_part = letter_list.index(cd_path_3[0][1])
+                cd_part = str(letter_list.index(cd_path_3[0][1]))
         elif cd_path_4 and "middle_number" in cd_char:
             cd_part = str(int(cd_path_4[0]))
 
@@ -1556,7 +1541,7 @@ def get_file_info(file_path, copy_sub=True):
     json_data["wuma"] = wuma
     json_data["youma"] = youma
     json_data["mosaic"] = mosaic
-    json_data["4K"] = ""
+    json_data["_4K"] = ""
     json_data["tag"] = ""
     json_data["actor_href"] = ""
     json_data["all_actor"] = ""
@@ -1566,7 +1551,7 @@ def get_file_info(file_path, copy_sub=True):
     return json_data, movie_number, folder_path, file_name, file_ex, sub_list, file_show_name, file_show_path
 
 
-def get_movie_list(file_mode: FileMode, movie_path, escape_folder_list):
+def get_movie_list(file_mode: FileMode, movie_path: str, escape_folder_list: list[str]) -> list[str]:
     movie_list = []
     if file_mode == FileMode.Default:  # 刮削默认视频目录的文件
         movie_path = convert_path(movie_path)
@@ -1603,7 +1588,7 @@ def get_movie_list(file_mode: FileMode, movie_path, escape_folder_list):
     return movie_list
 
 
-def _clean_empty_fodlers(path, file_mode):
+def _clean_empty_fodlers(path: str, file_mode: FileMode) -> None:
     start_time = time.time()
     if config.del_empty_folder == 0 or file_mode == FileMode.Again:
         return
@@ -1646,7 +1631,7 @@ def _clean_empty_fodlers(path, file_mode):
     signal.show_log_text("=" * 80)
 
 
-def get_success_list():
+def get_success_list() -> None:
     Flags.success_save_time = time.time()
     if os.path.isfile(resources.userdata_path("success.txt")):
         with open(resources.userdata_path("success.txt"), encoding="utf-8", errors="ignore") as f:
@@ -1659,20 +1644,20 @@ def get_success_list():
 
 
 def deal_old_files(
-    json_data,
-    folder_old_path,
-    folder_new_path,
-    file_path,
-    file_new_path,
-    thumb_new_path_with_filename,
-    poster_new_path_with_filename,
-    fanart_new_path_with_filename,
-    nfo_new_path,
-    file_ex,
-    poster_final_path,
-    thumb_final_path,
-    fanart_final_path,
-):
+    json_data: JsonData,
+    folder_old_path: str,
+    folder_new_path: str,
+    file_path: str,
+    file_new_path: str,
+    thumb_new_path_with_filename: str,
+    poster_new_path_with_filename: str,
+    fanart_new_path_with_filename: str,
+    nfo_new_path: str,
+    file_ex: str,
+    poster_final_path: str,
+    thumb_final_path: str,
+    fanart_final_path: str,
+) -> tuple[bool, bool]:
     """
     处理本地已存在的thumb、poster、fanart、nfo
     """
@@ -1746,7 +1731,7 @@ def deal_old_files(
         for each in folder_path_list:
             if os.path.isdir(each):
                 shutil.rmtree(each, ignore_errors=True)
-        return
+        return False, False
 
     # 非视频模式，将本地已有的图片、剧照等文件，按照命名规则，重新命名和移动。这个环节仅应用设置-命名设置，没有应用设置-下载的设置
     # 抢占图片的处理权
@@ -1797,7 +1782,7 @@ def deal_old_files(
     """
 
     # poster 处理：寻找对应文件放到最终路径上。这样避免刮削失败时，旧的图片被删除
-    done_poster_path = Flags.file_done_dic.get(json_data["number"]).get("poster")
+    done_poster_path = Flags.file_done_dic.get(json_data["number"], {}).get("poster")
     done_poster_path_copy = True
     try:
         # 图片最终路径等于已下载路径时，图片是已下载的，不需要处理
@@ -1840,7 +1825,7 @@ def deal_old_files(
         signal.show_log_text(traceback.format_exc())
 
     # thumb 处理：寻找对应文件放到最终路径上。这样避免刮削失败时，旧的图片被删除
-    done_thumb_path = Flags.file_done_dic.get(json_data["number"]).get("thumb")
+    done_thumb_path = Flags.file_done_dic.get(json_data["number"], {}).get("thumb")
     done_thumb_path_copy = True
     try:
         # 图片最终路径等于已下载路径时，图片是已下载的，不需要处理
@@ -1883,7 +1868,7 @@ def deal_old_files(
         signal.show_log_text(traceback.format_exc())
 
     # fanart 处理：寻找对应文件放到最终路径上。这样避免刮削失败时，旧的图片被删除
-    done_fanart_path = Flags.file_done_dic.get(json_data["number"]).get("fanart")
+    done_fanart_path = Flags.file_done_dic.get(json_data["number"], {}).get("fanart")
     done_fanart_path_copy = True
     try:
         # 图片最终路径等于已下载路径时，图片是已下载的，不需要处理
@@ -2002,7 +1987,7 @@ def deal_old_files(
             ):
                 delete_file(trailer_old_file_path_with_filename)
         else:
-            local_trailer = Flags.file_done_dic.get(json_data["number"]).get("local_trailer")
+            local_trailer = Flags.file_done_dic.get(json_data["number"], {}).get("local_trailer")
             if local_trailer and os.path.exists(local_trailer):
                 copy_file(local_trailer, trailer_new_file_path_with_filename)
 
@@ -2051,7 +2036,7 @@ def deal_old_files(
     return pic_final_catched, single_folder_catched
 
 
-def _pic_some_deal(json_data, thumb_final_path, fanart_final_path):
+def _pic_some_deal(json_data: JsonData, thumb_final_path: str, fanart_final_path: str) -> None:
     """
     thumb、poster、fanart 删除冗余的图片
     """
@@ -2066,7 +2051,7 @@ def _pic_some_deal(json_data, thumb_final_path, fanart_final_path):
             json_data["logs"] += "\n 🍀 Thumb delete done!"
 
 
-def _deal_path_name(path):
+def _deal_path_name(path: str) -> str:
     # Windows 保留文件名
     if config.is_windows:
         windows_keep_name = ["CON", "PRN", "NUL", "AUX"]
@@ -2078,7 +2063,7 @@ def _deal_path_name(path):
     return path
 
 
-def save_success_list(old_path="", new_path=""):
+def save_success_list(old_path: str = "", new_path: str = "") -> None:
     if old_path and config.record_success_file:
         # 软硬链接时，保存原路径；否则保存新路径
         if config.soft_link != 0:
@@ -2100,7 +2085,7 @@ def save_success_list(old_path="", new_path=""):
         signal.view_success_file_settext.emit(f"查看 ({len(Flags.success_list)})")
 
 
-def save_remain_list():
+def save_remain_list() -> None:
     if Flags.can_save_remain and "remain_task" in config.switch_on:
         try:
             with open(resources.userdata_path("remain.txt"), "w", encoding="utf-8", errors="ignore") as f:
@@ -2110,12 +2095,12 @@ def save_remain_list():
             signal.show_log_text(f"save remain list error: {str(e)}\n {traceback.format_exc()}")
 
 
-def check_and_clean_files():
+def check_and_clean_files() -> None:
     signal.change_buttons_status.emit()
     start_time = time.time()
     movie_path = get_movie_path_setting()[0]
     signal.show_log_text("🍯 🍯 🍯 NOTE: START CHECKING AND CLEAN FILE NOW!!!")
-    signal.show_log_text(f'\n ⏰ Start time: {time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}')
+    signal.show_log_text(f"\n ⏰ Start time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n ⏳ Checking all videos and cleaning, Please wait...")
     total = 0
     succ = 0
@@ -2136,7 +2121,7 @@ def check_and_clean_files():
                     signal.show_log_text(f" 🗑 Clean error: {error_info} ")
     signal.show_log_text(f" 🍀 Clean done!({get_used_time(start_time)}s)")
     signal.show_log_text("================================================================================")
-    _clean_empty_fodlers(movie_path, "")
+    _clean_empty_fodlers(movie_path, FileMode.Default)
     signal.set_label_file_path.emit("🗑 清理完成！")
     signal.show_log_text(
         f" 🎉🎉🎉 All finished!!!({get_used_time(start_time)}s) Total {total} , Success {succ} , Failed {fail} "

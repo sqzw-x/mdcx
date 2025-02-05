@@ -99,7 +99,13 @@ def get_trailer(html):  # 获取预览片
     return result[0] if result else ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="jp",
+):
     # https://faleno.jp/top/works/fsdss564/
     # https://dahlia-av.jp/works/dldss177/
     start_time = time.time()

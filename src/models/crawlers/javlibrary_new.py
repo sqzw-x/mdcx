@@ -10,7 +10,13 @@ from models.crawlers import javlibrary
 urllib3.disable_warnings()  # yapf: disable
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="zh_cn",
+):
     all_language = (
         config.title_language
         + config.outline_language

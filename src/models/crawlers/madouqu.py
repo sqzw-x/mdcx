@@ -77,7 +77,15 @@ def get_real_url(html, number_list):
     return False, "", "", ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number=""):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="zh_cn",
+    file_path="",
+    appoint_number="",
+):
     start_time = time.time()
     website_name = "madouqu"
     req_web += "-> %s" % website_name

@@ -10,6 +10,7 @@ import traceback
 
 import cv2
 import unicodedata
+from typing import Optional
 
 from models.base.file import read_link, split_path
 from models.base.number import get_number_letters
@@ -17,10 +18,11 @@ from models.base.path import get_main_path, get_path
 from models.base.utils import convert_path, get_used_time
 from models.config.config import config
 from models.config.resources import resources
+from models.core.types import JsonData
 from models.signals import signal
 
 
-def replace_word(json_data):
+def replace_word(json_data: JsonData):
     # 常见字段替换的字符
     for key, value in config.all_rep_word.items():
         for each in config.all_key_word:
@@ -44,7 +46,7 @@ def replace_word(json_data):
             json_data[field] = json_data[field].replace(each, "").strip(":， ").strip()
 
 
-def show_movie_info(json_data):
+def show_movie_info(json_data: JsonData):
     if config.show_data_log == "off":  # 调试模式打开时显示详细日志
         return
     for key in config.show_key:
@@ -60,7 +62,7 @@ def show_movie_info(json_data):
         json_data["logs"] += "\n     " + "%-13s" % key + ": " + str(value)
 
 
-def get_video_size(json_data, file_path):
+def get_video_size(json_data: JsonData, file_path: str):
     # 获取本地分辨率 同时获取视频编码格式
     definition = ""
     height = 0
@@ -126,7 +128,7 @@ def get_video_size(json_data, file_path):
     json_data["definition"] = definition
 
     if definition in ["4K", "8K", "UHD", "UHD8"]:
-        json_data["4K"] = "-" + definition
+        json_data["_4K"] = "-" + definition
 
     # 去除标签中的分辨率率，使用本地读取的实际分辨率
     remove_key = ["144P", "360P", "480P", "540P", "720P", "960P", "1080P", "1440P", "2160P", "4K", "8K"]
@@ -144,7 +146,7 @@ def get_video_size(json_data, file_path):
     return json_data
 
 
-def show_data_result(json_data, start_time):
+def show_data_result(json_data: JsonData, start_time: float):
     if json_data["error_info"] or json_data["title"] == "":
         json_data["logs"] += (
             "\n 🌐 [website] %s" % json_data["req_web"].strip("-> ")
@@ -169,7 +171,7 @@ def show_data_result(json_data, start_time):
         return True
 
 
-def deal_url(url):
+def deal_url(url: str) -> tuple[Optional[str], str]:
     if "://" not in url:
         url = "https://" + url
     url = url.strip()
@@ -184,10 +186,10 @@ def deal_url(url):
             if web_url in url:
                 return web_name, url
 
-    return False, url
+    return None, url
 
 
-def replace_special_word(json_data):
+def replace_special_word(json_data: JsonData):
     # 常见字段替换的字符
     all_key_word = [
         "title",
@@ -205,7 +207,7 @@ def replace_special_word(json_data):
             json_data[each] = json_data[each].replace(key, value)
 
 
-def convert_half(string):
+def convert_half(string: str) -> str:
     # 替换敏感词
     for key, value in config.special_word.items():
         string = string.replace(key, value)
@@ -216,7 +218,7 @@ def convert_half(string):
     return re.sub(r"[\W_]", "", string).upper()
 
 
-def get_new_release(release):
+def get_new_release(release: str) -> str:
     release_rule = config.release_rule
     if not release:
         release = "0000-00-00"
@@ -226,7 +228,7 @@ def get_new_release(release):
     return release_rule.replace("YYYY", year).replace("YY", year[-2:]).replace("MM", month).replace("DD", day)
 
 
-def nfd2c(path):
+def nfd2c(path: str) -> str:
     # 转换 NFC(mac nfc和nfd都能访问到文件，但是显示的是nfd，这里统一使用nfc，避免各种问题。
     # 日文浊音转换（mac的坑，osx10.12以下使用nfd，以上兼容nfc和nfd，只是显示成了nfd）
     if config.is_nfc:
@@ -236,7 +238,7 @@ def nfd2c(path):
     return new_path
 
 
-def deal_some_field(json_data):
+def deal_some_field(json_data: JsonData) -> JsonData:
     fields_rule = config.fields_rule
     actor = json_data["actor"]
     title = json_data["title"]
@@ -303,7 +305,7 @@ def deal_some_field(json_data):
     return json_data
 
 
-def get_movie_path_setting(file_path=""):
+def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str, str]:
     # 先把'\'转成'/'以便判断是路径还是目录
     movie_path = config.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
     if movie_path == "":  # 未设置为空时，使用主程序目录

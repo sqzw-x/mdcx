@@ -142,7 +142,13 @@ def get_real_url(html, number):
     return ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
+def main(
+    number,
+    appoint_url="",
+    log_info="",
+    req_web="",
+    language="zh_cn",
+):
     start_time = time.time()
     website_name = "airav_cc"
     req_web += f"-> {website_name}[{language}]"
@@ -157,7 +163,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
     if language == "zh_cn":
         airav_url += "/cn"
     web_info = "\n       "
-    log_info += f' \n    🌐 airav[{language.replace("zh_", "")}]'
+    log_info += f" \n    🌐 airav[{language.replace('zh_', '')}]"
 
     # real_url = 'https://airav5.fun/jp/playon.aspx?hid=44733'
 
@@ -260,7 +266,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
                     "image_cut": image_cut,
                     "log_info": log_info,
                     "error_info": "",
-                    "req_web": req_web + f"({round((time.time() - start_time), )}s) ",
+                    "req_web": req_web + f"({round((time.time() - start_time))}s) ",
                     "mosaic": mosaic,
                     "website": real_url,
                     "wanted": "",
@@ -281,7 +287,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
             "website": "",
             "log_info": log_info,
             "error_info": debug_info,
-            "req_web": req_web + f"({round((time.time() - start_time), )}s) ",
+            "req_web": req_web + f"({round((time.time() - start_time))}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
