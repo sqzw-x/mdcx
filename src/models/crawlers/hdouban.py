@@ -9,6 +9,7 @@ import zhconv
 
 from models.base.web import get_html, post_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -185,7 +186,6 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="zh_cn",
     file_path="",
@@ -204,7 +204,7 @@ def main(
     url_search = ""
     mosaic = ""
     web_info = "\n       "
-    log_info += " \n    🌐 hdouban"
+    LogBuffer.info().write(" \n    🌐 hdouban")
     debug_info = ""
     cover_url = ""
     poster = ""
@@ -240,19 +240,19 @@ def main(
                 # https://api.6dccbca.com/api/search?ty=movie&search=heyzo-1032&page=1&pageSize=12
                 url_search = f"https://api.6dccbca.com/api/search?ty=movie&search={number}&page=1&pageSize=12"
                 debug_info = "搜索地址: %s " % url_search
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
 
                 # ========================================================================搜索番号
                 result, html_search = get_html(url_search, json_data=True)
                 if not result:
                     debug_info = "网络请求错误: %s " % html_search
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 try:
                     result = html_search["data"]["list"]
                 except:
                     debug_info = "搜索结果解析错误: %s " % str(html_search)
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
 
                 temp_number = number.upper().replace("-", "").strip()
@@ -270,18 +270,18 @@ def main(
                     break
             else:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
         if real_url:
             debug_info = "番号地址: %s " % real_url
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             # 请求api获取详细数据
             detail_id = re.findall(r"moviedetail/(\d+)", real_url)
             if not detail_id:
                 debug_info = f"详情页链接中未获取到详情页 ID: {detail_id}"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             detail_url = "https://api.6dccbca.com/api/movie/detail"
@@ -289,7 +289,7 @@ def main(
             result, response = post_html(detail_url, data=data, json_data=True)
             if not result:
                 debug_info = "网络请求错误: %s" % response
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             res = response["data"]
             number = res["number"]
@@ -298,7 +298,7 @@ def main(
             title = res["name"].replace(number, "").strip()
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             cover_url = res["big_cove"]
             poster = res["small_cover"]
@@ -343,7 +343,6 @@ def main(
                     "trailer": trailer,
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "log_info": log_info,
                     "error_info": "",
                     "req_web": req_web
                     + "(%ss) "
@@ -357,11 +356,11 @@ def main(
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
                 debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
     except Exception as e:
         # print(traceback.format_exc())
@@ -370,7 +369,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web
             + "(%ss) "

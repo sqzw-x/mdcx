@@ -10,7 +10,7 @@ from models.base.file import delete_file, split_path
 from models.base.number import deal_actor_more, get_number_first_letter, get_number_letters
 from models.base.utils import convert_path, get_used_time
 from models.config.config import config
-from models.core.types import JsonData, LogBuffer
+from models.core.json_data import JsonData, LogBuffer
 from models.core.utils import get_new_release
 from models.signals import signal
 

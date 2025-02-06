@@ -8,6 +8,7 @@ from lxml import etree
 
 from models.base.web import get_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
 
 urllib3.disable_warnings()  # yapf: disable
@@ -206,7 +207,6 @@ def get_real_title(
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="zh_cn",
     file_path="",
@@ -217,7 +217,7 @@ def main(
     website_name = "javday"
     req_web += "-> %s" % website_name
     web_info = "\n       "
-    log_info += " \n    🌐 javday"
+    LogBuffer.info().write(" \n    🌐 javday")
     debug_info = ""
 
     javday_url = getattr(config, "javday_website", "https://javday.tv")
@@ -233,15 +233,15 @@ def main(
             for number in number_list_new:
                 testNumberUrl = javday_url + f"/videos/{number}/"
                 debug_info = f'搜索地址: {testNumberUrl} {{"wd": {number}}}'
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 result, html_content = get_html(testNumberUrl)
                 if not result:
                     debug_info = "网络请求错误: %s" % html_content
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                 else:
                     if "你似乎來到了沒有視頻存在的荒原" in html_content:
                         debug_info = "找不到番号: %s" % number
-                        log_info += web_info + debug_info
+                        LogBuffer.info().write(web_info + debug_info)
                         continue
                     debug_info = "找到网页: %s" % testNumberUrl
                     real_url = testNumberUrl
@@ -255,7 +255,7 @@ def main(
             title = get_title(html_info)  # 获取标题
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             series, tag, actor = get_some_info(html_info, title, file_path)
             actor_photo = get_actor_photo(actor)
@@ -294,7 +294,6 @@ def main(
                     "trailer": "",
                     "image_download": False,
                     "image_cut": "no",
-                    "log_info": log_info,
                     "error_info": "",
                     "req_web": req_web
                     + "(%ss) "
@@ -307,11 +306,11 @@ def main(
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
                 debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
     except Exception as e:
@@ -321,7 +320,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web
             + "(%ss) "

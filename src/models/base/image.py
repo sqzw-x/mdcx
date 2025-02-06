@@ -7,7 +7,7 @@ from PyQt5.QtGui import QImageReader, QPixmap
 
 from models.base.file import check_pic, copy_file, delete_file
 from models.base.utils import get_used_time
-from models.core.types import JsonData, LogBuffer
+from models.core.json_data import JsonData, LogBuffer
 from models.signals import signal
 
 

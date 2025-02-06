@@ -8,6 +8,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import curl_html, get_dmm_trailer
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -331,7 +332,6 @@ def get_mosaic(title, actor):
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="jp",
 ):
@@ -348,24 +348,24 @@ def main(
     web_info = "\n       "
     debug_info = ""
     real_url = f"https://freejavbt.com/{number}"
-    log_info += "\n    🌐 freejavbt"
+    LogBuffer.info().write("\n    🌐 freejavbt")
     if appoint_url:
         real_url = appoint_url.replace("/zh/", "/").replace("/en/", "/").replace("/ja/", "/")
 
     try:  # 捕获主动抛出的异常
         debug_info = "番号地址: %s " % real_url
-        log_info += web_info + debug_info
+        LogBuffer.info().write(web_info + debug_info)
 
         result, html_info = curl_html(real_url)
         if not result:
             debug_info = "请求错误: %s" % html_info
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
         # 判断返回内容是否有问题
         if not html_info:
             debug_info = "未匹配到番号！"
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
         html_detail = etree.fromstring(html_info, etree.HTMLParser())
@@ -374,7 +374,7 @@ def main(
         title, number = get_title(html_detail)  # 获取标题并去掉头尾歌手名
         if not title or "single-video-info col-12" not in html_info:
             debug_info = "数据获取失败: 番号标题不存在！"
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         actor, all_actor = get_actor(html_detail)  # 获取actor
         actor_photo = get_actor_photo(actor)
@@ -423,7 +423,6 @@ def main(
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "log_info": log_info,
                 "error_info": "",
                 "req_web": req_web
                 + "(%ss) "
@@ -437,11 +436,11 @@ def main(
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
-            log_info += web_info + debug_info
-            dic["log_info"] = log_info
+            LogBuffer.info().write(web_info + debug_info)
+
         except Exception as e:
             debug_info = "数据生成出错: %s" % str(e)
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
     except Exception as e:
@@ -451,7 +450,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web
             + "(%ss) "

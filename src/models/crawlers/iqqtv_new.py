@@ -9,7 +9,6 @@ from models.crawlers import iqqtv
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="zh_cn",
 ):
@@ -22,7 +21,7 @@ def main(
         + config.studio_language
     )
     appoint_url = appoint_url.replace("/cn/", "/jp/").replace("iqqtv.cloud/player", "iqqtv.cloud/jp/player")
-    json_data = json.loads(iqqtv.main(number, appoint_url, log_info, req_web, "jp"))
+    json_data = json.loads(iqqtv.main(number, appoint_url, req_web, "jp"))
     if not json_data["iqqtv"]["jp"]["title"]:
         json_data["iqqtv"]["zh_cn"] = json_data["iqqtv"]["jp"]
         json_data["iqqtv"]["zh_tw"] = json_data["iqqtv"]["jp"]
@@ -34,7 +33,6 @@ def main(
             separators=(",", ": "),
         )
 
-    log_info = json_data["iqqtv"]["jp"]["log_info"]
     req_web = json_data["iqqtv"]["jp"]["req_web"]
 
     if "zh_cn" in all_language:
@@ -45,7 +43,7 @@ def main(
         language = "zh_tw"
         appoint_url = json_data["iqqtv"]["jp"]["website"].replace("/jp/", "/")
 
-    json_data_zh = json.loads(iqqtv.main(number, appoint_url, log_info, req_web, language))
+    json_data_zh = json.loads(iqqtv.main(number, appoint_url, req_web, language))
     dic = json_data_zh["iqqtv"][language]
     dic["originaltitle"] = json_data["iqqtv"]["jp"]["originaltitle"]
     dic["originalplot"] = json_data["iqqtv"]["jp"]["originalplot"]

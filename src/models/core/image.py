@@ -14,7 +14,7 @@ from models.base.utils import convert_path, get_used_time
 from models.config.config import config
 from models.config.resources import resources
 from models.core.file import movie_lists
-from models.core.types import JsonData, LogBuffer
+from models.core.json_data import JsonData, LogBuffer
 from models.core.utils import get_movie_path_setting
 from models.signals import signal
 

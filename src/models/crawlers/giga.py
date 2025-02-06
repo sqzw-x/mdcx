@@ -7,6 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_html
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -128,7 +129,6 @@ def get_real_url(html, number):
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="jp",
 ):
@@ -141,7 +141,7 @@ def main(
     url_search = ""
     mosaic = "有码"
     web_info = "\n       "
-    log_info += " \n    🌐 giga"
+    LogBuffer.info().write(" \n    🌐 giga")
     debug_info = ""
 
     # real_url = 'https://www.giga-web.jp/product/index.php?product_id=6835'
@@ -151,13 +151,13 @@ def main(
             # 通过搜索获取real_url https://www.giga-web.jp/search/?keyword=GHOV-22
             url_search = f"https://www.giga-web.jp/search/?keyword={number}"
             debug_info = "搜索地址: %s " % url_search
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
             result, html_search = get_html(url_search)
             if not result:
                 debug_info = "网络请求错误: %s " % html_search
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             if "/cookie_set.php" in html_search:
@@ -165,35 +165,35 @@ def main(
                 result, html_cookies = get_html(url_cookies)
                 if not result:
                     debug_info = "网络请求错误: %s " % html_cookies
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 result, html_search = get_html(url_search)
                 if not result:
                     debug_info = "网络请求错误: %s " % html_search
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
 
             html = etree.fromstring(html_search, etree.HTMLParser())
             real_url = get_real_url(html, number)
             if not real_url:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
         if real_url:
             debug_info = "番号地址: %s" % real_url
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             result, html_content = get_html(real_url)
             if not result:
                 debug_info = "网络请求错误: %s" % html_content
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())
 
             title = get_title(html_info)
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             number = get_web_number(html_info, number)
             outline = get_outline(html_info)
@@ -236,7 +236,6 @@ def main(
                     "trailer": trailer,
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "log_info": log_info,
                     "error_info": "",
                     "req_web": req_web
                     + "(%ss) "
@@ -250,11 +249,11 @@ def main(
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
                 debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
     except Exception as e:
         # print(traceback.format_exc())
@@ -263,7 +262,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web
             + "(%ss) "

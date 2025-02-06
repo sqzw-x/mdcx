@@ -9,6 +9,7 @@ from lxml import etree
 from models.base.number import get_number_letters
 from models.base.web import get_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 from models.crawlers import prestige
 
 urllib3.disable_warnings()  # yapf: disable
@@ -116,7 +117,6 @@ def get_cover(html):
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="",
 ):
@@ -129,48 +129,48 @@ def main(
         if not official_url:
             raise Exception("不在官网番号前缀列表中")
         elif official_url == "https://www.prestige-av.com":
-            return prestige.main(number, appoint_url=appoint_url, log_info=log_info, req_web=req_web, language="jp")
+            return prestige.main(number, appoint_url=appoint_url, req_web=req_web, language="jp")
         website_name = official_url.split(".")[-2].replace("https://", "")
         req_web += "-> %s" % website_name
         real_url = appoint_url
         image_cut = ""
         mosaic = "有码"
         web_info = "\n       "
-        log_info += f" \n    🌐 {website_name}"
+        LogBuffer.info().write(f" \n    🌐 {website_name}")
         debug_info = ""
 
         url_search = official_url + "/search/list?keyword=" + number.replace("-", "")
         debug_info = "搜索地址: %s " % url_search
-        log_info += web_info + debug_info
+        LogBuffer.info().write(web_info + debug_info)
 
         # ========================================================================搜索番号
         result, html_search = get_html(url_search)
         if not result:
             debug_info = "网络请求错误: %s " % html_search
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
         html = etree.fromstring(html_search, etree.HTMLParser())
         real_url, poster = get_real_url(html, number)
         if not real_url:
             debug_info = "搜索结果: 未匹配到番号！"
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         else:
             debug_info = "番号地址: %s " % real_url
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             result, html_content = get_html(real_url)
             if not result:
                 debug_info = "网络请求错误: %s " % html_content
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             html_info = etree.fromstring(html_content, etree.HTMLParser())
             title = get_title(html_info)
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             cover_url, extrafanart = get_cover(html_info)
             outline = get_outline(html_info)
@@ -213,7 +213,6 @@ def main(
                     "trailer": trailer,
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "log_info": log_info,
                     "error_info": "",
                     "req_web": req_web
                     + "(%ss) "
@@ -227,11 +226,11 @@ def main(
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
                 debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
     except Exception as e:
@@ -241,7 +240,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web,
         }

@@ -7,6 +7,7 @@ from lxml import etree
 
 from models.base.web import get_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -86,7 +87,6 @@ def getMosaic(tag, title):  # 获取马赛克
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="jp",
 ):
@@ -99,27 +99,27 @@ def main(
     number = number.upper().replace("FC2PPV", "").replace("FC2-PPV-", "").replace("FC2-", "").replace("-", "").strip()
     dic = {}
     web_info = "\n       "
-    log_info += " \n    🌐 fc2hub"
+    LogBuffer.info().write(" \n    🌐 fc2hub")
 
     try:  # 捕获主动抛出的异常
         if not real_url:
             # 通过搜索获取real_url
             url_search = root_url + "/search?kw=" + number
             debug_info = "搜索地址: %s " % url_search
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
             result, html_search = get_html(url_search)
             if not result:
                 debug_info = "网络请求错误: %s" % html_search
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
             real_urls = html.xpath("//link[contains(@href, $number)]/@href", number="id" + number)
 
             if not real_urls:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             else:
                 language_not_jp = ["/tw/", "/ko/", "/en/"]
@@ -130,18 +130,18 @@ def main(
 
         if real_url:
             debug_info = "番号地址: %s " % real_url
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             result, html_content = get_html(real_url)
             if not result:
                 debug_info = "网络请求错误: %s" % html_content
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())
 
             title = getTitle(html_info)  # 获取标题
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             cover_url = getCover(html_info)  # 获取cover
             outline = getOutline(html_info)
@@ -180,7 +180,6 @@ def main(
                     "trailer": "",
                     "image_download": False,
                     "image_cut": "center",
-                    "log_info": log_info,
                     "error_info": "",
                     "req_web": req_web
                     + "(%ss) "
@@ -193,11 +192,11 @@ def main(
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
                 debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
     except Exception as e:
@@ -207,7 +206,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web
             + "(%ss) "

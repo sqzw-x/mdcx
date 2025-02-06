@@ -34,9 +34,9 @@ from models.core.file import (
 )
 from models.core.flags import Flags
 from models.core.image import add_mark, extrafanart_copy2, extrafanart_extras_copy
+from models.core.json_data import JsonData, LogBuffer
 from models.core.nfo import get_nfo_data, write_nfo
 from models.core.translate import translate_actor, translate_info, translate_title_outline
-from models.core.types import JsonData, LogBuffer
 from models.core.utils import (
     deal_some_field,
     get_movie_path_setting,

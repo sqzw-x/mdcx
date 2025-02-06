@@ -8,6 +8,7 @@ from lxml import etree
 
 from models.base.web import curl_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info, get_number_list
 
 urllib3.disable_warnings()  # yapf: disable
@@ -76,7 +77,6 @@ def get_redirected_url(url):
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="zh_cn",
     file_path="",
@@ -88,7 +88,7 @@ def main(
     title = ""
     cover_url = ""
     web_info = "\n       "
-    log_info += " \n    🌐 hscangku"
+    LogBuffer.info().write(" \n    🌐 hscangku")
     debug_info = ""
     real_url = appoint_url
     hscangku_url = getattr(config, "hscangku_website", "http://hsck.net")
@@ -102,18 +102,18 @@ def main(
             hscangku_url = get_redirected_url(hscangku_url)
             if not hscangku_url:
                 debug_info = "没有正确的 hscangku_url，无法刮削"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             for each in n_list:
                 real_url = f"{hscangku_url}/vodsearch/-------------.html?wd={each}&submit="
                 # real_url = 'http://hsck860.cc/vodsearch/-------------.html?wd=%E6%9F%9A%E5%AD%90%E7%8C%AB&submit='
                 debug_info = f"请求地址: {real_url} "
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 result, response = curl_html(real_url)
 
                 if not result:
                     debug_info = "网络请求错误: %s" % response
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 search_page = etree.fromstring(response, etree.HTMLParser())
                 result, number, title, real_url = get_real_url(search_page, n_list, hscangku_url)
@@ -122,16 +122,16 @@ def main(
                     break
             else:
                 debug_info = "没有匹配的搜索结果"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
         debug_info = f"番号地址: {real_url} "
-        log_info += web_info + debug_info
+        LogBuffer.info().write(web_info + debug_info)
         result, response = curl_html(real_url)
 
         if not result:
             debug_info = "没有找到数据 %s " % response
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
         detail_page = etree.fromstring(response, etree.HTMLParser())
@@ -165,7 +165,6 @@ def main(
                 "trailer": "",
                 "image_download": False,
                 "image_cut": "no",
-                "log_info": log_info,
                 "error_info": "",
                 "req_web": req_web
                 + "(%ss) "
@@ -178,11 +177,11 @@ def main(
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
-            log_info += web_info + debug_info
-            dic["log_info"] = log_info
+            LogBuffer.info().write(web_info + debug_info)
+
         except Exception as e:
             debug_info = "数据生成出错: %s" % str(e)
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
     except Exception as e:
@@ -192,7 +191,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web
             + "(%ss) "

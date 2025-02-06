@@ -13,7 +13,10 @@ class LogBuffer:
         return LogBuffer.global_buffer
 
     @staticmethod
-    def _get_buffer(category: str, pid: int) -> "LogBuffer":
+    def _get_buffer(category: str) -> "LogBuffer":
+        pid = threading.current_thread().ident
+        if pid is None:
+            return LogBuffer._global_buffer()
         if pid not in LogBuffer.all_buffers:
             LogBuffer.all_buffers[pid] = {}
         if category not in LogBuffer.all_buffers[pid]:
@@ -22,17 +25,15 @@ class LogBuffer:
 
     @staticmethod
     def log() -> "LogBuffer":
-        pid = threading.current_thread().ident
-        if pid:
-            return LogBuffer._get_buffer("log", pid)
-        return LogBuffer._global_buffer()
+        return LogBuffer._get_buffer("log")
+
+    @staticmethod
+    def info() -> "LogBuffer":
+        return LogBuffer._get_buffer("info")
 
     @staticmethod
     def error() -> "LogBuffer":
-        pid = threading.current_thread().ident
-        if pid:
-            return LogBuffer._get_buffer("log", pid)
-        return LogBuffer._global_buffer()
+        return LogBuffer._get_buffer("error")
 
     def __init__(self):
         self.buffer = []
@@ -133,7 +134,6 @@ class MovieData(TypedDict):
     website: str
     series: str
     trailer: str
-    log_info: str
     originaltitle_amazon: str
     originalplot: str
     wanted: str
@@ -143,7 +143,6 @@ class MovieData(TypedDict):
 
 
 class InternalStateData(TypedDict):
-    log_info: str
     failed_folder: str
     version: int
     image_download: bool  # 爬虫返回
@@ -274,7 +273,6 @@ def new_json_data() -> JsonData:
         "website": "",
         "series": "",
         "trailer": "",
-        "log_info": "",
         "originaltitle_amazon": "",
         "originalplot": "",
         "wanted": "",

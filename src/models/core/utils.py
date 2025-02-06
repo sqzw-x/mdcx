@@ -18,7 +18,7 @@ from models.base.path import get_main_path, get_path
 from models.base.utils import convert_path, get_used_time
 from models.config.config import config
 from models.config.resources import resources
-from models.core.types import JsonData, LogBuffer
+from models.core.json_data import JsonData, LogBuffer
 from models.signals import signal
 
 
@@ -91,9 +91,6 @@ def get_video_size(json_data: JsonData, file_path: str):
                 codec_fourcc = ""
 
         except Exception as e:
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_traceback_log(str(e))
-            signal.show_log_text(traceback.format_exc())
             signal.show_log_text(f" 🔴 无法获取视频分辨率! 文件地址: {file_path}  错误信息: {e}")
     elif hd_get == "path":
         file_path_temp = file_path.upper()
@@ -159,7 +156,7 @@ def show_data_result(json_data: JsonData, start_time: float):
         LogBuffer.log().write(
             "\n 🌐 [website] %s" % json_data["req_web"].strip("-> ")
             + "\n"
-            + json_data["log_info"].strip(" ").strip("\n")
+            + LogBuffer.info().get().strip(" ").strip("\n")
             + "\n"
             + " 🔴 Data failed!(%ss)" % (get_used_time(start_time))
         )
@@ -168,8 +165,7 @@ def show_data_result(json_data: JsonData, start_time: float):
         if config.show_web_log == "on":  # 字段刮削过程
             LogBuffer.log().write("\n 🌐 [website] %s" % json_data["req_web"].strip("-> "))
         try:
-            if json_data["log_info"]:
-                LogBuffer.log().write("\n" + json_data["log_info"].strip(" ").strip("\n"))
+            LogBuffer.log().write("\n" + LogBuffer.info().get().strip(" ").strip("\n"))
         except:
             signal.show_log_text(traceback.format_exc())
         if config.show_from_log == "on":  # 字段来源信息

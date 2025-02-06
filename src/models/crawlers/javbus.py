@@ -8,6 +8,7 @@ from lxml import etree
 
 from models.base.web import get_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -190,7 +191,7 @@ def get_real_url(
         url_search = javbus_url + "/uncensored/search/" + number + "&type=0&parent=uc"
 
     debug_info = "搜索地址: %s " % url_search
-    json_log["log_info_javbus"] += json_log["web_info"] + debug_info
+    LogBuffer.info().write(debug_info)
     # ========================================================================搜索番号
     result, html_search = get_html(url_search, headers)
     # 判断是否需要登录
@@ -203,7 +204,7 @@ def get_real_url(
 
     if not result:
         debug_info = "网络请求错误: %s " % html_search
-        json_log["log_info_javbus"] += json_log["web_info"] + debug_info
+        LogBuffer.info().write(debug_info)
         raise Exception(debug_info)
 
     html = etree.fromstring(html_search, etree.HTMLParser())
@@ -214,17 +215,16 @@ def get_real_url(
         number_2 = number_1 + "_"
         if each_url.endswith(number_1) or number_2 in each_url:
             debug_info = "番号地址: %s " % each
-            json_log["log_info_javbus"] += json_log["web_info"] + debug_info
+            LogBuffer.info().write(debug_info)
             return each
     debug_info = "搜索结果: 未匹配到番号！"
-    json_log["log_info_javbus"] += json_log["web_info"] + debug_info
+    LogBuffer.info().write(debug_info)
     raise Exception(debug_info)
 
 
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="jp",
     mosaic="",
@@ -248,11 +248,9 @@ def main(
     image_download = False
     image_cut = "right"
     dic = {}
-    web_info = "\n       "
     debug_info = ""
     json_log = {}
-    json_log["log_info_javbus"] = log_info + " \n    🌐 javbus"
-    json_log["web_info"] = web_info
+    LogBuffer.info().write(" \n    🌐 javbus")
 
     try:
         if not real_url:
@@ -269,7 +267,7 @@ def main(
                     real_url = javbus_url + "/" + temp_number
 
         debug_info = "番号地址: %s " % real_url
-        json_log["log_info_javbus"] += web_info + debug_info
+        LogBuffer.info().write(debug_info)
         result, htmlcode = get_html(real_url, headers)
 
         # 判断是否需要登录
@@ -284,13 +282,13 @@ def main(
             # 有404时尝试再次搜索 DV-1175
             if "404" not in htmlcode:
                 debug_info = f"番号地址:{real_url} \n       网络请求错误: {htmlcode} "
-                json_log["log_info_javbus"] += web_info + debug_info
+                LogBuffer.info().write(debug_info)
                 raise Exception(debug_info)
 
             # 欧美的不再搜索
             if "." in number:
                 debug_info = "未匹配到番号！"
-                json_log["log_info_javbus"] += web_info + debug_info
+                LogBuffer.info().write(debug_info)
                 raise Exception(debug_info)
 
             # 无码搜索结果
@@ -304,7 +302,7 @@ def main(
             result, htmlcode = get_html(real_url, headers)
             if not result:
                 debug_info = "未匹配到番号！"
-                json_log["log_info_javbus"] += web_info + debug_info
+                LogBuffer.info().write(debug_info)
                 raise Exception(debug_info)
 
         # 获取详情页内容
@@ -312,7 +310,7 @@ def main(
         title = get_title(html_info)
         if not title:
             debug_info = "数据获取失败: 未获取到title"
-            json_log["log_info_javbus"] += web_info + debug_info
+            LogBuffer.info().write(debug_info)
             raise Exception(debug_info)
         number = getWebNumber(html_info, number)  # 获取番号，用来替换标题里的番号
         title = title.replace(number, "").strip()
@@ -368,7 +366,6 @@ def main(
                 "trailer": "",
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "log_info": json_log["log_info_javbus"],
                 "error_info": "",
                 "req_web": req_web
                 + "(%ss) "
@@ -381,11 +378,10 @@ def main(
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
-            json_log["log_info_javbus"] += web_info + debug_info
-            dic["log_info"] = json_log["log_info_javbus"]
+            LogBuffer.info().write(debug_info)
         except Exception as e:
             debug_info = "数据生成出错: %s" % str(e)
-            json_log["log_info_javbus"] += web_info + debug_info
+            LogBuffer.info().write(debug_info)
             raise Exception(debug_info)
     except Exception as e:
         debug_info = str(e)
@@ -393,7 +389,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": json_log["log_info_javbus"],
             "error_info": debug_info,
             "req_web": req_web
             + "(%ss) "

@@ -17,7 +17,7 @@ from models.base.web import get_html, post_html
 from models.config.config import config
 from models.config.resources import resources
 from models.core.flags import Flags
-from models.core.types import JsonData, LogBuffer
+from models.core.json_data import JsonData, LogBuffer
 from models.core.web import get_actorname, get_yesjav_title, google_translate
 from models.signals import signal
 

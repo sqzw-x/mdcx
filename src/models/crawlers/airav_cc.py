@@ -9,6 +9,7 @@ from lxml import etree
 
 from models.base.web import curl_html
 from models.config import config
+from models.core.json_data import LogBuffer
 from models.signals import signal
 
 urllib3.disable_warnings()  # yapf: disable
@@ -107,17 +108,17 @@ def get_series(html):
     return result
 
 
-def retry_request(real_url, log_info, web_info):
+def retry_request(real_url, web_info):
     result, html_content = curl_html(real_url)
     if not result:
         debug_info = f"网络请求错误: {html_content} "
-        log_info += web_info + debug_info
+        LogBuffer.info().write(web_info + debug_info)
         raise Exception(debug_info)
     html_info = etree.fromstring(html_content, etree.HTMLParser())
     title = get_title(html_info)  # 获取标题
     if not title:
         debug_info = "数据获取失败: 未获取到title！"
-        log_info += web_info + debug_info
+        LogBuffer.info().write(web_info + debug_info)
         raise Exception(debug_info)
     web_number = get_web_number(html_info)  # 获取番号，用来替换标题里的番号
     web_number1 = f"[{web_number}]"
@@ -127,7 +128,7 @@ def retry_request(real_url, log_info, web_info):
     cover_url = get_cover(html_info)  # 获取cover
     tag = get_tag(html_info)
     studio = get_studio(html_info)
-    return html_info, title, outline, actor, cover_url, tag, studio, log_info
+    return html_info, title, outline, actor, cover_url, tag, studio
 
 
 def get_real_url(html, number):
@@ -145,7 +146,6 @@ def get_real_url(html, number):
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="zh_cn",
 ):
@@ -163,7 +163,7 @@ def main(
     if language == "zh_cn":
         airav_url += "/cn"
     web_info = "\n       "
-    log_info += f" \n    🌐 airav[{language.replace('zh_', '')}]"
+    LogBuffer.info().write(f" \n    🌐 airav[{language.replace('zh_', '')}]")
 
     # real_url = 'https://airav5.fun/jp/playon.aspx?hid=44733'
 
@@ -172,13 +172,13 @@ def main(
             # 通过搜索获取real_url https://airav.io/search_result?kw=ssis-200
             url_search = airav_url + f"/search_result?kw={number}"
             debug_info = f"搜索地址: {url_search} "
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
             result, html_search = curl_html(url_search)
             if not result:
                 debug_info = f"网络请求错误: {html_search} "
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
             real_url = html.xpath('//div[@class="col oneVideo"]//a[@href]/@href')
@@ -188,7 +188,7 @@ def main(
             # 没有搜索结果
             if not real_url:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
         if real_url:
@@ -197,17 +197,15 @@ def main(
             # 搜索结果页面有条目，但无法匹配到番号
             if not real_url:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             else:
                 real_url = urllib.parse.urljoin(airav_url, real_url) if real_url.startswith("/") else real_url
 
             debug_info = f"番号地址: {real_url} "
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             for i in range(3):
-                html_info, title, outline, actor, cover_url, tag, studio, log_info = retry_request(
-                    real_url, log_info, web_info
-                )
+                html_info, title, outline, actor, cover_url, tag, studio = retry_request(real_url, web_info)
 
                 if cover_url.startswith("/"):  # coverurl 可能是相对路径
                     cover_url = urllib.parse.urljoin(airav_url, cover_url)
@@ -218,11 +216,11 @@ def main(
                 else:
                     debug_info = f"{number} 请求 airav_cc 返回内容存在乱码 �，尝试第 {(i + 1)}/3 次请求"
                     signal.add_log(debug_info)
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
             else:
                 debug_info = f"{number} 已请求三次，返回内容仍存在乱码 � ！视为失败！"
                 signal.add_log(debug_info)
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             actor_photo = get_actor_photo(actor)
             number = get_number(html_info, number)
@@ -264,7 +262,6 @@ def main(
                     "trailer": "",
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "log_info": log_info,
                     "error_info": "",
                     "req_web": req_web + f"({round((time.time() - start_time))}s) ",
                     "mosaic": mosaic,
@@ -272,11 +269,10 @@ def main(
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
             except Exception as e:
                 debug_info = f"数据生成出错: {str(e)}"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
     except Exception as e:
         # print(traceback.format_exc())
@@ -285,7 +281,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web + f"({round((time.time() - start_time))}s) ",
         }

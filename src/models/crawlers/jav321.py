@@ -7,6 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import post_html
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -115,7 +116,6 @@ def getOutline(detail_page):
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="jp",
 ):
@@ -129,7 +129,7 @@ def main(
     image_cut = "right"
     mosaic = "有码"
     web_info = "\n       "
-    log_info += " \n    🌐 jav321"
+    LogBuffer.info().write(" \n    🌐 jav321")
     debug_info = ""
 
     try:
@@ -137,30 +137,30 @@ def main(
         if appoint_url != "":
             result_url = appoint_url
             debug_info = "番号地址: %s" % result_url
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
         else:
             debug_info = f'搜索地址: {result_url} {{"sn": {number}}}'
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
         result, response = post_html(result_url, data={"sn": number})
         if not result:
             debug_info = "网络请求错误: %s" % response
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         if "AVが見つかりませんでした" in response:
             debug_info = "搜索结果: 未匹配到番号！"
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         detail_page = etree.fromstring(response, etree.HTMLParser())
         website = getWebsite(detail_page)
         if website:
             debug_info = "番号地址: %s " % website
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
         actor = getActor(response)
         actor_photo = getActorPhoto(actor)
         title = getTitle(response).strip()  # 获取标题
         if not title:
             debug_info = "数据获取失败: 未获取到标题！"
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         cover_url = getCover(detail_page)  # 获取cover
         poster_url = getCoverSmall(detail_page)
@@ -243,7 +243,6 @@ def main(
                 "trailer": "",
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "log_info": log_info,
                 "error_info": "",
                 "req_web": req_web
                 + "(%ss) "
@@ -256,11 +255,11 @@ def main(
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
-            log_info += web_info + debug_info
-            dic["log_info"] = log_info
+            LogBuffer.info().write(web_info + debug_info)
+
         except Exception as e:
             debug_info = "数据生成出错: %s" % str(e)
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
     except Exception as e:
@@ -269,7 +268,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web
             + "(%ss) "

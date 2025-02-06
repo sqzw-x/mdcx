@@ -7,6 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_html
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 # import traceback
@@ -89,7 +90,6 @@ def get_extrafanart(html):
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="jp",
 ):
@@ -102,7 +102,7 @@ def main(
         image_cut = ""
         image_download = False
         web_info = "\n       "
-        log_info += " \n    🌐 kin8"
+        LogBuffer.info().write(" \n    🌐 kin8")
         debug_info = ""
         if real_url:
             key = re.findall(r"\d{3,}", real_url)
@@ -115,24 +115,24 @@ def main(
             assert isinstance(key, str)
             if not key:
                 debug_info = f"番号中未识别到 KIN8 番号: {number} "
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             number = f"KIN8-{key}"
             real_url = f"https://www.kin8tengoku.com/moviepages/{key}/index.html"
 
         debug_info = f"番号地址: {real_url} "
-        log_info += web_info + debug_info
+        LogBuffer.info().write(web_info + debug_info)
         result, html_content = get_html(real_url, encoding="euc-jp")
         if not result:
             debug_info = f"网络请求错误: {html_content} "
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
         html_info = etree.fromstring(html_content, etree.HTMLParser())
         title = get_title(html_info)
         if not title:
             debug_info = "数据获取失败: 未获取到title！"
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         outline = get_outline(html_info)
         actor = get_actor(html_info)
@@ -175,7 +175,6 @@ def main(
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "log_info": log_info,
                 "error_info": "",
                 "req_web": req_web
                 + "(%ss) "
@@ -189,11 +188,11 @@ def main(
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
-            log_info += web_info + debug_info
-            dic["log_info"] = log_info
+            LogBuffer.info().write(web_info + debug_info)
+
         except Exception as e:
             debug_info = "数据生成出错: %s" % str(e)
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
     except Exception as e:
         # print(traceback.format_exc())
@@ -202,7 +201,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web
             + "(%ss) "

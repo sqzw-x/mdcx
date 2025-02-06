@@ -7,6 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_html
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -149,7 +150,6 @@ def getScore(html):
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="jp",
     short_number="",
@@ -165,7 +165,7 @@ def main(
     image_cut = "right"
     dic = {}
     web_info = "\n       "
-    log_info += " \n    🌐 mgstage"
+    LogBuffer.info().write(" \n    🌐 mgstage")
     debug_info = ""
 
     try:
@@ -179,15 +179,15 @@ def main(
             real_url_list = [real_url]
         for real_url in real_url_list:
             debug_info = "番号地址: %s " % real_url
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             result, htmlcode = get_html(real_url, cookies={"adc": "1"})
             if not result:
                 debug_info = "网络请求错误: %s " % htmlcode
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             if not htmlcode.strip():
                 debug_info = "返回为空，请更换代理"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             htmlcode = etree.fromstring(htmlcode, etree.HTMLParser())
             actor = getActor(htmlcode).replace(" ", "").strip(",")
@@ -196,7 +196,7 @@ def main(
                 break
             else:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
         else:
             raise Exception(debug_info)
         cover_url = getCover(htmlcode)  # 获取cover
@@ -239,7 +239,6 @@ def main(
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "log_info": log_info,
                 "error_info": "",
                 "req_web": req_web
                 + "(%ss) "
@@ -252,11 +251,11 @@ def main(
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
-            log_info += web_info + debug_info
-            dic["log_info"] = log_info
+            LogBuffer.info().write(web_info + debug_info)
+
         except Exception as e:
             debug_info = "数据生成出错: %s" % str(e)
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
     except Exception as e:
@@ -266,7 +265,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web
             + "(%ss) "

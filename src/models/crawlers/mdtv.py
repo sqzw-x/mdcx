@@ -8,6 +8,7 @@ from lxml import etree
 
 from models.base.web import get_html, post_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
 
 urllib3.disable_warnings()  # yapf: disable
@@ -211,7 +212,6 @@ def get_real_title(
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="zh_cn",
     file_path="",
@@ -224,7 +224,7 @@ def main(
     title = ""
     cover_url = ""
     web_info = "\n       "
-    log_info += " \n    🌐 mdtv"
+    LogBuffer.info().write(" \n    🌐 mdtv")
     debug_info = ""
 
     mdtv_url = getattr(config, "mdtv_website", "https://www.mdpjzip.xyz")
@@ -240,15 +240,15 @@ def main(
             number_list_new.sort(key=total_number_list.index)
             for number in number_list_new:
                 debug_info = f'搜索地址: {search_url} {{"wd": {number}}}'
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 result, response = post_html(search_url, data={"wd": number}, keep=False)
                 if not result:
                     debug_info = "网络请求错误: %s" % response
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 if "没有找到匹配数据" in response:
                     debug_info = "搜索结果: 没有搜索内容"
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                 else:
                     break
             else:
@@ -258,23 +258,23 @@ def main(
             real_url = get_real_url(detail_page, number, mdtv_url, file_path)
             if real_url:
                 debug_info = "番号地址: %s " % real_url
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
             else:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
         if real_url:
             result, html_content = get_html(real_url)
             if not result:
                 debug_info = "网络请求错误: %s" % html_content
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())
             title = get_title(html_info)  # 获取标题
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             series, tag, actor = get_some_info(html_info, title, file_path)
             actor_photo = get_actor_photo(actor)
@@ -313,7 +313,6 @@ def main(
                     "trailer": "",
                     "image_download": False,
                     "image_cut": "no",
-                    "log_info": log_info,
                     "error_info": "",
                     "req_web": req_web
                     + "(%ss) "
@@ -326,11 +325,11 @@ def main(
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
                 debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
     except Exception as e:
@@ -340,7 +339,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web
             + "(%ss) "

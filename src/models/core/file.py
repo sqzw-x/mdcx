@@ -22,7 +22,7 @@ from models.base.utils import convert_path, get_current_time, get_used_time
 from models.config.config import config
 from models.config.resources import resources
 from models.core.flags import Flags
-from models.core.types import JsonData, LogBuffer, MoveContext, new_json_data
+from models.core.json_data import JsonData, LogBuffer, MoveContext, new_json_data
 from models.core.utils import get_movie_path_setting, get_new_release, nfd2c
 from models.entity.enums import FileMode
 from models.signals import signal

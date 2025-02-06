@@ -8,6 +8,7 @@ from lxml import etree
 
 from models.base.web import curl_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -156,7 +157,6 @@ def get_real_url(html, number):
 def main(
     number,
     appoint_url="",
-    log_info="",
     req_web="",
     language="",
 ):
@@ -177,7 +177,7 @@ def main(
     mosaic = ""
     url_search = ""
     web_info = "\n       "
-    log_info += " \n    🌐 avsex"
+    LogBuffer.info().write(" \n    🌐 avsex")
     debug_info = ""
     poster_url = ""
     # real_url = 'https://paycalling.com/#/home/video/332642'
@@ -192,38 +192,38 @@ def main(
             # 获取结果后简繁之后会统一转换，这里优先繁体可能是更稳定些？
             url_search = f"{avsex_url}/tw/search?query={number.lower()}"
             debug_info = "搜索地址: %s " % url_search
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
             result, html_search = curl_html(url_search)
             if not result:
                 debug_info = "网络请求错误: %s " % html_search
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
             real_url, poster_url = get_real_url(html, number)
             if not real_url:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
         if real_url:
             debug_info = "番号地址: %s " % real_url
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             # https://9sex.tv/#/home/video/332642
             # https://paycalling.com/web/video?id=340715
             result, html_content = curl_html(real_url)
             if not result:
                 debug_info = "网络请求错误: %s " % html_content
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             html_info = etree.fromstring(html_content, etree.HTMLParser())
             title = get_title(html_info)
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             number = get_web_number(html_info, number)
             release = get_release(html_info)
@@ -269,7 +269,6 @@ def main(
                     "trailer": trailer,
                     "image_download": False,
                     "image_cut": image_cut,
-                    "log_info": log_info,
                     "error_info": "",
                     "req_web": req_web
                     + "(%ss) "
@@ -283,11 +282,11 @@ def main(
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
                 debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
     except Exception as e:
@@ -297,7 +296,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
             "error_info": debug_info,
             "req_web": req_web
             + "(%ss) "
