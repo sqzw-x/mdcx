@@ -438,7 +438,6 @@ def main(
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "error_info": "",
                 "req_web": req_web
                 + "(%ss) "
                 % (

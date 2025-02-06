@@ -48,6 +48,7 @@ from models.core.file import (
 )
 from models.core.flags import Flags
 from models.core.image import add_del_extrafanart_copy
+from models.core.json_data import LogBuffer
 from models.core.nfo import write_nfo
 from models.core.scraper import again_search, get_remain_list, start_new_scrape
 from models.core.subtitle import add_sub_for_all_video
@@ -847,7 +848,7 @@ class MyMAinWindow(QMainWindow):
         if not json_data.get("actor"):
             json_data["actor"] = ""
         if not json_data.get("title") or result == "fail":
-            json_data["title"] = json_data["error_info"]
+            json_data["title"] = LogBuffer.error().get()
         if not json_data.get("outline"):
             json_data["outline"] = ""
         if not json_data.get("tag"):

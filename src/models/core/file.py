@@ -106,10 +106,10 @@ def creat_folder(
                 LogBuffer.log().write("\n 🔴 Failed to create folder! \n    " + str(e))
                 if len(folder_new_path) > 250:
                     LogBuffer.log().write("\n    可能是目录名过长！！！建议限制目录名长度！！！越小越好！！！")
-                    json_data["error_info"] = "创建文件夹失败！可能是目录名过长！"
+                    LogBuffer.error().write("创建文件夹失败！可能是目录名过长！")
                 else:
                     LogBuffer.log().write("\n    请检查是否有写入权限！")
-                    json_data["error_info"] = "创建文件夹失败！请检查是否有写入权限！"
+                    LogBuffer.error().write("创建文件夹失败！请检查是否有写入权限！")
                 return False
 
     # 判断是否有重复文件（Windows、Mac大小写不敏感）
@@ -159,7 +159,7 @@ def creat_folder(
 
                 # 路径不同，当指向不同文件时
                 json_data["title"] = "Success folder already exists a same name file!"
-                json_data["error_info"] = (
+                LogBuffer.error().write(
                     f"Success folder already exists a same name file! \n ❗️ Current file: {file_path} \n ❗️ Success folder already exists file: {file_new_path} "
                 )
                 return False
@@ -179,7 +179,7 @@ def creat_folder(
             # 路径不同，是两个文件
             else:
                 json_data["title"] = "Success folder already exists a same name file!"
-                json_data["error_info"] = (
+                LogBuffer.error().write(
                     f"Success folder already exists a same name file! \n"
                     f" ❗️ Current file is symlink file: {file_path} \n"
                     f" ❗️ real file: {real_file_path} \n"
@@ -269,7 +269,7 @@ def check_file(json_data: JsonData, file_path: str, file_escape_size: float) -> 
             return True, json_data
 
     if not os.path.exists(file_path):
-        json_data["error_info"] = "文件不存在"
+        LogBuffer.error().write("文件不存在")
         json_data["req_web"] = "do_not_update_json_data_dic"
         json_data["outline"] = split_path(file_path)[1]
         json_data["tag"] = file_path
@@ -277,7 +277,7 @@ def check_file(json_data: JsonData, file_path: str, file_escape_size: float) -> 
     if "no_skip_small_file" not in config.no_escape:
         file_size = os.path.getsize(file_path) / float(1024 * 1024)
         if file_size < file_escape_size:
-            json_data["error_info"] = (
+            LogBuffer.error().write(
                 f"文件小于 {file_escape_size} MB 被过滤!（实际大小 {round(file_size, 2)} MB）已跳过刮削！"
             )
             json_data["req_web"] = "do_not_update_json_data_dic"
@@ -418,7 +418,9 @@ def move_file_to_failed_folder(
         LogBuffer.log().write("\n 🔴 Move file to the failed folder!")
         LogBuffer.log().write("\n 🙊 [Movie] %s" % file_new_path)
         json_data["file_path"] = file_new_path
-        json_data["error_info"] = json_data["error_info"].replace(file_path, file_new_path)
+        error_info = LogBuffer.error().get()
+        LogBuffer.error().clear()
+        LogBuffer.error().write(error_info.replace(file_path, file_new_path))
 
         # 同步移动预告片
         trailer_new_path = file_new_path.replace(file_ext, "-trailer.mp4")
@@ -522,7 +524,7 @@ def move_movie(json_data: MoveContext, file_path: str, file_new_path: str) -> bo
                     f"硬链接要求待刮削文件和输出目录必须是同盘，不支持跨卷！"
                     f"如要跨卷可以尝试软链接模式！)\n{str(e)} "
                 )
-            json_data["error_info"] = "创建硬连接失败！"
+            LogBuffer.error().write("创建硬连接失败！")
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
             return False

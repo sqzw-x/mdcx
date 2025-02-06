@@ -152,7 +152,7 @@ def get_video_size(json_data: JsonData, file_path: str):
 
 
 def show_data_result(json_data: JsonData, start_time: float):
-    if json_data["error_info"] or json_data["title"] == "":
+    if LogBuffer.error().get() or json_data["title"] == "":
         LogBuffer.log().write(
             "\n 🌐 [website] %s" % json_data["req_web"].strip("-> ")
             + "\n"

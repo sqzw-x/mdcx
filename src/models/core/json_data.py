@@ -41,19 +41,19 @@ class LogBuffer:
     def write(self, message):
         self.buffer.append(message)
 
-    def flush(self):
-        pass
-
     def get(self):
         return "".join(self.buffer)
 
-    def __add__(self, other: str):
-        self.buffer.append(other)
-        return self
+    def last(self):
+        if len(self.buffer) == 0:
+            return ""
+        return self.buffer[-1]
+
+    def clear(self):
+        self.buffer.clear()
 
 
 class MoveContext(TypedDict):
-    error_info: str
     dont_move_movie: bool
     del_file_path: bool
     file_path: str
@@ -258,7 +258,6 @@ def new_json_data() -> JsonData:
         "youma": "",
         "mosaic": "",
         "tag": "",
-        "error_info": "",
         "_4K": "",
         "source": "",
         "release": "",

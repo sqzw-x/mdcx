@@ -211,8 +211,8 @@ def _scrape_one_file(file_path: str, file_info: Tuple, file_mode: FileMode) -> T
         else:
             done_file_new_path_list.append(file_path)  # 已存在时，添加到列表，停止刮削
             done_file_new_path_list.sort(reverse=True)
-            json_data["error_info"] = "存在重复文件（指刮削后的文件路径相同！），请检查:\n    🍁 " + "\n    🍁 ".join(
-                done_file_new_path_list
+            LogBuffer.error().write(
+                "存在重复文件（指刮削后的文件路径相同！），请检查:\n    🍁 " + "\n    🍁 ".join(done_file_new_path_list)
             )
             # json_data['req_web'] = 'do_not_update_json_data_dic'
             # do_not_update_json_data_dic 是不要更新json_data的标识，表示这个文件的数据有问题
@@ -431,7 +431,7 @@ def _scrape_exec_thread(task: Tuple[str, int, int]) -> None:
         _check_stop(file_name_temp)
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
-        json_data["error_info"] = "c1oreMain error: " + str(e)
+        LogBuffer.error().write("c1oreMain error: " + str(e))
         LogBuffer.log().write("\n" + traceback.format_exc())
         result = False
 
@@ -459,16 +459,16 @@ def _scrape_exec_thread(task: Tuple[str, int, int]) -> None:
                 + json_data["_4K"]
             )
             signal.show_list_name(fail_show_name, "fail", json_data, movie_number)
-            if json_data["error_info"]:
-                LogBuffer.log().write(f"\n 🔴 [Failed] Reason: {json_data['error_info']}")
-                if "WinError 5" in json_data["error_info"]:
+            if e := LogBuffer.error().get():
+                LogBuffer.log().write(f"\n 🔴 [Failed] Reason: {e}")
+                if "WinError 5" in e:
                     LogBuffer.log().write(
                         "\n 🔴 该问题为权限问题：请尝试以管理员身份运行，同时关闭其他正在运行的Python脚本！"
                     )
             fail_file_path = move_file_to_failed_folder(json_data, file_path, folder_old_path)
-            Flags.failed_list.append([fail_file_path, json_data["error_info"]])
+            Flags.failed_list.append([fail_file_path, LogBuffer.error().get()])
             Flags.failed_file_list.append(fail_file_path)
-            _failed_file_info_show(str(Flags.fail_count), fail_file_path, json_data["error_info"])
+            _failed_file_info_show(str(Flags.fail_count), fail_file_path, LogBuffer.error().get())
             signal.view_failed_list_settext.emit(f"失败 {Flags.fail_count}")
     except Exception as e:
         _check_stop(file_name_temp)

@@ -725,7 +725,7 @@ def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_final_pa
             LogBuffer.log().write(
                 "\n 🔴 Thumb download failed! 你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」 "
             )
-            json_data["error_info"] = (
+            LogBuffer.error().write(
                 "Thumb download failed! 你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」"
             )
             return False
@@ -841,7 +841,7 @@ def poster_download(json_data: JsonData, folder_new_path: str, poster_final_path
             LogBuffer.log().write(
                 "\n 🔴 Poster download failed! 你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」 "
             )
-            json_data["error_info"] = (
+            LogBuffer.error().write(
                 "Poster download failed! 你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」"
             )
             return False
@@ -874,7 +874,7 @@ def poster_download(json_data: JsonData, folder_new_path: str, poster_final_path
             LogBuffer.log().write(
                 "\n 🔴 Poster cut failed! 你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」 "
             )
-            json_data["error_info"] = "Poster failed！你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」"
+            LogBuffer.error().write("Poster failed！你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」")
             return False
 
 
@@ -948,7 +948,7 @@ def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
                 LogBuffer.log().write(
                     "\n 🔴 Fanart failed! 你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」 "
                 )
-                json_data["error_info"] = (
+                LogBuffer.error().write(
                     "Fanart 下载失败！你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」"
                 )
                 return False

@@ -908,7 +908,7 @@ def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回
                 website_list = config.website_fc2.split(",")
                 json_data = _decide_websites(json_data, website_list)
             else:
-                json_data["error_info"] = "未识别到FC2番号：%s" % file_number
+                LogBuffer.error().write("未识别到FC2番号：%s" % file_number)
 
         # =======================================================================sexart.15.06.14
         elif re.search(r"[^.]+\.\d{2}\.\d{2}\.\d{2}", file_number) or (

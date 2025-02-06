@@ -262,7 +262,6 @@ def main(
                     "trailer": "",
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "error_info": "",
                     "req_web": req_web + f"({round((time.time() - start_time))}s) ",
                     "mosaic": mosaic,
                     "website": real_url,
@@ -276,12 +275,11 @@ def main(
                 raise Exception(debug_info)
     except Exception as e:
         # print(traceback.format_exc())
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "error_info": debug_info,
             "req_web": req_web + f"({round((time.time() - start_time))}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}

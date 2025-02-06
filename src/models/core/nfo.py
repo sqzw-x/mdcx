@@ -413,7 +413,7 @@ def get_nfo_data(
     json_data["trailer_from"] = "local"
 
     if not os.path.exists(local_nfo_path):
-        json_data["error_info"] = "nfo文件不存在"
+        LogBuffer.error().write("nfo文件不存在")
         json_data["req_web"] = "do_not_update_json_data_dic"
         json_data["outline"] = split_path(file_path)[1]
         json_data["tag"] = file_path
@@ -428,7 +428,7 @@ def get_nfo_data(
     title = "".join(xml_nfo.xpath("//title/text()"))
     # 获取不到标题，表示xml错误，重新刮削
     if not title:
-        json_data["error_info"] = "nfo文件损坏"
+        LogBuffer.error().write("nfo文件损坏")
         json_data["req_web"] = "do_not_update_json_data_dic"
         json_data["outline"] = split_path(file_path)[1]
         json_data["tag"] = file_path
