@@ -3,13 +3,13 @@ import re
 import threading
 import time
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional, Tuple
 
 from PyQt5.QtWidgets import QMessageBox
 
 from models.base.file import copy_file, move_file, read_link, split_path
 from models.base.path import get_main_path
-from models.base.pool import Pool
 from models.base.utils import convert_path, get_current_time, get_real_time, get_used_time
 from models.config.config import config
 from models.config.resources import resources
@@ -628,7 +628,7 @@ def scrape(file_mode: FileMode, movie_list: Optional[List[str]]) -> None:
 
         # 创建线程池
         Flags.next_start_time = time.time()
-        Flags.pool = Pool(thread_number, "MDCx-Pool")
+        Flags.pool = ThreadPoolExecutor(thread_number, "MDCx-Pool")
         Flags.pool.map(_scrape_exec_thread, task_list)
 
         # self.extrafanart_pool.shutdown(wait=True)

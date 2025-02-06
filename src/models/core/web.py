@@ -8,13 +8,13 @@ import shutil
 import time
 import traceback
 import urllib
+from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, Tuple, cast
 
 from lxml import etree
 
 from models.base.file import copy_file, delete_file, move_file, split_path
 from models.base.image import check_pic, cut_thumb_to_poster
-from models.base.pool import Pool
 from models.base.utils import get_used_time
 from models.base.web import check_url, get_amazon_data, get_big_pic_by_google, get_html, get_imgsize, multi_download
 from models.config.config import config
@@ -995,7 +995,7 @@ def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Optional[
                 (json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path_temp, extrafanart_name)
             )
             task_list = cast(list[tuple[JsonData, str, str, str, str]], task_list)
-        extrafanart_pool = Pool(20)  # 剧照下载线程池
+        extrafanart_pool = ThreadPoolExecutor(20)  # 剧照下载线程池
         result = extrafanart_pool.map(_mutil_extrafanart_download_thread, task_list)
         for res in result:
             if res:
