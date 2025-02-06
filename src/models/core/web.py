@@ -40,7 +40,9 @@ def get_actorname(number):
 
 
 def get_yesjav_title(json_data, movie_number):
-    yesjav_url = "http://www.yesjav.info/search.asp?q=%s&" % movie_number
+    # html encode movie_number
+    movie_number = movie_number.replace("-", "%2D")
+    yesjav_url = "https://www.yesjav100.com/search.asp?q=%s&" % movie_number  #https://www.yesjav100.com/ replace http://www.yesjav.info/
     movie_title = ""
     result, response = get_html(yesjav_url)
     if result and response:

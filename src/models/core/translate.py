@@ -441,11 +441,23 @@ def openai_translate(title, outline, ls="JA", json_data=None):
         tuple: (翻译后的标题, 翻译后的简介, 错误信息)
     """
     openai_key = config.openai_key
-    if not openai_key:
-        return title, outline, "未设置OpenAI API密钥"
     openai_model = config.openai_model
     openai_url = config.openai_url
+    signal.show_log_text(f"OpenAI API请求开始! 模型：{openai_model}，URL：{openai_url}")    
 
+    # check openai_key
+    if not openai_key:
+        return title, outline, "未设置OpenAI API密钥"
+    
+    # check openai_model
+    if not openai_model:
+        return title, outline, "未设置OpenAI API模型"
+    
+    # check openai_url
+    if not openai_url:
+        return title, outline, "未设置OpenAI API URL"
+
+    start_time = time.time()
     client = OpenAI(api_key=openai_key, base_url=openai_url)
     try:
         messages = []
@@ -461,7 +473,7 @@ def openai_translate(title, outline, ls="JA", json_data=None):
             response = client.chat.completions.create(
                 model=openai_model,
                 messages=messages,
-                temperature=0.7,
+                temperature=0,
                 max_tokens=2000
             )
             title = response.choices[0].message.content
@@ -477,11 +489,12 @@ def openai_translate(title, outline, ls="JA", json_data=None):
             response = client.chat.completions.create(
                 model=openai_model, 
                 messages=messages,
-                temperature=0.7,
+                temperature=0,
                 max_tokens=2000
             )
             outline = response.choices[0].message.content
-            
+        end_time = round(time.time() - start_time, 2)          
+        signal.show_log_text(f"OpenAI API请求完成! 耗时：{end_time}秒")
         return title, outline, ""
         
     except Exception as e:
@@ -530,11 +543,17 @@ def translate_title_outline(json_data, movie_number):
         # 使用json_data数据
         if not movie_title and title_translate == "on" and json_data_title_language == "ja":
             trans_title = json_data["title"]
-
+            # if json_data["originaltitle"] not empty use originaltitle
+            if json_data["originaltitle"] and json_data["originaltitle"] != "":
+                trans_title = json_data["originaltitle"]
+    
     # 处理outline
     if json_data["outline"] and outline_language != "jp":
         if outline_translate == "on" and langid.classify(json_data["outline"])[0] == "ja":
             trans_outline = json_data["outline"]
+            # if json_data["originalplot"] not empty use originalplot
+            if json_data["originalplot"] and json_data["originalplot"] != "":
+                trans_outline = json_data["originalplot"]
 
     # 翻译
     if Flags.translate_by_list:
@@ -549,7 +568,7 @@ def translate_title_outline(json_data, movie_number):
                 elif each == "google":  # 使用 google 翻译
                     t, o, r = google_translate(trans_title, trans_outline)
                 elif each == "openai":  # 新增openai翻译选项
-                    t, o, r = openai_translate(trans_title, trans_outline, "JA", json_data)
+                    t, o, r = openai_translate(trans_title, trans_outline, "日文", json_data)
                 else:  # 使用deepl翻译
                     t, o, r = deepl_translate(trans_title, trans_outline, "JA", json_data)
                 if r:
