@@ -9,7 +9,7 @@ import time
 import traceback
 import urllib
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional, Tuple, cast
+from typing import Optional, cast
 
 from lxml import etree
 
@@ -24,7 +24,7 @@ from models.core.utils import convert_half
 from models.signals import signal
 
 
-def get_actorname(number: str) -> Tuple[bool, str]:
+def get_actorname(number: str) -> tuple[bool, str]:
     # 获取真实演员名字
     url = f"https://av-wiki.net/?s={number}"
     result, res = get_html(url)
@@ -60,7 +60,7 @@ def get_yesjav_title(movie_number: str) -> str:
     return movie_title
 
 
-def google_translate(title: str, outline: str) -> Tuple[str, str, Optional[str]]:
+def google_translate(title: str, outline: str) -> tuple[str, str, Optional[str]]:
     e1 = None
     e2 = None
     if title:
@@ -70,7 +70,7 @@ def google_translate(title: str, outline: str) -> Tuple[str, str, Optional[str]]
     return title, outline, e1 or e2
 
 
-def _google_translate(msg: str) -> Tuple[str, str]:
+def _google_translate(msg: str) -> tuple[str, str]:
     try:
         msg_unquote = urllib.parse.unquote(msg)
         url = f"https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}"

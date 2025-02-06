@@ -4,7 +4,7 @@ import threading
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from PyQt5.QtWidgets import QMessageBox
 
@@ -53,7 +53,7 @@ from models.tools.emby_actor_image import update_emby_actor_photo
 from models.tools.emby_actor_info import creat_kodi_actors
 
 
-def _scrape_one_file(file_path: str, file_info: Tuple, file_mode: FileMode) -> Tuple[bool, JsonData]:
+def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> tuple[bool, JsonData]:
     # 处理单个文件刮削
     # 初始化所需变量
     start_time = time.time()
@@ -350,7 +350,7 @@ def _scrape_one_file(file_path: str, file_info: Tuple, file_mode: FileMode) -> T
     return True, json_data
 
 
-def _scrape_exec_thread(task: Tuple[str, int, int]) -> None:
+def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     # 获取顺序
     with Flags.lock:
         file_path, count, count_all = task
@@ -551,7 +551,7 @@ def _scrape_exec_thread(task: Tuple[str, int, int]) -> None:
         signal.show_log_text(str(e))
 
 
-def scrape(file_mode: FileMode, movie_list: Optional[List[str]]) -> None:
+def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
     Flags.reset()
     if movie_list is None:
         movie_list = []
@@ -692,7 +692,7 @@ def scrape(file_mode: FileMode, movie_list: Optional[List[str]]) -> None:
         signal.exec_exit_app.emit()
 
 
-def start_new_scrape(file_mode: FileMode, movie_list: Optional[List[str]] = None) -> None:
+def start_new_scrape(file_mode: FileMode, movie_list: Optional[list[str]] = None) -> None:
     signal.change_buttons_status.emit()
     signal.exec_set_processbar.emit(0)
     try:
@@ -790,7 +790,7 @@ def move_sub(
     folder_old_path: str,
     folder_new_path: str,
     file_name: str,
-    sub_list: List[str],
+    sub_list: list[str],
     naming_rule: str,
 ) -> None:
     copy_flag = False

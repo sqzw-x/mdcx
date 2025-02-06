@@ -4,7 +4,7 @@
 
 import json
 import re
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable
 
 import langid
 
@@ -55,13 +55,13 @@ from models.entity.enums import FileMode
 
 
 def _get_new_website_list(
-    field_website_list: List[str],
-    number_website_list: List[str],
+    field_website_list: list[str],
+    number_website_list: list[str],
     file_number: str,
     short_number: str,
     field: str,
     all: bool = False,
-) -> List[str]:
+) -> list[str]:
     whole_fields = config.whole_fields  # 继续补全的字段
     field_website_list = [i for i in field_website_list if i.strip()]  # 去空
     number_website_list = [i for i in number_website_list if i.strip()]  # 去空
@@ -123,7 +123,7 @@ def _get_new_website_list(
     return same_list
 
 
-def _deal_some_list(field: str, website: str, same_list: List[str]) -> List[str]:
+def _deal_some_list(field: str, website: str, same_list: list[str]) -> list[str]:
     if website not in same_list:
         same_list.append(website)
     if field in ["title", "outline", "thumb", "poster", "trailer", "extrafanart"]:
@@ -142,7 +142,7 @@ def _call_crawler(
     short_number: str,
     mosaic: str,
     org_language: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     获取某个网站数据
     """
@@ -275,7 +275,7 @@ def _call_crawler(
 
 def _decide_websites(
     json_data: JsonData,
-    number_website_list: List[str],
+    number_website_list: list[str],
 ) -> JsonData:
     """
     获取一组网站的数据：按照设置的网站组，请求各字段数据，并返回最终的数据
@@ -562,9 +562,9 @@ def _decide_websites(
 
 
 def _deal_each_field(
-    all_json_data: Dict[str, Dict[str, Any]],
+    all_json_data: dict[str, dict[str, Any]],
     json_data: JsonData,
-    website_list: List[str],
+    website_list: list[str],
     field_name: str,
     field_cnname: str,
     field_language: str,
@@ -659,9 +659,9 @@ def _deal_each_field(
 
 
 def _call_crawlers(
-    all_json_data: Dict[str, Dict[str, Any]],
+    all_json_data: dict[str, dict[str, Any]],
     json_data: JsonData,
-    website_list: List[str],
+    website_list: list[str],
     field_name: str,
     field_cnname: str,
     field_language: str,
