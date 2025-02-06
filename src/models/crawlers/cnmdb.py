@@ -105,7 +105,7 @@ def main(
 ):
     start_time = time.time()
     website_name = "cnmdb"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
     title = ""
     cover_url = ""
     web_info = "\n       "
@@ -153,7 +153,7 @@ def main(
                     LogBuffer.info().write(web_info + debug_info)
                     result, response = get_html(search_url, keep=False)
                     if not result:
-                        debug_info = "网络请求错误: %s" % response
+                        debug_info = f"网络请求错误: {response}"
                         LogBuffer.info().write(web_info + debug_info)
                         raise Exception(debug_info)
                     search_page = etree.fromstring(response, etree.HTMLParser())
@@ -197,12 +197,7 @@ def main(
                 "image_download": False,
                 "image_cut": "no",
                 "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
+                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": "国产",
                 "wanted": "",
             }
@@ -210,7 +205,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
+            debug_info = f"数据生成出错: {str(e)}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -222,12 +217,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

@@ -131,7 +131,7 @@ def main(
         elif official_url == "https://www.prestige-av.com":
             return prestige.main(number, appoint_url=appoint_url, req_web=req_web, language="jp")
         website_name = official_url.split(".")[-2].replace("https://", "")
-        req_web += "-> %s" % website_name
+        req_web += f"-> {website_name}"
         real_url = appoint_url
         image_cut = ""
         mosaic = "有码"
@@ -140,13 +140,13 @@ def main(
         debug_info = ""
 
         url_search = official_url + "/search/list?keyword=" + number.replace("-", "")
-        debug_info = "搜索地址: %s " % url_search
+        debug_info = f"搜索地址: {url_search} "
         LogBuffer.info().write(web_info + debug_info)
 
         # ========================================================================搜索番号
         result, html_search = get_html(url_search)
         if not result:
-            debug_info = "网络请求错误: %s " % html_search
+            debug_info = f"网络请求错误: {html_search} "
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -157,12 +157,12 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         else:
-            debug_info = "番号地址: %s " % real_url
+            debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
             result, html_content = get_html(real_url)
             if not result:
-                debug_info = "网络请求错误: %s " % html_content
+                debug_info = f"网络请求错误: {html_content} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -214,12 +214,7 @@ def main(
                     "image_download": image_download,
                     "image_cut": image_cut,
                     "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
+                    + f"({round(time.time() - start_time)}s) ",
                     "mosaic": mosaic,
                     "website": real_url,
                     "wanted": "",
@@ -228,7 +223,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
+                debug_info = f"数据生成出错: {str(e)}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 

@@ -16,7 +16,7 @@ urllib3.disable_warnings()  # yapf: disable
 def getTitle(html, number):  # 获取标题
     result = html.xpath("//h3/text()")
     if result:
-        result = result[0].replace(("FC2-%s " % number), "")
+        result = result[0].replace(f"FC2-{number} ", "")
     else:
         result = ""
     return result
@@ -117,7 +117,7 @@ def main(
 ):
     start_time = time.time()
     website_name = "fc2club"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
     real_url = appoint_url
     title = ""
     cover_url = ""
@@ -129,15 +129,15 @@ def main(
 
     try:  # 捕获主动抛出的异常
         if not real_url:
-            real_url = "https://fc2club.top/html/FC2-%s.html" % number
+            real_url = f"https://fc2club.top/html/FC2-{number}.html"
 
-        debug_info = "番号地址: %s " % real_url
+        debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
 
         # ========================================================================搜索番号
         result, html_content = get_html(real_url)
         if not result:
-            debug_info = "网络请求错误: %s" % html_content
+            debug_info = f"网络请求错误: {html_content}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         html_info = etree.fromstring(html_content, etree.HTMLParser())
@@ -183,12 +183,7 @@ def main(
                 "image_download": False,
                 "image_cut": "center",
                 "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
+                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": mosaic,
                 "wanted": "",
             }
@@ -196,7 +191,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
+            debug_info = f"数据生成出错: {str(e)}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -207,12 +202,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

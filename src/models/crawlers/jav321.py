@@ -121,7 +121,7 @@ def main(
 ):
     start_time = time.time()
     website_name = "jav321"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
     title = ""
     cover_url = ""
     poster_url = ""
@@ -136,14 +136,14 @@ def main(
         result_url = "https://www.jav321.com/search"
         if appoint_url != "":
             result_url = appoint_url
-            debug_info = "番号地址: %s" % result_url
+            debug_info = f"番号地址: {result_url}"
             LogBuffer.info().write(web_info + debug_info)
         else:
             debug_info = f'搜索地址: {result_url} {{"sn": {number}}}'
             LogBuffer.info().write(web_info + debug_info)
         result, response = post_html(result_url, data={"sn": number})
         if not result:
-            debug_info = "网络请求错误: %s" % response
+            debug_info = f"网络请求错误: {response}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         if "AVが見つかりませんでした" in response:
@@ -153,7 +153,7 @@ def main(
         detail_page = etree.fromstring(response, etree.HTMLParser())
         website = getWebsite(detail_page)
         if website:
-            debug_info = "番号地址: %s " % website
+            debug_info = f"番号地址: {website} "
             LogBuffer.info().write(web_info + debug_info)
         actor = getActor(response)
         actor_photo = getActorPhoto(actor)
@@ -244,12 +244,7 @@ def main(
                 "image_download": image_download,
                 "image_cut": image_cut,
                 "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
+                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": mosaic,
                 "wanted": "",
             }
@@ -257,7 +252,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
+            debug_info = f"数据生成出错: {str(e)}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -268,12 +263,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

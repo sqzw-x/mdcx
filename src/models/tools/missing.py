@@ -95,7 +95,6 @@ def _get_actor_numbers(actor_url, actor_single_url):
                 video_date = f"{time_list[2]}/{time_list[0]}/{time_list[1]}"
             else:
                 video_date = f"{time_list[0]}/{time_list[1]}/{time_list[2]}"
-            # self.show_log_text('{}  {:<10}{:\u3000>5}   {}'.format(video_date, video_number, download_info, video_url))
             Flags.actor_numbers_dic[actor_url].update(
                 {video_number: [video_number, video_date, video_url, download_info, video_title, single_info]}
             )

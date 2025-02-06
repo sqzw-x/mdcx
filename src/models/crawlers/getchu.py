@@ -120,7 +120,7 @@ def main(
     start_time = time.time()
     website_name = "getchu"
     getchu_url = "http://www.getchu.com"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
     real_url = appoint_url.replace("&gc=gc", "") + "&gc=gc" if appoint_url else ""
     cover_url = ""
     image_cut = ""
@@ -234,12 +234,7 @@ def main(
                     "image_download": image_download,
                     "image_cut": image_cut,
                     "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
+                    + f"({round(time.time() - start_time)}s) ",
                     "mosaic": mosaic,
                     "website": real_url,
                     "wanted": "",
@@ -248,7 +243,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
+                debug_info = f"数据生成出错: {str(e)}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
     except Exception as e:
@@ -259,12 +254,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

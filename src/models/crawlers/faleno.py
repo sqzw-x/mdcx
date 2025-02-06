@@ -117,7 +117,7 @@ def main(
     # https://falenogroup.com/works/votan-034/
     start_time = time.time()
     website_name = "faleno"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
     real_url = appoint_url
     title = ""
     cover_url = ""
@@ -148,12 +148,12 @@ def main(
     try:  # 捕获主动抛出的异常
         if not real_url_list:
             for search_url in search_url_list:
-                debug_info = "请求地址: %s " % search_url
+                debug_info = f"请求地址: {search_url} "
                 LogBuffer.info().write(web_info + debug_info)
 
                 result, html_info = get_html(search_url)
                 if not result:
-                    debug_info = "请求错误: %s " % html_info
+                    debug_info = f"请求错误: {html_info} "
                     LogBuffer.info().write(web_info + debug_info)
                     continue
 
@@ -169,12 +169,12 @@ def main(
                 raise Exception(debug_info)
 
         for real_url in real_url_list:
-            debug_info = "番号地址: %s " % real_url
+            debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
             result, html_info = get_html(real_url)
             if not result:
-                debug_info = "请求错误: %s " % html_info
+                debug_info = f"请求错误: {html_info} "
                 LogBuffer.info().write(web_info + debug_info)
                 continue
 
@@ -239,12 +239,7 @@ def main(
                 "image_download": image_download,
                 "image_cut": image_cut,
                 "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
+                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": mosaic,
                 "website": website,
                 "wanted": "",
@@ -253,7 +248,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
+            debug_info = f"数据生成出错: {str(e)}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -265,12 +260,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

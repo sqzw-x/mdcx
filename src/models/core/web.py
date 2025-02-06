@@ -381,9 +381,7 @@ def trailer_download(
             file_size = os.path.getsize(trailer_file_path_temp)
             if file_size >= content_length or "ignore_size" in download_files:
                 LogBuffer.log().write(
-                    "\n 🍀 Trailer done! ({} {}/{})({}s) ".format(
-                        json_data["trailer_from"], file_size, content_length, get_used_time(start_time)
-                    )
+                    f"\n 🍀 Trailer done! ({json_data['trailer_from']} {file_size}/{content_length})({get_used_time(start_time)}s) "
                 )
                 signal.show_traceback_log(f"✅ {json_data['number']} trailer done!")
                 if trailer_file_path_temp != trailer_file_path:
@@ -402,10 +400,9 @@ def trailer_download(
                 return True
             else:
                 LogBuffer.log().write(
-                    "\n 🟠 Trailer size is incorrect! delete it! ({} {}/{}) ".format(
-                        json_data["trailer_from"], file_size, content_length
-                    )
+                    f"\n 🟠 Trailer size is incorrect! delete it! ({json_data['trailer_from']} {file_size}/{content_length}) "
                 )
+
         # 删除下载失败的文件
         delete_file(trailer_file_path_temp)
         LogBuffer.log().write("\n 🟠 Trailer download failed! (%s) " % trailer_url)
@@ -443,9 +440,7 @@ def _get_big_thumb(json_data: ImageContext) -> ImageContext:
     # faleno.jp 番号检查，都是大图，返回即可
     if json_data["cover_from"] in ["faleno", "dahlia"]:
         if json_data["cover"]:
-            LogBuffer.log().write(
-                "\n 🖼 HD Thumb found! ({})({}s)".format(json_data["cover_from"], get_used_time(start_time))
-            )
+            LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({json_data['cover_from']})({get_used_time(start_time)}s)")
         json_data["poster_big"] = True
         return json_data
 
@@ -518,9 +513,7 @@ def _get_big_thumb(json_data: ImageContext) -> ImageContext:
                 pic_domain = re.findall(r"://([^/]+)", thumb_url)[0]
                 json_data["cover_from"] = f"Google({pic_domain})"
                 json_data["cover"] = thumb_url
-                LogBuffer.log().write(
-                    "\n 🖼 HD Thumb found! ({})({}s)".format(json_data["cover_from"], get_used_time(start_time))
-                )
+                LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({json_data['cover_from']})({get_used_time(start_time)}s)")
 
     return json_data
 
@@ -607,9 +600,7 @@ def _get_big_poster(json_data: JsonData) -> JsonData:
     # 如果找到了高清链接，则替换
     if hd_pic_url:
         json_data["image_download"] = True
-        LogBuffer.log().write(
-            "\n 🖼 HD Poster found! ({})({}s)".format(json_data["poster_from"], get_used_time(start_time))
-        )
+        LogBuffer.log().write(f"\n 🖼 HD Poster found! ({json_data['poster_from']})({get_used_time(start_time)}s)")
 
     return json_data
 
@@ -697,7 +688,7 @@ def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_final_pa
                             Flags.file_done_dic[json_data["number"]].update(dic)
                         json_data["thumb_marked"] = False  # 表示还没有走加水印流程
                         LogBuffer.log().write(
-                            "\n 🍀 Thumb done! ({})({}s) ".format(json_data["cover_from"], get_used_time(start_time))
+                            f"\n 🍀 Thumb done! ({json_data['cover_from']})({get_used_time(start_time)}s) "
                         )
                         json_data["thumb_path"] = thumb_final_path
                         return True
@@ -1005,16 +996,12 @@ def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Optional[
                 shutil.rmtree(extrafanart_folder_path)
                 os.rename(extrafanart_folder_path_temp, extrafanart_folder_path)
             LogBuffer.log().write(
-                "\n 🍀 ExtraFanart done! ({} {}/{})({}s)".format(
-                    json_data["extrafanart_from"], extrafanart_count_succ, extrafanart_count, get_used_time(start_time)
-                )
+                f"\n 🍀 ExtraFanart done! ({json_data['extrafanart_from']} {extrafanart_count_succ}/{extrafanart_count})({get_used_time(start_time)}s)"
             )
             return True
         else:
             LogBuffer.log().write(
-                "\n 🟠  ExtraFanart download failed! ({} {}/{})({}s)".format(
-                    json_data["extrafanart_from"], extrafanart_count_succ, extrafanart_count, get_used_time(start_time)
-                )
+                f"\n 🟠 ExtraFanart download failed! ({json_data['extrafanart_from']} {extrafanart_count_succ}/{extrafanart_count})({get_used_time(start_time)}s)"
             )
             if extrafanart_folder_path_temp != extrafanart_folder_path:
                 shutil.rmtree(extrafanart_folder_path_temp)

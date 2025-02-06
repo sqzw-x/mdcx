@@ -68,7 +68,7 @@ def main(
 ):
     start_time = time.time()
     website_name = "prestige"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
     real_url = appoint_url.replace("goods", "api/product")
     image_cut = "right"
     image_download = True
@@ -86,13 +86,13 @@ def main(
         if not real_url:
             # 通过搜索获取real_url
             search_url = f"https://www.prestige-av.com/api/search?isEnabledQuery=true&searchText={number}&isEnableAggregation=false&release=false&reservation=false&soldOut=false&from=0&aggregationTermsSize=0&size=20"
-            debug_info = "搜索地址: %s " % search_url
+            debug_info = f"搜索地址: {search_url} "
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
             result, html_search = get_html(search_url, json_data=True)
             if not result:
-                debug_info = "网络请求错误: %s " % html_search
+                debug_info = f"网络请求错误: {html_search} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -105,11 +105,11 @@ def main(
         if real_url:
             # 'https://www.prestige-av.com/goods/2e4a2de8-7275-4803-bb07-7585fd4f2ff3'
             # 'https://www.prestige-av.com/api/product/2e4a2de8-7275-4803-bb07-7585fd4f2ff3'
-            debug_info = "番号地址: %s " % real_url.replace("api/product", "goods")
+            debug_info = f"番号地址: {real_url.replace('api/product', 'goods')} "
             LogBuffer.info().write(web_info + debug_info)
             result, page_data = get_html(real_url, json_data=True)
             if not result:
-                debug_info = "网络请求错误: %s " % page_data
+                debug_info = f"网络请求错误: {page_data} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -188,12 +188,7 @@ def main(
                     "image_download": image_download,
                     "image_cut": image_cut,
                     "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
+                    + f"({round(time.time() - start_time)}s) ",
                     "mosaic": mosaic,
                     "website": real_url.replace("api/product", "goods"),
                     "wanted": "",
@@ -202,7 +197,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
+                debug_info = f"数据生成出错: {str(e)}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
     except Exception as e:
@@ -213,12 +208,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {
         "official": {"zh_cn": dic, "zh_tw": dic, "jp": dic},

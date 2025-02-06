@@ -106,7 +106,7 @@ def main(
 ):
     start_time = time.time()
     website_name = "avsox"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
     real_url = appoint_url
     title = ""
     cover_url = ""
@@ -122,11 +122,11 @@ def main(
         if not real_url:
             avsox_url = get_avsox_domain()
             url_search = f"{avsox_url}/cn/search/{number}"
-            debug_info = "搜索地址: %s " % url_search
+            debug_info = f"搜索地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
             result, response = get_html(url_search)
             if not result:
-                debug_info = "网络请求错误: %s" % response
+                debug_info = f"网络请求错误: {response}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_search = etree.fromstring(response, etree.HTMLParser())
@@ -139,11 +139,11 @@ def main(
             if poster_url:
                 image_download = True
 
-        debug_info = "番号地址: %s " % real_url
+        debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
         result, htmlcode = get_html(real_url)
         if not result:
-            debug_info = "网络请求错误: %s" % htmlcode
+            debug_info = f"网络请求错误: {htmlcode}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         html = etree.fromstring(htmlcode, etree.HTMLParser())
@@ -189,12 +189,7 @@ def main(
                 "image_download": image_download,
                 "image_cut": image_cut,
                 "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
+                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": "无码",
                 "wanted": "",
             }
@@ -202,7 +197,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
+            debug_info = f"数据生成出错: {str(e)}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -214,12 +209,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

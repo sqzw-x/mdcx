@@ -90,7 +90,7 @@ def main(
 ):
     start_time = time.time()
     website_name = "fc2"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
     real_url = appoint_url
     title = ""
     cover_url = ""
@@ -105,15 +105,15 @@ def main(
 
     try:  # 捕获主动抛出的异常
         if not real_url:
-            real_url = "https://adult.contents.fc2.com/article/%s/" % number
+            real_url = f"https://adult.contents.fc2.com/article/{number}/"
 
-        debug_info = "番号地址: %s" % real_url
+        debug_info = f"番号地址: {real_url}"
         LogBuffer.info().write(web_info + debug_info)
 
         # ========================================================================番号详情页
         result, html_content = get_html(real_url)
         if not result:
-            debug_info = "网络请求错误: %s" % html_content
+            debug_info = f"网络请求错误: {html_content}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         html_info = etree.fromstring(html_content, etree.HTMLParser())
@@ -169,12 +169,7 @@ def main(
                 "image_download": image_download,
                 "image_cut": image_cut,
                 "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
+                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": mosaic,
                 "wanted": "",
             }
@@ -182,7 +177,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
+            debug_info = f"数据生成出错: {str(e)}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -193,12 +188,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

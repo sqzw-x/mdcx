@@ -190,7 +190,7 @@ def get_real_url(
     else:  # 无码
         url_search = javbus_url + "/uncensored/search/" + number + "&type=0&parent=uc"
 
-    debug_info = "搜索地址: %s " % url_search
+    debug_info = f"搜索地址: {url_search} "
     LogBuffer.info().write(debug_info)
     # ========================================================================搜索番号
     result, html_search = get_html(url_search, headers)
@@ -203,7 +203,7 @@ def get_real_url(
             raise Exception("当前节点需要填写 Cookie 才能刮削！请到 设置-网络 填写 Cookie 或更换节点！")
 
     if not result:
-        debug_info = "网络请求错误: %s " % html_search
+        debug_info = f"网络请求错误: {html_search} "
         LogBuffer.info().write(debug_info)
         raise Exception(debug_info)
 
@@ -214,7 +214,7 @@ def get_real_url(
         number_1 = "/" + number.upper().replace(".", "").replace("-", "")
         number_2 = number_1 + "_"
         if each_url.endswith(number_1) or number_2 in each_url:
-            debug_info = "番号地址: %s " % each
+            debug_info = f"番号地址: {each} "
             LogBuffer.info().write(debug_info)
             return each
     debug_info = "搜索结果: 未匹配到番号！"
@@ -231,7 +231,7 @@ def main(
 ):
     start_time = time.time()
     website_name = "javbus"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
     real_url = appoint_url
     javbus_url = getattr(config, "javbus_website", "https://www.javbus.com")
     headers = config.headers
@@ -266,7 +266,7 @@ def main(
                         temp_number = temp_number.replace("-", "-0")
                     real_url = javbus_url + "/" + temp_number
 
-        debug_info = "番号地址: %s " % real_url
+        debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(debug_info)
         result, htmlcode = get_html(real_url, headers)
 
@@ -367,19 +367,14 @@ def main(
                 "image_download": image_download,
                 "image_cut": image_cut,
                 "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
+                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": mosaic,
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
             LogBuffer.info().write(debug_info)
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
+            debug_info = f"数据生成出错: {str(e)}"
             LogBuffer.info().write(debug_info)
             raise Exception(debug_info)
     except Exception as e:
@@ -389,12 +384,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

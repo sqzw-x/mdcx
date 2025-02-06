@@ -143,7 +143,7 @@ def getOutline(html):
 def getScore(html):
     result = html.xpath('//td[@class="review"]/span/@class')
     if result:
-        result = "%.1f" % (int(result[0].replace("star_", "")[:2]) / 10)
+        result = f"{int(result[0].replace('star_', '')[:2]) / 10:.1f}"
     return str(result)
 
 
@@ -156,7 +156,7 @@ def main(
 ):
     start_time = time.time()
     website_name = "mgstage"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
     real_url = appoint_url
     title = ""
     cover_url = ""
@@ -172,17 +172,17 @@ def main(
         if not real_url:
             number = number.upper()
             short_number = short_number.upper()
-            real_url_list = ["https://www.mgstage.com/product/product_detail/%s/" % number]
+            real_url_list = [f"https://www.mgstage.com/product/product_detail/{number}/"]
             if short_number and short_number != number:
-                real_url_list.append("https://www.mgstage.com/product/product_detail/%s/" % short_number)
+                real_url_list.append(f"https://www.mgstage.com/product/product_detail/{short_number}/")
         else:
             real_url_list = [real_url]
         for real_url in real_url_list:
-            debug_info = "番号地址: %s " % real_url
+            debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
             result, htmlcode = get_html(real_url, cookies={"adc": "1"})
             if not result:
-                debug_info = "网络请求错误: %s " % htmlcode
+                debug_info = f"网络请求错误: {htmlcode} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             if not htmlcode.strip():
@@ -240,12 +240,7 @@ def main(
                 "image_download": image_download,
                 "image_cut": image_cut,
                 "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
+                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": "有码",
                 "wanted": "",
             }
@@ -253,7 +248,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
+            debug_info = f"数据生成出错: {str(e)}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -265,12 +260,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

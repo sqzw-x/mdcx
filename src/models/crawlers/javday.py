@@ -215,7 +215,7 @@ def main(
     lable_list = get_lable_list()
     start_time = time.time()
     website_name = "javday"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
     web_info = "\n       "
     LogBuffer.info().write(" \n    🌐 javday")
     debug_info = ""
@@ -236,14 +236,14 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
                 result, html_content = get_html(testNumberUrl)
                 if not result:
-                    debug_info = "网络请求错误: %s" % html_content
+                    debug_info = f"网络请求错误: {html_content}"
                     LogBuffer.info().write(web_info + debug_info)
                 else:
                     if "你似乎來到了沒有視頻存在的荒原" in html_content:
-                        debug_info = "找不到番号: %s" % number
+                        debug_info = f"找不到番号: {number}"
                         LogBuffer.info().write(web_info + debug_info)
                         continue
-                    debug_info = "找到网页: %s" % testNumberUrl
+                    debug_info = f"找到网页: {testNumberUrl}"
                     real_url = testNumberUrl
                     real_html_content = html_content
                     break
@@ -295,12 +295,7 @@ def main(
                     "image_download": False,
                     "image_cut": "no",
                     "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
+                    + f"({round(time.time() - start_time)}s) ",
                     "mosaic": "国产",
                     "wanted": "",
                 }
@@ -308,7 +303,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
+                debug_info = f"数据生成出错: {str(e)}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -320,12 +315,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

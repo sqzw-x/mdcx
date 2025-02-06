@@ -120,7 +120,7 @@ def get_extrafanart(html):
     i = 1
     result = []
     for each in result_list:
-        each = each.replace("-%s.jpg" % i, "jp-%s.jpg" % i)
+        each = each.replace(f"-{i}.jpg", f"jp-{i}.jpg")
         result.append(each)
         i += 1
     return result
@@ -172,7 +172,7 @@ def get_trailer(htmlcode, real_url):
             trailer_url = ""
     elif vr_cid:
         cid = vr_cid[0]
-        temp_url = "https://cc3001.dmm.co.jp/vrsample/{0}/{1}/{2}/{2}vrlite.mp4".format(cid[:1], cid[:3], cid)
+        temp_url = f"https://cc3001.dmm.co.jp/vrsample/{cid[:1]}/{cid[:3]}/{cid}/{cid}vrlite.mp4"
         trailer_url = check_url(temp_url)
     return trailer_url
 
@@ -441,7 +441,7 @@ def main(
 ):
     start_time = time.time()
     website_name = "dmm"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
     cookies = {"cookie": "uid=abcd786561031111; age_check_done=1;"}
     real_url = appoint_url
     title = ""
@@ -463,11 +463,11 @@ def main(
     debug_info = ""
 
     if not appoint_url:
-        real_url = "https://www.dmm.co.jp/search/=/searchstr=%s/sort=ranking/" % number_00  # 带00
-        debug_info = "搜索地址: %s " % real_url
+        real_url = f"https://www.dmm.co.jp/search/=/searchstr={number_00}/sort=ranking/"  # 带00
+        debug_info = f"搜索地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
     else:
-        debug_info = "番号地址: %s " % real_url
+        debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
 
     try:
@@ -475,7 +475,7 @@ def main(
         if "tv.dmm." not in real_url:
             result, htmlcode = get_html(real_url, cookies=cookies)
             if not result:  # 请求失败
-                debug_info = "网络请求错误: %s " % htmlcode
+                debug_info = f"网络请求错误: {htmlcode} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -493,14 +493,12 @@ def main(
                     debug_info = "搜索结果: 未匹配到番号！"
                     LogBuffer.info().write(web_info + debug_info)
                     if number_no_00 != number_00:
-                        real_url = (
-                            "https://www.dmm.co.jp/search/=/searchstr=%s/sort=ranking/" % number_no_00
-                        )  # 不带00，旧作 snis-027
-                        debug_info = "再次搜索地址: %s " % real_url
+                        real_url = f"https://www.dmm.co.jp/search/=/searchstr={number_no_00}/sort=ranking/"  # 不带00，旧作 snis-027
+                        debug_info = f"再次搜索地址: {real_url} "
                         LogBuffer.info().write(web_info + debug_info)
                         result, htmlcode = get_html(real_url, cookies=cookies)
                         if not result:  # 请求失败
-                            debug_info = "网络请求错误: %s " % htmlcode
+                            debug_info = f"网络请求错误: {htmlcode} "
                             LogBuffer.info().write(web_info + debug_info)
                             raise Exception(debug_info)
                         html = etree.fromstring(htmlcode, etree.HTMLParser())
@@ -511,12 +509,12 @@ def main(
 
                 # 写真
                 if not real_url:
-                    real_url = "https://www.dmm.com/search/=/searchstr=%s/sort=ranking/" % number_no_00
-                    debug_info = "再次搜索地址: %s " % real_url
+                    real_url = f"https://www.dmm.com/search/=/searchstr={number_no_00}/sort=ranking/"
+                    debug_info = f"再次搜索地址: {real_url} "
                     LogBuffer.info().write(web_info + debug_info)
                     result, htmlcode = get_html(real_url, cookies=cookies)
                     if not result:  # 请求失败
-                        debug_info = "网络请求错误: %s " % htmlcode
+                        debug_info = f"网络请求错误: {htmlcode} "
                         LogBuffer.info().write(web_info + debug_info)
                         raise Exception(debug_info)
                     html = etree.fromstring(htmlcode, etree.HTMLParser())
@@ -528,7 +526,7 @@ def main(
                 elif real_url.find("?i3_ref=search&i3_ord") != -1:  # 去除url中无用的后缀
                     real_url = real_url[: real_url.find("?i3_ref=search&i3_ord")]
 
-                debug_info = "番号地址: %s " % real_url
+                debug_info = f"番号地址: {real_url} "
                 LogBuffer.info().write(web_info + debug_info)
 
         # 获取详情页信息
@@ -552,9 +550,9 @@ def main(
                     number_00 = "5083" + number_00
                     number_00 = "5083" + number_00
                 real_url = f"https://tv.dmm.com/vod/detail/?season={number_00}"
-                debug_info = "再次搜索地址: %s " % real_url
+                debug_info = f"再次搜索地址: {real_url} "
             else:
-                debug_info = "番号地址: %s " % real_url
+                debug_info = f"番号地址: {real_url} "
                 number_00 = re.findall(r"season=([^&]+)", real_url)[0] if "season=" in real_url else number_00
             LogBuffer.info().write(web_info + debug_info)
             (
@@ -576,7 +574,7 @@ def main(
                 year,
             ) = get_tv_com_data(number_00)
             if not result:
-                debug_info = "数据获取失败: %s " % title
+                debug_info = f"数据获取失败: {title} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
         elif "tv.dmm.co.jp" in real_url:
@@ -599,14 +597,14 @@ def main(
                 year,
             ) = get_tv_jp_data(real_url)
             if not result:
-                debug_info = "数据获取失败: %s " % title
+                debug_info = f"数据获取失败: {title} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
         else:
             result, htmlcode = get_html(real_url, cookies=cookies)
             html = etree.fromstring(htmlcode, etree.HTMLParser())
             if not result:
-                debug_info = "网络请求错误: %s " % htmlcode
+                debug_info = f"网络请求错误: {htmlcode} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -642,7 +640,7 @@ def main(
                 mosaic = get_mosaic(html)
             except Exception as e:
                 # print(traceback.format_exc())
-                debug_info = "出错: %s" % str(e)
+                debug_info = f"出错: {str(e)}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
         actor_photo = get_actor_photo(actor)
@@ -674,13 +672,7 @@ def main(
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
+                "req_web": req_web + f"({round(time.time() - start_time)}s) ",
                 "mosaic": mosaic,
                 "wanted": "",
             }
@@ -688,7 +680,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
+            debug_info = f"数据生成出错: {str(e)}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -699,13 +691,7 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            "req_web": req_web + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(",", ": "))  # .encode('UTF-8')

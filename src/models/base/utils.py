@@ -41,7 +41,7 @@ def add_html(text: str) -> str:
     text = text.replace("🔮🧿⚔️", "=http")  # 还原不转换的
 
     # 链接放在span里，避免点击后普通文本变超链接，设置样式为pre-wrap（保留空格换行）
-    return '<span style="white-space: pre-wrap;">%s</span>' % text
+    return f'<span style="white-space: pre-wrap;">{text}</span>'
 
 
 def remove_repeat(a: str) -> str:

@@ -349,7 +349,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
         att_keys = actor_profile.find_all(scope=["row"])
         att_values = actor_profile.find_all(name="td", style=[""], colspan=False)
         bday = actor_output.find(class_="bday")
-        bday = "(%s)" % bday.get_text("", strip=True) if bday else ""
+        bday = f"({bday.get_text('', strip=True)})" if bday else ""
         if att_keys and att_values:
             overview += "\n===== 个人资料 =====\n"
             i = 0

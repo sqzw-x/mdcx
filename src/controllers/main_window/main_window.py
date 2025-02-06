@@ -741,14 +741,10 @@ class MyMAinWindow(QMainWindow):
                 average_time = used_time
             signal.show_scrape_info("⛔️ 刮削已手动停止！")
             self.set_label_file_path.emit(
-                "⛔️ 刮削已手动停止！\n   已刮削 {} 个视频，还剩余 {} 个！刮削用时 {} 秒".format(
-                    Flags.scrape_done, (Flags.total_count - Flags.scrape_done), used_time
-                )
+                f"⛔️ 刮削已手动停止！\n   已刮削 {Flags.scrape_done} 个视频, 还剩余 {Flags.total_count - Flags.scrape_done} 个! 刮削用时 {used_time} 秒"
             )
             signal.show_log_text(
-                "\n ⛔️ 刮削已手动停止！\n 😊 已刮削 {} 个视频，还剩余 {} 个！刮削用时 {} 秒，停止用时 {} 秒".format(
-                    Flags.scrape_done, (Flags.total_count - Flags.scrape_done), used_time, self.stop_used_time
-                )
+                f"\n ⛔️ 刮削已手动停止！\n 😊 已刮削 {Flags.scrape_done} 个视频, 还剩余 {Flags.total_count - Flags.scrape_done} 个! 刮削用时 {used_time} 秒, 停止用时 {self.stop_used_time} 秒"
             )
             signal.show_log_text("================================================================================")
             signal.show_log_text(

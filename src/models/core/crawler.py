@@ -586,9 +586,7 @@ def _deal_each_field(
 
     backup_data = ""
     LogBuffer.info().write(
-        "\n\n    🙋🏻‍ {} \n    ====================================\n    🌐 来源优先级：{}".format(
-            field_cnname, " -> ".join(website_list)
-        )
+        f"\n\n    🙋🏻‍ {field_cnname} \n    ====================================\n    🌐 来源优先级：{' -> '.join(website_list)}"
     )
     backup_website = ""
     title_language = getattr(config, field_language, "jp")

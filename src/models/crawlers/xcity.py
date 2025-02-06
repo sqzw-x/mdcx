@@ -169,7 +169,7 @@ def main(
 ):
     start_time = time.time()
     website_name = "xcity"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
 
     headers_o = config.headers
     real_url = appoint_url
@@ -185,12 +185,12 @@ def main(
     try:
         if not real_url:
             url_search = "https://xcity.jp/result_published/?q=" + number.replace("-", "")
-            debug_info = "搜索地址: %s " % url_search
+            debug_info = f"搜索地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
 
             result, html_search = get_html(url_search)
             if not result:
-                debug_info = "网络请求错误: %s " % html_search
+                debug_info = f"网络请求错误: {html_search} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             if "該当する作品はみつかりませんでした" in html_search:
@@ -207,11 +207,11 @@ def main(
                 real_url = "https://xcity.jp" + real_url[0]
 
         if real_url:
-            debug_info = "番号地址: %s " % real_url
+            debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
             result, html_content = get_html(real_url)
             if not result:
-                debug_info = "网络请求错误: %s " % html_search
+                debug_info = f"网络请求错误: {html_search} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())
@@ -222,7 +222,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             web_number = getWebNumber(html_info, number)  # 获取番号，用来替换标题里的番号
-            title = title.replace(" %s" % web_number, "").strip()
+            title = title.replace(f" {web_number}", "").strip()
             actor = getActor(html_info)  # 获取actor
             actor_photo = getActorPhoto(actor)
             cover_url = getCover(html_info)  # 获取cover
@@ -265,12 +265,7 @@ def main(
                     "image_download": image_download,
                     "image_cut": image_cut,
                     "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
+                    + f"({round(time.time() - start_time)}s) ",
                     "mosaic": "有码",
                     "wanted": "",
                 }
@@ -279,7 +274,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
+                debug_info = f"数据生成出错: {str(e)}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -290,12 +285,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(",", ": "))  # .encode('UTF-8')

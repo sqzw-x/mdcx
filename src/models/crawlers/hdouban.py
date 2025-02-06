@@ -142,7 +142,7 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     elif "REAL野性派" in file_name:
         result = re.search(r"REAL野性派-?(\d{3,})", file_name)
         if result:
-            number_normal = "REAL野性派-%s" % (result[1])
+            number_normal = f"REAL野性派-{result[1]}"
             number_list.append(number_normal)
 
     # mini06.全裸家政.只为弟弟的学费打工.被玩弄的淫乱家政小妹.mini传媒
@@ -195,7 +195,7 @@ def main(
     start_time = time.time()
     number = number.strip()
     website_name = "hdouban"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
 
     real_url = appoint_url
     cover_url = ""
@@ -239,19 +239,19 @@ def main(
                 # https://api.6dccbca.com/api/search?search=JUL-401&ty=movie&page=1&pageSize=12
                 # https://api.6dccbca.com/api/search?ty=movie&search=heyzo-1032&page=1&pageSize=12
                 url_search = f"https://api.6dccbca.com/api/search?ty=movie&search={number}&page=1&pageSize=12"
-                debug_info = "搜索地址: %s " % url_search
+                debug_info = f"搜索地址: {url_search} "
                 LogBuffer.info().write(web_info + debug_info)
 
                 # ========================================================================搜索番号
                 result, html_search = get_html(url_search, json_data=True)
                 if not result:
-                    debug_info = "网络请求错误: %s " % html_search
+                    debug_info = f"网络请求错误: {html_search} "
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 try:
                     result = html_search["data"]["list"]
                 except:
-                    debug_info = "搜索结果解析错误: %s " % str(html_search)
+                    debug_info = f"搜索结果解析错误: {str(html_search)} "
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
 
@@ -274,7 +274,7 @@ def main(
                 raise Exception(debug_info)
 
         if real_url:
-            debug_info = "番号地址: %s " % real_url
+            debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
             # 请求api获取详细数据
@@ -288,7 +288,7 @@ def main(
             data = {"id": str(detail_id[0])}
             result, response = post_html(detail_url, data=data, json_data=True)
             if not result:
-                debug_info = "网络请求错误: %s" % response
+                debug_info = f"网络请求错误: {response}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             res = response["data"]
@@ -344,12 +344,7 @@ def main(
                     "image_download": image_download,
                     "image_cut": image_cut,
                     "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
+                    + f"({round(time.time() - start_time)}s) ",
                     "mosaic": mosaic,
                     "website": re.sub(r"http[s]?://[^/]+", hdouban_url, real_url),
                     "wanted": "",
@@ -358,7 +353,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
+                debug_info = f"数据生成出错: {str(e)}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
     except Exception as e:
@@ -369,12 +364,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

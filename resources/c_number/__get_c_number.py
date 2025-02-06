@@ -119,7 +119,7 @@ def get_c_number():
             html = etree.HTML(res.text.replace('encoding="utf-8"', ""))
             if i == 1:
                 page_total = html.xpath('//a[@class="last"]/text()')[0][-3:]
-                print("当前共 {} 页数据！".format(page_total))
+                print(f"当前共 {page_total} 页数据！")
             print("\n" + "**" * 20)
             print(f"开始下载第 {i} 页数据...\n页面地址：{url}")
             # 获取当前页面帖子列表

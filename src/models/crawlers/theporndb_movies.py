@@ -272,7 +272,7 @@ def main(
         file_path = number + ".mp4"
     start_time = time.time()
     website_name = "theporndb"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
 
     api_token = config.theporndb_api_token
     real_url = appoint_url.replace("//theporndb", "//api.theporndb")
@@ -309,10 +309,10 @@ def main(
 
                 if not result:
                     # 判断返回内容是否有问题
-                    debug_info = "请求错误: %s" % hash_search
+                    debug_info = f"请求错误: {hash_search}"
                     LogBuffer.info().write(web_info + debug_info)
                     if "401 http" in hash_search:
-                        debug_info = "请检查 API Token 是否正确: %s " % api_token
+                        debug_info = f"请检查 API Token 是否正确: {api_token} "
                         LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 hash_data = hash_search.get("data")
@@ -355,7 +355,7 @@ def main(
                         debug_info = f"请求错误: {url_search}"
                         LogBuffer.info().write(web_info + debug_info)
                         if "401 http" in res_search:
-                            debug_info = "请检查 API Token 是否正确: %s " % api_token
+                            debug_info = f"请检查 API Token 是否正确: {api_token} "
                             LogBuffer.info().write(web_info + debug_info)
                         raise Exception(debug_info)
 
@@ -368,15 +368,15 @@ def main(
                     raise Exception(debug_info)
 
         if real_url and not hash_data:
-            debug_info = "番号地址: %s " % real_url
+            debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
             result, res_real = get_html(real_url, headers=headers, json_data=True)
             if not result:
                 # 判断返回内容是否有问题
-                debug_info = "请求错误: %s " % res_real
+                debug_info = f"请求错误: {res_real} "
                 LogBuffer.info().write(web_info + debug_info)
                 if "401 http" in res_real:
-                    debug_info = "请检查 API Token 是否正确: %s " % api_token
+                    debug_info = f"请检查 API Token 是否正确: {api_token} "
                     LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -402,7 +402,7 @@ def main(
                     real_url,
                 ) = read_data(real_data)
             else:
-                debug_info = "未获取正确数据: %s" % real_url
+                debug_info = f"未获取正确数据: {real_url}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -437,12 +437,7 @@ def main(
                 "image_download": image_download,
                 "image_cut": image_cut,
                 "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
+                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": mosaic,
                 "website": real_url,
                 "wanted": "",
@@ -451,7 +446,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
+            debug_info = f"数据生成出错: {str(e)}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -463,12 +458,7 @@ def main(
             "cover": "",
             "website": "",
             "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
