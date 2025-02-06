@@ -22,7 +22,7 @@ from models.base.utils import convert_path, get_current_time, get_used_time
 from models.config.config import config
 from models.config.resources import resources
 from models.core.flags import Flags
-from models.core.types import JsonData, new_json_data
+from models.core.types import JsonData, LogBuffer, MoveContext, new_json_data
 from models.core.utils import get_movie_path_setting, get_new_release, nfd2c
 from models.entity.enums import FileMode
 from models.signals import signal
@@ -99,16 +99,16 @@ def creat_folder(
     elif not os.path.isdir(folder_new_path):
         try:
             os.makedirs(folder_new_path)
-            json_data["logs"] += "\n 🍀 Folder done! (new)"
+            LogBuffer.log().write("\n 🍀 Folder done! (new)")
             return True
         except Exception as e:
             if not os.path.exists(folder_new_path):
-                json_data["logs"] += "\n 🔴 Failed to create folder! \n    " + str(e)
+                LogBuffer.log().write("\n 🔴 Failed to create folder! \n    " + str(e))
                 if len(folder_new_path) > 250:
-                    json_data["logs"] += "\n    可能是目录名过长！！！建议限制目录名长度！！！越小越好！！！"
+                    LogBuffer.log().write("\n    可能是目录名过长！！！建议限制目录名长度！！！越小越好！！！")
                     json_data["error_info"] = "创建文件夹失败！可能是目录名过长！"
                 else:
-                    json_data["logs"] += "\n    请检查是否有写入权限！"
+                    LogBuffer.log().write("\n    请检查是否有写入权限！")
                     json_data["error_info"] = "创建文件夹失败！请检查是否有写入权限！"
                 return False
 
@@ -208,7 +208,7 @@ def move_trailer_video(
         trailer_new_path = os.path.join(folder_new_path, (naming_rule + "-trailer" + media_type))
         if os.path.exists(trailer_old_path) and not os.path.exists(trailer_new_path):
             move_file(trailer_old_path, trailer_new_path)
-            json_data["logs"] += "\n 🍀 Trailer done!"
+            LogBuffer.log().write("\n 🍀 Trailer done!")
 
 
 def move_bif(json_data: JsonData, folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str) -> None:
@@ -223,7 +223,7 @@ def move_bif(json_data: JsonData, folder_old_path: str, folder_new_path: str, fi
     bif_new_path = os.path.join(folder_new_path, (naming_rule + "-320-10.bif"))
     if bif_old_path != bif_new_path and os.path.exists(bif_old_path) and not os.path.exists(bif_new_path):
         move_file(bif_old_path, bif_new_path)
-        json_data["logs"] += "\n 🍀 Bif done!"
+        LogBuffer.log().write("\n 🍀 Bif done!")
 
 
 def move_torrent(
@@ -250,7 +250,7 @@ def move_torrent(
         and not os.path.exists(torrent_file1_new_path)
     ):
         move_file(torrent_file1, torrent_file1_new_path)
-        json_data["logs"] += "\n 🍀 Torrent done!"
+        LogBuffer.log().write("\n 🍀 Torrent done!")
 
     if torrent_file2 != torrent_file1:
         if (
@@ -259,7 +259,7 @@ def move_torrent(
             and not os.path.exists(torrent_file2_new_path)
         ):
             move_file(torrent_file2, torrent_file2_new_path)
-            json_data["logs"] += "\n 🍀 Torrent done!"
+            LogBuffer.log().write("\n 🍀 Torrent done!")
 
 
 def check_file(json_data: JsonData, file_path: str, file_escape_size: float) -> tuple[bool, JsonData]:
@@ -302,7 +302,7 @@ def copy_trailer_to_theme_videos(json_data: JsonData, folder_new_path: str, nami
 
     # 保留主题视频并存在时返回
     if "theme_videos" in keep_files and os.path.exists(theme_videos_folder_path):
-        json_data["logs"] += "\n 🍀 Theme video done! (old)(%ss) " % get_used_time(start_time)
+        LogBuffer.log().write("\n 🍀 Theme video done! (old)(%ss) " % get_used_time(start_time))
         return
 
     # 不下载主题视频时返回
@@ -326,14 +326,14 @@ def copy_trailer_to_theme_videos(json_data: JsonData, folder_new_path: str, nami
     if os.path.exists(theme_videos_new_path):
         delete_file(theme_videos_new_path)
     copy_file(trailer_file_path, theme_videos_new_path)
-    json_data["logs"] += "\n 🍀 Theme video done! (copy trailer)"
+    LogBuffer.log().write("\n 🍀 Theme video done! (copy trailer)")
 
     # 不下载并且不保留预告片时，删除预告片
     if "trailer" not in download_files and "trailer" not in config.keep_files:
         delete_file(trailer_file_path)
         if trailer_name == 1:
             shutil.rmtree(trailer_folder, ignore_errors=True)
-        json_data["logs"] += "\n 🍀 Trailer delete done!"
+        LogBuffer.log().write("\n 🍀 Trailer delete done!")
 
 
 def move_other_file(
@@ -369,7 +369,7 @@ def move_other_file(
                     and not os.path.exists(old_file_new_path)
                 ):
                     move_file(old_file_old_path, old_file_new_path)
-                    json_data["logs"] += "\n 🍀 Move %s done!" % old_file
+                    LogBuffer.log().write("\n 🍀 Move %s done!" % old_file)
 
 
 def move_file_to_failed_folder(
@@ -382,7 +382,7 @@ def move_file_to_failed_folder(
     # 更新模式、读取模式，不移动失败文件；不移动文件-关时，不移动； 软硬链接开时，不移动
     main_mode = config.main_mode
     if main_mode == 3 or main_mode == 4 or config.failed_file_move == 0 or config.soft_link != 0:
-        json_data["logs"] += "\n 🙊 [Movie] %s" % file_path
+        LogBuffer.log().write("\n 🙊 [Movie] %s" % file_path)
         return file_path
 
     # 文件路径已经在失败路径内时不移动
@@ -390,7 +390,7 @@ def move_file_to_failed_folder(
     file_path_temp = file_path.replace("\\", "/")
 
     if failed_folder_temp in file_path_temp:
-        json_data["logs"] += "\n 🙊 [Movie] %s" % file_path
+        LogBuffer.log().write("\n 🙊 [Movie] %s" % file_path)
         return file_path
 
     # 创建failed文件夹
@@ -415,8 +415,8 @@ def move_file_to_failed_folder(
     # 移动
     try:
         move_file(file_path, file_new_path)
-        json_data["logs"] += "\n 🔴 Move file to the failed folder!"
-        json_data["logs"] += "\n 🙊 [Movie] %s" % file_new_path
+        LogBuffer.log().write("\n 🔴 Move file to the failed folder!")
+        LogBuffer.log().write("\n 🙊 [Movie] %s" % file_new_path)
         json_data["file_path"] = file_new_path
         json_data["error_info"] = json_data["error_info"].replace(file_path, file_new_path)
 
@@ -432,10 +432,10 @@ def move_file_to_failed_folder(
                     has_trailer = True
                     move_file(trailer_old_path_no_filename, trailer_new_path)
                 if has_trailer:
-                    json_data["logs"] += "\n 🔴 Move trailer to the failed folder!"
-                    json_data["logs"] += "\n 🔴 [Trailer] %s" % trailer_new_path
+                    LogBuffer.log().write("\n 🔴 Move trailer to the failed folder!")
+                    LogBuffer.log().write("\n 🔴 [Trailer] %s" % trailer_new_path)
             except Exception as e:
-                json_data["logs"] += "\n 🔴 Failed to move trailer to the failed folder! \n    " + str(e)
+                LogBuffer.log().write("\n 🔴 Failed to move trailer to the failed folder! \n    " + str(e))
 
         # 同步移动字幕
         sub_type_list = config.sub_type.split("|")
@@ -447,26 +447,26 @@ def move_file_to_failed_folder(
             if os.path.exists(sub_old_path) and not os.path.exists(sub_new_path):
                 result, error_info = move_file(sub_old_path, sub_new_path)
                 if not result:
-                    json_data["logs"] += f"\n 🔴 Failed to move sub to the failed folder!\n     {error_info}"
+                    LogBuffer.log().write(f"\n 🔴 Failed to move sub to the failed folder!\n     {error_info}")
                 else:
-                    json_data["logs"] += "\n 💡 Move sub to the failed folder!"
-                    json_data["logs"] += "\n 💡 [Sub] %s" % sub_new_path
+                    LogBuffer.log().write("\n 💡 Move sub to the failed folder!")
+                    LogBuffer.log().write("\n 💡 [Sub] %s" % sub_new_path)
         return file_new_path
     except Exception as e:
-        json_data["logs"] += "\n 🔴 Failed to move the file to the failed folder! \n    " + str(e)
+        LogBuffer.log().write("\n 🔴 Failed to move the file to the failed folder! \n    " + str(e))
         return file_path
 
 
-def move_movie(json_data: JsonData, file_path: str, file_new_path: str) -> bool:
+def move_movie(json_data: MoveContext, file_path: str, file_new_path: str) -> bool:
     # 明确不需要移动的，直接返回
     if json_data["dont_move_movie"]:
-        json_data["logs"] += "\n 🍀 Movie done! \n 🙉 [Movie] %s" % file_path
+        LogBuffer.log().write("\n 🍀 Movie done! \n 🙉 [Movie] %s" % file_path)
         return True
 
     # 明确要删除自己的，删除后返回
     if json_data["del_file_path"]:
         delete_file(file_path)
-        json_data["logs"] += "\n 🍀 Movie done! \n 🙉 [Movie] %s" % file_new_path
+        LogBuffer.log().write("\n 🍀 Movie done! \n 🙉 [Movie] %s" % file_new_path)
         json_data["file_path"] = file_new_path
         return True
 
@@ -481,19 +481,19 @@ def move_movie(json_data: JsonData, file_path: str, file_new_path: str) -> bool:
         try:
             os.symlink(file_path, file_new_path)
             json_data["file_path"] = file_new_path
-            json_data["logs"] += (
+            LogBuffer.log().write(
                 f"\n 🍀 Softlink done! \n    Softlink file: {file_new_path} \n    Source file: {file_path}"
             )
             return True
         except Exception as e:
             if config.is_windows:
-                json_data["logs"] += (
+                LogBuffer.log().write(
                     "\n 🥺 Softlink failed! (创建软连接失败！"
                     "注意：Windows 平台输出目录必须是本地磁盘！不支持挂载的 NAS 盘或网盘！"
                     f"如果是本地磁盘，请尝试以管理员身份运行！)\n{str(e)}\n 🙉 [Movie] {temp_path}"
                 )
             else:
-                json_data["logs"] += f"\n 🥺 Softlink failed! (创建软连接失败！)\n{str(e)}\n 🙉 [Movie] {temp_path}"
+                LogBuffer.log().write(f"\n 🥺 Softlink failed! (创建软连接失败！)\n{str(e)}\n 🙉 [Movie] {temp_path}")
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
             return False
@@ -504,20 +504,20 @@ def move_movie(json_data: JsonData, file_path: str, file_new_path: str) -> bool:
             delete_file(file_new_path)
             os.link(file_path, file_new_path)
             json_data["file_path"] = file_new_path
-            json_data["logs"] += (
+            LogBuffer.log().write(
                 f"\n 🍀 HardLink done! \n    HadrLink file: {file_new_path} \n    Source file: {file_path}"
             )
             return True
         except Exception as e:
             if config.is_mac:
-                json_data["logs"] += (
+                LogBuffer.log().write(
                     "\n 🥺 HardLink failed! (创建硬连接失败！"
                     "注意：硬链接要求待刮削文件和输出目录必须是同盘，不支持跨卷！"
                     "如要跨卷可以尝试软链接模式！另外，Mac 平台非本地磁盘不支持创建硬链接（权限问题），"
                     f"请选择软链接模式！)\n{str(e)} "
                 )
             else:
-                json_data["logs"] += (
+                LogBuffer.log().write(
                     f"\n 🥺 HardLink failed! (创建硬连接失败！注意："
                     f"硬链接要求待刮削文件和输出目录必须是同盘，不支持跨卷！"
                     f"如要跨卷可以尝试软链接模式！)\n{str(e)} "
@@ -530,9 +530,9 @@ def move_movie(json_data: JsonData, file_path: str, file_new_path: str) -> bool:
     # 其他情况，就移动文件
     result, error_info = move_file(file_path, file_new_path)
     if result:
-        json_data["logs"] += f"\n 🍀 Movie done! \n 🙉 [Movie] {file_new_path}"
+        LogBuffer.log().write(f"\n 🍀 Movie done! \n 🙉 [Movie] {file_new_path}")
         if os.path.islink(file_new_path):
-            json_data["logs"] += (
+            LogBuffer.log().write(
                 f"\n    It's a symlink file! Source file: \n    {read_link(file_new_path)}"  # win 不能用os.path.realpath()，返回的结果不准
             )
         json_data["file_path"] = file_new_path
@@ -544,10 +544,10 @@ def move_movie(json_data: JsonData, file_path: str, file_new_path: str) -> bool:
                 if temp_file not in os.listdir(temp_folder):
                     move_file(file_path, file_new_path + ".MDCx.tmp")
                     move_file(file_new_path + ".MDCx.tmp", file_new_path)
-            json_data["logs"] += f"\n 🍀 Movie done! \n 🙉 [Movie] {file_new_path}"
+            LogBuffer.log().write(f"\n 🍀 Movie done! \n 🙉 [Movie] {file_new_path}")
             json_data["file_path"] = file_new_path
             return True
-        json_data["logs"] += f"\n 🔴 Failed to move movie file to success folder!\n    {error_info}"
+        LogBuffer.log().write(f"\n 🔴 Failed to move movie file to success folder!\n    {error_info}")
         return False
 
 
@@ -714,17 +714,17 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -
     if len(folder_new_name) > folder_name_max:
         cut_index = folder_name_max - len(folder_new_name)
         if "originaltitle" in folder_name:
-            json_data["logs"] += (
+            LogBuffer.log().write(
                 f"\n 💡 当前目录名长度：{len(folder_new_name)}，最大允许长度：{folder_name_max}，目录命名时将去除原标题后{abs(cut_index)}个字符!"
             )
             folder_new_name = folder_new_name.replace(originaltitle, originaltitle[0:cut_index])
         elif "title" in folder_name:
-            json_data["logs"] += (
+            LogBuffer.log().write(
                 f"\n 💡 当前目录名长度：{len(folder_new_name)}，最大允许长度：{folder_name_max}，目录命名时将去除标题后{abs(cut_index)}个字符!"
             )
             folder_new_name = folder_new_name.replace(title, title[0:cut_index])
         elif "outline" in folder_name:
-            json_data["logs"] += (
+            LogBuffer.log().write(
                 f"\n 💡 当前目录名长度：{len(folder_new_name)}，最大允许长度：{folder_name_max}，目录命名时将去除简介后{abs(cut_index)}个字符!"
             )
             folder_new_name = folder_new_name.replace(outline, outline[0:cut_index])
@@ -901,19 +901,19 @@ def _generate_file_name(file_path: str, json_data: JsonData) -> str:
         # 如果没有防屏蔽字符，截短标题或者简介，这样不影响其他字段阅读
         if not prevent_char:
             if "originaltitle" in naming_file:
-                json_data["logs"] += (
+                LogBuffer.log().write(
                     f"\n 💡 当前文件名长度：{len(file_name)}，"
                     f"最大允许长度：{file_name_max}，文件命名时将去除原标题后{abs(cut_index)}个字符!"
                 )
                 file_name = file_name.replace(originaltitle, originaltitle[:cut_index])
             elif "title" in naming_file:
-                json_data["logs"] += (
+                LogBuffer.log().write(
                     f"\n 💡 当前文件名长度：{len(file_name)}，"
                     f"最大允许长度：{file_name_max}，文件命名时将去除标题后{abs(cut_index)}个字符!"
                 )
                 file_name = file_name.replace(title, title[:cut_index])
             elif "outline" in naming_file:
-                json_data["logs"] += (
+                LogBuffer.log().write(
                     f"\n 💡 当前文件名长度：{len(file_name)}，"
                     f"最大允许长度：{file_name_max}，文件命名时将去除简介后{abs(cut_index)}个字符!"
                 )
@@ -1506,7 +1506,7 @@ def get_file_info(file_path: str, copy_sub: bool = True) -> tuple[JsonData, str,
                     for sub_path in sub_path_list:
                         if os.path.exists(sub_path):
                             copy_file(sub_path, sub_new_path)
-                            json_data["logs"] += f"\n\n 🍉 Sub file '{sub_file_name}' copied successfully! "
+                            LogBuffer.log().write(f"\n\n 🍉 Sub file '{sub_file_name}' copied successfully! ")
                             sub_list.append(sub_type)
                             c_word = cnword_style  # 中文字幕影片后缀
                             has_sub = True
@@ -1525,8 +1525,8 @@ def get_file_info(file_path: str, copy_sub: bool = True) -> tuple[JsonData, str,
         signal.show_traceback_log(file_path)
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
-        json_data["logs"] += "\n" + file_path
-        json_data["logs"] += "\n" + traceback.format_exc()
+        LogBuffer.log().write("\n" + file_path)
+        LogBuffer.log().write("\n" + traceback.format_exc())
 
     # 车牌前缀
     letters = get_number_letters(movie_number)
@@ -2048,7 +2048,7 @@ def _pic_some_deal(json_data: JsonData, thumb_final_path: str, fanart_final_path
             Flags.file_done_dic[json_data["number"]].update({"thumb": ""})
         if os.path.exists(thumb_final_path):
             delete_file(thumb_final_path)
-            json_data["logs"] += "\n 🍀 Thumb delete done!"
+            LogBuffer.log().write("\n 🍀 Thumb delete done!")
 
 
 def _deal_path_name(path: str) -> str:

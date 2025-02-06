@@ -7,7 +7,7 @@ from PyQt5.QtGui import QImageReader, QPixmap
 
 from models.base.file import check_pic, copy_file, delete_file
 from models.base.utils import get_used_time
-from models.core.types import JsonData
+from models.core.types import JsonData, LogBuffer
 from models.signals import signal
 
 
@@ -97,7 +97,7 @@ def cut_thumb_to_poster(
     # 不裁剪
     if image_cut == "no":
         copy_file(thumb_path, poster_path)
-        json_data["logs"] += "\n 🍀 Poster done! (copy thumb)(%ss)" % get_used_time(start_time)
+        LogBuffer.log().write("\n 🍀 Poster done! (copy thumb)(%ss)" % get_used_time(start_time))
         json_data["poster_from"] = "copy thumb"
         img.close()
         return True
@@ -132,11 +132,11 @@ def cut_thumb_to_poster(
         img_new_png.save(poster_path, quality=95, subsampling=0)
         img.close()
         if check_pic(poster_path):
-            json_data["logs"] += f"\n 🍀 Poster done! ({json_data['poster_from']})({get_used_time(start_time)}s)"
+            LogBuffer.log().write(f"\n 🍀 Poster done! ({json_data['poster_from']})({get_used_time(start_time)}s)")
             return True
-        json_data["logs"] += f"\n 🥺 Poster cut failed! ({json_data['poster_from']})({get_used_time(start_time)}s)"
+        LogBuffer.log().write(f"\n 🥺 Poster cut failed! ({json_data['poster_from']})({get_used_time(start_time)}s)")
     except Exception as e:
-        json_data["logs"] += (
+        LogBuffer.log().write(
             f"\n 🥺 Poster failed! ({json_data['poster_from']})({get_used_time(start_time)}s)\n    {str(e)}"
         )
         signal.show_traceback_log(traceback.format_exc())

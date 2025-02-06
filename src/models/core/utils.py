@@ -18,7 +18,7 @@ from models.base.path import get_main_path, get_path
 from models.base.utils import convert_path, get_used_time
 from models.config.config import config
 from models.config.resources import resources
-from models.core.types import JsonData
+from models.core.types import JsonData, LogBuffer
 from models.signals import signal
 
 
@@ -59,7 +59,7 @@ def show_movie_info(json_data: JsonData):
             value = "中文字幕"
         elif key == "actor" and "actor_all," in config.nfo_include_new:
             value = json_data["all_actor"]
-        json_data["logs"] += "\n     " + "%-13s" % key + ": " + str(value)
+        LogBuffer.log().write("\n     " + "%-13s" % key + ": " + str(value))
 
 
 def get_video_size(json_data: JsonData, file_path: str):
@@ -156,7 +156,7 @@ def get_video_size(json_data: JsonData, file_path: str):
 
 def show_data_result(json_data: JsonData, start_time: float):
     if json_data["error_info"] or json_data["title"] == "":
-        json_data["logs"] += (
+        LogBuffer.log().write(
             "\n 🌐 [website] %s" % json_data["req_web"].strip("-> ")
             + "\n"
             + json_data["log_info"].strip(" ").strip("\n")
@@ -166,16 +166,16 @@ def show_data_result(json_data: JsonData, start_time: float):
         return False
     else:
         if config.show_web_log == "on":  # 字段刮削过程
-            json_data["logs"] += "\n 🌐 [website] %s" % json_data["req_web"].strip("-> ")
+            LogBuffer.log().write("\n 🌐 [website] %s" % json_data["req_web"].strip("-> "))
         try:
             if json_data["log_info"]:
-                json_data["logs"] += "\n" + json_data["log_info"].strip(" ").strip("\n")
+                LogBuffer.log().write("\n" + json_data["log_info"].strip(" ").strip("\n"))
         except:
             signal.show_log_text(traceback.format_exc())
         if config.show_from_log == "on":  # 字段来源信息
             if json_data["fields_info"]:
-                json_data["logs"] += "\n" + json_data["fields_info"].strip(" ").strip("\n")
-        json_data["logs"] += "\n 🍀 Data done!(%ss)" % (get_used_time(start_time))
+                LogBuffer.log().write("\n" + json_data["fields_info"].strip(" ").strip("\n"))
+        LogBuffer.log().write("\n 🍀 Data done!(%ss)" % (get_used_time(start_time)))
         return True
 
 

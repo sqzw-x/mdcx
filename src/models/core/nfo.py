@@ -10,7 +10,7 @@ from models.base.file import delete_file, split_path
 from models.base.number import deal_actor_more, get_number_first_letter, get_number_letters
 from models.base.utils import convert_path, get_used_time
 from models.config.config import config
-from models.core.types import JsonData
+from models.core.types import JsonData, LogBuffer
 from models.core.utils import get_new_release
 from models.signals import signal
 
@@ -30,7 +30,7 @@ def write_nfo(
     if not edit_mode:
         # 读取模式，有nfo，并且没有勾选更新 nfo 信息
         if not json_data["nfo_can_translate"]:
-            json_data["logs"] += "\n 🍀 Nfo done! (old)(%ss)" % get_used_time(start_time)
+            LogBuffer.log().write("\n 🍀 Nfo done! (old)(%ss)" % get_used_time(start_time))
             return True
 
         # 不下载，不保留时
@@ -41,7 +41,7 @@ def write_nfo(
 
         # 保留时，返回
         if "nfo" in keep_files and os.path.exists(nfo_new_path):
-            json_data["logs"] += "\n 🍀 Nfo done! (old)(%ss)" % get_used_time(start_time)
+            LogBuffer.log().write("\n 🍀 Nfo done! (old)(%ss)" % get_used_time(start_time))
             return True
 
     # 字符转义，避免emby无法解析
@@ -387,10 +387,10 @@ def write_nfo(
                 else:
                     print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
             print("</movie>", file=code)
-            json_data["logs"] += "\n 🍀 Nfo done! (new)(%ss)" % get_used_time(start_time)
+            LogBuffer.log().write("\n 🍀 Nfo done! (new)(%ss)" % get_used_time(start_time))
             return True
     except Exception as e:
-        json_data["logs"] += "\n 🔴 Nfo failed! \n     %s" % str(e)
+        LogBuffer.log().write("\n 🔴 Nfo failed! \n     %s" % str(e))
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
         return False
@@ -590,6 +590,6 @@ def get_nfo_data(
     json_data["poster_path"] = poster_path
     json_data["thumb_path"] = thumb_path
     json_data["fanart_path"] = fanart_path
-    json_data["logs"] += "\n 📄 [NFO] %s" % local_nfo_name
+    LogBuffer.log().write("\n 📄 [NFO] %s" % local_nfo_name)
     signal.show_traceback_log(f"{number} {json_data['mosaic']}")
     return True, json_data

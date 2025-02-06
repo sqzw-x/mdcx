@@ -843,7 +843,7 @@ def _deal_kodi_actors(gfriends_actor_data, add):
                                             local_file_path = os.path.join(actor_folder, net_file_name)
                                             if not os.path.isfile(local_file_path):
                                                 if not download_file_with_filepath(
-                                                    {"logs": ""}, net_pic_path, local_file_path, actor_folder
+                                                    net_pic_path, local_file_path, actor_folder
                                                 ):
                                                     signal.show_log_text(
                                                         f"🔴 {actor_name} 头像下载失败！{net_pic_path}"

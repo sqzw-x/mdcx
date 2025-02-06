@@ -17,7 +17,7 @@ from models.base.web import get_html, post_html
 from models.config.config import config
 from models.config.resources import resources
 from models.core.flags import Flags
-from models.core.types import JsonData
+from models.core.types import JsonData, LogBuffer
 from models.core.web import get_actorname, get_yesjav_title, google_translate
 from models.signals import signal
 
@@ -343,11 +343,11 @@ def translate_actor(json_data: JsonData):
                         actor_list[actor_list.index(item)] = temp_actor
                 json_data["all_actor"] = ",".join(actor_list)
 
-                json_data["logs"] += (
+                LogBuffer.log().write(
                     f"\n 👩🏻 Av-wiki done! Actor's real Japanese name is '{temp_actor}' ({get_used_time(start_time)}s)"
                 )
             else:
-                json_data["logs"] += f"\n 🔴 Av-wiki failed! {temp_actor} ({get_used_time(start_time)}s)"
+                LogBuffer.log().write(f"\n 🔴 Av-wiki failed! {temp_actor} ({get_used_time(start_time)}s)")
 
     # 如果不映射，返回
     if config.actor_translate == "off":
@@ -469,7 +469,7 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
                 signal.show_log_text(traceback.format_exc())
             if movie_title:
                 json_data["title"] = movie_title
-                json_data["logs"] += "\n 🌸 Sehua title done!(%ss)" % (get_used_time(start_time))
+                LogBuffer.log().write("\n 🌸 Sehua title done!(%ss)" % (get_used_time(start_time)))
 
         # 匹配网络高质量标题（yesjav， 可在线更新）
         if not movie_title and title_yesjav == "on" and json_data_title_language == "ja":
@@ -477,7 +477,7 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
             movie_title = get_yesjav_title(movie_number)
             if movie_title and langid.classify(movie_title)[0] != "ja":
                 json_data["title"] = movie_title
-                json_data["logs"] += "\n 🆈 Yesjav title done!(%ss)" % (get_used_time(start_time))
+                LogBuffer.log().write("\n 🆈 Yesjav title done!(%ss)" % (get_used_time(start_time)))
 
         # 使用json_data数据
         if not movie_title and title_translate == "on" and json_data_title_language == "ja":
@@ -503,7 +503,7 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
                 else:  # 使用deepl翻译
                     t, o, r = deepl_translate(trans_title, trans_outline, "JA", json_data)
                 if r:
-                    json_data["logs"] += (
+                    LogBuffer.log().write(
                         f"\n 🔴 Translation failed!({each.capitalize()})({get_used_time(start_time)}s) Error: {r}"
                     )
                 else:
@@ -511,12 +511,14 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
                         json_data["title"] = t
                     if o:
                         json_data["outline"] = o
-                    json_data["logs"] += f"\n 🍀 Translation done!({each.capitalize()})({get_used_time(start_time)}s)"
+                    LogBuffer.log().write(f"\n 🍀 Translation done!({each.capitalize()})({get_used_time(start_time)}s)")
                     json_data["outline_from"] = each
                     break
             else:
                 translate_by = translate_by.strip(",").capitalize()
-                json_data["logs"] += f"\n 🔴 Translation failed! {translate_by} 不可用！({get_used_time(start_time)}s)"
+                LogBuffer.log().write(
+                    f"\n 🔴 Translation failed! {translate_by} 不可用！({get_used_time(start_time)}s)"
+                )
 
     # 简繁转换
     if title_language == "zh_cn":

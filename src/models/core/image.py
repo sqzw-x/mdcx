@@ -14,7 +14,7 @@ from models.base.utils import convert_path, get_used_time
 from models.config.config import config
 from models.config.resources import resources
 from models.core.file import movie_lists
-from models.core.types import JsonData
+from models.core.types import JsonData, LogBuffer
 from models.core.utils import get_movie_path_setting
 from models.signals import signal
 
@@ -35,7 +35,7 @@ def extrafanart_copy2(json_data: JsonData, folder_new_path: str):
 
     # 如果保留，并且存在，返回
     if "extrafanart_copy" in keep_files and os.path.exists(extrafanart_copy_path):
-        json_data["logs"] += "\n 🍀 Extrafanart_copy done! (old)(%ss) " % get_used_time(start_time)
+        LogBuffer.log().write("\n 🍀 Extrafanart_copy done! (old)(%ss) " % get_used_time(start_time))
         return
 
     # 如果不下载，返回
@@ -55,7 +55,7 @@ def extrafanart_copy2(json_data: JsonData, folder_new_path: str):
         file_path = os.path.join(extrafanart_copy_path, each)
         file_new_path = os.path.join(extrafanart_copy_path, file_new_name)
         move_file(file_path, file_new_path)
-    json_data["logs"] += "\n 🍀 ExtraFanart_copy done! (copy extrafanart)(%ss)" % (get_used_time(start_time))
+    LogBuffer.log().write("\n 🍀 ExtraFanart_copy done! (copy extrafanart)(%ss)" % (get_used_time(start_time)))
 
 
 def extrafanart_extras_copy(json_data: JsonData, folder_new_path: str):
@@ -71,7 +71,7 @@ def extrafanart_extras_copy(json_data: JsonData, folder_new_path: str):
         return True
 
     if "extrafanart_extras" in keep_files and os.path.exists(extrafanart_extra_path):
-        json_data["logs"] += "\n 🍀 Extrafanart_extras done! (old)(%ss)" % get_used_time(start_time)
+        LogBuffer.log().write("\n 🍀 Extrafanart_extras done! (old)(%ss)" % get_used_time(start_time))
         return True
 
     if "extrafanart_extras" not in download_files:
@@ -89,7 +89,7 @@ def extrafanart_extras_copy(json_data: JsonData, folder_new_path: str):
         file_path = os.path.join(extrafanart_extra_path, each)
         file_new_path = os.path.join(extrafanart_extra_path, file_new_name)
         move_file(file_path, file_new_path)
-    json_data["logs"] += "\n 🍀 Extrafanart_extras done! (copy extrafanart)(%ss)" % get_used_time(start_time)
+    LogBuffer.log().write("\n 🍀 Extrafanart_extras done! (copy extrafanart)(%ss)" % get_used_time(start_time))
     return True
 
 
@@ -280,13 +280,13 @@ def add_mark(
 
         if config.thumb_mark == 1 and "thumb" in download_files and thumb_path and not thumb_marked:
             add_mark_thread(thumb_path, mark_list)
-            json_data["logs"] += "\n 🍀 Thumb add watermark: %s!" % mark_show_type
+            LogBuffer.log().write("\n 🍀 Thumb add watermark: %s!" % mark_show_type)
         if config.poster_mark == 1 and "poster" in download_files and poster_path and not poster_marked:
             add_mark_thread(poster_path, mark_list)
-            json_data["logs"] += "\n 🍀 Poster add watermark: %s!" % mark_show_type
+            LogBuffer.log().write("\n 🍀 Poster add watermark: %s!" % mark_show_type)
         if config.fanart_mark == 1 and ",fanart" in download_files and fanart_path and not fanart_marked:
             add_mark_thread(fanart_path, mark_list)
-            json_data["logs"] += "\n 🍀 Fanart add watermark: %s!" % mark_show_type
+            LogBuffer.log().write("\n 🍀 Fanart add watermark: %s!" % mark_show_type)
 
 
 def add_del_extrafanart_copy(mode: str):

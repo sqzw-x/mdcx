@@ -857,7 +857,6 @@ def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回
     short_number = json_data["short_number"]
     appoint_number = json_data["appoint_number"]
     appoint_url = json_data["appoint_url"]
-    logs = json_data["logs"]
     has_sub = json_data["has_sub"]
     c_word = json_data["c_word"]
     leak = json_data["leak"]
@@ -1001,7 +1000,6 @@ def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回
     json_data["cd_part"] = cd_part
     json_data["destroyed"] = destroyed
     json_data["version"] = version
-    json_data["logs"] = logs
     json_data["file_path"] = file_path
     json_data["appoint_number"] = appoint_number
     json_data["appoint_url"] = appoint_url

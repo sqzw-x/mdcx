@@ -265,7 +265,7 @@ def _get_graphis_pic(actor_name):
 
     # 保存图片
     if not has_pic and pic_path:
-        if download_file_with_filepath({"logs": ""}, small_pic, pic_path, actor_folder):
+        if download_file_with_filepath(small_pic, pic_path, actor_folder):
             logs += "🍊 使用 graphis.ne.jp 头像！ "
             if "graphis_backdrop" not in emby_on:
                 if not has_backdrop:
@@ -275,7 +275,7 @@ def _get_graphis_pic(actor_name):
             logs += "🔴 graphis.ne.jp 头像获取失败！ "
             pic_path = ""
     if not has_backdrop and "graphis_backdrop" in emby_on:
-        if download_file_with_filepath({"logs": ""}, big_pic, backdrop_path, actor_folder):
+        if download_file_with_filepath(big_pic, backdrop_path, actor_folder):
             logs += "🍊 使用 graphis.ne.jp 背景！ "
             fix_pic(backdrop_path, backdrop_path)
         else:
@@ -349,7 +349,7 @@ def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
             file_name = re.findall(r"^[^?]+", file_name)[0]
             file_path = os.path.join(actor_folder, file_name)
             if not os.path.isfile(file_path):
-                if not download_file_with_filepath({"logs": ""}, pic_path, file_path, actor_folder):
+                if not download_file_with_filepath(pic_path, file_path, actor_folder):
                     signal.show_log_text(
                         f"\n{deal_percent} 🔴 {i}/{count_all} 头像下载失败！ 👩🏻 {actor_name}  {logs}\n{actor_homepage}"
                     )

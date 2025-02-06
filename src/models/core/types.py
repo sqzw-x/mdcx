@@ -1,30 +1,107 @@
+import threading
 from typing import TypedDict
 
 
-class JsonData(TypedDict):
-    cover_size: tuple[int, int]
-    poster_big: bool
-    actor_amazon: list[str]
-    tag_only: str
-    only_tag_list: list[str]
-    fanart_from: str
-    image_cut: str
-    file_can_download: bool
-    nfo_can_translate: bool
-    nfo_update: bool
+class LogBuffer:
+    all_buffers = {}
+    global_buffer = None
+
+    @staticmethod
+    def _global_buffer() -> "LogBuffer":
+        if LogBuffer.global_buffer is None:
+            LogBuffer.global_buffer = LogBuffer()
+        return LogBuffer.global_buffer
+
+    @staticmethod
+    def _get_buffer(category: str, pid: int) -> "LogBuffer":
+        if pid not in LogBuffer.all_buffers:
+            LogBuffer.all_buffers[pid] = {}
+        if category not in LogBuffer.all_buffers[pid]:
+            LogBuffer.all_buffers[pid][category] = LogBuffer()
+        return LogBuffer.all_buffers[pid][category]
+
+    @staticmethod
+    def log() -> "LogBuffer":
+        pid = threading.current_thread().ident
+        if pid:
+            return LogBuffer._get_buffer("log", pid)
+        return LogBuffer._global_buffer()
+
+    @staticmethod
+    def error() -> "LogBuffer":
+        pid = threading.current_thread().ident
+        if pid:
+            return LogBuffer._get_buffer("log", pid)
+        return LogBuffer._global_buffer()
+
+    def __init__(self):
+        self.buffer = []
+
+    def write(self, message):
+        self.buffer.append(message)
+
+    def flush(self):
+        pass
+
+    def get(self):
+        return "".join(self.buffer)
+
+    def __add__(self, other: str):
+        self.buffer.append(other)
+        return self
+
+
+class MoveContext(TypedDict):
+    error_info: str
     dont_move_movie: bool
     del_file_path: bool
+    file_path: str
+    cd_part: str
+
+
+class ImageContext(TypedDict):
+    cd_part: str
+
+    cover_size: tuple[int, int]
+    poster_big: bool
+    image_cut: str
+    # poster_marked: bool
+    # thumb_marked: bool
+    # fanart_marked: bool
+    cover_list: list[tuple[str, str]]
+    poster_path: str
+    thumb_path: str
+    fanart_path: str
+    cover: str
+    poster: str
+    trailer: str
+    extrafanart: str
+    cover_from: str
+    poster_from: str
+    trailer_from: str
+
+
+class ActorData(TypedDict):
+    actor: str
+    actor_amazon: list[str]
+    actor_href: str
+    all_actor: str
+    actor_photo: str
+    all_actor_photo: dict
+    amazon_orginaltitle_actor: str
+
+
+class MovieData(TypedDict):
+    definition: str
     title: str
     outline: str
     failed_folder: str
     folder_name: str
     version: int
-    logs: str
     req_web: str
     image_download: bool
     outline_from: str
     cover_from: str
-    poster_from: str
     extrafanart_from: str
     trailer_from: str
     short_number: str
@@ -32,10 +109,64 @@ class JsonData(TypedDict):
     appoint_url: str
     website_name: str
     fields_info: str
-    poster_path: str
-    thumb_path: str
-    fanart_path: str
-    cover_list: list[tuple[str, str]]
+    number: str
+    letters: str
+    has_sub: bool
+    c_word: str
+    destroyed: str
+    leak: str
+    wuma: str
+    youma: str
+    mosaic: str
+    tag: str
+    _4K: str
+    source: str
+    release: str
+    year: str
+    javdbid: str
+    score: str
+    originaltitle: str
+    studio: str
+    publisher: str
+    runtime: str
+    director: str
+    website: str
+    series: str
+    trailer: str
+    log_info: str
+    originaltitle_amazon: str
+    originalplot: str
+    wanted: str
+    naming_media: str
+    naming_file: str
+    country: str
+
+
+class InternalStateData(TypedDict):
+    log_info: str
+    failed_folder: str
+    version: int
+    image_download: bool  # 爬虫返回
+    nfo_can_translate: bool  # 内部状态
+    # 内部状态, 控制是否加水印
+    poster_marked: bool
+    thumb_marked: bool
+    fanart_marked: bool
+
+
+class OutputData(TypedDict):
+    title: str
+    outline: str
+    folder_name: str
+    req_web: str
+    outline_from: str
+    extrafanart_from: str
+    trailer_from: str
+    short_number: str
+    appoint_number: str
+    appoint_url: str
+    website_name: str
+    fields_info: str
     number: str
     letters: str
     has_sub: bool
@@ -47,18 +178,8 @@ class JsonData(TypedDict):
     youma: str
     mosaic: str
     tag: str
-    actor_href: str
-    all_actor: str
-    definition: str
-    file_path: str
-    poster_marked: bool
-    thumb_marked: bool
-    fanart_marked: bool
-    error_info: str
     _4K: str
     source: str
-    cover: str
-    actor_amazon: list[str]
     release: str
     year: str
     javdbid: str
@@ -68,56 +189,53 @@ class JsonData(TypedDict):
     publisher: str
     runtime: str
     director: str
-    actor_photo: str
     website: str
     series: str
     trailer: str
-    actor: str
-    poster: str
-    log_info: str
-    all_actor_photo: dict
-    amazon_orginaltitle_actor: str
     originaltitle_amazon: str
     originalplot: str
     wanted: str
     naming_media: str
     naming_file: str
-    extrafanart: str
     country: str
+
+
+class JsonData(MoveContext, ActorData, MovieData, InternalStateData, OutputData, ImageContext):
+    pass
 
 
 def new_json_data() -> JsonData:
     return {
+        "definition": "",
+        "actor": "",
         "cover_size": (0, 0),
         "poster_big": False,
-        "country": "",
-        "naming_file": "",
-        "naming_media": "",
-        "wanted": "",
-        "originalplot": "",
-        "originaltitle_amazon": "",
-        "amazon_orginaltitle_actor": "",
-        "all_actor_photo": {},
-        "log_info": "",
-        "poster": "",
-        "actor": "",
-        "score": "0.0",
-        "javdbid": "",
-        "year": "",
-        "release": "",
-        "actor_amazon": [],
-        "tag_only": "",
-        "only_tag_list": [],
-        "fanart_from": "",
         "image_cut": "",
-        "extrafanart": "",
+        "poster_marked": True,
+        "thumb_marked": True,
+        "fanart_marked": True,
+        "cover_list": [],
+        "poster_path": "",
+        "thumb_path": "",
+        "fanart_path": "",
         "cover": "",
-        "source": "",
-        "file_can_download": False,
+        "poster": "",
+        "extrafanart": "",
+        "actor_amazon": [],
+        "actor_href": "",
+        "all_actor": "",
+        "actor_photo": "",
+        "all_actor_photo": {},
+        "amazon_orginaltitle_actor": "",
+        "file_path": "",
+        "del_file_path": False,
+        "dont_move_movie": False,
         "nfo_can_translate": False,
-        "nfo_update": False,
+        "title": "",
+        "outline": "",
+        "failed_folder": "",
+        "folder_name": "",
         "version": 0,
-        "logs": "",
         "req_web": "",
         "image_download": False,
         "outline_from": "",
@@ -130,10 +248,6 @@ def new_json_data() -> JsonData:
         "appoint_url": "",
         "website_name": "",
         "fields_info": "",
-        "poster_path": "",
-        "thumb_path": "",
-        "fanart_path": "",
-        "cover_list": [],
         "number": "",
         "letters": "",
         "has_sub": False,
@@ -145,28 +259,26 @@ def new_json_data() -> JsonData:
         "youma": "",
         "mosaic": "",
         "tag": "",
-        "actor_href": "",
-        "all_actor": "",
-        "definition": "",
-        "file_path": "",
-        "poster_marked": True,
-        "thumb_marked": True,
-        "fanart_marked": True,
         "error_info": "",
-        "dont_move_movie": False,
-        "del_file_path": False,
-        "title": "",
-        "outline": "",
-        "failed_folder": "",
-        "folder_name": "",
         "_4K": "",
+        "source": "",
+        "release": "",
+        "year": "",
+        "javdbid": "",
+        "score": "0.0",
         "originaltitle": "",
         "studio": "",
         "publisher": "",
         "runtime": "",
         "director": "",
-        "actor_photo": "",
         "website": "",
         "series": "",
         "trailer": "",
+        "log_info": "",
+        "originaltitle_amazon": "",
+        "originalplot": "",
+        "wanted": "",
+        "naming_media": "",
+        "naming_file": "",
+        "country": "",
     }
