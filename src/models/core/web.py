@@ -914,7 +914,6 @@ def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
             if fanart_path:
                 delete_file(fanart_path)
             copy_file(done_fanart_path, fanart_final_path)
-            json_data["fanart_from"] = "copy cd-fanart"
             json_data["fanart_path"] = fanart_final_path
             LogBuffer.log().write("\n 🍀 Fanart done! (copy cd-fanart)(%ss)" % get_used_time(start_time))
             return True
@@ -924,7 +923,6 @@ def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
         if fanart_path:
             delete_file(fanart_path)
         copy_file(thumb_path, fanart_final_path)
-        json_data["fanart_from"] = "copy thumb"
         json_data["fanart_path"] = fanart_final_path
         json_data["fanart_marked"] = json_data["thumb_marked"]
         LogBuffer.log().write("\n 🍀 Fanart done! (copy thumb)(%ss)" % get_used_time(start_time))

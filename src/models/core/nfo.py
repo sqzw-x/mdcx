@@ -408,7 +408,6 @@ def get_nfo_data(
     json_data["req_web"] = local_nfo_path
     json_data["poster_from"] = "local"
     json_data["cover_from"] = "local"
-    json_data["fanart_from"] = "local"
     json_data["extrafanart_from"] = "local"
     json_data["trailer_from"] = "local"
 
