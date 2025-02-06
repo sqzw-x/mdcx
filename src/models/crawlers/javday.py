@@ -102,16 +102,6 @@ def get_cover(html, javday_url):
     return result if result else ""
 
 
-# def get_year(release):
-#     result = re.search(r'\d{4}', release)
-#     return result[0] if result else release
-
-
-# def get_release(cover_url):
-#     a = re.search(r'\/(\d{4})(\d{2})(\d{2})-', cover_url)
-#     return '%s-%s-%s' % (a[1], a[2], a[3]) if a else ''
-
-
 def get_tag(html):  # 获取演员
     result = html.xpath('//div[@class="category"]/a[contains(@href, "/class/")]/text()')
     return ",".join(result)
@@ -294,8 +284,7 @@ def main(
                     "trailer": "",
                     "image_download": False,
                     "image_cut": "no",
-                    "req_web": req_web
-                    + f"({round(time.time() - start_time)}s) ",
+                    "req_web": req_web + f"({round(time.time() - start_time)}s) ",
                     "mosaic": "国产",
                     "wanted": "",
                 }
@@ -314,8 +303,7 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web
-            + f"({round(time.time() - start_time)}s) ",
+            "req_web": req_web + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

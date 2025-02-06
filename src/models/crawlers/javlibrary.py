@@ -187,19 +187,19 @@ def main(
         javlibrary_url = domain + "/ja/vl_searchbyid.php?keyword="
         domain_2 = f"{domain}/ja"
     web_info = "\n       "
-    LogBuffer.info().write(" \n    🌐 javlibrary[%s]" % language.replace("zh_", ""))
+    LogBuffer.info().write(f" \n    🌐 javlibrary[{language.replace('zh_', '')}]")
     debug_info = ""
 
     try:  # 捕获主动抛出的异常
         if not real_url:
             # 生成搜索地址
             url_search = javlibrary_url + number
-            debug_info = "搜索地址: %s " % url_search
+            debug_info = f"搜索地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
 
             result, html_search = curl_html(url_search, proxies=proxies)
             if not result:
-                debug_info = "请求错误: %s " % html_search
+                debug_info = f"请求错误: {html_search} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -219,12 +219,12 @@ def main(
                 raise Exception(debug_info)
 
         if real_url:
-            debug_info = "番号地址: %s " % real_url
+            debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
             result, html_info = curl_html(real_url, proxies=proxies)
             if not result:
-                debug_info = "请求错误: %s " % html_info
+                debug_info = f"请求错误: {html_info} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -282,13 +282,7 @@ def main(
                     "trailer": "",
                     "image_download": False,
                     "image_cut": "right",
-                    "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
+                    "req_web": f"{req_web}({round(time.time() - start_time)}s) ",
                     "mosaic": "有码",
                     "wanted": wanted,
                 }
@@ -296,7 +290,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
+                debug_info = f"数据生成出错: {str(e)}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -307,13 +301,7 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            "req_web": f"{req_web}({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {language: dic}}
     js = json.dumps(

@@ -152,15 +152,9 @@ def get_trailer(htmlcode, real_url):
     if normal_cid:
         cid = normal_cid[0]
         if "dmm.co.jp" in real_url:
-            url = (
-                "https://www.dmm.co.jp/service/digitalapi/-/html5_player/=/cid=%s/mtype=AhRVShI_/service=digital/floor=videoa/mode=/"
-                % cid
-            )
+            url = f"https://www.dmm.co.jp/service/digitalapi/-/html5_player/=/cid={cid}/mtype=AhRVShI_/service=digital/floor=videoa/mode=/"
         else:
-            url = (
-                "https://www.dmm.com/service/digitalapi/-/html5_player/=/cid=%s/mtype=AhRVShI_/service=digital/floor=videoa/mode=/"
-                % cid
-            )
+            url = f"https://www.dmm.com/service/digitalapi/-/html5_player/=/cid={cid}/mtype=AhRVShI_/service=digital/floor=videoa/mode=/"
 
         result, htmlcode = get_html(url)
         try:

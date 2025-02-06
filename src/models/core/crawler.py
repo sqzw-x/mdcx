@@ -553,7 +553,7 @@ def _decide_websites(
     if short_number:
         json_data["number"] = file_number
 
-    json_data["fields_info"] = "\n 🌐 [website] %s" % json_data["req_web"].strip("-> ") + json_data["fields_info"]
+    json_data["fields_info"] = f"\n 🌐 [website] {json_data['req_web'].strip('-> ')}{json_data['fields_info']}"
     if "javdb" in all_json_data and "javdbid" in all_json_data["javdb"]["jp"]:
         json_data["javdbid"] = all_json_data["javdb"]["jp"]["javdbid"]
     else:
@@ -822,7 +822,7 @@ def _call_specific_crawler(json_data: JsonData, website: str) -> JsonData:
     json_data["cover_from"] = website
     json_data["extrafanart_from"] = website
     json_data["trailer_from"] = website
-    json_data["fields_info"] = "\n 🌐 [website] %s" % json_data["req_web"].strip("-> ")
+    json_data["fields_info"] = f"\n 🌐 [website] {json_data['req_web'].strip('-> ')}"
 
     if short_number:
         json_data["number"] = file_number
@@ -906,7 +906,7 @@ def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回
                 website_list = config.website_fc2.split(",")
                 json_data = _decide_websites(json_data, website_list)
             else:
-                LogBuffer.error().write("未识别到FC2番号：%s" % file_number)
+                LogBuffer.error().write(f"未识别到FC2番号：{file_number}")
 
         # =======================================================================sexart.15.06.14
         elif re.search(r"[^.]+\.\d{2}\.\d{2}\.\d{2}", file_number) or (
@@ -972,7 +972,7 @@ def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回
     json_data["originaltitle_amazon"] = originaltitle
     for each in json_data["actor_amazon"]:  # 去除演员名，避免搜索不到
         try:
-            end_actor = re.compile(r" %s$" % each)
+            end_actor = re.compile(rf" {each}$")
             json_data["originaltitle_amazon"] = re.sub(end_actor, "", json_data["originaltitle_amazon"])
         except:
             pass

@@ -351,7 +351,6 @@ class CutWindow(QDialog):
         # 显示实际裁剪位置
         self.Ui.label_cut_postion.setText(f"{str(self.c_x)}, {str(self.c_y)}, {str(self.c_x2)}, {str(self.c_y2)}")
 
-        # self.show_traceback_log('选择位置： %s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
         # 显示实际裁剪尺寸
         self.Ui.label_cut_size.setText(f"{str(self.c_w)}, {str(self.c_h)}")
 

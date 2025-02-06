@@ -436,7 +436,7 @@ def _get_youdao_key_thread():
             signal.show_traceback_log(traceback.format_exc())
             signal.show_traceback_log("🔴 有道翻译接口key获取失败！" + str(e))
             signal.show_log_text(traceback.format_exc())
-            signal.show_log_text(" 🔴 有道翻译接口key获取失败！请检查网页版有道是否正常！%s" % str(e))
+            signal.show_log_text(" 🔴 有道翻译接口key获取失败！请检查网页版有道是否正常！" + str(e))
     return youdaokey
 
 
@@ -469,7 +469,7 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
                 signal.show_log_text(traceback.format_exc())
             if movie_title:
                 json_data["title"] = movie_title
-                LogBuffer.log().write("\n 🌸 Sehua title done!(%ss)" % (get_used_time(start_time)))
+                LogBuffer.log().write(f"\n 🌸 Sehua title done!({get_used_time(start_time)}s)")
 
         # 匹配网络高质量标题（yesjav， 可在线更新）
         if not movie_title and title_yesjav == "on" and json_data_title_language == "ja":
@@ -477,7 +477,7 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
             movie_title = get_yesjav_title(movie_number)
             if movie_title and langid.classify(movie_title)[0] != "ja":
                 json_data["title"] = movie_title
-                LogBuffer.log().write("\n 🆈 Yesjav title done!(%ss)" % (get_used_time(start_time)))
+                LogBuffer.log().write(f"\n 🆈 Yesjav title done!({get_used_time(start_time)}s)")
 
         # 使用json_data数据
         if not movie_title and title_translate == "on" and json_data_title_language == "ja":

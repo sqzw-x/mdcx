@@ -97,7 +97,7 @@ def cut_thumb_to_poster(
     # 不裁剪
     if image_cut == "no":
         copy_file(thumb_path, poster_path)
-        LogBuffer.log().write("\n 🍀 Poster done! (copy thumb)(%ss)" % get_used_time(start_time))
+        LogBuffer.log().write(f"\n 🍀 Poster done! (copy thumb)({get_used_time(start_time)}s)")
         json_data["poster_from"] = "copy thumb"
         img.close()
         return True

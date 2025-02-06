@@ -30,7 +30,7 @@ def write_nfo(
     if not edit_mode:
         # 读取模式，有nfo，并且没有勾选更新 nfo 信息
         if not json_data["nfo_can_translate"]:
-            LogBuffer.log().write("\n 🍀 Nfo done! (old)(%ss)" % get_used_time(start_time))
+            LogBuffer.log().write(f"\n 🍀 Nfo done! (old)({get_used_time(start_time)}s)")
             return True
 
         # 不下载，不保留时
@@ -41,7 +41,7 @@ def write_nfo(
 
         # 保留时，返回
         if "nfo" in keep_files and os.path.exists(nfo_new_path):
-            LogBuffer.log().write("\n 🍀 Nfo done! (old)(%ss)" % get_used_time(start_time))
+            LogBuffer.log().write(f"\n 🍀 Nfo done! (old)({get_used_time(start_time)}s)")
             return True
 
     # 字符转义，避免emby无法解析
@@ -387,10 +387,10 @@ def write_nfo(
                 else:
                     print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
             print("</movie>", file=code)
-            LogBuffer.log().write("\n 🍀 Nfo done! (new)(%ss)" % get_used_time(start_time))
+            LogBuffer.log().write(f"\n 🍀 Nfo done! (new)({get_used_time(start_time)}s)")
             return True
     except Exception as e:
-        LogBuffer.log().write("\n 🔴 Nfo failed! \n     %s" % str(e))
+        LogBuffer.log().write(f"\n 🔴 Nfo failed! \n     {str(e)}")
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
         return False
@@ -589,6 +589,6 @@ def get_nfo_data(
     json_data["poster_path"] = poster_path
     json_data["thumb_path"] = thumb_path
     json_data["fanart_path"] = fanart_path
-    LogBuffer.log().write("\n 📄 [NFO] %s" % local_nfo_name)
+    LogBuffer.log().write(f"\n 📄 [NFO] {local_nfo_name}")
     signal.show_traceback_log(f"{number} {json_data['mosaic']}")
     return True, json_data

@@ -154,16 +154,14 @@ def get_video_size(json_data: JsonData, file_path: str):
 def show_data_result(json_data: JsonData, start_time: float):
     if LogBuffer.error().get() or json_data["title"] == "":
         LogBuffer.log().write(
-            "\n 🌐 [website] %s" % json_data["req_web"].strip("-> ")
-            + "\n"
-            + LogBuffer.info().get().strip(" ").strip("\n")
-            + "\n"
-            + " 🔴 Data failed!(%ss)" % (get_used_time(start_time))
+            f"\n 🌐 [website] {json_data['req_web'].strip('-> ')}"
+            f"\n{LogBuffer.info().get().strip()}"
+            f"\n 🔴 Data failed!({get_used_time(start_time)}s)"
         )
         return False
     else:
         if config.show_web_log == "on":  # 字段刮削过程
-            LogBuffer.log().write("\n 🌐 [website] %s" % json_data["req_web"].strip("-> "))
+            LogBuffer.log().write(f"\n 🌐 [website] {json_data['req_web'].strip('-> ')}")
         try:
             LogBuffer.log().write("\n" + LogBuffer.info().get().strip(" ").strip("\n"))
         except:
@@ -171,7 +169,7 @@ def show_data_result(json_data: JsonData, start_time: float):
         if config.show_from_log == "on":  # 字段来源信息
             if json_data["fields_info"]:
                 LogBuffer.log().write("\n" + json_data["fields_info"].strip(" ").strip("\n"))
-        LogBuffer.log().write("\n 🍀 Data done!(%ss)" % (get_used_time(start_time)))
+        LogBuffer.log().write(f"\n 🍀 Data done!({get_used_time(start_time)}s)")
         return True
 
 
@@ -277,7 +275,7 @@ def deal_some_field(json_data: JsonData) -> JsonData:
                 new_all_actor_name_list.extend(actor_keyword_list)
             for each_actor in set(new_all_actor_name_list):
                 try:
-                    end_actor = re.compile(r" %s$" % each_actor)
+                    end_actor = re.compile(rf" {each_actor}$")
                     title = re.sub(end_actor, "", title)
                     originaltitle = re.sub(end_actor, "", originaltitle)
                 except:

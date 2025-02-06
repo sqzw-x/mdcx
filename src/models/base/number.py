@@ -133,7 +133,7 @@ def remove_escape_string(filename: str, replace_char: str = "") -> str:
         "PRT",
     ]
     for each in short_strings:
-        filename = re.sub(r"[-_ .\[]%s[-_ .\]]" % each.upper(), "-", filename)
+        filename = re.sub(rf"[-_ .\[]{each.upper()}[-_ .\]]", "-", filename)
     return filename.replace("--", "-").strip("-_ .")
 
 

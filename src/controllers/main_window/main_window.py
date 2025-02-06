@@ -753,8 +753,8 @@ class MyMAinWindow(QMainWindow):
             signal.show_log_text(
                 " 🏁 End time".ljust(13) + ": " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))
             )
-            signal.show_log_text(" ⏱ Used time".ljust(13) + ": %sS" % used_time)
-            signal.show_log_text(" 🍕 Per time".ljust(13) + ": %sS" % average_time)
+            signal.show_log_text(f"{' ⏱ Used time'.ljust(13)}: {used_time}S")
+            signal.show_log_text(f"{' 🍕 Per time'.ljust(13)}: {average_time}S")
             signal.show_log_text("================================================================================")
             Flags.again_dic.clear()
         except:
@@ -1073,7 +1073,7 @@ class MyMAinWindow(QMainWindow):
     def _check_main_file_path(self):
         if not self.file_main_open_path:
             QMessageBox.about(self, "没有目标文件", "请刮削后再使用！！")
-            signal.show_scrape_info("💡 请刮削后使用！%s" % get_current_time())
+            signal.show_scrape_info(f"💡 请刮削后使用！{get_current_time()}")
             return False
         return True
 
@@ -1146,7 +1146,7 @@ class MyMAinWindow(QMainWindow):
             )
             if ok and text:
                 Flags.again_dic[file_path] = [text, "", ""]
-                signal.show_scrape_info("💡 已添加刮削！%s" % get_current_time())
+                signal.show_scrape_info(f"💡 已添加刮削！{get_current_time()}")
                 if self.Ui.pushButton_start_cap.text() == "开始":
                     again_search()
 
@@ -1169,11 +1169,11 @@ class MyMAinWindow(QMainWindow):
                 website, url = deal_url(text)
                 if website:
                     Flags.again_dic[file_path] = ["", url, website]
-                    signal.show_scrape_info("💡 已添加刮削！%s" % get_current_time())
+                    signal.show_scrape_info(f"💡 已添加刮削！{get_current_time()}")
                     if self.Ui.pushButton_start_cap.text() == "开始":
                         again_search()
                 else:
-                    signal.show_scrape_info("💡 不支持的网站！%s" % get_current_time())
+                    signal.show_scrape_info(f"💡 不支持的网站！{get_current_time()}")
 
     def main_del_file_click(self):
         """
@@ -1190,7 +1190,7 @@ class MyMAinWindow(QMainWindow):
             if reply != QMessageBox.Yes:
                 return
             delete_file(file_path)
-            signal.show_scrape_info("💡 已删除文件！%s" % get_current_time())
+            signal.show_scrape_info(f"💡 已删除文件！{get_current_time()}")
 
     def main_del_folder_click(self):
         """
@@ -1207,7 +1207,7 @@ class MyMAinWindow(QMainWindow):
             if reply != QMessageBox.Yes:
                 return
             shutil.rmtree(folder_path, ignore_errors=True)
-            self.show_scrape_info("💡 已删除文件夹！%s" % get_current_time())
+            self.show_scrape_info(f"💡 已删除文件夹！{get_current_time()}")
 
     def _pic_main_clicked(self):
         """
@@ -1629,7 +1629,7 @@ class MyMAinWindow(QMainWindow):
         if website:
             Flags.website_name = website
         else:
-            signal.show_scrape_info("💡 不支持的网站！%s" % get_current_time())
+            signal.show_scrape_info(f"💡 不支持的网站！{get_current_time()}")
             return
         start_new_scrape(FileMode.Single)
 
@@ -1713,7 +1713,7 @@ class MyMAinWindow(QMainWindow):
             except Exception as e:
                 skip_list.append([file_name, file_path, str(e)])
         if skip_list:
-            signal.show_log_text("\n%s file(s) did not move!" % len(skip_list))
+            signal.show_log_text(f"\n{len(skip_list)} file(s) did not move!")
             i = 0
             for info in skip_list:
                 i += 1
@@ -1778,7 +1778,7 @@ class MyMAinWindow(QMainWindow):
             else:
                 self.Ui.lineEdit_config_folder.setText(media_folder_path)
                 self.pushButton_save_config_clicked()
-            signal.show_scrape_info("💡 目录已切换！%s" % get_current_time())
+            signal.show_scrape_info(f"💡 目录已切换！{get_current_time()}")
 
     # endregion
 
@@ -2046,8 +2046,7 @@ class MyMAinWindow(QMainWindow):
         if new_config_file != config.file:
             new_config_path = os.path.join(config.folder, new_config_file)
             signal.show_log_text(
-                "\n================================================================================\n切换配置：%s"
-                % new_config_path
+                f"\n================================================================================\n切换配置：{new_config_path}"
             )
             with open(config.get_mark_file_path(), "w", encoding="UTF-8") as f:
                 f.write(new_config_path)
@@ -2057,7 +2056,7 @@ class MyMAinWindow(QMainWindow):
             if temp_dark != self.dark_mode and temp_window_radius == self.window_radius:
                 self.show_flag = True
                 self._windows_auto_adjust()
-            signal.show_scrape_info("💡 配置已切换！%s" % get_current_time())
+            signal.show_scrape_info(f"💡 配置已切换！{get_current_time()}")
 
     # 重置配置
     def pushButton_init_config_clicked(self):
@@ -2070,7 +2069,7 @@ class MyMAinWindow(QMainWindow):
             self.show_flag = True
             self._windows_auto_adjust()
         self.Ui.pushButton_init_config.setEnabled(True)
-        signal.show_scrape_info("💡 配置已重置！%s" % get_current_time())
+        signal.show_scrape_info(f"💡 配置已重置！{get_current_time()}")
 
     # 设置-命名-分集-字母
     def checkBox_cd_part_a_clicked(self):
@@ -2109,7 +2108,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_save_config_clicked(self):
         self.save_config()
         # self.load_config()
-        signal.show_scrape_info("💡 配置已保存！%s" % get_current_time())
+        signal.show_scrape_info(f"💡 配置已保存！{get_current_time()}")
 
     # 设置-另存为
     def pushButton_save_new_config_clicked(self):

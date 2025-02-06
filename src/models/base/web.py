@@ -16,8 +16,8 @@ from PIL import Image
 from ping3 import ping
 from requests.exceptions import (
     ChunkedEncodingError,
-    ConnectTimeout,
     ConnectionError,
+    ConnectTimeout,
     ContentDecodingError,
     HTTPError,
     InvalidHeader,
@@ -224,40 +224,6 @@ class WebRequests:
                 signal.add_log(f"[{i + 1}/{retry_times}] {error_info}")
         signal.add_log(f"🔴 请求失败！{error_info}")
         return False, error_info
-
-    # def scraper_html(self, url: str, proxies=True, cookies=None, headers=None):
-    #     # 获取代理信息
-    #     is_docker = config.is_docker
-    #     timeout = config.timeout
-    #     retry_times = config.retry
-    #     if is_docker:
-    #         return self.get_html(url, proxies=proxies, cookies=cookies)
-    #     if proxies:
-    #         proxies = config.proxies
-    #     else:
-    #         proxies = {
-    #             "http": None,
-    #             "https": None,
-    #         }
-    #
-    #     signal.add_log(f'🔎 Scraper请求 {url}')
-    #     for i in range(retry_times):
-    #         try:
-    #             with self.scraper.get(url, headers=headers, proxies=proxies, cookies=cookies, timeout=timeout) as f:
-    #                 response = f
-    #
-    #             if response.status_code > 299:
-    #                 error_info = f"{response.status_code} {url} {str(f.cookies).replace('<RequestsCookieJar[', '').replace(']>', '')}"
-    #                 return False, error_info
-    #             else:
-    #                 signal.add_log(f'✅ Scraper成功 {url}')
-    #             response.encoding = 'utf-8'
-    #             return True, f.text
-    #         except Exception as e:
-    #             error_info = '%s\nError: %s' % (url, e)
-    #             signal.add_log('🔴 重试 [%s/%s] %s' % (i + 1, retry_times, error_info))
-    #     signal.add_log(f"🔴 请求失败！{error_info}")
-    #     return False, error_info
 
     def _get_filesize(self, url):
         proxies = config.proxies

@@ -208,7 +208,7 @@ def main(
     global sleep
     start_time = time.time()
     website_name = "javdb"
-    req_web += "-> %s" % website_name
+    req_web += f"-> {website_name}"
 
     javdb_time = config.javdb_time
     header = {"cookie": config.javdb}
@@ -227,7 +227,7 @@ def main(
 
     if javdb_time > 0 and sleep:
         rr = random.randint(int(javdb_time / 2), javdb_time)
-        LogBuffer.info().write("\n    🌐 javdb (⏱ %sS)" % rr)
+        LogBuffer.info().write(f"\n    🌐 javdb (⏱ {rr}S)")
         for i in range(rr):  # 检查是否手动停止刮削
             time.sleep(1)
     else:
@@ -236,8 +236,8 @@ def main(
     try:  # 捕获主动抛出的异常
         if not real_url:
             # 生成搜索地址
-            url_search = javdb_url + "/search?q=" + number.strip() + "&locale=zh"
-            debug_info = "搜索地址: %s " % url_search
+            url_search = f"{javdb_url}/search?q={number.strip()}&locale=zh"
+            debug_info = f"搜索地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
 
             # 先使用scraper方法请求，失败时再使用get请求
@@ -247,7 +247,7 @@ def main(
                 if html_search.startswith("403"):
                     debug_info = f"网站禁止访问！！请更换其他非日本节点！点击 {url_search} 查看详情！"
                 else:
-                    debug_info = "请求错误: %s" % html_search
+                    debug_info = f"请求错误: {html_search}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -281,13 +281,13 @@ def main(
             if real_url.startswith("/v/"):
                 javdbid = real_url.replace("/v/", "")
             if not appoint_url:
-                real_url = javdb_url + real_url + "?locale=zh"
-            debug_info = "番号地址: %s " % real_url
+                real_url = f"{javdb_url}{real_url}?locale=zh"
+            debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
             result, html_info = curl_html(real_url, headers=header)
             if not result:
-                debug_info = "请求错误: %s" % html_info
+                debug_info = f"请求错误: {html_info}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -401,13 +401,7 @@ def main(
                     "trailer": trailer,
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
+                    "req_web": f"{req_web}({round((time.time() - start_time))}s) ",
                     "mosaic": mosaic,
                     "website": website,
                     "wanted": wanted,
@@ -418,7 +412,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
+                debug_info = f"数据生成出错: {str(e)}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -429,13 +423,7 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
+            "req_web": f"{req_web}({round((time.time() - start_time))}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(

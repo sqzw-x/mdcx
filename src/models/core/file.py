@@ -103,7 +103,7 @@ def creat_folder(
             return True
         except Exception as e:
             if not os.path.exists(folder_new_path):
-                LogBuffer.log().write("\n 🔴 Failed to create folder! \n    " + str(e))
+                LogBuffer.log().write(f"\n 🔴 Failed to create folder! \n    {str(e)}")
                 if len(folder_new_path) > 250:
                     LogBuffer.log().write("\n    可能是目录名过长！！！建议限制目录名长度！！！越小越好！！！")
                     LogBuffer.error().write("创建文件夹失败！可能是目录名过长！")
@@ -302,7 +302,7 @@ def copy_trailer_to_theme_videos(json_data: JsonData, folder_new_path: str, nami
 
     # 保留主题视频并存在时返回
     if "theme_videos" in keep_files and os.path.exists(theme_videos_folder_path):
-        LogBuffer.log().write("\n 🍀 Theme video done! (old)(%ss) " % get_used_time(start_time))
+        LogBuffer.log().write(f"\n 🍀 Theme video done! (old)({get_used_time(start_time)}s) ")
         return
 
     # 不下载主题视频时返回
@@ -369,7 +369,7 @@ def move_other_file(
                     and not os.path.exists(old_file_new_path)
                 ):
                     move_file(old_file_old_path, old_file_new_path)
-                    LogBuffer.log().write("\n 🍀 Move %s done!" % old_file)
+                    LogBuffer.log().write(f"\n 🍀 Move {old_file} done!")
 
 
 def move_file_to_failed_folder(
@@ -382,7 +382,7 @@ def move_file_to_failed_folder(
     # 更新模式、读取模式，不移动失败文件；不移动文件-关时，不移动； 软硬链接开时，不移动
     main_mode = config.main_mode
     if main_mode == 3 or main_mode == 4 or config.failed_file_move == 0 or config.soft_link != 0:
-        LogBuffer.log().write("\n 🙊 [Movie] %s" % file_path)
+        LogBuffer.log().write(f"\n 🙊 [Movie] {file_path}")
         return file_path
 
     # 文件路径已经在失败路径内时不移动
@@ -390,7 +390,7 @@ def move_file_to_failed_folder(
     file_path_temp = file_path.replace("\\", "/")
 
     if failed_folder_temp in file_path_temp:
-        LogBuffer.log().write("\n 🙊 [Movie] %s" % file_path)
+        LogBuffer.log().write(f"\n 🙊 [Movie] {file_path}")
         return file_path
 
     # 创建failed文件夹
@@ -416,7 +416,7 @@ def move_file_to_failed_folder(
     try:
         move_file(file_path, file_new_path)
         LogBuffer.log().write("\n 🔴 Move file to the failed folder!")
-        LogBuffer.log().write("\n 🙊 [Movie] %s" % file_new_path)
+        LogBuffer.log().write(f"\n 🙊 [Movie] {file_new_path}")
         json_data["file_path"] = file_new_path
         error_info = LogBuffer.error().get()
         LogBuffer.error().clear()
@@ -435,9 +435,9 @@ def move_file_to_failed_folder(
                     move_file(trailer_old_path_no_filename, trailer_new_path)
                 if has_trailer:
                     LogBuffer.log().write("\n 🔴 Move trailer to the failed folder!")
-                    LogBuffer.log().write("\n 🔴 [Trailer] %s" % trailer_new_path)
+                    LogBuffer.log().write(f"\n 🔴 [Trailer] {trailer_new_path}")
             except Exception as e:
-                LogBuffer.log().write("\n 🔴 Failed to move trailer to the failed folder! \n    " + str(e))
+                LogBuffer.log().write(f"\n 🔴 Failed to move trailer to the failed folder! \n    {str(e)}")
 
         # 同步移动字幕
         sub_type_list = config.sub_type.split("|")
@@ -452,23 +452,23 @@ def move_file_to_failed_folder(
                     LogBuffer.log().write(f"\n 🔴 Failed to move sub to the failed folder!\n     {error_info}")
                 else:
                     LogBuffer.log().write("\n 💡 Move sub to the failed folder!")
-                    LogBuffer.log().write("\n 💡 [Sub] %s" % sub_new_path)
+                    LogBuffer.log().write(f"\n 💡 [Sub] {sub_new_path}")
         return file_new_path
     except Exception as e:
-        LogBuffer.log().write("\n 🔴 Failed to move the file to the failed folder! \n    " + str(e))
+        LogBuffer.log().write(f"\n 🔴 Failed to move the file to the failed folder! \n    {str(e)}")
         return file_path
 
 
 def move_movie(json_data: MoveContext, file_path: str, file_new_path: str) -> bool:
     # 明确不需要移动的，直接返回
     if json_data["dont_move_movie"]:
-        LogBuffer.log().write("\n 🍀 Movie done! \n 🙉 [Movie] %s" % file_path)
+        LogBuffer.log().write(f"\n 🍀 Movie done! \n 🙉 [Movie] {file_path}")
         return True
 
     # 明确要删除自己的，删除后返回
     if json_data["del_file_path"]:
         delete_file(file_path)
-        LogBuffer.log().write("\n 🍀 Movie done! \n 🙉 [Movie] %s" % file_new_path)
+        LogBuffer.log().write(f"\n 🍀 Movie done! \n 🙉 [Movie] {file_new_path}")
         json_data["file_path"] = file_new_path
         return True
 
@@ -1131,9 +1131,9 @@ def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path: str)
                 if _need_clean(path, f, file_type_current):
                     result, error_info = delete_file(path)
                     if result:
-                        signal.show_log_text(" 🗑 Clean: %s " % path)
+                        signal.show_log_text(f" 🗑 Clean: {path} ")
                     else:
-                        signal.show_log_text(" 🗑 Clean error: %s " % error_info)
+                        signal.show_log_text(f" 🗑 Clean error: {error_info} ")
                     continue
 
                 # 添加文件
@@ -1145,9 +1145,9 @@ def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path: str)
                         if "check_symlink" in config.no_escape and not os.path.exists(real_path):
                             result, error_info = delete_file(path)
                             if result:
-                                signal.show_log_text(" 🗑 Clean dead link: %s " % path)
+                                signal.show_log_text(f" 🗑 Clean dead link: {path} ")
                             else:
-                                signal.show_log_text(" 🗑 Clean dead link error: %s " % error_info)
+                                signal.show_log_text(f" 🗑 Clean dead link error: {error_info} ")
                             continue
                         if real_path in temp_total:
                             skip_repeat_softlink += 1
@@ -1624,7 +1624,7 @@ def _clean_empty_fodlers(path: str, file_mode: FileMode) -> None:
             try:
                 if not os.listdir(folder):
                     os.rmdir(folder)
-                    signal.show_log_text(" 🗑 Clean empty folder: " + convert_path(folder))
+                    signal.show_log_text(f" 🗑 Clean empty folder: {convert_path(folder)}")
             except Exception as e:
                 signal.show_traceback_log(traceback.format_exc())
                 signal.show_log_text(f" 🔴 Delete empty folder error: {str(e)}")
