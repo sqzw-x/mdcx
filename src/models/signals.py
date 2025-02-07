@@ -44,7 +44,7 @@ class Signals(QObject):
 
     def add_log(self, *text):
         if self.stop:
-            raise Exception("手动停止刮削")
+            return
         try:
             with self.log_lock:
                 self.detail_log_list.append(f" ⏰ {time.strftime('%H:%M:%S', time.localtime())} {' '.join(text)}")
