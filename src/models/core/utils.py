@@ -7,6 +7,7 @@
 import json
 import os
 import re
+import shutil
 import subprocess
 import traceback
 import unicodedata
@@ -62,6 +63,9 @@ def show_movie_info(json_data: JsonData):
         LogBuffer.log().write("\n     " + "%-13s" % key + ": " + str(value))
 
 
+has_ffprobe = True if shutil.which("ffprobe") else False
+
+
 def get_video_size(json_data: JsonData, file_path: str):
     # 获取本地分辨率 同时获取视频编码格式
     definition = ""
@@ -72,7 +76,7 @@ def get_video_size(json_data: JsonData, file_path: str):
             file_path = read_link(file_path)
         else:
             hd_get = "path"
-    if hd_get == "video":
+    if has_ffprobe and hd_get == "video":
         try:
             # Use ffprobe to get video information
             cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", file_path]
