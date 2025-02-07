@@ -405,7 +405,7 @@ def get_nfo_data(
     local_nfo_name = split_path(local_nfo_path)[1]
     file_folder = split_path(file_path)[0]
     json_data["source"] = "nfo"
-    json_data["req_web"] = local_nfo_path
+    LogBuffer.req().write(local_nfo_path)
     json_data["poster_from"] = "local"
     json_data["cover_from"] = "local"
     json_data["extrafanart_from"] = "local"
@@ -413,7 +413,7 @@ def get_nfo_data(
 
     if not os.path.exists(local_nfo_path):
         LogBuffer.error().write("nfo文件不存在")
-        json_data["req_web"] = "do_not_update_json_data_dic"
+        LogBuffer.req().write("do_not_update_json_data_dic")
         json_data["outline"] = split_path(file_path)[1]
         json_data["tag"] = file_path
         return False, json_data
@@ -428,7 +428,7 @@ def get_nfo_data(
     # 获取不到标题，表示xml错误，重新刮削
     if not title:
         LogBuffer.error().write("nfo文件损坏")
-        json_data["req_web"] = "do_not_update_json_data_dic"
+        LogBuffer.req().write("do_not_update_json_data_dic")
         json_data["outline"] = split_path(file_path)[1]
         json_data["tag"] = file_path
         return False, json_data

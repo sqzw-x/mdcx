@@ -117,7 +117,6 @@ def get_cover(html):
 def main(
     number,
     appoint_url="",
-    req_web="",
     language="",
 ):
     start_time = time.time()
@@ -129,9 +128,9 @@ def main(
         if not official_url:
             raise Exception("不在官网番号前缀列表中")
         elif official_url == "https://www.prestige-av.com":
-            return prestige.main(number, appoint_url=appoint_url, req_web=req_web, language="jp")
+            return prestige.main(number, appoint_url, language="jp")
         website_name = official_url.split(".")[-2].replace("https://", "")
-        req_web += f"-> {website_name}"
+        LogBuffer.req().write(f"-> {website_name}")
         real_url = appoint_url
         image_cut = ""
         mosaic = "有码"
@@ -213,8 +212,6 @@ def main(
                     "trailer": trailer,
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "req_web": req_web
-                    + f"({round(time.time() - start_time)}s) ",
                     "mosaic": mosaic,
                     "website": real_url,
                     "wanted": "",
@@ -234,7 +231,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web,
         }
     dic = {
         "official": {"zh_cn": dic, "zh_tw": dic, "jp": dic},
@@ -247,6 +243,7 @@ def main(
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

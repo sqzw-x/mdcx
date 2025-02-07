@@ -332,13 +332,12 @@ def get_mosaic(title, actor):
 def main(
     number,
     appoint_url="",
-    req_web="",
     language="jp",
 ):
     # https://freejavbt.com/VRKM-565
     start_time = time.time()
     website_name = "freejavbt"
-    req_web += f"-> {website_name}"
+    LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
     title = ""
     cover_url = ""
@@ -423,8 +422,6 @@ def main(
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "req_web": req_web
-                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": mosaic,
                 "website": website,
                 "wanted": "",
@@ -444,8 +441,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web
-            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -455,6 +450,7 @@ def main(
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

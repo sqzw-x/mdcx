@@ -13,7 +13,6 @@ urllib3.disable_warnings()  # yapf: disable
 def main(
     number,
     appoint_url="",
-    req_web="",
     language="zh_cn",
 ):
     all_language = (
@@ -25,7 +24,7 @@ def main(
         + config.studio_language
     )
     appoint_url = appoint_url.replace("/cn/", "/ja/").replace("/tw/", "/ja/")
-    json_data = json.loads(javlibrary.main(number, appoint_url, req_web, "jp"))
+    json_data = json.loads(javlibrary.main(number, appoint_url, "jp"))
     if not json_data["javlibrary"]["jp"]["title"]:
         json_data["javlibrary"]["zh_cn"] = json_data["javlibrary"]["jp"]
         json_data["javlibrary"]["zh_tw"] = json_data["javlibrary"]["jp"]
@@ -37,8 +36,6 @@ def main(
             separators=(",", ": "),
         )
 
-    req_web = json_data["javlibrary"]["jp"]["req_web"]
-
     if "zh_cn" in all_language:
         language = "zh_cn"
         appoint_url = json_data["javlibrary"]["jp"]["website"].replace("/ja/", "/cn/")
@@ -46,7 +43,7 @@ def main(
         language = "zh_tw"
         appoint_url = json_data["javlibrary"]["jp"]["website"].replace("/ja/", "/tw/")
 
-    json_data_zh = json.loads(javlibrary.main(number, appoint_url, req_web, language))
+    json_data_zh = json.loads(javlibrary.main(number, appoint_url, language))
     dic = json_data_zh["javlibrary"][language]
     dic["originaltitle"] = json_data["javlibrary"]["jp"]["originaltitle"]
     dic["originalplot"] = json_data["javlibrary"]["jp"]["originalplot"]
@@ -59,6 +56,7 @@ def main(
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

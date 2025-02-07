@@ -263,7 +263,6 @@ def get_year(release):
 def main(
     number,
     appoint_url="",
-    req_web="",
     language="zh_cn",
     file_path="",
     appoint_number="",
@@ -272,7 +271,7 @@ def main(
         file_path = number + ".mp4"
     start_time = time.time()
     website_name = "theporndb"
-    req_web += f"-> {website_name}"
+    LogBuffer.req().write(f"-> {website_name}")
 
     api_token = config.theporndb_api_token
     theporndb_no_hash = config.theporndb_no_hash
@@ -438,8 +437,6 @@ def main(
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "req_web": req_web
-                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": mosaic,
                 "website": real_url,
                 "wanted": "",
@@ -454,11 +451,9 @@ def main(
 
     except:
         # print(traceback.format_exc())
-        req_web = req_web + f"({round(time.time() - start_time)}s) "
         return theporndb_movies.main(
             number,
             appoint_url=appoint_url,
-            req_web=req_web,
             language="zh_cn",
             file_path=file_path,
             appoint_number=appoint_number,
@@ -472,6 +467,7 @@ def main(
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

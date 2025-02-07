@@ -90,13 +90,12 @@ def get_extrafanart(html):
 def main(
     number,
     appoint_url="",
-    req_web="",
     language="jp",
 ):
     try:  # 捕获主动抛出的异常
         start_time = time.time()
         website_name = "kin8"
-        req_web += f"-> {website_name}"
+        LogBuffer.req().write(f"-> {website_name}")
         real_url = appoint_url
         cover_url = ""
         image_cut = ""
@@ -175,8 +174,6 @@ def main(
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "req_web": req_web
-                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": mosaic,
                 "website": real_url,
                 "wanted": "",
@@ -195,8 +192,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web
-            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -206,6 +201,7 @@ def main(
         indent=4,
         separators=(",", ": "),
     )
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

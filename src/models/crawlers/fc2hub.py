@@ -87,12 +87,11 @@ def getMosaic(tag, title):  # 获取马赛克
 def main(
     number,
     appoint_url="",
-    req_web="",
     language="jp",
 ):
     start_time = time.time()
     website_name = "fc2hub"
-    req_web += f"-> {website_name}"
+    LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
     root_url = getattr(config, "fc2hub_website", "https://javten.com")
 
@@ -180,8 +179,6 @@ def main(
                     "trailer": "",
                     "image_download": False,
                     "image_cut": "center",
-                    "req_web": req_web
-                    + f"({round(time.time() - start_time)}s) ",
                     "mosaic": mosaic,
                     "wanted": "",
                 }
@@ -200,8 +197,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web
-            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -211,6 +206,7 @@ def main(
         indent=4,
         separators=(",", ": "),
     )
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

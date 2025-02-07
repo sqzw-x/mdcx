@@ -429,13 +429,12 @@ def get_tv_com_data(number):
 def main(
     number,
     appoint_url="",
-    req_web="",
     language="jp",
     file_path="",
 ):
     start_time = time.time()
     website_name = "dmm"
-    req_web += f"-> {website_name}"
+    LogBuffer.req().write(f"-> {website_name}")
     cookies = {"cookie": "uid=abcd786561031111; age_check_done=1;"}
     real_url = appoint_url
     title = ""
@@ -666,7 +665,6 @@ def main(
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "req_web": req_web + f"({round(time.time() - start_time)}s) ",
                 "mosaic": mosaic,
                 "wanted": "",
             }
@@ -685,10 +683,10 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(",", ": "))  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

@@ -714,7 +714,7 @@ class MyMAinWindow(QMainWindow):
             self.Ui.pushButton_start_cap2.setText(" ■ 停止中 ")
             signal.show_scrape_info("⛔️ 刮削停止中...")
             try:  # pool可能还没启动
-                Flags.pool.shutdown39(wait=False, cancel_futures=True)
+                Flags.pool.shutdown(wait=False, cancel_futures=True)
             except:
                 signal.show_traceback_log(traceback.format_exc())
             t = threading.Thread(target=self._kill_threads)  # 关闭线程池和扫描线程

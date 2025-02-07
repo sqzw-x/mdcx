@@ -161,12 +161,11 @@ def get_wanted(html):
 def main(
     number,
     appoint_url="",
-    req_web="",
     language="zh_cn",
 ):
     start_time = time.time()
     website_name = "javlibrary"
-    req_web += f"-> {website_name}[{language}]"
+    LogBuffer.req().write(f"-> {website_name}[{language}]")
     proxies = True
 
     domain = "https://www.javlibrary.com"
@@ -282,7 +281,6 @@ def main(
                     "trailer": "",
                     "image_download": False,
                     "image_cut": "right",
-                    "req_web": f"{req_web}({round(time.time() - start_time)}s) ",
                     "mosaic": "有码",
                     "wanted": wanted,
                 }
@@ -301,7 +299,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": f"{req_web}({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {language: dic}}
     js = json.dumps(
@@ -311,6 +308,7 @@ def main(
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

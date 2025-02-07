@@ -81,14 +81,13 @@ def get_real_url(html, number_list):
 def main(
     number,
     appoint_url="",
-    req_web="",
     language="zh_cn",
     file_path="",
     appoint_number="",
 ):
     start_time = time.time()
     website_name = "madouqu"
-    req_web += f"-> {website_name}"
+    LogBuffer.req().write(f"-> {website_name}")
     title = ""
     cover_url = ""
     web_info = "\n       "
@@ -162,8 +161,6 @@ def main(
                 "trailer": "",
                 "image_download": False,
                 "image_cut": "no",
-                "req_web": req_web
-                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": "国产",
                 "wanted": "",
             }
@@ -182,8 +179,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web
-            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -193,6 +188,7 @@ def main(
         indent=4,
         separators=(",", ": "),
     )
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

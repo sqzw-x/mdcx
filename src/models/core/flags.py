@@ -4,6 +4,7 @@
 """
 
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -19,7 +20,7 @@ class _Flags:
     total_kills: int = 0
     now_kill: int = 0
     success_save_time: float = 0.0
-    pool: Any = None
+    pool: ThreadPoolExecutor = None
     next_start_time: float = 0.0
     lock: threading.Lock = field(default_factory=threading.Lock)
     count_claw: int = 0  # 批量刮削次数

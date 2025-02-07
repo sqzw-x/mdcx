@@ -63,12 +63,11 @@ def get_real_url(html_search, number):
 def main(
     number,
     appoint_url="",
-    req_web="",
     language="jp",
 ):
     start_time = time.time()
     website_name = "prestige"
-    req_web += f"-> {website_name}"
+    LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url.replace("goods", "api/product")
     image_cut = "right"
     image_download = True
@@ -187,8 +186,6 @@ def main(
                     "trailer": trailer,
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "req_web": req_web
-                    + f"({round(time.time() - start_time)}s) ",
                     "mosaic": mosaic,
                     "website": real_url.replace("api/product", "goods"),
                     "wanted": "",
@@ -207,8 +204,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web
-            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {
         "official": {"zh_cn": dic, "zh_tw": dic, "jp": dic},
@@ -221,6 +216,7 @@ def main(
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

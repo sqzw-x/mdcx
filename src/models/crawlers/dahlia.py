@@ -103,14 +103,13 @@ def get_trailer(html):  # 获取预览片
 def main(
     number,
     appoint_url="",
-    req_web="",
     language="jp",
 ):
     # https://faleno.jp/top/works/fsdss564/
     # https://dahlia-av.jp/works/dldss177/
     start_time = time.time()
     website_name = "dahlia"
-    req_web += f"-> {website_name}"
+    LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
     title = ""
     cover_url = ""
@@ -197,8 +196,6 @@ def main(
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "req_web": req_web
-                + f"({round(time.time() - start_time)}s) ",
                 "mosaic": mosaic,
                 "website": website,
                 "wanted": "",
@@ -218,8 +215,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web
-            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -229,6 +224,7 @@ def main(
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

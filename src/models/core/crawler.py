@@ -148,7 +148,6 @@ def _call_crawler(
     """
     appoint_number = json_data["appoint_number"]
     appoint_url = json_data["appoint_url"]
-    req_web = json_data["req_web"]
     file_path = json_data["file_path"]
 
     # 259LUXU-1111， mgstage 和 avsex 之外使用 LUXU-1111（素人番号时，short_number有值，不带前缀数字；反之，short_number为空)
@@ -194,81 +193,81 @@ def _call_crawler(
         "javday": javday.main,
     }
     if website == "official":
-        res = json.loads(official.main(file_number, appoint_url, req_web, language))
+        res = json.loads(official.main(file_number, appoint_url, language))
     elif website == "iqqtv":
-        res = json.loads(iqqtv_new.main(file_number, appoint_url, req_web, language))
+        res = json.loads(iqqtv_new.main(file_number, appoint_url, language))
     elif website == "avsex":
-        res = json.loads(avsex.main(file_number, appoint_url, req_web, language))
+        res = json.loads(avsex.main(file_number, appoint_url, language))
     elif website == "airav_cc":
-        res = json.loads(airav_cc.main(file_number, appoint_url, req_web, language))
+        res = json.loads(airav_cc.main(file_number, appoint_url, language))
     elif website == "airav":
-        res = json.loads(airav.main(file_number, appoint_url, req_web, language))
+        res = json.loads(airav.main(file_number, appoint_url, language))
     elif website == "freejavbt":
-        res = json.loads(freejavbt.main(file_number, appoint_url, req_web, language))
+        res = json.loads(freejavbt.main(file_number, appoint_url, language))
     elif website == "javbus":
-        res = json.loads(javbus.main(file_number, appoint_url, req_web, language, mosaic))
+        res = json.loads(javbus.main(file_number, appoint_url, language, mosaic))
     elif website == "javdb":
-        res = json.loads(javdb.main(file_number, appoint_url, req_web, language, org_language))
+        res = json.loads(javdb.main(file_number, appoint_url, language, org_language))
     elif website == "jav321":
-        res = json.loads(jav321.main(file_number, appoint_url, req_web, language))
+        res = json.loads(jav321.main(file_number, appoint_url, language))
     elif website == "dmm":
-        res = json.loads(dmm.main(file_number, appoint_url, req_web, language, file_path))
+        res = json.loads(dmm.main(file_number, appoint_url, language, file_path))
     elif website == "javlibrary":
-        res = json.loads(javlibrary_new.main(file_number, appoint_url, req_web, language))
+        res = json.loads(javlibrary_new.main(file_number, appoint_url, language))
     elif website == "xcity":
-        res = json.loads(xcity.main(file_number, appoint_url, req_web, language))
+        res = json.loads(xcity.main(file_number, appoint_url, language))
     elif website == "avsox":
-        res = json.loads(avsox.main(file_number, appoint_url, req_web, language))
+        res = json.loads(avsox.main(file_number, appoint_url, language))
     elif website == "mgstage":
-        res = json.loads(mgstage.main(file_number, appoint_url, req_web, language, short_number))
+        res = json.loads(mgstage.main(file_number, appoint_url, language, short_number))
     elif website == "7mmtv":
-        res = json.loads(mmtv.main(file_number, appoint_url, req_web, language, file_path))
+        res = json.loads(mmtv.main(file_number, appoint_url, language, file_path))
     elif website == "fc2":
-        res = json.loads(fc2.main(file_number, appoint_url, req_web, language))
+        res = json.loads(fc2.main(file_number, appoint_url, language))
     elif website == "fc2hub":
-        res = json.loads(fc2hub.main(file_number, appoint_url, req_web, language))
+        res = json.loads(fc2hub.main(file_number, appoint_url, language))
     elif website == "fc2club":
-        res = json.loads(fc2club.main(file_number, appoint_url, req_web, language))
+        res = json.loads(fc2club.main(file_number, appoint_url, language))
     elif website == "mdtv":
-        res = json.loads(mdtv.main(file_number, appoint_url, req_web, language, file_path, appoint_number))
+        res = json.loads(mdtv.main(file_number, appoint_url, language, file_path, appoint_number))
     elif website == "madouqu":
-        res = json.loads(madouqu.main(file_number, appoint_url, req_web, language, file_path, appoint_number))
+        res = json.loads(madouqu.main(file_number, appoint_url, language, file_path, appoint_number))
     elif website == "hscangku":
-        res = json.loads(hscangku.main(file_number, appoint_url, req_web, language, file_path, appoint_number))
+        res = json.loads(hscangku.main(file_number, appoint_url, language, file_path, appoint_number))
     elif website == "cableav":
-        res = json.loads(cableav.main(file_number, appoint_url, req_web, language, file_path, appoint_number))
+        res = json.loads(cableav.main(file_number, appoint_url, language, file_path, appoint_number))
     elif website == "getchu":
-        res = json.loads(getchu.main(file_number, appoint_url, req_web, language))
+        res = json.loads(getchu.main(file_number, appoint_url, language))
     elif website == "getchu_dmm":
-        res = json.loads(getchu_dmm.main(file_number, appoint_url, req_web, language))
+        res = json.loads(getchu_dmm.main(file_number, appoint_url, language))
     elif website == "mywife":
-        res = json.loads(mywife.main(file_number, appoint_url, req_web, language))
+        res = json.loads(mywife.main(file_number, appoint_url, language))
     elif website == "giga":
-        res = json.loads(giga.main(file_number, appoint_url, req_web, language))
+        res = json.loads(giga.main(file_number, appoint_url, language))
     elif website == "hdouban":
-        res = json.loads(hdouban.main(file_number, appoint_url, req_web, language, file_path, appoint_number, mosaic))
+        res = json.loads(hdouban.main(file_number, appoint_url, language, file_path, appoint_number, mosaic))
     elif website == "lulubar":
-        res = json.loads(lulubar.main(file_number, appoint_url, req_web, language))
+        res = json.loads(lulubar.main(file_number, appoint_url, language))
     elif website == "love6":
-        res = json.loads(love6.main(file_number, appoint_url, req_web, language))
+        res = json.loads(love6.main(file_number, appoint_url, language))
     elif website == "cnmdb":
-        res = json.loads(cnmdb.main(file_number, appoint_url, req_web, language, file_path, appoint_number))
+        res = json.loads(cnmdb.main(file_number, appoint_url, language, file_path, appoint_number))
     elif website == "faleno":
-        res = json.loads(faleno.main(file_number, appoint_url, req_web, language))
+        res = json.loads(faleno.main(file_number, appoint_url, language))
     elif website == "fantastica":
-        res = json.loads(fantastica.main(file_number, appoint_url, req_web, language))
+        res = json.loads(fantastica.main(file_number, appoint_url, language))
     elif website == "theporndb":
-        res = json.loads(theporndb.main(file_number, appoint_url, req_web, language, file_path))
+        res = json.loads(theporndb.main(file_number, appoint_url, language, file_path))
     elif website == "dahlia":
-        res = json.loads(dahlia.main(file_number, appoint_url, req_web, language))
+        res = json.loads(dahlia.main(file_number, appoint_url, language))
     elif website == "prestige":
-        res = json.loads(prestige.main(file_number, appoint_url, req_web, language))
+        res = json.loads(prestige.main(file_number, appoint_url, language))
     elif website == "kin8":
-        res = json.loads(kin8.main(file_number, appoint_url, req_web, language))
+        res = json.loads(kin8.main(file_number, appoint_url, language))
     elif website == "javday":
-        res = json.loads(javday.main(file_number, appoint_url, req_web, language))
+        res = json.loads(javday.main(file_number, appoint_url, language))
     else:
-        res = json.loads(javdb.main(file_number, appoint_url, req_web, language))
+        res = json.loads(javdb.main(file_number, appoint_url, language))
 
     return res
 
@@ -553,7 +552,7 @@ def _decide_websites(
     if short_number:
         json_data["number"] = file_number
 
-    json_data["fields_info"] = f"\n 🌐 [website] {json_data['req_web'].strip('-> ')}{json_data['fields_info']}"
+    json_data["fields_info"] = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}{json_data['fields_info']}"
     if "javdb" in all_json_data and "javdbid" in all_json_data["javdb"]["jp"]:
         json_data["javdbid"] = all_json_data["javdb"]["jp"]["javdbid"]
     else:
@@ -701,7 +700,6 @@ def _call_crawlers(
             )
             all_json_data.update(web_data)
             web_data_json: dict = all_json_data.get(website, {}).get(title_language, {})
-            json_data["req_web"] = web_data_json["req_web"]
 
         if field_cnname == "标题":
             json_data.update(web_data_json)
@@ -709,7 +707,6 @@ def _call_crawlers(
             if not len(backup_jsondata):
                 backup_jsondata.update(web_data_json)
                 backup_website = website
-                backup_jsondata.pop("req_web")
             if field_cnname == "标题":
                 json_data["outline_from"] = website
                 json_data["poster_from"] = website
@@ -822,7 +819,7 @@ def _call_specific_crawler(json_data: JsonData, website: str) -> JsonData:
     json_data["cover_from"] = website
     json_data["extrafanart_from"] = website
     json_data["trailer_from"] = website
-    json_data["fields_info"] = f"\n 🌐 [website] {json_data['req_web'].strip('-> ')}"
+    json_data["fields_info"] = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
 
     if short_number:
         json_data["number"] = file_number
@@ -860,7 +857,6 @@ def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回
     mosaic = json_data["mosaic"]
     version = json_data["version"]
     json_data["title"] = ""
-    json_data["req_web"] = ""
     json_data["fields_info"] = ""
     json_data["all_actor"] = ""
     json_data["all_actor_photo"] = {}
@@ -962,7 +958,7 @@ def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回
             json_data["mosaic"] = "无码"
         else:
             json_data["mosaic"] = "有码"
-    print(number, cd_part, json_data["mosaic"], json_data["req_web"].strip("-> "))
+    print(number, cd_part, json_data["mosaic"], LogBuffer.req().get().strip("-> "))
 
     # 车牌字母
     letters = get_number_letters(number)

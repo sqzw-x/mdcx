@@ -112,15 +112,14 @@ def get_extrafanart(html):
 def main(
     number,
     appoint_url="",
-    req_web="",
     language="jp",
 ):
     if "DLID" in number.upper() or "ITEM" in number.upper() or "GETCHU" in number.upper() or "dl.getchu" in appoint_url:
-        return getchu_dl.main(number, appoint_url, req_web, "jp")
+        return getchu_dl.main(number, appoint_url, "jp")
     start_time = time.time()
     website_name = "getchu"
     getchu_url = "http://www.getchu.com"
-    req_web += f"-> {website_name}"
+    LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url.replace("&gc=gc", "") + "&gc=gc" if appoint_url else ""
     cover_url = ""
     image_cut = ""
@@ -172,7 +171,7 @@ def main(
             else:
                 debug_info = "搜索结果: 未匹配到番号！"
                 LogBuffer.info().write(web_info + debug_info)
-                return getchu_dl.main(number, appoint_url, req_web, "jp")
+                return getchu_dl.main(number, appoint_url, "jp")
 
         if real_url:
             debug_info = f"番号地址: {real_url} "
@@ -233,8 +232,6 @@ def main(
                     "trailer": "",
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "req_web": req_web
-                    + f"({round(time.time() - start_time)}s) ",
                     "mosaic": mosaic,
                     "website": real_url,
                     "wanted": "",
@@ -253,8 +250,6 @@ def main(
             "title": "",
             "cover": "",
             "website": "",
-            "req_web": req_web
-            + f"({round(time.time() - start_time)}s) ",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -264,6 +259,7 @@ def main(
         indent=4,
         separators=(",", ": "),
     )
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

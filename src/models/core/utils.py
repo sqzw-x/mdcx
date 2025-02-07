@@ -152,16 +152,16 @@ def get_video_size(json_data: JsonData, file_path: str):
 
 
 def show_data_result(json_data: JsonData, start_time: float):
-    if LogBuffer.error().get() or json_data["title"] == "":
+    if json_data["title"] == "":
         LogBuffer.log().write(
-            f"\n 🌐 [website] {json_data['req_web'].strip('-> ')}"
+            f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
             f"\n{LogBuffer.info().get().strip()}"
             f"\n 🔴 Data failed!({get_used_time(start_time)}s)"
         )
         return False
     else:
         if config.show_web_log == "on":  # 字段刮削过程
-            LogBuffer.log().write(f"\n 🌐 [website] {json_data['req_web'].strip('-> ')}")
+            LogBuffer.log().write(f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}")
         try:
             LogBuffer.log().write("\n" + LogBuffer.info().get().strip(" ").strip("\n"))
         except:

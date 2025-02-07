@@ -214,8 +214,6 @@ def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> t
             LogBuffer.error().write(
                 "存在重复文件（指刮削后的文件路径相同！），请检查:\n    🍁 " + "\n    🍁 ".join(done_file_new_path_list)
             )
-            # json_data['req_web'] = 'do_not_update_json_data_dic'
-            # do_not_update_json_data_dic 是不要更新json_data的标识，表示这个文件的数据有问题
             json_data["outline"] = split_path(file_path)[1]
             json_data["tag"] = file_path
             return False, json_data
@@ -425,7 +423,7 @@ def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     # 获取刮削数据
     try:
         result, json_data = _scrape_one_file(file_path, file_info, file_mode)
-        if json_data["req_web"] != "do_not_update_json_data_dic":
+        if LogBuffer.req().get() != "do_not_update_json_data_dic":
             Flags.json_data_dic.update({movie_number: json_data})
     except Exception as e:
         _check_stop(file_name_temp)

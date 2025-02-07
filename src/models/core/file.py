@@ -270,7 +270,7 @@ def check_file(json_data: JsonData, file_path: str, file_escape_size: float) -> 
 
     if not os.path.exists(file_path):
         LogBuffer.error().write("文件不存在")
-        json_data["req_web"] = "do_not_update_json_data_dic"
+        LogBuffer.req().write("do_not_update_json_data_dic")
         json_data["outline"] = split_path(file_path)[1]
         json_data["tag"] = file_path
         return False, json_data
@@ -280,7 +280,7 @@ def check_file(json_data: JsonData, file_path: str, file_escape_size: float) -> 
             LogBuffer.error().write(
                 f"文件小于 {file_escape_size} MB 被过滤!（实际大小 {round(file_size, 2)} MB）已跳过刮削！"
             )
-            json_data["req_web"] = "do_not_update_json_data_dic"
+            LogBuffer.req().write("do_not_update_json_data_dic")
             json_data["outline"] = split_path(file_path)[1]
             json_data["tag"] = file_path
             return False, json_data

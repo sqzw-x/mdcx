@@ -35,6 +35,10 @@ class LogBuffer:
     def error() -> "LogBuffer":
         return LogBuffer._get_buffer("error")
 
+    @staticmethod
+    def req() -> "LogBuffer":
+        return LogBuffer._get_buffer("req")
+
     def __init__(self):
         self.buffer = []
 
@@ -99,7 +103,6 @@ class MovieData(TypedDict):
     failed_folder: str
     folder_name: str
     version: int
-    req_web: str
     image_download: bool
     outline_from: str
     cover_from: str
@@ -157,7 +160,6 @@ class OutputData(TypedDict):
     title: str
     outline: str
     folder_name: str
-    req_web: str
     outline_from: str
     extrafanart_from: str
     trailer_from: str
@@ -235,7 +237,6 @@ def new_json_data() -> JsonData:
         "failed_folder": "",
         "folder_name": "",
         "version": 0,
-        "req_web": "",
         "image_download": False,
         "outline_from": "",
         "cover_from": "",
