@@ -53,7 +53,6 @@ def main(
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

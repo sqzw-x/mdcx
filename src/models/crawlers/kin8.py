@@ -92,17 +92,17 @@ def main(
     appoint_url="",
     language="jp",
 ):
-    try:  # 捕获主动抛出的异常
-        start_time = time.time()
-        website_name = "kin8"
-        LogBuffer.req().write(f"-> {website_name}")
-        real_url = appoint_url
-        cover_url = ""
-        image_cut = ""
-        image_download = False
-        web_info = "\n       "
-        LogBuffer.info().write(" \n    🌐 kin8")
-        debug_info = ""
+    start_time = time.time()
+    website_name = "kin8"
+    LogBuffer.req().write(f"-> {website_name}")
+    real_url = appoint_url
+    cover_url = ""
+    image_cut = ""
+    image_download = False
+    web_info = "\n       "
+    LogBuffer.info().write(" \n    🌐 kin8")
+    debug_info = ""
+    try:
         if real_url:
             key = re.findall(r"\d{3,}", real_url)
             key = key[0] if key else ""
