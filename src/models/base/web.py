@@ -169,14 +169,14 @@ class WebRequests:
         return False, error_info
 
     def post_html(
-        self, url: str, data=None, json=None, headers=None, cookies=None, proxies=True, json_data=False, keep=True
+        self, url: str, data=None, json=None, headers=None, cookies=None, use_proxy=True, json_data=False, keep=True
     ):
         # 获取代理信息
         timeout = config.timeout
         retry_times = config.retry
         if not headers:
             headers = config.headers
-        if proxies:
+        if use_proxy:
             proxies = config.proxies
         else:
             proxies = {
