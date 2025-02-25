@@ -17,6 +17,7 @@ Desktop.ini
 build/
 develop-eggs/
 dist/
+*.dist/
 downloads/
 eggs/
 .eggs/

@@ -13,7 +13,10 @@ from models.signals import signal
 def get_main_path() -> str:
     try:
         main_path = realpath(__file__)
-        for _ in range(4):  # 根据此文件路径确定根目录, 若移动此文件可能需要修改
+        i = 4
+        if "__compiled__" in globals():  # nuitka 编译
+            i = 3
+        for _ in range(i):  # 根据此文件路径确定根目录, 若移动此文件可能需要修改
             main_path = dirname(main_path)
     except Exception as e:
         signal.show_traceback_log("get_main_path ERROR: " + str(e) + traceback.format_exc())
