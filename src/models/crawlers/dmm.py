@@ -106,12 +106,12 @@ def get_cover(html):
 
 
 def get_poster(html, cover):
-    result = html.xpath('//img[@class="tdmm"]/@src')
+    result = html.xpath('//meta[@property="og:image"]/@content')
     if result:
         result = re.sub(r"pics.dmm.co.jp", r"awsimgsrc.dmm.co.jp/pics_dig", result[0])
         return result
     else:
-        return cover.replace("pt.jpg", "ps.jpg")
+        return cover.replace("pl.jpg", "ps.jpg")
 
 
 def get_extrafanart(html):
