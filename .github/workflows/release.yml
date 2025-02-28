@@ -39,7 +39,7 @@ jobs:
         uses: dev-drprasad/delete-tag-and-release@v1.1
         if: ${{ env.IS_DAILY == 'true' && steps.get-new-commits.outputs.count > 0  }}
         with:
-          tag_name: daily_release
+          tag_name: mdcx-v1.0
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       # https://github.com/actions/runner/issues/1985#issuecomment-1573518052
@@ -166,7 +166,7 @@ jobs:
           prerelease: ${{ env.IS_DAILY }}
           body: |
             ${{ env.IS_DAILY=='true' && github.event.repository.updated_at || steps.get-changelog.outputs.CHANGELOG }}
-          tag: ${{ env.IS_DAILY=='true' && 'daily_release' || github.ref }}
+          tag: ${{ env.IS_DAILY=='true' && 'mdcx-v1.0' || github.ref }}
 
       - name: Create Release - Windows
         uses: svenstaro/upload-release-action@2.7.0
@@ -176,4 +176,4 @@ jobs:
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ needs.init-matrix.outputs.short_sha }}.exe
           file: dist/MDCx.exe
           prerelease: ${{ env.IS_DAILY }}
-          tag: ${{ env.IS_DAILY=='true' && 'daily_release' || github.ref }}
+          tag: ${{ env.IS_DAILY=='true' && 'mdcx-v1.0' || github.ref }}
