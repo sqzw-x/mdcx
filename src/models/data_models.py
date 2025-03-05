@@ -6,9 +6,9 @@ class EMbyActressInfo:
     name: str
     server_id: str
     id: str
-    birthday: str = '0000-00-00'
-    year: str = '0000'
-    overview: str = ''
+    birthday: str = "0000-00-00"
+    year: str = "0000"
+    overview: str = ""
     taglines: list = field(default_factory=list)
     genres: list = field(default_factory=list)
     tags: list = field(default_factory=list)
