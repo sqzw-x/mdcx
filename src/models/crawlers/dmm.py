@@ -46,12 +46,12 @@ def get_mosaic(html):
 
 
 def get_studio(html):
-    result = html.xpath("//td/a[contains(@href, 'article=maker')]/text()")
+    result = html.xpath("//td[contains(text(),'メーカー')]/following-sibling::td/a/text()")
     return result[0] if result else ''
 
 
 def get_publisher(html, studio):
-    result = html.xpath("//td/a[contains(@href, 'article=label')]/text()")
+    result = html.xpath("//td[contains(text(),'レーベル')]/following-sibling::td/a/text()")
     return result[0] if result else studio
 
 
@@ -98,24 +98,25 @@ def get_tag(html):
 
 
 def get_cover(html):
-    result = html.xpath('//a[@name="package-image"]/@href')
-    result = re.sub(r'pics.dmm.co.jp', r'awsimgsrc.dmm.co.jp/pics_dig',result[0])
-    return result if result else ''
+    temp_result = html.xpath('//meta[@property="og:image"]/@content')
+    if temp_result:
+        result = re.sub(r'pics.dmm.co.jp', r'awsimgsrc.dmm.co.jp/pics_dig', temp_result[0])
+        if check_url(result):
+            return result.replace('ps.jpg', 'pl.jpg')
+        else:
+            return temp_result[0].replace('ps.jpg', 'pl.jpg')
+    else:
+        return ''
 
 
 def get_poster(html, cover):
-    result = html.xpath('//img[@class="tdmm"]/@src')
-    if result:
-        result = re.sub(r'pics.dmm.co.jp', r'awsimgsrc.dmm.co.jp/pics_dig', result[0])
-        return result
-    else:
-        return cover.replace('pt.jpg', 'ps.jpg')
+        return cover.replace('pl.jpg', 'ps.jpg')
 
 
 def get_extrafanart(html):
-    result_list = html.xpath("//div[@id='sample-image-block']/a/img/@src")
+    result_list = html.xpath("//div[@id='sample-image-block']/a/@href")
     if not result_list:
-        result_list = html.xpath("//a[@name='sample-image']/img/@src")
+        result_list = html.xpath("//a[@name='sample-image']/img/@data-lazy")
     i = 1
     result = []
     for each in result_list:
@@ -623,7 +624,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', file_pa
 if __name__ == '__main__':
     # yapf: disable
     # print(main('ipz-825'))    # 普通，有预告片
-    # print(main('SIVR-160'))     # vr，有预告片
+    print(main('SIVR-160'))     # vr，有预告片
     # print(main('enfd-5301'))  # 写真，有预告片
     # print(main('h_346rebdb00017'))  # 无预告片
     # print(main('', 'https://www.dmm.com/mono/dvd/-/detail/=/cid=n_641enfd5301/'))
@@ -643,7 +644,7 @@ if __name__ == '__main__':
     # print(main('cwx-001', file_path='134cwx001-1.mp4'))
     # print(main('ssis-222'))
     # print(main('snis-036'))
-    # print(main('GLOD-148'
+    # print(main('GLOD-148'))
     # print(main('（抱き枕カバー付き）自宅警備員 1stミッション イイナリ巨乳長女・さやか～編'))    # 番号最后有字母
     # print(main('エロコンビニ店長 泣きべそ蓮っ葉・栞〜お仕置きじぇらしぃナマ逸機〜'))
     # print(main('初めてのヒトヅマ 第4話 ビッチな女子の恋愛相談'))
@@ -660,6 +661,7 @@ if __name__ == '__main__':
     # print(main('ssni-888'))
     # print(main('ssni00888'))
     # print(main('ssni-288'))
+    # print(main('mbf-033'))
     # print(main('', 'https://www.dmm.co.jp/digital/videoa/-/detail/=/cid=ssni00288/'))
     # print(main('俺をイジメてた地元ヤンキーの巨乳彼女を寝とって復讐を果たす話 The Motion Anime'))  # 模糊匹配 MAXVR-008
     # print(main('', 'https://www.dmm.co.jp/mono/dvd/-/detail/=/cid=h_173dhry23/'))   # 地域限制
