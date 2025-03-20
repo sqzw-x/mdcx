@@ -68,6 +68,10 @@ def get_video_size(json_data, file_path):
     if os.path.islink(file_path):
         if "symlink_definition" in config.no_escape:
             file_path = read_link(file_path)
+
+            # Windows 系统指向 CloudDrive2 等网络挂载路径的链接，会带有前缀 \\?
+            if file_path.startswith('\\\\?'):
+                file_path = file_path[3:]
         else:
             hd_get = "path"
     if hd_get == "video":
