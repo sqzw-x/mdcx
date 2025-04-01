@@ -172,8 +172,8 @@ def get_trailer(htmlcode, real_url):
 
 def get_real_url(html, number, number2, file_path):
     number_temp = number2.lower().replace('-', '')
-    url_list = html.xpath("//p[@class='tmb']/a/@href")
-
+    url_list = re.findall(r'detailUrl.*?(https.*?)\\",', html, re.S)
+    # url_list = html.xpath("//p[@class='tmb']/a/@href")
     # https://tv.dmm.co.jp/list/?content=mide00726&i3_ref=search&i3_ord=1
     # https://www.dmm.co.jp/digital/videoa/-/detail/=/cid=mide00726/?i3_ref=search&i3_ord=2
     # https://www.dmm.com/mono/dvd/-/detail/=/cid=n_709mmrak089sp/?i3_ref=search&i3_ord=1
@@ -197,7 +197,8 @@ def get_real_url(html, number, number2, file_path):
                     if cid[-2:] in file_path:
                         number = cid
     if not temp_list:  # 通过标题搜索
-        title_list = html.xpath("//p[@class='txt']/a//text()")
+        # title_list = html.xpath("//p[@class='txt']/a//text()")
+        title_list = re.findall(r'title\\":\\"(.*?)\\",', html, re.S)
         if title_list and url_list:
             full_title = number
             for i in range(len(url_list)):
@@ -439,11 +440,11 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', file_pa
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
 
-            html = etree.fromstring(htmlcode, etree.HTMLParser())
+            # html = etree.fromstring(htmlcode, etree.HTMLParser())
 
             # 未指定详情页地址时，获取详情页地址（刚才请求的是搜索页）
             if not appoint_url:
-                real_url, number = get_real_url(html, number, number, file_path)
+                real_url, number = get_real_url(htmlcode, number, number, file_path)
                 if not real_url:
                     debug_info = '搜索结果: 未匹配到番号！'
                     log_info += web_info + debug_info
@@ -456,8 +457,8 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', file_pa
                             debug_info = '网络请求错误: %s ' % htmlcode
                             log_info += web_info + debug_info
                             raise Exception(debug_info)
-                        html = etree.fromstring(htmlcode, etree.HTMLParser())
-                        real_url, number = get_real_url(html, number, number_no_00, file_path)
+                        # html = etree.fromstring(htmlcode, etree.HTMLParser())
+                        real_url, number = get_real_url(htmlcode, number, number_no_00, file_path)
                         if not real_url:
                             debug_info = '搜索结果: 未匹配到番号！'
                             log_info += web_info + debug_info
@@ -472,8 +473,8 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', file_pa
                         debug_info = '网络请求错误: %s ' % htmlcode
                         log_info += web_info + debug_info
                         raise Exception(debug_info)
-                    html = etree.fromstring(htmlcode, etree.HTMLParser())
-                    real_url, number0 = get_real_url(html, number, number_no_00, file_path)
+                    # html = etree.fromstring(htmlcode, etree.HTMLParser())
+                    real_url, number0 = get_real_url(htmlcode, number, number_no_00, file_path)
                     if not real_url:
                         debug_info = '搜索结果: 未匹配到番号！'
                         log_info += web_info + debug_info
@@ -624,7 +625,7 @@ def main(number, appoint_url='', log_info='', req_web='', language='jp', file_pa
 if __name__ == '__main__':
     # yapf: disable
     # print(main('ipz-825'))    # 普通，有预告片
-    print(main('SIVR-160'))     # vr，有预告片
+    # print(main('SIVR-160'))     # vr，有预告片
     # print(main('enfd-5301'))  # 写真，有预告片
     # print(main('h_346rebdb00017'))  # 无预告片
     # print(main('', 'https://www.dmm.com/mono/dvd/-/detail/=/cid=n_641enfd5301/'))
@@ -677,4 +678,4 @@ if __name__ == '__main__':
     # print(main('', 'https://tv.dmm.com/vod/detail/?title=5533ftbd00042&season=5533ftbd00042'))
     # print(main('stars-779'))
     # print(main('FAKWM-001', 'https://tv.dmm.com/vod/detail/?season=5497fakwm00001'))
-    # print(main('FAKWM-064', 'https://tv.dmm.com/vod/detail/?season=5497fakwm00064'))
+    print(main('FAKWM-064', 'https://tv.dmm.com/vod/detail/?season=5497fakwm00064'))
