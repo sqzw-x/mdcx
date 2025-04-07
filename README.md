@@ -74,6 +74,7 @@ python -m venv venv
 venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 $env:PYTHONPATH = "./src;$env:PYTHONPATH"
+$env:QT_QPA_PLATFORM_PLUGIN_PATH = "E:\dev\mdcx\venv\Lib\site-packages\PyQt5\Qt5\plugins\platforms"
 python main.py
 ```
 

@@ -170,7 +170,7 @@ cython_debug/
 
 config.ini
 MDCx.config
-userdata/
+# userdata/
 Log/
 test
 dev/
