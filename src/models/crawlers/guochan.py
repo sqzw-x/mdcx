@@ -895,8 +895,8 @@ def get_number_list(number, appoint_number="", file_path=""):  # 处理国产番
         elif "REAL野性派" in file_name:
             result = re.search(r"REAL野性派-?(\d{3,})", file_name)
             if result:
-                number_no_line = "REAL野性派%s" % (result[1])
-                number_normal = "REAL野性派-%s" % (result[1])
+                number_no_line = f"REAL野性派{result[1]}"
+                number_normal = f"REAL野性派-{result[1]}"
                 number_list.extend([number_no_line, number_normal])
 
         # mini06.全裸家政.只为弟弟的学费打工.被玩弄的淫乱家政小妹.mini传媒
@@ -1006,7 +1006,14 @@ def get_number_list(number, appoint_number="", file_path=""):  # 处理国产番
     return new_number_list, new_filename_list
 
 
-def get_extra_info(title, file_path, info_type, tag="", actor="", series=""):
+def get_extra_info(
+    title,
+    file_path,
+    info_type,
+    tag="",
+    actor="",
+    series="",
+):
     all_info = title + file_path + tag + actor + series
 
     # 未找到标签时，从各种信息里匹配，忽略大小写

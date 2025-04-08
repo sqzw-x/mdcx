@@ -27,7 +27,7 @@ def add_sub_for_all_video():
     else:
         signal.show_log_text(" 如果字幕文件名以 .chs 结尾，将被自动删除！\n")
     movie_type = config.media_type
-    movie_list = movie_lists("", movie_type, movie_path)  # 获取所有需要刮削的影片列表
+    movie_list = movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
     sub_type_list = config.sub_type.split("|")  # 本地字幕文件后缀
 
     add_count = 0

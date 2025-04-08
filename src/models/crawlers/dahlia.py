@@ -8,6 +8,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_html
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -99,12 +100,16 @@ def get_trailer(html):  # 获取预览片
     return result[0] if result else ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    language="jp",
+):
     # https://faleno.jp/top/works/fsdss564/
     # https://dahlia-av.jp/works/dldss177/
     start_time = time.time()
     website_name = "dahlia"
-    req_web += "-> %s" % website_name
+    LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
     title = ""
     cover_url = ""
@@ -120,17 +125,17 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
     else:
         real_url_list = [f"https://dahlia-av.jp/works/{number_lo.replace('-', '')}/"]
 
-    log_info += "\n    🌐 dahlia"
+    LogBuffer.info().write("\n    🌐 dahlia")
     mosaic = "有码"
     try:  # 捕获主动抛出的异常
         for real_url in real_url_list:
-            debug_info = "番号地址: %s " % real_url
-            log_info += web_info + debug_info
+            debug_info = f"番号地址: {real_url} "
+            LogBuffer.info().write(web_info + debug_info)
 
             result, html_info = get_html(real_url)
             if not result:
-                debug_info = "请求错误: %s " % html_info
-                log_info += web_info + debug_info
+                debug_info = f"请求错误: {html_info} "
+                LogBuffer.info().write(web_info + debug_info)
                 continue
 
             html_detail = etree.fromstring(html_info, etree.HTMLParser())
@@ -139,7 +144,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
             title = get_title(html_detail)
             if not title:
                 debug_info = "数据获取失败: 番号标题不存在！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 continue
             break
         else:
@@ -191,43 +196,25 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "log_info": log_info,
-                "error_info": "",
-                "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
                 "mosaic": mosaic,
                 "website": website,
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
-            log_info += web_info + debug_info
-            dic["log_info"] = log_info
+            LogBuffer.info().write(web_info + debug_info)
+
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
-            log_info += web_info + debug_info
+            debug_info = f"数据生成出错: {str(e)}"
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
     except Exception as e:
         # print(traceback.format_exc())
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -237,6 +224,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

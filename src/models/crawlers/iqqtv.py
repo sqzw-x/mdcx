@@ -8,6 +8,7 @@ from lxml import etree
 
 from models.base.web import get_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -162,10 +163,14 @@ def get_real_url(html, number):
     return ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
+def main(
+    number,
+    appoint_url="",
+    language="zh_cn",
+):
     start_time = time.time()
     website_name = "iqqtv"
-    req_web += f"-> {website_name}[{language}]"
+    LogBuffer.req().write(f"-> {website_name}[{language}]")
 
     if not re.match(r"n\d{4}", number):
         number = number.upper()
@@ -187,21 +192,21 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
         iqqtv_url = iqqtv_url + "/jp/"
     # web_info = ' \n    >>> ' + "%-10s" % '[iqqtv] '
     web_info = "\n       "
-    log_info += " \n    🌐 iqqtv[%s]" % language
+    LogBuffer.info().write(f" \n    🌐 iqqtv[{language}]")
     debug_info = ""
 
     try:  # 捕获主动抛出的异常
         if not real_url:
             # 通过搜索获取real_url
             url_search = iqqtv_url + "search.php?kw=" + number
-            debug_info = "搜索地址: %s " % url_search
-            log_info += web_info + debug_info
+            debug_info = f"搜索地址: {url_search} "
+            LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
             result, html_search = get_html(url_search)
             if not result:
-                debug_info = "网络请求错误: %s" % html_search
-                log_info += web_info + debug_info
+                debug_info = f"网络请求错误: {html_search}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
             real_url = html.xpath('//a[@class="ga_click"]/@href')
@@ -210,27 +215,27 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
                 real_url = iqqtv_url + real_url_tmp.replace("/cn/", "").replace("/jp/", "").replace("&cat=19", "")
             else:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
         else:
             real_url = iqqtv_url + re.sub(r".*player", "player", appoint_url)
 
-        debug_info = "番号地址: %s " % real_url
-        log_info += web_info + debug_info
+        debug_info = f"番号地址: {real_url} "
+        LogBuffer.info().write(web_info + debug_info)
         result, html_content = get_html(real_url)
         if not result:
-            debug_info = "网络请求错误: %s" % html_content
-            log_info += web_info + debug_info
+            debug_info = f"网络请求错误: {html_content}"
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         html_info = etree.fromstring(html_content, etree.HTMLParser())
 
         title = get_title(html_info)  # 获取标题
         if not title:
             debug_info = "数据获取失败: 未获取到title！"
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         web_number = getWebNumber(title, number)  # 获取番号，用来替换标题里的番号
-        title = title.replace(" %s" % web_number, "").strip()
+        title = title.replace(f" {web_number}", "").strip()
         actor = getActor(html_info)  # 获取actor
         actor_photo = getActorPhoto(actor)
         title = get_real_title(title)
@@ -276,42 +281,24 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
                 "trailer": "",
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "log_info": log_info,
-                "error_info": "",
-                "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
                 "mosaic": mosaic,
                 "wanted": "",
             }
 
             debug_info = "数据获取成功！"
-            log_info += web_info + debug_info
-            dic["log_info"] = log_info
+            LogBuffer.info().write(web_info + debug_info)
+
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
-            log_info += web_info + debug_info
+            debug_info = "数据生成出错: " + str(e)
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
     except Exception as e:
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {language: dic}}
     js = json.dumps(
@@ -321,6 +308,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn"):
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

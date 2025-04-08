@@ -7,10 +7,11 @@ from PyQt5.QtGui import QImageReader, QPixmap
 
 from models.base.file import check_pic, copy_file, delete_file
 from models.base.utils import get_used_time
+from models.core.json_data import JsonData, LogBuffer
 from models.signals import signal
 
 
-def get_pixmap(pic_path, poster=True, pic_from=""):
+def get_pixmap(pic_path: str, poster=True, pic_from=""):
     try:
         # 使用 QImageReader 加载，适合加载大文件，pixmap适合显示
         # 判断是否可读取
@@ -47,7 +48,7 @@ def get_pixmap(pic_path, poster=True, pic_from=""):
         return [False, "", "加载失败", 156, 220]
 
 
-def fix_size(path, naming_rule):
+def fix_size(path: str, naming_rule: str):
     try:
         poster_path = os.path.join(path, (naming_rule + "-poster.jpg"))
         if os.path.exists(poster_path):
@@ -63,7 +64,12 @@ def fix_size(path, naming_rule):
         signal.show_log_text(f"{traceback.format_exc()}\n Pic: {poster_path}")
 
 
-def cut_thumb_to_poster(json_data, thumb_path, poster_path, image_cut=""):
+def cut_thumb_to_poster(
+    json_data: JsonData,
+    thumb_path: str,
+    poster_path: str,
+    image_cut="",
+):
     start_time = time.time()
     if os.path.exists(poster_path):
         delete_file(poster_path)
@@ -91,7 +97,7 @@ def cut_thumb_to_poster(json_data, thumb_path, poster_path, image_cut=""):
     # 不裁剪
     if image_cut == "no":
         copy_file(thumb_path, poster_path)
-        json_data["logs"] += "\n 🍀 Poster done! (copy thumb)(%ss)" % get_used_time(start_time)
+        LogBuffer.log().write(f"\n 🍀 Poster done! (copy thumb)({get_used_time(start_time)}s)")
         json_data["poster_from"] = "copy thumb"
         img.close()
         return True
@@ -126,19 +132,19 @@ def cut_thumb_to_poster(json_data, thumb_path, poster_path, image_cut=""):
         img_new_png.save(poster_path, quality=95, subsampling=0)
         img.close()
         if check_pic(poster_path):
-            json_data["logs"] += f"\n 🍀 Poster done! ({json_data['poster_from']})({get_used_time(start_time)}s)"
+            LogBuffer.log().write(f"\n 🍀 Poster done! ({json_data['poster_from']})({get_used_time(start_time)}s)")
             return True
-        json_data["logs"] += f'\n 🥺 Poster cut failed! ({json_data["poster_from"]})({get_used_time(start_time)}s)'
+        LogBuffer.log().write(f"\n 🥺 Poster cut failed! ({json_data['poster_from']})({get_used_time(start_time)}s)")
     except Exception as e:
-        json_data["logs"] += (
-            f'\n 🥺 Poster failed! ({json_data["poster_from"]})({get_used_time(start_time)}s)\n    {str(e)}'
+        LogBuffer.log().write(
+            f"\n 🥺 Poster failed! ({json_data['poster_from']})({get_used_time(start_time)}s)\n    {str(e)}"
         )
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
     return False
 
 
-def cut_pic(pic_path):
+def cut_pic(pic_path: str):
     # 打开图片, 获取图片尺寸
     try:
         img = Image.open(pic_path)  # 返回一个Image对象
@@ -175,7 +181,7 @@ def cut_pic(pic_path):
         signal.show_log_text(traceback.format_exc())
 
 
-def fix_pic(pic_path, new_path):
+def fix_pic(pic_path: str, new_path: str):
     try:
         pic = Image.open(pic_path)
         (w, h) = pic.size

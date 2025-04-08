@@ -8,6 +8,7 @@ from lxml import etree
 
 from models.base.web import get_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -81,10 +82,14 @@ def getMosaic(tag, title):  # 获取马赛克
     return result
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    language="jp",
+):
     start_time = time.time()
     website_name = "fc2"
-    req_web += "-> %s" % website_name
+    LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
     title = ""
     cover_url = ""
@@ -94,34 +99,34 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
     number = number.upper().replace("FC2PPV", "").replace("FC2-PPV-", "").replace("FC2-", "").replace("-", "").strip()
     dic = {}
     web_info = "\n       "
-    log_info += " \n    🌐 fc2"
+    LogBuffer.info().write(" \n    🌐 fc2")
     debug_info = ""
 
     try:  # 捕获主动抛出的异常
         if not real_url:
-            real_url = "https://adult.contents.fc2.com/article/%s/" % number
+            real_url = f"https://adult.contents.fc2.com/article/{number}/"
 
-        debug_info = "番号地址: %s" % real_url
-        log_info += web_info + debug_info
+        debug_info = f"番号地址: {real_url}"
+        LogBuffer.info().write(web_info + debug_info)
 
         # ========================================================================番号详情页
         result, html_content = get_html(real_url)
         if not result:
-            debug_info = "网络请求错误: %s" % html_content
-            log_info += web_info + debug_info
+            debug_info = f"网络请求错误: {html_content}"
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         html_info = etree.fromstring(html_content, etree.HTMLParser())
 
         title = getTitle(html_info)  # 获取标题
         if "お探しの商品が見つかりません" in title:
             debug_info = "搜索结果: 未匹配到番号！"
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
         cover_url, extrafanart = getCover(html_info)  # 获取cover,extrafanart
         if "http" not in cover_url:
             debug_info = "数据获取失败: 未获取到cover！"
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
         poster_url = getCoverSmall(html_info)
@@ -162,41 +167,23 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
                 "trailer": "",
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "log_info": log_info,
-                "error_info": "",
-                "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
                 "mosaic": mosaic,
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
-            log_info += web_info + debug_info
-            dic["log_info"] = log_info
+            LogBuffer.info().write(web_info + debug_info)
+
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
-            log_info += web_info + debug_info
+            debug_info = f"数据生成出错: {str(e)}"
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
     except Exception as e:
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -206,6 +193,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
         indent=4,
         separators=(",", ": "),
     )
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

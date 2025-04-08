@@ -8,6 +8,7 @@ from lxml import etree
 
 from models.base.web import curl_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info, get_number_list
 
 urllib3.disable_warnings()  # yapf: disable
@@ -25,7 +26,12 @@ def get_actor_photo(actor):
     return data
 
 
-def get_detail_info(html, real_url, number, file_path):
+def get_detail_info(
+    html,
+    real_url,
+    number,
+    file_path,
+):
     href = re.split(r"[/.]", real_url)[-2]
     title_h1 = html.xpath(
         '//h3[@class="title" and not(contains(normalize-space(.), "目录")) and not(contains(normalize-space(.), "为你推荐"))]/text()'
@@ -68,14 +74,20 @@ def get_redirected_url(url):
         return None
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number=""):
+def main(
+    number,
+    appoint_url="",
+    language="zh_cn",
+    file_path="",
+    appoint_number="",
+):
     start_time = time.time()
     website_name = "hscangku"
-    req_web += "-> %s" % website_name
+    LogBuffer.req().write(f"-> {website_name}")
     title = ""
     cover_url = ""
     web_info = "\n       "
-    log_info += " \n    🌐 hscangku"
+    LogBuffer.info().write(" \n    🌐 hscangku")
     debug_info = ""
     real_url = appoint_url
     hscangku_url = getattr(config, "hscangku_website", "http://hsck.net")
@@ -89,18 +101,18 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
             hscangku_url = get_redirected_url(hscangku_url)
             if not hscangku_url:
                 debug_info = "没有正确的 hscangku_url，无法刮削"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             for each in n_list:
                 real_url = f"{hscangku_url}/vodsearch/-------------.html?wd={each}&submit="
                 # real_url = 'http://hsck860.cc/vodsearch/-------------.html?wd=%E6%9F%9A%E5%AD%90%E7%8C%AB&submit='
                 debug_info = f"请求地址: {real_url} "
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 result, response = curl_html(real_url)
 
                 if not result:
-                    debug_info = "网络请求错误: %s" % response
-                    log_info += web_info + debug_info
+                    debug_info = f"网络请求错误: {response}"
+                    LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 search_page = etree.fromstring(response, etree.HTMLParser())
                 result, number, title, real_url = get_real_url(search_page, n_list, hscangku_url)
@@ -109,16 +121,16 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                     break
             else:
                 debug_info = "没有匹配的搜索结果"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
         debug_info = f"番号地址: {real_url} "
-        log_info += web_info + debug_info
+        LogBuffer.info().write(web_info + debug_info)
         result, response = curl_html(real_url)
 
         if not result:
-            debug_info = "没有找到数据 %s " % response
-            log_info += web_info + debug_info
+            debug_info = f"没有找到数据 {response} "
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
         detail_page = etree.fromstring(response, etree.HTMLParser())
@@ -152,42 +164,24 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                 "trailer": "",
                 "image_download": False,
                 "image_cut": "no",
-                "log_info": log_info,
-                "error_info": "",
-                "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
                 "mosaic": "国产",
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
-            log_info += web_info + debug_info
-            dic["log_info"] = log_info
+            LogBuffer.info().write(web_info + debug_info)
+
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
-            log_info += web_info + debug_info
+            debug_info = f"数据生成出错: {str(e)}"
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
     except Exception as e:
         # print(traceback.format_exc())
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -197,6 +191,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
         indent=4,
         separators=(",", ": "),
     )
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

@@ -4,12 +4,14 @@
     此模块不应依赖 models.core 中除 flags 外的任何其他模块
 """
 
+import json
 import os
 import re
+import shutil
+import subprocess
 import traceback
-
-import cv2
 import unicodedata
+from typing import Optional
 
 from models.base.file import read_link, split_path
 from models.base.number import get_number_letters
@@ -17,10 +19,11 @@ from models.base.path import get_main_path, get_path
 from models.base.utils import convert_path, get_used_time
 from models.config.config import config
 from models.config.resources import resources
+from models.core.json_data import JsonData, LogBuffer
 from models.signals import signal
 
 
-def replace_word(json_data):
+def replace_word(json_data: JsonData):
     # 常见字段替换的字符
     for key, value in config.all_rep_word.items():
         for each in config.all_key_word:
@@ -44,7 +47,7 @@ def replace_word(json_data):
             json_data[field] = json_data[field].replace(each, "").strip(":， ").strip()
 
 
-def show_movie_info(json_data):
+def show_movie_info(json_data: JsonData):
     if config.show_data_log == "off":  # 调试模式打开时显示详细日志
         return
     for key in config.show_key:
@@ -57,10 +60,13 @@ def show_movie_info(json_data):
             value = "中文字幕"
         elif key == "actor" and "actor_all," in config.nfo_include_new:
             value = json_data["all_actor"]
-        json_data["logs"] += "\n     " + "%-13s" % key + ": " + str(value)
+        LogBuffer.log().write("\n     " + "%-13s" % key + ": " + str(value))
 
 
-def get_video_size(json_data, file_path):
+has_ffprobe = True if shutil.which("ffprobe") else False
+
+
+def get_video_size(json_data: JsonData, file_path: str):
     # 获取本地分辨率 同时获取视频编码格式
     definition = ""
     height = 0
@@ -70,21 +76,26 @@ def get_video_size(json_data, file_path):
             file_path = read_link(file_path)
         else:
             hd_get = "path"
-    if hd_get == "video":
+    if has_ffprobe and hd_get == "video":
         try:
-            cap = cv2.VideoCapture(file_path)
-            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            ##使用opencv获取编码器格式
-            codec = int(cap.get(cv2.CAP_PROP_FOURCC))
-            codec_fourcc = (
-                chr(codec & 0xFF) + chr((codec >> 8) & 0xFF) + chr((codec >> 16) & 0xFF) + chr((codec >> 24) & 0xFF)
-            )
+            # Use ffprobe to get video information
+            cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", file_path]
+
+            result = subprocess.run(cmd, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            data = json.loads(result.stdout)
+
+            # Find video stream
+            video_stream = next((stream for stream in data["streams"] if stream["codec_type"] == "video"), None)
+
+            if video_stream:
+                height = int(video_stream["height"])
+                codec_fourcc = video_stream["codec_name"].upper()
+            else:
+                height = 0
+                codec_fourcc = ""
 
         except Exception as e:
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_traceback_log(str(e))
-            signal.show_log_text(traceback.format_exc())
-            signal.show_log_text(f" 🔴 无法获取视频分辨率！ 文件地址: {file_path}  错误信息: {e}")
+            signal.show_log_text(f" 🔴 无法获取视频分辨率! 文件地址: {file_path}  错误信息: {e}")
     elif hd_get == "path":
         file_path_temp = file_path.upper()
         if "8K" in file_path_temp:
@@ -126,7 +137,7 @@ def get_video_size(json_data, file_path):
     json_data["definition"] = definition
 
     if definition in ["4K", "8K", "UHD", "UHD8"]:
-        json_data["4K"] = "-" + definition
+        json_data["_4K"] = "-" + definition
 
     # 去除标签中的分辨率率，使用本地读取的实际分辨率
     remove_key = ["144P", "360P", "480P", "540P", "720P", "960P", "1080P", "1440P", "2160P", "4K", "8K"]
@@ -144,32 +155,29 @@ def get_video_size(json_data, file_path):
     return json_data
 
 
-def show_data_result(json_data, start_time):
-    if json_data["error_info"] or json_data["title"] == "":
-        json_data["logs"] += (
-            "\n 🌐 [website] %s" % json_data["req_web"].strip("-> ")
-            + "\n"
-            + json_data["log_info"].strip(" ").strip("\n")
-            + "\n"
-            + " 🔴 Data failed!(%ss)" % (get_used_time(start_time))
+def show_data_result(json_data: JsonData, start_time: float):
+    if json_data["title"] == "":
+        LogBuffer.log().write(
+            f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
+            f"\n{LogBuffer.info().get().strip()}"
+            f"\n 🔴 Data failed!({get_used_time(start_time)}s)"
         )
         return False
     else:
         if config.show_web_log == "on":  # 字段刮削过程
-            json_data["logs"] += "\n 🌐 [website] %s" % json_data["req_web"].strip("-> ")
+            LogBuffer.log().write(f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}")
         try:
-            if json_data["log_info"]:
-                json_data["logs"] += "\n" + json_data["log_info"].strip(" ").strip("\n")
+            LogBuffer.log().write("\n" + LogBuffer.info().get().strip(" ").strip("\n"))
         except:
             signal.show_log_text(traceback.format_exc())
         if config.show_from_log == "on":  # 字段来源信息
             if json_data["fields_info"]:
-                json_data["logs"] += "\n" + json_data["fields_info"].strip(" ").strip("\n")
-        json_data["logs"] += "\n 🍀 Data done!(%ss)" % (get_used_time(start_time))
+                LogBuffer.log().write("\n" + json_data["fields_info"].strip(" ").strip("\n"))
+        LogBuffer.log().write(f"\n 🍀 Data done!({get_used_time(start_time)}s)")
         return True
 
 
-def deal_url(url):
+def deal_url(url: str) -> tuple[Optional[str], str]:
     if "://" not in url:
         url = "https://" + url
     url = url.strip()
@@ -184,10 +192,10 @@ def deal_url(url):
             if web_url in url:
                 return web_name, url
 
-    return False, url
+    return None, url
 
 
-def replace_special_word(json_data):
+def replace_special_word(json_data: JsonData):
     # 常见字段替换的字符
     all_key_word = [
         "title",
@@ -205,7 +213,7 @@ def replace_special_word(json_data):
             json_data[each] = json_data[each].replace(key, value)
 
 
-def convert_half(string):
+def convert_half(string: str) -> str:
     # 替换敏感词
     for key, value in config.special_word.items():
         string = string.replace(key, value)
@@ -216,7 +224,7 @@ def convert_half(string):
     return re.sub(r"[\W_]", "", string).upper()
 
 
-def get_new_release(release):
+def get_new_release(release: str) -> str:
     release_rule = config.release_rule
     if not release:
         release = "0000-00-00"
@@ -226,7 +234,7 @@ def get_new_release(release):
     return release_rule.replace("YYYY", year).replace("YY", year[-2:]).replace("MM", month).replace("DD", day)
 
 
-def nfd2c(path):
+def nfd2c(path: str) -> str:
     # 转换 NFC(mac nfc和nfd都能访问到文件，但是显示的是nfd，这里统一使用nfc，避免各种问题。
     # 日文浊音转换（mac的坑，osx10.12以下使用nfd，以上兼容nfc和nfd，只是显示成了nfd）
     if config.is_nfc:
@@ -236,7 +244,7 @@ def nfd2c(path):
     return new_path
 
 
-def deal_some_field(json_data):
+def deal_some_field(json_data: JsonData) -> JsonData:
     fields_rule = config.fields_rule
     actor = json_data["actor"]
     title = json_data["title"]
@@ -271,7 +279,7 @@ def deal_some_field(json_data):
                 new_all_actor_name_list.extend(actor_keyword_list)
             for each_actor in set(new_all_actor_name_list):
                 try:
-                    end_actor = re.compile(r" %s$" % each_actor)
+                    end_actor = re.compile(rf" {each_actor}$")
                     title = re.sub(end_actor, "", title)
                     originaltitle = re.sub(end_actor, "", originaltitle)
                 except:
@@ -303,7 +311,7 @@ def deal_some_field(json_data):
     return json_data
 
 
-def get_movie_path_setting(file_path=""):
+def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str, str]:
     # 先把'\'转成'/'以便判断是路径还是目录
     movie_path = config.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
     if movie_path == "":  # 未设置为空时，使用主程序目录

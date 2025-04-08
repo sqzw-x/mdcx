@@ -14,11 +14,12 @@ from models.base.utils import convert_path, get_used_time
 from models.config.config import config
 from models.config.resources import resources
 from models.core.file import movie_lists
+from models.core.json_data import JsonData, LogBuffer
 from models.core.utils import get_movie_path_setting
 from models.signals import signal
 
 
-def extrafanart_copy2(json_data, folder_new_path):
+def extrafanart_copy2(json_data: JsonData, folder_new_path: str):
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -34,7 +35,7 @@ def extrafanart_copy2(json_data, folder_new_path):
 
     # 如果保留，并且存在，返回
     if "extrafanart_copy" in keep_files and os.path.exists(extrafanart_copy_path):
-        json_data["logs"] += "\n 🍀 Extrafanart_copy done! (old)(%ss) " % get_used_time(start_time)
+        LogBuffer.log().write(f"\n 🍀 Extrafanart_copy done! (old)({get_used_time(start_time)}s) ")
         return
 
     # 如果不下载，返回
@@ -54,10 +55,10 @@ def extrafanart_copy2(json_data, folder_new_path):
         file_path = os.path.join(extrafanart_copy_path, each)
         file_new_path = os.path.join(extrafanart_copy_path, file_new_name)
         move_file(file_path, file_new_path)
-    json_data["logs"] += "\n 🍀 ExtraFanart_copy done! (copy extrafanart)(%ss)" % (get_used_time(start_time))
+    LogBuffer.log().write(f"\n 🍀 ExtraFanart_copy done! (copy extrafanart)({get_used_time(start_time)}s)")
 
 
-def extrafanart_extras_copy(json_data, folder_new_path):
+def extrafanart_extras_copy(json_data: JsonData, folder_new_path: str):
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -70,7 +71,7 @@ def extrafanart_extras_copy(json_data, folder_new_path):
         return True
 
     if "extrafanart_extras" in keep_files and os.path.exists(extrafanart_extra_path):
-        json_data["logs"] += "\n 🍀 Extrafanart_extras done! (old)(%ss)" % get_used_time(start_time)
+        LogBuffer.log().write(f"\n 🍀 Extrafanart_extras done! (old)({get_used_time(start_time)}s)")
         return True
 
     if "extrafanart_extras" not in download_files:
@@ -88,11 +89,17 @@ def extrafanart_extras_copy(json_data, folder_new_path):
         file_path = os.path.join(extrafanart_extra_path, each)
         file_new_path = os.path.join(extrafanart_extra_path, file_new_name)
         move_file(file_path, file_new_path)
-    json_data["logs"] += "\n 🍀 Extrafanart_extras done! (copy extrafanart)(%ss)" % get_used_time(start_time)
+    LogBuffer.log().write(f"\n 🍀 Extrafanart_extras done! (copy extrafanart)({get_used_time(start_time)}s)")
     return True
 
 
-def _add_to_pic(pic_path, img_pic, mark_size, count, mark_name):
+def _add_to_pic(
+    pic_path: str,
+    img_pic: Image.Image,
+    mark_size: int,
+    count: int,
+    mark_name: str,
+):
     # 获取水印图片，生成水印
     mark_fixed = config.mark_fixed
     mark_pos_corner = config.mark_pos_corner
@@ -176,7 +183,7 @@ def _add_to_pic(pic_path, img_pic, mark_size, count, mark_name):
             move_file(temp_pic_path, pic_path)
 
 
-def add_mark_thread(pic_path, mark_list):
+def add_mark_thread(pic_path: str, mark_list: list[str]):
     mark_size = config.mark_size
     mark_fixed = config.mark_fixed
     mark_pos = config.mark_pos
@@ -204,7 +211,7 @@ def add_mark_thread(pic_path, mark_list):
             "bottom_right": 2,
             "bottom_left": 3,
         }
-        mark_pos_count = pos.get(mark_pos)  # 获取自定义位置, 取余配合pos达到顺时针添加的效果
+        mark_pos_count = pos.get(mark_pos, 0)  # 获取自定义位置, 取余配合pos达到顺时针添加的效果
         count_hd = ""
         for mark_name in mark_list:
             if mark_name == "4K" or mark_name == "8K":  # 4K/8K使用固定位置
@@ -227,7 +234,12 @@ def add_mark_thread(pic_path, mark_list):
     img_pic.close()
 
 
-def add_mark(json_data, poster_marked=False, thumb_marked=False, fanart_marked=False):
+def add_mark(
+    json_data: JsonData,
+    poster_marked=False,
+    thumb_marked=False,
+    fanart_marked=False,
+):
     download_files = config.download_files
     mark_type = config.mark_type.lower()
     has_sub = json_data["has_sub"]
@@ -268,24 +280,24 @@ def add_mark(json_data, poster_marked=False, thumb_marked=False, fanart_marked=F
 
         if config.thumb_mark == 1 and "thumb" in download_files and thumb_path and not thumb_marked:
             add_mark_thread(thumb_path, mark_list)
-            json_data["logs"] += "\n 🍀 Thumb add watermark: %s!" % mark_show_type
+            LogBuffer.log().write(f"\n 🍀 Thumb add watermark: {mark_show_type}!")
         if config.poster_mark == 1 and "poster" in download_files and poster_path and not poster_marked:
             add_mark_thread(poster_path, mark_list)
-            json_data["logs"] += "\n 🍀 Poster add watermark: %s!" % mark_show_type
+            LogBuffer.log().write(f"\n 🍀 Poster add watermark: {mark_show_type}!")
         if config.fanart_mark == 1 and ",fanart" in download_files and fanart_path and not fanart_marked:
             add_mark_thread(fanart_path, mark_list)
-            json_data["logs"] += "\n 🍀 Fanart add watermark: %s!" % mark_show_type
+            LogBuffer.log().write(f"\n 🍀 Fanart add watermark: {mark_show_type}!")
 
 
-def add_del_extrafanart_copy(mode):
-    signal.show_log_text("Start %s extrafanart copy! \n" % mode)
+def add_del_extrafanart_copy(mode: str):
+    signal.show_log_text(f"Start {mode} extrafanart copy! \n")
 
     movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = (
         get_movie_path_setting()
     )
-    signal.show_log_text(" 🖥 Movie path: %s \n 🔎 Checking all videos, Please wait..." % movie_path)
+    signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 Checking all videos, Please wait...")
     movie_type = config.media_type
-    movie_list = movie_lists("", movie_type, movie_path)  # 获取所有需要刮削的影片列表
+    movie_list = movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
 
     extrafanart_folder_path_list = []
     for movie in movie_list:

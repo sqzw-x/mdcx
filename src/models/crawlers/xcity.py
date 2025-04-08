@@ -8,6 +8,7 @@ from lxml import etree
 
 from models.base.web import get_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -160,10 +161,14 @@ def getSeries(html):
     return result
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    language="jp",
+):
     start_time = time.time()
     website_name = "xcity"
-    req_web += "-> %s" % website_name
+    LogBuffer.req().write(f"-> {website_name}")
 
     headers_o = config.headers
     real_url = appoint_url
@@ -173,50 +178,50 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
     image_cut = "right"
     dic = {}
     web_info = "\n       "
-    log_info += " \n    🌐 xcity"
+    LogBuffer.info().write(" \n    🌐 xcity")
     debug_info = ""
 
     try:
         if not real_url:
             url_search = "https://xcity.jp/result_published/?q=" + number.replace("-", "")
-            debug_info = "搜索地址: %s " % url_search
-            log_info += web_info + debug_info
+            debug_info = f"搜索地址: {url_search} "
+            LogBuffer.info().write(web_info + debug_info)
 
             result, html_search = get_html(url_search)
             if not result:
-                debug_info = "网络请求错误: %s " % html_search
-                log_info += web_info + debug_info
+                debug_info = f"网络请求错误: {html_search} "
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             if "該当する作品はみつかりませんでした" in html_search:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
             real_url = html.xpath("//table[@class='resultList']/tr/td/a/@href")
             if not real_url:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             else:
                 real_url = "https://xcity.jp" + real_url[0]
 
         if real_url:
-            debug_info = "番号地址: %s " % real_url
-            log_info += web_info + debug_info
+            debug_info = f"番号地址: {real_url} "
+            LogBuffer.info().write(web_info + debug_info)
             result, html_content = get_html(real_url)
             if not result:
-                debug_info = "网络请求错误: %s " % html_search
-                log_info += web_info + debug_info
+                debug_info = f"网络请求错误: {html_search} "
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())
 
             title = getTitle(html_info)  # 获取标题
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             web_number = getWebNumber(html_info, number)  # 获取番号，用来替换标题里的番号
-            title = title.replace(" %s" % web_number, "").strip()
+            title = title.replace(f" {web_number}", "").strip()
             actor = getActor(html_info)  # 获取actor
             actor_photo = getActorPhoto(actor)
             cover_url = getCover(html_info)  # 获取cover
@@ -258,45 +263,28 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
                     "trailer": "",
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "log_info": log_info,
-                    "error_info": "",
-                    "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
                     "mosaic": "有码",
                     "wanted": "",
                 }
 
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                debug_info = f"数据生成出错: {str(e)}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
     except Exception as e:
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(",", ": "))  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

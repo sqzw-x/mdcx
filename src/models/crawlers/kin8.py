@@ -7,6 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_html
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 # import traceback
@@ -86,18 +87,22 @@ def get_extrafanart(html):
     return new_result
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
-    try:  # 捕获主动抛出的异常
-        start_time = time.time()
-        website_name = "kin8"
-        req_web += "-> %s" % website_name
-        real_url = appoint_url
-        cover_url = ""
-        image_cut = ""
-        image_download = False
-        web_info = "\n       "
-        log_info += " \n    🌐 kin8"
-        debug_info = ""
+def main(
+    number,
+    appoint_url="",
+    language="jp",
+):
+    start_time = time.time()
+    website_name = "kin8"
+    LogBuffer.req().write(f"-> {website_name}")
+    real_url = appoint_url
+    cover_url = ""
+    image_cut = ""
+    image_download = False
+    web_info = "\n       "
+    LogBuffer.info().write(" \n    🌐 kin8")
+    debug_info = ""
+    try:
         if real_url:
             key = re.findall(r"\d{3,}", real_url)
             key = key[0] if key else ""
@@ -109,24 +114,24 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
             assert isinstance(key, str)
             if not key:
                 debug_info = f"番号中未识别到 KIN8 番号: {number} "
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             number = f"KIN8-{key}"
             real_url = f"https://www.kin8tengoku.com/moviepages/{key}/index.html"
 
         debug_info = f"番号地址: {real_url} "
-        log_info += web_info + debug_info
+        LogBuffer.info().write(web_info + debug_info)
         result, html_content = get_html(real_url, encoding="euc-jp")
         if not result:
             debug_info = f"网络请求错误: {html_content} "
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
         html_info = etree.fromstring(html_content, etree.HTMLParser())
         title = get_title(html_info)
         if not title:
             debug_info = "数据获取失败: 未获取到title！"
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         outline = get_outline(html_info)
         actor = get_actor(html_info)
@@ -169,42 +174,24 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "log_info": log_info,
-                "error_info": "",
-                "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
                 "mosaic": mosaic,
                 "website": real_url,
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
-            log_info += web_info + debug_info
-            dic["log_info"] = log_info
+            LogBuffer.info().write(web_info + debug_info)
+
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
-            log_info += web_info + debug_info
+            debug_info = f"数据生成出错: {str(e)}"
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
     except Exception as e:
         # print(traceback.format_exc())
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -214,6 +201,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
         indent=4,
         separators=(",", ": "),
     )
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

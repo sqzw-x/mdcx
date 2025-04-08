@@ -8,21 +8,23 @@ import shutil
 import time
 import traceback
 import urllib
+from concurrent.futures import ThreadPoolExecutor
+from typing import Optional, cast
 
 from lxml import etree
 
 from models.base.file import copy_file, delete_file, move_file, split_path
 from models.base.image import check_pic, cut_thumb_to_poster
-from models.base.pool import Pool
 from models.base.utils import get_used_time
 from models.base.web import check_url, get_amazon_data, get_big_pic_by_google, get_html, get_imgsize, multi_download
 from models.config.config import config
 from models.core.flags import Flags
+from models.core.json_data import ImageContext, JsonData, LogBuffer
 from models.core.utils import convert_half
 from models.signals import signal
 
 
-def get_actorname(number):
+def get_actorname(number: str) -> tuple[bool, str]:
     # 获取真实演员名字
     url = f"https://av-wiki.net/?s={number}"
     result, res = get_html(url)
@@ -39,8 +41,8 @@ def get_actorname(number):
     return False, "No Result!"
 
 
-def get_yesjav_title(json_data, movie_number):
-    yesjav_url = "http://www.yesjav.info/search.asp?q=%s&" % movie_number
+def get_yesjav_title(movie_number: str) -> str:
+    yesjav_url = f"http://www.yesjav.info/search.asp?q={movie_number}&"
     movie_title = ""
     result, response = get_html(yesjav_url)
     if result and response:
@@ -58,7 +60,7 @@ def get_yesjav_title(json_data, movie_number):
     return movie_title
 
 
-def google_translate(title, outline):
+def google_translate(title: str, outline: str) -> tuple[str, str, Optional[str]]:
     e1 = None
     e2 = None
     if title:
@@ -68,7 +70,7 @@ def google_translate(title, outline):
     return title, outline, e1 or e2
 
 
-def _google_translate(msg: str) -> (str, str):
+def _google_translate(msg: str) -> tuple[str, str]:
     try:
         msg_unquote = urllib.parse.unquote(msg)
         url = f"https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}"
@@ -80,7 +82,11 @@ def _google_translate(msg: str) -> (str, str):
         return msg, str(e)
 
 
-def download_file_with_filepath(json_data, url, file_path, folder_new_path):
+def download_file_with_filepath(
+    url: str,
+    file_path: str,
+    folder_new_path: str,
+) -> bool:
     if not url:
         return False
 
@@ -91,21 +97,25 @@ def download_file_with_filepath(json_data, url, file_path, folder_new_path):
             return True
     except:
         pass
-    json_data["logs"] += f"\n 🥺 Download failed! {url}"
+    LogBuffer.log().write(f"\n 🥺 Download failed! {url}")
     return False
 
 
-def _mutil_extrafanart_download_thread(task):
+def _mutil_extrafanart_download_thread(task: tuple[JsonData, str, str, str, str]) -> bool:
     json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path, extrafanart_name = task
-    if download_file_with_filepath(json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path):
+    if download_file_with_filepath(extrafanart_url, extrafanart_file_path, extrafanart_folder_path):
         if check_pic(extrafanart_file_path):
             return True
     else:
-        json_data["logs"] += f"\n 💡 {extrafanart_name} download failed! ( {extrafanart_url} )"
-        return False
+        LogBuffer.log().write(f"\n 💡 {extrafanart_name} download failed! ( {extrafanart_url} )")
+    return False
 
 
-def get_big_pic_by_amazon(json_data, originaltitle_amazon, actor_amazon):
+def get_big_pic_by_amazon(
+    json_data: JsonData,
+    originaltitle_amazon: str,
+    actor_amazon: str,
+) -> str:
     if not originaltitle_amazon or not actor_amazon:
         return ""
     hd_pic_url = ""
@@ -278,7 +288,12 @@ def get_big_pic_by_amazon(json_data, originaltitle_amazon, actor_amazon):
     return hd_pic_url
 
 
-def trailer_download(json_data, folder_new_path, folder_old_path, naming_rule):
+def trailer_download(
+    json_data: JsonData,
+    folder_new_path: str,
+    folder_old_path: str,
+    naming_rule: str,
+) -> Optional[bool]:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -332,7 +347,7 @@ def trailer_download(json_data, folder_new_path, folder_old_path, naming_rule):
                     shutil.rmtree(trailer_old_folder_path, ignore_errors=True)
                 if trailer_new_folder_path != trailer_old_folder_path and os.path.exists(trailer_new_folder_path):
                     shutil.rmtree(trailer_new_folder_path, ignore_errors=True)
-        json_data["logs"] += "\n 🍀 Trailer done! (old)(%ss) " % get_used_time(start_time)
+        LogBuffer.log().write(f"\n 🍀 Trailer done! (old)({get_used_time(start_time)}s) ")
         return True
 
     # 带文件名时，选择下载不保留，或者选择保留但没有预告片，检查是否有其他分集已下载或本地预告片
@@ -342,7 +357,7 @@ def trailer_download(json_data, folder_new_path, folder_old_path, naming_rule):
         if os.path.exists(trailer_file_path):
             delete_file(trailer_file_path)
         copy_file(done_trailer_path, trailer_file_path)
-        json_data["logs"] += "\n 🍀 Trailer done! (copy trailer)(%ss)" % get_used_time(start_time)
+        LogBuffer.log().write(f"\n 🍀 Trailer done! (copy trailer)({get_used_time(start_time)}s)")
         return
 
     # 不下载时返回（选择不下载保留，但本地并不存在，此时返回）
@@ -362,11 +377,11 @@ def trailer_download(json_data, folder_new_path, folder_old_path, naming_rule):
         trailer_file_path_temp = trailer_file_path
         if os.path.exists(trailer_file_path):
             trailer_file_path_temp = trailer_file_path + ".[DOWNLOAD].mp4"
-        if download_file_with_filepath(json_data, trailer_url, trailer_file_path_temp, trailer_folder_path):
+        if download_file_with_filepath(trailer_url, trailer_file_path_temp, trailer_folder_path):
             file_size = os.path.getsize(trailer_file_path_temp)
             if file_size >= content_length or "ignore_size" in download_files:
-                json_data["logs"] += "\n 🍀 Trailer done! ({} {}/{})({}s) ".format(
-                    json_data["trailer_from"], file_size, content_length, get_used_time(start_time)
+                LogBuffer.log().write(
+                    f"\n 🍀 Trailer done! ({json_data['trailer_from']} {file_size}/{content_length})({get_used_time(start_time)}s) "
                 )
                 signal.show_traceback_log(f"✅ {json_data['number']} trailer done!")
                 if trailer_file_path_temp != trailer_file_path:
@@ -384,12 +399,13 @@ def trailer_download(json_data, folder_new_path, folder_old_path, naming_rule):
                             shutil.rmtree(trailer_new_folder_path, ignore_errors=True)
                 return True
             else:
-                json_data["logs"] += "\n 🟠 Trailer size is incorrect! delete it! ({} {}/{}) ".format(
-                    json_data["trailer_from"], file_size, content_length
+                LogBuffer.log().write(
+                    f"\n 🟠 Trailer size is incorrect! delete it! ({json_data['trailer_from']} {file_size}/{content_length}) "
                 )
+
         # 删除下载失败的文件
         delete_file(trailer_file_path_temp)
-        json_data["logs"] += "\n 🟠 Trailer download failed! (%s) " % trailer_url
+        LogBuffer.log().write(f"\n 🟠 Trailer download failed! ({trailer_url}) ")
 
     if os.path.exists(trailer_file_path):  # 使用旧文件
         done_trailer_path = Flags.file_done_dic.get(json_data["number"]).get("trailer")
@@ -400,12 +416,12 @@ def trailer_download(json_data, folder_new_path, folder_old_path, naming_rule):
                     shutil.rmtree(trailer_old_folder_path, ignore_errors=True)
                 if trailer_new_folder_path != trailer_old_folder_path and os.path.exists(trailer_new_folder_path):
                     shutil.rmtree(trailer_new_folder_path, ignore_errors=True)
-        json_data["logs"] += "\n 🟠 Trailer download failed! 将继续使用之前的本地文件！"
-        json_data["logs"] += "\n 🍀 Trailer done! (old)(%ss)" % get_used_time(start_time)
+        LogBuffer.log().write("\n 🟠 Trailer download failed! 将继续使用之前的本地文件！")
+        LogBuffer.log().write(f"\n 🍀 Trailer done! (old)({get_used_time(start_time)}s)")
         return True
 
 
-def _get_big_thumb(json_data):
+def _get_big_thumb(json_data: ImageContext) -> ImageContext:
     """
     获取背景大图：
     1，官网图片
@@ -424,9 +440,7 @@ def _get_big_thumb(json_data):
     # faleno.jp 番号检查，都是大图，返回即可
     if json_data["cover_from"] in ["faleno", "dahlia"]:
         if json_data["cover"]:
-            json_data["logs"] += "\n 🖼 HD Thumb found! ({})({}s)".format(
-                json_data["cover_from"], get_used_time(start_time)
-            )
+            LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({json_data['cover_from']})({get_used_time(start_time)}s)")
         json_data["poster_big"] = True
         return json_data
 
@@ -439,7 +453,7 @@ def _get_big_thumb(json_data):
     elif "official" in config.download_hd_pics:
         # faleno.jp 番号检查
         if re.findall(r"F[A-Z]{2}SS", number):
-            req_url = "https://faleno.jp/top/works/%s/" % number_lower_no_line
+            req_url = f"https://faleno.jp/top/works/{number_lower_no_line}/"
             result, response = get_html(req_url)
             if result:
                 temp_url = re.findall(
@@ -455,7 +469,7 @@ def _get_big_thumb(json_data):
                     if trailer_temp:
                         json_data["trailer"] = trailer_temp[0]
                         json_data["trailer_from"] = "faleno"
-                    json_data["logs"] += "\n 🖼 HD Thumb found! (faleno)(%ss)" % get_used_time(start_time)
+                    LogBuffer.log().write(f"\n 🖼 HD Thumb found! (faleno)({get_used_time(start_time)}s)")
                     return json_data
 
         # km-produce.com 番号检查
@@ -468,7 +482,7 @@ def _get_big_thumb(json_data):
             if real_url:
                 json_data["cover"] = real_url
                 json_data["cover_from"] = "km-produce"
-                json_data["logs"] += "\n 🖼 HD Thumb found! (km-produce)(%ss)" % (get_used_time(start_time))
+                LogBuffer.log().write(f"\n 🖼 HD Thumb found! (km-produce)({get_used_time(start_time)}s)")
                 return json_data
 
         # www.prestige-av.com 番号检查
@@ -486,7 +500,7 @@ def _get_big_thumb(json_data):
                     json_data["cover_from"] = "prestige"
                     json_data["poster_from"] = "prestige"
                     json_data["poster_big"] = True
-                    json_data["logs"] += "\n 🖼 HD Thumb found! (prestige)(%ss)" % (get_used_time(start_time))
+                    LogBuffer.log().write(f"\n 🖼 HD Thumb found! (prestige)({get_used_time(start_time)}s)")
                     return json_data
 
     # 使用google以图搜图
@@ -499,14 +513,12 @@ def _get_big_thumb(json_data):
                 pic_domain = re.findall(r"://([^/]+)", thumb_url)[0]
                 json_data["cover_from"] = f"Google({pic_domain})"
                 json_data["cover"] = thumb_url
-                json_data["logs"] += "\n 🖼 HD Thumb found! ({})({}s)".format(
-                    json_data["cover_from"], get_used_time(start_time)
-                )
+                LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({json_data['cover_from']})({get_used_time(start_time)}s)")
 
     return json_data
 
 
-def _get_big_poster(json_data):
+def _get_big_poster(json_data: JsonData) -> JsonData:
     start_time = time.time()
 
     # 未勾选下载高清图poster时，返回
@@ -516,7 +528,7 @@ def _get_big_poster(json_data):
     # 如果有大图时，直接下载
     if json_data.get("poster_big") and get_imgsize(json_data["poster"])[1] > 600:
         json_data["image_download"] = True
-        json_data["logs"] += f"\n 🖼 HD Poster found! ({json_data['poster_from']})({get_used_time(start_time)}s)"
+        LogBuffer.log().write(f"\n 🖼 HD Poster found! ({json_data['poster_from']})({get_used_time(start_time)}s)")
         return json_data
 
     # 初始化数据
@@ -588,14 +600,12 @@ def _get_big_poster(json_data):
     # 如果找到了高清链接，则替换
     if hd_pic_url:
         json_data["image_download"] = True
-        json_data["logs"] += "\n 🖼 HD Poster found! ({})({}s)".format(
-            json_data["poster_from"], get_used_time(start_time)
-        )
+        LogBuffer.log().write(f"\n 🖼 HD Poster found! ({json_data['poster_from']})({get_used_time(start_time)}s)")
 
     return json_data
 
 
-def thumb_download(json_data, folder_new_path, thumb_final_path):
+def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_final_path: str) -> bool:
     start_time = time.time()
     poster_path = json_data["poster_path"]
     thumb_path = json_data["thumb_path"]
@@ -603,7 +613,7 @@ def thumb_download(json_data, folder_new_path, thumb_final_path):
 
     # 本地存在 thumb.jpg，且勾选保留旧文件时，不下载
     if thumb_path and "thumb" in config.keep_files:
-        json_data["logs"] += "\n 🍀 Thumb done! (old)(%ss) " % get_used_time(start_time)
+        LogBuffer.log().write(f"\n 🍀 Thumb done! (old)({get_used_time(start_time)}s) ")
         return True
 
     # 如果thumb不下载，看fanart、poster要不要下载，都不下载则返回
@@ -624,7 +634,7 @@ def thumb_download(json_data, folder_new_path, thumb_final_path):
             and split_path(done_thumb_path)[0] == split_path(thumb_final_path)[0]
         ):
             copy_file(done_thumb_path, thumb_final_path)
-            json_data["logs"] += "\n 🍀 Thumb done! (copy cd-thumb)(%ss) " % get_used_time(start_time)
+            LogBuffer.log().write(f"\n 🍀 Thumb done! (copy cd-thumb)({get_used_time(start_time)}s) ")
             json_data["cover_from"] = "copy cd-thumb"
             json_data["thumb_path"] = thumb_final_path
             return True
@@ -637,9 +647,9 @@ def thumb_download(json_data, folder_new_path, thumb_final_path):
     cover_from = json_data.get("cover_from")
     if cover_url:
         cover_list = json_data["cover_list"]
-        while [cover_from, cover_url] in cover_list:
-            cover_list.remove([cover_from, cover_url])
-        cover_list.insert(0, [cover_from, cover_url])
+        while (cover_from, cover_url) in cover_list:
+            cover_list.remove((cover_from, cover_url))
+        cover_list.insert(0, (cover_from, cover_url))
 
         thumb_final_path_temp = thumb_final_path
         if os.path.exists(thumb_final_path):
@@ -650,12 +660,12 @@ def thumb_download(json_data, folder_new_path, thumb_final_path):
             cover_from, cover_url = each
             cover_url = check_url(cover_url)
             if not cover_url:
-                json_data["logs"] += (
+                LogBuffer.log().write(
                     f"\n 🟠 检测到 Thumb 图片失效! 跳过！({cover_from})({get_used_time(start_time)}s) " + each[1]
                 )
                 continue
             json_data["cover_from"] = cover_from
-            if download_file_with_filepath(json_data, cover_url, thumb_final_path_temp, folder_new_path):
+            if download_file_with_filepath(cover_url, thumb_final_path_temp, folder_new_path):
                 cover_size = check_pic(thumb_final_path_temp)
                 if cover_size:
                     if (
@@ -677,42 +687,42 @@ def thumb_download(json_data, folder_new_path, thumb_final_path):
                             dic = {"thumb": thumb_final_path}
                             Flags.file_done_dic[json_data["number"]].update(dic)
                         json_data["thumb_marked"] = False  # 表示还没有走加水印流程
-                        json_data["logs"] += "\n 🍀 Thumb done! ({})({}s) ".format(
-                            json_data["cover_from"], get_used_time(start_time)
+                        LogBuffer.log().write(
+                            f"\n 🍀 Thumb done! ({json_data['cover_from']})({get_used_time(start_time)}s) "
                         )
                         json_data["thumb_path"] = thumb_final_path
                         return True
                     else:
                         delete_file(thumb_final_path_temp)
-                        json_data["logs"] += (
+                        LogBuffer.log().write(
                             f"\n 🟠 检测到 Thumb 分辨率不对{str(cover_size)}! 已删除 ({cover_from})({get_used_time(start_time)}s)"
                         )
                         continue
-                json_data["logs"] += f"\n 🟠 Thumb download failed! {cover_from}: {cover_url} "
+                LogBuffer.log().write(f"\n 🟠 Thumb download failed! {cover_from}: {cover_url} ")
     else:
-        json_data["logs"] += "\n 🟠 Thumb url is empty! "
+        LogBuffer.log().write("\n 🟠 Thumb url is empty! ")
 
     # 下载失败，本地有图
     if thumb_path:
-        json_data["logs"] += "\n 🟠 Thumb download failed! 将继续使用之前的图片！"
-        json_data["logs"] += "\n 🍀 Thumb done! (old)(%ss) " % get_used_time(start_time)
+        LogBuffer.log().write("\n 🟠 Thumb download failed! 将继续使用之前的图片！")
+        LogBuffer.log().write(f"\n 🍀 Thumb done! (old)({get_used_time(start_time)}s) ")
         return True
     else:
         if "ignore_pic_fail" in config.download_files:
-            json_data["logs"] += "\n 🟠 Thumb download failed! (你已勾选「图片下载失败时，不视为失败！」) "
-            json_data["logs"] += "\n 🍀 Thumb done! (none)(%ss)" % get_used_time(start_time)
+            LogBuffer.log().write("\n 🟠 Thumb download failed! (你已勾选「图片下载失败时，不视为失败！」) ")
+            LogBuffer.log().write(f"\n 🍀 Thumb done! (none)({get_used_time(start_time)}s)")
             return True
         else:
-            json_data["logs"] += (
+            LogBuffer.log().write(
                 "\n 🔴 Thumb download failed! 你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」 "
             )
-            json_data["error_info"] = (
+            LogBuffer.error().write(
                 "Thumb download failed! 你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」"
             )
             return False
 
 
-def poster_download(json_data, folder_new_path, poster_final_path):
+def poster_download(json_data: JsonData, folder_new_path: str, poster_final_path: str) -> bool:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -729,7 +739,7 @@ def poster_download(json_data, folder_new_path, poster_final_path):
 
     # 本地有poster时，且勾选保留旧文件时，不下载
     if poster_path and "poster" in keep_files:
-        json_data["logs"] += "\n 🍀 Poster done! (old)(%ss)" % get_used_time(start_time)
+        LogBuffer.log().write(f"\n 🍀 Poster done! (old)({get_used_time(start_time)}s)")
         return True
 
     # 不下载时返回
@@ -747,7 +757,7 @@ def poster_download(json_data, folder_new_path, poster_final_path):
             copy_file(done_poster_path, poster_final_path)
             json_data["poster_from"] = "copy cd-poster"
             json_data["poster_path"] = poster_final_path
-            json_data["logs"] += "\n 🍀 Poster done! (copy cd-poster)(%ss)" % get_used_time(start_time)
+            LogBuffer.log().write(f"\n 🍀 Poster done! (copy cd-poster)({get_used_time(start_time)}s)")
             return True
 
     # 勾选复制 thumb时：国产，复制thumb；无码，勾选不裁剪时，也复制thumb
@@ -775,7 +785,7 @@ def poster_download(json_data, folder_new_path, poster_final_path):
             json_data["poster_marked"] = json_data["thumb_marked"]
             json_data["poster_from"] = "copy thumb"
             json_data["poster_path"] = poster_final_path
-            json_data["logs"] += "\n 🍀 Poster done! (copy thumb)(%ss)" % get_used_time(start_time)
+            LogBuffer.log().write(f"\n 🍀 Poster done! (copy thumb)({get_used_time(start_time)}s)")
             return True
 
     # 获取高清 poster
@@ -789,7 +799,7 @@ def poster_download(json_data, folder_new_path, poster_final_path):
         poster_final_path_temp = poster_final_path + ".[DOWNLOAD].jpg"
     if json_data["image_download"]:
         start_time = time.time()
-        if download_file_with_filepath(json_data, poster_url, poster_final_path_temp, folder_new_path):
+        if download_file_with_filepath(poster_url, poster_final_path_temp, folder_new_path):
             poster_size = check_pic(poster_final_path_temp)
             if poster_size:
                 if (
@@ -805,24 +815,24 @@ def poster_download(json_data, folder_new_path, poster_final_path):
                         Flags.file_done_dic[json_data["number"]].update(dic)
                     json_data["poster_marked"] = False  # 下载的图，还没加水印
                     json_data["poster_path"] = poster_final_path
-                    json_data["logs"] += f"\n 🍀 Poster done! ({poster_from})({get_used_time(start_time)}s)"
+                    LogBuffer.log().write(f"\n 🍀 Poster done! ({poster_from})({get_used_time(start_time)}s)")
                     return True
                 else:
                     delete_file(poster_final_path_temp)
-                    json_data["logs"] += f"\n 🟠 检测到 Poster 分辨率不对{str(poster_size)}! 已删除 ({poster_from})"
+                    LogBuffer.log().write(f"\n 🟠 检测到 Poster 分辨率不对{str(poster_size)}! 已删除 ({poster_from})")
 
     # 判断之前有没有 poster 和 thumb
     if not poster_path and not thumb_path:
         json_data["poster_path"] = ""
         if "ignore_pic_fail" in download_files:
-            json_data["logs"] += "\n 🟠 Poster download failed! (你已勾选「图片下载失败时，不视为失败！」) "
-            json_data["logs"] += "\n 🍀 Poster done! (none)(%ss)" % get_used_time(start_time)
+            LogBuffer.log().write("\n 🟠 Poster download failed! (你已勾选「图片下载失败时，不视为失败！」) ")
+            LogBuffer.log().write(f"\n 🍀 Poster done! (none)({get_used_time(start_time)}s)")
             return True
         else:
-            json_data["logs"] += (
+            LogBuffer.log().write(
                 "\n 🔴 Poster download failed! 你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」 "
             )
-            json_data["error_info"] = (
+            LogBuffer.error().write(
                 "Poster download failed! 你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」"
             )
             return False
@@ -843,23 +853,23 @@ def poster_download(json_data, folder_new_path, poster_final_path):
 
     # 裁剪失败，本地有图
     if poster_path:
-        json_data["logs"] += "\n 🟠 Poster cut failed! 将继续使用之前的图片！"
-        json_data["logs"] += "\n 🍀 Poster done! (old)(%ss) " % get_used_time(start_time)
+        LogBuffer.log().write("\n 🟠 Poster cut failed! 将继续使用之前的图片！")
+        LogBuffer.log().write(f"\n 🍀 Poster done! (old)({get_used_time(start_time)}s) ")
         return True
     else:
         if "ignore_pic_fail" in download_files:
-            json_data["logs"] += "\n 🟠 Poster cut failed! (你已勾选「图片下载失败时，不视为失败！」) "
-            json_data["logs"] += "\n 🍀 Poster done! (none)(%ss)" % get_used_time(start_time)
+            LogBuffer.log().write("\n 🟠 Poster cut failed! (你已勾选「图片下载失败时，不视为失败！」) ")
+            LogBuffer.log().write(f"\n 🍀 Poster done! (none)({get_used_time(start_time)}s)")
             return True
         else:
-            json_data["logs"] += (
+            LogBuffer.log().write(
                 "\n 🔴 Poster cut failed! 你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」 "
             )
-            json_data["error_info"] = "Poster failed！你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」"
+            LogBuffer.error().write("Poster failed！你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」")
             return False
 
 
-def fanart_download(json_data, fanart_final_path):
+def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
     """
     复制thumb为fanart
     """
@@ -877,7 +887,7 @@ def fanart_download(json_data, fanart_final_path):
 
     # 保留，并且本地存在 fanart.jpg，不下载返回
     if ",fanart" in keep_files and fanart_path:
-        json_data["logs"] += "\n 🍀 Fanart done! (old)(%ss)" % get_used_time(start_time)
+        LogBuffer.log().write(f"\n 🍀 Fanart done! (old)({get_used_time(start_time)}s)")
         return True
 
     # 不下载时，返回
@@ -895,9 +905,8 @@ def fanart_download(json_data, fanart_final_path):
             if fanart_path:
                 delete_file(fanart_path)
             copy_file(done_fanart_path, fanart_final_path)
-            json_data["fanart_from"] = "copy cd-fanart"
             json_data["fanart_path"] = fanart_final_path
-            json_data["logs"] += "\n 🍀 Fanart done! (copy cd-fanart)(%ss)" % get_used_time(start_time)
+            LogBuffer.log().write(f"\n 🍀 Fanart done! (copy cd-fanart)({get_used_time(start_time)}s)")
             return True
 
     # 复制thumb
@@ -905,10 +914,9 @@ def fanart_download(json_data, fanart_final_path):
         if fanart_path:
             delete_file(fanart_path)
         copy_file(thumb_path, fanart_final_path)
-        json_data["fanart_from"] = "copy thumb"
         json_data["fanart_path"] = fanart_final_path
         json_data["fanart_marked"] = json_data["thumb_marked"]
-        json_data["logs"] += "\n 🍀 Fanart done! (copy thumb)(%ss)" % get_used_time(start_time)
+        LogBuffer.log().write(f"\n 🍀 Fanart done! (copy thumb)({get_used_time(start_time)}s)")
         if json_data["cd_part"]:
             dic = {"fanart": fanart_final_path}
             Flags.file_done_dic[json_data["number"]].update(dic)
@@ -916,26 +924,26 @@ def fanart_download(json_data, fanart_final_path):
     else:
         # 本地有 fanart 时，不下载
         if fanart_path:
-            json_data["logs"] += "\n 🟠 Fanart copy failed! 未找到 thumb 图片，将继续使用之前的图片！"
-            json_data["logs"] += "\n 🍀 Fanart done! (old)(%ss)" % get_used_time(start_time)
+            LogBuffer.log().write("\n 🟠 Fanart copy failed! 未找到 thumb 图片，将继续使用之前的图片！")
+            LogBuffer.log().write(f"\n 🍀 Fanart done! (old)({get_used_time(start_time)}s)")
             return True
 
         else:
             if "ignore_pic_fail" in download_files:
-                json_data["logs"] += "\n 🟠 Fanart failed! (你已勾选「图片下载失败时，不视为失败！」) "
-                json_data["logs"] += "\n 🍀 Fanart done! (none)(%ss)" % get_used_time(start_time)
+                LogBuffer.log().write("\n 🟠 Fanart failed! (你已勾选「图片下载失败时，不视为失败！」) ")
+                LogBuffer.log().write(f"\n 🍀 Fanart done! (none)({get_used_time(start_time)}s)")
                 return True
             else:
-                json_data["logs"] += (
+                LogBuffer.log().write(
                     "\n 🔴 Fanart failed! 你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」 "
                 )
-                json_data["error_info"] = (
+                LogBuffer.error().write(
                     "Fanart 下载失败！你可以到「设置」-「下载」，勾选「图片下载失败时，不视为失败！」"
                 )
                 return False
 
 
-def extrafanart_download(json_data, folder_new_path):
+def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Optional[bool]:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -950,7 +958,7 @@ def extrafanart_download(json_data, folder_new_path):
 
     # 本地存在 extrafanart_folder，且勾选保留旧文件时，不下载
     if "extrafanart" in keep_files and os.path.exists(extrafanart_folder_path):
-        json_data["logs"] += "\n 🍀 Extrafanart done! (old)(%ss) " % get_used_time(start_time)
+        LogBuffer.log().write(f"\n 🍀 Extrafanart done! (old)({get_used_time(start_time)}s) ")
         return True
 
     # 如果 extrafanart 不下载
@@ -975,9 +983,10 @@ def extrafanart_download(json_data, folder_new_path):
             extrafanart_name = "fanart" + str(extrafanart_count) + ".jpg"
             extrafanart_file_path = os.path.join(extrafanart_folder_path_temp, extrafanart_name)
             task_list.append(
-                [json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path_temp, extrafanart_name]
+                (json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path_temp, extrafanart_name)
             )
-        extrafanart_pool = Pool(20)  # 剧照下载线程池
+            task_list = cast(list[tuple[JsonData, str, str, str, str]], task_list)
+        extrafanart_pool = ThreadPoolExecutor(20)  # 剧照下载线程池
         result = extrafanart_pool.map(_mutil_extrafanart_download_thread, task_list)
         for res in result:
             if res:
@@ -986,26 +995,26 @@ def extrafanart_download(json_data, folder_new_path):
             if extrafanart_folder_path_temp != extrafanart_folder_path:
                 shutil.rmtree(extrafanart_folder_path)
                 os.rename(extrafanart_folder_path_temp, extrafanart_folder_path)
-            json_data["logs"] += "\n 🍀 ExtraFanart done! ({} {}/{})({}s)".format(
-                json_data["extrafanart_from"], extrafanart_count_succ, extrafanart_count, get_used_time(start_time)
+            LogBuffer.log().write(
+                f"\n 🍀 ExtraFanart done! ({json_data['extrafanart_from']} {extrafanart_count_succ}/{extrafanart_count})({get_used_time(start_time)}s)"
             )
             return True
         else:
-            json_data["logs"] += "\n 🟠  ExtraFanart download failed! ({} {}/{})({}s)".format(
-                json_data["extrafanart_from"], extrafanart_count_succ, extrafanart_count, get_used_time(start_time)
+            LogBuffer.log().write(
+                f"\n 🟠 ExtraFanart download failed! ({json_data['extrafanart_from']} {extrafanart_count_succ}/{extrafanart_count})({get_used_time(start_time)}s)"
             )
             if extrafanart_folder_path_temp != extrafanart_folder_path:
                 shutil.rmtree(extrafanart_folder_path_temp)
             else:
-                json_data["logs"] += "\n 🍀 ExtraFanart done! (incomplete)(%ss)" % get_used_time(start_time)
+                LogBuffer.log().write(f"\n 🍀 ExtraFanart done! (incomplete)({get_used_time(start_time)}s)")
                 return False
-        json_data["logs"] += "\n 🟠 ExtraFanart download failed! 将继续使用之前的本地文件！"
+        LogBuffer.log().write("\n 🟠 ExtraFanart download failed! 将继续使用之前的本地文件！")
     if os.path.exists(extrafanart_folder_path):  # 使用旧文件
-        json_data["logs"] += "\n 🍀 ExtraFanart done! (old)(%ss)" % get_used_time(start_time)
+        LogBuffer.log().write(f"\n 🍀 ExtraFanart done! (old)({get_used_time(start_time)}s)")
         return True
 
 
-def show_netstatus():
+def show_netstatus() -> None:
     signal.show_net_info(time.strftime("%Y-%m-%d %H:%M:%S").center(80, "="))
     proxy_type = ""
     retry_count = 0
@@ -1018,30 +1027,16 @@ def show_netstatus():
         signal.show_net_info(traceback.format_exc())
     if proxy == "" or proxy_type == "" or proxy_type == "no":
         signal.show_net_info(
-            " 当前网络状态：❌ 未启用代理\n   类型： "
-            + str(proxy_type)
-            + "    地址："
-            + str(proxy)
-            + "    超时时间："
-            + str(timeout)
-            + "    重试次数："
-            + str(retry_count)
+            f" 当前网络状态：❌ 未启用代理\n   类型： {str(proxy_type)}    地址：{str(proxy)}    超时时间：{str(timeout)}    重试次数：{str(retry_count)}"
         )
     else:
         signal.show_net_info(
-            " 当前网络状态：✅ 已启用代理\n   类型： "
-            + proxy_type
-            + "    地址："
-            + proxy
-            + "    超时时间："
-            + str(timeout)
-            + "    重试次数："
-            + str(retry_count)
+            f" 当前网络状态：✅ 已启用代理\n   类型： {proxy_type}    地址：{proxy}    超时时间：{str(timeout)}    重试次数：{str(retry_count)}"
         )
     signal.show_net_info("=" * 80)
 
 
-def check_proxyChange():
+def check_proxyChange() -> None:
     new_proxy = (config.type, config.proxy, config.timeout, config.retry)
     if Flags.current_proxy:
         if new_proxy != Flags.current_proxy:

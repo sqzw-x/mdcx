@@ -8,6 +8,7 @@ from lxml import etree
 
 from models.base.web import get_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
 
 urllib3.disable_warnings()  # yapf: disable
@@ -69,7 +70,7 @@ def get_studio(series, tag, lable_list):
     return ""
 
 
-# def get_real_url(html, number, javday_url, file_path):
+# def get_real_url(html, number, javday_url, file_path,):
 #     real_url = ''
 #     a = re.search(r'(\d*[A-Z]{2,})\s*(\d{3,})', number)
 #     real_number = number
@@ -101,22 +102,22 @@ def get_cover(html, javday_url):
     return result if result else ""
 
 
-# def get_year(release):
-#     result = re.search(r'\d{4}', release)
-#     return result[0] if result else release
-
-
-# def get_release(cover_url):
-#     a = re.search(r'\/(\d{4})(\d{2})(\d{2})-', cover_url)
-#     return '%s-%s-%s' % (a[1], a[2], a[3]) if a else ''
-
-
 def get_tag(html):  # 获取演员
     result = html.xpath('//div[@class="category"]/a[contains(@href, "/class/")]/text()')
     return ",".join(result)
 
 
-def get_real_number_title(number, title, number_list, appoint_number, appoint_url, lable_list, tag, actor, series):
+def get_real_number_title(
+    number,
+    title,
+    number_list,
+    appoint_number,
+    appoint_url,
+    lable_list,
+    tag,
+    actor,
+    series,
+):
     # 指定番号时，使用指定番号
     if appoint_number:
         number = appoint_number
@@ -160,7 +161,14 @@ def get_real_number_title(number, title, number_list, appoint_number, appoint_ur
     return number, temp_title
 
 
-def get_real_title(title, number_list, lable_list, tag, actor, series):
+def get_real_title(
+    title,
+    number_list,
+    lable_list,
+    tag,
+    actor,
+    series,
+):
     # 去除标题里的番号
     for number in number_list:
         title = title.replace(number, "")
@@ -186,13 +194,19 @@ def get_real_title(title, number_list, lable_list, tag, actor, series):
     return title.replace(" x ", "").replace(" X ", "").strip(" -.")
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number=""):
+def main(
+    number,
+    appoint_url="",
+    language="zh_cn",
+    file_path="",
+    appoint_number="",
+):
     lable_list = get_lable_list()
     start_time = time.time()
     website_name = "javday"
-    req_web += "-> %s" % website_name
+    LogBuffer.req().write(f"-> {website_name}")
     web_info = "\n       "
-    log_info += " \n    🌐 javday"
+    LogBuffer.info().write(" \n    🌐 javday")
     debug_info = ""
 
     javday_url = getattr(config, "javday_website", "https://javday.tv")
@@ -208,17 +222,17 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
             for number in number_list_new:
                 testNumberUrl = javday_url + f"/videos/{number}/"
                 debug_info = f'搜索地址: {testNumberUrl} {{"wd": {number}}}'
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 result, html_content = get_html(testNumberUrl)
                 if not result:
-                    debug_info = "网络请求错误: %s" % html_content
-                    log_info += web_info + debug_info
+                    debug_info = f"网络请求错误: {html_content}"
+                    LogBuffer.info().write(web_info + debug_info)
                 else:
                     if "你似乎來到了沒有視頻存在的荒原" in html_content:
-                        debug_info = "找不到番号: %s" % number
-                        log_info += web_info + debug_info
+                        debug_info = f"找不到番号: {number}"
+                        LogBuffer.info().write(web_info + debug_info)
                         continue
-                    debug_info = "找到网页: %s" % testNumberUrl
+                    debug_info = f"找到网页: {testNumberUrl}"
                     real_url = testNumberUrl
                     real_html_content = html_content
                     break
@@ -230,7 +244,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
             title = get_title(html_info)  # 获取标题
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             series, tag, actor = get_some_info(html_info, title, file_path)
             actor_photo = get_actor_photo(actor)
@@ -269,42 +283,24 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                     "trailer": "",
                     "image_download": False,
                     "image_cut": "no",
-                    "log_info": log_info,
-                    "error_info": "",
-                    "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
                     "mosaic": "国产",
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                debug_info = f"数据生成出错: {str(e)}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
     except Exception as e:
         # print(traceback.format_exc())
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -314,6 +310,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
         indent=4,
         separators=(",", ": "),
     )
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

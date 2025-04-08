@@ -6,7 +6,7 @@ import time
 import traceback
 import webbrowser
 
-from PyQt5.QtCore import QEvent, QPoint, QTimer, Qt, pyqtSignal
+from PyQt5.QtCore import QEvent, QPoint, Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QCursor, QHoverEvent, QIcon, QKeySequence
 from PyQt5.QtWidgets import (
     QAction,
@@ -27,14 +27,12 @@ from controllers.main_window.save_config import save_config
 from controllers.main_window.style import set_dark_style, set_style
 from models.base.file import _open_file_thread, delete_file, split_path
 from models.base.image import get_pixmap
-from models.base.number import get_info
 from models.base.path import get_main_path, get_path
 from models.base.utils import _async_raise, add_html, convert_path, get_current_time, get_used_time, kill_a_thread
 from models.base.web import (
     check_theporndb_api_token,
     check_version,
     get_avsox_domain,
-    get_html,
     ping_host,
     scraper_html,
 )
@@ -50,12 +48,13 @@ from models.core.file import (
 )
 from models.core.flags import Flags
 from models.core.image import add_del_extrafanart_copy
+from models.core.json_data import LogBuffer
 from models.core.nfo import write_nfo
 from models.core.scraper import again_search, get_remain_list, start_new_scrape
 from models.core.subtitle import add_sub_for_all_video
 from models.core.utils import deal_url, get_movie_path_setting
 from models.core.video import add_del_extras, add_del_theme_videos
-from models.core.web import show_netstatus
+from models.core.web import get_html, show_netstatus
 from models.entity.enums import FileMode
 from models.signals import signal
 from models.tools.actress_db import ActressDB
@@ -715,7 +714,7 @@ class MyMAinWindow(QMainWindow):
             self.Ui.pushButton_start_cap2.setText(" ■ 停止中 ")
             signal.show_scrape_info("⛔️ 刮削停止中...")
             try:  # pool可能还没启动
-                Flags.pool.shutdown39(wait=False, cancel_futures=True)
+                Flags.pool.shutdown(wait=False, cancel_futures=True)
             except:
                 signal.show_traceback_log(traceback.format_exc())
             t = threading.Thread(target=self._kill_threads)  # 关闭线程池和扫描线程
@@ -742,14 +741,10 @@ class MyMAinWindow(QMainWindow):
                 average_time = used_time
             signal.show_scrape_info("⛔️ 刮削已手动停止！")
             self.set_label_file_path.emit(
-                "⛔️ 刮削已手动停止！\n   已刮削 {} 个视频，还剩余 {} 个！刮削用时 {} 秒".format(
-                    Flags.scrape_done, (Flags.total_count - Flags.scrape_done), used_time
-                )
+                f"⛔️ 刮削已手动停止！\n   已刮削 {Flags.scrape_done} 个视频, 还剩余 {Flags.total_count - Flags.scrape_done} 个! 刮削用时 {used_time} 秒"
             )
             signal.show_log_text(
-                "\n ⛔️ 刮削已手动停止！\n 😊 已刮削 {} 个视频，还剩余 {} 个！刮削用时 {} 秒，停止用时 {} 秒".format(
-                    Flags.scrape_done, (Flags.total_count - Flags.scrape_done), used_time, self.stop_used_time
-                )
+                f"\n ⛔️ 刮削已手动停止！\n 😊 已刮削 {Flags.scrape_done} 个视频, 还剩余 {Flags.total_count - Flags.scrape_done} 个! 刮削用时 {used_time} 秒, 停止用时 {self.stop_used_time} 秒"
             )
             signal.show_log_text("================================================================================")
             signal.show_log_text(
@@ -758,8 +753,8 @@ class MyMAinWindow(QMainWindow):
             signal.show_log_text(
                 " 🏁 End time".ljust(13) + ": " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))
             )
-            signal.show_log_text(" ⏱ Used time".ljust(13) + ": %sS" % used_time)
-            signal.show_log_text(" 🍕 Per time".ljust(13) + ": %sS" % average_time)
+            signal.show_log_text(f"{' ⏱ Used time'.ljust(13)}: {used_time}S")
+            signal.show_log_text(f"{' 🍕 Per time'.ljust(13)}: {average_time}S")
             signal.show_log_text("================================================================================")
             Flags.again_dic.clear()
         except:
@@ -833,7 +828,13 @@ class MyMAinWindow(QMainWindow):
         # self.Ui.treeWidget_number.setCurrentItem(node)
         # self.Ui.treeWidget_number.scrollToItem(node)
 
-    def show_list_name(self, filename, result, json_data, real_number=""):
+    def show_list_name(
+        self,
+        filename,
+        result,
+        json_data,
+        real_number="",
+    ):
         # 添加树状节点
         self._addTreeChild(result, filename)
 
@@ -843,7 +844,7 @@ class MyMAinWindow(QMainWindow):
         if not json_data.get("actor"):
             json_data["actor"] = ""
         if not json_data.get("title") or result == "fail":
-            json_data["title"] = json_data["error_info"]
+            json_data["title"] = LogBuffer.error().get()
         if not json_data.get("outline"):
             json_data["outline"] = ""
         if not json_data.get("tag"):
@@ -1003,7 +1004,13 @@ class MyMAinWindow(QMainWindow):
             if not signal.stop:
                 signal.show_traceback_log(traceback.format_exc())
 
-    def set_pixmap_thread(self, poster_path="", thumb_path="", poster_from="", cover_from=""):
+    def set_pixmap_thread(
+        self,
+        poster_path="",
+        thumb_path="",
+        poster_from="",
+        cover_from="",
+    ):
         t = threading.Thread(
             target=self._set_pixmap,
             args=(
@@ -1015,7 +1022,13 @@ class MyMAinWindow(QMainWindow):
         )
         t.start()
 
-    def _set_pixmap(self, poster_path="", thumb_path="", poster_from="", cover_from=""):
+    def _set_pixmap(
+        self,
+        poster_path="",
+        thumb_path="",
+        poster_from="",
+        cover_from="",
+    ):
         poster_pix = [False, "", "暂无封面图", 156, 220]
         thumb_pix = [False, "", "暂无缩略图", 328, 220]
         if os.path.exists(poster_path):
@@ -1060,7 +1073,7 @@ class MyMAinWindow(QMainWindow):
     def _check_main_file_path(self):
         if not self.file_main_open_path:
             QMessageBox.about(self, "没有目标文件", "请刮削后再使用！！")
-            signal.show_scrape_info("💡 请刮削后使用！%s" % get_current_time())
+            signal.show_scrape_info(f"💡 请刮削后使用！{get_current_time()}")
             return False
         return True
 
@@ -1133,7 +1146,7 @@ class MyMAinWindow(QMainWindow):
             )
             if ok and text:
                 Flags.again_dic[file_path] = [text, "", ""]
-                signal.show_scrape_info("💡 已添加刮削！%s" % get_current_time())
+                signal.show_scrape_info(f"💡 已添加刮削！{get_current_time()}")
                 if self.Ui.pushButton_start_cap.text() == "开始":
                     again_search()
 
@@ -1156,11 +1169,11 @@ class MyMAinWindow(QMainWindow):
                 website, url = deal_url(text)
                 if website:
                     Flags.again_dic[file_path] = ["", url, website]
-                    signal.show_scrape_info("💡 已添加刮削！%s" % get_current_time())
+                    signal.show_scrape_info(f"💡 已添加刮削！{get_current_time()}")
                     if self.Ui.pushButton_start_cap.text() == "开始":
                         again_search()
                 else:
-                    signal.show_scrape_info("💡 不支持的网站！%s" % get_current_time())
+                    signal.show_scrape_info(f"💡 不支持的网站！{get_current_time()}")
 
     def main_del_file_click(self):
         """
@@ -1177,7 +1190,7 @@ class MyMAinWindow(QMainWindow):
             if reply != QMessageBox.Yes:
                 return
             delete_file(file_path)
-            signal.show_scrape_info("💡 已删除文件！%s" % get_current_time())
+            signal.show_scrape_info(f"💡 已删除文件！{get_current_time()}")
 
     def main_del_folder_click(self):
         """
@@ -1194,7 +1207,7 @@ class MyMAinWindow(QMainWindow):
             if reply != QMessageBox.Yes:
                 return
             shutil.rmtree(folder_path, ignore_errors=True)
-            self.show_scrape_info("💡 已删除文件夹！%s" % get_current_time())
+            self.show_scrape_info(f"💡 已删除文件夹！{get_current_time()}")
 
     def _pic_main_clicked(self):
         """
@@ -1220,29 +1233,23 @@ class MyMAinWindow(QMainWindow):
         try:
             json_data = self.json_array[self.show_name]
             self.now_show_name = json_data["show_name"]
-            (
-                title,
-                originaltitle,
-                studio,
-                publisher,
-                year,
-                outline,
-                runtime,
-                director,
-                actor_photo,
-                actor,
-                release,
-                tag,
-                number,
-                cover,
-                poster,
-                website,
-                series,
-                mosaic,
-                definition,
-                trailer,
-                letters,
-            ) = get_info(json_data)
+            title = json_data.get("title")
+            originaltitle = json_data.get("originaltitle")
+            studio = json_data.get("studio")
+            publisher = json_data.get("publisher")
+            year = json_data.get("year")
+            outline = json_data.get("outline")
+            runtime = json_data.get("runtime")
+            director = json_data.get("director")
+            actor = json_data.get("actor")
+            release = json_data.get("release")
+            tag = json_data.get("tag")
+            number = json_data.get("number")
+            cover = json_data.get("cover")
+            poster = json_data.get("poster")
+            website = json_data.get("website")
+            series = json_data.get("series")
+            trailer = json_data.get("trailer")
             file_path = json_data.get("file_path")
             number = json_data.get("number")
             originalplot = json_data.get("originalplot")
@@ -1622,7 +1629,7 @@ class MyMAinWindow(QMainWindow):
         if website:
             Flags.website_name = website
         else:
-            signal.show_scrape_info("💡 不支持的网站！%s" % get_current_time())
+            signal.show_scrape_info(f"💡 不支持的网站！{get_current_time()}")
             return
         start_new_scrape(FileMode.Single)
 
@@ -1706,7 +1713,7 @@ class MyMAinWindow(QMainWindow):
             except Exception as e:
                 skip_list.append([file_name, file_path, str(e)])
         if skip_list:
-            signal.show_log_text("\n%s file(s) did not move!" % len(skip_list))
+            signal.show_log_text(f"\n{len(skip_list)} file(s) did not move!")
             i = 0
             for info in skip_list:
                 i += 1
@@ -1771,7 +1778,7 @@ class MyMAinWindow(QMainWindow):
             else:
                 self.Ui.lineEdit_config_folder.setText(media_folder_path)
                 self.pushButton_save_config_clicked()
-            signal.show_scrape_info("💡 目录已切换！%s" % get_current_time())
+            signal.show_scrape_info(f"💡 目录已切换！{get_current_time()}")
 
     # endregion
 
@@ -2039,8 +2046,7 @@ class MyMAinWindow(QMainWindow):
         if new_config_file != config.file:
             new_config_path = os.path.join(config.folder, new_config_file)
             signal.show_log_text(
-                "\n================================================================================\n切换配置：%s"
-                % new_config_path
+                f"\n================================================================================\n切换配置：{new_config_path}"
             )
             with open(config.get_mark_file_path(), "w", encoding="UTF-8") as f:
                 f.write(new_config_path)
@@ -2050,7 +2056,7 @@ class MyMAinWindow(QMainWindow):
             if temp_dark != self.dark_mode and temp_window_radius == self.window_radius:
                 self.show_flag = True
                 self._windows_auto_adjust()
-            signal.show_scrape_info("💡 配置已切换！%s" % get_current_time())
+            signal.show_scrape_info(f"💡 配置已切换！{get_current_time()}")
 
     # 重置配置
     def pushButton_init_config_clicked(self):
@@ -2063,7 +2069,7 @@ class MyMAinWindow(QMainWindow):
             self.show_flag = True
             self._windows_auto_adjust()
         self.Ui.pushButton_init_config.setEnabled(True)
-        signal.show_scrape_info("💡 配置已重置！%s" % get_current_time())
+        signal.show_scrape_info(f"💡 配置已重置！{get_current_time()}")
 
     # 设置-命名-分集-字母
     def checkBox_cd_part_a_clicked(self):
@@ -2102,7 +2108,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_save_config_clicked(self):
         self.save_config()
         # self.load_config()
-        signal.show_scrape_info("💡 配置已保存！%s" % get_current_time())
+        signal.show_scrape_info(f"💡 配置已保存！{get_current_time()}")
 
     # 设置-另存为
     def pushButton_save_new_config_clicked(self):

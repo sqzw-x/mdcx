@@ -9,6 +9,7 @@ from lxml import etree
 from models.base.number import is_uncensored
 from models.base.web import curl_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info
 
 urllib3.disable_warnings()  # yapf: disable
@@ -174,14 +175,19 @@ def get_number(html, number):
     return number.replace("FC2-PPV ", "FC2-"), release, runtime, number
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path=""):
+def main(
+    number,
+    appoint_url="",
+    language="zh_cn",
+    file_path="",
+):
     start_time = time.time()
     website_name = "7mmtv"
-    req_web += "-> %s" % website_name
+    LogBuffer.req().write(f"-> {website_name}")
     title = ""
     cover_url = ""
     web_info = "\n       "
-    log_info += " \n    🌐 7mmtv"
+    LogBuffer.info().write(" \n    🌐 7mmtv")
     debug_info = ""
     mmtv_url = getattr(config, "7mmtv_website", "https://www.7mmtv.sx")
     real_url = appoint_url
@@ -198,29 +204,29 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
 
             search_url = f"{search_url}?search_keyword={search_keyword}&search_type=searchall&op=search"
             debug_info = f"搜索地址: {search_url} "
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             result, response = curl_html(search_url)
 
             if not result:
-                debug_info = "网络请求错误: %s" % response
-                log_info += web_info + debug_info
+                debug_info = f"网络请求错误: {response}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             detail_page = etree.fromstring(response, etree.HTMLParser())
             real_url = get_real_url(detail_page, number)
             if real_url:
-                debug_info = "番号地址: %s " % real_url
-                log_info += web_info + debug_info
+                debug_info = f"番号地址: {real_url} "
+                LogBuffer.info().write(web_info + debug_info)
             else:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
         if real_url:
             result, html_content = curl_html(real_url)
             if not result:
-                debug_info = "网络请求错误: %s" % html_content
-                log_info += web_info + debug_info
+                debug_info = f"网络请求错误: {html_content}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             html_info = etree.fromstring(html_content, etree.HTMLParser())
@@ -228,7 +234,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
             title = get_title(html_info, web_number)
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             actor = get_actor(html_info, title, file_path)
             actor_photo = get_actor_photo(actor)
@@ -268,43 +274,25 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                     "trailer": "",
                     "image_download": False,
                     "image_cut": "",
-                    "log_info": log_info,
-                    "error_info": "",
-                    "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
                     "mosaic": mosaic,
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                debug_info = f"数据生成出错: {str(e)}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
     except Exception as e:
         # import traceback
         # print(traceback.format_exc())
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -314,6 +302,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

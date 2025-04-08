@@ -22,10 +22,10 @@ from models.signals import signal
 def _scraper_web(url):
     result, html = scraper_html(url)
     if not result:
-        signal.show_log_text("请求错误: %s" % html)
+        signal.show_log_text(f"请求错误: {html}")
         return ""
     if "The owner of this website has banned your access based on your browser's behaving" in html:
-        signal.show_log_text("由于请求过多，javdb网站暂时禁止了你当前IP的访问！！可访问javdb.com查看详情！ %s" % html)
+        signal.show_log_text(f"由于请求过多，javdb网站暂时禁止了你当前IP的访问！！可访问javdb.com查看详情！ {html}")
         return ""
     if "Cloudflare" in html:
         signal.show_log_text("被 Cloudflare 5 秒盾拦截！请尝试更换cookie！")
@@ -42,7 +42,7 @@ def _get_actor_numbers(actor_url, actor_single_url):
     number_single_list = set()
     i = 1
     while next_page:
-        page_url = actor_url + "?page=%s" % i + "&t=s"
+        page_url = f"{actor_url}?page={i}&t=s"
         result, html = get_html(page_url)
         if not result:
             result, html = scraper_html(page_url)
@@ -64,7 +64,7 @@ def _get_actor_numbers(actor_url, actor_single_url):
     next_page = True
     i = 1
     while next_page:
-        page_url = actor_url + "?page=%s" % i
+        page_url = f"{actor_url}?page={i}"
         html = _scraper_web(page_url)
         if len(html) < 1:
             return
@@ -95,7 +95,6 @@ def _get_actor_numbers(actor_url, actor_single_url):
                 video_date = f"{time_list[2]}/{time_list[0]}/{time_list[1]}"
             else:
                 video_date = f"{time_list[0]}/{time_list[1]}/{time_list[2]}"
-            # self.show_log_text('{}  {:<10}{:\u3000>5}   {}'.format(video_date, video_number, download_info, video_url))
             Flags.actor_numbers_dic[actor_url].update(
                 {video_number: [video_number, video_date, video_url, download_info, video_title, single_info]}
             )
@@ -148,7 +147,7 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
         not_download_magnet_list = sorted(not_download_magnet_list, reverse=True)
         not_download_cnword_list = sorted(not_download_cnword_list, reverse=True)
 
-        signal.show_log_text(f'\n👩 [ {actor_name} ] 的全部网络番号({len(all_list)})...\n{("=" * 97)}')
+        signal.show_log_text(f"\n👩 [ {actor_name} ] 的全部网络番号({len(all_list)})...\n{('=' * 97)}")
         if all_list:
             for each in all_list:
                 signal.show_log_text(each)
@@ -163,7 +162,7 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
             signal.show_log_text("🎉 没有缺少的番号...\n")
 
         signal.show_log_text(
-            f'\n👩 [ {actor_name} ] 本地缺失的有磁力的番号({len(not_download_magnet_list)})...\n{("=" * 97)}'
+            f"\n👩 [ {actor_name} ] 本地缺失的有磁力的番号({len(not_download_magnet_list)})...\n{('=' * 97)}"
         )
         if not_download_magnet_list:
             for each in not_download_magnet_list:
@@ -172,7 +171,7 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
             signal.show_log_text("🎉 没有缺少的番号...\n")
 
         signal.show_log_text(
-            f'\n👩 [ {actor_name} ] 本地缺失的有字幕的番号({len(not_download_cnword_list)})...\n{("=" * 97)}'
+            f"\n👩 [ {actor_name} ] 本地缺失的有字幕的番号({len(not_download_cnword_list)})...\n{('=' * 97)}"
         )
         if not_download_cnword_list:
             for each in not_download_cnword_list:
@@ -203,13 +202,13 @@ def check_missing_number(actor_flag):
     # 遍历本地资源库
     if Flags.local_number_flag != new_movie_path_list:
         signal.show_log_text("")
+        s = "\n   ".join(new_movie_path_list)
         signal.show_log_text(
-            "\n本地资源库地址:\n   %s\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 开始遍历本地资源库，以获取本地视频的最新列表...\n   提示：每次启动第一次查询将更新本地视频数据。（大概1000个/30秒，如果视频较多，请耐心等待。）"
-            % "\n   ".join(new_movie_path_list)
+            f"\n本地资源库地址:\n   {s}\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 开始遍历本地资源库，以获取本地视频的最新列表...\n   提示：每次启动第一次查询将更新本地视频数据。（大概1000个/30秒，如果视频较多，请耐心等待。）"
         )
         all_movie_list = []
         for i in new_movie_path_list:
-            movie_list = movie_lists("", movie_type, i)  # 获取所有需要刮削的影片列表
+            movie_list = movie_lists([""], movie_type, i)  # 获取所有需要刮削的影片列表
             all_movie_list.extend(movie_list)
         signal.show_log_text(f"🎉 获取完毕！共找到视频数量（{len(all_movie_list)}）({get_used_time(start_time)}s)")
 
@@ -283,7 +282,7 @@ def check_missing_number(actor_flag):
     if config.actors_name:
         actor_list = re.split(r"[,，]", config.actors_name)
         signal.show_log_text(
-            f'\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n🔍 需要查询的演员：\n   {", ".join(actor_list)}'
+            f"\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n🔍 需要查询的演员：\n   {', '.join(actor_list)}"
         )
         for actor_name in actor_list:
             if not actor_name:

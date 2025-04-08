@@ -105,7 +105,7 @@ def update_emby_actor_info():
                 if config.use_database:
                     db_exist = ActressDB.update_actor_info_from_db(actor_info)
                 if db_exist or exist:
-                    r, res = post_html(update_url, json=actor_info.dump(), proxies=False)
+                    r, res = post_html(update_url, json=actor_info.dump(), use_proxy=False)
                     if r:
                         signal.show_log_text(f"\n ✅ 演员信息更新成功！\n 👩🏻 点击查看 {actor_name} 的 Emby 演员主页:")
                         signal.show_log_text(f" {actor_homepage}")
@@ -349,7 +349,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
         att_keys = actor_profile.find_all(scope=["row"])
         att_values = actor_profile.find_all(name="td", style=[""], colspan=False)
         bday = actor_output.find(class_="bday")
-        bday = "(%s)" % bday.get_text("", strip=True) if bday else ""
+        bday = f"({bday.get_text('', strip=True)})" if bday else ""
         if att_keys and att_values:
             overview += "\n===== 个人资料 =====\n"
             i = 0
@@ -843,7 +843,7 @@ def _deal_kodi_actors(gfriends_actor_data, add):
                                             local_file_path = os.path.join(actor_folder, net_file_name)
                                             if not os.path.isfile(local_file_path):
                                                 if not download_file_with_filepath(
-                                                    {"logs": ""}, net_pic_path, local_file_path, actor_folder
+                                                    net_pic_path, local_file_path, actor_folder
                                                 ):
                                                     signal.show_log_text(
                                                         f"🔴 {actor_name} 头像下载失败！{net_pic_path}"

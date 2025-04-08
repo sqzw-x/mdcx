@@ -9,7 +9,7 @@ from models.config.config import config
 from models.signals import signal
 
 
-def delete_file(file_path):
+def delete_file(file_path: str):
     try:
         for _ in range(5):
             if os.path.islink(file_path):
@@ -25,7 +25,10 @@ def delete_file(file_path):
         return False, error_info
 
 
-def move_file(old_path, new_path):
+def move_file(
+    old_path: str,
+    new_path: str,
+):
     try:
         if old_path.lower().replace("\\", "/") != new_path.lower().replace("\\", "/"):
             delete_file(new_path)
@@ -38,7 +41,10 @@ def move_file(old_path, new_path):
         return False, error_info
 
 
-def copy_file(old_path, new_path):
+def copy_file(
+    old_path: str,
+    new_path: str,
+):
     for _ in range(3):
         try:
             if not os.path.exists(old_path):
@@ -54,21 +60,21 @@ def copy_file(old_path, new_path):
     return False, error_info
 
 
-def read_link(path):
+def read_link(path: str):
     # 获取符号链接的真实路径
     while os.path.islink(path):
         path = os.readlink(path)
     return path
 
 
-def split_path(path):
+def split_path(path: str):
     if "\\" in path:
         p, f = os.path.split(path.replace("\\", "/"))
         return p.replace("/", "\\"), f
     return os.path.split(path)
 
 
-def open_image(pic_path):
+def open_image(pic_path: str):
     try:
         with Image.open(pic_path) as img:
             return True, img
@@ -79,7 +85,7 @@ def open_image(pic_path):
         return False, error_info
 
 
-def check_pic(path_pic):
+def check_pic(path_pic: str):
     if os.path.exists(path_pic):
         try:
             with Image.open(path_pic) as img:  # 如果文件不是图片，报错
@@ -95,7 +101,10 @@ def check_pic(path_pic):
     return False
 
 
-def _open_file_thread(file_path, is_dir):
+def _open_file_thread(
+    file_path: str,
+    is_dir: bool,
+):
     if config.is_windows:
         if is_dir:
             # os.system(f'explorer /select,"{file_path}"')  pyinstall打包后打开文件时会闪现cmd窗口。
