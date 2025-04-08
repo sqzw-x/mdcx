@@ -98,18 +98,20 @@ def get_tag(html):
 
 
 def get_cover(html):
-    result = html.xpath('//a[@name="package-image"]/@href')
-    result = re.sub(r"pics.dmm.co.jp", r"awsimgsrc.dmm.co.jp/pics_dig", result[0])
-    return result if result else ""
+    result = html.xpath('//a[@id="sample-image1"]/img/@src')
+    if result:
+        # 替换域名并返回第一个匹配项
+        return re.sub(r'pics.dmm.co.jp', r'awsimgsrc.dmm.co.jp/pics_dig', result[0])
+    return ''  # 无匹配时返回空字符串
 
 
 def get_poster(html, cover):
-    result = html.xpath('//img[@class="tdmm"]/@src')
+    result = html.xpath('//meta[@property="og:image"]/@content')
     if result:
         result = re.sub(r"pics.dmm.co.jp", r"awsimgsrc.dmm.co.jp/pics_dig", result[0])
         return result
     else:
-        return cover.replace("pt.jpg", "ps.jpg")
+        return cover.replace("pl.jpg", "ps.jpg")
 
 
 def get_extrafanart(html):
