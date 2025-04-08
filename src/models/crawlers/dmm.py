@@ -45,12 +45,12 @@ def get_mosaic(html):
 
 
 def get_studio(html):
-    result = html.xpath("//td/a[contains(@href, 'article=maker')]/text()")
+    result = html.xpath("//td[contains(text(),'メーカー')]/following-sibling::td/a/text()")
     return result[0] if result else ""
 
 
 def get_publisher(html, studio):
-    result = html.xpath("//td/a[contains(@href, 'article=label')]/text()")
+    result = html.xpath("//td[contains(text(),'レーベル')]/following-sibling::td/a/text()")
     return result[0] if result else studio
 
 
@@ -98,26 +98,25 @@ def get_tag(html):
 
 
 def get_cover(html):
-    result = html.xpath('//a[@id="sample-image1"]/img/@src')
-    if result:
-        # 替换域名并返回第一个匹配项
-        return re.sub(r'pics.dmm.co.jp', r'awsimgsrc.dmm.co.jp/pics_dig', result[0])
-    return ''  # 无匹配时返回空字符串
+    temp_result = html.xpath('//meta[@property="og:image"]/@content')
+    if temp_result:
+        result = re.sub(r"pics.dmm.co.jp", r"awsimgsrc.dmm.co.jp/pics_dig", temp_result[0])
+        if check_url(result):
+            return result.replace("ps.jpg", "pl.jpg")
+        else:
+            return temp_result[0].replace("ps.jpg", "pl.jpg")
+    else:
+        return ""
 
 
 def get_poster(html, cover):
-    result = html.xpath('//meta[@property="og:image"]/@content')
-    if result:
-        result = re.sub(r"pics.dmm.co.jp", r"awsimgsrc.dmm.co.jp/pics_dig", result[0])
-        return result
-    else:
-        return cover.replace("pl.jpg", "ps.jpg")
+    return cover.replace("pl.jpg", "ps.jpg")
 
 
 def get_extrafanart(html):
-    result_list = html.xpath("//div[@id='sample-image-block']/a/img/@src")
+    result_list = html.xpath("//div[@id='sample-image-block']/a/@href")
     if not result_list:
-        result_list = html.xpath("//a[@name='sample-image']/img/@src")
+        result_list = html.xpath("//a[@name='sample-image']/img/@data-lazy")
     i = 1
     result = []
     for each in result_list:
@@ -180,8 +179,8 @@ def get_trailer(htmlcode, real_url):
 
 def get_real_url(html, number, number2, file_path):
     number_temp = number2.lower().replace("-", "")
-    url_list = html.xpath("//p[@class='tmb']/a/@href")
-
+    url_list = re.findall(r'detailUrl.*?(https.*?)\\",', html, re.S)
+    # url_list = html.xpath("//p[@class='tmb']/a/@href")
     # https://tv.dmm.co.jp/list/?content=mide00726&i3_ref=search&i3_ord=1
     # https://www.dmm.co.jp/digital/videoa/-/detail/=/cid=mide00726/?i3_ref=search&i3_ord=2
     # https://www.dmm.com/mono/dvd/-/detail/=/cid=n_709mmrak089sp/?i3_ref=search&i3_ord=1
@@ -205,7 +204,8 @@ def get_real_url(html, number, number2, file_path):
                     if cid[-2:] in file_path:
                         number = cid
     if not temp_list:  # 通过标题搜索
-        title_list = html.xpath("//p[@class='txt']/a//text()")
+        # title_list = html.xpath("//p[@class='txt']/a//text()")
+        title_list = re.findall(r'title\\":\\"(.*?)\\",', html, re.S)
         if title_list and url_list:
             full_title = number
             for i in range(len(url_list)):
@@ -474,11 +474,11 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp", file_pa
                 log_info += web_info + debug_info
                 raise Exception(debug_info)
 
-            html = etree.fromstring(htmlcode, etree.HTMLParser())
+            # html = etree.fromstring(htmlcode, etree.HTMLParser())
 
             # 未指定详情页地址时，获取详情页地址（刚才请求的是搜索页）
             if not appoint_url:
-                real_url, number = get_real_url(html, number, number, file_path)
+                real_url, number = get_real_url(htmlcode, number, number, file_path)
                 if not real_url:
                     debug_info = "搜索结果: 未匹配到番号！"
                     log_info += web_info + debug_info
@@ -493,8 +493,8 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp", file_pa
                             debug_info = "网络请求错误: %s " % htmlcode
                             log_info += web_info + debug_info
                             raise Exception(debug_info)
-                        html = etree.fromstring(htmlcode, etree.HTMLParser())
-                        real_url, number = get_real_url(html, number, number_no_00, file_path)
+                        # html = etree.fromstring(htmlcode, etree.HTMLParser())
+                        real_url, number = get_real_url(htmlcode, number, number_no_00, file_path)
                         if not real_url:
                             debug_info = "搜索结果: 未匹配到番号！"
                             log_info += web_info + debug_info
@@ -509,8 +509,8 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp", file_pa
                         debug_info = "网络请求错误: %s " % htmlcode
                         log_info += web_info + debug_info
                         raise Exception(debug_info)
-                    html = etree.fromstring(htmlcode, etree.HTMLParser())
-                    real_url, number0 = get_real_url(html, number, number_no_00, file_path)
+                    # html = etree.fromstring(htmlcode, etree.HTMLParser())
+                    real_url, number0 = get_real_url(htmlcode, number, number_no_00, file_path)
                     if not real_url:
                         debug_info = "搜索结果: 未匹配到番号！"
                         log_info += web_info + debug_info
@@ -729,7 +729,7 @@ if __name__ == "__main__":
     # print(main('cwx-001', file_path='134cwx001-1.mp4'))
     # print(main('ssis-222'))
     # print(main('snis-036'))
-    # print(main('GLOD-148'
+    # print(main('GLOD-148'))
     # print(main('（抱き枕カバー付き）自宅警備員 1stミッション イイナリ巨乳長女・さやか～編'))    # 番号最后有字母
     # print(main('エロコンビニ店長 泣きべそ蓮っ葉・栞〜お仕置きじぇらしぃナマ逸機〜'))
     # print(main('初めてのヒトヅマ 第4話 ビッチな女子の恋愛相談'))
@@ -746,6 +746,7 @@ if __name__ == "__main__":
     # print(main('ssni-888'))
     # print(main('ssni00888'))
     # print(main('ssni-288'))
+    # print(main('mbf-033'))
     # print(main('', 'https://www.dmm.co.jp/digital/videoa/-/detail/=/cid=ssni00288/'))
     # print(main('俺をイジメてた地元ヤンキーの巨乳彼女を寝とって復讐を果たす話 The Motion Anime'))  # 模糊匹配 MAXVR-008
     # print(main('', 'https://www.dmm.co.jp/mono/dvd/-/detail/=/cid=h_173dhry23/'))   # 地域限制
@@ -761,5 +762,4 @@ if __name__ == "__main__":
     # print(main('', 'https://tv.dmm.com/vod/detail/?title=5533ftbd00042&season=5533ftbd00042'))
     # print(main('stars-779'))
     # print(main('FAKWM-001', 'https://tv.dmm.com/vod/detail/?season=5497fakwm00001'))
-    # print(main('FAKWM-064', 'https://tv.dmm.com/vod/detail/?season=5497fakwm00064'))
-    pass
+    print(main('FAKWM-064', 'https://tv.dmm.com/vod/detail/?season=5497fakwm00064'))
