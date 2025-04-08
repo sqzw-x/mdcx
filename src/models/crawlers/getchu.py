@@ -3,13 +3,14 @@
 import json
 import re
 import time
+import unicodedata
 import urllib
 
-import unicodedata
 import urllib3
 from lxml import etree
 
 from models.base.web import get_html
+from models.core.json_data import LogBuffer
 from models.crawlers import getchu_dl
 
 urllib3.disable_warnings()  # yapf: disable
@@ -108,20 +109,24 @@ def get_extrafanart(html):
     return result
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    language="jp",
+):
     if "DLID" in number.upper() or "ITEM" in number.upper() or "GETCHU" in number.upper() or "dl.getchu" in appoint_url:
-        return getchu_dl.main(number, appoint_url, log_info, req_web, "jp")
+        return getchu_dl.main(number, appoint_url, "jp")
     start_time = time.time()
     website_name = "getchu"
     getchu_url = "http://www.getchu.com"
-    req_web += "-> %s" % website_name
+    LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url.replace("&gc=gc", "") + "&gc=gc" if appoint_url else ""
     cover_url = ""
     image_cut = ""
     image_download = True
     url_search = ""
     web_info = "\n       "
-    log_info += " \n    🌐 getchu"
+    LogBuffer.info().write(" \n    🌐 getchu")
     debug_info = ""
 
     # real_url = 'http://www.getchu.com/soft.phtml?id=1141110&gc=gc'
@@ -143,13 +148,13 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
             url_search = f"http://www.getchu.com/php/search.phtml?genre=all&search_keyword={keyword2}&gc=gc"
             # http://www.getchu.com/php/search.phtml?genre=anime_dvd&search_keyword=_WORD_&check_key_dtl=1&submit=&genre=anime_dvd&gc=gc
             debug_info = f"搜索地址: {url_search} "
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
             result, html_search = get_html(url_search, encoding="euc-jp", timeout=40)
             if not result:
                 debug_info = f"网络请求错误: {html_search} "
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
             url_list = html.xpath("//a[@class='blueb']/@href")
@@ -165,23 +170,23 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
                         break
             else:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
-                return getchu_dl.main(number, appoint_url, log_info, req_web, "jp")
+                LogBuffer.info().write(web_info + debug_info)
+                return getchu_dl.main(number, appoint_url, "jp")
 
         if real_url:
             debug_info = f"番号地址: {real_url} "
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             result, html_content = get_html(real_url, encoding="euc-jp", timeout=40)
             if not result:
                 debug_info = f"网络请求错误: {html_content} "
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())
             title = get_title(html_info)
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             outline = get_outline(html_info)
             actor = ""
@@ -227,42 +232,24 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
                     "trailer": "",
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "log_info": log_info,
-                    "error_info": "",
-                    "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
                     "mosaic": mosaic,
                     "website": real_url,
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                debug_info = f"数据生成出错: {str(e)}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
     except Exception as e:
         # print(traceback.format_exc())
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -272,6 +259,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
         indent=4,
         separators=(",", ": "),
     )
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

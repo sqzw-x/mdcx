@@ -9,6 +9,7 @@ import zhconv
 
 from models.base.web import get_html, post_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 
@@ -55,7 +56,12 @@ def get_year(release):
         return release
 
 
-def get_mosaic(title, studio, tag, mosaic):
+def get_mosaic(
+    title,
+    studio,
+    tag,
+    mosaic,
+):
     all_info = title + studio + tag
     if "国产" in all_info or "國產" in all_info:
         mosaic = "国产"
@@ -136,7 +142,7 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     elif "REAL野性派" in file_name:
         result = re.search(r"REAL野性派-?(\d{3,})", file_name)
         if result:
-            number_normal = "REAL野性派-%s" % (result[1])
+            number_normal = f"REAL野性派-{result[1]}"
             number_list.append(number_normal)
 
     # mini06.全裸家政.只为弟弟的学费打工.被玩弄的淫乱家政小妹.mini传媒
@@ -177,11 +183,18 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     return number_list, filename_list
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number="", mosaic=""):
+def main(
+    number,
+    appoint_url="",
+    language="zh_cn",
+    file_path="",
+    appoint_number="",
+    mosaic="",
+):
     start_time = time.time()
     number = number.strip()
     website_name = "hdouban"
-    req_web += "-> %s" % website_name
+    LogBuffer.req().write(f"-> {website_name}")
 
     real_url = appoint_url
     cover_url = ""
@@ -190,7 +203,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
     url_search = ""
     mosaic = ""
     web_info = "\n       "
-    log_info += " \n    🌐 hdouban"
+    LogBuffer.info().write(" \n    🌐 hdouban")
     debug_info = ""
     cover_url = ""
     poster = ""
@@ -225,20 +238,20 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                 # https://api.6dccbca.com/api/search?search=JUL-401&ty=movie&page=1&pageSize=12
                 # https://api.6dccbca.com/api/search?ty=movie&search=heyzo-1032&page=1&pageSize=12
                 url_search = f"https://api.6dccbca.com/api/search?ty=movie&search={number}&page=1&pageSize=12"
-                debug_info = "搜索地址: %s " % url_search
-                log_info += web_info + debug_info
+                debug_info = f"搜索地址: {url_search} "
+                LogBuffer.info().write(web_info + debug_info)
 
                 # ========================================================================搜索番号
                 result, html_search = get_html(url_search, json_data=True)
                 if not result:
-                    debug_info = "网络请求错误: %s " % html_search
-                    log_info += web_info + debug_info
+                    debug_info = f"网络请求错误: {html_search} "
+                    LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 try:
                     result = html_search["data"]["list"]
                 except:
-                    debug_info = "搜索结果解析错误: %s " % str(html_search)
-                    log_info += web_info + debug_info
+                    debug_info = f"搜索结果解析错误: {str(html_search)} "
+                    LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
 
                 temp_number = number.upper().replace("-", "").strip()
@@ -256,26 +269,26 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                     break
             else:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
         if real_url:
-            debug_info = "番号地址: %s " % real_url
-            log_info += web_info + debug_info
+            debug_info = f"番号地址: {real_url} "
+            LogBuffer.info().write(web_info + debug_info)
 
             # 请求api获取详细数据
             detail_id = re.findall(r"moviedetail/(\d+)", real_url)
             if not detail_id:
                 debug_info = f"详情页链接中未获取到详情页 ID: {detail_id}"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             detail_url = "https://api.6dccbca.com/api/movie/detail"
             data = {"id": str(detail_id[0])}
             result, response = post_html(detail_url, data=data, json_data=True)
             if not result:
-                debug_info = "网络请求错误: %s" % response
-                log_info += web_info + debug_info
+                debug_info = f"网络请求错误: {response}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             res = response["data"]
             number = res["number"]
@@ -284,7 +297,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
             title = res["name"].replace(number, "").strip()
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             cover_url = res["big_cove"]
             poster = res["small_cover"]
@@ -329,42 +342,24 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                     "trailer": trailer,
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "log_info": log_info,
-                    "error_info": "",
-                    "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
                     "mosaic": mosaic,
                     "website": re.sub(r"http[s]?://[^/]+", hdouban_url, real_url),
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                debug_info = f"数据生成出错: {str(e)}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
     except Exception as e:
         # print(traceback.format_exc())
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -374,6 +369,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

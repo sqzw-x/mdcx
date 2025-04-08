@@ -7,6 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import check_url, get_html
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 # import traceback
@@ -122,18 +123,22 @@ def get_number_data(number):
     return mywife_data.get(str(number))
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
+def main(
+    number,
+    appoint_url="",
+    language="jp",
+):
     global seesaawiki_request_fail_flag
     try:  # 捕获主动抛出的异常
         start_time = time.time()
         website_name = "mywife"
-        req_web += "-> %s" % website_name
+        LogBuffer.req().write(f"-> {website_name}")
         real_url = appoint_url
         cover_url = ""
         image_cut = ""
         image_download = True
         web_info = "\n       "
-        log_info += " \n    🌐 mywife"
+        LogBuffer.info().write(" \n    🌐 mywife")
         debug_info = ""
         key = re.findall(r"NO\.(\d*)", number.upper())
         key = key[0] if key else ""
@@ -145,7 +150,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
                     real_url = f"https://mywife.cc/teigaku/model/no/{key}"
         if not key:
             debug_info = f"番号中未识别到三位及以上数字: {number} "
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         actor = ""
         poster = ""
@@ -154,7 +159,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
         if not real_url:
             req_wiki_data = True
             debug_info = "请求 seesaawiki.jp 数据... "
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             number_data = get_number_data(key)
             if number_data:
@@ -175,57 +180,57 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
                     )
             else:
                 debug_info = "track.bannerbridge.net 无法访问！无法快速获取官网详情页地址！建议更换代理！当前尝试使用官网搜索查询..."
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             url_search = f"https://mywife.jp/?s={key}"
             debug_info = f"搜索页地址: {url_search} "
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             result, html_content = get_html(url_search)
             if not result:
                 debug_info = f"网络请求错误: {html_content} "
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())
             first_url = get_first_url(html_info, key)
 
             if first_url:
                 debug_info = f"中间页地址: {first_url} "
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
 
                 result, html_content = get_html(first_url)
                 if not result:
                     debug_info = f"网络请求错误: {html_content} "
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 html_info = etree.fromstring(html_content, etree.HTMLParser())
                 real_url = get_second_url(html_info)
                 if not real_url:
                     debug_info = f"中间页未获取到详情页地址！ {first_url} "
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
             else:
                 debug_info = f"搜索页未获取到匹配数据！ {url_search} "
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
 
                 debug_info = "尝试拼接番号地址"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 real_url = f"https://mywife.cc/teigaku/model/no/{key}"
 
         if real_url:
             debug_info = f"番号地址: {real_url} "
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
 
             result, html_content = get_html(real_url)
             if not result:
                 debug_info = f"网络请求错误: {html_content} "
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())
             number, title = get_title(html_info)
             if not title:
                 debug_info = "数据获取失败: 未获取到title！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             outline = get_outline(html_info)
             if not actor:
@@ -246,7 +251,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
             mosaic = "有码"
             if not req_wiki_data:
                 debug_info = "请求 seesaawiki.jp 获取真实演员... "
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
 
                 key = number.replace("No.", "")
                 number_data = get_number_data(key)
@@ -280,42 +285,24 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
                     "trailer": trailer,
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "log_info": log_info,
-                    "error_info": "",
-                    "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
                     "mosaic": mosaic,
                     "website": real_url,
                     "wanted": "",
                 }
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                debug_info = f"数据生成出错: {str(e)}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
     except Exception as e:
         # print(traceback.format_exc())
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -325,6 +312,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

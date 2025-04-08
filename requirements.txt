@@ -9,7 +9,7 @@ PySocks==1.7.1
 urllib3==1.25.11
 zhconv==1.4.3
 langid==1.1.6
-opencv-contrib-python-headless==4.7.0.68
+# opencv-contrib-python-headless==4.7.0.68
 deepl-translate==1.2.0
 ping3==4.0.4
 oshash==0.1.1

@@ -82,7 +82,7 @@ class Resources:
         # 查询映射表
         xml_actor = self.actor_mapping_data
         if len(xml_actor):
-            actor_name = ",%s," % actor.upper()
+            actor_name = f",{actor.upper()},"
             for each in config.full_half_char:
                 actor_name = actor_name.replace(each[0], each[1])
             actor_ob = xml_actor.xpath(
@@ -112,7 +112,7 @@ class Resources:
         # 查询映射表
         xml_info = self.info_mapping_data
         if len(xml_info):
-            info_name = ",%s," % info.upper()
+            info_name = f",{info.upper()},"
             for each in config.full_half_char:
                 info_name = info_name.replace(each[0], each[1])
             info_ob = xml_info.xpath(
