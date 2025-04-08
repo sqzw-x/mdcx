@@ -72,7 +72,7 @@ class GeneratedConfig:
     website_suren = r"mgstage,avsex,jav321,freejavbt,7mmtv,javbus,javdb"
     website_fc2 = r"fc2,fc2club,fc2hub,freejavbt,7mmtv,hdouban,javdb,avsox,airav"
     website_oumei = r"theporndb,javdb,javbus,hdouban"
-    website_guochan = r"madouqu,mdtv,hdouban,cnmdb,javday"
+    website_guochan = r"madouqu,mdtv,hdouban,cnmdb,javday,av911"
     whole_fields = r"outline,actor,thumb,release,tag,"
     none_fields = r"wanted,"
     website_set = r"official,"
@@ -99,9 +99,13 @@ class GeneratedConfig:
     runtime_website = r"javbus,freejavbt"
     runtime_website_exclude = r"airav,airav_cc,fc2,fc2club,fc2hub,lulubar"
     score_website = r"jav321,javlibrary,javdb"
-    score_website_exclude = r"airav,airav_cc,avsex,avsox,7mmtv,fc2,fc2hub,iqqtv,javbus,xcity,lulubar"
+    score_website_exclude = (
+        r"airav,airav_cc,avsex,avsox,7mmtv,fc2,fc2hub,iqqtv,javbus,xcity,lulubar"
+    )
     director_website = r"javbus,freejavbt"
-    director_website_exclude = r"airav,airav_cc,avsex,avsox,fc2,fc2hub,iqqtv,jav321,mgstage,lulubar"
+    director_website_exclude = (
+        r"airav,airav_cc,avsex,avsox,fc2,fc2hub,iqqtv,jav321,mgstage,lulubar"
+    )
     series_website = r"javbus,freejavbt"
     series_website_exclude = r"airav,airav_cc,avsex,iqqtv,7mmtv,javlibrary,lulubar"
     studio_website = r"javbus,freejavbt"

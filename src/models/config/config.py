@@ -59,7 +59,9 @@ class MDCxConfig(GeneratedConfig, ManualConfig):
         """
 
         if platform.system() == "Darwin":
-            return os.path.join(self.get_mac_default_config_folder(), self.mark_file_name)
+            return os.path.join(
+                self.get_mac_default_config_folder(), self.mark_file_name
+            )
         else:
             return self.mark_file_name
 
@@ -217,7 +219,7 @@ nfo_tagline = {self.nfo_tagline}
 nfo_tag_series = {self.nfo_tag_series}
 nfo_tag_studio = {self.nfo_tag_studio}
 nfo_tag_publisher = {self.nfo_tag_publisher}
-# website: iqqtv, javbus, javdb, freejavbt, jav321, dmm, avsox, xcity, mgstage, fc2, fc2club, fc2hub, airav, javlibrary, mdtv
+# website: iqqtv, javbus, javdb, freejavbt, jav321, dmm, avsox, xcity, mgstage, fc2, fc2club, fc2hub, av911, airav, javlibrary, mdtv
 
 [Name_Rule]
 folder_name = {self.folder_name}
@@ -359,8 +361,14 @@ statement = {self.statement}
         self.record_success_file = "record_success_file" in self.no_escape
 
         # 是否清理文件以及清理列表
-        can_clean = True if "i_know" in self.clean_enable and "i_agree" in self.clean_enable else False
-        can_clean_auto = True if can_clean and "clean_auto" in self.clean_enable else False
+        can_clean = (
+            True
+            if "i_know" in self.clean_enable and "i_agree" in self.clean_enable
+            else False
+        )
+        can_clean_auto = (
+            True if can_clean and "clean_auto" in self.clean_enable else False
+        )
         clean_ext_list = (
             re.split(r"[|｜，,]", self.clean_ext)
             if can_clean and self.clean_ext and "clean_ext" in self.clean_enable
@@ -373,18 +381,26 @@ statement = {self.statement}
         )
         clean_contains_list = (
             re.split(r"[|｜，,]", self.clean_contains)
-            if can_clean and self.clean_contains and "clean_contains" in self.clean_enable
+            if can_clean
+            and self.clean_contains
+            and "clean_contains" in self.clean_enable
             else []
         )
-        clean_size_list = self.clean_size if can_clean and "clean_size" in self.clean_enable else ""
+        clean_size_list = (
+            self.clean_size if can_clean and "clean_size" in self.clean_enable else ""
+        )
         clean_ignore_ext_list = (
             re.split(r"[|｜，,]", self.clean_ignore_ext)
-            if can_clean and self.clean_ignore_ext and "clean_ignore_ext" in self.clean_enable
+            if can_clean
+            and self.clean_ignore_ext
+            and "clean_ignore_ext" in self.clean_enable
             else []
         )
         clean_ignore_contains_list = (
             re.split(r"[|｜，,]", self.clean_ignore_contains)
-            if can_clean and self.clean_ignore_contains and "clean_ignore_contains" in self.clean_enable
+            if can_clean
+            and self.clean_ignore_contains
+            and "clean_ignore_contains" in self.clean_enable
             else []
         )
         self.can_clean = can_clean
@@ -399,7 +415,11 @@ statement = {self.statement}
         # 获取排除字符列表
         temp_list = re.split("[,，]", self.string) + self.repl_list
         self.escape_string_list = []
-        [self.escape_string_list.append(i) for i in temp_list if i.strip() and i not in self.escape_string_list]
+        [
+            self.escape_string_list.append(i)
+            for i in temp_list
+            if i.strip() and i not in self.escape_string_list
+        ]
 
         # 番号对应官网
         official_websites_dic = {}
@@ -412,15 +432,23 @@ statement = {self.statement}
         # 字段命名规则-后缀字段顺序
         all_str_list = ["mosaic", "cnword", "definition"]
         read_str_list = re.split(r"[,，]", self.suffix_sort)
-        new_str_list1 = [i1 for i1 in read_str_list if i1 in all_str_list]  # 去除不在list中的字符
+        new_str_list1 = [
+            i1 for i1 in read_str_list if i1 in all_str_list
+        ]  # 去除不在list中的字符
         new_str_list = []
-        [new_str_list.append(i1) for i1 in new_str_list1 if i1 not in new_str_list]  # 去重
-        [new_str_list.append(i1) for i1 in all_str_list if i1 not in new_str_list]  # 补全
+        [
+            new_str_list.append(i1) for i1 in new_str_list1 if i1 not in new_str_list
+        ]  # 去重
+        [
+            new_str_list.append(i1) for i1 in all_str_list if i1 not in new_str_list
+        ]  # 补全
         new_str = ",".join(new_str_list)
         self.suffix_sort = new_str
 
     def _get_config_path(self):
-        mdcx_config = self.get_mark_file_path()  # 此文件用于记录当前配置文件的绝对路径, 从而实现多配置切换
+        mdcx_config = (
+            self.get_mark_file_path()
+        )  # 此文件用于记录当前配置文件的绝对路径, 从而实现多配置切换
         # 此文件必须存在, 且与 main.py 或打包的可执行文件在同一目录下.
         if not os.path.exists(mdcx_config):  # 不存在时, 创建
             if platform.system() == "Darwin":
@@ -428,7 +456,9 @@ statement = {self.statement}
                     self.get_mac_default_config_folder(), "config.ini"
                 )  # macOS下默认配置文件: ~/.mdcx/config.ini
             else:
-                self.path = os.path.realpath("config.ini")  # 默认配置文件: 同目录下的 config.ini
+                self.path = os.path.realpath(
+                    "config.ini"
+                )  # 默认配置文件: 同目录下的 config.ini
             # 设置默认配置文件路径, 若存在则可读取, 否则生成默认配置文件
             with open(mdcx_config, "w", encoding="UTF-8") as f:
                 f.write(self.path)
@@ -464,9 +494,15 @@ def get_new_str(a: str, wanted=False):
     if wanted:
         all_website_list = ["javlibrary", "javdb"]
     read_web_list = re.split(r"[,，]", a)
-    new_website_list1 = [i for i in read_web_list if i in all_website_list]  # 去除错误网站
+    new_website_list1 = [
+        i for i in read_web_list if i in all_website_list
+    ]  # 去除错误网站
     new_website_list = []
     # 此处配置包含优先级, 因此必须按顺序去重
-    [new_website_list.append(i) for i in new_website_list1 if i not in new_website_list]  # 去重
+    [
+        new_website_list.append(i)
+        for i in new_website_list1
+        if i not in new_website_list
+    ]  # 去重
     new_str = ",".join(new_website_list)
     return new_str

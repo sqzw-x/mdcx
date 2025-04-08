@@ -46,6 +46,7 @@ class ManualConfig:
         "avsex",
         "avsox",
         "cnmdb",
+        "av911",
         "dahlia",
         "dmm",
         "faleno",
@@ -533,6 +534,7 @@ class ManualConfig:
         "lulubar": "lulubar",
         "love6": "love6",
         "cnmdb": "cnmdb",
+        "av911": "av911",
         "kin8": "kin8",
         "fantastica": "fantastica",
         "theporndb": "theporndb",
@@ -562,7 +564,16 @@ class ManualConfig:
         "导演剪辑最终版",
         "堂友",
     ]
-    all_key_word = ["title", "originaltitle", "outline", "originalplot", "series", "director", "studio", "publisher"]
+    all_key_word = [
+        "title",
+        "originaltitle",
+        "outline",
+        "originalplot",
+        "series",
+        "director",
+        "studio",
+        "publisher",
+    ]
     all_rep_word = {
         "&amp;": "＆",  # 将网页中存在二次抓取的&amp;(实际意义为&)的字符全局替换成＆（大写的&，不会被emby误判，显示更美观）
         "&lt;": "<",  # 将网页中存在二次抓取的&lt;(实际意义为<)的字符全局替换成<
