@@ -11573,6 +11573,13 @@ class Ui_MDCx(object):
         self.checkBox_google.setText(_translate("MDCx", "Google"))
         self.checkBox_deepl.setText(_translate("MDCx", "DeepL"))
         self.label_80.setText(_translate("MDCx", "DeepL API key："))
+
+        self.checkBox_openai = QtWidgets.QCheckBox(self.layoutWidget_2)
+        self.checkBox_openai.setObjectName("checkBox_openai")
+        self.horizontalLayout_20.addWidget(self.checkBox_openai)  
+        self.checkBox_openai.setText(_translate("MDCx", "OpenAI"))              
+        self.checkBox_openai.setText(_translate("MDCx", "OpenAI"))
+
         self.label_164.setText(_translate("MDCx", "当勾选多个时，将随机使用所勾选的其中任一翻译引擎，可降低被封几率"))
         self.groupBox_82.setTitle(_translate("MDCx", "标题"))
         self.checkBox_title_sehua.setText(_translate("MDCx", "使用色花中文标题"))

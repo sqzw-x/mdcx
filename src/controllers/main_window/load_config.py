@@ -574,6 +574,13 @@ def load_config(self):
         self.Ui.checkBox_nfo_website.setChecked("website," in nfo_include_new)
         # endregion
 
+        # close all checkbox
+        self.Ui.checkBox_youdao.setChecked(False)
+        self.Ui.checkBox_google.setChecked(False)
+        self.Ui.checkBox_deepl.setChecked(False)
+        self.Ui.checkBox_openai.setChecked(False)
+
+        # region translate_by   
         translate_by = config.translate_by  # 翻译引擎
         if "youdao" in translate_by:
             self.Ui.checkBox_youdao.setChecked(True)
@@ -581,9 +588,14 @@ def load_config(self):
             self.Ui.checkBox_google.setChecked(True)
         if "deepl" in translate_by:
             self.Ui.checkBox_deepl.setChecked(True)
+        if "openai" in translate_by:
+            self.Ui.checkBox_openai.setChecked(True)
         Flags.translate_by_list = translate_by.strip(",").split(",") if translate_by.strip(",") else []
 
         self.Ui.lineEdit_deepl_key.setText(str(config.deepl_key))  # deepl_key
+        # self.Ui.lineEdit_openai_key.setText(str(config.openai_key))  # openai_key
+        # self.Ui.lineEdit_openai_model.setText(str(config.openai_model))  # openai_model
+        # self.Ui.lineEdit_openai_url.setText(str(config.openai_url))  # openai_url
         # endregion
 
         # region common

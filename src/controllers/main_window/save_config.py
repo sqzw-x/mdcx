@@ -418,7 +418,12 @@ def save_config(self):
         config.translate_by += "google,"
     if self.Ui.checkBox_deepl.isChecked():  # deepl 翻译
         config.translate_by += "deepl,"
+    if self.Ui.checkBox_openai.isChecked():  # openai 翻译
+        config.translate_by += "openai,"
     config.deepl_key = self.Ui.lineEdit_deepl_key.text()  # deepl key
+    # config.openai_key = self.Ui.lineEdit_openai_key.text()  # openai key
+    # config.openai_model = self.Ui.lineEdit_openai_model.text()  # openai model
+    # config.openai_url = self.Ui.lineEdit_openai_url.text()  # openai url
     # endregion
 
     # region common
