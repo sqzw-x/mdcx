@@ -80,8 +80,15 @@ def get_video_size(json_data: JsonData, file_path: str):
         try:
             # Use ffprobe to get video information
             cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", file_path]
-
-            result = subprocess.run(cmd, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            
+            # macOS and Linux use default flags
+            creationflags = 0
+            # Windows use CREATE_NO_WINDOW to suppress the console window
+            if os.name == 'nt':
+                creationflags = subprocess.CREATE_NO_WINDOW
+                
+            result = subprocess.run(cmd, capture_output=True, text=True, creationflags=creationflags)
+                
             data = json.loads(result.stdout)
 
             # Find video stream
