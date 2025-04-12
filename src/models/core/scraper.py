@@ -3,12 +3,13 @@ import re
 import threading
 import time
 import traceback
+from concurrent.futures import ThreadPoolExecutor
+from typing import Optional
 
 from PyQt5.QtWidgets import QMessageBox
 
 from models.base.file import copy_file, move_file, read_link, split_path
 from models.base.path import get_main_path
-from models.base.pool import Pool
 from models.base.utils import convert_path, get_current_time, get_real_time, get_used_time
 from models.config.config import config
 from models.config.resources import resources
@@ -33,6 +34,7 @@ from models.core.file import (
 )
 from models.core.flags import Flags
 from models.core.image import add_mark, extrafanart_copy2, extrafanart_extras_copy
+from models.core.json_data import JsonData, LogBuffer
 from models.core.nfo import get_nfo_data, write_nfo
 from models.core.translate import translate_actor, translate_info, translate_title_outline
 from models.core.utils import (
@@ -51,7 +53,7 @@ from models.tools.emby_actor_image import update_emby_actor_photo
 from models.tools.emby_actor_info import creat_kodi_actors
 
 
-def _scrape_one_file(file_path, file_info, file_mode):
+def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> tuple[bool, JsonData]:
     # 处理单个文件刮削
     # 初始化所需变量
     start_time = time.time()
@@ -63,9 +65,14 @@ def _scrape_one_file(file_path, file_info, file_mode):
     json_data, movie_number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = file_info
 
     # 获取设置的媒体目录、失败目录、成功目录
-    movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = (
-        get_movie_path_setting(file_path)
-    )
+    (
+        _,
+        success_folder,
+        failed_folder,
+        _,
+        _,
+        _,
+    ) = get_movie_path_setting(file_path)
     json_data["failed_folder"] = failed_folder
 
     # 检查文件大小
@@ -74,24 +81,24 @@ def _scrape_one_file(file_path, file_info, file_mode):
         return False, json_data
 
     # 读取模式
-    json_data["file_can_download"] = True
+    file_can_download = True
     json_data["nfo_can_translate"] = True
-    json_data["nfo_update"] = False
+    nfo_update = False
     if config.main_mode == 4:
         result, json_data = get_nfo_data(json_data, file_path, movie_number)
         if result:  # 有nfo
             movie_number = json_data["number"]
-            json_data["nfo_update"] = True
+            nfo_update = True
             if "has_nfo_update" not in read_mode:  # 不更新并返回
                 show_data_result(json_data, start_time)
                 show_movie_info(json_data)
-                json_data["logs"] += f"\n 🙉 [Movie] {file_path}"
+                LogBuffer.log().write(f"\n 🙉 [Movie] {file_path}")
                 save_success_list(file_path, file_path)  # 保存成功列表
                 return True, json_data
 
             # 读取模式要不要下载
             if "read_download_again" not in read_mode:
-                json_data["file_can_download"] = False
+                file_can_download = False
 
             # 读取模式要不要翻译
             if "read_translate_again" not in read_mode:
@@ -126,7 +133,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
         json_data_new["leak"] = json_data["leak"]
         json_data_new["wuma"] = json_data["wuma"]
         json_data_new["youma"] = json_data["youma"]
-        json_data_new["4K"] = ""
+        json_data_new["_4K"] = ""
 
         def deal_tag_data(tag):
             for each in [
@@ -150,7 +157,6 @@ def _scrape_one_file(file_path, file_info, file_mode):
             return tag.replace(",,", ",")
 
         json_data_new["tag"] = deal_tag_data(json_data_old["tag"])
-        json_data_new["logs"] = json_data["logs"]
         json_data_new["file_path"] = json_data["file_path"]
 
         if "破解" in json_data_old["mosaic"] or "流出" in json_data_old["mosaic"]:
@@ -158,7 +164,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
         elif "破解" in json_data["mosaic"] or "流出" in json_data["mosaic"]:
             json_data_new["mosaic"] = json_data["mosaic"]
         json_data.update(json_data_new)
-    elif not json_data["nfo_update"]:
+    elif not nfo_update:
         json_data = crawl(json_data, file_mode)
 
     # 显示json_data结果或日志
@@ -205,11 +211,9 @@ def _scrape_one_file(file_path, file_info, file_mode):
         else:
             done_file_new_path_list.append(file_path)  # 已存在时，添加到列表，停止刮削
             done_file_new_path_list.sort(reverse=True)
-            json_data["error_info"] = "存在重复文件（指刮削后的文件路径相同！），请检查:\n    🍁 " + "\n    🍁 ".join(
-                done_file_new_path_list
+            LogBuffer.error().write(
+                "存在重复文件（指刮削后的文件路径相同！），请检查:\n    🍁 " + "\n    🍁 ".join(done_file_new_path_list)
             )
-            # json_data['req_web'] = 'do_not_update_json_data_dic'
-            # do_not_update_json_data_dic 是不要更新json_data的标识，表示这个文件的数据有问题
             json_data["outline"] = split_path(file_path)[1]
             json_data["tag"] = file_path
             return False, json_data
@@ -284,7 +288,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
 
     # 如果 final_pic_path 没处理过，这时才需要下载和加水印
     if pic_final_catched:
-        if json_data["file_can_download"]:
+        if file_can_download:
             # 下载thumb
             if not thumb_download(json_data, folder_new_path, thumb_final_path):
                 return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
@@ -344,7 +348,7 @@ def _scrape_one_file(file_path, file_info, file_mode):
     return True, json_data
 
 
-def _scrape_exec_thread(task):
+def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     # 获取顺序
     with Flags.lock:
         file_path, count, count_all = task
@@ -407,26 +411,26 @@ def _scrape_exec_thread(task):
     signal.label_result.emit(
         f" 刮削中：{Flags.scrape_started - Flags.succ_count - Flags.fail_count} 成功：{Flags.succ_count} 失败：{Flags.fail_count}"
     )
-    json_data["logs"] += "\n" + "👆" * 50
-    json_data["logs"] += "\n 🙈 [Movie] " + convert_path(file_path)
-    json_data["logs"] += "\n 🚘 [Number] " + movie_number
+    LogBuffer.log().write("\n" + "👆" * 50)
+    LogBuffer.log().write("\n 🙈 [Movie] " + convert_path(file_path))
+    LogBuffer.log().write("\n 🚘 [Number] " + movie_number)
 
     # 如果指定了单一网站，进行提示
     website_single = config.website_single
     if config.scrape_like == "single" and file_mode != FileMode.Single and config.main_mode != 4:
-        json_data["logs"] += f"\n 😸 [Note] You specified 「 {website_single} 」, some videos may not have results! "
+        LogBuffer.log().write(f"\n 😸 [Note] You specified 「 {website_single} 」, some videos may not have results! ")
 
     # 获取刮削数据
     try:
         result, json_data = _scrape_one_file(file_path, file_info, file_mode)
-        if json_data["req_web"] != "do_not_update_json_data_dic":
+        if LogBuffer.req().get() != "do_not_update_json_data_dic":
             Flags.json_data_dic.update({movie_number: json_data})
     except Exception as e:
         _check_stop(file_name_temp)
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
-        json_data["error_info"] = "c1oreMain error: " + str(e)
-        json_data["logs"] += "\n" + traceback.format_exc()
+        LogBuffer.error().write("c1oreMain error: " + str(e))
+        LogBuffer.log().write("\n" + traceback.format_exc())
         result = False
 
     # 显示刮削数据
@@ -439,7 +443,7 @@ def _scrape_exec_thread(task):
                 + str(Flags.succ_count)
                 + "."
                 + file_show_name.replace(movie_number, json_data["number"])
-                + json_data["4K"]
+                + json_data["_4K"]
             )
             signal.show_list_name(succ_show_name, "succ", json_data, movie_number)
         else:
@@ -450,19 +454,19 @@ def _scrape_exec_thread(task):
                 + str(Flags.fail_count)
                 + "."
                 + file_show_name.replace(movie_number, json_data["number"])
-                + json_data["4K"]
+                + json_data["_4K"]
             )
             signal.show_list_name(fail_show_name, "fail", json_data, movie_number)
-            if json_data["error_info"]:
-                json_data["logs"] += f'\n 🔴 [Failed] Reason: {json_data["error_info"]}'
-                if "WinError 5" in json_data["error_info"]:
-                    json_data["logs"] += (
+            if e := LogBuffer.error().get():
+                LogBuffer.log().write(f"\n 🔴 [Failed] Reason: {e}")
+                if "WinError 5" in e:
+                    LogBuffer.log().write(
                         "\n 🔴 该问题为权限问题：请尝试以管理员身份运行，同时关闭其他正在运行的Python脚本！"
                     )
-            fail_file_path = move_file_to_failed_folder(json_data, file_path, folder_old_path, file_ex)
-            Flags.failed_list.append([fail_file_path, json_data["error_info"]])
+            fail_file_path = move_file_to_failed_folder(json_data, file_path, folder_old_path)
+            Flags.failed_list.append([fail_file_path, LogBuffer.error().get()])
             Flags.failed_file_list.append(fail_file_path)
-            _failed_file_info_show(str(Flags.fail_count), fail_file_path, json_data["error_info"])
+            _failed_file_info_show(str(Flags.fail_count), fail_file_path, LogBuffer.error().get())
             signal.view_failed_list_settext.emit(f"失败 {Flags.fail_count}")
     except Exception as e:
         _check_stop(file_name_temp)
@@ -481,8 +485,7 @@ def _scrape_exec_thread(task):
             scrape_info_begin = f"{count:d}/{count_all:d} ({progress_percentage}) round({Flags.count_claw}) {split_path(file_path)[1]}    新的刮削线程"
             scrape_info_begin = "\n\n\n" + "👇" * 50 + "\n" + scrape_info_begin
             scrape_info_after = f"\n 🕷 {get_current_time()} {count}/{count_all} {split_path(file_path)[1]} 刮削完成！用时 {used_time} 秒！"
-            json_data["logs"] = scrape_info_begin + json_data["logs"] + scrape_info_after
-            signal.show_log_text(json_data["logs"])
+            signal.show_log_text(scrape_info_begin + LogBuffer.log().get() + scrape_info_after)
             remain_count = Flags.scrape_started - count
             if Flags.scrape_started == count_all:
                 signal.show_log_text(f" 🕷 剩余正在刮削的线程：{remain_count}")
@@ -546,7 +549,7 @@ def _scrape_exec_thread(task):
         signal.show_log_text(str(e))
 
 
-def scrape(file_mode: FileMode, movie_list):
+def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
     Flags.reset()
     if movie_list is None:
         movie_list = []
@@ -623,7 +626,7 @@ def scrape(file_mode: FileMode, movie_list):
 
         # 创建线程池
         Flags.next_start_time = time.time()
-        Flags.pool = Pool(thread_number, "MDCx-Pool")
+        Flags.pool = ThreadPoolExecutor(thread_number, "MDCx-Pool")
         Flags.pool.map(_scrape_exec_thread, task_list)
 
         # self.extrafanart_pool.shutdown(wait=True)
@@ -687,7 +690,7 @@ def scrape(file_mode: FileMode, movie_list):
         signal.exec_exit_app.emit()
 
 
-def start_new_scrape(file_mode: FileMode, movie_list=None):
+def start_new_scrape(file_mode: FileMode, movie_list: Optional[list[str]] = None) -> None:
     signal.change_buttons_status.emit()
     signal.exec_set_processbar.emit(0)
     try:
@@ -701,7 +704,7 @@ def start_new_scrape(file_mode: FileMode, movie_list=None):
         signal.show_log_text(traceback.format_exc())
 
 
-def _check_stop(file_name_temp):
+def _check_stop(file_name_temp: str) -> None:
     if signal.stop:
         Flags.now_kill += 1
         signal.show_log_text(
@@ -711,10 +714,10 @@ def _check_stop(file_name_temp):
             f"⛔️ 正在停止刮削...\n   正在停止已在运行的任务线程（{Flags.now_kill}/{Flags.total_kills}）..."
         )
         # exceptions must derive from BaseException
-        raise "手动停止刮削"
+        raise Exception("手动停止刮削")
 
 
-def _failed_file_info_show(count, path, error_info):
+def _failed_file_info_show(count: str, path: str, error_info: str) -> None:
     folder = os.path.dirname(path)
     info_str = f"{'🔴 ' + count + '.':<3} {path} \n    所在目录: {folder} \n    失败原因: {error_info} \n"
     if os.path.islink(path):
@@ -727,7 +730,7 @@ def _failed_file_info_show(count, path, error_info):
     signal.logs_failed_show.emit(info_str)
 
 
-def get_remain_list():
+def get_remain_list() -> bool:
     remain_list_path = resources.userdata_path("remain.txt")
     if os.path.isfile(remain_list_path):
         with open(remain_list_path, encoding="utf-8", errors="ignore") as f:
@@ -773,14 +776,21 @@ def get_remain_list():
     return False
 
 
-def again_search():
+def again_search() -> None:
     Flags.new_again_dic = Flags.again_dic.copy()
     new_movie_list = list(Flags.new_again_dic.keys())
     Flags.again_dic.clear()
     start_new_scrape(FileMode.Again, new_movie_list)
 
 
-def move_sub(json_data, folder_old_path, folder_new_path, file_name, sub_list, naming_rule):
+def move_sub(
+    json_data: JsonData,
+    folder_old_path: str,
+    folder_new_path: str,
+    file_name: str,
+    sub_list: list[str],
+    naming_rule: str,
+) -> None:
     copy_flag = False
 
     # 没有字幕，返回
@@ -810,9 +820,9 @@ def move_sub(json_data, folder_old_path, folder_new_path, file_name, sub_list, n
         if os.path.exists(sub_old_path) and not os.path.exists(sub_new_path):
             if copy_flag:
                 if not copy_file(sub_old_path, sub_new_path):
-                    json_data["logs"] += "\n 🔴 Sub copy failed!"
+                    LogBuffer.log().write("\n 🔴 Sub copy failed!")
                     return
             elif not move_file(sub_old_path, sub_new_path):
-                json_data["logs"] += "\n 🔴 Sub move failed!"
+                LogBuffer.log().write("\n 🔴 Sub move failed!")
                 return
-        json_data["logs"] += "\n 🍀 Sub done!"
+        LogBuffer.log().write("\n 🍀 Sub done!")

@@ -10,7 +10,6 @@ class GeneratedConfig:
     Auto generated configuration
     Also used as default configuration
     """
-
     # modified_time
     modified_time = r"2024-09-24 23:18:45"
     version = 120240924
@@ -68,9 +67,7 @@ class GeneratedConfig:
     # website
     scrape_like = r"info"
     website_single = r"airav_cc"
-    website_youma = (
-        r"airav_cc,iqqtv,javbus,freejavbt,jav321,dmm,javlibrary,7mmtv,hdouban,javdb,avsex,lulubar,airav,xcity,avsox"
-    )
+    website_youma = r"airav_cc,iqqtv,javbus,freejavbt,jav321,dmm,javlibrary,7mmtv,hdouban,javdb,avsex,lulubar,airav,xcity,avsox"
     website_wuma = r"iqqtv,javbus,freejavbt,jav321,avsox,7mmtv,hdouban,javdb,airav"
     website_suren = r"mgstage,avsex,jav321,freejavbt,7mmtv,javbus,javdb"
     website_fc2 = r"fc2,fc2club,fc2hub,freejavbt,7mmtv,hdouban,javdb,avsox,airav"

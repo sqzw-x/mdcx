@@ -10,6 +10,7 @@ from lxml import etree
 
 from models.base.web import curl_html, get_dmm_trailer
 from models.config.config import config
+from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
 # import traceback
@@ -197,11 +198,16 @@ def get_wanted(html):
     return str(result[0]) if result else ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp", org_language="zh_cn"):
+def main(
+    number,
+    appoint_url="",
+    language="jp",
+    org_language="zh_cn",
+):
     global sleep
     start_time = time.time()
     website_name = "javdb"
-    req_web += "-> %s" % website_name
+    LogBuffer.req().write(f"-> {website_name}")
 
     javdb_time = config.javdb_time
     header = {"cookie": config.javdb}
@@ -220,18 +226,18 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp", org_lan
 
     if javdb_time > 0 and sleep:
         rr = random.randint(int(javdb_time / 2), javdb_time)
-        log_info += "\n    🌐 javdb (⏱ %sS)" % rr
+        LogBuffer.info().write(f"\n    🌐 javdb (⏱ {rr}S)")
         for i in range(rr):  # 检查是否手动停止刮削
             time.sleep(1)
     else:
-        log_info += "\n    🌐 javdb"
+        LogBuffer.info().write("\n    🌐 javdb")
 
     try:  # 捕获主动抛出的异常
         if not real_url:
             # 生成搜索地址
-            url_search = javdb_url + "/search?q=" + number.strip() + "&locale=zh"
-            debug_info = "搜索地址: %s " % url_search
-            log_info += web_info + debug_info
+            url_search = f"{javdb_url}/search?q={number.strip()}&locale=zh"
+            debug_info = f"搜索地址: {url_search} "
+            LogBuffer.info().write(web_info + debug_info)
 
             # 先使用scraper方法请求，失败时再使用get请求
             result, html_search = curl_html(url_search, headers=header)
@@ -240,25 +246,25 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp", org_lan
                 if html_search.startswith("403"):
                     debug_info = f"网站禁止访问！！请更换其他非日本节点！点击 {url_search} 查看详情！"
                 else:
-                    debug_info = "请求错误: %s" % html_search
-                log_info += web_info + debug_info
+                    debug_info = f"请求错误: {html_search}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             # 判断返回内容是否有问题
             if "The owner of this website has banned your access based on your browser's behaving" in html_search:
                 debug_info = f"由于请求过多，javdb网站暂时禁止了你当前IP的访问！！点击 {url_search} 查看详情！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             if "Due to copyright restrictions" in html_search:
                 debug_info = (
                     f"由于版权限制，javdb网站禁止了日本IP的访问！！请更换日本以外代理！点击 {url_search} 查看详情！"
                 )
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             if "ray-id" in html_search:
                 real_url = ""
                 debug_info = "搜索结果: 被 Cloudflare 5 秒盾拦截！请尝试更换cookie！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             # 获取链接
@@ -266,7 +272,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp", org_lan
             real_url = get_real_url(html, number)
             if not real_url:
                 debug_info = "搜索结果: 未匹配到番号！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
         if real_url:
@@ -274,45 +280,45 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp", org_lan
             if real_url.startswith("/v/"):
                 javdbid = real_url.replace("/v/", "")
             if not appoint_url:
-                real_url = javdb_url + real_url + "?locale=zh"
-            debug_info = "番号地址: %s " % real_url
-            log_info += web_info + debug_info
+                real_url = f"{javdb_url}{real_url}?locale=zh"
+            debug_info = f"番号地址: {real_url} "
+            LogBuffer.info().write(web_info + debug_info)
 
             result, html_info = curl_html(real_url, headers=header)
             if not result:
-                debug_info = "请求错误: %s" % html_info
-                log_info += web_info + debug_info
+                debug_info = f"请求错误: {html_info}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             # 判断返回内容是否有问题
             if "The owner of this website has banned your access based on your browser's behaving" in html_info:
                 debug_info = f"由于请求过多，javdb网站暂时禁止了你当前IP的访问！！点击 {real_url} 查看详情！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             if "Due to copyright restrictions" in html_info:
                 debug_info = (
                     f"由于版权限制，javdb网站禁止了日本IP的访问！！请更换日本以外代理！点击 {real_url} 查看详情！"
                 )
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             if "/plans/sfpay_order" in html_info or "payment-methods" in html_info:
                 debug_info = f"需要 VIP 权限才能访问此内容！点击 {real_url} 查看详情！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             if "/password_resets" in html_info:
                 debug_info = f"此內容需要登入才能查看或操作！点击 {real_url} 查看详情！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 if config.javdb:
                     debug_info = "Cookie 已失效，请到设置中更新 javdb Cookie！"
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                 else:
                     debug_info = "请到【设置】-【网络】中添加 javdb Cookie！"
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             if "Cloudflare" in html_info:
                 real_url = ""
                 debug_info = "返回结果: 被 Cloudflare 5 秒盾拦截！请尝试更换cookie！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             html_detail = etree.fromstring(html_info, etree.HTMLParser())
@@ -321,7 +327,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp", org_lan
             title, originaltitle = get_title(html_detail, org_language)  # 获取标题并去掉头尾歌手名
             if not title:
                 debug_info = "数据获取失败: 未获取到标题！"
-                log_info += web_info + debug_info
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             mosaic = get_mosaic(title)
             actor, all_actor = get_actor(html_detail)  # 获取actor
@@ -394,15 +400,6 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp", org_lan
                     "trailer": trailer,
                     "image_download": image_download,
                     "image_cut": image_cut,
-                    "log_info": log_info,
-                    "error_info": "",
-                    "req_web": req_web
-                    + "(%ss) "
-                    % (
-                        round(
-                            (time.time() - start_time),
-                        )
-                    ),
                     "mosaic": mosaic,
                     "website": website,
                     "wanted": wanted,
@@ -410,29 +407,20 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp", org_lan
                 if javdbid:
                     dic["javdbid"] = javdbid
                 debug_info = "数据获取成功！"
-                log_info += web_info + debug_info
-                dic["log_info"] = log_info
+                LogBuffer.info().write(web_info + debug_info)
+
             except Exception as e:
-                debug_info = "数据生成出错: %s" % str(e)
-                log_info += web_info + debug_info
+                debug_info = f"数据生成出错: {str(e)}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
     except Exception as e:
         # print(traceback.format_exc())
-        debug_info = str(e)
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -442,6 +430,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp", org_lan
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 

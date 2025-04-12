@@ -16,8 +16,8 @@ from PIL import Image
 from ping3 import ping
 from requests.exceptions import (
     ChunkedEncodingError,
-    ConnectTimeout,
     ConnectionError,
+    ConnectTimeout,
     ContentDecodingError,
     HTTPError,
     InvalidHeader,
@@ -64,6 +64,35 @@ class WebRequests:
         self.pool = ThreadPoolExecutor(32)
         self.curl_session = curl_cffi.requests.Session(max_redirects=10)
 
+    def _prepare_request_params(self, url=None, headers=None, proxies=True, timeout=None):
+        """预处理请求参数"""
+        # 处理代理
+        if proxies is True:
+            proxies = config.proxies
+        elif proxies is False:
+            proxies = {"http": None, "https": None}
+
+        # 处理请求头
+        if not headers:
+            headers = config.headers.copy()
+
+        if url:
+            if "getchu" in url:
+                headers.update({"Referer": "http://www.getchu.com/top.html"})
+            elif "xcity" in url:
+                headers.update(
+                    {"referer": "https://xcity.jp/result_published/?genre=%2Fresult_published%2F&q=2&sg=main&num=60"}
+                )
+            elif "javbus" in url:
+                headers.update({"Referer": "https://www.javbus.com/"})
+            elif "giga" in url and "cookie_set.php" not in url:
+                headers.update({"Referer": "https://www.giga-web.jp/top.html"})
+
+        # 处理超时
+        timeout = timeout or config.timeout
+
+        return headers, proxies, timeout
+
     def get_html(
         self,
         url: str,
@@ -79,185 +108,194 @@ class WebRequests:
         encoding="utf-8",
         back_cookie=False,
     ):
-        # 获取代理信息
-        retry_times = config.retry
-        if proxies:
-            proxies = config.proxies
+        headers, proxies, timeout = self._prepare_request_params(url, headers, proxies, timeout)
+
+        if content:
+            return self._get_content(url, headers, cookies, proxies, timeout, allow_redirects)
+        elif json_data:
+            return self._get_json(url, headers, cookies, proxies, timeout, allow_redirects, encoding)
+        elif res:
+            return self._get_response(url, headers, cookies, proxies, timeout, allow_redirects)
         else:
-            proxies = {
-                "http": None,
-                "https": None,
-            }
+            return self._get_text(url, headers, cookies, proxies, timeout, allow_redirects, encoding, keep, back_cookie)
 
-        if not headers:
-            headers = config.headers
-        if not timeout:
-            timeout = config.timeout
-        if "getchu" in url:
-            headers_o = {
-                "Referer": "http://www.getchu.com/top.html",
-            }
-            headers.update(headers_o)
-        elif "xcity" in url:
-            headers_o = {
-                "referer": "https://xcity.jp/result_published/?genre=%2Fresult_published%2F&q=2&sg=main&num=60",
-            }
-            headers.update(headers_o)
-        # javbus封面图需携带refer，refer似乎没有做强校验，但须符合格式要求，否则403
-        elif "javbus" in url:
-            headers_o = {
-                "Referer": "https://www.javbus.com/",
-            }
-            headers.update(headers_o)
-        elif "giga" in url:
-            # 搜索时需要携带refer，获取cookies时不能携带
-            giga_refer = "" if "cookie_set.php" in url else "https://www.giga-web.jp/top.html"
-            headers_o = {
-                "Referer": giga_refer,
-            }
-            headers.update(headers_o)
-
-        signal.add_log(f"🔎 请求 {url}")
-        for i in range(int(retry_times)):
+    def _get_content(self, url, headers, cookies, proxies, timeout, allow_redirects):
+        """获取二进制内容"""
+        for i in range(config.retry):
             try:
-                if keep:
-                    response = self.session_g.get(
-                        url,
-                        headers=headers,
-                        cookies=cookies,
-                        proxies=proxies,
-                        timeout=timeout,
-                        verify=False,
-                        allow_redirects=allow_redirects,
-                    )
-                else:
-                    response = requests.get(
-                        url,
-                        headers=headers,
-                        cookies=cookies,
-                        proxies=proxies,
-                        timeout=timeout,
-                        verify=False,
-                        allow_redirects=allow_redirects,
-                    )
-                # print(response.headers.items())
-                # print(response.status_code, url)
-                _header = response.headers
-                if back_cookie:
-                    _header = response.cookies if response.cookies else _header
-                if response.status_code > 299:
-                    if response.status_code == 302 and allow_redirects:
-                        pass
-                    else:
-                        error_info = f"{response.status_code} {url}"
-                        signal.add_log(f"🔴 重试 [{i + 1}/{retry_times}] {error_info}")
-                        continue
-                else:
-                    signal.add_log(f"✅ 成功 {url}")
-                if res:
-                    return _header, response
-                if content:
-                    return _header, response.content
-                response.encoding = encoding
-                if json_data:
-                    return _header, response.json()
-                return _header, response.text
+                response = self.session_g.get(
+                    url,
+                    headers=headers,
+                    cookies=cookies,
+                    proxies=proxies,
+                    timeout=timeout,
+                    verify=False,
+                    allow_redirects=allow_redirects,
+                )
+                if self._check_response(response, url, i):
+                    return True, response.content
             except Exception as e:
-                error_info = f"{url}\nError: {e}"
-                signal.add_log(f"[{i + 1}/{retry_times}] {error_info}")
-        signal.add_log(f"🔴 请求失败！{error_info}")
-        return False, error_info
+                self._handle_request_error(e, url, i)
+        return False, f"请求失败! {url}"
+
+    def _get_json(self, url, headers, cookies, proxies, timeout, allow_redirects, encoding):
+        """获取JSON响应"""
+        for i in range(config.retry):
+            try:
+                response = self.session_g.get(
+                    url,
+                    headers=headers,
+                    cookies=cookies,
+                    proxies=proxies,
+                    timeout=timeout,
+                    verify=False,
+                    allow_redirects=allow_redirects,
+                )
+                if self._check_response(response, url, i):
+                    response.encoding = encoding
+                    return True, response.json()
+            except Exception as e:
+                self._handle_request_error(e, url, i)
+        return False, f"请求失败! {url}"
+
+    def _get_response(self, url, headers, cookies, proxies, timeout, allow_redirects):
+        """获取完整响应对象"""
+        for i in range(config.retry):
+            try:
+                response = self.session_g.get(
+                    url,
+                    headers=headers,
+                    cookies=cookies,
+                    proxies=proxies,
+                    timeout=timeout,
+                    verify=False,
+                    allow_redirects=allow_redirects,
+                )
+                if self._check_response(response, url, i):
+                    return response.headers, response
+            except Exception as e:
+                self._handle_request_error(e, url, i)
+        return False, f"请求失败! {url}"
+
+    def _get_text(self, url, headers, cookies, proxies, timeout, allow_redirects, encoding, keep, back_cookie):
+        """获取文本响应"""
+        session = self.session_g if keep else requests
+        for i in range(config.retry):
+            try:
+                response = session.get(
+                    url,
+                    headers=headers,
+                    cookies=cookies,
+                    proxies=proxies,
+                    timeout=timeout,
+                    verify=False,
+                    allow_redirects=allow_redirects,
+                )
+                if self._check_response(response, url, i):
+                    _header = response.cookies if back_cookie else response.headers
+                    response.encoding = encoding
+                    return _header, response.text
+            except Exception as e:
+                self._handle_request_error(e, url, i)
+        return False, f"请求失败! {url}"
 
     def post_html(
-        self, url: str, data=None, json=None, headers=None, cookies=None, proxies=True, json_data=False, keep=True
+        self, url: str, data=None, json=None, headers=None, cookies=None, use_proxy=True, json_data=False, keep=True
     ):
-        # 获取代理信息
-        timeout = config.timeout
-        retry_times = config.retry
-        if not headers:
-            headers = config.headers
-        if proxies:
-            proxies = config.proxies
+        # 预处理请求参数
+        headers, proxies, timeout = self._prepare_request_params(headers=headers, proxies=use_proxy)
+
+        # 根据参数组合路由到不同的处理子方法
+        if json_data:
+            return self._post_json(url, data, json, headers, cookies, proxies, timeout, keep)
         else:
-            proxies = {
-                "http": None,
-                "https": None,
-            }
+            return self._post_text(url, data, json, headers, cookies, proxies, timeout, keep)
 
-        signal.add_log(f"🔎 POST请求 {url}")
-        for i in range(int(retry_times)):
+    def _post_json(self, url, data, json_data, headers, cookies, proxies, timeout, keep):
+        """发送POST请求并获取JSON响应"""
+        session = self.session_g if keep else requests
+        for i in range(config.retry):
             try:
-                if keep:
-                    response = self.session_g.post(
-                        url=url,
-                        data=data,
-                        json=json,
-                        headers=headers,
-                        cookies=cookies,
-                        proxies=proxies,
-                        timeout=timeout,
-                        verify=False,
-                    )
-                else:
-                    response = requests.post(
-                        url=url,
-                        data=data,
-                        json=json,
-                        headers=headers,
-                        cookies=cookies,
-                        proxies=proxies,
-                        timeout=timeout,
-                        verify=False,
-                    )
-                if response.status_code > 299:
-                    error_info = f"{response.status_code} {url}"
-                    signal.add_log(f"🔴 重试 [{i + 1}/{retry_times}] {error_info}")
-                    continue
-                else:
-                    signal.add_log(f"✅ POST成功 {url}")
-                response.encoding = "utf-8"
-                if json_data:
+                response = session.post(
+                    url,
+                    data=data,
+                    json=json_data,
+                    headers=headers,
+                    cookies=cookies,
+                    proxies=proxies,
+                    timeout=timeout,
+                    verify=False,
+                )
+                if self._check_response(response, url, i):
                     return True, response.json()
-                return True, response.text
             except Exception as e:
-                error_info = f"{url}\nError: {e}"
-                signal.add_log(f"[{i + 1}/{retry_times}] {error_info}")
-        signal.add_log(f"🔴 请求失败！{error_info}")
-        return False, error_info
+                self._handle_request_error(e, url, i)
+        return False, f"请求失败! {url}"
 
-    # def scraper_html(self, url: str, proxies=True, cookies=None, headers=None):
-    #     # 获取代理信息
-    #     is_docker = config.is_docker
-    #     timeout = config.timeout
-    #     retry_times = config.retry
-    #     if is_docker:
-    #         return self.get_html(url, proxies=proxies, cookies=cookies)
-    #     if proxies:
-    #         proxies = config.proxies
-    #     else:
-    #         proxies = {
-    #             "http": None,
-    #             "https": None,
-    #         }
-    #
-    #     signal.add_log(f'🔎 Scraper请求 {url}')
-    #     for i in range(retry_times):
-    #         try:
-    #             with self.scraper.get(url, headers=headers, proxies=proxies, cookies=cookies, timeout=timeout) as f:
-    #                 response = f
-    #
-    #             if response.status_code > 299:
-    #                 error_info = f"{response.status_code} {url} {str(f.cookies).replace('<RequestsCookieJar[', '').replace(']>', '')}"
-    #                 return False, error_info
-    #             else:
-    #                 signal.add_log(f'✅ Scraper成功 {url}')
-    #             response.encoding = 'utf-8'
-    #             return True, f.text
-    #         except Exception as e:
-    #             error_info = '%s\nError: %s' % (url, e)
-    #             signal.add_log('🔴 重试 [%s/%s] %s' % (i + 1, retry_times, error_info))
-    #     signal.add_log(f"🔴 请求失败！{error_info}")
-    #     return False, error_info
+    def _post_text(self, url, data, json_data, headers, cookies, proxies, timeout, keep):
+        """发送POST请求并获取文本响应"""
+        session = self.session_g if keep else requests
+        for i in range(config.retry):
+            try:
+                response = session.post(
+                    url,
+                    data=data,
+                    json=json_data,
+                    headers=headers,
+                    cookies=cookies,
+                    proxies=proxies,
+                    timeout=timeout,
+                    verify=False,
+                )
+                if self._check_response(response, url, i):
+                    response.encoding = "utf-8"
+                    return True, response.text
+            except Exception as e:
+                self._handle_request_error(e, url, i)
+        return False, f"请求失败! {url}"
+
+    def _get_proxies(self, use_proxy):
+        """获取代理配置"""
+        if use_proxy is True:
+            return config.proxies
+        elif use_proxy is False:
+            return {"http": None, "https": None}
+        return use_proxy
+
+    def _get_headers(self, headers, url=None):
+        """获取请求头"""
+        if not headers:
+            headers = config.headers.copy()
+
+        if url:
+            if "getchu" in url:
+                headers.update({"Referer": "http://www.getchu.com/top.html"})
+            elif "xcity" in url:
+                headers.update(
+                    {"referer": "https://xcity.jp/result_published/?genre=%2Fresult_published%2F&q=2&sg=main&num=60"}
+                )
+            elif "javbus" in url:
+                headers.update({"Referer": "https://www.javbus.com/"})
+            elif "giga" in url and "cookie_set.php" not in url:
+                headers.update({"Referer": "https://www.giga-web.jp/top.html"})
+
+        return headers
+
+    def _check_response(self, response, url, retry_index):
+        """检查响应状态"""
+        if response.status_code > 299:
+            if not (response.status_code == 302 and response.headers.get("Location")):
+                error_info = f"{response.status_code} {url}"
+                signal.add_log(f"🔴 重试 [{retry_index + 1}/{config.retry}] {error_info}")
+                return False
+        else:
+            signal.add_log(f"✅ 成功 {url}")
+        return True
+
+    def _handle_request_error(self, error, url, retry_index):
+        """处理请求异常"""
+        error_info = f"{url}\nError: {error}"
+        signal.add_log(f"[{retry_index + 1}/{config.retry}] {error_info}")
 
     def _get_filesize(self, url):
         proxies = config.proxies
@@ -562,7 +600,7 @@ def get_avsox_domain():
 
 def get_amazon_data(req_url):
     """
-    获取 Amazon 数据，修改地区为540-0002
+    获取 Amazon 数据
     """
     headers = {
         "accept-encoding": "gzip, deflate, br",
@@ -595,70 +633,6 @@ def get_amazon_data(req_url):
 
         if not result:
             return False, html_info
-
-    if "540-0002" not in html_info:
-        try:
-            # 获取 anti_csrftoken_a2z
-            anti_csrftoken_a2z = re.findall(r"anti-csrftoken-a2z([^}]+)", html_info)[0].replace("&quot;", "").strip(":")
-            session_id = re.findall(r'sessionId: "([^"]+)', html_info)[0]
-            ubid_acbjp = ""
-            if "ubid-acbjp" in str(result):
-                try:
-                    ubid_acbjp = result["set-cookie"]
-                except:
-                    try:
-                        ubid_acbjp = re.findall(r"ubid-acbjp=([^ ]+)", str(result))[0]
-                    except:
-                        pass
-            headers_o = {
-                "Anti-csrftoken-a2z": anti_csrftoken_a2z,
-                "cookie": f"session-id={session_id}; ubid_acbjp={ubid_acbjp}",
-            }
-            headers.update(headers_o)
-            mid_url = (
-                "https://www.amazon.co.jp/portal-migration/hz/glow/get-rendered-toaster"
-                "?pageType=Search&aisTransitionState=in&rancorLocationSource=REALM_DEFAULT&_="
-            )
-            result, html = curl_html(mid_url, headers=headers)
-            try:
-                anti_csrftoken_a2z = re.findall(r'csrfToken="([^"]+)', html)[0]
-                ubid_acbjp = re.findall(r"ubid-acbjp=([^ ]+)", str(result))[0]
-            except:
-                pass
-
-            # 修改配送地址为日本，这样结果多一些
-            headers_o = {
-                "Anti-csrftoken-a2z": anti_csrftoken_a2z,
-                "Content-length": "140",
-                "Content-Type": "application/json",
-                "cookie": f"session-id={session_id}; ubid_acbjp={ubid_acbjp}",
-            }
-            headers.update(headers_o)
-            post_url = "https://www.amazon.co.jp/portal-migration/hz/glow/address-change?actionSource=glow"
-            data = {
-                "locationType": "LOCATION_INPUT",
-                "zipCode": "540-0002",
-                "storeContext": "generic",
-                "deviceType": "web",
-                "pageType": "Search",
-                "actionSource": "glow",
-            }
-            result, html = post_html(post_url, json=data, headers=headers)
-            if result:
-                if "540-0002" in str(html):
-                    headers = {
-                        "Host": "www.amazon.co.jp",
-                        "User-Agent": get_user_agent(),
-                    }
-                    result, html_info = curl_html(req_url, headers=headers)
-                else:
-                    print("Amazon 修改地区失败: ", req_url, str(result), str(html))
-            else:
-                print("Amazon 修改地区异常: ", req_url, str(result), str(html))
-
-        except Exception as e:
-            print("Amazon 修改地区出错: ", req_url, str(e))
-            print(traceback.format_exc())
 
     return result, html_info
 

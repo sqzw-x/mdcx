@@ -304,7 +304,7 @@ def init_QTreeWidget(self):
     # 初始化树状控件
     try:
         self.set_label_file_path.emit(
-            "🎈 当前刮削路径: \n %s" % get_movie_path_setting()[0]
+            f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}"
         )  # 主界面右上角显示提示信息
     except:
         signal.show_traceback_log(traceback.format_exc())

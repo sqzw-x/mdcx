@@ -16,7 +16,12 @@ from views.posterCutTool import Ui_Dialog_cut_poster
 
 
 class DraggableButton(QPushButton):
-    def __init__(self, title, parent, cutwindow):
+    def __init__(
+        self,
+        title,
+        parent,
+        cutwindow,
+    ):
         super().__init__(title, parent)
         self.iniDragCor = [0, 0]
         self.cutwindow = cutwindow
@@ -131,7 +136,7 @@ class CutWindow(QDialog):
         x, y, width, height = self.Ui.pushButton_select_cutrange.geometry().getRect()
         height = (abc + 1) / 10000 * self.pic_h
         self.rect_h_w_ratio = height / width  # 更新高宽比
-        self.Ui.label_cut_ratio.setText(str("%.2f" % self.rect_h_w_ratio))
+        self.Ui.label_cut_ratio.setText(str(f"{self.rect_h_w_ratio:.2f}"))
         self.Ui.pushButton_select_cutrange.setGeometry(x, y, width, height)  # 显示裁剪框
         self.getRealPos()  # 显示裁剪框实际位置
 
@@ -140,7 +145,7 @@ class CutWindow(QDialog):
         x, y, width, height = self.Ui.pushButton_select_cutrange.geometry().getRect()
         width = (abc + 1) / 10000 * self.pic_w
         self.rect_h_w_ratio = height / width  # 更新高宽比
-        self.Ui.label_cut_ratio.setText(str("%.2f" % self.rect_h_w_ratio))
+        self.Ui.label_cut_ratio.setText(str(f"{self.rect_h_w_ratio:.2f}"))
         self.Ui.pushButton_select_cutrange.setGeometry(x, y, width, height)  # 显示裁剪框
         self.getRealPos()  # 显示裁剪框实际位置
 
@@ -346,7 +351,6 @@ class CutWindow(QDialog):
         # 显示实际裁剪位置
         self.Ui.label_cut_postion.setText(f"{str(self.c_x)}, {str(self.c_y)}, {str(self.c_x2)}, {str(self.c_y2)}")
 
-        # self.show_traceback_log('选择位置： %s, %s, %s, %s' % (str(self.c_x), str(self.c_y), str(self.c_x2), str(self.c_y2)))
         # 显示实际裁剪尺寸
         self.Ui.label_cut_size.setText(f"{str(self.c_w)}, {str(self.c_h)}")
 

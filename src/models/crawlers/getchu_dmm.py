@@ -5,18 +5,21 @@ import json
 from models.crawlers import dmm, getchu
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="jp"):
-    json_data_getchu = json.loads(getchu.main(number, appoint_url, log_info, req_web, "jp"))
+def main(
+    number,
+    appoint_url="",
+    language="jp",
+):
+    json_data_getchu = json.loads(getchu.main(number, appoint_url, "jp"))
     json_data_new = json_data_getchu["getchu"]["jp"]
-    log_info = json_data_new["log_info"]
-    req_web = json_data_new["req_web"]
+
     poster = json_data_new.get("poster")
     outline = json_data_new.get("outline")
     if json_data_new["title"]:
         number = json_data_new["number"]
         if number.startswith("DLID") or "dl.getchu" in appoint_url:
             return json_data_getchu
-    json_data_dmm = json.loads(dmm.main(number, appoint_url, log_info, req_web, "jp"))
+    json_data_dmm = json.loads(dmm.main(number, appoint_url, "jp"))
     if json_data_dmm["dmm"]["jp"]["title"]:
         json_data_new.update(json_data_dmm["dmm"]["jp"])
         if poster:  # 使用 getchu 封面
@@ -24,9 +27,6 @@ def main(number, appoint_url="", log_info="", req_web="", language="jp"):
         if outline:  # 使用 getchu 简介
             json_data_new["outline"] = outline
             json_data_new["originalplot"] = outline
-    else:
-        json_data_new["log_info"] = json_data_dmm["dmm"]["jp"]["log_info"]
-        json_data_new["req_web"] = json_data_dmm["dmm"]["jp"]["req_web"]
     return json.dumps(
         {
             "getchu_dmm": {

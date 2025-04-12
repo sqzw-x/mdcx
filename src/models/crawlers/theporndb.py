@@ -12,6 +12,7 @@ import urllib3
 from models.base.number import long_name, remove_escape_string
 from models.base.web import get_html
 from models.config.config import config
+from models.core.json_data import LogBuffer
 from models.crawlers import theporndb_movies
 
 urllib3.disable_warnings()  # yapf: disable
@@ -109,7 +110,12 @@ def read_data(data):
     )
 
 
-def get_real_url(res_search, file_path, series_ex, date):
+def get_real_url(
+    res_search,
+    file_path,
+    series_ex,
+    date,
+):
     search_data = res_search.get("data")
     file_name = os.path.split(file_path)[1].lower()
     new_file_name = re.findall(r"[\.-_]\d{2}\.\d{2}\.\d{2}(.+)", file_name)
@@ -254,12 +260,18 @@ def get_year(release):
         return ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number=""):
+def main(
+    number,
+    appoint_url="",
+    language="zh_cn",
+    file_path="",
+    appoint_number="",
+):
     if not file_path:
         file_path = number + ".mp4"
     start_time = time.time()
     website_name = "theporndb"
-    req_web += "-> %s" % website_name
+    LogBuffer.req().write(f"-> {website_name}")
 
     api_token = config.theporndb_api_token
     theporndb_no_hash = config.theporndb_no_hash
@@ -269,7 +281,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
     poster_url = ""
     image_download = False
     image_cut = ""
-    log_info += "\n    🌐 theporndb"
+    LogBuffer.info().write("\n    🌐 theporndb")
     web_info = "\n       "
     debug_info = ""
     mosaic = "无码"
@@ -284,7 +296,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
     try:  # 捕获主动抛出的异常
         if not api_token:
             debug_info = "请添加 API Token 后刮削！（「设置」-「网络」-「API Token」）"
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
         if not real_url:
@@ -294,17 +306,17 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                     hash = oshash.oshash(file_path)
                     # hash = '8679fcbdd29fa735'
                     url_hash = f"https://api.theporndb.net/scenes/hash/{hash}"
-                    debug_info = "请求地址: %s " % url_hash
-                    log_info += web_info + debug_info
+                    debug_info = f"请求地址: {url_hash} "
+                    LogBuffer.info().write(web_info + debug_info)
                     result, hash_search = get_html(url_hash, headers=headers, json_data=True)
 
                     if not result:
                         # 判断返回内容是否有问题
-                        debug_info = "请求错误: %s" % hash_search
-                        log_info += web_info + debug_info
+                        debug_info = f"请求错误: {hash_search}"
+                        LogBuffer.info().write(web_info + debug_info)
                         if "401 http" in hash_search:
-                            debug_info = "请检查 API Token 是否正确: %s " % api_token
-                            log_info += web_info + debug_info
+                            debug_info = f"请检查 API Token 是否正确: {api_token} "
+                            LogBuffer.info().write(web_info + debug_info)
                         raise Exception(debug_info)
                     hash_data = hash_search.get("data")
                     if hash_data:
@@ -336,16 +348,16 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                 for search_keyword in search_keyword_list:
                     url_search = f"https://api.theporndb.net/scenes?parse={search_keyword}&per_page=100"
                     debug_info = f"请求地址: {url_search} "
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                     result, res_search = get_html(url_search, headers=headers, json_data=True)
 
                     if not result:
                         # 判断返回内容是否有问题
                         debug_info = f"请求错误: {url_search}"
-                        log_info += web_info + debug_info
+                        LogBuffer.info().write(web_info + debug_info)
                         if "401 http" in res_search:
                             debug_info = f"请检查 API Token 是否正确: {api_token} "
-                            log_info += web_info + debug_info
+                            LogBuffer.info().write(web_info + debug_info)
                         raise Exception(debug_info)
 
                     real_url = get_real_url(res_search, file_path, series_ex, date)
@@ -353,20 +365,20 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                         break
                 else:
                     debug_info = f"未找到匹配的内容: {url_search}"
-                    log_info += web_info + debug_info
+                    LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
 
         if not hash_data:
-            debug_info = "番号地址: %s " % real_url
-            log_info += web_info + debug_info
+            debug_info = f"番号地址: {real_url} "
+            LogBuffer.info().write(web_info + debug_info)
             result, res_real = get_html(real_url, headers=headers, json_data=True)
             if not result:
                 # 判断返回内容是否有问题
-                debug_info = "请求错误: %s " % res_real
-                log_info += web_info + debug_info
+                debug_info = f"请求错误: {res_real} "
+                LogBuffer.info().write(web_info + debug_info)
                 if "401 http" in res_real:
-                    debug_info = "请检查 API Token 是否正确: %s " % api_token
-                    log_info += web_info + debug_info
+                    debug_info = f"请检查 API Token 是否正确: {api_token} "
+                    LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             real_data = res_real.get("data")
@@ -391,8 +403,8 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                     real_url,
                 ) = read_data(real_data)
             else:
-                debug_info = "未获取正确数据: %s" % real_url
-                log_info += web_info + debug_info
+                debug_info = f"未获取正确数据: {real_url}"
+                LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
         actor_photo = get_actor_photo(actor)
@@ -425,39 +437,23 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                 "trailer": trailer,
                 "image_download": image_download,
                 "image_cut": image_cut,
-                "log_info": log_info,
-                "error_info": "",
-                "req_web": req_web
-                + "(%ss) "
-                % (
-                    round(
-                        (time.time() - start_time),
-                    )
-                ),
                 "mosaic": mosaic,
                 "website": real_url,
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
-            log_info += web_info + debug_info
-            dic["log_info"] = log_info
+            LogBuffer.info().write(web_info + debug_info)
+
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
-            log_info += web_info + debug_info
+            debug_info = f"数据生成出错: {str(e)}"
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
     except:
         # print(traceback.format_exc())
-        req_web = req_web + "(%ss) " % (
-            round(
-                (time.time() - start_time),
-            )
-        )
         return theporndb_movies.main(
             number,
             appoint_url=appoint_url,
-            log_info=log_info,
-            req_web=req_web,
             language="zh_cn",
             file_path=file_path,
             appoint_number=appoint_number,
@@ -471,6 +467,7 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
         indent=4,
         separators=(",", ": "),
     )  # .encode('UTF-8')
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 
