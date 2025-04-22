@@ -548,6 +548,8 @@ def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
         signal.show_log_text(traceback.format_exc())
         signal.show_log_text(str(e))
 
+    LogBuffer.clear_thread()
+
 
 def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
     Flags.reset()

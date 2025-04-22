@@ -24,6 +24,12 @@ class LogBuffer:
         return LogBuffer.all_buffers[pid][category]
 
     @staticmethod
+    def clear_thread():
+        pid = threading.current_thread().ident
+        if pid is not None:
+            LogBuffer.all_buffers.pop(pid, None)
+
+    @staticmethod
     def log() -> "LogBuffer":
         return LogBuffer._get_buffer("log")
 
