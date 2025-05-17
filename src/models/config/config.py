@@ -217,7 +217,7 @@ nfo_tagline = {self.nfo_tagline}
 nfo_tag_series = {self.nfo_tag_series}
 nfo_tag_studio = {self.nfo_tag_studio}
 nfo_tag_publisher = {self.nfo_tag_publisher}
-# website: iqqtv, javbus, javdb, freejavbt, jav321, dmm, avsox, xcity, mgstage, fc2, fc2club, fc2hub, airav, javlibrary, mdtv
+# website: iqqtv, javbus, javdb, freejavbt, jav321, dmm, avsox, xcity, mgstage, fc2, fc2club, fc2hub, fc2ppvdb, airav, javlibrary, mdtv
 
 [Name_Rule]
 folder_name = {self.folder_name}
