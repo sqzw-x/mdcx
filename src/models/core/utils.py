@@ -13,6 +13,12 @@ import traceback
 import unicodedata
 from typing import Optional
 
+try:
+    import cv2
+
+    has_opencv = True
+except ImportError:
+    has_opencv = False
 from models.base.file import read_link, split_path
 from models.base.number import get_number_letters
 from models.base.path import get_main_path, get_path
@@ -66,6 +72,46 @@ def show_movie_info(json_data: JsonData):
 has_ffprobe = True if shutil.which("ffprobe") else False
 
 
+def _get_video_metadata_opencv(file_path: str) -> tuple[int, str]:
+    cap = cv2.VideoCapture(file_path)
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    ##使用opencv获取编码器格式
+    codec = int(cap.get(cv2.CAP_PROP_FOURCC))
+    codec_fourcc = chr(codec & 0xFF) + chr((codec >> 8) & 0xFF) + chr((codec >> 16) & 0xFF) + chr((codec >> 24) & 0xFF)
+    return height, codec_fourcc
+
+
+def _get_video_metadata_ffmpeg(file_path: str) -> tuple[int, str]:
+    if not has_ffprobe:
+        raise RuntimeError("当前版本无 opencv. 若想获取视频分辨率请请安装 ffprobe 或改用带 opencv 版本.")
+    # Use ffprobe to get video information
+    cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", file_path]
+
+    # macOS and Linux use default flags
+    creationflags = 0
+    # Windows use CREATE_NO_WINDOW to suppress the console window
+    if os.name == "nt":
+        creationflags = subprocess.CREATE_NO_WINDOW
+
+    result = subprocess.run(cmd, capture_output=True, text=True, creationflags=creationflags)
+
+    data = json.loads(result.stdout)
+
+    # Find video stream
+    video_stream = next((stream for stream in data["streams"] if stream["codec_type"] == "video"), None)
+
+    if video_stream:
+        height = int(video_stream["height"])
+        codec_fourcc = video_stream["codec_name"].upper()
+    else:
+        height = 0
+        codec_fourcc = ""
+    return height, codec_fourcc
+
+
+_get_video_metadata = _get_video_metadata_opencv if has_opencv else _get_video_metadata_ffmpeg
+
+
 def get_video_size(json_data: JsonData, file_path: str):
     # 获取本地分辨率 同时获取视频编码格式
     definition = ""
@@ -76,24 +122,9 @@ def get_video_size(json_data: JsonData, file_path: str):
             file_path = read_link(file_path)
         else:
             hd_get = "path"
-    if has_ffprobe and hd_get == "video":
+    if hd_get == "video":
         try:
-            # Use ffprobe to get video information
-            cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", file_path]
-
-            result = subprocess.run(cmd, capture_output=True, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-            data = json.loads(result.stdout)
-
-            # Find video stream
-            video_stream = next((stream for stream in data["streams"] if stream["codec_type"] == "video"), None)
-
-            if video_stream:
-                height = int(video_stream["height"])
-                codec_fourcc = video_stream["codec_name"].upper()
-            else:
-                height = 0
-                codec_fourcc = ""
-
+            height, codec_fourcc = _get_video_metadata(file_path)
         except Exception as e:
             signal.show_log_text(f" 🔴 无法获取视频分辨率! 文件地址: {file_path}  错误信息: {e}")
     elif hd_get == "path":

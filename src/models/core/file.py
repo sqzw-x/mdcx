@@ -385,14 +385,6 @@ def move_file_to_failed_folder(
         LogBuffer.log().write(f"\n 🙊 [Movie] {file_path}")
         return file_path
 
-    # 文件路径已经在失败路径内时不移动
-    failed_folder_temp = failed_folder.replace("\\", "/") + "/"
-    file_path_temp = file_path.replace("\\", "/")
-
-    if failed_folder_temp in file_path_temp:
-        LogBuffer.log().write(f"\n 🙊 [Movie] {file_path}")
-        return file_path
-
     # 创建failed文件夹
     if config.failed_file_move == 1 and not os.path.exists(failed_folder):
         try:
