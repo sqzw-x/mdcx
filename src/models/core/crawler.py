@@ -26,6 +26,7 @@ from models.crawlers import (
     fc2,
     fc2club,
     fc2hub,
+    fc2ppvdb,
     freejavbt,
     getchu,
     getchu_dmm,
@@ -228,6 +229,8 @@ def _call_crawler(
         res = json.loads(fc2hub.main(file_number, appoint_url, language))
     elif website == "fc2club":
         res = json.loads(fc2club.main(file_number, appoint_url, language))
+    elif website == "fc2ppvdb":
+        res = json.loads(fc2ppvdb.main(file_number, appoint_url, log_info, req_web, language))
     elif website == "mdtv":
         res = json.loads(mdtv.main(file_number, appoint_url, language, file_path, appoint_number))
     elif website == "madouqu":
