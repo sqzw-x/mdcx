@@ -73,6 +73,8 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
     website_name = "fc2ppvdb"
     req_web += "-> %s" % website_name
     real_url = appoint_url
+    image_cut = "right"
+    image_download = False
     number = number.upper().replace("FC2PPV", "").replace("FC2-PPV-", "").replace("FC2-", "").replace("-", "").strip()
     dic = {}
     web_info = "\n       "
@@ -137,6 +139,8 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                 "poster": cover_url,
                 "extrafanart": "",
                 "trailer": video_url,
+                "image_download": image_download,
+                "image_cut": image_cut,
                 "log_info": log_info,
                 "error_info": "",
                 "req_web": req_web
