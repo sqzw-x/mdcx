@@ -112,8 +112,6 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
         tag = tag.replace("無修正,", "").replace("無修正", "").strip(",")
         if "fc2_seller" in config.fields_rule:
             actor = studio
-        else:
-            actor = ""
 
         try:
             dic = {
