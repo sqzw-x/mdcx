@@ -173,6 +173,7 @@ def _call_crawler(
         "fc2": fc2.main,
         "fc2hub": fc2hub.main,
         "fc2club": fc2club.main,
+        "fc2ppvdb": fc2ppvdb.main,
         "mdtv": mdtv.main,
         "madouqu": madouqu.main,
         "hscangku": hscangku.main,
