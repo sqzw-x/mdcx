@@ -62,6 +62,8 @@ def main(
     number,
     appoint_url="",
     language="jp",
+    file_path,
+    appoint_number,
 ):
     """
     主函数，获取FC2视频信息
