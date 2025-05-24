@@ -6,6 +6,7 @@ import urllib3
 from lxml import etree
 from src.models.base.web import get_html
 from src.models.config.config import config
+from models.core.json_data import LogBuffer
 
 # 禁用SSL警告
 urllib3.disable_warnings()
@@ -57,49 +58,51 @@ def get_video_time(html):  #获取视频时长
     return video_size_nodes[0] if video_size_nodes else ""
 
 
-def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file_path="", appoint_number=""):
+def main(
+    number,
+    appoint_url="",
+    language="jp",
+):
     """
     主函数，获取FC2视频信息
     :param number: 番号
     :param appoint_url: 指定的URL
-    :param log_info: 日志信息
-    :param req_web: 请求网站信息
     :param language: 语言
-    :param file_path: 文件路径
-    :param appoint_number: 指定番号
     :return: JSON格式的影片信息
     """
     start_time = time.time()
     website_name = "fc2ppvdb"
-    req_web += "-> %s" % website_name
+    LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
     image_cut = "right"
     image_download = False
     number = number.upper().replace("FC2PPV", "").replace("FC2-PPV-", "").replace("FC2-", "").replace("-", "").strip()
     dic = {}
     web_info = "\n       "
-    log_info += " \n     🌐fc2ppvdb"
-    debug_info = ""
 
     try:
         if not real_url:
-            real_url = f"https://fc2ppvdb.com/articles/{number}"
+            url_search = f"https://fc2ppvdb.com/articles/{number}"
 
         debug_info = "番号地址: %s" % real_url
-        log_info += web_info + debug_info
+        LogBuffer.info().write(web_info + debug_info)
         # ========================================================================番号详情页
-        result, html_content = get_html(real_url)
+        result, html_content = get_html(url_search)
         if not result:
-            debug_info = "网络请求错误: %s" % html_content
-            log_info += web_info + debug_info
+            debug_info = f"网络请求错误: {html_content}"
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         html_info = etree.fromstring(html_content, etree.HTMLParser())
 
         title = get_title(html_info)
+        if not title:
+            debug_info = "数据获取失败: 未获取到title！"
+            LogBuffer.info().write(web_info + debug_info)
+            raise Exception(debug_info)
         cover_url = get_cover(html_info,number)
         if "http" not in cover_url:
             debug_info = "数据获取失败: 未获取到cover！"
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         release_date = get_release_date(html_info)
         year = release_date[:4] if release_date else ""
@@ -137,43 +140,26 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
                 "poster": cover_url,
                 "extrafanart": "",
                 "trailer": video_url,
-                "image_download": image_download,
-                "image_cut": image_cut,
-                "log_info": log_info,
+                "image_download": False,
+                "image_cut": "center",
                 "error_info": "",
-                "req_web": req_web
-                           + "(%ss) "
-                           % (
-                               round(
-                                   (time.time() - start_time),
-                               )
-                           ),
                 "mosaic": "无码" if video_type == "無碼" else "有码",
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
-            log_info += web_info + debug_info
-            dic["log_info"] = log_info
+            LogBuffer.info().write(web_info + debug_info)
         except Exception as e:
             debug_info = "数据生成出错: %s" % str(e)
-            log_info += web_info + debug_info
+            LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
     except Exception as e:
-        debug_info = str(e)
+        # print(traceback.format_exc())
+        LogBuffer.error().write(str(e))
         dic = {
             "title": "",
             "cover": "",
             "website": "",
-            "log_info": log_info,
-            "error_info": debug_info,
-            "req_web": req_web
-            + "(%ss) "
-            % (
-                round(
-                    (time.time() - start_time),
-                )
-            ),
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
     js = json.dumps(
@@ -183,8 +169,9 @@ def main(number, appoint_url="", log_info="", req_web="", language="zh_cn", file
         indent=4,
         separators=(",", ": "),
     )
+    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
     return js
 
 
 if __name__ == "__main__":
-    print(main("FC2-3259498", file_path=""))
+    print(main("FC2-3259498"))
