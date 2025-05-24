@@ -1,200 +1,159 @@
 #!/usr/bin/env python3
 import json
-import re
-import time  # yapf: disable # NOQA: E402
-
+import time
+import requests
 import urllib3
 from lxml import etree
-
-from models.base.web import get_html
-from models.config.config import config
+from src.models.base.web import get_html
+from src.models.config.config import config
 from models.core.json_data import LogBuffer
 
-urllib3.disable_warnings()  # yapf: disable
+# 禁用SSL警告
+urllib3.disable_warnings()
 
 
-def getTitle(html, number):  # 获取标题
-    result = html.xpath("//h3/text()")
-    if result:
-        result = result[0].replace(f"FC2-{number} ", "")
-    else:
-        result = ""
-    return result
+def get_title(html):  # 获取标题
+    title_nodes = html.xpath("//h2/a/text()")
+    return title_nodes[0] if title_nodes else ""
 
 
-def getNum(html):  # 获取番号
-    result = html.xpath("//h1/text()")
-    if result:
-        result = result[0]
-    else:
-        result = ""
-    return result
+def get_cover(html,number):  # 获取封面
+    cover_url_nodes = html.xpath(f"//img[contains(@alt, '{number.replace('FC2-', '')}')]/@src")
+    return cover_url_nodes[0] if cover_url_nodes else ""
 
 
-def getCover(html):  # 获取封面
-    extrafanart = []
-    result = html.xpath('//img[@class="responsive"]/@src')
-    if result:
-        for res in result:
-            extrafanart.append(res.replace("../uploadfile", "https://fc2club.top/uploadfile"))
-        result = result[0].replace("../uploadfile", "https://fc2club.top/uploadfile")
-    else:
-        result = ""
-    return result, extrafanart
+def get_release_date(html):  #获取发行日期
+    release_date_nodes = html.xpath("//div[starts-with(text(),'販売日：')]/span/text()")
+    return release_date_nodes[0] if release_date_nodes else ""
 
 
-def getStudio(html):  # 使用卖家作为厂家
-    result = html.xpath('//strong[contains(text(), "卖家信息")]/../a/text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
-    return result.replace("本资源官网地址", "")
+def get_actors(html):  #获取演员
+    actors_nodes = html.xpath("//div[starts-with(text(),'女優：')]/span/a/text()")
+    return ",".join([a.strip() for a in actors_nodes]) if actors_nodes else ""
 
 
-def getScore(html):  # 获取评分
-    try:
-        result = html.xpath('//strong[contains(text(), "影片评分")]/../text()')
-        result = re.findall(r"\d+", result[0])[0]
-    except:
-        result = ""
-    return result
+def get_tags(html):  #获取标签
+    tags_nodes = html.xpath("//div[starts-with(text(),'タグ：')]/span/a/text()")
+    return ",".join([t.strip() for t in tags_nodes]) if tags_nodes else ""
 
 
-def getActor(html, studio):  # 获取演员
-    result = html.xpath('//strong[contains(text(), "女优名字")]/../a/text()')
-    if result:
-        result = str(result).strip(" []").replace('"', "").replace("'", "").replace(", ", ",")
-    else:
-        if "fc2_seller" in config.fields_rule:
-            result = studio
-        else:
-            result = ""
-    return result
+def get_studio(html):  #获取厂家
+    studio_nodes = html.xpath("//div[starts-with(text(),'販売者：')]/span/a/text()")
+    return studio_nodes[0].strip() if studio_nodes else ""
 
 
-def getActorPhoto(actor):  # 获取演员头像
-    actor_photo = {}
-    actor_list = actor.split(",")
-    for act in actor_list:
-        actor_photo[act] = ""
-    return actor_photo
+def get_video_type(html):  #获取视频类型
+    uncensored_str_nodes = html.xpath("//div[starts-with(text(),'モザイク：')]/span/text()")
+    uncensored_str = uncensored_str_nodes[0] if uncensored_str_nodes else ""
+    return "無碼" if uncensored_str == "無" else "有碼" if uncensored_str == "有" else ""
 
 
-def getTag(html):  # 获取标签
-    result = html.xpath('//strong[contains(text(), "影片标签")]/../a/text()')
-    result = str(result).strip(" []").replace('"', "").replace("'", "").replace(", ", ",")
-    return result
+def get_video_url(html):  #获取视频URL
+    video_url_nodes = html.xpath("//a[starts-with(text(),'サンプル動画')]/@href")
+    return video_url_nodes[0] if video_url_nodes else ""
 
 
-def getOutline(html):  # 获取简介
-    result = (
-        str(html.xpath('//div[@class="col des"]/text()'))
-        .strip("[]")
-        .replace("',", "")
-        .replace("\\n", "")
-        .replace("'", "")
-        .replace("・", "")
-        .strip()
-    )
-    return result
-
-
-def getMosaic(html):  # 获取马赛克
-    result = str(html.xpath('//h5/strong[contains(text(), "资源参数")]/../text()'))
-    if "无码" in result:
-        mosaic = "无码"
-    else:
-        mosaic = "有码"
-    return mosaic
+def get_video_time(html):  #获取视频时长
+    video_size_nodes = html.xpath("//div[starts-with(text(),'収録時間：')]/span/text()")
+    return video_size_nodes[0] if video_size_nodes else ""
 
 
 def main(
     number,
     appoint_url="",
     language="jp",
-    file_path,
-    appoint_number,
 ):
+    """
+    主函数，获取FC2视频信息
+    :param number: 番号
+    :param appoint_url: 指定的URL
+    :param language: 语言
+    :return: JSON格式的影片信息
+    """
     start_time = time.time()
-    website_name = "fc2club"
+    website_name = "fc2ppvdb"
     LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
-    title = ""
-    cover_url = ""
+    image_cut = "right"
+    image_download = False
     number = number.upper().replace("FC2PPV", "").replace("FC2-PPV-", "").replace("FC2-", "").replace("-", "").strip()
     dic = {}
     web_info = "\n       "
-    LogBuffer.info().write(" \n    🌐 fc2club")
-    debug_info = ""
 
-    try:  # 捕获主动抛出的异常
+    try:
         if not real_url:
-            real_url = f"https://fc2club.top/html/FC2-{number}.html"
+            url_search = f"https://fc2ppvdb.com/articles/{number}"
 
-        debug_info = f"番号地址: {real_url} "
+        debug_info = "番号地址: %s" % real_url
         LogBuffer.info().write(web_info + debug_info)
-
-        # ========================================================================搜索番号
-        result, html_content = get_html(real_url)
+        # ========================================================================番号详情页
+        result, html_content = get_html(url_search)
         if not result:
             debug_info = f"网络请求错误: {html_content}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         html_info = etree.fromstring(html_content, etree.HTMLParser())
 
-        title = getTitle(html_info, number)  # 获取标题
+        title = get_title(html_info)
         if not title:
             debug_info = "数据获取失败: 未获取到title！"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
+        cover_url = get_cover(html_info,number)
+        if "http" not in cover_url:
+            debug_info = "数据获取失败: 未获取到cover！"
+            LogBuffer.info().write(web_info + debug_info)
+            raise Exception(debug_info)
+        release_date = get_release_date(html_info)
+        year = release_date[:4] if release_date else ""
+        actor = get_actors(html_info)
+        tag = get_tags(html_info)
+        studio = get_studio(html_info) # 使用卖家作为厂商
+        video_type = get_video_type(html_info)
+        video_url = get_video_url(html_info)
+        video_time = get_video_time(html_info)
+        tag = tag.replace("無修正,", "").replace("無修正", "").strip(",")
+        if "fc2_seller" in config.fields_rule:
+            actor = studio
 
-        cover_url, extrafanart = getCover(html_info)  # 获取cover
-        # outline = getOutline(html_info)
-        tag = getTag(html_info)
-        studio = getStudio(html_info)  # 获取厂商
-        score = getScore(html_info)  # 获取厂商
-        actor = getActor(html_info, studio)  # 获取演员
-        actor_photo = getActorPhoto(actor)  # 获取演员列表
-        mosaic = getMosaic(html_info)
         try:
             dic = {
                 "number": "FC2-" + str(number),
                 "title": title,
                 "originaltitle": title,
-                "actor": actor,
                 "outline": "",
+                "actor": actor,
                 "originalplot": "",
                 "tag": tag,
-                "release": "",
-                "year": "",
+                "release": release_date,
+                "year": year,
                 "runtime": "",
-                "score": score,
+                "score": "",
                 "series": "FC2系列",
                 "director": "",
                 "studio": studio,
                 "publisher": studio,
-                "source": "fc2club",
-                "website": str(real_url).strip("[]"),
-                "actor_photo": actor_photo,
+                "source": "fc2",
+                "website": real_url,
+                "actor_photo": {actor: ""},
                 "cover": cover_url,
-                "poster": "",
-                "extrafanart": extrafanart,
-                "trailer": "",
+                "poster": cover_url,
+                "extrafanart": "",
+                "trailer": video_url,
                 "image_download": False,
                 "image_cut": "center",
-                "mosaic": mosaic,
+                "mosaic": "无码" if video_type == "無碼" else "有码",
                 "wanted": "",
             }
             debug_info = "数据获取成功！"
             LogBuffer.info().write(web_info + debug_info)
-
         except Exception as e:
-            debug_info = f"数据生成出错: {str(e)}"
+            debug_info = "数据生成出错: %s" % str(e)
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
     except Exception as e:
+        # print(traceback.format_exc())
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
@@ -214,7 +173,4 @@ def main(
 
 
 if __name__ == "__main__":
-    # print(main('1470588', ''))
-    print(
-        main("743423", "")
-    )  # print(main('674261', ''))  # print(main('406570', ''))  # print(main('1474843', ''))  # print(main('1860858', ''))  # print(main('1599412', ''))  # print(main('1131214', ''))  # print(main('1837553', ''))  # print(main('1613618', ''))  # print(main('1837553', ''))  # print(main('1837589', ""))  # print(main('1760182', ''))  # print(main('1251689', ''))  # print(main('674239', ""))  # print(main('674239', "))
+    print(main("FC2-3259498"))
