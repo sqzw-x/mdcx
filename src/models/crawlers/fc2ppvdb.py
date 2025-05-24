@@ -113,6 +113,8 @@ def main(
     number,
     appoint_url="",
     language="jp",
+    file_path,
+    appoint_number,
 ):
     start_time = time.time()
     website_name = "fc2club"
