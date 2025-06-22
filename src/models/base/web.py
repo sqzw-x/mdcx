@@ -2,7 +2,6 @@
 import re
 import socket
 import threading
-import traceback
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
 from threading import Lock

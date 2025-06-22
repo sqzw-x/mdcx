@@ -9,6 +9,7 @@ import shutil
 import time
 import traceback
 import urllib
+from typing import cast
 
 import bs4
 import langid
@@ -82,12 +83,13 @@ def update_emby_actor_info():
                 actor
             )
             result, res = get_html(actor_person, proxies=False, json_data=True)
+            res = cast(dict, res)
             if not result:
                 signal.show_log_text(
                     f"🔴 {i}/{total} {actor_name}: {server_name} 获取演员信息错误！\n    错误信息: {res}"
                 )
                 continue
-            if res.get("Overview") and "actor_info_miss" in emby_on:
+            if res.get("Overview") and "无维基百科信息" not in res.get("Overview") and "actor_info_miss" in emby_on:
                 signal.show_log_text(f"✅ {i}/{total} {actor_name}: {server_name} 已有演员信息！跳过！")
                 continue
 
@@ -294,7 +296,7 @@ def show_emby_actor_list(mode):
 def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
     ja = True if "ja." in url else False
     emby_on = config.emby_on
-    result, res = get_html(url)
+    result, res = get_html(url, headers=config.random_headers)
     if not result:
         signal.show_log_text(f" 🔴 维基百科演员页请求失败！\n    错误信息: {res}\n    请求地址: {url}")
         return False
@@ -348,6 +350,12 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
     if actor_profile:
         att_keys = actor_profile.find_all(scope=["row"])
         att_values = actor_profile.find_all(name="td", style=[""], colspan=False)
+        if len(att_keys) != len(att_values):
+            signal.show_log_text(
+                " 🔴 个人资料表格列数不匹配，可能是页面格式变更或数据不完整，请检查！\n"
+                f"    列数: {len(att_keys)} - {len(att_values)}\n    页面地址: {url}"
+            )
+            return False
         bday = actor_output.find(class_="bday")
         bday = f"({bday.get_text('', strip=True)})" if bday else ""
         if att_keys and att_values:
@@ -572,7 +580,7 @@ def _search_wiki(actor_info: EMbyActressInfo):
     # https://www.wikidata.org/w/api.php?action=wbsearchentities&search=夢乃あいか&language=zh&format=json
     # https://www.wikidata.org/w/api.php?action=wbsearchentities&search=吉根柚莉愛&language=zh&format=json
     signal.show_log_text(f" 🌐 请求搜索页: {url}")
-    head, res = get_html(url, json_data=True)
+    head, res = get_html(url, json_data=True, headers=config.random_headers)
     if not head:
         signal.show_log_text(f" 🔴 维基百科搜索结果请求失败！\n    错误信息: {res}")
         return
@@ -626,7 +634,7 @@ def _search_wiki(actor_info: EMbyActressInfo):
             # https://m.wikidata.org/wiki/Special:EntityData/Q24836820.json
             # https://m.wikidata.org/wiki/Special:EntityData/Q76283484.json
             signal.show_log_text(f" 🌐 请求 ID 数据: {url}")
-            head, res = get_html(url, json_data=True)
+            head, res = get_html(url, json_data=True, headers=config.random_headers)
             if not head:
                 signal.show_log_text(f" 🔴 通过 id 获取 wiki url 失败！\n    错误信息: {res}")
                 continue

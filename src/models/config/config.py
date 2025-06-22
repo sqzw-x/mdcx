@@ -5,7 +5,7 @@ import re
 import time
 from configparser import RawConfigParser
 
-from models.base.utils import get_user_agent, singleton
+from models.base.utils import get_random_headers, get_user_agent, singleton
 from models.config.config_generated import GeneratedConfig
 from models.config.config_manual import ManualConfig
 
@@ -344,6 +344,8 @@ statement = {self.statement}
         self.headers = {
             "User-Agent": get_user_agent(),
         }
+
+        self.random_headers = get_random_headers()
 
         # 去掉^符号！！！
         self.cnword_style = self.cnword_style.strip("^")
