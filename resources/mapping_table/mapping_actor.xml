@@ -9,6 +9,7 @@ href：演员主页，刮削时在主界面点击演员名可以打开主页。-
   <a zh_cn="ANNA" zh_tw="ANNA" jp="ANNA" keyword=",ANNA," href="https://javdb.com/actors/3OZN"/>
   <a zh_cn="ANRI" zh_tw="ANRI" jp="ANRI" keyword=",ANRI," href="https://javdb.com/actors/RZ9m"/>
   <a zh_cn="ARIA" zh_tw="ARIA" jp="ARIA" keyword=",ARIA," href="https://javdb.com/actors/kJ3N"/>
+  <a zh_cn="ASUKA" zh_tw="ASUKA" jp="ASUKA" keyword=",ASUKA,Asuka," href="https://javdb.com/actors/exQd"/>
   <a zh_cn="AYA" zh_tw="AYA" jp="AYA" keyword=",AYA," href="https://javdb.com/actors/Zwmm"/>
   <a zh_cn="Abella Danger" zh_tw="Abella Danger" jp="Abella Danger" keyword=",Abella Danger," href="https://javdb.com/actors/mvyR"/>
   <a zh_cn="Aften Opal" zh_tw="Aften Opal" jp="Aften Opal" keyword=",Aften Opal," href="https://javdb.com/actors/OYRz"/>
@@ -7632,7 +7633,6 @@ href：演员主页，刮削时在主界面点击演员名可以打开主页。-
   <a zh_cn="薇薇" zh_tw="薇薇" jp="薇薇" keyword=",薇薇,小冉,"/>
   <a zh_cn="朱莉" zh_tw="朱莉" jp="朱莉" keyword=",舒舒,朱莉,"/>
   <a zh_cn="阿水" zh_tw="阿水" jp="阿水" keyword=",阿水,优米,"/>
-  <a zh_cn="Asuka" zh_tw="Asuka" jp="Asuka" keyword=",Asuka,ASUKA,"/>
   <a zh_cn="绚音" zh_tw="絢音" jp="日賀絢音" keyword=",绚音,絢音,日賀絢音,"/>
   <a zh_cn="南凉" zh_tw="南涼" jp="水希悠" keyword=",南凉,南涼,水希悠,久我山みなみ,"/>
   <a zh_cn="安寿レイナ" zh_tw="安寿レイナ" jp="安寿レイナ" keyword=",安寿レイナ,"/>
@@ -7663,6 +7663,7 @@ href：演员主页，刮削时在主界面点击演员名可以打开主页。-
   <a zh_cn="杉山" zh_tw="杉山" jp="杉山" keyword=",杉山,"/>
   <a zh_cn="原口" zh_tw="原口" jp="原口" keyword=",原口,"/>
   <a zh_cn="佳纯" zh_tw="佳纯" jp="佳纯" keyword=",佳纯,"/>
+  <!-- 注释：上方维持原文，下方为原文变动项；(2025-06-25) 演员合并去重，格式错误修正，拆分关键词修正，特殊关键词修正，多人同名处理 -->
   <a zh_cn="日向なつ" zh_tw="日向なつ" jp="日向なつ" keyword=",日向夏,日向なつ,ひなたなつ," href="https://javdb.com/actors/7689R"/>
   <a zh_cn="川北明沙" zh_tw="川北明沙" jp="川北メイサ" keyword=",川北明沙,川北メイサ,かわきためいさ,沢北みなみ," href="https://javdb.com/actors/J20zB"/>
   <a zh_cn="梨々花" zh_tw="梨々花" jp="梨々花" keyword=",梨々花,須藤野乃花,日田梨々花,仲村梨々花,山村梨花,藤崎さん," href="https://javdb.com/actors/0Egv"/>
@@ -7871,18 +7872,21 @@ href：演员主页，刮削时在主界面点击演员名可以打开主页。-
   <a zh_cn="叶风优莉亚" zh_tw="葉風優莉亞" jp="葉風ゆりあ" keyword=",叶风优莉亚,葉風優莉亞,葉風ゆりあ,ユリア,ゆりあ," href="https://javdb.com/actors/7683R"/>
   <a zh_cn="乃木はるか" zh_tw="乃木はるか" jp="乃木はるか" keyword=",乃木はるか,成宮はるあ,成宫はるあ,東美奈,一ノ木ありさ,葵律,陽咲希美,芦原亮子,春宮はるな,深山梢," href="https://javdb.com/actors/MqmJ"/>
   <a zh_cn="筱原リョウ" zh_tw="篠原リョウ" jp="篠原リョウ" keyword=",筱原リョウ,篠原リョウ,三浦加奈,筿原リョウ,相原れな,相原れな（三浦加奈、篠原リョウ）," href="https://javdb.com/actors/xevn"/>
+  <!-- 注释：特殊关键词修正合并，全角空格条目修正 (2025-06-25)  -->
   <a zh_cn="S级素人" zh_tw="S級素人" jp="S級素人" keyword=",S級素人,S级素人," href="https://javdb.com/actors/65dN9"/>
   <a zh_cn="素人" zh_tw="素人" jp="素人" keyword=",素人,素人１,素人不明,人物不明,女优不明,素人人物不明," href="https://javdb.com/actors/zYqy"/>
   <a zh_cn="素人(多人)" zh_tw="素人(多人)" jp="素人(多人)" keyword=",女優多数,女优多数,素人多数,多数,素人娘達,素人娘达,複数の素人娘,复数の素人娘," href="https://javdb.com/actors/AWGO"/>
   <a zh_cn="素人妻" zh_tw="素人妻" jp="素人妻" keyword=",人妻,素人妻,素人奥様,本妻,美人な人妻," href="https://javdb.com/actors/Bw8A"/>
   <a zh_cn="素人娘" zh_tw="素人娘" jp="素人娘" keyword=",素人娘,素人少女,年轻女孩," href="https://javdb.com/actors/MkGJ"/>
   <a zh_cn="素人(援交)" zh_tw="素人(円光娘)" jp="素人(円光娘)" keyword=",円光娘,援交娘,援助交际,援交," href="https://javdb.com/actors/Rww7"/>
+  <!-- 注释：全角空格处理方案，保留原空格关键词，预防爬虫数据有空格时才能正确命中 (2025-06-25)  -->
   <a zh_cn="素人(偷窃)" zh_tw="素人(万引き娘)" jp="素人(万引き娘)" keyword=",素人 万引き娘,素人　万引き娘,万引き娘," href="https://javdb.com/actors/N5A3"/>
   <a zh_cn="素人(患者)" zh_tw="素人(患者)" jp="素人(患者)" keyword=",素人 患者,素人　患者,患者," href="https://javdb.com/actors/kW3J"/>
   <a zh_cn="宫崎 后藤夫妻" zh_tw="宮崎 後藤夫妻" jp="宮崎 後藤夫妻" keyword=",宫崎 后藤夫妻,宫崎后藤夫妻,后藤夫妻,宫崎 后藤夫妻 デビ みずき はるか りえ,宮崎 後藤夫妻,宮崎後藤夫妻,後藤夫妻,宮崎 後藤夫妻 デビ みずき はるか りえ,宫崎　后藤夫妻　デビ　みずき　はるか　りえ,宮崎　後藤夫妻　デビ　みずき　はるか　りえ," href="https://javdb.com/actors/RV6z"/>
-  <a zh_cn="井上绫子" zh_tw="井上綾子" jp="井上綾子" keyword=",井上绫子,井上綾子,井上綾子　,井上綾子 ,"
-  <a zh_cn="観月あいな " zh_tw="観月あいな " jp="観月あいな " keyword=",観月あいな,みづきあいな,"/>
+  <a zh_cn="井上绫子" zh_tw="井上綾子" jp="井上綾子" keyword=",井上绫子,井上綾子,井上綾子　,井上綾子 ,"/>
+  <a zh_cn="観月あいな" zh_tw="観月あいな" jp="観月あいな" keyword=",観月あいな,みづきあいな,"/>
   <a zh_cn="白石もも" zh_tw="白石もも" jp="白石もも" keyword=",白石もも,しらいしもも,"/>
+  <!-- 注释：多人同名处理，处理重名 (2025-06-25)  -->
   <a zh_cn="重名-RENA(宫野ゆかな、衣吹花音)" zh_tw="重複-RENA(宮野ゆかな、衣吹花音)" jp="重複-RENA(宮野ゆかな、衣吹かのん)" keyword=",RENA,名字冲突,姓名重複,"/>
   <a zh_cn="宫野ゆかな" zh_tw="宮野ゆかな" jp="宮野ゆかな" keyword=",宫野ゆかな,宮野ゆかな,長谷川まゆみ,宮坂レア,今井歩,宮田玲香,宮川玲子,梅原夏海,宮坂レイア,ユータン,宮川怜子,坂井絵里奈,さら,さきな," href="https://javdb.com/actors/WBVe"/>
   <a zh_cn="衣吹花音" zh_tw="衣吹花音" jp="衣吹かのん" keyword=",衣吹花音,衣吹かのん,伊吹さん," href="https://javdb.com/actors/MVOX"/>
@@ -8060,4 +8064,5 @@ href：演员主页，刮削时在主界面点击演员名可以打开主页。-
   <a zh_cn="重名-めい(深月芽衣、莲见天)" zh_tw="重複-めい(深月芽衣、蓮見天)" jp="重複-めい(深月めい、蓮見天)" keyword=",めい,名字冲突,姓名重複,"/>
   <a zh_cn="深月芽衣" zh_tw="深月芽衣" jp="深月めい" keyword=",深月芽衣,深月めい," href="https://javdb.com/actors/zKMNE"/>
   <a zh_cn="莲见天" zh_tw="蓮見天" jp="蓮見天" keyword=",莲见天,蓮見天,れん,てんちゃん," href="https://javdb.com/actors/mwAZ"/>
+  <!-- 注释：上方为变动项；(2025-06-25) 演员合并去重，格式错误修正，拆分关键词修正，特殊关键词修正，多人同名处理 -->
 </actor>
