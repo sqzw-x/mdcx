@@ -7,7 +7,7 @@ import re
 import sqlite3
 import traceback
 
-from models.config.config import config
+from models.config.manager import config
 from models.data_models import EMbyActressInfo
 from models.signals import signal
 

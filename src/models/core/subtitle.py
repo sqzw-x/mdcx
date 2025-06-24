@@ -1,12 +1,12 @@
 import os
 
-from models.base.file import copy_file, move_file, split_path
-from models.config.config import config
-from models.core.file import get_file_info, movie_lists
-from models.core.scraper import start_new_scrape
-from models.core.utils import get_movie_path_setting
-from models.entity.enums import FileMode
-from models.signals import signal
+from ..base.file import copy_file, move_file, split_path
+from ..config.manager import config
+from ..entity.enums import FileMode
+from ..signals import signal
+from .file import get_file_info, movie_lists
+from .scraper import start_new_scrape
+from .utils import get_movie_path_setting
 
 
 def add_sub_for_all_video():
@@ -22,7 +22,7 @@ def add_sub_for_all_video():
         get_movie_path_setting()
     )
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 正在检查所有视频，请稍候...")
-    if config.subtitle_add_chs == "on":
+    if config.subtitle_add_chs:
         signal.show_log_text(" 如果字幕文件名不以 .chs 结尾，则会自动添加！\n")
     else:
         signal.show_log_text(" 如果字幕文件名以 .chs 结尾，将被自动删除！\n")
@@ -46,7 +46,7 @@ def add_sub_for_all_video():
                 for sub_type in sub_type_list:
                     sub_path = os.path.join(config.subtitle_folder, (number + cd_part + sub_type))
                     sub_file_name = file_name + sub_type
-                    if config.subtitle_add_chs == "on":
+                    if config.subtitle_add_chs:
                         sub_file_name = file_name + ".chs" + sub_type
                     sub_new_path = os.path.join(folder_old_path, sub_file_name)
 
@@ -61,7 +61,7 @@ def add_sub_for_all_video():
             for sub_type in sub_list:
                 sub_old_path = os.path.join(folder_old_path, (file_name + sub_type))
                 sub_new_path = os.path.join(folder_old_path, (file_name + ".chs" + sub_type))
-                if config.subtitle_add_chs == "on":
+                if config.subtitle_add_chs:
                     if ".chs" not in sub_old_path and not os.path.exists(sub_new_path):
                         move_file(sub_old_path, sub_new_path)
                         signal.show_log_text(
@@ -81,12 +81,7 @@ def add_sub_for_all_video():
                     file_cnword = config.file_cnword
                     folder_name = config.folder_name
                     naming_file = config.naming_file
-                    if (
-                        folder_cnword == "on"
-                        or file_cnword == "on"
-                        or "cnword" in folder_name
-                        or "cnword" in naming_file
-                    ):
+                    if folder_cnword or file_cnword or "cnword" in folder_name or "cnword" in naming_file:
                         new_sub_movie_list.append(movie)
 
     signal.show_log_text(f"\nDone! \n成功添加字幕影片数量: {add_count} \n仍无字幕影片数量: {no_sub_count - add_count} ")
@@ -95,7 +90,7 @@ def add_sub_for_all_video():
     list2 = list(set(new_sub_movie_list))  # 去重
     list3 = [each for each in list2 if each.strip()]  # 去空
     list3.sort(key=new_sub_movie_list.index)  # 排序（保持原顺序）
-    if list3 and config.subtitle_add_rescrape == "on":
+    if list3 and config.subtitle_add_rescrape:
         signal.show_log_text("开始对新添加字幕的视频重新刮削...")
         start_new_scrape(FileMode.Default, movie_list=list3)
     signal.reset_buttons_status.emit()

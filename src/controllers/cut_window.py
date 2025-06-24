@@ -9,9 +9,8 @@ from PyQt5.QtWidgets import QDialog, QFileDialog, QPushButton
 
 import models.core.file
 import models.core.image
-import models.core.scraper
 from models.base.file import delete_file, split_path
-from models.config.config import config
+from models.config.manager import config
 from views.posterCutTool import Ui_Dialog_cut_poster
 
 
@@ -177,7 +176,7 @@ class CutWindow(QDialog):
         # 获取水印设置
         poster_mark = config.poster_mark
         mark_type = config.mark_type
-        pic_name = config.pic_name
+        pic_name = config.pic_simple_name
 
         # 显示图片及水印情况
         if img_path and os.path.exists(img_path):
@@ -238,7 +237,7 @@ class CutWindow(QDialog):
 
             # 获取裁剪后的的poster和thumb路径
             poster_path = os.path.join(img_folder, "poster.jpg")
-            if pic_name == 0:  # 文件名-poster.jpg
+            if not pic_name:  # 文件名-poster.jpg
                 if "-" in img_name:
                     poster_path = (
                         img_path.replace("-fanart", "").replace("-thumb", "").replace("-poster", "").replace(img_ex, "")
@@ -390,7 +389,7 @@ class CutWindow(QDialog):
         # 裁剪poster
         try:
             img = Image.open(img_path)
-        except:
+        except Exception:
             self.parent().show_log_text(f"{traceback.format_exc()}\n Open Pic: {img_path}")
             return False
         img = img.convert("RGB")

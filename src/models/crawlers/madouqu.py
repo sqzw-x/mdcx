@@ -8,7 +8,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import curl_html
-from models.config.config import config
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info, get_number_list
 
@@ -57,7 +57,7 @@ def get_detail_info(html, number, file_path):
         release = date_obj.strftime("%Y-%m-%d")
         # 该字段应为字符串，nfo_title 替换该字段时 replace 函数第二个参数仅接受字符串参数
         year = str(date_obj.year)
-    except:
+    except Exception:
         release = ""
         year = ""
     return number, title, actor, cover_url, studio, release, year

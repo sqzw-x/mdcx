@@ -7,7 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_html
-from models.config.config import config
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -56,7 +56,7 @@ def getScore(html):  # 获取评分
     try:
         result = html.xpath('//strong[contains(text(), "影片评分")]/../text()')
         result = re.findall(r"\d+", result[0])[0]
-    except:
+    except Exception:
         result = ""
     return result
 

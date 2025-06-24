@@ -2,7 +2,8 @@ import os
 import re
 import unicodedata
 
-from models.config.config import config
+from models.config.manager import config
+from models.config.manual import ManualConfig
 
 
 def is_uncensored(number: str) -> bool:
@@ -63,7 +64,7 @@ def is_uncensored(number: str) -> bool:
 def is_suren(number: str) -> bool:
     if re.search(r"\d{3,}[A-Z]+-\d{2}", number.upper()) or "SIRO" in number.upper():
         return True
-    for key in config.suren_dic.keys():
+    for key in ManualConfig.SUREN_DIC.keys():
         if number.upper().startswith(key):
             return True
     return False
@@ -105,7 +106,7 @@ def get_number_first_letter(number: str) -> str:
 
 
 def long_name(short_name: str) -> str:
-    long_name = config.oumei_name.get(short_name.lower())
+    long_name = ManualConfig.OUMEI_NAME.get(short_name.lower())
     return long_name.lower().replace("-", "").replace(".", "") if long_name else short_name.lower()
 
 
@@ -244,7 +245,7 @@ def get_file_number(filepath: str) -> str:
 
     elif r := re.search(r"[A-Z]{2,}-\d{2,}[Z]?", filename):  # 提取类似mkbd-120番号
         file_number = r.group()
-        for key, value in config.suren_dic.items():
+        for key, value in ManualConfig.SUREN_DIC.items():
             if key in file_number:
                 file_number = value + file_number
                 break
@@ -278,7 +279,7 @@ def get_file_number(filepath: str) -> str:
         temp_name = unicodedata.normalize("NFC", temp_name)  # Mac 把会拆成两个字符，即 NFD，而网页请求使用的是 NFC
         try:
             temp_name = temp_name.encode("cp932").decode("shift_jis")  # 转换为常见日文，比如～ 转换成 〜
-        except:
+        except Exception:
             pass
         file_number = temp_name
 

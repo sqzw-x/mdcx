@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Any
 
-from models.entity.enums import FileMode
+from ..entity.enums import FileMode
 
 
 @dataclass

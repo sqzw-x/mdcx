@@ -8,7 +8,7 @@ import urllib3
 import zhconv
 
 from models.base.web import get_html, post_html
-from models.config.config import config
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -52,7 +52,7 @@ def get_year(release):
     try:
         result = str(re.search(r"\d{4}", release).group())
         return result
-    except:
+    except Exception:
         return release
 
 
@@ -249,7 +249,7 @@ def main(
                     raise Exception(debug_info)
                 try:
                     result = html_search["data"]["list"]
-                except:
+                except Exception:
                     debug_info = f"搜索结果解析错误: {str(html_search)} "
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)

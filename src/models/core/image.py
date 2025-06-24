@@ -9,14 +9,14 @@ import traceback
 
 from PIL import Image
 
-from models.base.file import check_pic, move_file, split_path
-from models.base.utils import convert_path, get_used_time
-from models.config.config import config
-from models.config.resources import resources
-from models.core.file import movie_lists
-from models.core.json_data import JsonData, LogBuffer
-from models.core.utils import get_movie_path_setting
-from models.signals import signal
+from ..base.file import check_pic, move_file, split_path
+from ..base.utils import convert_path, get_used_time
+from ..config.manager import config
+from ..config.resources import resources
+from ..signals import signal
+from .file import movie_lists
+from .json_data import JsonData, LogBuffer
+from .utils import get_movie_path_setting
 
 
 def extrafanart_copy2(json_data: JsonData, folder_new_path: str):
@@ -126,7 +126,7 @@ def _add_to_pic(
             scroll_high = int(img_pic.height * mark_size / 40)
             scroll_width = int(scroll_high * img_subt.width / img_subt.height)
             img_subt = img_subt.resize((scroll_width, scroll_high), Image.LANCZOS)
-        except:
+        except Exception:
             signal.show_log_text(f"{traceback.format_exc()}\n Open Pic: {mark_pic_path}")
             print(traceback.format_exc())
             return
@@ -169,14 +169,14 @@ def _add_to_pic(
             mark_postion = (pos[count]["x"], pos[count]["y"])
         try:  # 图片如果下载不完整时，这里会崩溃，跳过
             img_pic.paste(img_subt, mark_postion, mask=a)
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
         img_pic = img_pic.convert("RGB")
         temp_pic_path = pic_path + ".[MARK].jpg"
         try:
             img_pic.load()
             img_pic.save(temp_pic_path, quality=95, subsampling=0)
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
         img_subt.close()
         if check_pic(temp_pic_path):
@@ -193,7 +193,7 @@ def add_mark_thread(pic_path: str, mark_list: list[str]):
     mark_pos_corner = config.mark_pos_corner
     try:
         img_pic = Image.open(pic_path)
-    except:
+    except Exception:
         signal.show_log_text(f"{traceback.format_exc()}\n Open Pic: {pic_path}")
         return
 
@@ -217,7 +217,7 @@ def add_mark_thread(pic_path: str, mark_list: list[str]):
             if mark_name == "4K" or mark_name == "8K":  # 4K/8K使用固定位置
                 count_hd = pos.get(mark_pos_hd)
                 _add_to_pic(pic_path, img_pic, mark_size, count_hd, mark_name)
-            elif mark_fixed == "on":  # 固定位置
+            elif mark_fixed == "fixed":  # 固定位置
                 if mark_name == "字幕":
                     count = pos.get(mark_pos_sub)
                 else:

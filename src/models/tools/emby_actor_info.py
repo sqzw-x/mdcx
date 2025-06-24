@@ -19,7 +19,8 @@ from lxml import etree
 from models.base.file import copy_file
 from models.base.utils import get_used_time
 from models.base.web import get_html, post_html
-from models.config.config import config
+from models.config.manager import config
+from models.config.manual import ManualConfig
 from models.config.resources import resources
 from models.core.flags import Flags
 from models.core.translate import deepl_translate, youdao_translate
@@ -117,7 +118,7 @@ def update_emby_actor_info():
                 else:
                     signal.show_log_text(f"🔴 {i}/{total} {actor_name}: 未检索到演员信息！跳过！")
                     continue
-            except:
+            except Exception:
                 signal.show_log_text(traceback.format_exc())
                 continue
             signal.show_log_text("=" * 80)
@@ -408,7 +409,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
                 for each in actor_1:
                     info = each.get_text("", strip=True)
                     overview += info + "\n"
-    except:
+    except Exception:
         signal.show_traceback_log(traceback.format_exc())
 
     # 简历
@@ -440,7 +441,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
                 for each in actor_1:
                     info = each.get_text("", strip=True)
                     overview += info + "\n"
-    except:
+    except Exception:
         signal.show_traceback_log(traceback.format_exc())
 
     # 翻译
@@ -557,7 +558,7 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
             signal.show_log_text(f"出生: {date} 在 {locations[0]}")
         if overview:
             signal.show_log_text(f"\n{overview}")
-    except:
+    except Exception:
         signal.show_log_text(traceback.format_exc())
     return True
 
@@ -616,7 +617,7 @@ def _search_wiki(actor_info: EMbyActressInfo):
                 description_en = description
                 description_t = description.lower()
                 signal.show_log_text(f" 📄 描述信息: {description}")
-                for each_des in config.actress_wiki_keywords:
+                for each_des in ManualConfig.ACTRESS_WIKI_KEYWORDS:
                     if each_des.lower() in description_t:
                         signal.show_log_text(f" 🎉 描述命中关键词: {each_des}")
                         break
@@ -647,11 +648,11 @@ def _search_wiki(actor_info: EMbyActressInfo):
                 if descriptions:
                     try:
                         description_zh = descriptions["zh"]["value"]
-                    except:
+                    except Exception:
                         signal.show_traceback_log(traceback.format_exc())
                     try:
                         description_ja = descriptions["ja"]["value"]
-                    except:
+                    except Exception:
                         signal.show_traceback_log(traceback.format_exc())
                     if description_en:
                         if not description_zh:
@@ -682,14 +683,14 @@ def _search_wiki(actor_info: EMbyActressInfo):
                             temp_ja = en_ja.get(description_en)
                             if temp_ja:
                                 description_ja = temp_ja
-            except:
+            except Exception:
                 signal.show_traceback_log(traceback.format_exc())
 
             # 获取 Tmdb，Imdb，Twitter，Instagram等id
             url_log = ""
             try:
                 claims = res["entities"][wiki_id]["claims"]
-            except:
+            except Exception:
                 signal.show_traceback_log(traceback.format_exc())
                 claims = None
             if claims:
@@ -697,37 +698,37 @@ def _search_wiki(actor_info: EMbyActressInfo):
                     tmdb_id = claims["P4985"][0]["mainsnak"]["datavalue"]["value"]
                     actor_info.provider_ids["Tmdb"] = tmdb_id
                     url_log += f"TheMovieDb: https://www.themoviedb.org/person/{tmdb_id} \n"
-                except:
+                except Exception:
                     signal.show_traceback_log(traceback.format_exc())
                 try:
                     imdb_id = claims["P345"][0]["mainsnak"]["datavalue"]["value"]
                     actor_info.provider_ids["Imdb"] = imdb_id
                     url_log += (f"IMDb: https://www.imdb.com/name/{imdb_id} \n",)
-                except:
+                except Exception:
                     signal.show_traceback_log(traceback.format_exc())
                 try:
                     twitter_id = claims["P2002"][0]["mainsnak"]["datavalue"]["value"]
                     actor_info.provider_ids["Twitter"] = twitter_id
                     url_log += f"Twitter: https://twitter.com/{twitter_id} \n"
-                except:
+                except Exception:
                     signal.show_traceback_log(traceback.format_exc())
                 try:
                     instagram_id = claims["P2003"][0]["mainsnak"]["datavalue"]["value"]
                     actor_info.provider_ids["Instagram"] = instagram_id
                     url_log += f"Instagram: https://www.instagram.com/{instagram_id} \n"
-                except:
+                except Exception:
                     signal.show_traceback_log(traceback.format_exc())
                 try:
                     fanza_id = claims["P9781"][0]["mainsnak"]["datavalue"]["value"]
                     actor_info.provider_ids["Fanza"] = fanza_id
                     url_log += f"Fanza: https://actress.dmm.co.jp/-/detail/=/actress_id={fanza_id} \n"
-                except:
+                except Exception:
                     signal.show_traceback_log(traceback.format_exc())
                 try:
                     xhamster_id = claims["P8720"][0]["mainsnak"]["datavalue"]["value"]
                     actor_info.provider_ids["xHamster"] = f"https://xhamster.com/pornstars/{xhamster_id}"
                     url_log += f"xHamster: https://xhamster.com/pornstars/{xhamster_id} \n"
-                except:
+                except Exception:
                     signal.show_traceback_log(traceback.format_exc())
 
             # 获取 wiki url 和 description
@@ -792,10 +793,10 @@ def _search_wiki(actor_info: EMbyActressInfo):
                     else:
                         signal.show_log_text(" 🔴 维基百科未获取到演员页 url！")
                     return
-            except:
+            except Exception:
                 signal.show_traceback_log(traceback.format_exc())
 
-    except:
+    except Exception:
         signal.show_log_text(traceback.format_exc())
 
 
@@ -871,7 +872,7 @@ def _deal_kodi_actors(gfriends_actor_data, add):
                                 signal.show_log_text(f"🔴 {each} 没有头像资源！")
                                 failed.add(each)
                                 no_pic.add(each)
-                    except:
+                    except Exception:
                         signal.show_traceback_log(traceback.format_exc())
         if add:
             signal.show_log_text(

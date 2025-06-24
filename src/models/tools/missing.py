@@ -12,7 +12,7 @@ from lxml import etree
 from models.base.path import get_main_path
 from models.base.utils import get_used_time
 from models.base.web import get_html, scraper_html
-from models.config.config import config
+from models.config.manager import config
 from models.config.resources import resources
 from models.core.file import get_file_info, movie_lists
 from models.core.flags import Flags

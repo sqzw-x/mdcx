@@ -7,7 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_html, post_html
-from models.config.config import config
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
 

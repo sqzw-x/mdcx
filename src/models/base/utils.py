@@ -4,12 +4,30 @@
 
 import ctypes
 import inspect
+import os
 import platform
 import random
 import re
 import time
 import traceback
 from threading import Thread
+
+
+def get_mac_default_config_folder() -> str:
+    """
+    获取macOS下默认的配置文件夹路径
+
+    ~/.mdcx
+
+    :return: 配置文件夹路径
+    """
+
+    home = os.path.expanduser("~")
+    folder_name = ".mdcx"
+    config_folder = os.path.join(home, folder_name)
+    if not os.path.exists(config_folder):
+        os.makedirs(config_folder, exist_ok=True, mode=0o755)
+    return config_folder
 
 
 def get_current_time() -> str:
@@ -77,7 +95,7 @@ def kill_a_thread(t: Thread):
     try:
         while t.is_alive():
             _async_raise(t.ident, SystemExit)
-    except:
+    except Exception:
         print(traceback.format_exc())
         _async_raise(t.ident, SystemExit)
 

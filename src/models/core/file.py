@@ -8,8 +8,8 @@ import shutil
 import time
 import traceback
 
-from models.base.file import copy_file, delete_file, move_file, read_link, split_path
-from models.base.number import (
+from ..base.file import copy_file, delete_file, move_file, read_link, split_path
+from ..base.number import (
     deal_actor_more,
     get_file_number,
     get_number_first_letter,
@@ -17,15 +17,15 @@ from models.base.number import (
     is_uncensored,
     remove_escape_string,
 )
-from models.base.path import showFilePath
-from models.base.utils import convert_path, get_current_time, get_used_time
-from models.config.config import config
-from models.config.resources import resources
-from models.core.flags import Flags
-from models.core.json_data import JsonData, LogBuffer, MoveContext, new_json_data
-from models.core.utils import get_movie_path_setting, get_new_release, nfd2c
-from models.entity.enums import FileMode
-from models.signals import signal
+from ..base.path import showFilePath
+from ..base.utils import convert_path, get_current_time, get_used_time
+from ..config.manager import config
+from ..config.resources import resources
+from ..entity.enums import FileMode
+from ..signals import signal
+from .flags import Flags
+from .json_data import JsonData, LogBuffer, MoveContext, new_json_data
+from .utils import get_movie_path_setting, get_new_release, nfd2c
 
 
 def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
@@ -62,7 +62,7 @@ def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
         try:  # 路径太长时，此处会报错 FileNotFoundError: [WinError 3] 系统找不到指定的路径。
             if os.path.getsize(file_path) <= config.clean_size_list * 1024:
                 return True
-        except:
+        except Exception:
             pass
     return False
 
@@ -82,7 +82,7 @@ def creat_folder(
     dont_creat_folder = False  # 不需要创建文件夹
 
     # 正常模式、视频模式时，软连接关，成功后不移动文件开时，这时不创建文件夹
-    if config.main_mode < 3 and config.soft_link == 0 and config.success_file_move == 0:
+    if config.main_mode < 3 and config.soft_link == 0 and not config.success_file_move:
         dont_creat_folder = True
 
     # 更新模式、读取模式，选择更新c文件时，不创建文件夹
@@ -91,7 +91,7 @@ def creat_folder(
 
     # 如果不需要创建文件夹，当不重命名时，直接返回
     if dont_creat_folder:
-        if config.success_file_rename == 0:
+        if not config.success_file_rename:
             json_data["dont_move_movie"] = True
             return True
 
@@ -154,7 +154,7 @@ def creat_folder(
                             # 在移动时删除即可。delete_file(file_new_path)
                             pass
                         return True
-                except:
+                except Exception:
                     pass
 
                 # 路径不同，当指向不同文件时
@@ -195,11 +195,11 @@ def move_trailer_video(
     json_data: JsonData, folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str
 ) -> None:
     if config.main_mode < 2:
-        if config.success_file_move == 0 and config.success_file_rename == 0:
+        if not config.success_file_move and not config.success_file_rename:
             return
     if config.main_mode > 2:
         update_mode = config.update_mode
-        if update_mode == "c" and config.success_file_rename == 0:
+        if update_mode == "c" and not config.success_file_rename:
             return
 
     media_type_list = config.media_type.split("|")
@@ -214,10 +214,10 @@ def move_trailer_video(
 def move_bif(json_data: JsonData, folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str) -> None:
     # 更新模式 或 读取模式
     if config.main_mode == 3 or config.main_mode == 4:
-        if config.update_mode == "c" and config.success_file_rename == 0:
+        if config.update_mode == "c" and not config.success_file_rename:
             return
 
-    elif config.success_file_move == 0 and config.success_file_rename == 0:
+    elif not config.success_file_move and not config.success_file_rename:
         return
     bif_old_path = os.path.join(folder_old_path, (file_name + "-320-10.bif"))
     bif_new_path = os.path.join(folder_new_path, (naming_rule + "-320-10.bif"))
@@ -231,14 +231,14 @@ def move_torrent(
 ) -> None:
     # 更新模式 或 读取模式
     if config.main_mode == 3 or config.main_mode == 4:
-        if config.update_mode == "c" and config.success_file_rename == 0:
+        if config.update_mode == "c" and not config.success_file_rename:
             return
 
     # 软硬链接开时，不移动
     elif config.soft_link != 0:
         return
 
-    elif config.success_file_move == 0 and config.success_file_rename == 0:
+    elif not config.success_file_move and not config.success_file_rename:
         return
     torrent_file1 = os.path.join(folder_old_path, (file_name + ".torrent"))
     torrent_file2 = os.path.join(folder_old_path, (movie_number + ".torrent"))
@@ -310,9 +310,9 @@ def copy_trailer_to_theme_videos(json_data: JsonData, folder_new_path: str, nami
         return
 
     # 不存在预告片时返回
-    trailer_name = config.trailer_name
+    trailer_name = config.trailer_simple_name
     trailer_folder = ""
-    if trailer_name == 1:
+    if trailer_name:
         trailer_folder = os.path.join(folder_new_path, "trailers")
         trailer_file_path = os.path.join(trailer_folder, "trailer.mp4")
     else:
@@ -331,7 +331,7 @@ def copy_trailer_to_theme_videos(json_data: JsonData, folder_new_path: str, nami
     # 不下载并且不保留预告片时，删除预告片
     if "trailer" not in download_files and "trailer" not in config.keep_files:
         delete_file(trailer_file_path)
-        if trailer_name == 1:
+        if trailer_name:
             shutil.rmtree(trailer_folder, ignore_errors=True)
         LogBuffer.log().write("\n 🍀 Trailer delete done!")
 
@@ -349,10 +349,10 @@ def move_other_file(
 
     # 更新模式 或 读取模式
     if config.main_mode == 3 or config.main_mode == 4:
-        if config.update_mode == "c" and config.success_file_rename == 0:
+        if config.update_mode == "c" and not config.success_file_rename:
             return
 
-    elif config.success_file_move == 0 and config.success_file_rename == 0:
+    elif not config.success_file_move and not config.success_file_rename:
         return
 
     files = os.listdir(folder_old_path)
@@ -381,7 +381,7 @@ def move_file_to_failed_folder(
 
     # 更新模式、读取模式，不移动失败文件；不移动文件-关时，不移动； 软硬链接开时，不移动
     main_mode = config.main_mode
-    if main_mode == 3 or main_mode == 4 or config.failed_file_move == 0 or config.soft_link != 0:
+    if main_mode == 3 or main_mode == 4 or not config.failed_file_move or config.soft_link != 0:
         LogBuffer.log().write(f"\n 🙊 [Movie] {file_path}")
         return file_path
 
@@ -389,7 +389,7 @@ def move_file_to_failed_folder(
     if config.failed_file_move == 1 and not os.path.exists(failed_folder):
         try:
             os.makedirs(failed_folder)
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
 
@@ -480,7 +480,7 @@ def move_movie(json_data: MoveContext, file_path: str, file_new_path: str) -> bo
             )
             return True
         except Exception as e:
-            if config.is_windows:
+            if IS_WINDOWS:
                 LogBuffer.log().write(
                     "\n 🥺 Softlink failed! (创建软连接失败！"
                     "注意：Windows 平台输出目录必须是本地磁盘！不支持挂载的 NAS 盘或网盘！"
@@ -503,7 +503,7 @@ def move_movie(json_data: MoveContext, file_path: str, file_new_path: str) -> bo
             )
             return True
         except Exception as e:
-            if config.is_mac:
+            if IS_MAC:
                 LogBuffer.log().write(
                     "\n 🥺 HardLink failed! (创建硬连接失败！"
                     "注意：硬链接要求待刮削文件和输出目录必须是同盘，不支持跨卷！"
@@ -569,7 +569,7 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -
     # 正常模式 或 整理模式
     else:
         # 关闭软连接，并且成功后移动文件关时，使用原来文件夹
-        if config.soft_link == 0 and config.success_file_move == 0:
+        if config.soft_link == 0 and not config.success_file_move:
             folder_path = split_path(file_path)[0]
             json_data["folder_name"] = folder_name
             return folder_path
@@ -610,7 +610,7 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -
 
     # 是否勾选目录名添加字幕标识
     cnword = c_word
-    if config.folder_cnword != "on":
+    if not config.folder_cnword:
         c_word = ""
 
     # 是否勾选目录名添加4k标识
@@ -751,7 +751,7 @@ def _generate_file_name(file_path: str, json_data: JsonData) -> str:
     filename = file_name
 
     # 如果成功后不重命名，则返回原来名字
-    if config.success_file_rename == 0:
+    if not config.success_file_rename:
         return file_name
 
     # 获取文件信息
@@ -796,7 +796,7 @@ def _generate_file_name(file_path: str, json_data: JsonData) -> str:
 
     # 判断是否勾选文件名添加字幕标识
     cnword = c_word
-    if config.file_cnword != "on":
+    if not config.file_cnword:
         c_word = ""
 
     # 判断是否勾选文件名添加版本标识
@@ -955,7 +955,7 @@ def get_output_name(
     fanart_new_path_with_filename = convert_path(os.path.join(folder_new_path, fanart_new_name))
     # =====================================================================================生成图片最终路径
     # 如果图片命名规则不加文件名并且视频目录不为空
-    if config.pic_name == 1 and json_data["folder_name"].replace(" ", ""):
+    if config.pic_simple_name and json_data["folder_name"].replace(" ", ""):
         poster_final_name = "poster.jpg"
         thumb_final_name = "thumb.jpg"
         fanart_final_name = "fanart.jpg"
@@ -1154,7 +1154,7 @@ def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path: str)
                     else:
                         temp_total.append(path)
                     # mac 转换成 NFC，因为mac平台nfc和nfd指向同一个文件，windows平台指向不同文件
-                    if not config.is_windows:
+                    if not IS_WINDOWS:
                         path = nfd2c(path)
                     new_path = convert_path(path)
                     if not_skip_success or new_path not in Flags.success_list:
@@ -1315,7 +1315,7 @@ def get_file_info(file_path: str, copy_sub: bool = True) -> tuple[JsonData, str,
         elif cd_path_4 and "middle_number" in cd_char:
             cd_part = str(int(cd_path_4[0]))
 
-        # 判断分集命名规则是
+        # 判断分集命名规则
         if cd_part:
             cd_name = config.cd_name
             if int(cd_part) == 0:
@@ -1469,7 +1469,7 @@ def get_file_info(file_path: str, copy_sub: bool = True) -> tuple[JsonData, str,
                     elif ">动漫</" in nfo_content or ">動漫</" in nfo_content:
                         youma = youma_style
                         mosaic = "动漫"
-            except:
+            except Exception:
                 signal.show_traceback_log(traceback.format_exc())
 
         if not has_sub and os.path.exists(nfo_old_path):
@@ -1479,21 +1479,21 @@ def get_file_info(file_path: str, copy_sub: bool = True) -> tuple[JsonData, str,
                 if "<genre>中文字幕</genre>" in nfo_content or "<tag>中文字幕</tag>" in nfo_content:
                     c_word = cnword_style  # 中文字幕影片后缀
                     has_sub = True
-            except:
+            except Exception:
                 signal.show_traceback_log(traceback.format_exc())
 
         # 查找字幕包目录字幕文件
         subtitle_add = config.subtitle_add
-        if not has_sub and copy_sub and subtitle_add == "on":
+        if not has_sub and copy_sub and subtitle_add:
             subtitle_folder = config.subtitle_folder
             subtitle_add = config.subtitle_add
-            if subtitle_add == "on" and subtitle_folder:  # 复制字幕开
+            if subtitle_add and subtitle_folder:  # 复制字幕开
                 for sub_type in sub_type_list:
                     sub_path_1 = os.path.join(subtitle_folder, (movie_number + cd_part + sub_type))
                     sub_path_2 = os.path.join(subtitle_folder, file_name + sub_type)
                     sub_path_list = [sub_path_1, sub_path_2]
                     sub_file_name = file_name + sub_type
-                    if config.subtitle_add_chs == "on":
+                    if config.subtitle_add_chs:
                         sub_file_name = file_name + ".chs" + sub_type
                         sub_type = ".chs" + sub_type
                     sub_new_path = os.path.join(folder_path, sub_file_name)
@@ -1515,7 +1515,7 @@ def get_file_info(file_path: str, copy_sub: bool = True) -> tuple[JsonData, str,
                 file_show_name += c_word
         file_show_name += cd_part
 
-    except:
+    except Exception:
         signal.show_traceback_log(file_path)
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
@@ -1563,7 +1563,7 @@ def get_movie_list(file_mode: FileMode, movie_path: str, escape_folder_list: lis
                 movie_list = movie_lists(
                     escape_folder_list, config.media_type, movie_path
                 )  # 获取所有需要刮削的影片列表
-            except:
+            except Exception:
                 signal.show_traceback_log(traceback.format_exc())
                 signal.show_log_text(traceback.format_exc())
             count_all = len(movie_list)
@@ -1584,7 +1584,7 @@ def get_movie_list(file_mode: FileMode, movie_path: str, escape_folder_list: lis
 
 def _clean_empty_fodlers(path: str, file_mode: FileMode) -> None:
     start_time = time.time()
-    if config.del_empty_folder == 0 or file_mode == FileMode.Again:
+    if not config.del_empty_folder or file_mode == FileMode.Again:
         return
     signal.set_label_file_path.emit("🗑 正在清理空文件夹，请等待...")
     signal.show_log_text(" ⏳ Cleaning empty folders...")
@@ -1666,7 +1666,7 @@ def deal_old_files(
     extrafanart_folder = config.extrafanart_folder
     extrafanart_copy_old_path = convert_path(os.path.join(folder_old_path, extrafanart_folder))
     extrafanart_copy_new_path = convert_path(os.path.join(folder_new_path, extrafanart_folder))
-    trailer_name = config.trailer_name
+    trailer_name = config.trailer_simple_name
     trailer_old_folder_path = convert_path(os.path.join(folder_old_path, "trailers"))
     trailer_new_folder_path = convert_path(os.path.join(folder_new_path, "trailers"))
     trailer_old_file_path = convert_path(os.path.join(trailer_old_folder_path, "trailer.mp4"))
@@ -1815,7 +1815,7 @@ def deal_old_files(
         elif Flags.file_done_dic[json_data["number"]]["local_poster"]:
             copy_file(Flags.file_done_dic[json_data["number"]]["local_poster"], poster_final_path)
 
-    except:
+    except Exception:
         signal.show_log_text(traceback.format_exc())
 
     # thumb 处理：寻找对应文件放到最终路径上。这样避免刮削失败时，旧的图片被删除
@@ -1858,7 +1858,7 @@ def deal_old_files(
         elif Flags.file_done_dic[json_data["number"]]["local_thumb"]:
             copy_file(Flags.file_done_dic[json_data["number"]]["local_thumb"], thumb_final_path)
 
-    except:
+    except Exception:
         signal.show_log_text(traceback.format_exc())
 
     # fanart 处理：寻找对应文件放到最终路径上。这样避免刮削失败时，旧的图片被删除
@@ -1901,7 +1901,7 @@ def deal_old_files(
         elif Flags.file_done_dic[json_data["number"]]["local_fanart"]:
             copy_file(Flags.file_done_dic[json_data["number"]]["local_fanart"], fanart_final_path)
 
-    except:
+    except Exception:
         signal.show_log_text(traceback.format_exc())
 
     # 更新图片地址
@@ -1916,11 +1916,11 @@ def deal_old_files(
                 delete_file(nfo_old_path)
         elif nfo_old_path != nfo_new_path and os.path.exists(nfo_old_path):
             move_file(nfo_old_path, nfo_new_path)
-    except:
+    except Exception:
         signal.show_log_text(traceback.format_exc())
 
     # trailer
-    if trailer_name == 1:  # 预告片名字不含视频文件名
+    if trailer_name:  # 预告片名字不含视频文件名
         # trailer最终路径等于已下载路径时，trailer是已下载的，不需要处理
         if os.path.exists(trailer_new_file_path):
             if os.path.exists(trailer_old_file_path_with_filename):
@@ -1996,7 +1996,7 @@ def deal_old_files(
                     shutil.rmtree(extrafanart_old_path, ignore_errors=True)
             elif os.path.exists(extrafanart_old_path):
                 move_file(extrafanart_old_path, extrafanart_new_path)
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
         # extrafanart副本
@@ -2008,7 +2008,7 @@ def deal_old_files(
                     shutil.rmtree(extrafanart_copy_old_path, ignore_errors=True)
             elif os.path.exists(extrafanart_copy_old_path):
                 move_file(extrafanart_copy_old_path, extrafanart_copy_new_path)
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
         # 主题视频
@@ -2047,7 +2047,7 @@ def _pic_some_deal(json_data: JsonData, thumb_final_path: str, fanart_final_path
 
 def _deal_path_name(path: str) -> str:
     # Windows 保留文件名
-    if config.is_windows:
+    if IS_WINDOWS:
         windows_keep_name = ["CON", "PRN", "NUL", "AUX"]
         temp_list = re.split(r"[/\\]", path)
         for i in range(len(temp_list)):

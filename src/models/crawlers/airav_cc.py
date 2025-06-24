@@ -8,7 +8,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import curl_html
-from models.config import config
+from models.config import manager
 from models.core.json_data import LogBuffer
 from models.signals import signal
 
@@ -42,7 +42,7 @@ def get_actor(html):
     try:
         actor_list = html.xpath('//*[contains(text(), "女優") or contains(text(), "女优")]//a/text()')
         result = ",".join(actor_list)
-    except:
+    except Exception:
         result = ""
     return result
 
@@ -73,7 +73,7 @@ def get_year(release):
     try:
         result = str(re.search(r"\d{4}", release).group())
         return result
-    except:
+    except Exception:
         return release
 
 
@@ -158,7 +158,7 @@ def main(
     image_cut = "right"
     image_download = False
     mosaic = "有码"
-    airav_url = getattr(config, "airav_cc_website", "https://airav.io")
+    airav_url = getattr(manager, "airav_cc_website", "https://airav.io")
     if language == "zh_cn":
         airav_url += "/cn"
     web_info = "\n       "

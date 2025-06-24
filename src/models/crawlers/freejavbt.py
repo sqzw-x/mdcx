@@ -36,7 +36,7 @@ def get_title(html):
         if not title or "翻译错误" in title or "每日更新" in str(result):
             return "", ""
         return title, number
-    except:
+    except Exception:
         return "", ""
 
 
@@ -303,7 +303,7 @@ def get_cover(html):
         )[0]
         if "no_preview_lg" in result or "http" not in result:
             return ""
-    except:
+    except Exception:
         result = ""
     return result
 

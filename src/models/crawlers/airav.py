@@ -29,7 +29,7 @@ def getTitle(html):
 def getActor(html):
     try:
         result = str(html.xpath('//li[@class="videoAvstarListItem"]/a/text()')).strip("['']").replace("'", "")
-    except:
+    except Exception:
         result = ""
     return result
 
@@ -57,7 +57,7 @@ def getYear(getRelease):
     try:
         result = str(re.search(r"\d{4}", getRelease).group())
         return result
-    except:
+    except Exception:
         return getRelease
 
 
@@ -69,7 +69,7 @@ def getTag(html):
 def getCover(html):
     try:
         result = str(html.xpath('//div[@class="videoPlayerMobile d-none "]/div/img/@src')[0]).strip(" ['']")
-    except:
+    except Exception:
         result = ""
     return result
 
@@ -79,7 +79,7 @@ def getOutline(html, language, real_url):
         real_url = real_url.replace("cn.airav.wiki", "www.airav.wiki").replace("zh_CN", "zh_TW")
         try:
             result, html_content = curl_html(real_url)
-        except:
+        except Exception:
             pass
         html = etree.fromstring(html_content, etree.HTMLParser())
     result = str(html.xpath('//div[@class="synopsis"]/p/text()')).strip(" ['']")

@@ -8,11 +8,9 @@ from typing import Any, Callable
 
 import langid
 
-from models.base.number import get_number_letters, is_uncensored
-from models.config.config import config
-from models.core.flags import Flags
-from models.core.json_data import JsonData, LogBuffer
-from models.crawlers import (
+from ..base.number import get_number_letters, is_uncensored
+from ..config.manager import config
+from ..crawlers import (
     airav,
     airav_cc,
     avsex,
@@ -52,7 +50,9 @@ from models.crawlers import (
     theporndb,
     xcity,
 )
-from models.entity.enums import FileMode
+from ..entity.enums import FileMode
+from .flags import Flags
+from .json_data import JsonData, LogBuffer
 
 
 def _get_new_website_list(
@@ -605,7 +605,7 @@ def _deal_each_field(
             title_language = "jp"
         try:
             web_data_json = all_json_data[website][title_language]
-        except:
+        except Exception:
             continue
 
         if web_data_json["title"] and web_data_json[field_name]:
@@ -698,7 +698,7 @@ def _call_crawlers(
 
         try:
             web_data_json = all_json_data[website][title_language]
-        except:
+        except Exception:
             web_data = _call_crawler(
                 json_data, website, title_language, file_number, short_number, mosaic, config.title_language
             )
@@ -974,7 +974,7 @@ def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回
         try:
             end_actor = re.compile(rf" {each}$")
             json_data["originaltitle_amazon"] = re.sub(end_actor, "", json_data["originaltitle_amazon"])
-        except:
+        except Exception:
             pass
 
     # VR 时下载小封面

@@ -2,7 +2,7 @@
 
 import json
 
-from models.config.config import config
+from models.config.manager import config
 from models.crawlers import iqqtv
 
 

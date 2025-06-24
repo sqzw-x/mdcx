@@ -20,11 +20,6 @@ from PyQt5.QtWidgets import (
     QTreeWidgetItem,
 )
 
-from controllers.cut_window import CutWindow
-from controllers.main_window.init import Init_QSystemTrayIcon, Init_Singal, Init_Ui, init_QTreeWidget
-from controllers.main_window.load_config import load_config
-from controllers.main_window.save_config import save_config
-from controllers.main_window.style import set_dark_style, set_style
 from models.base.file import _open_file_thread, delete_file, split_path
 from models.base.image import get_pixmap
 from models.base.path import get_main_path, get_path
@@ -36,7 +31,9 @@ from models.base.web import (
     ping_host,
     scraper_html,
 )
-from models.config.config import config
+from models.config.consts import IS_WINDOWS
+from models.config.manager import config, manager
+from models.config.manual import ManualConfig
 from models.config.resources import resources
 from models.core.file import (
     check_and_clean_files,
@@ -62,6 +59,12 @@ from models.tools.emby_actor_image import update_emby_actor_photo
 from models.tools.emby_actor_info import creat_kodi_actors, show_emby_actor_list, update_emby_actor_info
 from models.tools.missing import check_missing_number
 from views.MDCx import Ui_MDCx
+
+from ..cut_window import CutWindow
+from .init import Init_QSystemTrayIcon, Init_Singal, Init_Ui, init_QTreeWidget
+from .load_config import load_config
+from .save_config import save_config
+from .style import set_dark_style, set_style
 
 
 class MyMAinWindow(QMainWindow):
@@ -99,7 +102,7 @@ class MyMAinWindow(QMainWindow):
         super().__init__(parent)
 
         # region 初始化需要的变量
-        self.localversion = config.local_version  # 当前版本号
+        self.localversion = ManualConfig.LOCAL_VERSION  # 当前版本号
         self.new_version = "\n🔍 点击检查最新版本"  # 有版本更新时在左下角显示的新版本信息
         self.json_data = {}  # 当前树状图选中文件的json_data
         self.img_path = ""  # 当前树状图选中文件的图片地址
@@ -270,7 +273,7 @@ class MyMAinWindow(QMainWindow):
     # region 窗口操作
     def tray_icon_click(self, e):
         if int(e) == 3:
-            if config.is_windows:
+            if IS_WINDOWS:
                 if self.isVisible():
                     self.hide()
                 else:
@@ -320,7 +323,7 @@ class MyMAinWindow(QMainWindow):
         # WindowState （WindowNoState=0 正常窗口; WindowMinimized= 1 最小化;
         # WindowMaximized= 2 最大化; WindowFullScreen= 3 全屏;WindowActive= 8 可编辑。）
         # windows平台无问题，仅mac平台python版有问题
-        if not config.is_windows:
+        if not IS_WINDOWS:
             if self.window_radius and event.type() == QEvent.WindowStateChange and not int(self.windowState()):
                 self.setWindowFlag(Qt.FramelessWindowHint, True)  # 隐藏边框
                 self.show()
@@ -337,7 +340,7 @@ class MyMAinWindow(QMainWindow):
             if self.window_radius == 0:
                 self.show_flag = True
             self.window_radius = 5
-            if config.is_windows:
+            if IS_WINDOWS:
                 self.window_border = 1
             else:
                 self.window_border = 0
@@ -446,10 +449,7 @@ class MyMAinWindow(QMainWindow):
         need_save_config = False
 
         if bool(self.Ui.checkBox_cover.isChecked()) != bool(show_poster):
-            if self.Ui.checkBox_cover.isChecked():
-                config.show_poster = 1
-            else:
-                config.show_poster = 0
+            config.show_poster = self.Ui.checkBox_cover.isChecked()
             need_save_config = True
         if self.Ui.textBrowser_log_main_2.isHidden() == bool("show_logs" in switch_on):
             if self.Ui.textBrowser_log_main_2.isHidden():
@@ -459,12 +459,12 @@ class MyMAinWindow(QMainWindow):
             need_save_config = True
         if need_save_config:
             try:
-                config.save_config()
-            except:
+                manager.save_config()
+            except Exception:
                 signal.show_traceback_log(traceback.format_exc())
         try:
             self.tray_icon.hide()
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
         signal.show_traceback_log("\n\n\n\n************ 程序正常退出！************\n")
         os._exit(0)
@@ -477,7 +477,7 @@ class MyMAinWindow(QMainWindow):
             self.hide()
             return
         # mac 平台 python 版本 最小化有问题，此处就是为了兼容它，需要先设置为显示窗口标题栏才能最小化
-        if not config.is_windows:
+        if not IS_WINDOWS:
             self.setWindowFlag(Qt.FramelessWindowHint, False)  # 不隐藏边框
 
         # self.setWindowState(Qt.WindowMinimized)
@@ -485,7 +485,7 @@ class MyMAinWindow(QMainWindow):
         self.showMinimized()
 
     def pushButton_min_clicked2(self):
-        if not config.is_windows:
+        if not IS_WINDOWS:
             self.setWindowFlag(Qt.FramelessWindowHint, False)  # 不隐藏边框
             # self.show()  # 加上后可以显示缩小动画
         self.showMinimized()
@@ -534,7 +534,7 @@ class MyMAinWindow(QMainWindow):
                 self.Ui.pushButton_about.setStyleSheet(
                     "QPushButton:hover#pushButton_about{color: black;background-color: rgba(160,160,165,40);}"
                 )
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
 
     # endregion
@@ -544,7 +544,7 @@ class MyMAinWindow(QMainWindow):
         try:
             t = threading.Thread(target=self._show_version_thread)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
 
@@ -576,7 +576,7 @@ class MyMAinWindow(QMainWindow):
         try:
             t = threading.Thread(target=check_theporndb_api_token)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
 
@@ -592,7 +592,7 @@ class MyMAinWindow(QMainWindow):
                 if hasattr(config, "javdb_website"):
                     self.label_number_url = self.label_number_url.replace("https://javdb.com", config.javdb_website)
                 webbrowser.open(self.label_number_url)
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
 
     def label_actor_clicked(self, test):
@@ -604,7 +604,7 @@ class MyMAinWindow(QMainWindow):
                 if hasattr(config, "javdb_website"):
                     self.label_actor_url = self.label_actor_url.replace("https://javdb.com", config.javdb_website)
                 webbrowser.open(self.label_actor_url)
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
 
     def label_version_clicked(self, test):
@@ -613,7 +613,7 @@ class MyMAinWindow(QMainWindow):
                 webbrowser.open("https://github.com/sqzw-x/mdcx/releases/tag/daily_release")
             else:
                 webbrowser.open("https://github.com/sqzw-x/mdcx/releases")
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
 
     # endregion
@@ -661,7 +661,7 @@ class MyMAinWindow(QMainWindow):
             else:
                 self.Ui.pushButton_setting.setStyleSheet("font-weight: bold; background-color: rgba(160,160,165,100);")
             self._check_mac_config_folder()
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
 
     # 点击左侧【检测网络】按钮，切换到检测网络页面
@@ -715,7 +715,7 @@ class MyMAinWindow(QMainWindow):
             signal.show_scrape_info("⛔️ 刮削停止中...")
             try:  # pool可能还没启动
                 Flags.pool.shutdown(wait=False, cancel_futures=True)
-            except:
+            except Exception:
                 signal.show_traceback_log(traceback.format_exc())
             t = threading.Thread(target=self._kill_threads)  # 关闭线程池和扫描线程
             t.start()
@@ -757,7 +757,7 @@ class MyMAinWindow(QMainWindow):
             signal.show_log_text(f"{' 🍕 Per time'.ljust(13)}: {average_time}S")
             signal.show_log_text("================================================================================")
             Flags.again_dic.clear()
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
         print(threading.enumerate())
@@ -1000,7 +1000,7 @@ class MyMAinWindow(QMainWindow):
                 cover_from = json_data["cover_from"]
 
                 self.set_pixmap_thread(poster_path, thumb_path, poster_from, cover_from)
-        except:
+        except Exception:
             if not signal.stop:
                 signal.show_traceback_log(traceback.format_exc())
 
@@ -1061,13 +1061,13 @@ class MyMAinWindow(QMainWindow):
     # 主界面-点击树状条目
     def treeWidget_number_clicked(self, qmodeLindex):
         item = self.Ui.treeWidget_number.currentItem()
-        if item.text(0) != "成功" and item.text(0) != "失败":
+        if item and item.text(0) != "成功" and item.text(0) != "失败":
             try:
                 index_json = str(item.text(0))
                 signal.add_label_info(self.json_array[str(index_json)])
                 if not self.Ui.widget_nfo.isHidden():
                     self._show_nfo_info()
-            except:
+            except Exception:
                 signal.show_traceback_log(item.text(0) + ": No info!")
 
     def _check_main_file_path(self):
@@ -1286,7 +1286,7 @@ class MyMAinWindow(QMainWindow):
                     country = "JP"
             AllItems = [self.Ui.comboBox_nfo.itemText(i) for i in range(self.Ui.comboBox_nfo.count())]
             self.Ui.comboBox_nfo.setCurrentIndex(AllItems.index(country))
-        except:
+        except Exception:
             if not signal.stop:
                 signal.show_traceback_log(traceback.format_exc())
 
@@ -1324,7 +1324,7 @@ class MyMAinWindow(QMainWindow):
                 signal.add_label_info(json_data)
             else:
                 self.Ui.label_save_tips.setText(f"保存失败! {get_current_time()}")
-        except:
+        except Exception:
             if not signal.stop:
                 signal.show_traceback_log(traceback.format_exc())
 
@@ -1343,9 +1343,9 @@ class MyMAinWindow(QMainWindow):
                 scrape_info = "🍯 软链接 · 开\n" + scrape_info
             elif config.soft_link == 2:
                 scrape_info = "🍯 硬链接 · 开\n" + scrape_info
-            after_info = f"\n{scrape_info}\n🛠 {config.file}\n🐰 MDCx {self.localversion}"
+            after_info = f"\n{scrape_info}\n🛠 {manager.file}\n🐰 MDCx {self.localversion}"
             self.label_show_version.emit(before_info + after_info + self.new_version)
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
 
     # region 获取/保存成功刮削列表
@@ -1474,10 +1474,10 @@ class MyMAinWindow(QMainWindow):
         if not text:
             return
         text = str(text)
-        if config.save_log == "on":  # 保存日志
+        if config.save_log:  # 保存日志
             try:
                 Flags.log_txt.write((text + "\n").encode("utf-8"))
-            except:
+            except Exception:
                 log_folder = os.path.join(get_main_path(), "Log")
                 if not os.path.exists(log_folder):
                     os.makedirs(log_folder)
@@ -1498,7 +1498,7 @@ class MyMAinWindow(QMainWindow):
                 self.main_logs_show.emit(add_html(" 🗑️ 日志过多，已清屏！"))
                 # self.show_traceback_log(self.Ui.textBrowser_log_main.document().lineCount())
 
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
             self.Ui.textBrowser_log_main.append(traceback.format_exc())
 
@@ -1514,7 +1514,7 @@ class MyMAinWindow(QMainWindow):
             try:
                 t = threading.Thread(target=check_missing_number, args=(False,))
                 t.start()  # 启动线程,即让线程开始执行
-            except:
+            except Exception:
                 signal.show_traceback_log(traceback.format_exc())
                 signal.show_log_text(traceback.format_exc())
 
@@ -1562,7 +1562,7 @@ class MyMAinWindow(QMainWindow):
             )
             Flags.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
 
@@ -1583,7 +1583,7 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(target=check_missing_number, args=(True,))
             Flags.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
 
@@ -1665,7 +1665,7 @@ class MyMAinWindow(QMainWindow):
                 t = threading.Thread(target=self._move_file_thread)
                 Flags.threads_list.append(t)
                 t.start()  # 启动线程,即让线程开始执行
-            except:
+            except Exception:
                 signal.show_traceback_log(traceback.format_exc())
                 signal.show_log_text(traceback.format_exc())
 
@@ -1880,7 +1880,7 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(target=check_and_clean_files)
             Flags.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
 
@@ -1891,7 +1891,7 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(target=add_sub_for_all_video)
             Flags.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
 
@@ -1902,7 +1902,7 @@ class MyMAinWindow(QMainWindow):
         try:
             t = threading.Thread(target=add_del_extras, args=("add",))
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
     def pushButton_del_all_extras_clicked(self):
@@ -1910,7 +1910,7 @@ class MyMAinWindow(QMainWindow):
         try:
             t = threading.Thread(target=add_del_extras, args=("del",))
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
     # 为所有视频中的创建/删除剧照副本
@@ -1920,7 +1920,7 @@ class MyMAinWindow(QMainWindow):
         try:
             t = threading.Thread(target=add_del_extrafanart_copy, args=("add",))
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
     def pushButton_del_all_extrafanart_copy_clicked(self):
@@ -1929,7 +1929,7 @@ class MyMAinWindow(QMainWindow):
         try:
             t = threading.Thread(target=add_del_extrafanart_copy, args=("del",))
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
     # 为所有视频中的创建/删除主题视频
@@ -1938,7 +1938,7 @@ class MyMAinWindow(QMainWindow):
         try:
             t = threading.Thread(target=add_del_theme_videos, args=("add",))
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
     def pushButton_del_all_theme_videos_clicked(self):
@@ -1946,7 +1946,7 @@ class MyMAinWindow(QMainWindow):
         try:
             t = threading.Thread(target=add_del_theme_videos, args=("del",))
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
     # endregion
@@ -1960,7 +1960,7 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(target=update_emby_actor_info)
             Flags.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
     # 设置-演员 补全演员头像按钮
@@ -1971,7 +1971,7 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(target=update_emby_actor_photo)
             Flags.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
     # 设置-演员 补全演员头像按钮 kodi
@@ -1982,7 +1982,7 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(target=creat_kodi_actors, args=(True,))
             Flags.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
     # 设置-演员 清除演员头像按钮 kodi
@@ -1992,7 +1992,7 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(target=creat_kodi_actors, args=(False,))
             Flags.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
     # 设置-演员 查看演员列表按钮
@@ -2002,7 +2002,7 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(target=show_emby_actor_list, args=(self.Ui.comboBox_pic_actor.currentIndex(),))
             Flags.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
 
     # endregion
@@ -2043,12 +2043,12 @@ class MyMAinWindow(QMainWindow):
 
     # 切换配置
     def config_file_change(self, new_config_file):
-        if new_config_file != config.file:
-            new_config_path = os.path.join(config.folder, new_config_file)
+        if new_config_file != manager.file:
+            new_config_path = os.path.join(manager.folder, new_config_file)
             signal.show_log_text(
                 f"\n================================================================================\n切换配置：{new_config_path}"
             )
-            with open(config.get_mark_file_path(), "w", encoding="UTF-8") as f:
+            with open(manager.get_mark_file_path(), "w", encoding="UTF-8") as f:
                 f.write(new_config_path)
             temp_dark = self.dark_mode
             temp_window_radius = self.window_radius
@@ -2061,7 +2061,7 @@ class MyMAinWindow(QMainWindow):
     # 重置配置
     def pushButton_init_config_clicked(self):
         self.Ui.pushButton_init_config.setEnabled(False)
-        config.init_config()
+        manager.init_config()
         temp_dark = self.dark_mode
         temp_window_radius = self.window_radius
         self.load_config()
@@ -2089,12 +2089,12 @@ class MyMAinWindow(QMainWindow):
 
     # 读取设置页的设置, 保存config.ini，然后重新加载
     def _check_mac_config_folder(self):
-        if self.check_mac and not config.is_windows and ".app/Contents/Resources" in config.folder:
+        if self.check_mac and not IS_WINDOWS and ".app/Contents/Resources" in manager.folder:
             self.check_mac = False
             box = QMessageBox(
                 QMessageBox.Warning,
                 "选择配置文件目录",
-                f"检测到当前配置文件目录为：\n {config.folder}\n\n由于 MacOS 平台在每次更新 APP 版本时会覆盖该目录的配置，因此请选择其他的配置目录！\n这样下次更新 APP 时，选择相同的配置目录即可读取你之前的配置！！！",
+                f"检测到当前配置文件目录为：\n {manager.folder}\n\n由于 MacOS 平台在每次更新 APP 版本时会覆盖该目录的配置，因此请选择其他的配置目录！\n这样下次更新 APP 时，选择相同的配置目录即可读取你之前的配置！！！",
             )
             box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
             box.button(QMessageBox.Yes).setText("选择目录")
@@ -2118,8 +2118,8 @@ class MyMAinWindow(QMainWindow):
             new_config_name = re.sub(r'[\\:*?"<>|\r\n]+', "", new_config_name)
             if os.path.splitext(new_config_name)[1] != ".ini":
                 new_config_name += ".ini"
-            if new_config_name != config.file:
-                config.file = new_config_name
+            if new_config_name != manager.file:
+                manager.file = new_config_name
                 self.pushButton_save_config_clicked()
 
     def save_config(self): ...
@@ -2271,7 +2271,7 @@ class MyMAinWindow(QMainWindow):
                 signal.show_net_info("   " + name.ljust(12) + each[1])
             signal.show_net_info(f"\n🎉 网络检测已完成！用时 {get_used_time(start_time)} 秒！")
             signal.show_net_info("================================================================================\n")
-        except:
+        except Exception:
             if signal.stop:
                 signal.show_net_info("\n⛔️ 当前有刮削任务正在停止中，请等待刮削停止后再进行检测！")
                 signal.show_net_info(
@@ -2293,7 +2293,7 @@ class MyMAinWindow(QMainWindow):
             try:
                 self.t_net = threading.Thread(target=self.network_check)
                 self.t_net.start()  # 启动线程,即让线程开始执行
-            except:
+            except Exception:
                 signal.show_traceback_log(traceback.format_exc())
                 signal.show_net_info(traceback.format_exc())
         elif self.Ui.pushButton_check_net.text() == "停止检测":
@@ -2318,7 +2318,7 @@ class MyMAinWindow(QMainWindow):
     def show_net_info(self, text):
         try:
             self.net_logs_show.emit(add_html(text))
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
             self.Ui.textBrowser_net_main.append(traceback.format_exc())
 
@@ -2333,7 +2333,7 @@ class MyMAinWindow(QMainWindow):
         try:
             t = threading.Thread(target=self._check_javdb_cookie)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
 
@@ -2402,7 +2402,7 @@ class MyMAinWindow(QMainWindow):
         try:
             t = threading.Thread(target=self._check_javbus_cookie)
             t.start()  # 启动线程,即让线程开始执行
-        except:
+        except Exception:
             signal.show_traceback_log(traceback.format_exc())
             self.show_log_text(traceback.format_exc())
 
@@ -2457,7 +2457,7 @@ class MyMAinWindow(QMainWindow):
     # 改回接受焦点状态
     def recover_windowflags(self):
         return
-        if not config.is_windows and not self.window().isActiveWindow():  # 不在前台，有点击事件，即切换回前台
+        if not IS_WINDOWS and not self.window().isActiveWindow():  # 不在前台，有点击事件，即切换回前台
             if (self.windowFlags() | Qt.WindowDoesNotAcceptFocus) == self.windowFlags():
                 self.setWindowFlags(self.windowFlags() & ~Qt.WindowDoesNotAcceptFocus)
                 self.show()

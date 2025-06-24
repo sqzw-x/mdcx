@@ -6,7 +6,7 @@ import sys
 import traceback
 from os.path import abspath, dirname, realpath
 
-from models.config.config import config
+from models.config.manager import config
 from models.signals import signal
 
 

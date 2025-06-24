@@ -29,7 +29,7 @@ def get_actor(html):
     try:
         actor_list = html.xpath('//span[@class="yaku"]/a/text()')
         result = ",".join(actor_list)
-    except:
+    except Exception:
         result = ""
     return result
 
@@ -64,7 +64,7 @@ def get_year(release):
     try:
         result = str(re.search(r"\d{4}", release).group())
         return result
-    except:
+    except Exception:
         return release
 
 

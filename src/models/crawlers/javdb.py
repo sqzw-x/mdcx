@@ -9,7 +9,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import curl_html, get_dmm_trailer
-from models.config.config import config
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -97,7 +97,7 @@ def get_year(get_release):
     try:
         result = str(re.search(r"\d{4}", get_release).group())
         return result
-    except:
+    except Exception:
         return get_release
 
 
@@ -118,7 +118,7 @@ def get_tag(html):
 def get_cover(html):
     try:
         result = str(html.xpath("//img[@class='video-cover']/@src")[0]).strip(" ['']")
-    except:
+    except Exception:
         result = ""
     return result
 
@@ -147,7 +147,7 @@ def get_score(html):
             score = score[0]
         else:
             score = ""
-    except:
+    except Exception:
         score = ""
     return score
 
