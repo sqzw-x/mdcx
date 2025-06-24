@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- 说明：可使用文本编辑器打开本文件后自行编辑。
+keyword：用于匹配演员名字，其中的每个名字前后都需要用逗号隔开。当其中包含刮削得到的演员名时，可以输出对应语言的演员名字。
+zh_cn/zh_tw/jp：指对应语言输出的演员名字，按设置的对应语言输出。
+href：演员主页，刮削时在主界面点击演员名可以打开主页。-->
+<actor>
+  <a zh_cn="重名-RENA(宫野ゆかな、衣吹花音)" zh_tw="重複-RENA(宮野ゆかな、衣吹花音)" jp="重複-RENA(宮野ゆかな、衣吹かのん)" keyword=",RENA,名字冲突,姓名重複,"/>
+  <a zh_cn="宫野ゆかな" zh_tw="宮野ゆかな" jp="宮野ゆかな" keyword=",宫野ゆかな,宮野ゆかな,長谷川まゆみ,宮坂レア,今井歩,宮田玲香,宮川玲子,梅原夏海,宮坂レイア,ユータン,宮川怜子,坂井絵里奈,さら,さきな," href="https://javdb.com/actors/WBVe"/>
+  <a zh_cn="衣吹花音" zh_tw="衣吹花音" jp="衣吹かのん" keyword=",衣吹花音,衣吹かのん,伊吹さん," href="https://javdb.com/actors/MVOX"/>
+
+  <a zh_cn="重名-あいり(白雪公主、百瀬爱梨)" zh_tw="重複-あいり(白雪公主、百瀬爱梨)" jp="重複-あいり(白雪ひめ、百瀬あいり)" keyword=",あいり,名字冲突,姓名重複,"/>
+  <a zh_cn="白雪公主" zh_tw="白雪公主" jp="白雪ひめ" keyword=",白雪公主,白雪ひめ,白雪さん,白石姫花,芹澤あんず," href="https://javdb.com/actors/0RJEk"/>
+  <a zh_cn="百瀬爱梨" zh_tw="百瀬爱梨" jp="百瀬あいり" keyword=",百瀬爱梨,百瀬あいり,百瀬アイリ,竹内るい,伊勢あけ美,相瀬千里," href="https://javdb.com/actors/xvDXE"/>
+
+  <a zh_cn="重名-あおい(小野寺葵、枢木葵)" zh_tw="重複-あおい(小野寺葵、樞木葵)" jp="重複-あおい(小野寺あおい、枢木あおい)" keyword=",あおい,名字冲突,姓名重複,"/>
+  <a zh_cn="小野寺葵" zh_tw="小野寺葵" jp="小野寺あおい" keyword=",小野寺葵,小野寺あおい," href="https://javdb.com/actors/8VqRO"/>
+  <a zh_cn="枢木葵" zh_tw="樞木葵" jp="枢木あおい" keyword=",樞木葵,枢木あおい,山内愛,吉岡さち,枢木葵," href="https://javdb.com/actors/zAmz"/>
+
+  <a zh_cn="重名-ゆいさん(佐知子、春风光、新村晶)" zh_tw="重複-ゆいさん(佐知子、春風光、新村晶)" jp="重複-ゆいさん(佐知子、春風ひかる、新村晶)" keyword=",ゆいさん,名字冲突,姓名重複,"/>
+  <a zh_cn="佐知子" zh_tw="佐知子" jp="佐知子" keyword=",佐知子," href="https://javdb.com/actors/2emw"/>
+  <a zh_cn="春风光" zh_tw="春風光" jp="春風ひかる" keyword=",春風光,春風ひかる,春风光," href="https://javdb.com/actors/v8E8"/>
+
+  <a zh_cn="重名-あかりちゃん(新村晶、星奈爱)" zh_tw="重複-あかりちゃん(新村晶、星奈愛)" jp="重複-あかりちゃん(新村あかり、星奈あい)" keyword=",あかりちゃん,名字冲突,姓名重複,"/>
+  <a zh_cn="新村晶" zh_tw="新村晶" jp="新村あかり" keyword=",新村晶,新村あかり,朱音,有村さおり,都丸ゆきえ,神林恵美,水樹舞花,新村明里,高山真由,間宮しずる,桜庭洋子,新村あかりさん,れいか," href="https://javdb.com/actors/awzn"/>
+  <a zh_cn="星奈爱" zh_tw="星奈愛" jp="星奈あい" keyword=",星奈愛,星奈あい,羽村絵里菜,佐藤真奈,木村真奈,竹内しずか,星奈爱," href="https://javdb.com/actors/GMN7"/>
+
+  <a zh_cn="重名-あまね(天音萌亚、音梓)" zh_tw="重複-あまね(天音萌亞、音梓)" jp="重複-あまね(天音めあ、音あずさ)" keyword=",あまね,名字冲突,姓名重複,"/>
+  <a zh_cn="天音萌亚" zh_tw="天音萌亞" jp="天音めあ" keyword=",天音萌亚,天音萌亞,天音めあ,由貴,宇筒ゆめ," href="https://javdb.com/actors/Mm4DX"/>
+  <a zh_cn="音梓" zh_tw="音梓" jp="音あずさ" keyword=",音梓,音あずさ,神楽あまね," href="https://javdb.com/actors/XxvJ"/>
+
+  <a zh_cn="重名-あや(川北里菜、泉亚弥、神谷充希)" zh_tw="重複-あや(川北里菜、泉亞彌、神谷充希)" jp="重複-あや(川北りな、泉あや、神谷充希)" keyword=",あや,名字冲突,姓名重複,"/>
+  <a zh_cn="川北里菜" zh_tw="川北里菜" jp="川北りな" keyword=",川北里菜,川北りな," href="https://javdb.com/actors/36mN"/>
+  <a zh_cn="泉亚弥" zh_tw="泉亞彌" jp="泉あや" keyword=",泉亚弥,泉亞彌,泉あや,アヤ," href="https://javdb.com/actors/bAgRa"/>
+  <a zh_cn="神谷充希" zh_tw="神谷充希" jp="神谷充希" keyword=",神谷充希,亜矢みつき," href="https://javdb.com/actors/V933"/>
+
+  <a zh_cn="重名-ありさ(中野ありさ、富冈亚梨沙、柚月亚莉莎)" zh_tw="重複-ありさ(中野ありさ、富岡亞梨沙、柚月亞莉莎)" jp="重複-ありさ(中野ありさ、富岡ありさ、柚月ありさ)" keyword=",ありさ,名字冲突,姓名重複,"/>
+  <a zh_cn="中野ありさ" zh_tw="中野ありさ" jp="中野ありさ" keyword=",中野ありさ," href="https://javdb.com/actors/apJX"/>
+  <a zh_cn="富冈亚梨沙" zh_tw="富岡亞梨沙" jp="富岡ありさ" keyword=",富冈亚梨沙,富岡亞梨沙,富岡ありさ,高橋佳代," href="https://javdb.com/actors/9DY98"/>
+  <a zh_cn="柚月亚莉莎" zh_tw="柚月亞莉莎" jp="柚月ありさ" keyword=",柚月亚莉莎,柚月亞莉莎,柚月ありさ," href="https://javdb.com/actors/dVRB"/>
+
+  <a zh_cn="重名-いろは(一色彩叶、南彩叶)" zh_tw="重複-いろは(一色彩葉、南彩葉)" jp="重複-いろは(一色彩葉、南いろは)" keyword=",いろは,名字冲突,姓名重複,"/>
+  <a zh_cn="一色彩叶" zh_tw="一色彩葉" jp="一色彩葉" keyword=",一色彩叶,一色彩葉,MEISA," href="https://javdb.com/actors/k4Bpe"/>
+  <a zh_cn="南彩叶" zh_tw="南彩葉" jp="南いろは" keyword=",南彩叶,南彩葉,南いろは," href="https://javdb.com/actors/456Yp"/>
+
+  <a zh_cn="重名-えりか(葵こはる、伊南惠梨香)" zh_tw="重複-えりか(葵こはる、伊南惠梨香)" jp="重複-えりか(葵こはる、伊南えりか)" keyword=",えりか,名字冲突,姓名重複,"/>
+  <a zh_cn="葵こはる" zh_tw="葵こはる" jp="葵こはる" keyword=",葵こはる,葵こはる（えりか）," href="https://javdb.com/actors/yARW"/>
+  <a zh_cn="伊南惠梨香" zh_tw="伊南惠梨香" jp="伊南えりか" keyword=",伊南惠梨香,伊南えりか,伊南さん," href="https://javdb.com/actors/XW4MJ"/>
+
+  <a zh_cn="重名-かれんちゃん(近藤れおな、朝日奈花恋)" zh_tw="重複-かれんちゃん(近藤れおな、朝日奈花戀)" jp="重複-かれんちゃん(近藤れおな、朝日奈かれん)" keyword=",かれんちゃん,名字冲突,姓名重複,"/>
+  <a zh_cn="近藤れおな" zh_tw="近藤れおな" jp="近藤れおな" keyword=",近藤れおな,立浪花恋,岬唯香," href="https://javdb.com/actors/nEaM"/>
+  <a zh_cn="朝日奈花恋" zh_tw="朝日奈花戀" jp="朝日奈かれん" keyword=",朝日奈花恋,朝日奈花戀,朝日奈かれん,朝比奈かれん,綾香,朝日向さん,朝日奈さん," href="https://javdb.com/actors/eVrb"/>
+
+  <a zh_cn="重名-さや(美波沙耶、谷花纱耶)" zh_tw="重複-さや(美波沙耶、谷花紗耶)" jp="重複-さや(美波沙耶、谷花紗耶)" keyword=",さや,名字冲突,姓名重複,"/>
+  <a zh_cn="美波沙耶" zh_tw="美波沙耶" jp="美波沙耶" keyword=",美波沙耶,武田風花," href="https://javdb.com/actors/QB6K"/>
+  <a zh_cn="谷花纱耶" zh_tw="谷花紗耶" jp="谷花紗耶" keyword=",谷花纱耶,谷花紗耶,伊澄知世,真田梨亜,大島知世,鍵谷沙織,坂木麗奈,谷花沙耶," href="https://javdb.com/actors/KaY0"/>
+
+  <a zh_cn="重名-さやか(若宫穂乃、有沢りさ)" zh_tw="重複-さやか(若宮穂乃、有沢りさ)" jp="重複-さやか(若宮穂乃、有沢りさ)" keyword=",さやか,名字冲突,姓名重複,"/>
+  <a zh_cn="若宫穂乃" zh_tw="若宮穂乃" jp="若宮穂乃" keyword=",若宮穂乃,向井夏海,大島すず,赤堀真凛,田村麻里奈,ほの,若宫穂乃," href="https://javdb.com/actors/YbD8"/>
+  <a zh_cn="有沢りさ" zh_tw="有沢りさ" jp="有沢りさ" keyword=",有沢りさ,結城未来,南沙也加,花川ひらり,南沙耶香,南沙也香," href="https://javdb.com/actors/ZgRm"/>
+
+  <a zh_cn="重名-しずく(花井滴、初美沙希)" zh_tw="重複-しずく(花井滴、初美沙希)" jp="重複-しずく(花井しずく、初美沙希)" keyword=",しずく,名字冲突,姓名重複,"/>
+  <a zh_cn="花井滴" zh_tw="花井滴" jp="花井しずく" keyword=",花井滴,花井しずく,桜井ゆの," href="https://javdb.com/actors/GMZPq"/>
+  <a zh_cn="初美沙希" zh_tw="初美沙希" jp="初美沙希" keyword=",初美沙希,戸田沙希,初音さきえ,橋本しずか,西野瞳,江夏裕加,中村真弓,菊川恵美,初美さき," href="https://javdb.com/actors/J6Rx"/>
+
+  <a zh_cn="重名-つくし(唯月つくし、しほのちさ)" zh_tw="重複-つくし(唯月つくし、しほのちさ)" jp="重複-つくし(唯月つくし、しほのちさ)" keyword=",つくし,名字冲突,姓名重複,"/>
+  <a zh_cn="唯月つくし" zh_tw="唯月つくし" jp="唯月つくし" keyword=",唯月つくし," href="https://javdb.com/actors/dE0a"/>
+  <a zh_cn="しほのちさ" zh_tw="しほのちさ" jp="しほのちさ" keyword=",しほのちさ,しほのさち,大沢つくし,藤森あかね,杉菜つくし,しほの千里," href="https://javdb.com/actors/B1g1"/>
+
+  <a zh_cn="重名-つむぎ(望月彩花、乙叶つむぎ)" zh_tw="重複-つむぎ(望月彩花、乙葉つむぎ)" jp="重複-つむぎ(望月あやか、乙葉つむぎ)" keyword=",つむぎ,名字冲突,姓名重複,"/>
+  <a zh_cn="望月彩花" zh_tw="望月彩花" jp="望月あやか" keyword=",望月彩花,望月あやか,太田さえこ,卯月亜矢,香取沙也さん," href="https://javdb.com/actors/NxGN"/>
+  <a zh_cn="乙叶つむぎ" zh_tw="乙葉つむぎ" jp="乙葉つむぎ" keyword=",乙叶つむぎ,乙葉つむぎ,角名つむぎ," href="https://javdb.com/actors/yr7Rd"/>
+
+  <a zh_cn="重名-なな(早见なな、美咲奈奈)" zh_tw="重複-なな(早見なな、美咲奈奈)" jp="重複-なな(早見なな、美咲なな)" keyword=",なな,名字冲突,姓名重複,"/>
+  <a zh_cn="早见なな" zh_tw="早見なな" jp="早見なな" keyword=",早见なな,早見なな," href="https://javdb.com/actors/Rdke4"/>
+  <a zh_cn="美咲奈奈" zh_tw="美咲奈奈" jp="美咲なな" keyword=",美咲奈奈,美咲なな,高城玲香," href="https://javdb.com/actors/O22B0"/>
+
+  <a zh_cn="重名-ののか(河合乃乃花、有加里乃乃花)" zh_tw="重複-ののか(河合乃乃花、有加里乃乃花)" jp="重複-ののか(河合ののか、有加里ののか)" keyword=",ののか,名字冲突,姓名重複,"/>
+  <a zh_cn="河合乃乃花" zh_tw="河合乃乃花" jp="河合ののか" keyword=",河合乃乃花,河合ののか,白雪えりな,綾波優子,相川ももか,小野のどか,廣松悠里," href="https://javdb.com/actors/69zn"/>
+  <a zh_cn="有加里乃乃花" zh_tw="有加里乃乃花" jp="有加里ののか" keyword=",有加里乃乃花,有加里ののか,あかりののか," href="https://javdb.com/actors/eKEwx"/>
+
+  <a zh_cn="重名-はな(白桃花、姬咲华)" zh_tw="重複-はな(白桃花、姬咲華)" jp="重複-はな(白桃はな、姫咲はな)" keyword=",はな,名字冲突,姓名重複,"/>
+  <a zh_cn="重名-はなちゃん(白桃花、姬咲华)" zh_tw="重複-はなちゃん(白桃花、姬咲華)" jp="重複-はなちゃん(白桃はな、姫咲はな)" keyword=",はなちゃん,名字冲突,姓名重複,"/>
+  <a zh_cn="白桃花" zh_tw="白桃花" jp="白桃はな" keyword=",白桃花,白桃はな,ももか," href="https://javdb.com/actors/Xa1G"/>
+  <a zh_cn="姬咲华" zh_tw="姬咲華" jp="姫咲はな" keyword=",姬咲華,姫咲はな,佐野みな実,智子,氷室春菜,ひめ,さき,姬咲华," href="https://javdb.com/actors/a0bn"/>
+
+  <a zh_cn="重名-ひかり(明日来ひかり、日乃花羽里)" zh_tw="重複-ひかり(明日来ひかり、日乃花羽裡)" jp="重複-ひかり(明日来ひかり、日乃ふわり)" keyword=",ひかり,名字冲突,姓名重複,"/>
+  <a zh_cn="明日来ひかり" zh_tw="明日来ひかり" jp="明日来ひかり" keyword=",明日来ひかり," href="https://javdb.com/actors/0Rpaq"/>
+  <a zh_cn="日乃花羽里" zh_tw="日乃花羽裡" jp="日乃ふわり" keyword=",日乃花羽里,日乃花羽裡,日乃ふわり," href="https://javdb.com/actors/AzRkK"/>
+
+  <a zh_cn="重名-ひかる(皆月光、小西光)" zh_tw="重複-ひかる(皆月光、小西光)" jp="重複-ひかる(皆月ひかる、小西ひかる)" keyword=",ひかる,名字冲突,姓名重複,"/>
+  <a zh_cn="皆月光" zh_tw="皆月光" jp="皆月ひかる" keyword=",皆月光,皆月ひかる,高橋未来,月野ひかる,水樹葵,佐咲まなみ," href="https://javdb.com/actors/7WNR"/>
+  <a zh_cn="小西光" zh_tw="小西光" jp="小西ひかる" keyword=",小西光,小西ひかる,高宮穂乃果," href="https://javdb.com/actors/Ynnz6"/>
+
+  <a zh_cn="重名-まどか(诗月圆、胡桃沢ももこ)" zh_tw="重複-まどか(詩月圓、胡桃沢ももこ)" jp="重複-まどか(詩月まどか、胡桃沢ももこ)" keyword=",まどか,名字冲突,姓名重複,"/>
+  <a zh_cn="诗月圆" zh_tw="詩月圓" jp="詩月まどか" keyword=",诗月圆,詩月圓,詩月まどか,栗原まどか,ウタハラマドカ,観月綾香," href="https://javdb.com/actors/0nWX"/>
+  <a zh_cn="胡桃沢ももこ" zh_tw="胡桃沢ももこ" jp="胡桃沢ももこ" keyword=",胡桃沢ももこ,一色さゆり,星崎さゆり,加藤ゆう菜,柊紗栄子,紗栄子ちゃん,一色友里,紗栄子," href="https://javdb.com/actors/y3pg"/>
+
+  <a zh_cn="重名-なつ(夏目蓝果、东条夏)" zh_tw="重複-なつ(夏目藍果、東條夏)" jp="重複-なつ(夏目藍果、東條なつ)" keyword=",なつ,名字冲突,姓名重複,"/>
+  <a zh_cn="夏目蓝果" zh_tw="夏目藍果" jp="夏目藍果" keyword=",夏目蓝果,夏目藍果,あいか,夏目さん," href="https://javdb.com/actors/E2bW4"/>
+
+  <a zh_cn="重名-はる(山口叶瑠、东条夏)" zh_tw="重複-はる(山口葉瑠、東條夏)" jp="重複-はる(山口葉瑠、東條なつ)" keyword=",はる,名字冲突,姓名重複,"/>
+  <a zh_cn="山口叶瑠" zh_tw="山口葉瑠" jp="山口葉瑠" keyword=",山口叶瑠,山口葉瑠,新庄夏美,瀧●美樹," href="https://javdb.com/actors/3Ppw"/>
+
+  <a zh_cn="重名-さん(三尾惠、秋吉花音)" zh_tw="重複-さん(三尾惠、秋吉花音)" jp="重複-さん(三尾めぐ、秋吉花音)" keyword=",さん,名字冲突,姓名重複,"/>
+  <a zh_cn="三尾惠" zh_tw="三尾惠" jp="三尾めぐ" keyword=",三尾惠,三尾めぐ,三尾友里,"/>
+  <a zh_cn="秋吉花音" zh_tw="秋吉花音" jp="秋吉花音" keyword=",秋吉花音,有村友梨,比嘉マイカ,"/>
+
+  <a zh_cn="重名-みお(东条夏、朝日奈みお、一条美绪、三尾惠)" zh_tw="重複-みお(東條夏、朝日奈みお、一條美緒、三尾惠)" jp="重複-みお(東條なつ、朝日奈みお、一条みお、三尾めぐ)" keyword=",みお,名字冲突,姓名重複,"/>
+  <a zh_cn="东条夏" zh_tw="東條夏" jp="東條なつ" keyword=",東條夏,東條なつ,銀座ルナ,东条夏," href="https://javdb.com/actors/A6zy"/>
+  <a zh_cn="朝日奈みお" zh_tw="朝日奈みお" jp="朝日奈みお" keyword=",朝日奈みお," href="https://javdb.com/actors/MVzk"/>
+  <a zh_cn="一条美绪" zh_tw="一條美緒" jp="一条みお" keyword=",一條美緒,一条みお,一条みおさん,一条巳緒,西条みのり,小松奈いよ,五十嵐優香,一条美绪," href="https://javdb.com/actors/4nG3"/>
+
+  <a zh_cn="重名-みき(相本みき、白石美希)" zh_tw="重複-みき(相本みき、白石美希)" jp="重複-みき(相本みき、白石みき)" keyword=",みき,名字冲突,姓名重複,"/>
+  <a zh_cn="相本みき" zh_tw="相本みき" jp="相本みき" keyword=",相本みき," href="https://javdb.com/actors/3kKN"/>
+  <a zh_cn="白石美希" zh_tw="白石美希" jp="白石みき" keyword=",白石美希,白石みき,香山亜衣,白石さん," href="https://javdb.com/actors/qDQy6"/>
+
+  <a zh_cn="重名-みく(来栖美、舞咲美娜、真白美久留)" zh_tw="重複-みく(来栖美、舞咲美娜、真白美久留)" jp="重複-みく(来栖みく、舞咲みくに、真白みくる)" keyword=",みく,名字冲突,姓名重複,"/>
+  <a zh_cn="来栖美" zh_tw="来栖美" jp="来栖みく" keyword=",来栖美,来栖みく,中澤久瑠実," href="https://javdb.com/actors/wqG1m"/>
+  <a zh_cn="舞咲美娜" zh_tw="舞咲美娜" jp="舞咲みくに" keyword=",舞咲美娜,舞咲みくに,MARINA,三国舞,前川美久," href="https://javdb.com/actors/7bnR"/>
+
+  <a zh_cn="重名-みくる(永泽雪乃、真白美久留)" zh_tw="重複-みくる(永澤雪乃、真白美久留)" jp="重複-みくる(永澤ゆきの、真白みくる)" keyword=",みくる,名字冲突,姓名重複,"/>
+  <a zh_cn="永泽雪乃" zh_tw="永澤雪乃" jp="永澤ゆきの" keyword=",永泽雪乃,永澤雪乃,永澤ゆきの," href="https://javdb.com/actors/7pVV"/>
+  <a zh_cn="真白美久留" zh_tw="真白美久留" jp="真白みくる" keyword=",真白美久留,真白みくる,斎藤絵里," href="https://javdb.com/actors/vDZK8"/>
+
+  <a zh_cn="重名-みさちゃん(あやね遥菜、天上美沙)" zh_tw="重複-みさちゃん(あやね遥菜、天上美沙)" jp="重複-みさちゃん(あやね遥菜、天上みさ)" keyword=",みさちゃん,名字冲突,姓名重複,"/>
+  <a zh_cn="あやね遥菜" zh_tw="あやね遥菜" jp="あやね遥菜" keyword=",あやね遥菜,あやね遙菜,望月みく,矢島あやね," href="https://javdb.com/actors/xR2Q"/>
+  <a zh_cn="天上美沙" zh_tw="天上美沙" jp="天上みさ" keyword=",天上美沙,天上みさ,みー,ミサちゃん," href="https://javdb.com/actors/g00vg"/>
+
+  <a zh_cn="重名-みつき(唐泽由纪、唯奈美月、広瀬美希、冲奈ミツキ)" zh_tw="重複-みつき(唐澤由紀、唯奈美月、広瀬美希、沖奈ミツキ)" jp="重複-みつき(唐澤由紀、唯奈みつき、広瀬みつき、沖奈ミツキ)" keyword=",みつき,名字冲突,姓名重複,"/>
+  <a zh_cn="唯奈美月" zh_tw="唯奈美月" jp="唯奈みつき" keyword=",唯奈美月,唯奈みつき,星川美織," href="https://javdb.com/actors/vDO1b"/>
+  <a zh_cn="広瀬美希" zh_tw="広瀬美希" jp="広瀬みつき" keyword=",広瀬美希,広瀬みつき," href="https://javdb.com/actors/E2Zr3"/>
+  <a zh_cn="冲奈ミツキ" zh_tw="沖奈ミツキ" jp="沖奈ミツキ" keyword=",冲奈ミツキ,沖奈ミツキ," href="https://javdb.com/actors/Nw9Ng"/>
+
+  <a zh_cn="重名-みづき(弥生美月、天然美月、唐泽由纪)" zh_tw="重複-みづき(彌生美月、天然美月、唐澤由紀)" jp="重複-みづき(弥生みづき、天然かのん、唐澤由紀)" keyword=",みづき,名字冲突,姓名重複,"/>
+  <a zh_cn="弥生美月" zh_tw="彌生美月" jp="弥生みづき" keyword=",彌生美月,弥生みづき,みつきちゃん,弥生美月," href="https://javdb.com/actors/Jekq"/>
+  <a zh_cn="天然美月" zh_tw="天然美月" jp="天然かのん" keyword=",天然美月,天然かのん,"/>
+  <a zh_cn="唐泽由纪" zh_tw="唐澤由紀" jp="唐澤由紀" keyword=",唐泽由纪,唐澤由紀,純名みつき," href="https://javdb.com/actors/QVJ54"/>
+
+  <a zh_cn="重名-みなみ(吉沢みなみ、广仲南)" zh_tw="重複-みなみ(吉沢みなみ、廣仲南)" jp="重複-みなみ(吉沢みなみ、広仲みなみ)" keyword=",みなみ,名字冲突,姓名重複,"/>
+  <a zh_cn="吉沢みなみ" zh_tw="吉沢みなみ" jp="吉沢みなみ" keyword=",吉沢みなみ," href="https://javdb.com/actors/6eRD"/>
+  <a zh_cn="广仲南" zh_tw="廣仲南" jp="広仲みなみ" keyword=",广仲南,廣仲南,広仲みなみ,みなみちゃん,北見愛理,広仲梨沙,南弘子,みるあ," href="https://javdb.com/actors/VwXA3"/>
+
+  <a zh_cn="重名-みや(真琴亚美、新道美夜)" zh_tw="重複-みや(真琴亞美、新道美夜)" jp="重複-みや(真琴つぐみ、新道みや)" keyword=",みや,名字冲突,姓名重複,"/>
+  <a zh_cn="真琴亚美" zh_tw="真琴亞美" jp="真琴つぐみ" keyword=",真琴亚美,真琴亞美,真琴つぐみ," href="https://javdb.com/actors/Vw4ZG"/>
+  <a zh_cn="新道美夜" zh_tw="新道美夜" jp="新道みや" keyword=",新道美夜,新道みや," href="https://javdb.com/actors/ZX4B7"/>
+
+  <a zh_cn="重名-める(天河める、伊东爱瑠)" zh_tw="重複-める(天河める、伊東愛瑠)" jp="重複-める(天河める、伊東める)" keyword=",める,名字冲突,姓名重複,"/>
+  <a zh_cn="天河める" zh_tw="天河める" jp="天河める" keyword=",天河める," href="https://javdb.com/actors/AzqEy"/>
+  <a zh_cn="伊东爱瑠" zh_tw="伊東愛瑠" jp="伊東める" keyword=",伊东爱瑠,伊東愛瑠,伊東める,伊藤さん,伊藤愛瑠,めるる,めるちゃん," href="https://javdb.com/actors/k4OAm"/>
+
+  <a zh_cn="重名-もも(美波桃、福田桃、桃乃りん)" zh_tw="重複-もも(美波桃、福田桃、桃乃りん)" jp="重複-もも(美波もも、福田もも、桃乃りん)" keyword=",もも,名字冲突,姓名重複,"/>
+  <a zh_cn="美波桃" zh_tw="美波桃" jp="美波もも" keyword=",美波桃,美波もも," href="https://javdb.com/actors/W13qK"/>
+  <a zh_cn="福田桃" zh_tw="福田桃" jp="福田もも" keyword=",福田桃,福田もも," href="https://javdb.com/actors/5EXNp"/>
+  <a zh_cn="桃乃りん" zh_tw="桃乃りん" jp="桃乃りん" keyword=",桃乃りん," href="https://javdb.com/actors/k4BWY"/>
+
+  <a zh_cn="重名-ゆあ(川栄结爱、椚ゆあ)" zh_tw="重複-ゆあ(川栄結愛、椚ゆあ)" jp="重複-ゆあ(川栄結愛、椚ゆあ)" keyword=",ゆあ,名字冲突,姓名重複,"/>
+  <a zh_cn="川栄结爱" zh_tw="川栄結愛" jp="川栄結愛" keyword=",川栄结爱,川栄結愛,結愛,希咲ひなた," href="https://javdb.com/actors/Nw9y4"/>
+  <a zh_cn="椚ゆあ" zh_tw="椚ゆあ" jp="椚ゆあ" keyword=",椚ゆあ,深田みお,小森みくろ,秋吉みお,浅田ちゃん," href="https://javdb.com/actors/bNbg"/>
+
+  <a zh_cn="重名-ひまり(木下日葵、绫濑日葵)" zh_tw="重複-ひまり(木下日葵、綾瀨日葵)" jp="重複-ひまり(木下日葵、綾瀬ひまり)" keyword=",ひまり,名字冲突,姓名重複,"/>
+  <a zh_cn="绫濑日葵" zh_tw="綾瀨日葵" jp="綾瀬ひまり" keyword=",绫濑日葵,綾瀨日葵,綾瀬ひまり,伊藤真友子," href="https://javdb.com/actors/0R5m3"/>
+
+  <a zh_cn="重名-ゆいな(丹羽堇、木下日葵)" zh_tw="重複-ゆいな(丹羽菫、木下日葵)" jp="重複-ゆいな(丹羽すみれ、木下ひまり)" keyword=",ゆいな,名字冲突,姓名重複,"/>
+  <a zh_cn="丹羽堇" zh_tw="丹羽菫" jp="丹羽すみれ" keyword=",丹羽菫,丹羽すみれ,七瀬未悠,遠藤美咲,元七瀬未悠,大野すみれ,丹羽堇,はずき,松原友梨乃,丹波すみれ," href="https://javdb.com/actors/4a5b"/>
+  <a zh_cn="木下日葵" zh_tw="木下日葵" jp="木下ひまり" keyword=",木下日葵,木下ひまり,花沢ひまり,前田さん,牧田希美,新宿メル,川口彩夏,長谷川麻美," href="https://javdb.com/actors/MW44"/>
+
+  <a zh_cn="重名-ゆの(神狩柚乃、运メイ)" zh_tw="重複-ゆの(神狩柚乃、運メイ)" jp="重複-ゆの(神狩ゆの、運メイ)" keyword=",ゆの,名字冲突,姓名重複,"/>
+  <a zh_cn="神狩柚乃" zh_tw="神狩柚乃" jp="神狩ゆの" keyword=",神狩柚乃,神狩ゆの,猪狩ゆの,天绪まい,天緒まい," href="https://javdb.com/actors/d4ZKg"/>
+  <a zh_cn="运メイ" zh_tw="運メイ" jp="運メイ" keyword=",运メイ,運メイ,環ニコ,環仁子,环仁子,結城結乃," href="https://javdb.com/actors/g0Wvm"/>
+
+  <a zh_cn="重名-りえ(水蜜理惠、东条えみり)" zh_tw="重複-りえ(水蜜理惠、東條えみり)" jp="重複-りえ(水蜜りえ、東條えみり)" keyword=",りえ,名字冲突,姓名重複,"/>
+  <a zh_cn="水蜜理惠" zh_tw="水蜜理惠" jp="水蜜りえ" keyword=",水蜜理惠,水蜜りえ," href="https://javdb.com/actors/rmYqk"/>
+  <a zh_cn="东条えみり" zh_tw="東條えみり" jp="東條えみり" keyword=",东条えみり,東條えみり,えみ," href="https://javdb.com/actors/E2vx4"/>
+
+  <a zh_cn="重名-りお(东条りお、心菜りお、流川莉央)" zh_tw="重複-りお(東条りお、心菜りお、流川莉央)" jp="重複-りお(東条りお、心菜りお、流川莉央)" keyword=",りお,名字冲突,姓名重複,"/>
+  <a zh_cn="东条りお" zh_tw="東条りお" jp="東条りお" keyword=",SOD,りお（SOD）,东条りお,千葉多香子,東条りお," href="https://javdb.com/actors/wz17"/>
+  <a zh_cn="心菜りお" zh_tw="心菜りお" jp="心菜りお" keyword=",心菜りお,真奈りおな," href="https://javdb.com/actors/MP3Q"/>
+  <a zh_cn="流川莉央" zh_tw="流川莉央" jp="流川莉央" keyword=",流川莉央," href="https://javdb.com/actors/J21m3"/>
+
+  <a zh_cn="重名-りの(结城莉乃、桐嶋莉乃)" zh_tw="重複-りの(結城莉乃、桐嶋莉乃)" jp="重複-りの(結城りの、桐嶋りの)" keyword=",りの,名字冲突,姓名重複,"/>
+  <a zh_cn="结城莉乃" zh_tw="結城莉乃" jp="結城りの" keyword=",结城莉乃,結城莉乃,結城りの,川西優,みこ," href="https://javdb.com/actors/K4nOv"/>
+  <a zh_cn="桐嶋莉乃" zh_tw="桐嶋莉乃" jp="桐嶋りの" keyword=",桐嶋莉乃,桐嶋りの," href="https://javdb.com/actors/ne2M"/>
+
+  <a zh_cn="重名-りん(朝日凛、宫崎玲)" zh_tw="重複-りん(朝日凜、宮崎玲)" jp="重複-りん(朝日りん、宮崎リン)" keyword=",りん,名字冲突,姓名重複,"/>
+  <a zh_cn="朝日凛" zh_tw="朝日凜" jp="朝日りん" keyword=",朝日凛,朝日凜,朝日りん,すずさん," href="https://javdb.com/actors/k4BaJ"/>
+  <a zh_cn="宫崎玲" zh_tw="宮崎玲" jp="宮崎リン" keyword=",宫崎玲,宮崎玲,宮崎リン,りんちゃん,沙絵子," href="https://javdb.com/actors/bk4B"/>
+
+  <a zh_cn="重名-りな(碓冰莲、日向理名)" zh_tw="重複-りな(碓冰蓮、日向理名)" jp="重複-りな(碓氷れん、日向理名)" keyword=",りな,名字冲突,姓名重複,"/>
+  <a zh_cn="日向理名" zh_tw="日向理名" jp="日向理名" keyword=",日向理名,リナ," href="https://javdb.com/actors/v99Y"/>
+
+  <a zh_cn="重名-れな(儿玉玲奈、碓冰莲)" zh_tw="重複-れな(兒玉玲奈、碓冰蓮)" jp="重複-れな(児玉れな、碓氷れん)" keyword=",れな,名字冲突,姓名重複,"/>
+  <a zh_cn="儿玉玲奈" zh_tw="兒玉玲奈" jp="児玉れな" keyword=",儿玉玲奈,兒玉玲奈,児玉れな," href="https://javdb.com/actors/AWDe"/>
+  <a zh_cn="碓冰莲" zh_tw="碓冰蓮" jp="碓氷れん" keyword=",碓冰莲,碓冰蓮,碓氷れん,碓水れん," href="https://javdb.com/actors/GMZK7"/>
+
+  <a zh_cn="重名-ありす(有栖るる、美音艾莉丝)" zh_tw="重複-ありす(有栖るる、美音艾莉絲)" jp="重複-ありす(有栖るる、美音ありす)" keyword=",ありす,名字冲突,姓名重複,"/>
+  <a zh_cn="有栖るる" zh_tw="有栖るる" jp="有栖るる" keyword=",有栖るる,有栖川あまね,松田優香,るるちゃ。,るるちゃ," href="https://javdb.com/actors/VnbW"/>
+  <a zh_cn="美音艾莉丝" zh_tw="美音艾莉絲" jp="美音ありす" keyword=",美音艾莉丝,美音艾莉絲,美音ありす,桂木美沙,美音ゆめ," href="https://javdb.com/actors/qZe6"/>
+
+  <a zh_cn="重名-るか(稻场流花、有栖るる)" zh_tw="重複-るか(稻場流花、有栖るる)" jp="重複-るか(稲場るか、有栖るる)" keyword=",るか,名字冲突,姓名重複,"/>
+  <a zh_cn="稻场流花" zh_tw="稻場流花" jp="稲場るか" keyword=",稻場流花,稲場るか,稲葉るか,一ノ瀬迅,南優里,稻场流花," href="https://javdb.com/actors/vNKW"/>
+
+  <a zh_cn="重名-前田由美(藤森里穂、伊沢むつみ)" zh_tw="重複-前田由美(藤森里穂、伊沢むつみ)" jp="重複-前田由美(藤森里穂、伊沢むつみ)" keyword=",前田由美,名字冲突,姓名重複,"/>
+  <a zh_cn="藤森里穂" zh_tw="藤森里穂" jp="藤森里穂" keyword=",藤森里穂,山本しゅり,はるかみらい,葵桃香,加藤ゆり,橋本優希,牧野宏美,西山里穂,井上遥香,遥まいみ,瀧本しおり,みらいちゃん,森川あやみ,有村あおい,神戸まなみ,明日香未来,藤森さん," href="https://javdb.com/actors/8pk9"/>
+  <a zh_cn="伊沢むつみ" zh_tw="伊沢むつみ" jp="伊沢むつみ" keyword=",伊沢むつみ,一之瀬みき,上原みく,上原ミク,深田奈緒,小島睦,岩崎やよい," href="https://javdb.com/actors/mwnY"/>
+
+  <a zh_cn="重名-松岡すず(松冈铃、时多しほり)" zh_tw="重複-松岡すず(松岡鈴、時多しほり)" jp="重複-松岡すず(松岡すず、時多しほり)" keyword=",松岡すず,名字冲突,姓名重複,"/>
+  <a zh_cn="松冈铃" zh_tw="松岡鈴" jp="松岡すず" keyword=",松冈铃,松岡鈴," href="https://javdb.com/actors/zK4N5"/>
+  <a zh_cn="时多しほり" zh_tw="時多しほり" jp="時多しほり" keyword=",时多しほり,時多しほり,加藤ゆかり,今永恭子," href="https://javdb.com/actors/56bp"/>
+
+  <a zh_cn="重名-橋本麗香(関根奈美、芦名春希)" zh_tw="重複-橋本麗香(関根奈美、蘆名春希)" jp="重複-橋本麗香(関根奈美、芦名はるき)" keyword=",橋本麗香,名字冲突,姓名重複,"/>
+  <a zh_cn="関根奈美" zh_tw="関根奈美" jp="関根奈美" keyword=",関根奈美,奈美アンナ,奈美," href="https://javdb.com/actors/YOMK"/>
+  <a zh_cn="芦名春希" zh_tw="蘆名春希" jp="芦名はるき" keyword=",芦名春希,蘆名春希,芦名はるき,宮川円香," href="https://javdb.com/actors/PQq5a"/>
+
+  <a zh_cn="重名-玲奈(玲奈、藤咲玲奈、宇佐美玲奈)" zh_tw="重複-玲奈(玲奈、藤咲玲奈、宇佐美玲奈)" jp="重複-玲奈(玲奈、藤咲れおな、宇佐美玲奈)" keyword=",玲奈,名字冲突,姓名重複,"/>
+  <a zh_cn="玲奈" zh_tw="玲奈" jp="玲奈" keyword=",玲奈ちゃん," href="https://javdb.com/actors/41E3"/>
+  <a zh_cn="藤咲玲奈" zh_tw="藤咲玲奈" jp="藤咲れおな" keyword=",藤咲玲奈,藤咲れおな,杉原みう,藤咲さん," href="https://javdb.com/actors/xvAVO"/>
+  <a zh_cn="宇佐美玲奈" zh_tw="宇佐美玲奈" jp="宇佐美玲奈" keyword=",宇佐美玲奈,吉野里奈,レイナ,武田玲,れいなちゃん,宇佐美さん," href="https://javdb.com/actors/eK85z"/>
+
+  <a zh_cn="重名-鈴木さとみ(铃木里美、水谷あおい)" zh_tw="重複-鈴木さとみ(鈴木里美、水谷あおい)" jp="重複-鈴木さとみ(鈴木さとみ、水谷あおい)" keyword=",鈴木さとみ,名字冲突,姓名重複,"/>
+  <a zh_cn="水谷あおい" zh_tw="水谷あおい" jp="水谷あおい" keyword=",水谷あおい,市川留美,安達理沙,速水奈々聖," href="https://javdb.com/actors/Q8DM"/>
+  <a zh_cn="铃木里美" zh_tw="鈴木里美" jp="鈴木さとみ" keyword=",鈴木里美,浅田真美,吉井麻紀,佐藤みさと,三浦愛美,鈴木夕子,佐藤絵美,凛奈,铃木里美," href="https://javdb.com/actors/YyNK"/>
+
+  <a zh_cn="重名-かすみ(月野香澄、香澄星奈)" zh_tw="重複-かすみ(月野香澄、香澄星奈)" jp="重複-かすみ(月野かすみ、香澄せな)" keyword=",かすみ,名字冲突,姓名重複,"/>
+  <a zh_cn="香澄星奈" zh_tw="香澄星奈" jp="香澄せな" keyword=",香澄星奈,香澄せな,高山玲奈,せな," href="https://javdb.com/actors/wE6z"/>
+
+  <a zh_cn="重名-かずみ(月野香澄、织田花纯)" zh_tw="重複-かずみ(月野香澄、織田花純)" jp="重複-かずみ(月野かすみ、織田花純)" keyword=",かずみ,名字冲突,姓名重複,"/>
+  <a zh_cn="月野香澄" zh_tw="月野香澄" jp="月野かすみ" keyword=",月野香澄,月野かすみ,かすみちゃん," href="https://javdb.com/actors/znyb"/>
+  <a zh_cn="织田花纯" zh_tw="織田花純" jp="織田花純" keyword=",织田花纯,織田花純," href="https://javdb.com/actors/8V9kO"/>
+
+  <a zh_cn="重名-麻美(高本优香、夏川步美)" zh_tw="重複-麻美(高本優香、夏川步美)" jp="重複-麻美(高本優香、夏川あゆみ)" keyword=",麻美,名字冲突,姓名重複,"/>
+  <a zh_cn="高本优香" zh_tw="高本優香" jp="高本優香" keyword=",高本优香,高本優香," href="https://javdb.com/actors/BWd6"/>
+  <a zh_cn="夏川步美" zh_tw="夏川步美" jp="夏川あゆみ" keyword=",夏川步美,夏川あゆみ," href="https://javdb.com/actors/QV2yK"/>
+
+  <a zh_cn="重名-石川さん(奏音花音、石川祐奈)" zh_tw="重複-石川さん(奏音花音、石川祐奈)" jp="重複-石川さん(奏音かのん、石川祐奈)" keyword=",石川さん,名字冲突,姓名重複,"/>
+  <a zh_cn="奏音花音" zh_tw="奏音花音" jp="奏音かのん" keyword=",奏音花音,奏音かのん,西野ゆき,黒木佳蓮,熊野樹," href="https://javdb.com/actors/ewAz"/>
+  <a zh_cn="石川祐奈" zh_tw="石川祐奈" jp="石川祐奈" keyword=",石川祐奈,広瀬はるな,伊藤綾,五十嵐舞美," href="https://javdb.com/actors/aPGg"/>
+
+  <a zh_cn="重名-めい(深月芽衣、莲见天)" zh_tw="重複-めい(深月芽衣、蓮見天)" jp="重複-めい(深月めい、蓮見天)" keyword=",めい,名字冲突,姓名重複,"/>
+  <a zh_cn="深月芽衣" zh_tw="深月芽衣" jp="深月めい" keyword=",深月芽衣,深月めい," href="https://javdb.com/actors/zKMNE"/>
+  <a zh_cn="莲见天" zh_tw="蓮見天" jp="蓮見天" keyword=",莲见天,蓮見天,れん,てんちゃん," href="https://javdb.com/actors/mwAZ"/>
+</actor>
