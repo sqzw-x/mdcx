@@ -31,9 +31,9 @@ from requests.exceptions import (
     URLRequired,
 )
 
-from models.base.utils import get_user_agent, singleton
-from models.config.config import config
-from models.signals import signal
+from ..config.manager import config
+from ..signals import signal
+from .utils import get_user_agent, singleton
 
 
 def _allowed_gai_family():
@@ -47,7 +47,7 @@ def _allowed_gai_family():
 try:
     if config.ipv4_only:
         urllib3_cn.allowed_gai_family = _allowed_gai_family
-except:
+except Exception:
     urllib3_cn.allowed_gai_family = _allowed_gai_family
 
 
@@ -307,7 +307,7 @@ class WebRequests:
                 response = self.session_g.head(url, headers=headers, proxies=proxies, timeout=timeout, verify=False)
                 file_size = response.headers.get("Content-Length")
                 return file_size
-            except:
+            except Exception:
                 pass
         return False
 
@@ -394,7 +394,7 @@ class WebRequests:
                     self.lock.release()
                 del chunks
                 return True
-            except:
+            except Exception:
                 pass
         return False
 
@@ -608,7 +608,7 @@ def get_amazon_data(req_url):
     }
     try:
         result, html_info = curl_html(req_url)
-    except:
+    except Exception:
         result, html_info = curl_html(req_url, headers=headers)
         session_id = ""
         ubid_acbjp = ""
@@ -677,9 +677,9 @@ def get_imgsize(url):
                     try:
                         img = Image.open(file_head)
                         return img.size
-                    except:
+                    except Exception:
                         return 0, 0
-        except:
+        except Exception:
             return 0, 0
     return 0, 0
 
@@ -751,7 +751,7 @@ def ping_host(host_address):
 
 
 def check_version():
-    if config.update_check == "on":
+    if config.update_check:
         url = "https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
         _, res_json = get_html(url, json_data=True)
         if isinstance(res_json, dict):
@@ -759,7 +759,7 @@ def check_version():
                 latest_version = res_json["tag_name"]
                 latest_version = int(latest_version)
                 return latest_version
-            except:
+            except Exception:
                 signal.add_log(f"❌ 获取最新版本失败！{res_json}")
 
 

@@ -1,11 +1,11 @@
 import os
 import shutil
 
-from models.base.file import copy_file, move_file, split_path
-from models.config.config import config
-from models.core.file import movie_lists
-from models.core.utils import get_movie_path_setting
-from models.signals import signal
+from ..base.file import copy_file, move_file, split_path
+from ..config.manager import config
+from ..signals import signal
+from .file import movie_lists
+from .utils import get_movie_path_setting
 
 
 def add_del_extras(mode: str):

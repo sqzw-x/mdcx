@@ -43,7 +43,7 @@ def get_year(release):
     try:
         result = str(re.search(r"\d{4}", release).group())
         return result
-    except:
+    except Exception:
         return release
 
 
@@ -140,7 +140,7 @@ def main(
             keyword = unicodedata.normalize("NFC", number)  # Mac 会拆成两个字符，即 NFD，而网页请求使用的是 NFC
             try:
                 keyword = keyword.encode("cp932").decode("shift_jis")  # 转换为常见日文，比如～ 转换成 〜
-            except:
+            except Exception:
                 pass
             keyword2 = urllib.parse.quote_plus(
                 keyword, encoding="EUC-JP"

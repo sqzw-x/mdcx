@@ -5,7 +5,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QMenu, QSystemTrayIcon, QTreeWidgetItem
 
-from models.config.config import config
+from models.config.consts import IS_WINDOWS
+from models.config.manual import ManualConfig
 from models.config.resources import resources
 from models.core.flags import Flags
 from models.core.utils import get_movie_path_setting
@@ -16,7 +17,7 @@ def Init_Ui(self):
     self.setWindowTitle("MDCx")  # 设置任务栏标题
     self.setWindowIcon(QIcon(resources.icon_ico))  # 设置任务栏图标
     self.setWindowOpacity(1.0)  # 设置窗口透明度
-    if config.is_windows:
+    if IS_WINDOWS:
         self.setFixedSize(
             self.width(), self.height()
         )  # 禁止调整窗口大小(mac 平台禁止后最小化没反应，恢复时顶部会残留标题栏)
@@ -99,7 +100,7 @@ def Init_Ui(self):
     self.Ui.textBrowser_log_main_3.hide()  # 失败列表隐藏
     self.Ui.pushButton_scraper_failed_list.hide()
     self.Ui.pushButton_save_failed_list.hide()
-    self.Ui.comboBox_custom_website.addItems(config.SUPPORTED_WEBSITES)
+    self.Ui.comboBox_custom_website.addItems(ManualConfig.SUPPORTED_WEBSITES)
     # self.Ui.textBrowser_log_main.document().setMaximumBlockCount(100000)     # 限制日志页最大行数rowCount
     # self.Ui.textBrowser_log_main_2.document().setMaximumBlockCount(30000)     # 限制日志页最大行数rowCount
     self.Ui.textBrowser_log_main.viewport().installEventFilter(self)  # 注册事件用于识别点击控件时隐藏失败列表面板
@@ -303,10 +304,8 @@ def Init_QSystemTrayIcon(self):
 def init_QTreeWidget(self):
     # 初始化树状控件
     try:
-        self.set_label_file_path.emit(
-            f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}"
-        )  # 主界面右上角显示提示信息
-    except:
+        self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")  # 主界面右上角显示提示信息
+    except Exception:
         signal.show_traceback_log(traceback.format_exc())
     signal.add_label_info("")
     Flags.count_claw = 0  # 批量刮削次数

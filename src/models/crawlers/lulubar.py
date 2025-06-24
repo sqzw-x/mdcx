@@ -28,7 +28,7 @@ def get_title(html):
         if not title or "撸撸吧" in title:
             title = number
         return title, number
-    except:
+    except Exception:
         return "", ""
 
 
@@ -71,7 +71,7 @@ def get_year(release):
     try:
         result = str(re.search(r"\d{4}", release).group())
         return result
-    except:
+    except Exception:
         return release
 
 

@@ -48,7 +48,7 @@ class Signals(QObject):
         try:
             with self.log_lock:
                 self.detail_log_list.append(f" ⏰ {time.strftime('%H:%M:%S', time.localtime())} {' '.join(text)}")
-        except:
+        except Exception:
             pass
 
     def get_log(self):

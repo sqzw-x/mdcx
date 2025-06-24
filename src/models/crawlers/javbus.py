@@ -7,7 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_html
-from models.config.config import config
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -35,7 +35,7 @@ def getActor(html):
         result = (
             str(html.xpath('//div[@class="star-name"]/a/text()')).strip(" ['']").replace("'", "").replace(", ", ",")
         )
-    except:
+    except Exception:
         result = ""
     return result
 
@@ -90,7 +90,7 @@ def getYear(release):
     try:
         result = str(re.search(r"\d{4}", release).group())
         return result
-    except:
+    except Exception:
         return release[:4]
 
 

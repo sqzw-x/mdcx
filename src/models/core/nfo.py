@@ -6,13 +6,14 @@ import traceback
 import langid
 from lxml import etree
 
-from models.base.file import delete_file, split_path
-from models.base.number import deal_actor_more, get_number_first_letter, get_number_letters
-from models.base.utils import convert_path, get_used_time
-from models.config.config import config
-from models.core.json_data import JsonData, LogBuffer
-from models.core.utils import get_new_release
-from models.signals import signal
+from ..base.file import delete_file, split_path
+from ..base.number import deal_actor_more, get_number_first_letter, get_number_letters
+from ..base.utils import convert_path, get_used_time
+from ..config.manager import config
+from ..config.manual import ManualConfig
+from ..signals import signal
+from .json_data import JsonData, LogBuffer
+from .utils import get_new_release
 
 
 def write_nfo(
@@ -239,7 +240,7 @@ def write_nfo(
             # 输出国家和分级
             try:
                 country = json_data["country"]
-            except:
+            except Exception:
                 if re.findall(r"\.\d{2}\.\d{2}\.\d{2}", number):
                     country = "US"
                 else:
@@ -293,14 +294,14 @@ def write_nfo(
                         print("  <rating>" + str(score) + "</rating>", file=code)
                     if "criticrating," in nfo_include_new:
                         print("  <criticrating>" + str(int(score * 10)) + "</criticrating>", file=code)
-            except:
+            except Exception:
                 print(traceback.format_exc())
 
             # 输出我想看人数
             try:
                 if json_data["wanted"] and "wanted," in nfo_include_new:
                     print("  <votes>" + json_data["wanted"] + "</votes>", file=code)
-            except:
+            except Exception:
                 pass
 
             # 输出年代
@@ -352,7 +353,7 @@ def write_nfo(
                     for i in tag:
                         if i:
                             print("  <tag>" + i + "</tag>", file=code)
-                except:
+                except Exception:
                     signal.show_log_text(traceback.format_exc())
 
             # 输出 genre
@@ -361,7 +362,7 @@ def write_nfo(
                     for i in tag:
                         if i:
                             print("  <genre>" + i + "</genre>", file=code)
-                except:
+                except Exception:
                     signal.show_log_text(traceback.format_exc())
 
             # 输出封面地址
@@ -447,7 +448,7 @@ def get_nfo_data(
     originaltitle = originaltitle.replace(number + " ", "").strip()
     originaltitle_amazon = originaltitle
     if originaltitle:
-        for key, value in config.special_word.items():
+        for key, value in ManualConfig.SPECIAL_WORD.items():
             originaltitle_amazon = originaltitle_amazon.replace(value, key)
     actor = ",".join(xml_nfo.xpath("//actor/name/text()"))
     originalplot = "".join(xml_nfo.xpath("//originalplot/text()"))

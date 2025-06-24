@@ -5,10 +5,10 @@ import traceback
 from PIL import Image, ImageFilter
 from PyQt5.QtGui import QImageReader, QPixmap
 
-from models.base.file import check_pic, copy_file, delete_file
-from models.base.utils import get_used_time
-from models.core.json_data import JsonData, LogBuffer
-from models.signals import signal
+from ..core.json_data import JsonData, LogBuffer
+from ..signals import signal
+from .file import check_pic, copy_file, delete_file
+from .utils import get_used_time
 
 
 def get_pixmap(pic_path: str, poster=True, pic_from=""):
@@ -43,14 +43,14 @@ def get_pixmap(pic_path: str, poster=True, pic_from=""):
         if poster:
             return [False, "", "封面图损坏", 156, 220]
         return [False, "", "缩略图损坏", 328, 220]
-    except:
+    except Exception:
         signal.show_log_text(traceback.format_exc())
         return [False, "", "加载失败", 156, 220]
 
 
 def fix_size(path: str, naming_rule: str):
+    poster_path = os.path.join(path, (naming_rule + "-poster.jpg"))
     try:
-        poster_path = os.path.join(path, (naming_rule + "-poster.jpg"))
         if os.path.exists(poster_path):
             pic = Image.open(poster_path)
             (width, height) = pic.size
@@ -60,7 +60,7 @@ def fix_size(path: str, naming_rule: str):
                 fixed_pic.paste(pic, (0, int((3 / 2 * width - height) / 2)))  # 粘贴原图
                 fixed_pic.save(poster_path, quality=95, subsampling=0)
             pic.close()
-    except:
+    except Exception:
         signal.show_log_text(f"{traceback.format_exc()}\n Pic: {poster_path}")
 
 
@@ -77,7 +77,7 @@ def cut_thumb_to_poster(
     # 打开图片, 获取图片尺寸
     try:
         img = Image.open(thumb_path)  # 返回一个Image对象
-    except:
+    except Exception:
         signal.show_log_text(f"{traceback.format_exc()}\n Pic: {thumb_path}")
         return False
 
@@ -148,7 +148,7 @@ def cut_pic(pic_path: str):
     # 打开图片, 获取图片尺寸
     try:
         img = Image.open(pic_path)  # 返回一个Image对象
-    except:
+    except Exception:
         signal.show_log_text(f"{traceback.format_exc()}\n Pic: {pic_path}")
         return
 
@@ -205,6 +205,6 @@ def fix_pic(pic_path: str, new_path: str):
         fixed_pic = fixed_pic.convert("RGB")
         fixed_pic.save(new_path, quality=95, subsampling=0)
         pic.close()
-    except:
+    except Exception:
         signal.show_log_text(f"{traceback.format_exc()}\n Pic: {pic_path}")
         signal.show_traceback_log(traceback.format_exc())

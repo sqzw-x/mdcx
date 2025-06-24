@@ -4,7 +4,7 @@ import json
 
 import urllib3
 
-from models.config.config import config
+from models.config.manager import config
 from models.crawlers import javlibrary
 
 urllib3.disable_warnings()  # yapf: disable

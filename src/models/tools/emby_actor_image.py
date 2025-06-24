@@ -11,7 +11,7 @@ from lxml import etree
 from models.base.image import cut_pic, fix_pic
 from models.base.utils import get_used_time
 from models.base.web import get_html
-from models.config.config import config
+from models.config.manager import config
 from models.config.resources import resources
 from models.core.web import download_file_with_filepath
 from models.signals import signal
@@ -84,7 +84,7 @@ def _upload_actor_photo(url, pic_path):
             }
         requests.post(url=url, data=b6_pic, headers=header)
         return True
-    except:
+    except Exception:
         signal.show_log_text(traceback.format_exc())
         return False
 
@@ -137,7 +137,7 @@ def _get_gfriends_actor_data():
                 lastest_time = time.strptime(date_time[0], "%Y-%m-%dT%H:%M:%S")
                 net_float = time.mktime(lastest_time) - time.timezone
                 net_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(net_float))
-            except:
+            except Exception:
                 signal.show_log_text("🔴 Gfriends 历史页面解析失败！请向开发者报告! ")
                 return False
             signal.show_log_text(f"✅ Gfriends 连接成功！最新数据更新时间: {net_time}")
@@ -150,7 +150,7 @@ def _get_gfriends_actor_data():
             try:
                 with open(gfriends_json_path, encoding="utf-8") as f:
                     gfriends_actor_data = json.load(f)
-            except:
+            except Exception:
                 signal.show_log_text("🔴 本地缓存数据读取失败！需重新缓存！")
                 update_data = True
             else:
@@ -177,7 +177,7 @@ def _get_gfriends_actor_data():
             try:
                 with open(gfriends_json_path, encoding="utf-8") as f:
                     gfriends_actor_data = json.load(f)
-            except:
+            except Exception:
                 signal.show_log_text("🔴 本地缓存数据读取失败！补全已停止！")
                 return False
             else:

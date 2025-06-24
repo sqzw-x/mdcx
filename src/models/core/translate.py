@@ -11,15 +11,15 @@ import deepl
 import langid
 import zhconv
 
-from models.base.number import get_number_letters
-from models.base.utils import get_used_time, remove_repeat
-from models.base.web import get_html, post_html
-from models.config.config import config
-from models.config.resources import resources
-from models.core.flags import Flags
-from models.core.json_data import JsonData, LogBuffer
-from models.core.web import get_actorname, get_yesjav_title, google_translate
-from models.signals import signal
+from ..base.number import get_number_letters
+from ..base.utils import get_used_time, remove_repeat
+from ..base.web import get_html, post_html
+from ..config.manager import config
+from ..config.resources import resources
+from ..signals import signal
+from .flags import Flags
+from .json_data import JsonData, LogBuffer
+from .web import get_actorname, get_yesjav_title, google_translate
 
 deepl_result = {}
 REGEX_KANA = re.compile(r"[\u3040-\u30ff]")  # 平假名/片假名
@@ -217,7 +217,7 @@ def translate_info(json_data: JsonData):
         tag = tag.replace(each_key, "")
 
     # 映射tag并且存在xml_info时，处理tag映射
-    if tag_translate == "on":
+    if tag_translate:
         tag_list = re.split(r"[,，]", tag)
         tag_new = []
         for each_info in tag_list:
@@ -269,7 +269,7 @@ def translate_info(json_data: JsonData):
 
     # 系列
     if series:  # 为空时会匹配所有
-        if series_translate == "on":  # 映射
+        if series_translate:  # 映射
             info_data = resources.get_info_data(series)
             series = info_data.get(series_language)
         if series and "series" in tag_include:  # 写nfo
@@ -279,7 +279,7 @@ def translate_info(json_data: JsonData):
 
     # 片商
     if studio:
-        if studio_translate == "on":
+        if studio_translate:
             info_data = resources.get_info_data(studio)
             studio = info_data.get(studio_language)
         if studio and "studio" in tag_include:
@@ -289,7 +289,7 @@ def translate_info(json_data: JsonData):
 
     # 发行
     if publisher:
-        if publisher_translate == "on":
+        if publisher_translate:
             info_data = resources.get_info_data(publisher)
             publisher = info_data.get(publisher_language)
         if publisher and "publisher" in tag_include:
@@ -299,7 +299,7 @@ def translate_info(json_data: JsonData):
 
     # 导演
     if director:
-        if director_translate == "on":
+        if director_translate:
             info_data = resources.get_info_data(director)
             director = info_data.get(director_language)
 
@@ -326,7 +326,7 @@ def translate_actor(json_data: JsonData):
     number = json_data["number"]
 
     # 非读取模式，勾选了使用真实名字时; 读取模式，勾选了允许更新真实名字时
-    if actor_realname == "on":
+    if actor_realname:
         start_time = time.time()
         if mosaic != "国产" and (
             number.startswith("FC2") or number.startswith("SIRO") or re.search(r"\d{3,}[A-Z]{3,}-", number)
@@ -350,7 +350,7 @@ def translate_actor(json_data: JsonData):
                 LogBuffer.log().write(f"\n 🔴 Av-wiki failed! {temp_actor} ({get_used_time(start_time)}s)")
 
     # 如果不映射，返回
-    if config.actor_translate == "off":
+    if not config.actor_translate:
         return json_data
 
     # 映射表数据加载失败，返回
@@ -402,7 +402,7 @@ def get_youdao_key():
     try:
         t = threading.Thread(target=_get_youdao_key_thread)
         t.start()  # 启动线程,即让线程开始执行
-    except:
+    except Exception:
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
 
@@ -428,7 +428,7 @@ def _get_youdao_key_thread():
         youdaokey = re.search(r'(?<="fanyideskweb" \+ e \+ i \+ ")[^"]+', req).group(
             0
         )  # sign: n.md5("fanyideskweb" + e + i + "Ygy_4c=r#e#4EX^NUGUc5")
-    except:
+    except Exception:
         try:
             youdaokey = re.search(r'(?<="fanyideskweb"\+e\+i\+")[^"]+', req).group(0)
         except Exception as e:
@@ -460,11 +460,11 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
         movie_title = ""
 
         # 匹配本地高质量标题(色花标题数据)
-        if title_sehua_zh == "on" or (json_data_title_language == "ja" and title_sehua == "on"):
+        if title_sehua_zh or (json_data_title_language == "ja" and title_sehua):
             start_time = time.time()
             try:
                 movie_title = resources.sehua_title_data.get(movie_number)
-            except:
+            except Exception:
                 signal.show_traceback_log(traceback.format_exc())
                 signal.show_log_text(traceback.format_exc())
             if movie_title:
@@ -472,7 +472,7 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
                 LogBuffer.log().write(f"\n 🌸 Sehua title done!({get_used_time(start_time)}s)")
 
         # 匹配网络高质量标题（yesjav， 可在线更新）
-        if not movie_title and title_yesjav == "on" and json_data_title_language == "ja":
+        if not movie_title and title_yesjav and json_data_title_language == "ja":
             start_time = time.time()
             movie_title = get_yesjav_title(movie_number)
             if movie_title and langid.classify(movie_title)[0] != "ja":
@@ -480,17 +480,17 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
                 LogBuffer.log().write(f"\n 🆈 Yesjav title done!({get_used_time(start_time)}s)")
 
         # 使用json_data数据
-        if not movie_title and title_translate == "on" and json_data_title_language == "ja":
+        if not movie_title and title_translate and json_data_title_language == "ja":
             trans_title = json_data["title"]
 
     # 处理outline
     if json_data["outline"] and outline_language != "jp":
-        if outline_translate == "on" and langid.classify(json_data["outline"])[0] == "ja":
+        if outline_translate and langid.classify(json_data["outline"])[0] == "ja":
             trans_outline = json_data["outline"]
 
     # 翻译
     if Flags.translate_by_list:
-        if (trans_title and title_translate == "on") or (trans_outline and outline_translate == "on"):
+        if (trans_title and title_translate) or (trans_outline and outline_translate):
             start_time = time.time()
             translate_by_list = Flags.translate_by_list.copy()
             if not json_data["cd_part"]:

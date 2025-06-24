@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
                 info = AppKit.NSBundle.mainBundle().infoDictionary()
                 info["LSUIElement"] = True
-            except:
+            except Exception:
                 pass
 
     if os.path.isfile("highdpi_passthrough"):

@@ -5,7 +5,7 @@ import traceback
 
 from PIL import Image
 
-from models.config.config import config
+from models.config.consts import IS_MAC, IS_WINDOWS
 from models.signals import signal
 
 
@@ -96,7 +96,7 @@ def check_pic(path_pic: str):
             try:
                 os.remove(path_pic)
                 signal.add_log("删除成功！")
-            except:
+            except Exception:
                 signal.add_log("删除失败！")
     return False
 
@@ -105,14 +105,14 @@ def _open_file_thread(
     file_path: str,
     is_dir: bool,
 ):
-    if config.is_windows:
+    if IS_WINDOWS:
         if is_dir:
             # os.system(f'explorer /select,"{file_path}"')  pyinstall打包后打开文件时会闪现cmd窗口。
             # file_path路径必须转换为windows样式，并且加上引号（不加引号，文件名过长会截断）。select,后面不能有空格！！！
             subprocess.Popen(f'explorer /select,"{file_path}"')
         else:
             subprocess.Popen(f'explorer "{file_path}"')
-    elif config.is_mac:
+    elif IS_MAC:
         if is_dir:
             if os.path.islink(file_path):
                 file_path = split_path(file_path)[0]
@@ -125,7 +125,7 @@ def _open_file_thread(
                 file_path = split_path(file_path)[0]
             try:
                 subprocess.Popen(["dolphin", "--select", file_path])
-            except:
+            except Exception:
                 subprocess.Popen(["xdg-open", "-R", file_path])
         else:
             subprocess.Popen(["xdg-open", file_path])

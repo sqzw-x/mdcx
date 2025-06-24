@@ -163,7 +163,7 @@ def get_trailer(htmlcode, real_url):
             trailer_url = json.loads(var_params).get("bitrates")[-1].get("src")
             if trailer_url.startswith("//"):
                 trailer_url = "https:" + trailer_url
-        except:
+        except Exception:
             trailer_url = ""
     elif vr_cid:
         cid = vr_cid[0]
@@ -279,27 +279,27 @@ def get_tv_jp_data(real_url):
         # year = api_data['title']
         try:
             runtime = str(int(api_data["playInfo"]["duration"] / 60))
-        except:
+        except Exception:
             runtime = ""
         try:
             score = api_data["reviewSummary"]["averagePoint"]
-        except:
+        except Exception:
             score = ""
         try:
             series = api_data["series"]["name"]
-        except:
+        except Exception:
             series = ""
         try:
             director = api_data["directors"][0]["name"]
-        except:
+        except Exception:
             director = ""
         try:
             studio = api_data["maker"]["name"]
-        except:
+        except Exception:
             studio = ""
         try:
             publisher = api_data["label"][0]["name"]
-        except:
+        except Exception:
             publisher = ""
         extrafanart = []
         for each in api_data["samplePictures"]:
@@ -311,7 +311,7 @@ def get_tv_jp_data(real_url):
             trailer = trailer_url.replace("playlist.m3u8", cid + "_sm_w.mp4")
             trailer = get_dmm_trailer(trailer)
 
-        except:
+        except Exception:
             trailer = ""
         return (
             True,
@@ -375,23 +375,23 @@ def get_tv_com_data(number):
         year = str(api_data["productionYear"])
         try:
             runtime = str(int(api_data["playInfo"]["duration"] / 60))
-        except:
+        except Exception:
             runtime = ""
         try:
             score = str(api_data["reviewSummary"]["averagePoint"])
-        except:
+        except Exception:
             score = ""
         try:
             series = api_data["series"]["name"]
-        except:
+        except Exception:
             series = ""
         try:
             director = api_data["directors"][0]["name"]
-        except:
+        except Exception:
             director = ""
         try:
             studio = api_data["staffs"][0]["staffName"]
-        except:
+        except Exception:
             studio = ""
         publisher = studio
         extrafanart = []
@@ -404,7 +404,7 @@ def get_tv_com_data(number):
             trailer = trailer_url.replace("playlist.m3u8", cid + "_sm_w.mp4")
             trailer = get_dmm_trailer(trailer)
 
-        except:
+        except Exception:
             trailer = ""
         return (
             True,

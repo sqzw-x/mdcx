@@ -4,14 +4,15 @@ import sys
 import traceback
 
 import zhconv
-from PyQt5.QtGui import QFontDatabase
 from lxml import etree
+from PyQt5.QtGui import QFontDatabase
 
-from models.base.file import copy_file
-from models.base.path import get_main_path
-from models.base.utils import singleton
-from models.config.config import config
-from models.signals import signal
+from ..base.file import copy_file
+from ..base.path import get_main_path
+from ..base.utils import singleton
+from ..signals import signal
+from .manager import manager
+from .manual import ManualConfig
 
 
 @singleton
@@ -83,7 +84,7 @@ class Resources:
         xml_actor = self.actor_mapping_data
         if len(xml_actor):
             actor_name = f",{actor.upper()},"
-            for each in config.full_half_char:
+            for each in ManualConfig.FULL_HALF_CHAR:
                 actor_name = actor_name.replace(each[0], each[1])
             actor_ob = xml_actor.xpath(
                 '//a[contains(translate(@keyword, "abcdefghijklmnopqrstuvwxyzａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ・", "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ·"), $name)]',
@@ -113,7 +114,7 @@ class Resources:
         xml_info = self.info_mapping_data
         if len(xml_info):
             info_name = f",{info.upper()},"
-            for each in config.full_half_char:
+            for each in ManualConfig.FULL_HALF_CHAR:
                 info_name = info_name.replace(each[0], each[1])
             info_ob = xml_info.xpath(
                 "//a[contains(translate(@keyword, "
@@ -135,11 +136,11 @@ class Resources:
         if getattr(sys, "frozen", False):  # 是否Bundle Resource，是否打包成exe运行
             try:
                 self._resources_base_path = os.path.join(sys._MEIPASS, "resources")
-            except:
+            except Exception:
                 signal.show_traceback_log(self._resources_base_path)
                 signal.show_traceback_log(traceback.format_exc())
                 print(self._resources_base_path, traceback.format_exc())
-        self._userdata_base_path = os.path.join(config.folder, "userdata")
+        self._userdata_base_path = os.path.join(manager.folder, "userdata")
 
     def _resource_path(self, relative_path):
         if os.path.exists(os.path.join(self._resources_base_path, relative_path)):

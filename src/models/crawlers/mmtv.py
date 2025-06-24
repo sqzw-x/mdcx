@@ -8,7 +8,7 @@ from lxml import etree
 
 from models.base.number import is_uncensored
 from models.base.web import curl_html
-from models.config.config import config
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info
 
@@ -155,7 +155,7 @@ def get_mosaic(html, number):
             mosaic = "无码"
         elif "有碼AV" in result or "素人AV" in result:
             mosaic = "有码"
-    except:
+    except Exception:
         pass
     if not mosaic:
         if number.upper().startswith("FC2"):

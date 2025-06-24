@@ -7,7 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import curl_html
-from models.config.config import config
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -101,7 +101,7 @@ def get_year(release):
     try:
         result = str(re.search(r"\d{4}", release).group())
         return result
-    except:
+    except Exception:
         return release
 
 

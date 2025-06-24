@@ -1,42 +1,6 @@
 class ManualConfig:
-    # 设置软件版本
-    local_version = 120240924
-
-    # 定义配置值类型
-    INT_KEY = [
-        "version",
-        "thread_number",
-        "thread_time",
-        "javdb_time",
-        "main_mode",
-        "soft_link",
-        "success_file_move",
-        "failed_file_move",
-        "success_file_rename",
-        "del_empty_folder",
-        "show_poster",
-        "folder_name_max",
-        "file_name_max",
-        "actor_name_max",
-        "cd_name",
-        "pic_name",
-        "trailer_name",
-        "use_database",
-        "poster_mark",
-        "thumb_mark",
-        "fanart_mark",
-        "mark_size",
-        "timeout",
-        "retry",
-        "rest_count",
-        "statement",
-        "actor_photo_kodi_auto",
-        "auto_link",
-    ]
-    FLOAT_KEY = [
-        "file_size",
-        "clean_size",
-    ]
+    # 表示运行时版本, 用于检查更新以及向后兼容配置文件
+    LOCAL_VERSION = 120240924
 
     # 支持的网站, 用于支持自定义域名
     SUPPORTED_WEBSITES = [
@@ -78,7 +42,7 @@ class ManualConfig:
     ]
 
     # 刮削过程所需预设值
-    oumei_name = {
+    OUMEI_NAME = {
         "wgp": "WhenGirlsPlay",
         "18og": "18OnlyGirls",
         "18yo": "18YearsOld",
@@ -371,7 +335,7 @@ class ManualConfig:
         "yt": "YoungThroats",
         "zb": "ZoliBoy",
     }
-    official = {
+    OFFICIAL = {
         "https://s1s1s1.com": "sivr|ssis|ssni|snis|soe|oned|one|onsd|ofje|sps|tksoe",  # https://s1s1s1.com/search/list?keyword=soe
         "https://moodyz.com": "mdvr|midv|mide|midd|mibd|mimk|miid|migd|mifd|miae|miad|miaa|mdl|mdj|mdi|mdg|mdf|mde|mdld|mded|mizd|mird|mdjd|rmid|mdid|mdmd|mimu|mdpd|mivd|mdud|mdgd|mdvd|mias|miqd|mint|rmpd|mdrd|tkmide|tkmidd|kmide|tkmigd|mdfd|rmwd|miab",
         "https://www.madonna-av.com": "juvr|jusd|juq|juy|jux|jul|juk|juc|jukd|jusd|oba|jufd|roeb|roe|ure|mdon|jfb|obe|jums",
@@ -403,7 +367,7 @@ class ManualConfig:
         "https://hhh-av.com": "huntb|hunta|hunt|hunbl|royd|tysf",
         "https://www.prestige-av.com": "abp|mbm|ezd|docp|onez|yrh|abw|abs|chn|mgt|tre|edd|ult|cmi|mbd|dnw|sga|rdd|dcx|evo|rdt|ppt|gets|sim|kil|tus|dtt|gnab|man|mas|tbl|rtp|ctd|fiv|dic|esk|kbi|tem|ama|kfne|trd|har|yrz|srs|mzq|zzr|gzap|tgav|rix|aka|bgn|lxv|afs|goal|giro|cpde|nmp|mct|abc|inu|shl|mbms|pxh|nrs|ftn|prdvr|fst|blo|shs|kum|gsx|ndx|atd|dld|kbh|bcv|raw|soud|job|chs|yok|bsd|fsb|nnn|hyk|sor|hsp|jbs|xnd|mei|day|mmy|kzd|jan|gyan|tdt|tok|dms|fnd|cdc|jcn|pvrbst|sdvr|docvr|fcp|abf",
     }
-    suren_dic = {
+    SUREN_DIC = {
         "SHN-": "116",  # 116SHN-045
         "GANA": "200",  # 200GANA-2556
         "CUTE-": "229",  # 229SCUTE-953
@@ -437,7 +401,7 @@ class ManualConfig:
         "DANDY": "104",  # 104DANDY-852A
         "ICHK": "368",  # 368ICHK-018
     }
-    repl_list = [
+    REPL_LIST = [
         "HEYDOUGA",
         "CARIBBEANCOM",
         "CARIB",
@@ -498,7 +462,7 @@ class ManualConfig:
         ".cht",
         ".chs",
     ]
-    web_dic = {
+    WEB_DIC = {
         "airav.io": "airav_cc",
         "airav.wiki": "airav",
         "9sex": "avsex",
@@ -540,7 +504,7 @@ class ManualConfig:
         "theporndb": "theporndb",
         "prestige": "prestige",
     }
-    char_list = [
+    CHAR_LIST = [
         "[高清] (中文字幕)",
         "[高清 (中文字幕)",
         " (中文字幕)",
@@ -564,8 +528,8 @@ class ManualConfig:
         "导演剪辑最终版",
         "堂友",
     ]
-    all_key_word = ["title", "originaltitle", "outline", "originalplot", "series", "director", "studio", "publisher"]
-    all_rep_word = {
+    ALL_KEY_WORD = ["title", "originaltitle", "outline", "originalplot", "series", "director", "studio", "publisher"]
+    ALL_REP_WORD = {
         "&amp;": "＆",  # 将网页中存在二次抓取的&amp;(实际意义为&)的字符全局替换成＆（大写的&，不会被emby误判，显示更美观）
         "&lt;": "<",  # 将网页中存在二次抓取的&lt;(实际意义为<)的字符全局替换成<
         "&gt;": ">",  # 将网页中存在二次抓取的&gt;(实际意义为>)的字符替全局换成>
@@ -656,7 +620,7 @@ class ManualConfig:
         "０": "0",  # 将全角数字替换成半角数字
         "\t": " ",  # 将制表符替换为空格
     }
-    chinese_rep_word = {
+    CHINESE_REP_WORD = {
         "姊": "姐",  # 中文简体常见错字全局替换
         "著": "着",  # 中文简体常见错字全局替换
         "慾": "欲",  # 中文简体常见错字全局替换
@@ -671,7 +635,7 @@ class ManualConfig:
         "卅": "三十",  # 中文简体常见错字全局替换
         "卌": "四十",  # 中文简体常见错字全局替换
     }
-    title_rep = [
+    TITLE_REP = [
         "第一集",
         "第二集",
         " - 上",
@@ -685,7 +649,7 @@ class ManualConfig:
         "(蓝光版)",
         "(ブルーレイ版)",
     ]
-    show_key = [
+    SHOW_KEY = [
         "number",
         "letters",
         "has_sub",
@@ -710,7 +674,7 @@ class ManualConfig:
         "website",
         "javdbid",
     ]
-    full_half_char = [
+    FULL_HALF_CHAR = [
         ("・", "·"),
         ("．", "."),
         ("，", ","),
@@ -809,7 +773,7 @@ class ManualConfig:
         ("９", "9"),
         ("　", " "),
     ]
-    special_word = {
+    SPECIAL_WORD = {
         "強●": "強制",
         "犯●": "犯さ",
         "凌●": "凌辱",
@@ -835,7 +799,7 @@ class ManualConfig:
         "ﾒｲﾄﾞ": "メイド",
         "ﾎｰﾙﾄﾞ": "ホールド",
     }
-    actress_wiki_keywords = [
+    ACTRESS_WIKI_KEYWORDS = [
         "AV idol",
         "pornographic",
         "pornoactrice",

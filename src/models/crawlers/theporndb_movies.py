@@ -11,7 +11,7 @@ import urllib3
 
 from models.base.number import long_name, remove_escape_string
 from models.base.web import get_html
-from models.config.config import config
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -39,38 +39,38 @@ def read_data(data):
         trailer = ""
     try:
         cover = data["background"]["large"]
-    except:
+    except Exception:
         cover = data.get("image")
     if not cover:
         cover = ""
     try:
         poster = data["posters"]["large"]
-    except:
+    except Exception:
         poster = data.get("poster")
     if not poster:
         poster = ""
     try:
         runtime = str(int(int(data.get("duration")) / 60))
-    except:
+    except Exception:
         runtime = ""
     try:
         series = data["site"]["name"]
-    except:
+    except Exception:
         series = ""
     try:
         studio = data["site"]["network"]["name"]
-    except:
+    except Exception:
         studio = ""
     publisher = studio
     try:
         director = data["director"]["name"]
-    except:
+    except Exception:
         director = ""
     tag_list = []
     try:
         for each in data["tags"]:
             tag_list.append(each["name"])
-    except:
+    except Exception:
         pass
     tag = ",".join(tag_list)
     slug = data["slug"]
@@ -82,7 +82,7 @@ def read_data(data):
             all_actor_list.append(each["name"])
             if each["parent"]["extras"]["gender"] != "Male":
                 actor_list.append(each["name"])
-    except:
+    except Exception:
         pass
     all_actor = ",".join(all_actor_list)
     actor = ",".join(actor_list)
@@ -131,11 +131,11 @@ def get_real_url(
                 res_id_url = f"https://api.theporndb.net/movies/{each['slug']}"
                 try:
                     res_series = each["site"]["short_name"]
-                except:
+                except Exception:
                     res_series = ""
                 try:
                     res_url = each["site"]["url"].replace("-", "")
-                except:
+                except Exception:
                     res_url = ""
                 res_date = each["date"]
                 res_title_space = re.sub(r"[\W_]", " ", each["title"].lower())
@@ -207,7 +207,7 @@ def get_real_url(
                         m = n
                         real_url = each[0]
                 return real_url
-    except:
+    except Exception:
         print(traceback.format_exc())
     return False
 
@@ -239,7 +239,7 @@ def get_number(series, release, title):
     try:
         if series and release:
             return series.replace(" ", "") + "." + re.findall(r"\d{2}-\d{2}-\d{2}", release)[0].replace("-", ".")
-    except:
+    except Exception:
         pass
     return title
 
@@ -256,7 +256,7 @@ def get_actor_photo(actor):
 def get_year(release):
     try:
         return re.findall(r"\d{4}", release)[0]
-    except:
+    except Exception:
         return ""
 
 
@@ -335,7 +335,7 @@ def main(
                         publisher,
                         real_url,
                     ) = read_data(hash_data)
-            except:
+            except Exception:
                 pass
 
             # 通过文件名搜索

@@ -13,15 +13,16 @@ from typing import Optional, cast
 
 from lxml import etree
 
-from models.base.file import copy_file, delete_file, move_file, split_path
-from models.base.image import check_pic, cut_thumb_to_poster
-from models.base.utils import get_used_time
-from models.base.web import check_url, get_amazon_data, get_big_pic_by_google, get_html, get_imgsize, multi_download
-from models.config.config import config
-from models.core.flags import Flags
-from models.core.json_data import ImageContext, JsonData, LogBuffer
-from models.core.utils import convert_half
-from models.signals import signal
+from ..base.file import copy_file, delete_file, move_file, split_path
+from ..base.image import check_pic, cut_thumb_to_poster
+from ..base.utils import get_used_time
+from ..base.web import check_url, get_amazon_data, get_big_pic_by_google, get_html, get_imgsize, multi_download
+from ..config.manager import config
+from ..config.manual import ManualConfig
+from ..signals import signal
+from .flags import Flags
+from .json_data import ImageContext, JsonData, LogBuffer
+from .utils import convert_half
 
 
 def get_actorname(number: str) -> tuple[bool, str]:
@@ -54,7 +55,7 @@ def get_yesjav_title(movie_number: str) -> str:
         )
         if movie_title:
             movie_title = movie_title[0]
-            for each in config.char_list:
+            for each in ManualConfig.CHAR_LIST:
                 movie_title = movie_title.replace(each, "")
             movie_title = movie_title.strip()
     return movie_title
@@ -95,7 +96,7 @@ def download_file_with_filepath(
     try:
         if multi_download(url, file_path):
             return True
-    except:
+    except Exception:
         pass
     LogBuffer.log().write(f"\n 🥺 Download failed! {url}")
     return False
@@ -253,7 +254,7 @@ def get_big_pic_by_amazon(
                 for each in title_result_list[:4]:
                     try:
                         url_new = "https://www.amazon.co.jp" + re.findall(r"(/dp/[^/]+)", each[1])[0]
-                    except:
+                    except Exception:
                         url_new = each[1]
                     result, html_detail = get_amazon_data(url_new)
                     if result and html_detail:
@@ -297,13 +298,13 @@ def trailer_download(
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
-    trailer_name = config.trailer_name
+    trailer_name = config.trailer_simple_name
     trailer_url = json_data["trailer"]
     trailer_old_folder_path = os.path.join(folder_old_path, "trailers")
     trailer_new_folder_path = os.path.join(folder_new_path, "trailers")
 
     # 预告片名字不含视频文件名（只让一个视频去下载即可）
-    if trailer_name == 1:
+    if trailer_name:
         trailer_folder_path = os.path.join(folder_new_path, "trailers")
         trailer_file_name = "trailer.mp4"
         trailer_file_path = os.path.join(trailer_folder_path, trailer_file_name)
@@ -342,7 +343,7 @@ def trailer_download(
         if not Flags.file_done_dic.get(json_data["number"]).get("trailer"):
             Flags.file_done_dic[json_data["number"]].update({"trailer": trailer_file_path})
             # 带文件名时，删除掉新、旧文件夹，用不到了。（其他分集如果没有，可以复制第一个文件的预告片。此时不删，没机会删除了）
-            if trailer_name == 0:
+            if not trailer_name:
                 if os.path.exists(trailer_old_folder_path):
                     shutil.rmtree(trailer_old_folder_path, ignore_errors=True)
                 if trailer_new_folder_path != trailer_old_folder_path and os.path.exists(trailer_new_folder_path):
@@ -353,7 +354,7 @@ def trailer_download(
     # 带文件名时，选择下载不保留，或者选择保留但没有预告片，检查是否有其他分集已下载或本地预告片
     # 选择下载不保留，当没有下载成功时，不会删除不保留的文件
     done_trailer_path = Flags.file_done_dic.get(json_data["number"]).get("trailer")
-    if trailer_name == 0 and done_trailer_path and os.path.exists(done_trailer_path):
+    if not trailer_name and done_trailer_path and os.path.exists(done_trailer_path):
         if os.path.exists(trailer_file_path):
             delete_file(trailer_file_path)
         copy_file(done_trailer_path, trailer_file_path)
@@ -1022,7 +1023,7 @@ def show_netstatus() -> None:
     timeout = 0
     try:
         proxy_type, proxy, timeout, retry_count = config.type, config.proxy, config.timeout, config.retry
-    except:
+    except Exception:
         signal.show_traceback_log(traceback.format_exc())
         signal.show_net_info(traceback.format_exc())
     if proxy == "" or proxy_type == "" or proxy_type == "no":

@@ -109,7 +109,7 @@ def get_c_number():
         # 获取当前页面信息
         try:
             res = requests.get(url, headers=headers)
-        except:
+        except Exception:
             print("获取当前页面信息失败！信息已保存到：_错误信息.txt")
             # print(res.text)
             error_info = "\nPA 获取当前页面信息失败！\n" + url + "\n"
@@ -125,7 +125,7 @@ def get_c_number():
             # 获取当前页面帖子列表
             try:
                 post_info = html.xpath('//tbody[contains(@id, "normal")]/tr/th/a[2]')
-            except:
+            except Exception:
                 print("获取当前页面帖子列表失败！信息已保存到：_错误信息.txt")
                 error_info = "\nL 获取当前页面帖子列表失败！\n" + url + "\n"
                 save_log(error_info)
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     print(".......")
     try:
         os.remove("_错误信息.txt")
-    except:
+    except Exception:
         pass
     get_c_number()
     print("\n\n# ===== 处理完成！ ===== #\n")

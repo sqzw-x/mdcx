@@ -104,7 +104,7 @@ def get_wiki_data():
                 "website": website,
             }
         return mywife_dic
-    except:
+    except Exception:
         # print(traceback.format_exc())
         return False
 
@@ -114,7 +114,7 @@ def get_number_data(number):
     data = {}
     try:
         mywife_data = data["mywife"]
-    except:
+    except Exception:
         mywife_data = get_wiki_data()
         if not mywife_data:
             seesaawiki_request_fail_flag = True

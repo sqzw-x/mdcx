@@ -39,7 +39,7 @@ def get_year(release):
     try:
         result = str(re.search(r"\d{4}", release).group())
         return result
-    except:
+    except Exception:
         return release
 
 
@@ -125,40 +125,40 @@ def main(
                 poster = "https://www.prestige-av.com/api/media/" + page_data["thumbnail"]["path"]
                 if "noimage" in poster:
                     poster = ""
-            except:
+            except Exception:
                 poster = ""
             try:
                 cover_url = "https://www.prestige-av.com/api/media/" + page_data["packageImage"]["path"]
-            except:
+            except Exception:
                 cover_url = ""
             try:
                 release = page_data["sku"][0]["salesStartAt"][:10]
-            except:
+            except Exception:
                 release = ""
             year = get_year(release)
             runtime = str(page_data["playTime"])
             score = ""
             try:
                 series = page_data["series"]["name"]
-            except:
+            except Exception:
                 series = ""
             tag = get_tag(page_data)
             try:
                 director = page_data["directors"][0]["name"]
-            except:
+            except Exception:
                 director = ""
             try:
                 studio = page_data["maker"]["name"]
-            except:
+            except Exception:
                 studio = ""
             try:
                 publisher = page_data["label"]["name"]
-            except:
+            except Exception:
                 publisher = ""
             extrafanart = get_extrafanart(page_data)
             try:
                 trailer = "https://www.prestige-av.com/api/media/" + page_data["movie"]["path"]
-            except:
+            except Exception:
                 trailer = ""
             mosaic = "有码"
             try:

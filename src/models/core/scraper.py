@@ -8,13 +8,17 @@ from typing import Optional
 
 from PyQt5.QtWidgets import QMessageBox
 
-from models.base.file import copy_file, move_file, read_link, split_path
-from models.base.path import get_main_path
-from models.base.utils import convert_path, get_current_time, get_real_time, get_used_time
-from models.config.config import config
-from models.config.resources import resources
-from models.core.crawler import crawl
-from models.core.file import (
+from ..base.file import copy_file, move_file, read_link, split_path
+from ..base.path import get_main_path
+from ..base.utils import convert_path, get_current_time, get_real_time, get_used_time
+from ..config.manager import config
+from ..config.resources import resources
+from ..entity.enums import FileMode
+from ..signals import signal
+from ..tools.emby_actor_image import update_emby_actor_photo
+from ..tools.emby_actor_info import creat_kodi_actors
+from .crawler import crawl
+from .file import (
     _clean_empty_fodlers,
     _pic_some_deal,
     check_file,
@@ -32,12 +36,12 @@ from models.core.file import (
     newtdisk_creat_symlink,
     save_success_list,
 )
-from models.core.flags import Flags
-from models.core.image import add_mark, extrafanart_copy2, extrafanart_extras_copy
-from models.core.json_data import JsonData, LogBuffer
-from models.core.nfo import get_nfo_data, write_nfo
-from models.core.translate import translate_actor, translate_info, translate_title_outline
-from models.core.utils import (
+from .flags import Flags
+from .image import add_mark, extrafanart_copy2, extrafanart_extras_copy
+from .json_data import JsonData, LogBuffer
+from .nfo import get_nfo_data, write_nfo
+from .translate import translate_actor, translate_info, translate_title_outline
+from .utils import (
     deal_some_field,
     get_movie_path_setting,
     get_video_size,
@@ -46,11 +50,7 @@ from models.core.utils import (
     show_data_result,
     show_movie_info,
 )
-from models.core.web import extrafanart_download, fanart_download, poster_download, thumb_download, trailer_download
-from models.entity.enums import FileMode
-from models.signals import signal
-from models.tools.emby_actor_image import update_emby_actor_photo
-from models.tools.emby_actor_info import creat_kodi_actors
+from .web import extrafanart_download, fanart_download, poster_download, thumb_download, trailer_download
 
 
 def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> tuple[bool, JsonData]:
@@ -701,7 +701,7 @@ def start_new_scrape(file_mode: FileMode, movie_list: Optional[list[str]] = None
         Flags.threads_list.append(t)
         Flags.stop_other = False
         t.start()
-    except:
+    except Exception:
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
 
@@ -801,7 +801,7 @@ def move_sub(
 
     # 更新模式 或 读取模式
     if config.main_mode > 2:
-        if config.update_mode == "c" and config.success_file_rename == 0:
+        if config.update_mode == "c" and not config.success_file_rename:
             return
 
     # 软硬链接开时，复制字幕（EMBY 显示字幕）
@@ -809,14 +809,14 @@ def move_sub(
         copy_flag = True
 
     # 成功移动关、成功重命名关时，返回
-    elif config.success_file_move == 0 and config.success_file_rename == 0:
+    elif not config.success_file_move and not config.success_file_rename:
         return
 
     for sub in sub_list:
         sub_old_path = os.path.join(folder_old_path, (file_name + sub))
         sub_new_path = os.path.join(folder_new_path, (naming_rule + sub))
         sub_new_path_chs = os.path.join(folder_new_path, (naming_rule + ".chs" + sub))
-        if config.subtitle_add_chs == "on":
+        if config.subtitle_add_chs:
             if ".chs" not in sub:
                 sub_new_path = sub_new_path_chs
         if os.path.exists(sub_old_path) and not os.path.exists(sub_new_path):

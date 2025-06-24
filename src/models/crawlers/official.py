@@ -8,7 +8,7 @@ from lxml import etree
 
 from models.base.number import get_number_letters
 from models.base.web import get_html
-from models.config.config import config
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers import prestige
 
@@ -90,7 +90,7 @@ def get_year(release):
     try:
         result = str(re.search(r"\d{4}", release).group())
         return result
-    except:
+    except Exception:
         return release
 
 

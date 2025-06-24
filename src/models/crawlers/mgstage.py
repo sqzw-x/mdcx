@@ -20,7 +20,7 @@ def getTitle(html):
     try:
         result = str(html.xpath('//*[@id="center_column"]/div[1]/h1/text()')).strip(" ['']")
         return result.replace("/", ",")
-    except:
+    except Exception:
         return ""
 
 
@@ -88,7 +88,7 @@ def getYear(getRelease):
     try:
         result = str(re.search(r"\d{4}", getRelease).group())
         return result
-    except:
+    except Exception:
         return getRelease
 
 

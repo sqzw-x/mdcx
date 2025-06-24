@@ -13,26 +13,29 @@ import traceback
 import unicodedata
 from typing import Optional
 
+from ..base.file import read_link, split_path
+from ..base.number import get_number_letters
+from ..base.path import get_main_path, get_path
+from ..base.utils import convert_path, get_used_time
+from ..config.consts import IS_NFC
+from ..config.manager import config
+from ..config.manual import ManualConfig
+from ..config.resources import resources
+from ..signals import signal
+from .json_data import JsonData, LogBuffer
+
 try:
     import cv2
 
     has_opencv = True
 except ImportError:
     has_opencv = False
-from models.base.file import read_link, split_path
-from models.base.number import get_number_letters
-from models.base.path import get_main_path, get_path
-from models.base.utils import convert_path, get_used_time
-from models.config.config import config
-from models.config.resources import resources
-from models.core.json_data import JsonData, LogBuffer
-from models.signals import signal
 
 
 def replace_word(json_data: JsonData):
     # 常见字段替换的字符
-    for key, value in config.all_rep_word.items():
-        for each in config.all_key_word:
+    for key, value in ManualConfig.ALL_REP_WORD.items():
+        for each in ManualConfig.ALL_KEY_WORD:
             json_data[each] = json_data[each].replace(key, value)
 
     # 简体时替换的字符
@@ -42,21 +45,21 @@ def replace_word(json_data: JsonData):
     if config.outline_language == "zh_cn":
         key_word.append("outline")
 
-    for key, value in config.chinese_rep_word.items():
+    for key, value in ManualConfig.CHINESE_REP_WORD.items():
         for each in key_word:
             json_data[each] = json_data[each].replace(key, value)
 
     # 替换标题的上下集信息
     fields_word = ["title", "originaltitle"]
     for field in fields_word:
-        for each in config.title_rep:
+        for each in ManualConfig.TITLE_REP:
             json_data[field] = json_data[field].replace(each, "").strip(":， ").strip()
 
 
 def show_movie_info(json_data: JsonData):
-    if config.show_data_log == "off":  # 调试模式打开时显示详细日志
+    if not config.show_data_log:  # 调试模式打开时显示详细日志
         return
-    for key in config.show_key:
+    for key in ManualConfig.SHOW_KEY:
         value = json_data.get(key)
         if not value:
             continue
@@ -195,13 +198,13 @@ def show_data_result(json_data: JsonData, start_time: float):
         )
         return False
     else:
-        if config.show_web_log == "on":  # 字段刮削过程
+        if config.show_web_log:  # 字段刮削过程
             LogBuffer.log().write(f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}")
         try:
             LogBuffer.log().write("\n" + LogBuffer.info().get().strip(" ").strip("\n"))
-        except:
+        except Exception:
             signal.show_log_text(traceback.format_exc())
-        if config.show_from_log == "on":  # 字段来源信息
+        if config.show_from_log:  # 字段来源信息
             if json_data["fields_info"]:
                 LogBuffer.log().write("\n" + json_data["fields_info"].strip(" ").strip("\n"))
         LogBuffer.log().write(f"\n 🍀 Data done!({get_used_time(start_time)}s)")
@@ -212,12 +215,12 @@ def deal_url(url: str) -> tuple[Optional[str], str]:
     if "://" not in url:
         url = "https://" + url
     url = url.strip()
-    for key, vlaue in config.web_dic.items():
+    for key, vlaue in ManualConfig.WEB_DIC.items():
         if key.lower() in url.lower():
             return vlaue, url
 
     # 自定义的网址
-    for web_name in config.SUPPORTED_WEBSITES:
+    for web_name in ManualConfig.SUPPORTED_WEBSITES:
         if hasattr(config, web_name + "_website"):
             web_url = getattr(config, web_name + "_website")
             if web_url in url:
@@ -239,17 +242,17 @@ def replace_special_word(json_data: JsonData):
         "publisher",
         "tag",
     ]
-    for key, value in config.special_word.items():
+    for key, value in ManualConfig.SPECIAL_WORD.items():
         for each in all_key_word:
             json_data[each] = json_data[each].replace(key, value)
 
 
 def convert_half(string: str) -> str:
     # 替换敏感词
-    for key, value in config.special_word.items():
+    for key, value in ManualConfig.SPECIAL_WORD.items():
         string = string.replace(key, value)
     # 替换全角为半角
-    for each in config.full_half_char:
+    for each in ManualConfig.FULL_HALF_CHAR:
         string = string.replace(each[0], each[1])
     # 去除空格等符号
     return re.sub(r"[\W_]", "", string).upper()
@@ -268,7 +271,7 @@ def get_new_release(release: str) -> str:
 def nfd2c(path: str) -> str:
     # 转换 NFC(mac nfc和nfd都能访问到文件，但是显示的是nfd，这里统一使用nfc，避免各种问题。
     # 日文浊音转换（mac的坑，osx10.12以下使用nfd，以上兼容nfc和nfd，只是显示成了nfd）
-    if config.is_nfc:
+    if IS_NFC:
         new_path = unicodedata.normalize("NFC", path)  # Mac 会拆成两个字符，即 NFD，windwos是 NFC
     else:
         new_path = unicodedata.normalize("NFD", path)  # Mac 会拆成两个字符，即 NFD，windwos是 NFC
@@ -313,7 +316,7 @@ def deal_some_field(json_data: JsonData) -> JsonData:
                     end_actor = re.compile(rf" {each_actor}$")
                     title = re.sub(end_actor, "", title)
                     originaltitle = re.sub(end_actor, "", originaltitle)
-                except:
+                except Exception:
                     signal.show_traceback_log(traceback.format_exc())
         json_data["title"] = title.strip()
         json_data["originaltitle"] = originaltitle.strip()
