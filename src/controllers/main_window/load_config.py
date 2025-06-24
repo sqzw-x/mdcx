@@ -55,14 +55,7 @@ def load_config(self):
         else:
             self.Ui.comboBox_change_config.setCurrentIndex(all_config_files.index("config.ini"))
 
-        # region modified_time
-        # config.modified_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        try:  # 修改时间
-            read_version = config.version
-        except Exception:
-            read_version = 20220101
-        # endregion
-
+        read_version = config.version
         # region media
         self.Ui.lineEdit_movie_path.setText(convert_path(config.media_path))  # 视频目录
         self.Ui.lineEdit_movie_softlink_path.setText(convert_path(config.softlink_path))  # 软链接目录

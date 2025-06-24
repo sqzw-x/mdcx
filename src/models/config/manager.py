@@ -142,8 +142,6 @@ class ConfigManager(ManualConfig):
 
 @dataclass
 class ConfigSchema:
-    # modified_time
-    modified_time: str = r"2024-09-24 23:18:45"
     version: int = 120240924
 
     # media
@@ -363,7 +361,13 @@ class ConfigSchema:
     rest_time: str = r"00:01:02"
     statement: int = 3
 
+    def _update(self):
+        """处理版本变更"""
+        if self.version == ManualConfig.LOCAL_VERSION:
+            return
+
     def init(self):
+        self._update()
         # 获取proxies
         if self.type == "http":
             self.proxies = {
