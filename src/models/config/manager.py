@@ -242,8 +242,18 @@ class ConfigSchema:
     publisher_website: str = r"javbus"
     publisher_website_exclude: str = r"airav,airav_cc,avsex,iqqtv,lulubar"
     wanted_website: str = r"javlibrary,javdb"
+
+    # translate
     translate_by: str = r"youdao,google,deepl,"
     deepl_key: str = r""
+    llm_url: str = r"https://api.llm.com/v1"
+    llm_model: str = r"gpt-3.5-turbo"
+    llm_key: str = r""
+    llm_prompt: str = r"请将以下内容翻译成中文：{content}"
+    llm_config: str = r"temperature=0.7,top_p=1.0,max_tokens=1000,frequency_penalty=0,presence_penalty=0"
+    llm_max_req_sec: int = 5  # 每秒请求次数限制
+    llm_max_try: int = 3  # 最大请求次数
+    llm_timeout: int = 10  # 请求超时时间
     title_language: str = r"zh_cn"
     title_sehua: bool = True
     title_yesjav: bool = False
@@ -266,13 +276,15 @@ class ConfigSchema:
     studio_translate: bool = True
     publisher_language: str = r"zh_cn"
     publisher_translate: bool = True
+
+    # nfo
     nfo_include_new: str = r"sorttitle,originaltitle,title_cd,outline,plot_,originalplot,release_,releasedate,premiered,country,mpaa,customrating,year,runtime,wanted,score,criticrating,actor,director,series,tag,genre,series_set,studio,maker,publisher,label,poster,cover,trailer,website,"
     nfo_tagline: str = r"发行日期 release"
     nfo_tag_series: str = r"系列: series"
     nfo_tag_studio: str = r"片商: studio"
     nfo_tag_publisher: str = r"发行: publisher"
 
-    # Name_Rule
+    # name
     folder_name: str = r"actor/number actor"
     naming_file: str = r"number"
     naming_media: str = r"number title"
