@@ -554,7 +554,7 @@ class WebRequests:
                 if "amazon" in url:
                     response.encoding = "Shift_JIS"
                 else:
-                    response.encoding = "UFT-8"
+                    response.encoding = "UTF-8"
                 if response.status_code == 200:
                     signal.add_log(f"✅ 成功 {url}")
                     return response.headers, response.text
