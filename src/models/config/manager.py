@@ -369,18 +369,19 @@ class ConfigSchema:
     def init(self):
         self._update()
         # 获取proxies
-        if self.type == "http":
-            self.proxies = {
-                "http": "http://" + self.proxy,
-                "https": "http://" + self.proxy,
-            }
-        elif self.type == "socks5":
-            self.proxies = {
-                "http": "socks5h://" + self.proxy,
-                "https": "socks5h://" + self.proxy,
-            }
+        if any(schema in self.proxy for schema in ["http://", "https://", "socks5://", "socks5h://"]):
+            self.proxy = self.proxy.strip()
         else:
+            self.proxy = "http://" + self.proxy.strip()
+        if self.type == "no":  # todo type 现在只需要 bool
             self.proxies = None
+            self.httpx_proxy = None
+        else:
+            self.proxies = {
+                "http": self.proxy,
+                "https": self.proxy,
+            }
+            self.httpx_proxy = self.proxy
 
         self.ipv4_only = "ipv4_only" in self.switch_on
         self.theporndb_no_hash = "theporndb_no_hash" in self.switch_on
