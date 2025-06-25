@@ -2,15 +2,98 @@
 基本工具函数, 此模块不应依赖任何项目代码
 """
 
+import asyncio
+import concurrent
+import concurrent.futures
 import ctypes
 import inspect
 import os
 import platform
 import random
 import re
+import threading
 import time
 import traceback
+from concurrent.futures import Future
 from threading import Thread
+from typing import Coroutine, Set
+
+
+class AsyncBackgroundExecutor:
+    """将协程提交到后台线程执行的执行器, 可以线程安全的进行异步调用"""
+
+    def __init__(self):
+        self._loop: asyncio.AbstractEventLoop
+        self._thread: threading.Thread
+        self._start_event = threading.Event()
+        self._pending_futures: Set[Future] = set()
+        self._lock = threading.Lock()
+
+        self._thread = threading.Thread(target=self._run_event_loop, daemon=True, name="AsyncBackgroundThread")
+        self._thread.start()
+        self._start_event.wait()
+
+    def submit(self, coro: Coroutine) -> Future:
+        """提交任务并返回Future对象"""
+        future = asyncio.run_coroutine_threadsafe(coro, self._loop)
+        with self._lock:
+            self._pending_futures.add(future)
+        future.add_done_callback(self._remove_future)
+        return future
+
+    def run(self, coro: Coroutine):
+        """submit 的同步版本, 等待协程执行完毕并返回结果"""
+        future = asyncio.run_coroutine_threadsafe(coro, self._loop)
+        with self._lock:
+            self._pending_futures.add(future)
+        future.add_done_callback(self._remove_future)
+        return future.result()
+
+    def wait_all(self, timeout=None):
+        """等待所有未完成任务执行完毕"""
+        with self._lock:
+            current_futures = list(self._pending_futures)
+
+        if not current_futures:
+            return []
+
+        # 使用concurrent.futures等待机制
+        done, not_done = concurrent.futures.wait(
+            current_futures,
+            timeout=timeout,
+            return_when=concurrent.futures.ALL_COMPLETED,
+        )
+
+        if not_done:
+            raise TimeoutError(f"{len(not_done)} tasks not completed within timeout")
+
+        return [f.result() for f in done]
+
+    def shutdown(self):
+        """手动关闭执行器，释放资源"""
+        if hasattr(self, "_loop") and not self._loop.is_closed():
+            self._loop.call_soon_threadsafe(self._loop.stop)
+            while self._loop.is_running():
+                threading.Event().wait(0.1)
+            self._loop.close()
+
+    def _run_event_loop(self):
+        self._loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self._loop)
+        self._start_event.set()
+        self._loop.run_forever()
+
+    def _remove_future(self, future):
+        """自动移除已完成的任务"""
+        with self._lock:
+            self._pending_futures.discard(future)
+
+    def __del__(self):
+        """析构函数，确保资源被释放"""
+        try:
+            self.shutdown()
+        except Exception:
+            pass  # 忽略析构时的异常
 
 
 def get_mac_default_config_folder() -> str:
