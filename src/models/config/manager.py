@@ -6,7 +6,11 @@ from configparser import ConfigParser, RawConfigParser
 from dataclasses import dataclass, fields
 from io import StringIO
 
+import httpx
+
 from ..base.utils import get_mac_default_config_folder, get_random_headers, get_user_agent, singleton
+from ..base.web_async import AsyncWebClient
+from ..signals import signal
 from .manual import ManualConfig
 
 
@@ -466,6 +470,15 @@ class ConfigSchema:
         [new_str_list.append(i1) for i1 in all_str_list if i1 not in new_str_list]  # 补全
         new_str = ",".join(new_str_list)
         self.suffix_sort = new_str
+
+        # 依赖于 config 的类不能作为全局变量, 必须在 config 内构建, 以在 config 更新后正确重建
+        self.async_client = AsyncWebClient(
+            proxy=config.httpx_proxy,
+            retry=config.retry,
+            timeout=httpx.Timeout(config.timeout),
+            default_headers=config.headers,
+            log_fn=signal.add_log,
+        )
 
 
 manager = ConfigManager()

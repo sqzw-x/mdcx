@@ -1,4 +1,5 @@
 import asyncio
+import time
 from io import BytesIO
 from typing import Any, Callable, Literal, Optional
 
@@ -88,10 +89,11 @@ class AsyncWebClient:
         try:
             headers = self._prepare_headers(url, headers)
             retry_count = self.retry
+            error_msg = ""
             for attempt in range(retry_count):
                 try:
-                    self.log_fn(f"🔎 异步请求 {method} {url} (尝试 {attempt + 1}/{retry_count})")
-                    response = await self._client(use_proxy).request(
+                    self.log_fn(f"🔎 {time.time()} {method} {url}" + f" ({attempt + 1}/{retry_count})" * (attempt != 0))
+                    resp = await self._client(use_proxy).request(
                         method,
                         url,
                         headers=headers,
@@ -101,42 +103,27 @@ class AsyncWebClient:
                         timeout=timeout or httpx.USE_CLIENT_DEFAULT,
                     )
                     # 检查响应状态
-                    if response.status_code >= 400:
-                        error_msg = f"HTTP {response.status_code}: {url}"
+                    if resp.status_code >= 300 and not (resp.status_code == 302 and resp.headers.get("Location")):
+                        error_msg = f"HTTP {resp.status_code}"
                         self.log_fn(f"🔴 请求失败 {error_msg}")
-                        if attempt == retry_count - 1:
-                            return None, error_msg
-                        continue
-
-                    self.log_fn(f"✅ 请求成功 {url}")
-                    return response, ""
-
+                    else:
+                        self.log_fn(f"✅ 请求成功 {url}")
+                        return resp, ""
                 except httpx.TimeoutException:
-                    error_msg = f"请求超时: {url}"
+                    error_msg = "请求超时"
                     self.log_fn(f"🔴 {error_msg} (尝试 {attempt + 1}/{retry_count})")
-                    if attempt == retry_count - 1:
-                        return None, error_msg
-
                 except httpx.ConnectError as e:
                     error_msg = f"连接错误: {str(e)}"
                     self.log_fn(f"🔴 {error_msg} (尝试 {attempt + 1}/{retry_count})")
-                    if attempt == retry_count - 1:
-                        return None, error_msg
-
                 except Exception as e:
                     error_msg = f"请求异常: {str(e)}"
                     self.log_fn(f"🔴 {error_msg} (尝试 {attempt + 1}/{retry_count})")
-                    if attempt == retry_count - 1:
-                        return None, error_msg
-
                 # 重试前等待
                 if attempt < retry_count - 1:
-                    await asyncio.sleep(attempt + 1)
-
-            return None, f"请求失败, 已重试{retry_count}次: {url}"
-
+                    await asyncio.sleep(attempt * 3 + 2)
+            return None, f"{method} {url} 失败: {error_msg}"
         except Exception as e:
-            error_msg = f"请求发生未知错误: {str(e)}"
+            error_msg = f"{method} {url} 发生未知错误:  {str(e)}"
             self.log_fn(f"🔴 {error_msg}")
             return None, error_msg
 
