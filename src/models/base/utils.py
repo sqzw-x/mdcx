@@ -7,7 +7,6 @@ import concurrent
 import concurrent.futures
 import ctypes
 import inspect
-import os
 import platform
 import random
 import re
@@ -94,23 +93,6 @@ class AsyncBackgroundExecutor:
             self.shutdown()
         except Exception:
             pass  # 忽略析构时的异常
-
-
-def get_mac_default_config_folder() -> str:
-    """
-    获取macOS下默认的配置文件夹路径
-
-    ~/.mdcx
-
-    :return: 配置文件夹路径
-    """
-
-    home = os.path.expanduser("~")
-    folder_name = ".mdcx"
-    config_folder = os.path.join(home, folder_name)
-    if not os.path.exists(config_folder):
-        os.makedirs(config_folder, exist_ok=True, mode=0o755)
-    return config_folder
 
 
 def get_current_time() -> str:

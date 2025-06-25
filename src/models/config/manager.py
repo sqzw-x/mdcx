@@ -1,25 +1,21 @@
 import os
 import os.path
-import platform
 import re
 from configparser import ConfigParser, RawConfigParser
 from dataclasses import dataclass, fields
 from io import StringIO
 
-from ..base.utils import get_mac_default_config_folder, get_random_headers, get_user_agent, singleton
+from ..base.utils import get_random_headers, get_user_agent, singleton
+from .consts import MAIN_PATH, MARK_FILE
 from .manual import ManualConfig
 
 
 @singleton
 class ConfigManager(ManualConfig):
-    mark_file_name = "MDCx.config"
-
     def __init__(self):
-        self.file = ""
-        self.folder = ""
+        self._get_config_path()
         self._path = ""
         self.config = ConfigSchema()  # 此初始值作为默认配置
-        self.youdaokey = "Ygy_4c=r#e#4EX^NUGUc5"
 
     @property
     def path(self) -> str:
@@ -27,31 +23,19 @@ class ConfigManager(ManualConfig):
 
     @path.setter
     def path(self, path: str):
-        self.folder, self.file = os.path.split(path)
+        self.data_folder, self.file = os.path.split(path)
         self._path = path
 
     @path.getter
     def path(self) -> str:
         return self._path
 
-    def get_mark_file_path(self) -> str:
-        """
-        获取`记录了配置文件路径`的文件的路径。
-        对于macOS，该文件位于`~/.mdcx/MDCx.config`。
-        其他平台，该文件跟应用程序在同一目录下。
-        """
-
-        if platform.system() == "Darwin":
-            return os.path.join(get_mac_default_config_folder(), self.mark_file_name)
-        else:
-            return self.mark_file_name
-
     def read_config(self):
         self._get_config_path()
         return self._read_file(self.path)
 
     def save_config(self):
-        with open(self.get_mark_file_path(), "w", encoding="UTF-8") as f:
+        with open(MARK_FILE, "w", encoding="UTF-8") as f:
             f.write(self.path)
         with open(self.path, "w", encoding="UTF-8") as f:
             f.write(self.format_ini(self.config))
@@ -118,26 +102,20 @@ class ConfigManager(ManualConfig):
         return buffer.getvalue()
 
     def init_config(self):
-        """生成默认配置文件"""
+        """写入默认配置"""
         with open(self.path, "w", encoding="UTF-8") as f:
             f.write(self.format_ini(ConfigSchema()))
 
     def _get_config_path(self):
-        mdcx_config = self.get_mark_file_path()  # 此文件用于记录当前配置文件的绝对路径, 从而实现多配置切换
-        # 此文件必须存在, 且与 main.py 或打包的可执行文件在同一目录下.
-        if not os.path.exists(mdcx_config):  # 不存在时, 创建
-            if platform.system() == "Darwin":  # macOS下默认配置文件: ~/.mdcx/config.ini
-                self.path = os.path.join(get_mac_default_config_folder(), "config.ini")
-            else:
-                self.path = os.path.realpath("config.ini")  # 默认配置文件: 同目录下的 config.ini
-            # 设置默认配置文件路径, 若存在则可读取, 否则生成默认配置文件
-            with open(mdcx_config, "w", encoding="UTF-8") as f:
+        if not os.path.exists(MARK_FILE):  # 标记文件不存在
+            self.path = os.path.join(MAIN_PATH, "config.ini")  # 默认配置文件路径
+            with open(MARK_FILE, "w", encoding="UTF-8") as f:
                 f.write(self.path)
-            if not os.path.exists(self.path):
-                self.init_config()
         else:
-            with open(mdcx_config, encoding="UTF-8") as f:
+            with open(MARK_FILE, encoding="UTF-8") as f:
                 self.path = f.read()
+        if not os.path.exists(self.path):  # 配置文件不存在, 写入默认值
+            self.init_config()
 
 
 @dataclass
@@ -435,7 +413,7 @@ class ConfigSchema:
             if can_clean and self.clean_contains and "clean_contains" in self.clean_enable
             else []
         )
-        clean_size_list = self.clean_size if can_clean and "clean_size" in self.clean_enable else 0.0
+        clean_size_list = self.clean_size if can_clean and "clean_size" in self.clean_enable else None
         clean_ignore_ext_list = (
             re.split(r"[|｜，,]", self.clean_ignore_ext)
             if can_clean and self.clean_ignore_ext and "clean_ignore_ext" in self.clean_enable

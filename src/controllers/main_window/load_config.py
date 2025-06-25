@@ -9,7 +9,6 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QFileDialog
 
 from models.base.file import delete_file
-from models.base.path import get_main_path
 from models.base.utils import convert_path
 from models.config.consts import IS_WINDOWS
 from models.config.manager import config, get_new_str, manager
@@ -34,7 +33,7 @@ def load_config(self):
     if errors:
         signal.show_log_text(f"⚠️ 读取配置文件出错:\n{errors}\n这不会阻止程序运行, 无效配置将使用默认值")
     config.init()
-    config_folder = manager.folder
+    config_folder = manager.data_folder
     config_file = manager.file
     config_path = manager.path
 
@@ -950,7 +949,7 @@ def load_config(self):
         # endregion
 
         # region other
-        self.Ui.lineEdit_config_folder.setText(convert_path(manager.folder))  # 配置文件目录
+        self.Ui.lineEdit_config_folder.setText(convert_path(manager.data_folder))  # 配置文件目录
         rest_count = int(config.rest_count)  # 间歇刮削文件数量
         if rest_count == 0:
             rest_count = 1
@@ -1120,7 +1119,7 @@ def load_config(self):
                 scrape_like_text += " · 硬连接开"
             signal.show_log_text(
                 f" 🛠 当前配置：{manager.path} 加载完成！\n "
-                f"📂 程序目录：{get_main_path()} \n "
+                f"📂 程序目录：{manager.data_folder} \n "
                 f"📂 刮削目录：{get_movie_path_setting()[0]} \n "
                 f"💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n "
                 f"🖥️ 系统信息：{platform.platform()} \n "

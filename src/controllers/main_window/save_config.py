@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, cast
 
 from PyQt5.QtCore import Qt
 
-from models.base.path import get_main_path
 from models.base.utils import convert_path
 from models.config.manager import config, manager
 from models.core.flags import Flags
@@ -643,7 +642,7 @@ def save_config(self):
 
     config_folder: str = self.Ui.lineEdit_config_folder.text()  # 配置文件目录
     if not os.path.exists(config_folder):
-        config_folder = manager.folder
+        config_folder = manager.data_folder
     manager.path = convert_path(os.path.join(config_folder, manager.file))
     config.version = self.localversion
     manager.save_config()
@@ -659,7 +658,7 @@ def save_config(self):
             scrape_like_text += " · 硬连接开"
         signal.show_log_text(
             f" 🛠 当前配置：{manager.path} 保存完成！\n "
-            f"📂 程序目录：{get_main_path()} \n "
+            f"📂 程序目录：{manager.data_folder} \n "
             f"📂 刮削目录：{get_movie_path_setting()[0]} \n "
             f"💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n "
             f"🖥️ 系统信息：{platform.platform()} \n "

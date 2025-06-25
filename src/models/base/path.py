@@ -1,35 +1,6 @@
 # 主程序路径
 import os
-import platform
 import re
-import sys
-import traceback
-from os.path import abspath, dirname, realpath
-
-from models.config.manager import config
-from models.signals import signal
-
-
-def get_main_path() -> str:
-    try:
-        main_path = realpath(__file__)
-        i = 4
-        if "__compiled__" in globals():  # nuitka 编译
-            i = 3
-        for _ in range(i):  # 根据此文件路径确定根目录, 若移动此文件可能需要修改
-            main_path = dirname(main_path)
-    except Exception as e:
-        signal.show_traceback_log("get_main_path ERROR: " + str(e) + traceback.format_exc())
-        main_path = abspath(sys.path[0])
-
-        # 或sys.argv[0],取的是被初始执行的脚本的所在目录，打包后路径会变成\base_libarary.zip
-        # base_path = abspath(".") 取的是起始执行目录，和os.getcwd()结果一样，不太准
-    if getattr(sys, "frozen", False):  # 是否Bundle Resource，是否打包成exe运行
-        if platform.system() == "Darwin":
-            main_path = config.get_mac_default_config_folder()
-        else:
-            main_path = abspath("")  # 打包后，路径是准的
-    return main_path
 
 
 def get_path(movie_path: str, path: str) -> str:

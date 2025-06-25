@@ -15,10 +15,10 @@ from typing import Optional
 
 from ..base.file import read_link, split_path
 from ..base.number import get_number_letters
-from ..base.path import get_main_path, get_path
+from ..base.path import get_path
 from ..base.utils import convert_path, get_used_time
 from ..config.consts import IS_NFC
-from ..config.manager import config
+from ..config.manager import config, manager
 from ..config.manual import ManualConfig
 from ..config.resources import resources
 from ..signals import signal
@@ -348,8 +348,8 @@ def deal_some_field(json_data: JsonData) -> JsonData:
 def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str, str]:
     # 先把'\'转成'/'以便判断是路径还是目录
     movie_path = config.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
-    if movie_path == "":  # 未设置为空时，使用主程序目录
-        movie_path = get_main_path()
+    if movie_path == "":  # 未设置为空时，使用用户数据目录
+        movie_path = manager.data_folder
     movie_path = nfd2c(movie_path)
     end_folder_name = split_path(movie_path)[1]
     # 用户设置的软链接输出目录
