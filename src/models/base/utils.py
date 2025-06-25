@@ -96,6 +96,9 @@ class AsyncBackgroundExecutor:
             pass  # 忽略析构时的异常
 
 
+executor = AsyncBackgroundExecutor()  # 全局执行器
+
+
 def get_mac_default_config_folder() -> str:
     """
     获取macOS下默认的配置文件夹路径

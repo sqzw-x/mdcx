@@ -377,7 +377,3 @@ class AsyncWebClient:
             fp.write(res)
         self.log_fn(f"✅ 分块 {chunk_id} 下载完成 ({start}-{end})")
         return True
-
-
-# 创建全局实例
-async_client = AsyncWebClient()
