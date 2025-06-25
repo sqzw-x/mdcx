@@ -6,8 +6,8 @@ import sys
 import traceback
 from os.path import abspath, dirname, realpath
 
-from models.config.manager import config
-from models.signals import signal
+from ..signals import signal
+from .utils import get_mac_default_config_folder
 
 
 def get_main_path() -> str:
@@ -26,7 +26,7 @@ def get_main_path() -> str:
         # base_path = abspath(".") 取的是起始执行目录，和os.getcwd()结果一样，不太准
     if getattr(sys, "frozen", False):  # 是否Bundle Resource，是否打包成exe运行
         if platform.system() == "Darwin":
-            main_path = config.get_mac_default_config_folder()
+            main_path = get_mac_default_config_folder()
         else:
             main_path = abspath("")  # 打包后，路径是准的
     return main_path
