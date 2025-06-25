@@ -16,7 +16,9 @@ import time
 import traceback
 from concurrent.futures import Future
 from threading import Thread
-from typing import Coroutine, Set
+from typing import Any, Coroutine, Set, TypeVar
+
+T = TypeVar("T")
 
 
 class AsyncBackgroundExecutor:
@@ -33,7 +35,7 @@ class AsyncBackgroundExecutor:
         self._thread.start()
         self._start_event.wait()
 
-    def submit(self, coro: Coroutine) -> Future:
+    def submit(self, coro: Coroutine[Any, Any, T]) -> Future[T]:
         """提交任务并返回Future对象"""
         future = asyncio.run_coroutine_threadsafe(coro, self._loop)
         with self._lock:
@@ -41,7 +43,7 @@ class AsyncBackgroundExecutor:
         future.add_done_callback(self._remove_future)
         return future
 
-    def run(self, coro: Coroutine):
+    def run(self, coro: Coroutine[Any, Any, T]) -> T:
         """submit 的同步版本, 等待协程执行完毕并返回结果"""
         future = asyncio.run_coroutine_threadsafe(coro, self._loop)
         with self._lock:

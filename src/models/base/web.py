@@ -35,6 +35,7 @@ from requests.exceptions import (
 from ..config.manager import config
 from ..signals import signal
 from .utils import get_user_agent, singleton
+from .web_compat import *
 
 
 def _allowed_gai_family():
@@ -569,12 +570,12 @@ class WebRequests:
         return False, error_info
 
 
-web = WebRequests()
-get_html = web.get_html
-post_html = web.post_html
-scraper_html = web.curl_html
-multi_download = web.multi_download
-curl_html = web.curl_html
+# web = WebRequests()
+# get_html = web.get_html
+# post_html = web.post_html
+# scraper_html = web.curl_html
+# multi_download = web.multi_download
+# curl_html = web.curl_html
 
 
 def url_encode(url: str) -> str:

@@ -49,7 +49,7 @@ def get_html(
         if content_data is not None:
             return True, content_data
         else:
-            return False, error or "请求失败"
+            return False, error
 
     elif json_data:
         # 返回 JSON 数据
@@ -59,25 +59,18 @@ def get_html(
         if json_result is not None:
             return True, json_result
         else:
-            return False, error or "请求失败"
+            return False, error
 
     elif res:
         # 返回响应对象的模拟
         # 由于异步客户端不直接返回响应对象，我们需要获取文本内容和头部信息
-        text_result, error = executor.run(
-            async_client.get_text(url, headers=headers, cookies=cookies_dict, encoding=encoding, use_proxy=use_proxy)
+        resp, error = executor.run(
+            async_client.request("GET", url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
         )
-        if text_result is not None:
-            # 创建一个模拟响应对象
-            class MockResponse:
-                def __init__(self, text):
-                    self.text = text
-                    self.headers = {}  # 简化处理，实际应该获取真实头部
-
-            mock_response = MockResponse(text_result)
-            return mock_response.headers, mock_response
+        if resp is not None:
+            return resp.headers, resp
         else:
-            return False, error or "请求失败"
+            return False, error
 
     else:
         # 返回文本内容
@@ -91,7 +84,7 @@ def get_html(
             else:
                 return {}, text_result  # 返回空字典和文本
         else:
-            return False, error or "请求失败"
+            return False, error
 
 
 def post_html(
@@ -122,7 +115,7 @@ def post_html(
         if json_result is not None:
             return True, json_result
         else:
-            return False, error or "请求失败"
+            return False, error
     else:
         # 返回文本内容
         text_result, error = executor.run(
@@ -133,7 +126,7 @@ def post_html(
         if text_result is not None:
             return True, text_result
         else:
-            return False, error or "请求失败"
+            return False, error
 
 
 def curl_html(
@@ -152,15 +145,22 @@ def curl_html(
     cookies_dict = cookies or {}
 
     # 使用 get_text 方法获取内容
-    text_result, error = executor.run(
-        async_client.get_text(url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
+    response, error = executor.run(
+        async_client.request("GET", url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
     )
 
-    if text_result is not None:
-        # 返回模拟的头部信息和文本内容
-        return {}, text_result
+    if response is None:
+        return False, error
     else:
-        return False, error or "请求失败"
+        if "amazon" in url:
+            response.encoding = "Shift_JIS"
+        else:
+            response.encoding = "UFT-8"
+        if response.status_code == 200:
+            signal.add_log(f"✅ 成功 {url}")
+            return response.headers, response.text
+        else:
+            return False, f"请求失败，状态码: {response.status_code}"
 
 
 def multi_download(self, url: str, file_path: str) -> bool:
