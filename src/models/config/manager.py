@@ -19,7 +19,6 @@ class ConfigManager(ManualConfig):
         self.folder = ""
         self._path = ""
         self.config = ConfigSchema()  # 此初始值作为默认配置
-        self.youdaokey = "Ygy_4c=r#e#4EX^NUGUc5"
 
     @property
     def path(self) -> str:

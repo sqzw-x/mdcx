@@ -30,7 +30,7 @@ def youdao_translate(title: str, outline: str):
     msg = f"{title}\n{outline}"
     lts = str(int(time.time() * 1000))
     salt = lts + str(random.randint(0, 10))
-    sign = hashlib.md5(("fanyideskweb" + msg + salt + config.youdaokey).encode("utf-8")).hexdigest()
+    sign = hashlib.md5(("fanyideskweb" + msg + salt + "Ygy_4c=r#e#4EX^NUGUc5").encode("utf-8")).hexdigest()
 
     data = {
         "i": msg,

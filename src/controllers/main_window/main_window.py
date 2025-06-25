@@ -1764,9 +1764,9 @@ class MyMAinWindow(QMainWindow):
     # 设置-其他-配置文件目录-点选择目录
     def pushButton_select_config_folder_clicked(self):
         media_folder_path = convert_path(self._get_select_folder_path())
-        if media_folder_path and media_folder_path != config.folder:
+        if media_folder_path and media_folder_path != manager.folder:
             config_path = os.path.join(media_folder_path, "config.ini")
-            with open(config.get_mark_file_path(), "w", encoding="UTF-8") as f:
+            with open(manager.get_mark_file_path(), "w", encoding="UTF-8") as f:
                 f.write(config_path)
             if os.path.isfile(config_path):
                 temp_dark = self.dark_mode
@@ -1784,7 +1784,7 @@ class MyMAinWindow(QMainWindow):
 
     # 设置-演员-补全信息-演员信息数据库-选择文件按钮
     def pushButton_select_actor_info_db_clicked(self):
-        database_path, _ = QFileDialog.getOpenFileName(None, "选择数据库文件", config.folder, options=self.options)
+        database_path, _ = QFileDialog.getOpenFileName(None, "选择数据库文件", manager.folder, options=self.options)
         if database_path:
             self.Ui.lineEdit_actor_db_path.setText(convert_path(database_path))
             self.pushButton_save_config_clicked()
