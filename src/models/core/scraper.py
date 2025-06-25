@@ -9,9 +9,8 @@ from typing import Optional
 from PyQt5.QtWidgets import QMessageBox
 
 from ..base.file import copy_file, move_file, read_link, split_path
-from ..base.path import get_main_path
 from ..base.utils import convert_path, get_current_time, get_real_time, get_used_time
-from ..config.manager import config
+from ..config.manager import config, manager
 from ..config.resources import resources
 from ..entity.enums import FileMode
 from ..signals import signal
@@ -752,7 +751,7 @@ def get_remain_list() -> bool:
                 if reply == QMessageBox.Yes:
                     movie_path = config.media_path
                     if movie_path == "":
-                        movie_path = get_main_path()
+                        movie_path = manager.data_folder
                     if not re.findall(r"[/\\]$", movie_path):
                         movie_path += "/"
                     movie_path = convert_path(movie_path)
