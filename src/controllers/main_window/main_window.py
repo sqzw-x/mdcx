@@ -2205,7 +2205,7 @@ class MyMAinWindow(QMainWindow):
                 "hhh-av": ["https://hhh-av.com", ""],
             }
 
-            for website in config.SUPPORTED_WEBSITES:
+            for website in ManualConfig.SUPPORTED_WEBSITES:
                 if hasattr(config, f"{website}_website"):
                     signal.show_net_info(f"   ⚠️{website} 使用自定义网址：{getattr(config, f'{website}_website')}")
                     net_info[website][0] = getattr(config, f"{website}_website")
@@ -2271,12 +2271,19 @@ class MyMAinWindow(QMainWindow):
                 signal.show_net_info("   " + name.ljust(12) + each[1])
             signal.show_net_info(f"\n🎉 网络检测已完成！用时 {get_used_time(start_time)} 秒！")
             signal.show_net_info("================================================================================\n")
-        except Exception:
+        except Exception as e:
             if signal.stop:
                 signal.show_net_info("\n⛔️ 当前有刮削任务正在停止中，请等待刮削停止后再进行检测！")
                 signal.show_net_info(
                     "================================================================================\n"
                 )
+            else:
+                signal.show_net_info("\n⛔️ 网络检测出现异常！")
+                signal.show_net_info(
+                    "================================================================================\n"
+                )
+                signal.show_traceback_log(str(e))
+                signal.show_traceback_log(traceback.format_exc())
         self.Ui.pushButton_check_net.setEnabled(True)
         self.Ui.pushButton_check_net.setText("开始检测")
         self.Ui.pushButton_check_net.setStyleSheet(
