@@ -423,7 +423,7 @@ class ConfigSchema:
             if can_clean and self.clean_contains and "clean_contains" in self.clean_enable
             else []
         )
-        clean_size_list = self.clean_size if can_clean and "clean_size" in self.clean_enable else 0.0
+        clean_size_list = self.clean_size if can_clean and "clean_size" in self.clean_enable else None
         clean_ignore_ext_list = (
             re.split(r"[|｜，,]", self.clean_ignore_ext)
             if can_clean and self.clean_ignore_ext and "clean_ignore_ext" in self.clean_enable
