@@ -19,7 +19,7 @@ do
       echo "Usage: build-macos.sh [options]"
       echo "Options:"
       echo "  --version, -v       Specify the version number. \
-      The value within config.ini.default file will be usded if not specified."
+      The LOCAL_VERSION within src/models/config/manual.py file will be used if not specified."
       echo "  --create-dmg, -dmg  Create DMG file. Default is false."
       exit 0
       ;;
@@ -30,11 +30,11 @@ do
 done
 
 
-# 从配置文件获取应用版本
+# 从Python文件获取应用版本
 getAppVersionFromConfig () {
-  local configPath="$1"
+  local configPath="src/models/config/manual.py"
   if [[ -f "$configPath" ]]; then
-    local version=$(cat $configPath | grep -oi 'version\s*=\s*[0-9]\+' | grep -oi '[0-9]\+$')
+    local version=$(cat $configPath | grep -o 'LOCAL_VERSION\s*=\s*[0-9]\+' | grep -o '[0-9]\+$')
     echo $version
   else
     echo ''
@@ -44,10 +44,10 @@ getAppVersionFromConfig () {
 
 # Check APP_VERSION
 if [ -z "$APP_VERSION" ]; then
-  echo "APP_VERSION is not set. Trying to get it from config.ini.default..."
-  APP_VERSION=$(getAppVersionFromConfig "config.ini.default")
+  echo "APP_VERSION is not set. Trying to get it from src/models/config/manual.py ..."
+  APP_VERSION=$(getAppVersionFromConfig)
   if [ -z "$APP_VERSION" ]; then
-    echo "❌ APP_VERSION is not set and cannot be found in config.ini.default!"
+    echo "❌ APP_VERSION is not set and cannot be found in src/models/config/manual.py!"
     exit 1
   else
     echo "APP_VERSION is set to $APP_VERSION"
@@ -95,7 +95,7 @@ insertAfterLine() {
     fi
     i=$((i+1))
   done < "$file"
-  echo -e "$newContent"
+  echo  "$newContent"
 }
 
 # Add `info_plist` to `MDCx.spec` file
@@ -109,7 +109,7 @@ EOF
 
 LINE=$(findLine "MDCx.spec" "bundle_identifier")
 NEW_CONTENT=$(insertAfterLine "MDCx.spec" $LINE "$INFO_PLIST")
-echo -e "$NEW_CONTENT" > MDCx.spec
+echo  "$NEW_CONTENT" > MDCx.spec
 
 
 # Build the app

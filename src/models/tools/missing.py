@@ -9,10 +9,9 @@ import time
 
 from lxml import etree
 
-from models.base.path import get_main_path
 from models.base.utils import get_used_time
 from models.base.web import get_html, scraper_html
-from models.config.manager import config
+from models.config.manager import config, manager
 from models.config.resources import resources
 from models.core.file import get_file_info, movie_lists
 from models.core.flags import Flags
@@ -195,7 +194,7 @@ def check_missing_number(actor_flag):
     new_movie_path_list = set()
     for i in movie_path_list:
         if i == "":  # 为空时，使用主程序目录
-            i = get_main_path()
+            i = manager.data_folder
         new_movie_path_list.add(i)
     new_movie_path_list = sorted(new_movie_path_list)
 

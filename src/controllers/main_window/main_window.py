@@ -22,7 +22,7 @@ from PyQt5.QtWidgets import (
 
 from models.base.file import _open_file_thread, delete_file, split_path
 from models.base.image import get_pixmap
-from models.base.path import get_main_path, get_path
+from models.base.path import get_path
 from models.base.utils import _async_raise, add_html, convert_path, get_current_time, get_used_time, kill_a_thread
 from models.base.web import (
     check_theporndb_api_token,
@@ -31,7 +31,7 @@ from models.base.web import (
     ping_host,
     scraper_html,
 )
-from models.config.consts import IS_WINDOWS
+from models.config.consts import IS_WINDOWS, MARK_FILE
 from models.config.manager import config, manager
 from models.config.manual import ManualConfig
 from models.config.resources import resources
@@ -1478,7 +1478,7 @@ class MyMAinWindow(QMainWindow):
             try:
                 Flags.log_txt.write((text + "\n").encode("utf-8"))
             except Exception:
-                log_folder = os.path.join(get_main_path(), "Log")
+                log_folder = os.path.join(manager.data_folder, "Log")
                 if not os.path.exists(log_folder):
                     os.makedirs(log_folder)
                 log_name = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + ".txt"
@@ -1591,7 +1591,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_select_file_clicked(self):
         media_path = self.Ui.lineEdit_movie_path.text()  # 获取待刮削目录作为打开目录
         if not media_path:
-            media_path = get_main_path()
+            media_path = manager.data_folder
         file_path, filetype = QFileDialog.getOpenFileName(
             None,
             "选取视频文件",
@@ -1643,7 +1643,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_select_thumb_clicked(self):
         path = self.Ui.lineEdit_movie_path.text()
         if not path:
-            path = get_main_path()
+            path = manager.data_folder
         file_path, fileType = QFileDialog.getOpenFileName(
             None, "选取缩略图", path, "Picture Files(*.jpg *.png);;All Files(*)", options=self.options
         )
@@ -1676,7 +1676,7 @@ class MyMAinWindow(QMainWindow):
         all_type = movie_type.strip("|") + "|" + sub_type.strip("|")
         movie_path = config.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
         if movie_path == "":  # 未设置为空时，使用主程序目录
-            movie_path = get_main_path()
+            movie_path = manager.data_folder
         escape_dir = self.Ui.lineEdit_escape_dir_move.text().replace("\\", "/")
         escape_dir = escape_dir + ",Movie_moved"
         escape_folder_list = escape_dir.split(",")
@@ -1764,9 +1764,9 @@ class MyMAinWindow(QMainWindow):
     # 设置-其他-配置文件目录-点选择目录
     def pushButton_select_config_folder_clicked(self):
         media_folder_path = convert_path(self._get_select_folder_path())
-        if media_folder_path and media_folder_path != config.folder:
+        if media_folder_path and media_folder_path != manager.data_folder:
             config_path = os.path.join(media_folder_path, "config.ini")
-            with open(config.get_mark_file_path(), "w", encoding="UTF-8") as f:
+            with open(MARK_FILE, "w", encoding="UTF-8") as f:
                 f.write(config_path)
             if os.path.isfile(config_path):
                 temp_dark = self.dark_mode
@@ -1784,7 +1784,9 @@ class MyMAinWindow(QMainWindow):
 
     # 设置-演员-补全信息-演员信息数据库-选择文件按钮
     def pushButton_select_actor_info_db_clicked(self):
-        database_path, _ = QFileDialog.getOpenFileName(None, "选择数据库文件", config.folder, options=self.options)
+        database_path, _ = QFileDialog.getOpenFileName(
+            None, "选择数据库文件", manager.data_folder, options=self.options
+        )
         if database_path:
             self.Ui.lineEdit_actor_db_path.setText(convert_path(database_path))
             self.pushButton_save_config_clicked()
@@ -2044,11 +2046,11 @@ class MyMAinWindow(QMainWindow):
     # 切换配置
     def config_file_change(self, new_config_file):
         if new_config_file != manager.file:
-            new_config_path = os.path.join(manager.folder, new_config_file)
+            new_config_path = os.path.join(manager.data_folder, new_config_file)
             signal.show_log_text(
                 f"\n================================================================================\n切换配置：{new_config_path}"
             )
-            with open(manager.get_mark_file_path(), "w", encoding="UTF-8") as f:
+            with open(MARK_FILE, "w", encoding="UTF-8") as f:
                 f.write(new_config_path)
             temp_dark = self.dark_mode
             temp_window_radius = self.window_radius
@@ -2089,12 +2091,12 @@ class MyMAinWindow(QMainWindow):
 
     # 读取设置页的设置, 保存config.ini，然后重新加载
     def _check_mac_config_folder(self):
-        if self.check_mac and not IS_WINDOWS and ".app/Contents/Resources" in manager.folder:
+        if self.check_mac and not IS_WINDOWS and ".app/Contents/Resources" in manager.data_folder:
             self.check_mac = False
             box = QMessageBox(
                 QMessageBox.Warning,
                 "选择配置文件目录",
-                f"检测到当前配置文件目录为：\n {manager.folder}\n\n由于 MacOS 平台在每次更新 APP 版本时会覆盖该目录的配置，因此请选择其他的配置目录！\n这样下次更新 APP 时，选择相同的配置目录即可读取你之前的配置！！！",
+                f"检测到当前配置文件目录为：\n {manager.data_folder}\n\n由于 MacOS 平台在每次更新 APP 版本时会覆盖该目录的配置，因此请选择其他的配置目录！\n这样下次更新 APP 时，选择相同的配置目录即可读取你之前的配置！！！",
             )
             box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
             box.button(QMessageBox.Yes).setText("选择目录")
@@ -2457,7 +2459,7 @@ class MyMAinWindow(QMainWindow):
     def _get_select_folder_path(self):
         media_path = self.Ui.lineEdit_movie_path.text()  # 获取待刮削目录作为打开目录
         if not media_path:
-            media_path = get_main_path()
+            media_path = manager.data_folder
         media_folder_path = QFileDialog.getExistingDirectory(None, "选择目录", media_path, options=self.options)
         return convert_path(media_folder_path)
 

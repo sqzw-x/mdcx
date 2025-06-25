@@ -59,7 +59,7 @@ def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
     # 清理的文件大小<=(KB)
     if os.path.islink(file_path):
         file_path = os.readlink(file_path)
-    if config.clean_size_list != "":
+    if config.clean_size_list is not None:
         try:  # 路径太长时，此处会报错 FileNotFoundError: [WinError 3] 系统找不到指定的路径。
             if os.path.getsize(file_path) <= config.clean_size_list * 1024:
                 return True
