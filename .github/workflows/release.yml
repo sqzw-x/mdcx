@@ -9,7 +9,7 @@ on:
     tags:
       - 120*
   schedule:
-    - cron: "0 18 * * *"
+    - cron: "0 21 * * *"
   workflow_dispatch:
     inputs:
       tag:
