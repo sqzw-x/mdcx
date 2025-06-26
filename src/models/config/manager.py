@@ -7,6 +7,7 @@ from io import StringIO
 
 import httpx
 
+from ..base.llm import LLMClient
 from ..base.utils import get_random_headers, get_user_agent, singleton
 from ..base.web_async import AsyncWebClient
 from ..signals import signal
@@ -231,10 +232,10 @@ class ConfigSchema:
     llm_url: str = r"https://api.llm.com/v1"
     llm_model: str = r"gpt-3.5-turbo"
     llm_key: str = r""
-    llm_prompt: str = r"请将以下内容翻译成中文：{content}"  # 原文-{content} 目标语言-{lang}
-    llm_max_req_sec: int = 5  # 每秒请求次数限制
-    llm_max_try: int = 3
-    llm_timeout: int = 10
+    llm_prompt: str = "Please translate the following text to {lang}. Output only the translation without any explanation.\n{content}"  # 原文-{content} 目标语言-{lang}
+    llm_max_req_sec: float = 1  # 每秒请求次数限制
+    llm_max_try: int = 5
+    llm_timeout: int = 15
     title_language: str = r"zh_cn"
     title_sehua: bool = True
     title_yesjav: bool = False
@@ -467,6 +468,14 @@ class ConfigSchema:
             timeout=httpx.Timeout(config.timeout),
             default_headers=config.headers,
             log_fn=signal.add_log,
+        )
+
+        self.llm_client = LLMClient(
+            client=self.async_client,
+            api_key=config.llm_key,
+            base_url=config.llm_url,
+            timeout=httpx.Timeout(config.timeout, read=config.llm_timeout),
+            rate=(max(config.llm_max_req_sec, 1), max(1, 1 / config.llm_max_req_sec)),
         )
 
 

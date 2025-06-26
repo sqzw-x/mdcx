@@ -27,12 +27,14 @@ class AsyncWebClient:
             verify=False,
             timeout=timeout,
             follow_redirects=True,
+            max_redirects=10,
         )
         self.no_proxy_client = httpx.AsyncClient(
             limits=limits,
             verify=False,
             timeout=timeout,
             follow_redirects=True,
+            max_redirects=10,
         )
         self.log_fn = log_fn if log_fn is not None else lambda _: None
 

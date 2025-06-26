@@ -7,22 +7,28 @@ from httpx import Timeout
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
+from .web_async import AsyncWebClient
+
 
 class LLMClient:
     def __init__(
         self,
         *,
+        # 复用底层的 httpx.AsyncClient
+        client: AsyncWebClient,
         api_key: str,
         base_url: str,  # https://api.openai.com/v1
+        # 为 LLM API 请求设置单独的超时, 会覆盖 client 的超时设置
         timeout: Timeout,
-        rate_per_sec: float,
+        rate: tuple[float, float],
     ):
         self.client = AsyncOpenAI(
             api_key=api_key,
             base_url=base_url,
+            http_client=client.proxy_client,
             timeout=timeout,
         )
-        self.limiter = AsyncLimiter(rate_per_sec, 1)
+        self.limiter = AsyncLimiter(*rate)
 
     async def ask(
         self,
