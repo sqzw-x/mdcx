@@ -33,7 +33,6 @@ class LLMClient:
         temperature: float = 0.8,
         max_try: int,
         log_fn: Callable[[str], None] = lambda _: None,
-        **kwargs,
     ) -> Optional[str]:
         messages: list[ChatCompletionMessageParam] = [
             {"role": "system", "content": system_prompt},
@@ -47,7 +46,6 @@ class LLMClient:
                         model=model,
                         messages=messages,
                         temperature=temperature,
-                        **kwargs,
                     )
                     break
                 except Exception as e:

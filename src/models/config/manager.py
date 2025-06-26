@@ -227,11 +227,10 @@ class ConfigSchema:
     llm_url: str = r"https://api.llm.com/v1"
     llm_model: str = r"gpt-3.5-turbo"
     llm_key: str = r""
-    llm_prompt: str = r"请将以下内容翻译成中文：{content}"
-    llm_config: str = r"temperature=0.7,top_p=1.0,max_tokens=1000,frequency_penalty=0,presence_penalty=0"
+    llm_prompt: str = r"请将以下内容翻译成中文：{content}"  # 原文-{content} 目标语言-{lang}
     llm_max_req_sec: int = 5  # 每秒请求次数限制
-    llm_max_try: int = 3  # 最大请求次数
-    llm_timeout: int = 10  # 请求超时时间
+    llm_max_try: int = 3
+    llm_timeout: int = 10
     title_language: str = r"zh_cn"
     title_sehua: bool = True
     title_yesjav: bool = False
