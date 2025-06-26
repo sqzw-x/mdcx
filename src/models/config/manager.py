@@ -5,7 +5,11 @@ from configparser import ConfigParser, RawConfigParser
 from dataclasses import dataclass, fields
 from io import StringIO
 
+import httpx
+
 from ..base.utils import get_random_headers, get_user_agent, singleton
+from ..base.web_async import AsyncWebClient
+from ..signals import signal
 from .consts import MAIN_PATH, MARK_FILE
 from .manual import ManualConfig
 
@@ -358,18 +362,19 @@ class ConfigSchema:
     def init(self):
         self._update()
         # 获取proxies
-        if self.type == "http":
-            self.proxies = {
-                "http": "http://" + self.proxy,
-                "https": "http://" + self.proxy,
-            }
-        elif self.type == "socks5":
-            self.proxies = {
-                "http": "socks5h://" + self.proxy,
-                "https": "socks5h://" + self.proxy,
-            }
+        if any(schema in self.proxy for schema in ["http://", "https://", "socks5://", "socks5h://"]):
+            self.proxy = self.proxy.strip()
         else:
+            self.proxy = "http://" + self.proxy.strip()
+        if self.type == "no":  # todo type 现在只需要 bool
             self.proxies = None
+            self.httpx_proxy = None
+        else:
+            self.proxies = {
+                "http": self.proxy,
+                "https": self.proxy,
+            }
+            self.httpx_proxy = self.proxy
 
         self.ipv4_only = "ipv4_only" in self.switch_on
         self.theporndb_no_hash = "theporndb_no_hash" in self.switch_on
@@ -454,6 +459,15 @@ class ConfigSchema:
         [new_str_list.append(i1) for i1 in all_str_list if i1 not in new_str_list]  # 补全
         new_str = ",".join(new_str_list)
         self.suffix_sort = new_str
+
+        # 依赖于 config 的类不能作为全局变量, 必须在 config 内构建, 以在 config 更新后正确重建
+        self.async_client = AsyncWebClient(
+            proxy=config.httpx_proxy,
+            retry=config.retry,
+            timeout=httpx.Timeout(config.timeout),
+            default_headers=config.headers,
+            log_fn=signal.add_log,
+        )
 
 
 manager = ConfigManager()

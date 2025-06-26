@@ -5,7 +5,7 @@ import threading
 import time
 import traceback
 import urllib
-from typing import Optional
+from typing import Optional, cast
 
 import deepl
 import langid
@@ -68,7 +68,7 @@ def youdao_translate(title: str, outline: str):
     if not result:
         return title, outline, f"请求失败！可能是被封了，可尝试更换代理！错误：{res}"
     else:
-        assert not isinstance(res, str)
+        res = cast(dict, res)
         translateResult = res.get("translateResult")
         if not translateResult:
             return title, outline, f"返回数据未找到翻译结果！返回内容：{res}"
