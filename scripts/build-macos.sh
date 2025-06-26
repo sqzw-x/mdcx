@@ -344,7 +344,7 @@ if [ -d "dist/$appName.app" ]; then
   
   # 显示应用包信息
   if [ "$LOG_LEVEL" -ge 2 ]; then
-    local app_size=$(du -sh "dist/$appName.app" | cut -f1)
+    app_size=$(du -sh "dist/$appName.app" | cut -f1)
     log_info "应用包大小: $app_size"
     
     # 检查应用包结构
@@ -453,7 +453,7 @@ if [ "$CREATE_DMG" = true ]; then
     
     # 验证 DMG 文件
     if [ -f "dist/$appName.dmg" ]; then
-      local dmg_size=$(du -sh "dist/$appName.dmg" | cut -f1)
+      dmg_size=$(du -sh "dist/$appName.dmg" | cut -f1)
       log_info "✓ DMG 文件: dist/$appName.dmg (大小: $dmg_size)"
     else
       log_warn "DMG 文件验证失败"
