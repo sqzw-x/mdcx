@@ -39,7 +39,7 @@ jobs:
           echo "short_sha=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_OUTPUT
 
       - name: Delete old daily release
-        if: ${{ env.IS_DAILY == 'true' && steps.get-new-commits.outputs.count > 0  }}
+        if: ${{ env.IS_DAILY && steps.get-new-commits.outputs.count > 0  }}
         run: |
           # 删除旧的daily_release
           echo "Deleting old daily release..."
@@ -178,8 +178,8 @@ jobs:
           file: dist/MDCx.dmg
           prerelease: ${{ env.IS_DAILY || env.IS_DEV }}
           body: |
-            ${{ env.IS_DAILY=='true' && github.event.repository.updated_at || steps.get-changelog.outputs.CHANGELOG }}
-          tag: ${{ env.IS_DAILY=='true' && 'daily_release' || env.IS_DEV && 'dev' || github.ref }}
+            ${{ env.IS_DAILY && env.IS_DEV && github.event.repository.updated_at || steps.get-changelog.outputs.CHANGELOG }}
+          tag: ${{ env.IS_DAILY && 'daily_release' || env.IS_DEV && 'dev' || github.ref }}
 
       - name: Create Release - Windows
         uses: svenstaro/upload-release-action@v2
@@ -189,4 +189,4 @@ jobs:
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ needs.init-matrix.outputs.short_sha }}.exe
           file: dist/MDCx.exe
           prerelease: ${{ env.IS_DAILY || env.IS_DEV }}
-          tag: ${{ env.IS_DAILY=='true' && 'daily_release' || env.IS_DEV && 'dev' || github.ref }}
+          tag: ${{ env.IS_DAILY && 'daily_release' || env.IS_DEV && 'dev' || github.ref }}
