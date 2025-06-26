@@ -2,21 +2,24 @@ name: Build and Release
 
 on:
   release:
-    types: [ published ]
+    types: [published]
   push:
+    branches:
+      - dev
     tags:
       - 120*
   schedule:
-    - cron: '0 18 * * *'
+    - cron: "0 21 * * *"
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag'
+        description: "Tag"
         required: false
 
 env:
-  PYTHON_VERSION: '3.9'
-  IS_DAILY: ${{ !startsWith(github.ref, 'refs/tags/120') }}
+  PYTHON_VERSION: "3.9"
+  IS_DAILY: ${{ !startsWith(github.ref, 'refs/tags/120') && github.ref== 'refs/heads/master' }}
+  IS_DEV: ${{ github.ref == 'refs/heads/dev' }}
 
 jobs:
   init-matrix:
@@ -35,12 +38,22 @@ jobs:
           echo "count=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_OUTPUT
           echo "short_sha=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_OUTPUT
 
-      - name: Delete old release
-        uses: dev-drprasad/delete-tag-and-release@v1.1
-        if: ${{ env.IS_DAILY == 'true' && steps.get-new-commits.outputs.count > 0  }}
-        with:
-          tag_name: daily_release
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Delete old daily release
+        if: ${{ env.IS_DAILY && steps.get-new-commits.outputs.count > 0  }}
+        run: |
+          # 删除旧的daily_release
+          echo "Deleting old daily release..."
+          gh release delete daily_release --yes || echo "No previous daily release found."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete old dev release
+        if: ${{ env.IS_DEV == 'true' }}
+        run: |
+          echo "Deleting old dev release..."
+          gh release delete dev --yes || echo "No previous dev release found."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # https://github.com/actions/runner/issues/1985#issuecomment-1573518052
       - name: Set matrix
@@ -64,7 +77,7 @@ jobs:
           if [[ -n "${{ vars.BUILD_FOR_WINDOWS_LEGACY }}" ]]; then
             items+=('{"build": "windows", "os": "windows-2019", "arch": "x86_64", "python": "3.8", "tail": "-legacy"}')
           fi
-          
+
           # 合并items到json数组
           matrix="matrix=["
           for ((i=0; i<${#items[@]}; i++)); do
@@ -102,14 +115,14 @@ jobs:
 
       - name: Set up Python - cache pip
         if: ${{ matrix.cache != 'none' }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python || env.PYTHON_VERSION }}
           cache: ${{ matrix.cache || 'pip' }}
 
       - name: Set up Python - no cache
         if: ${{ matrix.cache == 'none' }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python || env.PYTHON_VERSION }}
 
@@ -125,14 +138,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-mac.txt
-          pip install pyinstaller==5.8.0
+          pip install pyinstaller==6.14.1
 
       - name: Install dependencies - Windows
         if: ${{ matrix.build == 'windows' }}
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyinstaller==5.8.0
+          pip install pyinstaller==6.14.1
 
       - name: Build macOS app - macOS
         if: ${{ matrix.build == 'macos' }}
@@ -142,11 +155,11 @@ jobs:
           if [ -n "${{ github.event.inputs.tag }}" ]; then
             version="${{ github.event.inputs.tag }}"
           fi
-          bash ./build-macos.sh --create-dmg --version "$version"
+          bash scripts/build-macos.sh --create-dmg --version "$version"
 
       - name: Build Windows app - Windows
         if: ${{ matrix.build == 'windows' }}
-        run: ./build-action
+        run: scripts/build-action
 
       - name: Get changelog
         id: get-changelog
@@ -157,23 +170,23 @@ jobs:
           echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Create Release - macOS
-        uses: svenstaro/upload-release-action@2.7.0
+        uses: svenstaro/upload-release-action@v2
         if: ${{ matrix.build == 'macos' }}
         with:
           overwrite: true
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ needs.init-matrix.outputs.short_sha }}.dmg
           file: dist/MDCx.dmg
-          prerelease: ${{ env.IS_DAILY }}
+          prerelease: ${{ env.IS_DAILY || env.IS_DEV }}
           body: |
-            ${{ env.IS_DAILY=='true' && github.event.repository.updated_at || steps.get-changelog.outputs.CHANGELOG }}
-          tag: ${{ env.IS_DAILY=='true' && 'daily_release' || github.ref }}
+            ${{ env.IS_DAILY && env.IS_DEV && github.event.repository.updated_at || steps.get-changelog.outputs.CHANGELOG }}
+          tag: ${{ env.IS_DAILY && 'daily_release' || env.IS_DEV && 'dev' || github.ref }}
 
       - name: Create Release - Windows
-        uses: svenstaro/upload-release-action@2.7.0
+        uses: svenstaro/upload-release-action@v2
         if: ${{ matrix.build == 'windows' }}
         with:
           overwrite: true
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ needs.init-matrix.outputs.short_sha }}.exe
           file: dist/MDCx.exe
-          prerelease: ${{ env.IS_DAILY }}
-          tag: ${{ env.IS_DAILY=='true' && 'daily_release' || github.ref }}
+          prerelease: ${{ env.IS_DAILY || env.IS_DEV }}
+          tag: ${{ env.IS_DAILY && 'daily_release' || env.IS_DEV && 'dev' || github.ref }}
