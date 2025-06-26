@@ -522,10 +522,20 @@ def load_config(self):
             (self.Ui.checkBox_youdao, "youdao"),
             (self.Ui.checkBox_google, "google"),
             (self.Ui.checkBox_deepl, "deepl"),
+            (self.Ui.checkBox_llm, "llm"),
         )
         Flags.translate_by_list = translate_by.strip(",").split(",") if translate_by.strip(",") else []
 
-        self.Ui.lineEdit_deepl_key.setText(str(config.deepl_key))  # deepl_key
+        self.Ui.lineEdit_deepl_key.setText(config.deepl_key)  # deepl_key
+
+        # llm config
+        self.Ui.lineEdit_llm_url.setText(config.llm_url)
+        self.Ui.lineEdit_llm_key.setText(config.llm_key)
+        self.Ui.lineEdit_llm_model.setText(config.llm_model)
+        self.Ui.textEdit_llm_prompt.setText(config.llm_prompt)
+        self.Ui.doubleSpinBox_llm_max_req_sec.setValue(config.llm_max_req_sec)
+        self.Ui.spinBox_llm_max_try.setValue(config.llm_max_try)
+        self.Ui.doubleSpinBox_llm_timeout.setValue(config.llm_timeout)
         # endregion
 
         # region common

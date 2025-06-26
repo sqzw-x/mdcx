@@ -235,7 +235,7 @@ class ConfigSchema:
     llm_prompt: str = "Please translate the following text to {lang}. Output only the translation without any explanation.\n{content}"  # 原文-{content} 目标语言-{lang}
     llm_max_req_sec: float = 1  # 每秒请求次数限制
     llm_max_try: int = 5
-    llm_timeout: int = 15
+    llm_timeout: float = 15
     title_language: str = r"zh_cn"
     title_sehua: bool = True
     title_yesjav: bool = False
