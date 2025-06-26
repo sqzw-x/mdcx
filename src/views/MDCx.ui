@@ -2344,7 +2344,7 @@
               <enum>QTabWidget::Rounded</enum>
             </property>
             <property name="currentIndex">
-              <number>5</number>
+              <number>0</number>
             </property>
             <property name="iconSize">
               <size>
@@ -15476,7 +15476,7 @@
                         <rect>
                           <x>20</x>
                           <y>30</y>
-                          <width>727</width>
+                          <width>661</width>
                           <height>561</height>
                         </rect>
                       </property>
@@ -15513,11 +15513,37 @@
                             </property>
                           </widget>
                         </item>
-                        <item row="12" column="1">
-                          <widget class="QDoubleSpinBox" name="doubleSpinBox_llm_timeout">
+                        <item row="1" column="1">
+                          <widget class="QLabel" name="label_llm_url_desc">
+                            <property name="styleSheet">
+                              <string notr="true">color: rgb(8, 128, 128);</string>
+                            </property>
+                            <property name="text">
+                              <string>示例: https://api.openai.com/v1</string>
+                            </property>
+                          </widget>
+                        </item>
+                        <item row="2" column="0">
+                          <widget class="QLabel" name="label_llm_model">
                             <property name="minimumSize">
                               <size>
-                                <width>100</width>
+                                <width>130</width>
+                                <height>30</height>
+                              </size>
+                            </property>
+                            <property name="text">
+                              <string>Model:</string>
+                            </property>
+                            <property name="alignment">
+                              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                            </property>
+                          </widget>
+                        </item>
+                        <item row="2" column="1">
+                          <widget class="QLineEdit" name="lineEdit_llm_model">
+                            <property name="minimumSize">
+                              <size>
+                                <width>300</width>
                                 <height>30</height>
                               </size>
                             </property>
@@ -15539,6 +15565,16 @@
                             </property>
                           </widget>
                         </item>
+                        <item row="3" column="1">
+                          <widget class="QLineEdit" name="lineEdit_llm_key">
+                            <property name="minimumSize">
+                              <size>
+                                <width>300</width>
+                                <height>30</height>
+                              </size>
+                            </property>
+                          </widget>
+                        </item>
                         <item row="4" column="0">
                           <widget class="QLabel" name="label_llm_prompt">
                             <property name="minimumSize">
@@ -15555,7 +15591,99 @@
                             </property>
                           </widget>
                         </item>
-                        <item row="12" column="0">
+                        <item row="4" column="1">
+                          <widget class="QTextEdit" name="textEdit_llm_prompt">
+                            <property name="minimumSize">
+                              <size>
+                                <width>300</width>
+                                <height>60</height>
+                              </size>
+                            </property>
+                          </widget>
+                        </item>
+                        <item row="5" column="1">
+                          <widget class="QLabel" name="label_llm_prompt_desc">
+                            <property name="styleSheet">
+                              <string notr="true">color: rgb(8, 128, 128);</string>
+                            </property>
+                            <property name="text">
+                              <string>提示词模板. 可用变量: {content} 原文 {lang} 目标语言</string>
+                            </property>
+                          </widget>
+                        </item>
+                        <item row="6" column="1">
+                          <widget class="QDoubleSpinBox" name="doubleSpinBox_llm_max_req_sec">
+                            <property name="minimumSize">
+                              <size>
+                                <width>100</width>
+                                <height>30</height>
+                              </size>
+                            </property>
+                          </widget>
+                        </item>
+                        <item row="6" column="0">
+                          <widget class="QLabel" name="label_llm_max_req_sec">
+                            <property name="minimumSize">
+                              <size>
+                                <width>130</width>
+                                <height>30</height>
+                              </size>
+                            </property>
+                            <property name="text">
+                              <string>最大请求速率(/秒):</string>
+                            </property>
+                            <property name="alignment">
+                              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                            </property>
+                          </widget>
+                        </item>
+                        <item row="7" column="1">
+                          <widget class="QLabel" name="label_llm_max_req_sec_desc">
+                            <property name="styleSheet">
+                              <string notr="true">color: rgb(8, 128, 128);</string>
+                            </property>
+                            <property name="text">
+                              <string>根据你使用的 API 提供商的限制设定</string>
+                            </property>
+                          </widget>
+                        </item>
+                        <item row="8" column="1">
+                          <widget class="QSpinBox" name="spinBox_llm_max_try">
+                            <property name="minimumSize">
+                              <size>
+                                <width>100</width>
+                                <height>30</height>
+                              </size>
+                            </property>
+                          </widget>
+                        </item>
+                        <item row="8" column="0">
+                          <widget class="QLabel" name="label_llm_max_try">
+                            <property name="minimumSize">
+                              <size>
+                                <width>130</width>
+                                <height>30</height>
+                              </size>
+                            </property>
+                            <property name="text">
+                              <string>最大尝试次数:</string>
+                            </property>
+                            <property name="alignment">
+                              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                            </property>
+                          </widget>
+                        </item>
+                        <item row="9" column="1">
+                          <widget class="QLabel" name="label_llm_max_try_desc">
+                            <property name="styleSheet">
+                              <string notr="true">color: rgb(8, 128, 128);</string>
+                            </property>
+                            <property name="text">
+                              <string>API 请求失败可能只是因为暂时限流, 因此可多重试几次</string>
+                            </property>
+                          </widget>
+                        </item>
+                        <item row="10" column="0">
                           <widget class="QLabel" name="label_llm_timeout">
                             <property name="minimumSize">
                               <size>
@@ -15571,116 +15699,8 @@
                             </property>
                           </widget>
                         </item>
-                        <item row="5" column="1">
-                          <widget class="QLabel" name="label_llm_prompt_desc">
-                            <property name="styleSheet">
-                              <string notr="true">color: rgb(8, 128, 128);</string>
-                            </property>
-                            <property name="text">
-                              <string>提示词模板. 可用变量: {content} 原文 {lang} 目标语言</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item row="6" column="0">
-                          <widget class="QLabel" name="label_llm_config">
-                            <property name="minimumSize">
-                              <size>
-                                <width>130</width>
-                                <height>30</height>
-                              </size>
-                            </property>
-                            <property name="text">
-                              <string>其它设置:</string>
-                            </property>
-                            <property name="alignment">
-                              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                            </property>
-                          </widget>
-                        </item>
-                        <item row="6" column="1">
-                          <widget class="QLineEdit" name="lineEdit_llm_config">
-                            <property name="minimumSize">
-                              <size>
-                                <width>300</width>
-                                <height>30</height>
-                              </size>
-                            </property>
-                          </widget>
-                        </item>
-                        <item row="4" column="1">
-                          <widget class="QTextEdit" name="textEdit_llm_prompt">
-                            <property name="minimumSize">
-                              <size>
-                                <width>300</width>
-                                <height>60</height>
-                              </size>
-                            </property>
-                          </widget>
-                        </item>
-                        <item row="8" column="1">
-                          <widget class="QDoubleSpinBox" name="doubleSpinBox_llm_max_req_sec">
-                            <property name="minimumSize">
-                              <size>
-                                <width>100</width>
-                                <height>30</height>
-                              </size>
-                            </property>
-                          </widget>
-                        </item>
-                        <item row="7" column="1">
-                          <widget class="QLabel" name="label_llm_config_desc">
-                            <property name="styleSheet">
-                              <string notr="true">color: rgb(8, 128, 128);</string>
-                            </property>
-                            <property name="text">
-                              <string>其它请求参数</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item row="3" column="1">
-                          <widget class="QLineEdit" name="lineEdit_llm_key">
-                            <property name="minimumSize">
-                              <size>
-                                <width>300</width>
-                                <height>30</height>
-                              </size>
-                            </property>
-                          </widget>
-                        </item>
-                        <item row="8" column="0">
-                          <widget class="QLabel" name="label_llm_max_req_sec">
-                            <property name="minimumSize">
-                              <size>
-                                <width>130</width>
-                                <height>30</height>
-                              </size>
-                            </property>
-                            <property name="text">
-                              <string>最大请求数(/s):</string>
-                            </property>
-                            <property name="alignment">
-                              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                            </property>
-                          </widget>
-                        </item>
-                        <item row="2" column="0">
-                          <widget class="QLabel" name="label_llm_model">
-                            <property name="minimumSize">
-                              <size>
-                                <width>130</width>
-                                <height>30</height>
-                              </size>
-                            </property>
-                            <property name="text">
-                              <string>Model:</string>
-                            </property>
-                            <property name="alignment">
-                              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                            </property>
-                          </widget>
-                        </item>
                         <item row="10" column="1">
-                          <widget class="QSpinBox" name="spinBox_llm_max_try">
+                          <widget class="QDoubleSpinBox" name="doubleSpinBox_llm_timeout">
                             <property name="minimumSize">
                               <size>
                                 <width>100</width>
@@ -15689,49 +15709,13 @@
                             </property>
                           </widget>
                         </item>
-                        <item row="2" column="1">
-                          <widget class="QLineEdit" name="lineEdit_llm_model">
-                            <property name="minimumSize">
-                              <size>
-                                <width>300</width>
-                                <height>30</height>
-                              </size>
-                            </property>
-                          </widget>
-                        </item>
-                        <item row="10" column="0">
-                          <widget class="QLabel" name="label_llm_max_try">
-                            <property name="minimumSize">
-                              <size>
-                                <width>130</width>
-                                <height>30</height>
-                              </size>
-                            </property>
-                            <property name="text">
-                              <string>最大重试</string>
-                            </property>
-                            <property name="alignment">
-                              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                            </property>
-                          </widget>
-                        </item>
-                        <item row="1" column="1">
-                          <widget class="QLabel" name="label_llm_url_desc">
+                        <item row="11" column="1">
+                          <widget class="QLabel" name="label_llm_timeout_desc">
                             <property name="styleSheet">
                               <string notr="true">color: rgb(8, 128, 128);</string>
                             </property>
                             <property name="text">
-                              <string>示例: https://api.openai.com/v1</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item row="9" column="1">
-                          <widget class="QLabel" name="label_llm_config_desc_3">
-                            <property name="styleSheet">
-                              <string notr="true">color: rgb(8, 128, 128);</string>
-                            </property>
-                            <property name="text">
-                              <string>每秒最多请求次数</string>
+                              <string>LLM 生成可能耗时较长, 可设置较高超时</string>
                             </property>
                           </widget>
                         </item>
@@ -22410,24 +22394,29 @@
                         </rect>
                       </property>
                       <layout class="QGridLayout" name="gridLayout_10">
-                        <item row="2" column="1">
-                          <widget class="QPlainTextEdit" name="plainTextEdit_cookie_javbus">
+                        <item row="0" column="0">
+                          <widget class="QLabel" name="label_45">
+                            <property name="sizePolicy">
+                              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                              </sizepolicy>
+                            </property>
                             <property name="minimumSize">
                               <size>
-                                <width>300</width>
-                                <height>80</height>
+                                <width>0</width>
+                                <height>30</height>
                               </size>
                             </property>
-                            <property name="accessibleDescription">
-                              <string />
+                            <property name="layoutDirection">
+                              <enum>Qt::RightToLeft</enum>
                             </property>
-                            <property name="styleSheet">
-                              <string notr="true"> border: 1px solid rgba(0,0,0, 50);
-                                border-radius: 1px;
-                                font: &quot;Courier&quot;;</string>
+                            <property name="text">
+                              <string>javdb：
+                                （登录状态）</string>
                             </property>
-                            <property name="placeholderText">
-                              <string>美国节点需要填写，其他节点一般不需要填写，除非提示需要填写。</string>
+                            <property name="alignment">
+                              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                             </property>
                           </widget>
                         </item>
@@ -22517,29 +22506,24 @@
                             </property>
                           </widget>
                         </item>
-                        <item row="0" column="0">
-                          <widget class="QLabel" name="label_45">
-                            <property name="sizePolicy">
-                              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                                <horstretch>0</horstretch>
-                                <verstretch>0</verstretch>
-                              </sizepolicy>
-                            </property>
+                        <item row="2" column="1">
+                          <widget class="QPlainTextEdit" name="plainTextEdit_cookie_javbus">
                             <property name="minimumSize">
                               <size>
-                                <width>0</width>
-                                <height>30</height>
+                                <width>300</width>
+                                <height>80</height>
                               </size>
                             </property>
-                            <property name="layoutDirection">
-                              <enum>Qt::RightToLeft</enum>
+                            <property name="accessibleDescription">
+                              <string />
                             </property>
-                            <property name="text">
-                              <string>javdb：
-                                （登录状态）</string>
+                            <property name="styleSheet">
+                              <string notr="true"> border: 1px solid rgba(0,0,0, 50);
+                                border-radius: 1px;
+                                font: &quot;Courier&quot;;</string>
                             </property>
-                            <property name="alignment">
-                              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                            <property name="placeholderText">
+                              <string>美国节点需要填写，其他节点一般不需要填写，除非提示需要填写。</string>
                             </property>
                           </widget>
                         </item>
