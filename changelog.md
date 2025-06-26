@@ -1,53 +1,67 @@
+# ⚠️ 注意: 此版本与旧版本的配置文件不兼容, 使用此版本保存的配置文件将无法在旧版本中使用, 请备份配置文件后再升级, 并且不要用新版本加载备份文件
+
 ## 新增
 
-* 点击左下角可直接查看 daily_release
-* 添加网站 javday
-* 更灵活的图片裁剪工具
+- 刮削过程可以立刻创建软链接
+- DMM 2K分辨率的横版封面 (#301)
+- 数据源 fc2ppvdb (#401)
+- 更新内置演员映射表
 
 ## 修复
 
-* iqqtv, airav_cc
-* 有道翻译
-* Google Translate 混合标题和简介
-* wiki 演员信息
-* 日文演员名不进行繁简转换
-* 其他错误修复
+- wiki 获取演员信息失败
+- DMM 四位数番号只需补零到五位
+- 无法根据文件大小进行清理
+- 裁剪图片路径未清空
+- fc2hub, javday 默认 url
+- 若干 DMM 失效问题
 
-## 其他
+## 开发相关
 
-由于本人最近较为繁忙, issue 和 PR 可能无法及时回应.
-
-此外重申: 原则上不考虑加入新功能, 因此添加新网站等 issue 将被直接关闭, 请谅解.
-
+- 在 MacOS 上从源代码运行时将读取项目目录下的 `MDCx.config` 文件, 与 Windows 上的行为一致, 不再读取 `~/.mdcx/MDCx.config`. 打包后行为未发生变化. 这可以有效隔离开发环境的配置文件.
+- 增加配置项更容易了, 详见 `readme`
 
 <details>
 <summary>Full Changelog</summary>
 
-7cd1fbe fix: iqqtv ( #246), airav_cc (#251) (#264)
-3950f99 fix: 有道翻译 (#261)
-19ecef6 fix: wiki字段 (#260)
-677884b fix: wiki fields (fix #255)
-1cc1a88 fix: 图片裁剪同名时无法生成
-928724b fix: close #237
-9704c1d remove test
-39c358a fix: google translate 混合多行文本
-3c9638f fix: numpy 2.0 incompatibility(close #234)
-1649b55 修复madouqu番号获取
-cc3bf58 修复madouqu番号获取
-7efda28 docs: 源码运行
-b63509c fix: crawlers; logging; add referer header (#221)
-daff178 fix: 番号后缀顺序允许设置分辨率 (close #204)
-dff05d3 feat: 图片裁剪工具允许任意大小及位置 (close #203)
-e89dc18 fix: 当演员名包含假名时不进行繁简转换; 更新 zhcdict.json (close #194)
-58af476 CI: macos aarch64; allow workflow_disspatch (#199)
-fb4262c Fix Issue 197 (#202)
-e345697 chore: 完善番号官网映射 (#192)
-8940684 feat: add website javday (#172)
-f49516a fix: dont remove slash (close #165)
-28432b1 CI: only delete before build
-57ce07f CI: delete old daily build
-ff818b9 fix: UI not set from config (#164)
-5c9fcc9 fix: airavcc cover url relative path (close #157)
-b39b85f CI: commit sha
+2135104 CI: 构建流程优化和依赖升级 (#424)
+2d3b7bd CI: 添加脚本权限; 修复 mac 构建脚本
+3830a21 refactor: 优化配置路径管理
+7890018 fix: get_mac_default_config_folder
+416ce08 fix: 通过 config 访问 manager 上的字段
+03919a9 fix: 无法正确根据文件大小进行清理
+7e8f0c3 fix(web): typo
+4befead fix: 网络检测异常日志
+624b420 fix: missing import (fix #423)
+b105bcf 修正 xml 格式错误，增加注释 (#421)
+77474fa feat!:优化配置管理与UI绑定 (#420)
+f976f92 更新：mapping_actor.xml 去重，更新，修正 (#418)
+f1f83f8 fix: get actor info from wiki (fix #415)
+5aa9946 feat: add website fc2ppvdb (#401)
+9d55e2a fix: dmm 四位数序号只需补零到五位 (close #393)
+d609557 fix: Logbuffer 未释放 (#375)
+34c89ab fix: 默认使用 opencv 获取分辨率, 否则使用 ffprobe
+5e033b3 fix: adjust subprocess flags for cross-platform compatibility in get_video_size function
+b35ef5b fix(file): 移动失败文件时不能移动到父/祖先目录 (fix #251)
+dea801e refactor! (#372)
+90c1a43 fix: dmm xpath; 检测高清图片 url 是否有效; 修复Dmm搜索 (#357)
+edb8fbc fix: dmm cover download (#356)
+1f30c32 feat: pyupgrade
+b36e607 fix(config): 避免 ruff 格式化生成的代码; 生成代码尽量符合规范
+540b35b style: use ruff to format code
+4285f0b style: use pyupgrade
+602d195 add: build with uv venv
+f4e03d3 chore: 移除无用文件
+89e1df1 fix: change pic_title_list xpath (#315)
+ecc04b0 fix: dmm.py empty main block (#305)
+f5b4261 feat: DMM 2K分辨率的横版封面 (#301)
+4da2048 docs: 授权许可 (#298)
+1cd7fad feat: 刮削过程中立刻创建软链接
+667f106 fix: race
+5de2804 chore: format
+7c9d183 opt: 创建软链接时不对网络文件进行有效性检查
+afcbf85 fix: 裁剪图片路径未清空
+b07bfa1 fix: unexpected exceptions
+50a8eec fix: fc2hub, javday url (fix#265)
 
 </details>
