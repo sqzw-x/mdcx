@@ -144,7 +144,7 @@ def curl_html(
         return response.headers, response.text
 
 
-def multi_download(self, url: str, file_path: str) -> bool:
+def multi_download(url: str, file_path: str) -> bool:
     """多线程下载的同步包装器"""
     result = executor.run(config.async_client.download(url, file_path))
     return result
