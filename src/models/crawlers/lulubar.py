@@ -6,7 +6,7 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web_compat import get_text
+from models.base.web_sync import get_text
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable

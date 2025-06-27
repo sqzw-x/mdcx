@@ -17,7 +17,7 @@ from ..base.file import copy_file, delete_file, move_file, split_path
 from ..base.image import check_pic, cut_thumb_to_poster
 from ..base.utils import get_used_time
 from ..base.web import check_url, get_amazon_data, get_big_pic_by_google, get_imgsize
-from ..base.web_compat import get_json, get_text, multi_download
+from ..base.web_sync import get_json, get_text, multi_download
 from ..config.manager import config
 from ..config.manual import ManualConfig
 from ..signals import signal

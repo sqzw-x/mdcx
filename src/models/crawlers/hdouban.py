@@ -7,7 +7,7 @@ import time
 import urllib3
 import zhconv
 
-from models.base.web_compat import get_json, post_json
+from models.base.web_sync import get_json, post_json
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 

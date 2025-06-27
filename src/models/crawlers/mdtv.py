@@ -6,7 +6,7 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web_compat import get_text, post_text
+from models.base.web_sync import get_text, post_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_actor_list, get_lable_list, get_number_list

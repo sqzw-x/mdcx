@@ -10,7 +10,7 @@ import oshash
 import urllib3
 
 from models.base.number import long_name, remove_escape_string
-from models.base.web_compat import get_json
+from models.base.web_sync import get_json
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers import theporndb_movies

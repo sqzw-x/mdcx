@@ -18,7 +18,7 @@ from lxml import etree
 
 from models.base.file import copy_file
 from models.base.utils import get_used_time
-from models.base.web_compat import get_json, get_text, post_text
+from models.base.web_sync import get_json, get_text, post_text
 from models.config.manager import config
 from models.config.manual import ManualConfig
 from models.config.resources import resources

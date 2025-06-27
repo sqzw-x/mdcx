@@ -7,7 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import check_url, get_dmm_trailer
-from models.base.web_compat import get_text, post_json
+from models.base.web_sync import get_text, post_json
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable

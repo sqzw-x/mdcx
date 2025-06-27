@@ -10,7 +10,7 @@ import time
 from lxml import etree
 
 from models.base.utils import get_used_time
-from models.base.web_compat import get_text
+from models.base.web_sync import get_text
 from models.config.manager import config, manager
 from models.config.resources import resources
 from models.core.file import get_file_info, movie_lists

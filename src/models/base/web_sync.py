@@ -1,7 +1,3 @@
-"""
-Web 请求兼容层 - 使用异步客户端和执行器提供向后兼容的同步接口
-"""
-
 from typing import Any, Dict, Optional
 
 from ..config.manager import config

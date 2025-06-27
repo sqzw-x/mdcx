@@ -30,7 +30,7 @@ from requests.exceptions import (
 from ..config.manager import config
 from ..signals import signal
 from .utils import get_user_agent
-from .web_compat import get_json, get_text
+from .web_sync import get_json, get_text
 
 
 def _allowed_gai_family():

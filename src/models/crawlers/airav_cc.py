@@ -7,7 +7,7 @@ import urllib.parse
 import urllib3
 from lxml import etree
 
-from models.base.web_compat import get_text
+from models.base.web_sync import get_text
 from models.config import manager
 from models.core.json_data import LogBuffer
 from models.signals import signal

@@ -5,7 +5,7 @@ import time
 
 import urllib3
 
-from models.base.web_compat import get_json
+from models.base.web_sync import get_json
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable

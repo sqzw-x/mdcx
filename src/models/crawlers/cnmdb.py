@@ -7,7 +7,7 @@ from urllib.parse import unquote
 import urllib3
 from lxml import etree
 
-from models.base.web_compat import get_text
+from models.base.web_sync import get_text
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_number_list
 

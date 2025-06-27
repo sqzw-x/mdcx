@@ -13,7 +13,7 @@ import zhconv
 
 from ..base.number import get_number_letters
 from ..base.utils import get_used_time, remove_repeat
-from ..base.web_compat import get_text, post_json
+from ..base.web_sync import get_text, post_json
 from ..config.manager import config
 from ..config.resources import resources
 from ..signals import signal

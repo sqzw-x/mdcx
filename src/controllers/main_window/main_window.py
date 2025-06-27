@@ -30,7 +30,7 @@ from models.base.web import (
     get_avsox_domain,
     ping_host,
 )
-from models.base.web_compat import get_text
+from models.base.web_sync import get_text
 from models.config.consts import IS_WINDOWS, MARK_FILE
 from models.config.manager import config, manager
 from models.config.manual import ManualConfig
