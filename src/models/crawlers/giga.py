@@ -6,7 +6,7 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web_compat import get_text_
+from models.base.web_compat import get_text
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -89,8 +89,8 @@ def get_trailer(real_url):
     # https://www.giga-web.jp/product/index.php?product_id=6841
     # https://www.giga-web.jp/product/player_sample.php?id=6841&q=h
     url = real_url.replace("index.php?product_id=", "player_sample.php?id=") + "&q=h"
-    result, html = get_text_(url)
-    if result:
+    html, error = get_text(url)
+    if html is not None:
         # <source src="https://cdn-dl.webstream.ne.jp/gigadlcdn/dl/X4baSNNrcDfRdCiSN4we_s_sample/ghov28_6000.mp4" type='video/mp4'>
         result = re.findall(r'<source src="([^"]+)', html)
     return result[0] if result else ""
@@ -153,22 +153,22 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            result, html_search = get_text_(url_search)
-            if not result:
-                debug_info = f"网络请求错误: {html_search} "
+            html_search, error = get_text(url_search)
+            if html_search is None:
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
             if "/cookie_set.php" in html_search:
                 url_cookies = "https://www.giga-web.jp/cookie_set.php"
-                result, html_cookies = get_text_(url_cookies)
-                if not result:
-                    debug_info = f"网络请求错误: {html_cookies} "
+                html_cookies, error = get_text(url_cookies)
+                if html_cookies is None:
+                    debug_info = f"网络请求错误: {error} "
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
-                result, html_search = get_text_(url_search)
-                if not result:
-                    debug_info = f"网络请求错误: {html_search} "
+                html_search, error = get_text(url_search)
+                if html_search is None:
+                    debug_info = f"网络请求错误: {error} "
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
 
@@ -182,9 +182,9 @@ def main(
         if real_url:
             debug_info = f"番号地址: {real_url}"
             LogBuffer.info().write(web_info + debug_info)
-            result, html_content = get_text_(real_url)
-            if not result:
-                debug_info = f"网络请求错误: {html_content}"
+            html_content, error = get_text(real_url)
+            if html_content is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())

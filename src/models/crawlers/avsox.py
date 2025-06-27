@@ -7,7 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_avsox_domain
-from models.base.web_compat import get_text_
+from models.base.web_compat import get_text
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -124,9 +124,9 @@ def main(
             url_search = f"{avsox_url}/cn/search/{number}"
             debug_info = f"搜索地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
-            result, response = get_text_(url_search)
-            if not result:
-                debug_info = f"网络请求错误: {response}"
+            response, error = get_text(url_search)
+            if response is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_search = etree.fromstring(response, etree.HTMLParser())
@@ -141,9 +141,9 @@ def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
-        result, htmlcode = get_text_(real_url)
-        if not result:
-            debug_info = f"网络请求错误: {htmlcode}"
+        htmlcode, error = get_text(real_url)
+        if htmlcode is None:
+            debug_info = f"网络请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         html = etree.fromstring(htmlcode, etree.HTMLParser())

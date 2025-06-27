@@ -6,7 +6,7 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web_compat import get_json_, get_text_
+from models.base.web_compat import get_json, get_text
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -124,11 +124,13 @@ def get_trailer(html):
     play_url = html.xpath("//a[@class='review-btn']/@href")
     if play_url:
         play_url = play_url[0].replace("/mypage/review.php", "/sampleplayer/sampleRespons.php")
-        result, htmlcode = get_json_(play_url, cookies={"adc": "1"})
-        if result:
-            url_temp = re.search(r"(https.+)ism/request", htmlcode.get("url"))
-            if url_temp:
-                trailer = url_temp.group(1) + "mp4"
+        htmlcode, error = get_json(play_url, cookies={"adc": "1"})
+        if htmlcode is not None:
+            url_str = htmlcode.get("url")
+            if url_str:
+                url_temp = re.search(r"(https.+)ism/request", str(url_str))
+                if url_temp:
+                    trailer = url_temp.group(1) + "mp4"
     return trailer
 
 
@@ -179,9 +181,9 @@ def main(
         for real_url in real_url_list:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            result, htmlcode = get_text_(real_url, cookies={"adc": "1"})
-            if not result:
-                debug_info = f"网络请求错误: {htmlcode} "
+            htmlcode, error = get_text(real_url, cookies={"adc": "1"})
+            if htmlcode is None:
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             if not htmlcode.strip():

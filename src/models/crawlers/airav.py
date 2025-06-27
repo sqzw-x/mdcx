@@ -6,7 +6,7 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web import curl_html
+from models.base.web_compat import get_text
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -77,11 +77,10 @@ def getCover(html):
 def getOutline(html, language, real_url):
     if language == "zh_cn":
         real_url = real_url.replace("cn.airav.wiki", "www.airav.wiki").replace("zh_CN", "zh_TW")
-        try:
-            result, html_content = curl_html(real_url)
-        except Exception:
-            pass
-        html = etree.fromstring(html_content, etree.HTMLParser())
+        html_content, error = get_text(real_url)
+        if html_content is not None:
+            html = etree.fromstring(html_content, etree.HTMLParser())
+
     result = str(html.xpath('//div[@class="synopsis"]/p/text()')).strip(" ['']")
     return result
 
@@ -119,9 +118,9 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            result, html_search = curl_html(url_search)
-            if not result:
-                debug_info = f"网络请求错误: {html_search}"
+            html_search, error = get_text(url_search)
+            if html_search is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
@@ -140,9 +139,9 @@ def main(
         if real_url:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            result, html_content = curl_html(real_url)
-            if not result:
-                debug_info = f"网络请求错误: {html_content}"
+            html_content, error = get_text(real_url)
+            if html_content is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 

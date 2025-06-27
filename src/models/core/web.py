@@ -7,7 +7,7 @@ import re
 import shutil
 import time
 import traceback
-import urllib
+import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, cast
 
@@ -16,8 +16,8 @@ from lxml import etree
 from ..base.file import copy_file, delete_file, move_file, split_path
 from ..base.image import check_pic, cut_thumb_to_poster
 from ..base.utils import get_used_time
-from ..base.web import check_url, get_amazon_data, get_big_pic_by_google, get_imgsize, multi_download
-from ..base.web_compat import get_json_, get_text_
+from ..base.web import check_url, get_amazon_data, get_big_pic_by_google, get_imgsize
+from ..base.web_compat import get_json, get_text, multi_download
 from ..config.manager import config
 from ..config.manual import ManualConfig
 from ..signals import signal
@@ -29,9 +29,9 @@ from .utils import convert_half
 def get_actorname(number: str) -> tuple[bool, str]:
     # 获取真实演员名字
     url = f"https://av-wiki.net/?s={number}"
-    result, res = get_text_(url)
-    if not result:
-        return False, f"Error: {res}"
+    res, error = get_text(url)
+    if res is None:
+        return False, f"Error: {error}"
     html_detail = etree.fromstring(res, etree.HTMLParser(encoding="utf-8"))
     actor_box = html_detail.xpath('//ul[@class="post-meta clearfix"]')
     for each in actor_box:
@@ -46,8 +46,8 @@ def get_actorname(number: str) -> tuple[bool, str]:
 def get_yesjav_title(movie_number: str) -> str:
     yesjav_url = f"http://www.yesjav.info/search.asp?q={movie_number}&"
     movie_title = ""
-    result, response = get_text_(yesjav_url)
-    if result and response:
+    response, error = get_text(yesjav_url)
+    if response is not None:
         parser = etree.HTMLParser(encoding="utf-8")
         html = etree.HTML(response, parser)
         movie_title = html.xpath(
@@ -76,9 +76,9 @@ def _google_translate(msg: str) -> tuple[str, str]:
     try:
         msg_unquote = urllib.parse.unquote(msg)
         url = f"https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}"
-        result, response = get_json_(url)
-        if not result:
-            return msg, f"请求失败！可能是被封了，可尝试更换代理！错误：{response}"
+        response, error = get_json(url)
+        if response is None:
+            return msg, f"请求失败！可能是被封了，可尝试更换代理！错误：{error}"
         return "".join([sen[0] for sen in response[0]]), ""
     except Exception as e:
         return msg, str(e)
@@ -456,8 +456,8 @@ def _get_big_thumb(json_data: ImageContext) -> ImageContext:
         # faleno.jp 番号检查
         if re.findall(r"F[A-Z]{2}SS", number):
             req_url = f"https://faleno.jp/top/works/{number_lower_no_line}/"
-            result, response = get_text_(req_url)
-            if result:
+            response, error = get_text(req_url)
+            if response is not None:
                 temp_url = re.findall(
                     r'src="((https://cdn.faleno.net/top/wp-content/uploads/[^_]+_)([^?]+))\?output-quality=', response
                 )
@@ -569,8 +569,8 @@ def _get_big_poster(json_data: JsonData) -> JsonData:
         official_url = config.official_websites.get(letters)
         if official_url:
             url_search = official_url + "/search/list?keyword=" + number.replace("-", "")
-            result, html_search = get_text_(url_search)
-            if result:
+            html_search, error = get_text(url_search)
+            if html_search is not None:
                 poster_url_list = re.findall(r'img class="c-main-bg lazyload" data-src="([^"]+)"', html_search)
                 if poster_url_list:
                     # 使用官网图作为封面去 google 搜索

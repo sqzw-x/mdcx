@@ -7,7 +7,7 @@ import urllib.parse
 import urllib3
 from lxml import etree
 
-from models.base.web import curl_html
+from models.base.web_compat import get_text
 from models.config import manager
 from models.core.json_data import LogBuffer
 from models.signals import signal
@@ -109,9 +109,9 @@ def get_series(html):
 
 
 def retry_request(real_url, web_info):
-    result, html_content = curl_html(real_url)
-    if not result:
-        debug_info = f"网络请求错误: {html_content} "
+    html_content, error = get_text(real_url)
+    if html_content is None:
+        debug_info = f"网络请求错误: {error} "
         LogBuffer.info().write(web_info + debug_info)
         raise Exception(debug_info)
     html_info = etree.fromstring(html_content, etree.HTMLParser())
@@ -174,9 +174,9 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            result, html_search = curl_html(url_search)
-            if not result:
-                debug_info = f"网络请求错误: {html_search} "
+            html_search, error = get_text(url_search)
+            if html_search is None:
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())

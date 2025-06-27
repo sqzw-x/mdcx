@@ -6,7 +6,7 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web import curl_html
+from models.base.web_compat import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info, get_number_list
@@ -61,11 +61,12 @@ def get_real_url(html, number_list, hscangku_url):
 
 
 def get_redirected_url(url):
-    result, response = curl_html(url)
-    if not result:
+    response, error = get_text(url)
+    if response is None:
         return None
 
-    if redirected_url := re.search(r'"(https?://.*?)"', response).group(1):
+    if redirected_url := re.search(r'"(https?://.*?)"', response):
+        redirected_url = redirected_url.group(1)
         http = urllib3.PoolManager()
         response = http.request("GET", f"{redirected_url}{url}&p=", redirect=False)
         final_url = response.get_redirect_location()
@@ -108,10 +109,10 @@ def main(
                 # real_url = 'http://hsck860.cc/vodsearch/-------------.html?wd=%E6%9F%9A%E5%AD%90%E7%8C%AB&submit='
                 debug_info = f"请求地址: {real_url} "
                 LogBuffer.info().write(web_info + debug_info)
-                result, response = curl_html(real_url)
+                response, error = get_text(real_url)
 
-                if not result:
-                    debug_info = f"网络请求错误: {response}"
+                if response is None:
+                    debug_info = f"网络请求错误: {error}"
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 search_page = etree.fromstring(response, etree.HTMLParser())
@@ -126,10 +127,10 @@ def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
-        result, response = curl_html(real_url)
+        response, error = get_text(real_url)
 
-        if not result:
-            debug_info = f"没有找到数据 {response} "
+        if response is None:
+            debug_info = f"没有找到数据 {error} "
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 

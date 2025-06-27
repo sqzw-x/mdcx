@@ -8,7 +8,8 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web import curl_html, get_dmm_trailer
+from models.base.web import get_dmm_trailer
+from models.base.web_compat import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -240,13 +241,13 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # 先使用scraper方法请求，失败时再使用get请求
-            result, html_search = curl_html(url_search, headers=header)
-            if not result:
+            html_search, error = get_text(url_search, headers=header)
+            if html_search is None:
                 # 判断返回内容是否有问题
-                if html_search.startswith("403"):
+                if "HTTP 403" in error:
                     debug_info = f"网站禁止访问！！请更换其他非日本节点！点击 {url_search} 查看详情！"
                 else:
-                    debug_info = f"请求错误: {html_search}"
+                    debug_info = f"请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -284,9 +285,9 @@ def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_info = curl_html(real_url, headers=header)
-            if not result:
-                debug_info = f"请求错误: {html_info}"
+            html_info, error = get_text(real_url, headers=header)
+            if html_info is None:
+                debug_info = f"请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 

@@ -27,11 +27,10 @@ from models.base.utils import _async_raise, add_html, convert_path, get_current_
 from models.base.web import (
     check_theporndb_api_token,
     check_version,
-    curl_html,
     get_avsox_domain,
     ping_host,
 )
-from models.base.web_compat import get_text_
+from models.base.web_compat import get_text
 from models.config.consts import IS_WINDOWS, MARK_FILE
 from models.config.manager import config, manager
 from models.config.manual import ManualConfig
@@ -2232,28 +2231,28 @@ class MyMAinWindow(QMainWindow):
                     each[1] = res_theporndb.replace("✅ 连接正常", f"✅ 连接正常{ping_host(host_address)}")
                 elif name == "javlibrary":
                     use_proxy = True
-                    if hasattr(config, f"javlibrary_website"):
+                    if hasattr(config, "javlibrary_website"):
                         use_proxy = False
-                    result, html_info = curl_html(each[0], use_proxy=use_proxy)
-                    if not result:
-                        each[1] = "❌ 连接失败 请检查网络或代理设置！ " + html_info
+                    html_info, error = get_text(each[0], use_proxy=use_proxy)
+                    if html_info is None:
+                        each[1] = "❌ 连接失败 请检查网络或代理设置！ " + error
                     elif "Cloudflare" in html_info:
                         each[1] = "❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)"
                     else:
                         each[1] = f"✅ 连接正常{ping_host(host_address)}"
                 elif name in ["avsex", "freejavbt", "airav_cc", "airav", "madouqu", "7mmtv"]:
-                    result, html_info = curl_html(each[0])
-                    if not result:
-                        each[1] = "❌ 连接失败 请检查网络或代理设置！ " + html_info
+                    html_info, error = get_text(each[0])
+                    if html_info is None:
+                        each[1] = "❌ 连接失败 请检查网络或代理设置！ " + error
                     elif "Cloudflare" in html_info:
                         each[1] = "❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)"
                     else:
                         each[1] = f"✅ 连接正常{ping_host(host_address)}"
                 else:
                     try:
-                        result, html_content = get_text_(each[0])
-                        if not result:
-                            each[1] = "❌ 连接失败 请检查网络或代理设置！ " + str(html_content)
+                        html_content, error = get_text(each[0])
+                        if html_content is None:
+                            each[1] = "❌ 连接失败 请检查网络或代理设置！ " + str(error)
                         else:
                             if name == "dmm":
                                 if re.findall("このページはお住まいの地域からご利用になれません", html_content):
@@ -2359,9 +2358,9 @@ class MyMAinWindow(QMainWindow):
         cookies = config.javdb
         javdb_url = getattr(config, "javdb_website", "https://javdb.com") + "/v/D16Q5?locale=zh"
         try:
-            result, response = curl_html(javdb_url, headers=header)
-            if not result:
-                if "Cookie" in response:
+            response, error = get_text(javdb_url, headers=header)
+            if response is None:
+                if "Cookie" in error:
                     if cookies != input_cookie:
                         tips = "❌ Cookie 已过期！"
                     else:
@@ -2432,10 +2431,10 @@ class MyMAinWindow(QMainWindow):
         javbus_url = getattr(config, "javbus_website", "https://javbus.com") + "/FSDSS-660"
 
         try:
-            result, response = get_text_(javbus_url, headers=headers, cookies=new_cookie)
+            response, error = get_text(javbus_url, headers=headers, cookies=new_cookie)
 
-            if not result:
-                tips = f"❌ 连接失败！请检查网络或代理设置！ {response}"
+            if response is None:
+                tips = f"❌ 连接失败！请检查网络或代理设置！ {error}"
             elif "lostpasswd" in response:
                 if input_cookie:
                     tips = "❌ Cookie 无效！"

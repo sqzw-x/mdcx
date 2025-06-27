@@ -6,7 +6,7 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web import curl_html
+from models.base.web_compat import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -193,9 +193,9 @@ def main(
             debug_info = f"搜索地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_search = curl_html(url_search, use_proxy=use_proxy)
-            if not result:
-                debug_info = f"请求错误: {html_search} "
+            html_search, error = get_text(url_search, use_proxy=use_proxy)
+            if html_search is None:
+                debug_info = f"请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -218,9 +218,9 @@ def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_info = curl_html(real_url, use_proxy=use_proxy)
-            if not result:
-                debug_info = f"请求错误: {html_info} "
+            html_info, error = get_text(real_url, use_proxy=use_proxy)
+            if html_info is None:
+                debug_info = f"请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 

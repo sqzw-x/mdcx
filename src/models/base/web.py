@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import re
-import socket
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
@@ -35,7 +34,7 @@ from requests.exceptions import (
 from ..config.manager import config
 from ..signals import signal
 from .utils import get_user_agent, singleton
-from .web_compat import *
+from .web_compat import get_content, get_json, get_text
 
 
 def _allowed_gai_family():
@@ -453,8 +452,8 @@ class WebRequests:
         # 没有大小时，不支持分段下载，直接下载；< 2 MB 的直接下载
         MB = 1024**2
         if not file_size or int(file_size) <= 2 * MB or webp:
-            result, response = get_content_(url)
-            if result:
+            response, error = get_content(url)
+            if response is not None:
                 if webp:
                     if isinstance(response, bytes):
                         byte_stream = BytesIO(response)
@@ -720,9 +719,9 @@ def check_url(url: str, length: bool = False, real_url: bool = False) -> Union[i
 
 def get_avsox_domain() -> str:
     issue_url = "https://tellme.pw/avsox"
-    result, response = get_text_(issue_url)
+    response, error = get_text(issue_url)
     domain = "https://avsox.click"
-    if result and isinstance(response, str):
+    if response is not None:
         res = re.findall(r'(https://[^"]+)', response)
         for s in res:
             if s and "https://avsox.com" not in s or "api.qrserver.com" not in s:
@@ -739,57 +738,32 @@ def get_amazon_data(req_url: str) -> Tuple[bool, str]:
         "Host": "www.amazon.co.jp",
         "User-Agent": get_user_agent(),
     }
-    try:
-        result, html_info = curl_html(req_url)
-    except Exception:
-        result, html_info = curl_html(req_url, headers=headers)
+    html_info, error = get_text(req_url, encoding="Shift_JIS")
+    if html_info is None:
+        html_info, error = get_text(req_url, headers=headers, encoding="Shift_JIS")
+    if html_info is None:
         session_id = ""
         ubid_acbjp = ""
-        if x := re.findall(r'sessionId: "([^"]+)', html_info):
+        if x := re.findall(r'sessionId: "([^"]+)', html_info or ""):
             session_id = x[0]
-        if x := re.findall(r"ubid-acbjp=([^ ]+)", html_info):
+        if x := re.findall(r"ubid-acbjp=([^ ]+)", html_info or ""):
             ubid_acbjp = x[0]
         headers_o = {
             "cookie": f"session-id={session_id}; ubid_acbjp={ubid_acbjp}",
         }
         headers.update(headers_o)
-        result, html_info = curl_html(req_url, headers=headers)
-
-    if not result:
-        if "503 http" in html_info:
-            headers = {
-                "Host": "www.amazon.co.jp",
-                "User-Agent": get_user_agent(),
-            }
-            result, html_info = get_response_(req_url, headers=headers)
-
-        if not result:
-            return False, html_info
-
-    return result, html_info
-
-
-if "__main__" == __name__:
-    # 测试下载文件
-    list1 = [
-        "https://issuecdn.baidupcs.com/issue/netdisk/yunguanjia/BaiduNetdisk_7.2.8.9.exe",
-        "https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw015/118abw015_mhb_w.mp4",
-        "https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00016/118abw00016_mhb_w.mp4",
-        "https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00017/118abw00017_mhb_w.mp4",
-        "https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00018/118abw00018_mhb_w.mp4",
-        "https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00019/118abw00019_mhb_w.mp4",
-        "https://www.prestige-av.com/images/corner/goods/prestige/tktabw/018/pb_tktabw-018.jpg",
-        "https://iqq1.one/preview/80/b/3SBqI8OjheI-800.jpg?v=1636404497",
-    ]
-    for each in list1:
-        url = each
-        file_path = each.split("/")[-1]
-        t = threading.Thread(target=multi_download, args=(url, file_path))
-        t.start()
-
-    # 死循环，避免程序程序完后，pool自动关闭
-    while True:
-        pass
+        html_info, error = get_text(req_url, headers=headers, encoding="Shift_JIS")
+    if html_info is None:
+        return False, error
+    if "HTTP 503" in html_info:
+        headers = {
+            "Host": "www.amazon.co.jp",
+            "User-Agent": get_user_agent(),
+        }
+        html_info, error = get_text(req_url, headers=headers, encoding="Shift_JIS")
+    if html_info is None:
+        return False, error
+    return True, html_info
 
 
 def get_imgsize(url):
@@ -886,8 +860,8 @@ def ping_host(host_address: str) -> str:
 def check_version() -> Optional[int]:
     if config.update_check:
         url = "https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
-        _, res_json = get_json_(url)
-        if isinstance(res_json, dict):
+        res_json, error = get_json(url)
+        if res_json is not None:
             try:
                 latest_version = res_json["tag_name"]
                 latest_version = int(latest_version)
@@ -935,9 +909,9 @@ def _get_pic_by_google(pic_url):
     google_keyword = config.google_keyword
     req_url = f"https://www.google.com/searchbyimage?sbisrc=2&image_url={pic_url}"
     # req_url = f'https://lens.google.com/uploadbyurl?url={pic_url}&hl=zh-CN&re=df&ep=gisbubu'
-    result, response = get_text_(req_url)
+    response, error = get_text(req_url)
     big_pic = True
-    if result:
+    if response is not None:
         url_list = re.findall(r'a href="([^"]+isz:l[^"]+)">', response)
         url_list_middle = re.findall(r'a href="([^"]+isz:m[^"]+)">', response)
         if not url_list and url_list_middle:
@@ -945,8 +919,8 @@ def _get_pic_by_google(pic_url):
             big_pic = False
         if url_list:
             req_url = "https://www.google.com" + url_list[0].replace("amp;", "")
-            result, response = get_text_(req_url)
-            if result:
+            response, error = get_text(req_url)
+            if response is not None:
                 url_list = re.findall(r'\["(http[^"]+)",(\d{3,4}),(\d{3,4})\],[^[]', response)
                 # 优先下载放前面
                 new_url_list = []
