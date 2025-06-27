@@ -1,5 +1,5 @@
+import asyncio
 import re
-import time
 from typing import Callable, Optional
 
 from aiolimiter import AsyncLimiter
@@ -55,11 +55,11 @@ class LLMClient:
                     )
                     break
                 except Exception as e:
-                    log_fn(f"LLM API 请求失败: {e}, {wait}s 后重试")
-                    time.sleep(wait)
+                    log_fn(f"⚠️ LLM API 请求失败: {e}, {wait}s 后重试")
+                    await asyncio.sleep(wait)
                     wait *= 2
             else:
-                log_fn("LLM API 请求失败, 已达最大重试次数\n")
+                log_fn("❌ LLM API 请求失败, 已达最大重试次数\n")
                 return None
         # reasoning_content = getattr(chat.choices[0].message, "reasoning_content", None)
         text = chat.choices[0].message.content

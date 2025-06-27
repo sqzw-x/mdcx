@@ -235,7 +235,7 @@ class ConfigSchema:
     llm_prompt: str = "Please translate the following text to {lang}. Output only the translation without any explanation.\n{content}"  # 原文-{content} 目标语言-{lang}
     llm_max_req_sec: float = 1  # 每秒请求次数限制
     llm_max_try: int = 5
-    llm_timeout: float = 15
+    llm_temperature: float = 0.2
     title_language: str = r"zh_cn"
     title_sehua: bool = True
     title_yesjav: bool = False
@@ -474,7 +474,7 @@ class ConfigSchema:
             client=self.async_client,
             api_key=config.llm_key,
             base_url=config.llm_url,
-            timeout=httpx.Timeout(config.timeout, read=config.llm_timeout),
+            timeout=httpx.Timeout(config.timeout, read=None),
             rate=(max(config.llm_max_req_sec, 1), max(1, 1 / config.llm_max_req_sec)),
         )
         self.executor = executor  # 方便通过 config 访问 executor

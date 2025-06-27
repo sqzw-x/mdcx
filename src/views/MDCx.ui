@@ -11056,7 +11056,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-1212</y>
+           <y>0</y>
            <width>760</width>
            <height>1870</height>
           </rect>
@@ -15212,7 +15212,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-1365</y>
+           <y>0</y>
            <width>760</width>
            <height>2900</height>
           </rect>
@@ -15519,7 +15519,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
+            <item row="4" column="0">
              <widget class="QLabel" name="label_llm_key">
               <property name="minimumSize">
                <size>
@@ -15535,7 +15535,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
+            <item row="4" column="1">
              <widget class="QLineEdit" name="lineEdit_llm_key">
               <property name="minimumSize">
                <size>
@@ -15551,7 +15551,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
+            <item row="5" column="0">
              <widget class="QLabel" name="label_llm_prompt">
               <property name="minimumSize">
                <size>
@@ -15567,7 +15567,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
+            <item row="5" column="1">
              <widget class="QTextEdit" name="textEdit_llm_prompt">
               <property name="minimumSize">
                <size>
@@ -15580,7 +15580,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
               </property>
              </widget>
             </item>
-            <item row="5" column="1">
+            <item row="6" column="1">
              <widget class="QLabel" name="label_llm_prompt_desc">
               <property name="styleSheet">
                <string notr="true">color: rgb(8, 128, 128);</string>
@@ -15590,7 +15590,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
               </property>
              </widget>
             </item>
-            <item row="6" column="1">
+            <item row="7" column="1">
              <widget class="QDoubleSpinBox" name="doubleSpinBox_llm_max_req_sec">
               <property name="minimumSize">
                <size>
@@ -15603,7 +15603,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
               </property>
              </widget>
             </item>
-            <item row="6" column="0">
+            <item row="7" column="0">
              <widget class="QLabel" name="label_llm_max_req_sec">
               <property name="minimumSize">
                <size>
@@ -15619,7 +15619,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
               </property>
              </widget>
             </item>
-            <item row="7" column="1">
+            <item row="8" column="1">
              <widget class="QLabel" name="label_llm_max_req_sec_desc">
               <property name="styleSheet">
                <string notr="true">color: rgb(8, 128, 128);</string>
@@ -15629,7 +15629,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
               </property>
              </widget>
             </item>
-            <item row="8" column="1">
+            <item row="9" column="1">
              <widget class="QSpinBox" name="spinBox_llm_max_try">
               <property name="minimumSize">
                <size>
@@ -15639,7 +15639,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
               </property>
              </widget>
             </item>
-            <item row="8" column="0">
+            <item row="9" column="0">
              <widget class="QLabel" name="label_llm_max_try">
               <property name="minimumSize">
                <size>
@@ -15655,7 +15655,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
               </property>
              </widget>
             </item>
-            <item row="9" column="1">
+            <item row="10" column="1">
              <widget class="QLabel" name="label_llm_max_try_desc">
               <property name="styleSheet">
                <string notr="true">color: rgb(8, 128, 128);</string>
@@ -15665,8 +15665,8 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
               </property>
              </widget>
             </item>
-            <item row="10" column="0">
-             <widget class="QLabel" name="label_llm_timeout">
+            <item row="11" column="0">
+             <widget class="QLabel" name="label_llm_temperature">
               <property name="minimumSize">
                <size>
                 <width>130</width>
@@ -15674,30 +15674,26 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
                </size>
               </property>
               <property name="text">
-               <string>超时 (sec):</string>
+               <string>Temperature:</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
-            <item row="10" column="1">
-             <widget class="QDoubleSpinBox" name="doubleSpinBox_llm_timeout">
+            <item row="11" column="1">
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_llm_temperature">
               <property name="minimumSize">
                <size>
                 <width>100</width>
                 <height>30</height>
                </size>
               </property>
-             </widget>
-            </item>
-            <item row="11" column="1">
-             <widget class="QLabel" name="label_llm_timeout_desc">
-              <property name="styleSheet">
-               <string notr="true">color: rgb(8, 128, 128);</string>
+              <property name="maximum">
+               <double>2.000000000000000</double>
               </property>
-              <property name="text">
-               <string>LLM 生成可能耗时较长, 可设置较高超时</string>
+              <property name="singleStep">
+               <double>0.100000000000000</double>
               </property>
              </widget>
             </item>
@@ -17093,7 +17089,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-202</y>
+           <y>0</y>
            <width>760</width>
            <height>860</height>
           </rect>
@@ -17698,7 +17694,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-1012</y>
+           <y>0</y>
            <width>760</width>
            <height>1670</height>
           </rect>
@@ -19015,7 +19011,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-442</y>
+           <y>0</y>
            <width>796</width>
            <height>1100</height>
           </rect>
@@ -23415,7 +23411,7 @@ first_folder_name （指待刮削目录下第一层子文件夹名，是动态�
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-342</y>
+           <y>0</y>
            <width>770</width>
            <height>1000</height>
           </rect>

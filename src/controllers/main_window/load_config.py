@@ -527,7 +527,7 @@ def load_config(self):
         self.Ui.textEdit_llm_prompt.setText(config.llm_prompt)
         self.Ui.doubleSpinBox_llm_max_req_sec.setValue(config.llm_max_req_sec)
         self.Ui.spinBox_llm_max_try.setValue(config.llm_max_try)
-        self.Ui.doubleSpinBox_llm_timeout.setValue(config.llm_timeout)
+        self.Ui.doubleSpinBox_llm_temperature.setValue(config.llm_temperature)
         # endregion
 
         # region common

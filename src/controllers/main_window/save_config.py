@@ -283,7 +283,7 @@ def save_config(self):
     config.llm_prompt = self.Ui.textEdit_llm_prompt.toPlainText()
     config.llm_max_req_sec = self.Ui.doubleSpinBox_llm_max_req_sec.value()
     config.llm_max_try = self.Ui.spinBox_llm_max_try.value()
-    config.llm_timeout = self.Ui.doubleSpinBox_llm_timeout.value()
+    config.llm_temperature = self.Ui.doubleSpinBox_llm_temperature.value()
     # endregion
 
     # region common

@@ -191,6 +191,7 @@ def _llm_translate(text: str, target_language: str = "简体中文") -> Optional
             model=config.llm_model,
             system_prompt="You are a professional translator.",
             user_prompt=config.llm_prompt.replace("{content}", text).replace("{lang}", target_language),
+            temperature=config.llm_temperature,
             max_try=config.llm_max_try,
             log_fn=signal.add_log,
         )
