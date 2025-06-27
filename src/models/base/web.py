@@ -720,7 +720,7 @@ def check_url(url: str, length: bool = False, real_url: bool = False) -> Union[i
 
 def get_avsox_domain() -> str:
     issue_url = "https://tellme.pw/avsox"
-    result, response = get_html(issue_url)
+    result, response = get_text(issue_url)
     domain = "https://avsox.click"
     if result and isinstance(response, str):
         res = re.findall(r'(https://[^"]+)', response)

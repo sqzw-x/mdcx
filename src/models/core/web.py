@@ -17,6 +17,7 @@ from ..base.file import copy_file, delete_file, move_file, split_path
 from ..base.image import check_pic, cut_thumb_to_poster
 from ..base.utils import get_used_time
 from ..base.web import check_url, get_amazon_data, get_big_pic_by_google, get_html, get_imgsize, multi_download
+from ..base.web_compat import get_text
 from ..config.manager import config
 from ..config.manual import ManualConfig
 from ..signals import signal
@@ -28,7 +29,7 @@ from .utils import convert_half
 def get_actorname(number: str) -> tuple[bool, str]:
     # 获取真实演员名字
     url = f"https://av-wiki.net/?s={number}"
-    result, res = get_html(url)
+    result, res = get_text(url)
     if not result:
         return False, f"Error: {res}"
     html_detail = etree.fromstring(res, etree.HTMLParser(encoding="utf-8"))
@@ -45,7 +46,7 @@ def get_actorname(number: str) -> tuple[bool, str]:
 def get_yesjav_title(movie_number: str) -> str:
     yesjav_url = f"http://www.yesjav.info/search.asp?q={movie_number}&"
     movie_title = ""
-    result, response = get_html(yesjav_url)
+    result, response = get_text(yesjav_url)
     if result and response:
         parser = etree.HTMLParser(encoding="utf-8")
         html = etree.HTML(response, parser)
@@ -455,7 +456,7 @@ def _get_big_thumb(json_data: ImageContext) -> ImageContext:
         # faleno.jp 番号检查
         if re.findall(r"F[A-Z]{2}SS", number):
             req_url = f"https://faleno.jp/top/works/{number_lower_no_line}/"
-            result, response = get_html(req_url)
+            result, response = get_text(req_url)
             if result:
                 temp_url = re.findall(
                     r'src="((https://cdn.faleno.net/top/wp-content/uploads/[^_]+_)([^?]+))\?output-quality=', response
@@ -568,7 +569,7 @@ def _get_big_poster(json_data: JsonData) -> JsonData:
         official_url = config.official_websites.get(letters)
         if official_url:
             url_search = official_url + "/search/list?keyword=" + number.replace("-", "")
-            result, html_search = get_html(url_search)
+            result, html_search = get_text(url_search)
             if result:
                 poster_url_list = re.findall(r'img class="c-main-bg lazyload" data-src="([^"]+)"', html_search)
                 if poster_url_list:

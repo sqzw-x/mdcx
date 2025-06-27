@@ -7,6 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import check_url, get_dmm_trailer, get_html, post_html
+from models.base.web_compat import get_text
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -157,7 +158,7 @@ def get_trailer(htmlcode, real_url):
         else:
             url = f"https://www.dmm.com/service/digitalapi/-/html5_player/=/cid={cid}/mtype=AhRVShI_/service=digital/floor=videoa/mode=/"
 
-        result, htmlcode = get_html(url)
+        result, htmlcode = get_text(url)
         try:
             var_params = re.findall(r" = ({[^;]+)", htmlcode)[0].replace(r"\/", "/")
             trailer_url = json.loads(var_params).get("bitrates")[-1].get("src")

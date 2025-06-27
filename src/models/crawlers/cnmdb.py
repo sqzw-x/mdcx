@@ -8,6 +8,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_html
+from models.base.web_compat import get_text
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_number_list
 
@@ -117,7 +118,7 @@ def main(
         if real_url:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            _, response = get_html(real_url)
+            _, response = get_text(real_url)
             if response:
                 detail_page = etree.fromstring(response, etree.HTMLParser())
                 result, number, title, actor, real_url, cover_url, studio, series = get_detail_info(

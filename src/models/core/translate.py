@@ -13,7 +13,8 @@ import zhconv
 
 from ..base.number import get_number_letters
 from ..base.utils import get_used_time, remove_repeat
-from ..base.web import get_html, post_html
+from ..base.web import post_html
+from ..base.web_compat import get_text
 from ..config.manager import config
 from ..config.resources import resources
 from ..signals import signal
@@ -411,7 +412,7 @@ def _get_youdao_key_thread():
     # 获取 js url
     js_url = ""
     youdao_url = "https://fanyi.youdao.com"
-    result, req = get_html(youdao_url)
+    result, req = get_text(youdao_url)
     if result:
         # https://shared.ydstatic.com/fanyi/newweb/v1.1.11/scripts/newweb/fanyi.min.js
         url_temp = re.search(r"(https://shared.ydstatic.com/fanyi/newweb/.+/scripts/newweb/fanyi.min.js)", req)
@@ -423,7 +424,7 @@ def _get_youdao_key_thread():
         return
 
     # 请求 js url ，获取 youdao key
-    result, req = get_html(js_url)
+    result, req = get_text(js_url)
     try:
         youdaokey = re.search(r'(?<="fanyideskweb" \+ e \+ i \+ ")[^"]+', req).group(
             0

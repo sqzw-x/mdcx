@@ -28,9 +28,11 @@ from models.base.web import (
     check_theporndb_api_token,
     check_version,
     get_avsox_domain,
+    get_html,
     ping_host,
     scraper_html,
 )
+from models.base.web_compat import get_text
 from models.config.consts import IS_WINDOWS, MARK_FILE
 from models.config.manager import config, manager
 from models.config.manual import ManualConfig
@@ -51,7 +53,7 @@ from models.core.scraper import again_search, get_remain_list, start_new_scrape
 from models.core.subtitle import add_sub_for_all_video
 from models.core.utils import deal_url, get_movie_path_setting
 from models.core.video import add_del_extras, add_del_theme_videos
-from models.core.web import get_html, show_netstatus
+from models.core.web import show_netstatus
 from models.entity.enums import FileMode
 from models.signals import signal
 from models.tools.actress_db import ActressDB
@@ -2250,7 +2252,7 @@ class MyMAinWindow(QMainWindow):
                         each[1] = f"✅ 连接正常{ping_host(host_address)}"
                 else:
                     try:
-                        result, html_content = get_html(each[0])
+                        result, html_content = get_text(each[0])
                         if not result:
                             each[1] = "❌ 连接失败 请检查网络或代理设置！ " + str(html_content)
                         else:

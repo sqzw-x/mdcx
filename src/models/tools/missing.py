@@ -10,7 +10,7 @@ import time
 from lxml import etree
 
 from models.base.utils import get_used_time
-from models.base.web import get_html, scraper_html
+from models.base.web_compat import get_text, scraper_html
 from models.config.manager import config, manager
 from models.config.resources import resources
 from models.core.file import get_file_info, movie_lists
@@ -42,7 +42,7 @@ def _get_actor_numbers(actor_url, actor_single_url):
     i = 1
     while next_page:
         page_url = f"{actor_url}?page={i}&t=s"
-        result, html = get_html(page_url)
+        result, html = get_text(page_url)
         if not result:
             result, html = scraper_html(page_url)
         if not result:

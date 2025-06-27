@@ -6,7 +6,7 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web import get_html
+from models.base.web_compat import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
@@ -223,7 +223,7 @@ def main(
                 testNumberUrl = javday_url + f"/videos/{number}/"
                 debug_info = f'搜索地址: {testNumberUrl} {{"wd": {number}}}'
                 LogBuffer.info().write(web_info + debug_info)
-                result, html_content = get_html(testNumberUrl)
+                result, html_content = get_text(testNumberUrl)
                 if not result:
                     debug_info = f"网络请求错误: {html_content}"
                     LogBuffer.info().write(web_info + debug_info)

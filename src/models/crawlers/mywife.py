@@ -7,6 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import check_url, get_html
+from models.base.web_compat import get_text
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -186,7 +187,7 @@ def main(
             debug_info = f"搜索页地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_content = get_html(url_search)
+            result, html_content = get_text(url_search)
             if not result:
                 debug_info = f"网络请求错误: {html_content} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -198,7 +199,7 @@ def main(
                 debug_info = f"中间页地址: {first_url} "
                 LogBuffer.info().write(web_info + debug_info)
 
-                result, html_content = get_html(first_url)
+                result, html_content = get_text(first_url)
                 if not result:
                     debug_info = f"网络请求错误: {html_content} "
                     LogBuffer.info().write(web_info + debug_info)
@@ -221,7 +222,7 @@ def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_content = get_html(real_url)
+            result, html_content = get_text(real_url)
             if not result:
                 debug_info = f"网络请求错误: {html_content} "
                 LogBuffer.info().write(web_info + debug_info)

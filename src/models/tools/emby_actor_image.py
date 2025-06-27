@@ -11,6 +11,7 @@ from lxml import etree
 from models.base.image import cut_pic, fix_pic
 from models.base.utils import get_used_time
 from models.base.web import get_html
+from models.base.web_compat import get_text
 from models.config.manager import config
 from models.config.resources import resources
 from models.core.web import download_file_with_filepath
@@ -126,7 +127,7 @@ def _get_gfriends_actor_data():
         update_data = False
         signal.show_log_text("⏳ 连接 Gfriends 网络头像库...")
         net_url = f"{gfriends_github}/commits/master/Filetree.json"
-        result, response = get_html(net_url)
+        result, response = get_text(net_url)
         if not result:
             signal.show_log_text("🔴 Gfriends 查询最新数据更新时间失败！")
             net_float = 0
@@ -250,7 +251,7 @@ def _get_graphis_pic(actor_name):
         return pic_path, backdrop_path, ""
 
     # 请求图片
-    result, res = get_html(url)
+    result, res = get_text(url)
     if not result:
         logs += f"🔴 graphis.ne.jp 请求失败！\n{res}"
         return "", "", logs

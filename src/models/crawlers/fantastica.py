@@ -6,7 +6,8 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web import get_html, get_imgsize
+from models.base.web import get_imgsize
+from models.base.web_compat import get_text
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -133,7 +134,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            result, html_search = get_html(search_url)
+            result, html_search = get_text(search_url)
             if not result:
                 debug_info = f"网络请求错误: {html_search} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -150,7 +151,7 @@ def main(
         if real_url:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            result, html_content = get_html(real_url)
+            result, html_content = get_text(real_url)
             if not result:
                 debug_info = f"网络请求错误: {html_content} "
                 LogBuffer.info().write(web_info + debug_info)

@@ -6,7 +6,7 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web import get_html
+from models.base.web_compat import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -203,7 +203,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            result, html_search = get_html(url_search)
+            result, html_search = get_text(url_search)
             if not result:
                 debug_info = f"网络请求错误: {html_search}"
                 LogBuffer.info().write(web_info + debug_info)
@@ -222,7 +222,7 @@ def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
-        result, html_content = get_html(real_url)
+        result, html_content = get_text(real_url)
         if not result:
             debug_info = f"网络请求错误: {html_content}"
             LogBuffer.info().write(web_info + debug_info)
