@@ -152,13 +152,13 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[bytes], Optional[str]]:
+    ) -> tuple[Optional[bytes], str]:
         """请求二进制内容"""
         resp, error = await self.request("GET", url, headers=headers, cookies=cookies, use_proxy=use_proxy)
         if resp is None:
             return None, error
 
-        return resp.content, None
+        return resp.content, ""
 
     async def get_json(
         self,
@@ -167,13 +167,13 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[dict[str, Any]], Optional[str]]:
+    ) -> tuple[Optional[dict[str, Any]], str]:
         """请求JSON数据"""
         response, error = await self.request("GET", url, headers=headers, cookies=cookies, use_proxy=use_proxy)
         if response is None:
             return None, error
         try:
-            return response.json(), None
+            return response.json(), ""
         except Exception as e:
             return None, f"JSON解析失败: {str(e)}"
 
@@ -187,7 +187,7 @@ class AsyncWebClient:
         cookies: Optional[dict[str, str]] = None,
         encoding: str = "utf-8",
         use_proxy: bool = True,
-    ) -> tuple[Optional[str], Optional[str]]:
+    ) -> tuple[Optional[str], str]:
         """POST 请求, 返回响应文本内容"""
         response, error = await self.request(
             "POST", url, data=data, json_data=json_data, headers=headers, cookies=cookies, use_proxy=use_proxy
@@ -196,7 +196,7 @@ class AsyncWebClient:
             return None, error
         try:
             response.encoding = encoding
-            return response.text, None
+            return response.text, ""
         except Exception as e:
             return None, f"文本解析失败: {str(e)}"
 
@@ -209,7 +209,7 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[dict[str, Any]], Optional[str]]:
+    ) -> tuple[Optional[dict[str, Any]], str]:
         """POST 请求, 返回响应JSON数据"""
         response, error = await self.request(
             "POST", url, data=data, json_data=json_data, headers=headers, cookies=cookies, use_proxy=use_proxy
@@ -218,7 +218,7 @@ class AsyncWebClient:
             return None, error
 
         try:
-            return response.json(), None
+            return response.json(), ""
         except Exception as e:
             return None, f"JSON解析失败: {str(e)}"
 
@@ -231,7 +231,7 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[bytes], Optional[str]]:
+    ) -> tuple[Optional[bytes], str]:
         """POST请求, 返回二进制响应"""
         response, error = await self.request(
             "POST", url, data=data, json_data=json_data, headers=headers, cookies=cookies, use_proxy=use_proxy
@@ -239,7 +239,7 @@ class AsyncWebClient:
         if error or response is None:
             return None, error
 
-        return response.content, None
+        return response.content, ""
 
     async def get_filesize(self, url: str, *, use_proxy: bool = True) -> Optional[int]:
         """获取文件大小"""
