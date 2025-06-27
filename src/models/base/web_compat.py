@@ -15,24 +15,20 @@ def get_html(
     cookies: Optional[Dict[str, str]] = None,
     proxies: Union[bool, Optional[Dict[str, str]]] = True,
     allow_redirects: bool = True,
-    res: bool = False,
     keep: bool = True,
     timeout: Union[bool, float] = False,
     encoding: str = "utf-8",
     back_cookie: bool = False,
 ):
     """GET 请求的同步包装器 - 根据参数调用相应的细分方法"""
-    if res:
-        return get_response(url, headers=headers, cookies=cookies, proxies=proxies)
-    else:
-        success, result = get_text(url, headers=headers, cookies=cookies, proxies=proxies, encoding=encoding)
-        if not success:
-            return False, result
-        if back_cookie:
-            # 返回 cookies 和文本
-            cookies_dict = cookies or {}
-            return cookies_dict, result
-        return True, result
+    success, result = get_text(url, headers=headers, cookies=cookies, proxies=proxies, encoding=encoding)
+    if not success:
+        return False, result
+    if back_cookie:
+        # 返回 cookies 和文本
+        cookies_dict = cookies or {}
+        return cookies_dict, result
+    return True, result
 
 
 def get_text(
