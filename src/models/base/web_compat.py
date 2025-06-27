@@ -80,46 +80,49 @@ def get_response(
         return False, error
 
 
-def post_html(
+def post_text(
     url: str,
     *,
     data: Optional[Dict[str, Any]] = None,
     json: Optional[Dict[str, Any]] = None,
     headers: Optional[Dict[str, str]] = None,
     cookies: Optional[Dict[str, str]] = None,
-    use_proxy: Union[bool, Optional[Dict[str, str]]] = True,
-    json_data: bool = False,
-    keep: bool = True,
+    use_proxy=True,
 ):
-    """POST 请求的同步包装器"""
-    # 处理代理参数
-    use_proxy_flag = use_proxy is not False
+    text_result, error = executor.run(
+        config.async_client.post_text(
+            url, data=data, json_data=json, headers=headers, cookies=cookies, use_proxy=use_proxy
+        )
+    )
+    if text_result is not None:
+        return True, text_result
+    else:
+        return False, error
 
+
+def post_json(
+    url: str,
+    *,
+    data: Optional[Dict[str, Any]] = None,
+    json: Optional[Dict[str, Any]] = None,
+    headers: Optional[Dict[str, str]] = None,
+    cookies: Optional[Dict[str, str]] = None,
+    use_proxy=True,
+):
+    """POST 请求并返回 JSON 数据的同步包装器"""
     # 处理 cookies
     cookies_dict = cookies or {}
 
-    if json_data:
-        # 返回 JSON 数据
-        json_result, error = executor.run(
-            config.async_client.post_json(
-                url, data=data, json_data=json, headers=headers, cookies=cookies_dict, use_proxy=use_proxy_flag
-            )
+    # 返回 JSON 数据
+    json_result, error = executor.run(
+        config.async_client.post_json(
+            url, data=data, json_data=json, headers=headers, cookies=cookies_dict, use_proxy=use_proxy
         )
-        if json_result is not None:
-            return True, json_result
-        else:
-            return False, error
+    )
+    if json_result is not None:
+        return True, json_result
     else:
-        # 返回文本内容
-        text_result, error = executor.run(
-            config.async_client.post_text(
-                url, data=data, json_data=json, headers=headers, cookies=cookies_dict, use_proxy=use_proxy_flag
-            )
-        )
-        if text_result is not None:
-            return True, text_result
-        else:
-            return False, error
+        return False, error
 
 
 def curl_html(

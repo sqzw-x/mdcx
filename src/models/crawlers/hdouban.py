@@ -7,8 +7,7 @@ import time
 import urllib3
 import zhconv
 
-from models.base.web import post_html
-from models.base.web_compat import get_json
+from models.base.web_compat import get_json, post_json
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -286,7 +285,7 @@ def main(
 
             detail_url = "https://api.6dccbca.com/api/movie/detail"
             data = {"id": str(detail_id[0])}
-            result, response = post_html(detail_url, data=data, json_data=True)
+            result, response = post_json(detail_url, data=data)
             if not result:
                 debug_info = f"网络请求错误: {response}"
                 LogBuffer.info().write(web_info + debug_info)

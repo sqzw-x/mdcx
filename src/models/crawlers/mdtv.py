@@ -6,7 +6,7 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web import post_html
+from models.base.web import post_text
 from models.base.web_compat import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
@@ -241,7 +241,7 @@ def main(
             for number in number_list_new:
                 debug_info = f'搜索地址: {search_url} {{"wd": {number}}}'
                 LogBuffer.info().write(web_info + debug_info)
-                result, response = post_html(search_url, data={"wd": number}, keep=False)
+                result, response = post_text(search_url, data={"wd": number})
                 if not result:
                     debug_info = f"网络请求错误: {response}"
                     LogBuffer.info().write(web_info + debug_info)

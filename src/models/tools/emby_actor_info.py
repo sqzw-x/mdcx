@@ -18,7 +18,7 @@ from lxml import etree
 
 from models.base.file import copy_file
 from models.base.utils import get_used_time
-from models.base.web import post_html
+from models.base.web import post_text
 from models.base.web_compat import get_json, get_text
 from models.config.manager import config
 from models.config.manual import ManualConfig
@@ -109,7 +109,7 @@ def update_emby_actor_info():
                 if config.use_database:
                     db_exist = ActressDB.update_actor_info_from_db(actor_info)
                 if db_exist or exist:
-                    r, res = post_html(update_url, json=actor_info.dump(), use_proxy=False)
+                    r, res = post_text(update_url, json=actor_info.dump(), use_proxy=False)
                     if r:
                         signal.show_log_text(f"\n ✅ 演员信息更新成功！\n 👩🏻 点击查看 {actor_name} 的 Emby 演员主页:")
                         signal.show_log_text(f" {actor_homepage}")

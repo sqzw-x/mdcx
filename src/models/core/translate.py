@@ -13,8 +13,7 @@ import zhconv
 
 from ..base.number import get_number_letters
 from ..base.utils import get_used_time, remove_repeat
-from ..base.web import post_html
-from ..base.web_compat import get_text
+from ..base.web_compat import get_text, post_json
 from ..config.manager import config
 from ..config.resources import resources
 from ..signals import signal
@@ -65,7 +64,7 @@ def youdao_translate(title: str, outline: str):
     }
     headers_o = config.headers
     headers.update(headers_o)
-    result, res = post_html(url, data=data, headers=headers, json_data=True)
+    result, res = post_json(url, data=data, headers=headers)
     if not result:
         return title, outline, f"请求失败！可能是被封了，可尝试更换代理！错误：{res}"
     else:
@@ -155,7 +154,7 @@ def deepl_translate(
     }
 
     if title:
-        result, res = post_html(url, data=params_title, json_data=True)
+        result, res = post_json(url, data=params_title)
         if not result:
             return title, outline, f"API 接口请求失败！错误：{res}"
         else:
@@ -164,7 +163,7 @@ def deepl_translate(
             else:
                 return title, outline, f"API 接口返回数据异常！返回内容：{res}"
     if outline:
-        result, res = post_html(url, data=params_outline, json_data=True)
+        result, res = post_json(url, data=params_outline)
         if not result:
             return title, outline, f"API 接口请求失败！错误：{res}"
         else:
