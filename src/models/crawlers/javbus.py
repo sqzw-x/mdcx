@@ -6,7 +6,7 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web import get_html
+from models.base.web_compat import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -193,7 +193,7 @@ def get_real_url(
     debug_info = f"搜索地址: {url_search} "
     LogBuffer.info().write(debug_info)
     # ========================================================================搜索番号
-    result, html_search = get_html(url_search, headers)
+    result, html_search = get_text(url_search, headers)
     # 判断是否需要登录
     if "lostpasswd" in html_search:
         # 有 cookie
@@ -267,7 +267,7 @@ def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(debug_info)
-        result, htmlcode = get_html(real_url, headers)
+        result, htmlcode = get_text(real_url, headers)
 
         # 判断是否需要登录
         if "lostpasswd" in htmlcode:
@@ -298,7 +298,7 @@ def main(
             else:
                 real_url = get_real_url(number, "censored", javbus_url, json_log, headers, cookie)
 
-            result, htmlcode = get_html(real_url, headers)
+            result, htmlcode = get_text(real_url, headers)
             if not result:
                 debug_info = "未匹配到番号！"
                 LogBuffer.info().write(debug_info)

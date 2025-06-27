@@ -6,8 +6,7 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web import get_html
-from models.base.web_compat import get_json
+from models.base.web_compat import get_json, get_text
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -180,7 +179,7 @@ def main(
         for real_url in real_url_list:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            result, htmlcode = get_html(real_url, cookies={"adc": "1"})
+            result, htmlcode = get_text(real_url, cookies={"adc": "1"})
             if not result:
                 debug_info = f"网络请求错误: {htmlcode} "
                 LogBuffer.info().write(web_info + debug_info)

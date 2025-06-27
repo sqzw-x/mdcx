@@ -6,7 +6,7 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web import check_url, get_html
+from models.base.web import check_url
 from models.base.web_compat import get_text
 from models.core.json_data import LogBuffer
 
@@ -77,7 +77,7 @@ def get_extrafanart(html):
 
 def get_wiki_data():
     url = "https://seesaawiki.jp/av_neme/d/%C9%F1%A5%EF%A5%A4%A5%D5"
-    result, html_search = get_html(url, encoding="euc-jp")
+    result, html_search = get_text(url, encoding="euc-jp")
     if not result:
         return False
     try:

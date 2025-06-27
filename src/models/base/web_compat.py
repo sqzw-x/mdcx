@@ -14,13 +14,18 @@ def get_html(
     headers: Optional[Dict[str, str]] = None,
     cookies: Optional[Dict[str, str]] = None,
     proxies: Union[bool, Optional[Dict[str, str]]] = True,
-    allow_redirects: bool = True,
     keep: bool = True,
     timeout: Union[bool, float] = False,
     encoding: str = "utf-8",
     back_cookie: bool = False,
 ):
-    """GET 请求的同步包装器 - 根据参数调用相应的细分方法"""
+    """
+    目标是全部替换为 get_text, 一些参数不兼容:
+
+    keep: 此参数 False 的原行为是使用裸 requests.get 而不是 session 发出请求
+    timeout: 此参数允许为请求单独设置超时, 可以支持. 但实际上此前项目里只有 getchu 刮削使用此参数, 且设置固定值 40s (首个提交就如此), 似乎不合理
+    back_cookie: 此参数会返回 response.cookies, 只有 get_amazon_data 使用此参数. 可以用 get_response 替代
+    """
     success, result = get_text(url, headers=headers, cookies=cookies, proxies=proxies, encoding=encoding)
     if not success:
         return False, result
@@ -35,15 +40,12 @@ def get_text(
     url: str,
     headers: Optional[Dict[str, str]] = None,
     cookies: Optional[Dict[str, str]] = None,
-    proxies: Union[bool, Optional[Dict[str, str]]] = True,
+    use_proxy=True,
     encoding: str = "utf-8",
 ):
     """获取文本内容的同步包装器"""
-    use_proxy = proxies is not False
-    cookies_dict = cookies or {}
-
     text, error = executor.run(
-        config.async_client.get_text(url, headers=headers, cookies=cookies_dict, encoding=encoding, use_proxy=use_proxy)
+        config.async_client.get_text(url, headers=headers, cookies=cookies, encoding=encoding, use_proxy=use_proxy)
     )
     if text is None:
         return False, error
@@ -55,10 +57,9 @@ def get_content(
     url: str,
     headers: Optional[Dict[str, str]] = None,
     cookies: Optional[Dict[str, str]] = None,
-    proxies: Union[bool, Optional[Dict[str, str]]] = True,
+    use_proxy=True,
 ):
     """获取二进制内容的同步包装器"""
-    use_proxy = proxies is not False
     cookies_dict = cookies or {}
 
     content_data, error = executor.run(
@@ -74,10 +75,9 @@ def get_json(
     url: str,
     headers: Optional[Dict[str, str]] = None,
     cookies: Optional[Dict[str, str]] = None,
-    proxies: Union[bool, Optional[Dict[str, str]]] = True,
+    use_proxy=True,
 ):
     """获取JSON数据的同步包装器"""
-    use_proxy = proxies is not False
     cookies_dict = cookies or {}
 
     json_result, error = executor.run(
@@ -93,10 +93,9 @@ def get_response(
     url: str,
     headers: Optional[Dict[str, str]] = None,
     cookies: Optional[Dict[str, str]] = None,
-    proxies: Union[bool, Optional[Dict[str, str]]] = True,
+    use_proxy=True,
 ):
     """获取响应对象的同步包装器"""
-    use_proxy = proxies is not False
     cookies_dict = cookies or {}
 
     resp, error = executor.run(

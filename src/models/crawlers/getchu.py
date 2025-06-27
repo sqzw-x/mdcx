@@ -9,7 +9,7 @@ import urllib
 import urllib3
 from lxml import etree
 
-from models.base.web import get_html
+from models.base.web_compat import get_text
 from models.core.json_data import LogBuffer
 from models.crawlers import getchu_dl
 
@@ -151,7 +151,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            result, html_search = get_html(url_search, encoding="euc-jp", timeout=40)
+            result, html_search = get_text(url_search, encoding="euc-jp")
             if not result:
                 debug_info = f"网络请求错误: {html_search} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -177,7 +177,7 @@ def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_content = get_html(real_url, encoding="euc-jp", timeout=40)
+            result, html_content = get_text(real_url, encoding="euc-jp")
             if not result:
                 debug_info = f"网络请求错误: {html_content} "
                 LogBuffer.info().write(web_info + debug_info)

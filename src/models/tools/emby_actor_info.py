@@ -18,8 +18,8 @@ from lxml import etree
 
 from models.base.file import copy_file
 from models.base.utils import get_used_time
-from models.base.web import get_html, post_html
-from models.base.web_compat import get_json
+from models.base.web import post_html
+from models.base.web_compat import get_json, get_text
 from models.config.manager import config
 from models.config.manual import ManualConfig
 from models.config.resources import resources
@@ -84,7 +84,7 @@ def update_emby_actor_info():
             actor_homepage, actor_person, pic_url, backdrop_url, backdrop_url_0, update_url = _generate_server_url(
                 actor
             )
-            result, res = get_json(actor_person, proxies=False)
+            result, res = get_json(actor_person, use_proxy=False)
             res = cast(dict, res)
             if not result:
                 signal.show_log_text(
@@ -207,7 +207,7 @@ def show_emby_actor_list(mode):
                 count += 1
             else:
                 # http://192.168.5.191:8096/emby/Persons/梦乃爱华?api_key=ee9a2f2419704257b1dd60b975f2d64e
-                result, res = get_json(actor_person, proxies=False)
+                result, res = get_json(actor_person, use_proxy=False)
                 if not result:
                     signal.show_log_text(
                         f"\n🔴 {count}/{total} Emby 获取演员信息错误！👩🏻 {actor_name} \n    错误信息: {res}"
@@ -298,7 +298,7 @@ def show_emby_actor_list(mode):
 def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
     ja = True if "ja." in url else False
     emby_on = config.emby_on
-    result, res = get_html(url, headers=config.random_headers)
+    result, res = get_text(url, headers=config.random_headers)
     if not result:
         signal.show_log_text(f" 🔴 维基百科演员页请求失败！\n    错误信息: {res}\n    请求地址: {url}")
         return False

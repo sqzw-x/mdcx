@@ -6,7 +6,7 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web import check_url, get_dmm_trailer, get_html, post_html
+from models.base.web import check_url, get_dmm_trailer, post_html
 from models.base.web_compat import get_text
 from models.core.json_data import LogBuffer
 
@@ -472,7 +472,7 @@ def main(
     try:
         # tv.dmm未屏蔽非日本ip，此处请求页面，看是否可以访问
         if "tv.dmm." not in real_url:
-            result, htmlcode = get_html(real_url, cookies=cookies)
+            result, htmlcode = get_text(real_url, cookies=cookies)
             if not result:  # 请求失败
                 debug_info = f"网络请求错误: {htmlcode} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -495,7 +495,7 @@ def main(
                         real_url = f"https://www.dmm.co.jp/search/=/searchstr={number_no_00}/sort=ranking/"  # 不带00，旧作 snis-027
                         debug_info = f"再次搜索地址: {real_url} "
                         LogBuffer.info().write(web_info + debug_info)
-                        result, htmlcode = get_html(real_url, cookies=cookies)
+                        result, htmlcode = get_text(real_url, cookies=cookies)
                         if not result:  # 请求失败
                             debug_info = f"网络请求错误: {htmlcode} "
                             LogBuffer.info().write(web_info + debug_info)
@@ -511,7 +511,7 @@ def main(
                     real_url = f"https://www.dmm.com/search/=/searchstr={number_no_00}/sort=ranking/"
                     debug_info = f"再次搜索地址: {real_url} "
                     LogBuffer.info().write(web_info + debug_info)
-                    result, htmlcode = get_html(real_url, cookies=cookies)
+                    result, htmlcode = get_text(real_url, cookies=cookies)
                     if not result:  # 请求失败
                         debug_info = f"网络请求错误: {htmlcode} "
                         LogBuffer.info().write(web_info + debug_info)
@@ -600,7 +600,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
         else:
-            result, htmlcode = get_html(real_url, cookies=cookies)
+            result, htmlcode = get_text(real_url, cookies=cookies)
             html = etree.fromstring(htmlcode, etree.HTMLParser())
             if not result:
                 debug_info = f"网络请求错误: {htmlcode} "

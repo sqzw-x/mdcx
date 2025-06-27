@@ -55,7 +55,7 @@ def _get_emby_actor_list():
         signal.show_log_text(f"🔴 {server_name} API 密钥未填写！")
         signal.show_log_text("================================================================================")
 
-    result, response = get_json(url, proxies=False)
+    result, response = get_json(url, use_proxy=False)
     if not result:
         signal.show_log_text(
             f"🔴 {server_name} 连接失败！请检查 {server_name} 地址 和 API 密钥是否正确填写！ {response}"

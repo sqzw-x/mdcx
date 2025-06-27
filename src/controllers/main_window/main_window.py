@@ -28,7 +28,6 @@ from models.base.web import (
     check_theporndb_api_token,
     check_version,
     get_avsox_domain,
-    get_html,
     ping_host,
     scraper_html,
 )
@@ -2433,7 +2432,7 @@ class MyMAinWindow(QMainWindow):
         javbus_url = getattr(config, "javbus_website", "https://javbus.com") + "/FSDSS-660"
 
         try:
-            result, response = get_html(javbus_url, headers=headers, cookies=new_cookie)
+            result, response = get_text(javbus_url, headers=headers, cookies=new_cookie)
 
             if not result:
                 tips = f"❌ 连接失败！请检查网络或代理设置！ {response}"
