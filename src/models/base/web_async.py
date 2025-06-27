@@ -269,35 +269,35 @@ class AsyncWebClient:
         webp = False
         if file_path.endswith("jpg") and ".webp" in url:
             webp = True
-        MB = 1024**2
-        if not file_size or file_size <= 2 * MB or webp:
-            # 没有大小时, 不支持分段下载, 直接下载; < 2 MB 的直接下载
-            content, error = await self.get_content(url, use_proxy=use_proxy)
-            if not content:
-                self.log_fn(f"🔴 下载失败: {error}")
-                return False
-            if webp:
-                try:
-                    byte_stream = BytesIO(content)
-                    img: Image.Image = Image.open(byte_stream)
-                    if img.mode == "RGBA":
-                        img = img.convert("RGB")
-                    img.save(file_path, quality=95, subsampling=0)
-                    img.close()
-                    return True
-                except Exception as e:
-                    self.log_fn(f"🔴 WebP转换失败: {str(e)}")
-                    return False
-            else:
-                try:
-                    with open(file_path, "wb") as f:
-                        f.write(content)
-                    return True
-                except Exception as e:
-                    self.log_fn(f"🔴 文件写入失败: {str(e)}")
-                    return False
 
-        return await self._download_chunks(url, file_path, file_size, use_proxy)
+        MB = 1024**2
+        # 2 MB 以上使用分块下载, 不清楚为什么 webp 不分块, 可能是因为要转换成 jpg
+        if file_size and file_size > 2 * MB and not webp:
+            return await self._download_chunks(url, file_path, file_size, use_proxy)
+
+        content, error = await self.get_content(url, use_proxy=use_proxy)
+        if not content:
+            self.log_fn(f"🔴 下载失败: {error}")
+            return False
+        if not webp:
+            try:
+                with open(file_path, "wb") as f:
+                    f.write(content)
+                return True
+            except Exception as e:
+                self.log_fn(f"🔴 文件写入失败: {str(e)}")
+                return False
+        try:
+            byte_stream = BytesIO(content)
+            img: Image.Image = Image.open(byte_stream)
+            if img.mode == "RGBA":
+                img = img.convert("RGB")
+            img.save(file_path, quality=95, subsampling=0)
+            img.close()
+            return True
+        except Exception as e:
+            self.log_fn(f"🔴 WebP转换失败: {str(e)}")
+            return False
 
     async def _download_chunks(self, url: str, file_path: str, file_size: int, use_proxy: bool = True) -> bool:
         """分块下载大文件"""
