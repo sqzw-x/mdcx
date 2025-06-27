@@ -23,57 +23,99 @@ def get_html(
     encoding: str = "utf-8",
     back_cookie: bool = False,
 ):
-    """GET 请求的同步包装器"""
-    # 处理代理参数
-    use_proxy = proxies is not False
+    """GET 请求的同步包装器 - 根据参数调用相应的细分方法"""
+    if content:
+        return get_content(url, headers=headers, cookies=cookies, proxies=proxies)
+    elif json_data:
+        return get_json(url, headers=headers, cookies=cookies, proxies=proxies)
+    elif res:
+        return get_response(url, headers=headers, cookies=cookies, proxies=proxies)
+    else:
+        success, result = get_text(url, headers=headers, cookies=cookies, proxies=proxies, encoding=encoding)
+        if not success:
+            return False, result
+        if back_cookie:
+            # 返回 cookies 和文本
+            cookies_dict = cookies or {}
+            return cookies_dict, result
+        return True, result
 
-    # 处理 cookies
+
+def get_text(
+    url: str,
+    headers: Optional[Dict[str, str]] = None,
+    cookies: Optional[Dict[str, str]] = None,
+    proxies: Union[bool, Optional[Dict[str, str]]] = True,
+    encoding: str = "utf-8",
+):
+    """获取文本内容的同步包装器"""
+    use_proxy = proxies is not False
     cookies_dict = cookies or {}
 
-    if content:
-        # 返回二进制内容
-        content_data, error = executor.run(
-            config.async_client.get_content(url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
-        )
-        if content_data is not None:
-            return True, content_data
-        else:
-            return False, error
-
-    elif json_data:
-        # 返回 JSON 数据
-        json_result, error = executor.run(
-            config.async_client.get_json(url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
-        )
-        if json_result is not None:
-            return True, json_result
-        else:
-            return False, error
-
-    elif res:
-        # 返回响应对象的模拟
-        # 由于异步客户端不直接返回响应对象，我们需要获取文本内容和头部信息
-        resp, error = executor.run(
-            config.async_client.request("GET", url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
-        )
-        if resp is not None:
-            return resp.headers, resp
-        else:
-            return False, error
-
+    text, error = executor.run(
+        config.async_client.get_text(url, headers=headers, cookies=cookies_dict, encoding=encoding, use_proxy=use_proxy)
+    )
+    if text is None:
+        return False, error
     else:
-        # 返回文本内容
-        text, error = executor.run(
-            config.async_client.get_text(
-                url, headers=headers, cookies=cookies_dict, encoding=encoding, use_proxy=use_proxy
-            )
-        )
-        if text is None:
-            return False, error
-        else:
-            if back_cookie:
-                return cookies_dict, text  # 返回 cookies 和文本
-            return True, text
+        return True, text
+
+
+def get_content(
+    url: str,
+    headers: Optional[Dict[str, str]] = None,
+    cookies: Optional[Dict[str, str]] = None,
+    proxies: Union[bool, Optional[Dict[str, str]]] = True,
+):
+    """获取二进制内容的同步包装器"""
+    use_proxy = proxies is not False
+    cookies_dict = cookies or {}
+
+    content_data, error = executor.run(
+        config.async_client.get_content(url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
+    )
+    if content_data is not None:
+        return True, content_data
+    else:
+        return False, error
+
+
+def get_json(
+    url: str,
+    headers: Optional[Dict[str, str]] = None,
+    cookies: Optional[Dict[str, str]] = None,
+    proxies: Union[bool, Optional[Dict[str, str]]] = True,
+):
+    """获取JSON数据的同步包装器"""
+    use_proxy = proxies is not False
+    cookies_dict = cookies or {}
+
+    json_result, error = executor.run(
+        config.async_client.get_json(url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
+    )
+    if json_result is not None:
+        return True, json_result
+    else:
+        return False, error
+
+
+def get_response(
+    url: str,
+    headers: Optional[Dict[str, str]] = None,
+    cookies: Optional[Dict[str, str]] = None,
+    proxies: Union[bool, Optional[Dict[str, str]]] = True,
+):
+    """获取响应对象的同步包装器"""
+    use_proxy = proxies is not False
+    cookies_dict = cookies or {}
+
+    resp, error = executor.run(
+        config.async_client.request("GET", url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
+    )
+    if resp is not None:
+        return resp.headers, resp
+    else:
+        return False, error
 
 
 def post_html(
