@@ -177,6 +177,22 @@ jobs:
           cat changelog.md >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
+      - name: Create dev release message
+        id: get-dev-msg
+        if: ${{ matrix.build == 'macos' && env.IS_DEV == 'true' }}
+        run: |
+          echo 'DEV_MESSAGE<<EOF' >> $GITHUB_OUTPUT
+          echo "🚀 Development Build - ${{ needs.init-matrix.outputs.short_sha }}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "**Latest Commit:**" >> $GITHUB_OUTPUT
+          echo "${{ needs.init-matrix.outputs.last_commit }}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "**Commits Since Last Tag (${{ needs.init-matrix.outputs.last_tag }}):**" >> $GITHUB_OUTPUT
+          echo "${{ needs.init-matrix.outputs.commits_since_tag }}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "⚠️ This is a development build and may contain unstable features." >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
       - name: Create Release - macOS
         uses: svenstaro/upload-release-action@v2
         if: ${{ matrix.build == 'macos' }}
@@ -186,9 +202,7 @@ jobs:
           file: dist/MDCx.dmg
           prerelease: ${{ env.IS_DAILY == 'true' || env.IS_DEV == 'true' }}
           body: |
-            ${{ env.IS_DAILY == 'true' && github.event.repository.updated_at || env.IS_DEV == 'true' && format('{0}
-
-            {1}', needs.init-matrix.outputs.last_commit, needs.init-matrix.outputs.commits_since_tag) || steps.get-changelog.outputs.CHANGELOG }}
+            ${{ env.IS_DAILY == 'true' && github.event.repository.updated_at || env.IS_DEV == 'true' && steps.get-dev-msg.outputs.DEV_MESSAGE || steps.get-changelog.outputs.CHANGELOG }}
           tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.ref }}
 
       - name: Create Release - Windows
@@ -199,4 +213,6 @@ jobs:
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ needs.init-matrix.outputs.short_sha }}.exe
           file: dist/MDCx.exe
           prerelease: ${{ env.IS_DAILY == 'true' || env.IS_DEV == 'true' }}
+          body: |
+            ${{ env.IS_DAILY == 'true' && github.event.repository.updated_at || env.IS_DEV == 'true' && steps.get-dev-msg.outputs.DEV_MESSAGE || steps.get-changelog.outputs.CHANGELOG }}
           tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.ref }}
