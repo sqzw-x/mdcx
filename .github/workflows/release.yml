@@ -35,7 +35,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-tags: true
+          fetch-depth: 0
 
       - name: Get new commits
         id: get-new-commits
@@ -61,7 +61,7 @@ jobs:
         if: ${{ env.IS_DEV == 'true' }}
         run: |
           echo "Deleting old dev release..."
-          gh release delete dev --yes || echo "No previous dev release found."
+          gh release delete alpha --yes || echo "No previous dev release found."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
