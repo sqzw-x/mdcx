@@ -6,7 +6,7 @@ git log -1 --pretty=format:"**Latest Commit:** %s%n%nAuthor: %an%nDate: %ai%nSHA
 echo 'END_LAST_COMMIT'
 
 # 获取最后一个tag
-LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "No tags found")
+LAST_TAG=$(git describe --tags --match '120*' --abbrev=0 2>/dev/null || echo "No tags found")
 echo "last_tag=$LAST_TAG"
 
 # 获取自最后一个tag以来的commit历史
