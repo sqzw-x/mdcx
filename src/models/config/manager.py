@@ -5,7 +5,12 @@ from configparser import ConfigParser, RawConfigParser
 from dataclasses import dataclass, fields
 from io import StringIO
 
-from ..base.utils import get_random_headers, get_user_agent, singleton
+import httpx
+
+from ..base.llm import LLMClient
+from ..base.utils import executor, get_random_headers, get_user_agent, singleton
+from ..base.web_async import AsyncWebClient
+from ..signals import signal
 from .consts import MAIN_PATH, MARK_FILE
 from .manual import ManualConfig
 
@@ -220,8 +225,17 @@ class ConfigSchema:
     publisher_website: str = r"javbus"
     publisher_website_exclude: str = r"airav,airav_cc,avsex,iqqtv,lulubar"
     wanted_website: str = r"javlibrary,javdb"
+
+    # translate
     translate_by: str = r"youdao,google,deepl,"
     deepl_key: str = r""
+    llm_url: str = r"https://api.llm.com/v1"
+    llm_model: str = r"gpt-3.5-turbo"
+    llm_key: str = r""
+    llm_prompt: str = "Please translate the following text to {lang}. Output only the translation without any explanation.\n{content}"  # 原文-{content} 目标语言-{lang}
+    llm_max_req_sec: float = 1  # 每秒请求次数限制
+    llm_max_try: int = 5
+    llm_temperature: float = 0.2
     title_language: str = r"zh_cn"
     title_sehua: bool = True
     title_yesjav: bool = False
@@ -244,13 +258,15 @@ class ConfigSchema:
     studio_translate: bool = True
     publisher_language: str = r"zh_cn"
     publisher_translate: bool = True
+
+    # nfo
     nfo_include_new: str = r"sorttitle,originaltitle,title_cd,outline,plot_,originalplot,release_,releasedate,premiered,country,mpaa,customrating,year,runtime,wanted,score,criticrating,actor,director,series,tag,genre,series_set,studio,maker,publisher,label,poster,cover,trailer,website,"
     nfo_tagline: str = r"发行日期 release"
     nfo_tag_series: str = r"系列: series"
     nfo_tag_studio: str = r"片商: studio"
     nfo_tag_publisher: str = r"发行: publisher"
 
-    # Name_Rule
+    # name
     folder_name: str = r"actor/number actor"
     naming_file: str = r"number"
     naming_media: str = r"number title"
@@ -347,18 +363,19 @@ class ConfigSchema:
     def init(self):
         self._update()
         # 获取proxies
-        if self.type == "http":
-            self.proxies = {
-                "http": "http://" + self.proxy,
-                "https": "http://" + self.proxy,
-            }
-        elif self.type == "socks5":
-            self.proxies = {
-                "http": "socks5h://" + self.proxy,
-                "https": "socks5h://" + self.proxy,
-            }
+        if any(schema in self.proxy for schema in ["http://", "https://", "socks5://", "socks5h://"]):
+            self.proxy = self.proxy.strip()
         else:
+            self.proxy = "http://" + self.proxy.strip()
+        if self.type == "no":  # todo type 现在只需要 bool
             self.proxies = None
+            self.httpx_proxy = None
+        else:
+            self.proxies = {
+                "http": self.proxy,
+                "https": self.proxy,
+            }
+            self.httpx_proxy = self.proxy
 
         self.ipv4_only = "ipv4_only" in self.switch_on
         self.theporndb_no_hash = "theporndb_no_hash" in self.switch_on
@@ -443,6 +460,24 @@ class ConfigSchema:
         [new_str_list.append(i1) for i1 in all_str_list if i1 not in new_str_list]  # 补全
         new_str = ",".join(new_str_list)
         self.suffix_sort = new_str
+
+        # 依赖于 config 的类不能作为全局变量, 必须在 config 内构建, 以在 config 更新后正确重建
+        self.async_client = AsyncWebClient(
+            proxy=config.httpx_proxy,
+            retry=config.retry,
+            timeout=httpx.Timeout(config.timeout),
+            default_headers=config.headers,
+            log_fn=signal.add_log,
+        )
+
+        self.llm_client = LLMClient(
+            client=self.async_client,
+            api_key=config.llm_key,
+            base_url=config.llm_url,
+            timeout=httpx.Timeout(config.timeout, read=None),
+            rate=(max(config.llm_max_req_sec, 1), max(1, 1 / config.llm_max_req_sec)),
+        )
+        self.executor = executor  # 方便通过 config 访问 executor
 
 
 manager = ConfigManager()

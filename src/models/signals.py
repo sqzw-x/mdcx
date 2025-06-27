@@ -43,6 +43,7 @@ class Signals(QObject):
         self.stop = False
 
     def add_log(self, *text):
+        """打印日志到日志页下方详情框"""
         if self.stop:
             return
         try:
