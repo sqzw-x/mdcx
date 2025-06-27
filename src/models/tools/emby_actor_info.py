@@ -23,7 +23,7 @@ from models.config.manager import config
 from models.config.manual import ManualConfig
 from models.config.resources import resources
 from models.core.flags import Flags
-from models.core.translate import deepl_translate, youdao_translate
+from models.core.translate import deepl_translate, llm_translate, youdao_translate
 from models.core.utils import get_movie_path_setting
 from models.core.web import download_file_with_filepath, google_translate
 from models.data_models import EMbyActressInfo
@@ -467,6 +467,8 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
                             t, o, r = youdao_translate(tag_req, "")
                         elif each == "google":  # 使用 google 翻译
                             t, o, r = google_translate(tag_req, "")
+                        elif each == "llm":  # 使用 llm 翻译
+                            t, o, r = llm_translate(tag_req, "")
                         else:  # 使用deepl翻译
                             t, o, r = deepl_translate(tag_req, "", ls="EN")
                         if r:
@@ -485,6 +487,8 @@ def _get_wiki_detail(url, url_log, actor_info: EMbyActressInfo):
                         t, o, r = youdao_translate(tag_req, overview_req)
                     elif each == "google":  # 使用 google 翻译
                         t, o, r = google_translate(tag_req, overview_req)
+                    elif each == "llm":  # 使用 llm 翻译
+                        t, o, r = llm_translate(tag_req, overview_req)
                     else:  # 使用deepl翻译
                         t, o, r = deepl_translate(tag_req, overview_req)
                     if r:

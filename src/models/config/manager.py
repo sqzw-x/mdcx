@@ -8,7 +8,7 @@ from io import StringIO
 import httpx
 
 from ..base.llm import LLMClient
-from ..base.utils import get_random_headers, get_user_agent, singleton
+from ..base.utils import executor, get_random_headers, get_user_agent, singleton
 from ..base.web_async import AsyncWebClient
 from ..signals import signal
 from .consts import MAIN_PATH, MARK_FILE
@@ -477,6 +477,7 @@ class ConfigSchema:
             timeout=httpx.Timeout(config.timeout, read=config.llm_timeout),
             rate=(max(config.llm_max_req_sec, 1), max(1, 1 / config.llm_max_req_sec)),
         )
+        self.executor = executor  # 方便通过 config 访问 executor
 
 
 manager = ConfigManager()

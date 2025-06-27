@@ -171,7 +171,30 @@ def deepl_translate(
                 outline = res["translations"][0]["text"]
             else:
                 return title, outline, f"API 接口返回数据异常！返回内容：{res}"
-    return title, outline, ""
+    return title, outline, None
+
+
+def llm_translate(title: str, outline: str, target_language: str = "简体中文"):
+    r1 = _llm_translate(title, target_language)
+    r2 = _llm_translate(outline, target_language)
+    if r1 is None or r2 is None:
+        return "", "", "LLM 翻译失败! 查看网络日志以获取更多信息"
+    return r1, r2, None
+
+
+def _llm_translate(text: str, target_language: str = "简体中文") -> Optional[str]:
+    """调用 LLM 翻译文本"""
+    if not text:
+        return ""
+    return config.executor.run(
+        config.llm_client.ask(
+            model=config.llm_model,
+            system_prompt="You are a professional translator.",
+            user_prompt=config.llm_prompt.replace("{content}", text).replace("{lang}", target_language),
+            max_try=config.llm_max_try,
+            log_fn=signal.add_log,
+        )
+    )
 
 
 def translate_info(json_data: JsonData):
@@ -500,6 +523,8 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
                     t, o, r = youdao_translate(trans_title, trans_outline)
                 elif each == "google":  # 使用 google 翻译
                     t, o, r = google_translate(trans_title, trans_outline)
+                elif each == "llm":  # 使用 llm 翻译
+                    t, o, r = llm_translate(trans_title, trans_outline)
                 else:  # 使用deepl翻译
                     t, o, r = deepl_translate(trans_title, trans_outline, "JA", json_data)
                 if r:
