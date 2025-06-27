@@ -11,14 +11,16 @@ echo "last_tag=$LAST_TAG"
 
 # 获取自最后一个tag以来的commit历史
 echo 'COMMITS_SINCE_TAG<<END_COMMITS_SINCE_TAG'
+echo '<details>'
 if [ "$LAST_TAG" != "No tags found" ]; then
     echo "**Commits since $LAST_TAG:**"
     echo ""
-    git log $LAST_TAG..HEAD --pretty=format:"- %s (%an, %ar)" --reverse
+    git log $LAST_TAG..HEAD --pretty=format:"- %s (%an, %ar)"
 else
     echo "**All commits:**"
     echo ""
-    git log --pretty=format:"- %s (%an, %ar)" --reverse
+    git log --pretty=format:"- %s (%an, %ar)"
 fi
+echo '</details>'
 echo ''
 echo 'END_COMMITS_SINCE_TAG'

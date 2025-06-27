@@ -186,10 +186,8 @@ jobs:
           echo 'DEV_MESSAGE<<EOF' >> $GITHUB_OUTPUT
           echo "🚀 Development Build - ${{ needs.init-matrix.outputs.short_sha }}" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
-          echo "**Latest Commit:**" >> $GITHUB_OUTPUT
           echo "${{ needs.init-matrix.outputs.last_commit }}" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
-          echo "**Commits Since Last Tag (${{ needs.init-matrix.outputs.last_tag }}):**" >> $GITHUB_OUTPUT
           echo "${{ needs.init-matrix.outputs.commits_since_tag }}" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
           echo "⚠️ This is a development build and may contain unstable features." >> $GITHUB_OUTPUT
