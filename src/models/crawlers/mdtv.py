@@ -6,7 +6,7 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web import get_html, post_html
+from models.base.web_compat import get_text, post_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
@@ -240,9 +240,9 @@ def main(
             for number in number_list_new:
                 debug_info = f'搜索地址: {search_url} {{"wd": {number}}}'
                 LogBuffer.info().write(web_info + debug_info)
-                result, response = post_html(search_url, data={"wd": number}, keep=False)
-                if not result:
-                    debug_info = f"网络请求错误: {response}"
+                response, error = post_text(search_url, data={"wd": number})
+                if response is None:
+                    debug_info = f"网络请求错误: {error}"
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 if "没有找到匹配数据" in response:
@@ -264,9 +264,9 @@ def main(
                 raise Exception(debug_info)
 
         if real_url:
-            result, html_content = get_html(real_url)
-            if not result:
-                debug_info = f"网络请求错误: {html_content}"
+            html_content, error = get_text(real_url)
+            if html_content is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())

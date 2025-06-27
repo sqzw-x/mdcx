@@ -13,7 +13,7 @@ import zhconv
 
 from ..base.number import get_number_letters
 from ..base.utils import get_used_time, remove_repeat
-from ..base.web import get_html, post_html
+from ..base.web_compat import get_text, post_json
 from ..config.manager import config
 from ..config.resources import resources
 from ..signals import signal
@@ -64,9 +64,9 @@ def youdao_translate(title: str, outline: str):
     }
     headers_o = config.headers
     headers.update(headers_o)
-    result, res = post_html(url, data=data, headers=headers, json_data=True)
-    if not result:
-        return title, outline, f"请求失败！可能是被封了，可尝试更换代理！错误：{res}"
+    res, error = post_json(url, data=data, headers=headers)
+    if res is None:
+        return title, outline, f"请求失败！可能是被封了，可尝试更换代理！错误：{error}"
     else:
         res = cast(dict, res)
         translateResult = res.get("translateResult")
@@ -154,18 +154,18 @@ def deepl_translate(
     }
 
     if title:
-        result, res = post_html(url, data=params_title, json_data=True)
-        if not result:
-            return title, outline, f"API 接口请求失败！错误：{res}"
+        res, error = post_json(url, data=params_title)
+        if res is None:
+            return title, outline, f"API 接口请求失败！错误：{error}"
         else:
             if "translations" in res:
                 title = res["translations"][0]["text"]
             else:
                 return title, outline, f"API 接口返回数据异常！返回内容：{res}"
     if outline:
-        result, res = post_html(url, data=params_outline, json_data=True)
-        if not result:
-            return title, outline, f"API 接口请求失败！错误：{res}"
+        res, error = post_json(url, data=params_outline)
+        if res is None:
+            return title, outline, f"API 接口请求失败！错误：{error}"
         else:
             if "translations" in res:
                 outline = res["translations"][0]["text"]
@@ -435,8 +435,8 @@ def _get_youdao_key_thread():
     # 获取 js url
     js_url = ""
     youdao_url = "https://fanyi.youdao.com"
-    result, req = get_html(youdao_url)
-    if result:
+    req, error = get_text(youdao_url)
+    if req is not None:
         # https://shared.ydstatic.com/fanyi/newweb/v1.1.11/scripts/newweb/fanyi.min.js
         url_temp = re.search(r"(https://shared.ydstatic.com/fanyi/newweb/.+/scripts/newweb/fanyi.min.js)", req)
         if url_temp:
@@ -447,7 +447,10 @@ def _get_youdao_key_thread():
         return
 
     # 请求 js url ，获取 youdao key
-    result, req = get_html(js_url)
+    req, error = get_text(js_url)
+    if req is None:
+        signal.show_traceback_log("youdao js content get failed!!!")
+        return
     try:
         youdaokey = re.search(r'(?<="fanyideskweb" \+ e \+ i \+ ")[^"]+', req).group(
             0

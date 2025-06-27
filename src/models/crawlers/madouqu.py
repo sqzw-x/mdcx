@@ -7,7 +7,7 @@ from datetime import datetime
 import urllib3
 from lxml import etree
 
-from models.base.web import curl_html
+from models.base.web_compat import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info, get_number_list
@@ -106,10 +106,10 @@ def main(
                 # real_url = 'https://madouqu.com/?s=XSJ-138.%E5%85%BB%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86%E6%95%99%E5%AD%A6EP6'
                 debug_info = f"请求地址: {real_url} "
                 LogBuffer.info().write(web_info + debug_info)
-                result, response = curl_html(real_url)
+                response, error = get_text(real_url)
 
-                if not result:
-                    debug_info = f"网络请求错误: {response}"
+                if response is None:
+                    debug_info = f"网络请求错误: {error}"
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 search_page = etree.fromstring(response, etree.HTMLParser())
@@ -123,10 +123,10 @@ def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
-        result, response = curl_html(real_url)
+        response, error = get_text(real_url)
 
-        if not result:
-            debug_info = f"没有找到数据 {response} "
+        if response is None:
+            debug_info = f"没有找到数据 {error} "
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 

@@ -10,7 +10,7 @@ import oshash
 import urllib3
 
 from models.base.number import long_name, remove_escape_string
-from models.base.web import get_html
+from models.base.web_compat import get_json
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -304,13 +304,13 @@ def main(
                 url_hash = f"https://api.theporndb.net/movies/hash/{hash}"
                 debug_info = f"请求地址: {url_hash} "
                 LogBuffer.info().write(web_info + debug_info)
-                result, hash_search = get_html(url_hash, headers=headers, json_data=True)
+                hash_search, error = get_json(url_hash, headers=headers)
 
-                if not result:
+                if hash_search is None:
                     # 判断返回内容是否有问题
-                    debug_info = f"请求错误: {hash_search}"
+                    debug_info = f"请求错误: {error}"
                     LogBuffer.info().write(web_info + debug_info)
-                    if "401 http" in hash_search:
+                    if "HTTP 401" in error:
                         debug_info = f"请检查 API Token 是否正确: {api_token} "
                         LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
@@ -347,13 +347,13 @@ def main(
                     url_search = f"https://api.theporndb.net/movies?q={search_keyword}&per_page=100"
                     debug_info = f"请求地址: {url_search} "
                     LogBuffer.info().write(web_info + debug_info)
-                    result, res_search = get_html(url_search, headers=headers, json_data=True)
+                    res_search, error = get_json(url_search, headers=headers)
 
-                    if not result:
+                    if res_search is None:
                         # 判断返回内容是否有问题
                         debug_info = f"请求错误: {url_search}"
                         LogBuffer.info().write(web_info + debug_info)
-                        if "401 http" in res_search:
+                        if "HTTP 401" in error:
                             debug_info = f"请检查 API Token 是否正确: {api_token} "
                             LogBuffer.info().write(web_info + debug_info)
                         raise Exception(debug_info)
@@ -369,12 +369,12 @@ def main(
         if real_url and not hash_data:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            result, res_real = get_html(real_url, headers=headers, json_data=True)
-            if not result:
+            res_real, error = get_json(real_url, headers=headers)
+            if res_real is None:
                 # 判断返回内容是否有问题
-                debug_info = f"请求错误: {res_real} "
+                debug_info = f"请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
-                if "401 http" in res_real:
+                if "HTTP 401" in error:
                     debug_info = f"请检查 API Token 是否正确: {api_token} "
                     LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)

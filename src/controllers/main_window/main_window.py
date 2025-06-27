@@ -29,8 +29,8 @@ from models.base.web import (
     check_version,
     get_avsox_domain,
     ping_host,
-    scraper_html,
 )
+from models.base.web_compat import get_text
 from models.config.consts import IS_WINDOWS, MARK_FILE
 from models.config.manager import config, manager
 from models.config.manual import ManualConfig
@@ -51,7 +51,7 @@ from models.core.scraper import again_search, get_remain_list, start_new_scrape
 from models.core.subtitle import add_sub_for_all_video
 from models.core.utils import deal_url, get_movie_path_setting
 from models.core.video import add_del_extras, add_del_theme_videos
-from models.core.web import get_html, show_netstatus
+from models.core.web import show_netstatus
 from models.entity.enums import FileMode
 from models.signals import signal
 from models.tools.actress_db import ActressDB
@@ -2230,29 +2230,29 @@ class MyMAinWindow(QMainWindow):
                     res_theporndb = check_theporndb_api_token()
                     each[1] = res_theporndb.replace("✅ 连接正常", f"✅ 连接正常{ping_host(host_address)}")
                 elif name == "javlibrary":
-                    proxies = True
-                    if hasattr(config, f"javlibrary_website"):
-                        proxies = False
-                    result, html_info = scraper_html(each[0], proxies=proxies)
-                    if not result:
-                        each[1] = "❌ 连接失败 请检查网络或代理设置！ " + html_info
+                    use_proxy = True
+                    if hasattr(config, "javlibrary_website"):
+                        use_proxy = False
+                    html_info, error = get_text(each[0], use_proxy=use_proxy)
+                    if html_info is None:
+                        each[1] = "❌ 连接失败 请检查网络或代理设置！ " + error
                     elif "Cloudflare" in html_info:
                         each[1] = "❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)"
                     else:
                         each[1] = f"✅ 连接正常{ping_host(host_address)}"
                 elif name in ["avsex", "freejavbt", "airav_cc", "airav", "madouqu", "7mmtv"]:
-                    result, html_info = scraper_html(each[0])
-                    if not result:
-                        each[1] = "❌ 连接失败 请检查网络或代理设置！ " + html_info
+                    html_info, error = get_text(each[0])
+                    if html_info is None:
+                        each[1] = "❌ 连接失败 请检查网络或代理设置！ " + error
                     elif "Cloudflare" in html_info:
                         each[1] = "❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)"
                     else:
                         each[1] = f"✅ 连接正常{ping_host(host_address)}"
                 else:
                     try:
-                        result, html_content = get_html(each[0])
-                        if not result:
-                            each[1] = "❌ 连接失败 请检查网络或代理设置！ " + str(html_content)
+                        html_content, error = get_text(each[0])
+                        if html_content is None:
+                            each[1] = "❌ 连接失败 请检查网络或代理设置！ " + str(error)
                         else:
                             if name == "dmm":
                                 if re.findall("このページはお住まいの地域からご利用になれません", html_content):
@@ -2358,9 +2358,9 @@ class MyMAinWindow(QMainWindow):
         cookies = config.javdb
         javdb_url = getattr(config, "javdb_website", "https://javdb.com") + "/v/D16Q5?locale=zh"
         try:
-            result, response = scraper_html(javdb_url, headers=header)
-            if not result:
-                if "Cookie" in response:
+            response, error = get_text(javdb_url, headers=header)
+            if response is None:
+                if "Cookie" in error:
                     if cookies != input_cookie:
                         tips = "❌ Cookie 已过期！"
                     else:
@@ -2431,10 +2431,10 @@ class MyMAinWindow(QMainWindow):
         javbus_url = getattr(config, "javbus_website", "https://javbus.com") + "/FSDSS-660"
 
         try:
-            result, response = get_html(javbus_url, headers=headers, cookies=new_cookie)
+            response, error = get_text(javbus_url, headers=headers, cookies=new_cookie)
 
-            if not result:
-                tips = f"❌ 连接失败！请检查网络或代理设置！ {response}"
+            if response is None:
+                tips = f"❌ 连接失败！请检查网络或代理设置！ {error}"
             elif "lostpasswd" in response:
                 if input_cookie:
                     tips = "❌ Cookie 无效！"

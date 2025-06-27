@@ -10,7 +10,7 @@ import time
 from lxml import etree
 
 from models.base.utils import get_used_time
-from models.base.web import get_html, scraper_html
+from models.base.web_compat import get_text
 from models.config.manager import config, manager
 from models.config.resources import resources
 from models.core.file import get_file_info, movie_lists
@@ -19,9 +19,9 @@ from models.signals import signal
 
 
 def _scraper_web(url):
-    result, html = scraper_html(url)
-    if not result:
-        signal.show_log_text(f"请求错误: {html}")
+    html, error = get_text(url)
+    if html is None:
+        signal.show_log_text(f"请求错误: {error}")
         return ""
     if "The owner of this website has banned your access based on your browser's behaving" in html:
         signal.show_log_text(f"由于请求过多，javdb网站暂时禁止了你当前IP的访问！！可访问javdb.com查看详情！ {html}")
@@ -42,10 +42,10 @@ def _get_actor_numbers(actor_url, actor_single_url):
     i = 1
     while next_page:
         page_url = f"{actor_url}?page={i}&t=s"
-        result, html = get_html(page_url)
-        if not result:
-            result, html = scraper_html(page_url)
-        if not result:
+        html, error = get_text(page_url)
+        if html is None:
+            html, error = get_text(page_url)
+        if html is None:
             return
         if "pagination-next" not in html or i >= 60:
             next_page = False

@@ -15,25 +15,27 @@ class AsyncWebClient:
         timeout: Optional[httpx.Timeout] = None,
         default_headers: Optional[dict[str, str]] = None,
         log_fn: Optional[Callable[[str], None]] = None,
+        ipv4_only: bool = False,
     ):
         limits = httpx.Limits(max_connections=100, max_keepalive_connections=50, keepalive_expiry=20)
         self.retry = retry
         self.default_headers = default_headers or {}
-        # httpx 不支持为每个请求单独设置代理
+        # httpx 不支持为每个请求单独设置代理, 需要两个客户端
         self.proxy_client = httpx.AsyncClient(
             limits=limits,
             proxy=proxy,
             verify=False,
             timeout=timeout,
             follow_redirects=True,
-            max_redirects=10,
+            # https://github.com/encode/httpx/discussions/2664
+            transport=httpx.AsyncHTTPTransport(local_address="0.0.0.0") if ipv4_only else None,
         )
         self.no_proxy_client = httpx.AsyncClient(
             limits=limits,
             verify=False,
             timeout=timeout,
             follow_redirects=True,
-            max_redirects=10,
+            transport=httpx.AsyncHTTPTransport(local_address="0.0.0.0") if ipv4_only else None,
         )
         self.log_fn = log_fn if log_fn is not None else lambda _: None
 
@@ -154,13 +156,13 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[bytes], Optional[str]]:
+    ) -> tuple[Optional[bytes], str]:
         """请求二进制内容"""
         resp, error = await self.request("GET", url, headers=headers, cookies=cookies, use_proxy=use_proxy)
         if resp is None:
             return None, error
 
-        return resp.content, None
+        return resp.content, ""
 
     async def get_json(
         self,
@@ -169,13 +171,13 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[dict[str, Any]], Optional[str]]:
+    ) -> tuple[Optional[dict[str, Any]], str]:
         """请求JSON数据"""
         response, error = await self.request("GET", url, headers=headers, cookies=cookies, use_proxy=use_proxy)
         if response is None:
             return None, error
         try:
-            return response.json(), None
+            return response.json(), ""
         except Exception as e:
             return None, f"JSON解析失败: {str(e)}"
 
@@ -189,7 +191,7 @@ class AsyncWebClient:
         cookies: Optional[dict[str, str]] = None,
         encoding: str = "utf-8",
         use_proxy: bool = True,
-    ) -> tuple[Optional[str], Optional[str]]:
+    ) -> tuple[Optional[str], str]:
         """POST 请求, 返回响应文本内容"""
         response, error = await self.request(
             "POST", url, data=data, json_data=json_data, headers=headers, cookies=cookies, use_proxy=use_proxy
@@ -198,7 +200,7 @@ class AsyncWebClient:
             return None, error
         try:
             response.encoding = encoding
-            return response.text, None
+            return response.text, ""
         except Exception as e:
             return None, f"文本解析失败: {str(e)}"
 
@@ -211,7 +213,7 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[dict[str, Any]], Optional[str]]:
+    ) -> tuple[Optional[dict[str, Any]], str]:
         """POST 请求, 返回响应JSON数据"""
         response, error = await self.request(
             "POST", url, data=data, json_data=json_data, headers=headers, cookies=cookies, use_proxy=use_proxy
@@ -220,7 +222,7 @@ class AsyncWebClient:
             return None, error
 
         try:
-            return response.json(), None
+            return response.json(), ""
         except Exception as e:
             return None, f"JSON解析失败: {str(e)}"
 
@@ -233,7 +235,7 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[bytes], Optional[str]]:
+    ) -> tuple[Optional[bytes], str]:
         """POST请求, 返回二进制响应"""
         response, error = await self.request(
             "POST", url, data=data, json_data=json_data, headers=headers, cookies=cookies, use_proxy=use_proxy
@@ -241,7 +243,7 @@ class AsyncWebClient:
         if error or response is None:
             return None, error
 
-        return response.content, None
+        return response.content, ""
 
     async def get_filesize(self, url: str, *, use_proxy: bool = True) -> Optional[int]:
         """获取文件大小"""
@@ -271,35 +273,35 @@ class AsyncWebClient:
         webp = False
         if file_path.endswith("jpg") and ".webp" in url:
             webp = True
-        MB = 1024**2
-        if not file_size or file_size <= 2 * MB or webp:
-            # 没有大小时, 不支持分段下载, 直接下载; < 2 MB 的直接下载
-            content, error = await self.get_content(url, use_proxy=use_proxy)
-            if not content:
-                self.log_fn(f"🔴 下载失败: {error}")
-                return False
-            if webp:
-                try:
-                    byte_stream = BytesIO(content)
-                    img: Image.Image = Image.open(byte_stream)
-                    if img.mode == "RGBA":
-                        img = img.convert("RGB")
-                    img.save(file_path, quality=95, subsampling=0)
-                    img.close()
-                    return True
-                except Exception as e:
-                    self.log_fn(f"🔴 WebP转换失败: {str(e)}")
-                    return False
-            else:
-                try:
-                    with open(file_path, "wb") as f:
-                        f.write(content)
-                    return True
-                except Exception as e:
-                    self.log_fn(f"🔴 文件写入失败: {str(e)}")
-                    return False
 
-        return await self._download_chunks(url, file_path, file_size, use_proxy)
+        MB = 1024**2
+        # 2 MB 以上使用分块下载, 不清楚为什么 webp 不分块, 可能是因为要转换成 jpg
+        if file_size and file_size > 2 * MB and not webp:
+            return await self._download_chunks(url, file_path, file_size, use_proxy)
+
+        content, error = await self.get_content(url, use_proxy=use_proxy)
+        if not content:
+            self.log_fn(f"🔴 下载失败: {error}")
+            return False
+        if not webp:
+            try:
+                with open(file_path, "wb") as f:
+                    f.write(content)
+                return True
+            except Exception as e:
+                self.log_fn(f"🔴 文件写入失败: {str(e)}")
+                return False
+        try:
+            byte_stream = BytesIO(content)
+            img: Image.Image = Image.open(byte_stream)
+            if img.mode == "RGBA":
+                img = img.convert("RGB")
+            img.save(file_path, quality=95, subsampling=0)
+            img.close()
+            return True
+        except Exception as e:
+            self.log_fn(f"🔴 WebP转换失败: {str(e)}")
+            return False
 
     async def _download_chunks(self, url: str, file_path: str, file_size: int, use_proxy: bool = True) -> bool:
         """分块下载大文件"""

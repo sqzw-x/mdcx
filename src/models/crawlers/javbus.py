@@ -6,7 +6,7 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web import get_html
+from models.base.web_compat import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -193,19 +193,18 @@ def get_real_url(
     debug_info = f"搜索地址: {url_search} "
     LogBuffer.info().write(debug_info)
     # ========================================================================搜索番号
-    result, html_search = get_html(url_search, headers)
+    html_search, error = get_text(url_search, headers=headers)
     # 判断是否需要登录
+    if html_search is None:
+        debug_info = f"网络请求错误: {error} "
+        LogBuffer.info().write(debug_info)
+        raise Exception(debug_info)
     if "lostpasswd" in html_search:
         # 有 cookie
         if cookie:
             raise Exception("Cookie 无效！请重新填写 Cookie 或更新节点！")
         else:
             raise Exception("当前节点需要填写 Cookie 才能刮削！请到 设置-网络 填写 Cookie 或更换节点！")
-
-    if not result:
-        debug_info = f"网络请求错误: {html_search} "
-        LogBuffer.info().write(debug_info)
-        raise Exception(debug_info)
 
     html = etree.fromstring(html_search, etree.HTMLParser())
     url_list = html.xpath("//a[@class='movie-box']/@href")
@@ -267,9 +266,13 @@ def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(debug_info)
-        result, htmlcode = get_html(real_url, headers)
+        htmlcode, error = get_text(real_url, headers=headers)
 
         # 判断是否需要登录
+        if htmlcode is None:
+            debug_info = f"网络请求错误: {error} "
+            LogBuffer.info().write(debug_info)
+            raise Exception(debug_info)
         if "lostpasswd" in htmlcode:
             # 有 cookie
             if cookie:
@@ -277,10 +280,10 @@ def main(
             else:
                 raise Exception("当前节点需要填写 Cookie 才能刮削！请到 设置-网络 填写 Cookie 或更换节点！")
 
-        if not result:
+        if htmlcode is None:
             # 有404时尝试再次搜索 DV-1175
-            if "404" not in htmlcode:
-                debug_info = f"番号地址:{real_url} \n       网络请求错误: {htmlcode} "
+            if "404" not in error:
+                debug_info = f"番号地址:{real_url} \n       网络请求错误: {error} "
                 LogBuffer.info().write(debug_info)
                 raise Exception(debug_info)
 
@@ -298,8 +301,8 @@ def main(
             else:
                 real_url = get_real_url(number, "censored", javbus_url, json_log, headers, cookie)
 
-            result, htmlcode = get_html(real_url, headers)
-            if not result:
+            htmlcode, error = get_text(real_url, headers=headers)
+            if htmlcode is None:
                 debug_info = "未匹配到番号！"
                 LogBuffer.info().write(debug_info)
                 raise Exception(debug_info)

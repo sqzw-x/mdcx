@@ -7,7 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.number import is_uncensored
-from models.base.web import curl_html
+from models.base.web_compat import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info
@@ -205,10 +205,10 @@ def main(
             search_url = f"{search_url}?search_keyword={search_keyword}&search_type=searchall&op=search"
             debug_info = f"搜索地址: {search_url} "
             LogBuffer.info().write(web_info + debug_info)
-            result, response = curl_html(search_url)
+            response, error = get_text(search_url)
 
-            if not result:
-                debug_info = f"网络请求错误: {response}"
+            if response is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -223,9 +223,9 @@ def main(
                 raise Exception(debug_info)
 
         if real_url:
-            result, html_content = curl_html(real_url)
-            if not result:
-                debug_info = f"网络请求错误: {html_content}"
+            html_content, error = get_text(real_url)
+            if html_content is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 

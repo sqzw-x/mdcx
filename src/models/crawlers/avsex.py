@@ -6,7 +6,7 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web import curl_html
+from models.base.web_compat import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -194,9 +194,9 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            result, html_search = curl_html(url_search)
-            if not result:
-                debug_info = f"网络请求错误: {html_search} "
+            html_search, error = get_text(url_search)
+            if html_search is None:
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
@@ -212,9 +212,9 @@ def main(
 
             # https://9sex.tv/#/home/video/332642
             # https://paycalling.com/web/video?id=340715
-            result, html_content = curl_html(real_url)
-            if not result:
-                debug_info = f"网络请求错误: {html_content} "
+            html_content, error = get_text(real_url)
+            if html_content is None:
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 

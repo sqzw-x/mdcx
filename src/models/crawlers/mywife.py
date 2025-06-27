@@ -6,7 +6,8 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web import check_url, get_html
+from models.base.web import check_url
+from models.base.web_compat import get_text
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -76,8 +77,8 @@ def get_extrafanart(html):
 
 def get_wiki_data():
     url = "https://seesaawiki.jp/av_neme/d/%C9%F1%A5%EF%A5%A4%A5%D5"
-    result, html_search = get_html(url, encoding="euc-jp")
-    if not result:
+    html_search, error = get_text(url, encoding="euc-jp")
+    if html_search is None:
         return False
     try:
         html = etree.fromstring(html_search, etree.HTMLParser())
@@ -186,9 +187,9 @@ def main(
             debug_info = f"搜索页地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_content = get_html(url_search)
-            if not result:
-                debug_info = f"网络请求错误: {html_content} "
+            html_content, error = get_text(url_search)
+            if html_content is None:
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())
@@ -198,9 +199,9 @@ def main(
                 debug_info = f"中间页地址: {first_url} "
                 LogBuffer.info().write(web_info + debug_info)
 
-                result, html_content = get_html(first_url)
-                if not result:
-                    debug_info = f"网络请求错误: {html_content} "
+                html_content, error = get_text(first_url)
+                if html_content is None:
+                    debug_info = f"网络请求错误: {error} "
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 html_info = etree.fromstring(html_content, etree.HTMLParser())
@@ -221,9 +222,9 @@ def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_content = get_html(real_url)
-            if not result:
-                debug_info = f"网络请求错误: {html_content} "
+            html_content, error = get_text(real_url)
+            if html_content is None:
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())

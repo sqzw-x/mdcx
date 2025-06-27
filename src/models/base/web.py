@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
 import re
-import socket
 import threading
-from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
-from threading import Lock
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union, overload
+from typing import List, Optional, Tuple, Union
 from urllib.parse import quote
 
-# import cloudscraper
-import curl_cffi.requests
 import requests
 import urllib3.util.connection as urllib3_cn
 from PIL import Image
@@ -34,8 +29,8 @@ from requests.exceptions import (
 
 from ..config.manager import config
 from ..signals import signal
-from .utils import get_user_agent, singleton
-from .web_compat import *
+from .utils import get_user_agent
+from .web_compat import get_json, get_text
 
 
 def _allowed_gai_family():
@@ -51,531 +46,6 @@ try:
         urllib3_cn.allowed_gai_family = _allowed_gai_family
 except Exception:
     urllib3_cn.allowed_gai_family = _allowed_gai_family
-
-
-@singleton
-class WebRequests:
-    def __init__(self):
-        self.session_g = requests.Session()
-        self.session_g.mount("https://", requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100))
-        self.session_g.mount("http://", requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100))
-        # self.scraper = cloudscraper.create_scraper(
-        #     browser={'browser': 'firefox', 'platform': 'windows', 'mobile': False})  # returns a CloudScraper instance
-        self.lock = Lock()
-        self.pool = ThreadPoolExecutor(32)
-        self.curl_session = curl_cffi.requests.Session(max_redirects=10)
-
-    def _prepare_request_params(
-        self,
-        url: Optional[str] = None,
-        headers: Optional[Dict[str, str]] = None,
-        proxy: Union[bool, Optional[Dict[str, str]]] = True,
-        timeout: Optional[float] = None,
-    ) -> Tuple[Dict[str, str], Optional[Dict[str, str]], float]:
-        """预处理请求参数"""
-        # todo 用一个单独参数控制是否使用代理
-        if proxy is True:
-            proxy = config.proxies
-        elif proxy is False:
-            proxy = None
-
-        # 处理请求头
-        if not headers:
-            headers = config.headers.copy()
-
-        if url:
-            if "getchu" in url:
-                headers.update({"Referer": "http://www.getchu.com/top.html"})
-            elif "xcity" in url:
-                headers.update(
-                    {"referer": "https://xcity.jp/result_published/?genre=%2Fresult_published%2F&q=2&sg=main&num=60"}
-                )
-            elif "javbus" in url:
-                headers.update({"Referer": "https://www.javbus.com/"})
-            elif "giga" in url and "cookie_set.php" not in url:
-                headers.update({"Referer": "https://www.giga-web.jp/top.html"})
-
-        # 处理超时
-        timeout = timeout or config.timeout
-
-        return headers, proxy, timeout
-
-    @overload
-    def get_html(
-        self,
-        url: str,
-        *,
-        content: Literal[True],
-        headers: Optional[Dict[str, str]] = None,
-        cookies: Optional[Dict[str, str]] = None,
-        proxies: Union[bool, Optional[Dict[str, str]]] = True,
-        allow_redirects: bool = True,
-        json_data: bool = False,
-        res: bool = False,
-        keep: bool = True,
-        timeout: Union[bool, float] = False,
-        encoding: str = "utf-8",
-        back_cookie: bool = False,
-    ) -> Tuple[bool, Union[bytes, str]]: ...
-
-    @overload
-    def get_html(
-        self,
-        url: str,
-        *,
-        json_data: Literal[True],
-        headers: Optional[Dict[str, str]] = None,
-        cookies: Optional[Dict[str, str]] = None,
-        proxies: Union[bool, Optional[Dict[str, str]]] = True,
-        allow_redirects: bool = True,
-        content: bool = False,
-        res: bool = False,
-        keep: bool = True,
-        timeout: Union[bool, float] = False,
-        encoding: str = "utf-8",
-        back_cookie: bool = False,
-    ) -> Tuple[bool, Union[Dict[str, Any], str]]: ...
-
-    @overload
-    def get_html(
-        self,
-        url: str,
-        *,
-        res: Literal[True],
-        headers: Optional[Dict[str, str]] = None,
-        cookies: Optional[Dict[str, str]] = None,
-        proxies: Union[bool, Optional[Dict[str, str]]] = True,
-        allow_redirects: bool = True,
-        json_data: bool = False,
-        content: bool = False,
-        keep: bool = True,
-        timeout: Union[bool, float] = False,
-        encoding: str = "utf-8",
-        back_cookie: bool = False,
-    ) -> Tuple[Any, Union[Any, str]]: ...
-
-    def get_html(
-        self,
-        url: str,
-        headers: Optional[Dict[str, str]] = None,
-        cookies: Optional[Dict[str, str]] = None,
-        proxies: Union[bool, Optional[Dict[str, str]]] = True,
-        allow_redirects: bool = True,
-        json_data: bool = False,
-        content: bool = False,
-        res: bool = False,
-        keep: bool = True,
-        timeout: Union[bool, float] = False,
-        encoding: str = "utf-8",
-        back_cookie: bool = False,
-    ):
-        headers, proxy, timeout = self._prepare_request_params(url, headers, proxies, timeout)
-
-        if content:
-            return self._get_content(url, headers, cookies, proxy, timeout, allow_redirects)
-        elif json_data:
-            return self._get_json(url, headers, cookies, proxy, timeout, allow_redirects, encoding)
-        elif res:
-            return self._get_response(url, headers, cookies, proxy, timeout, allow_redirects)
-        else:
-            return self._get_text(url, headers, cookies, proxy, timeout, allow_redirects, encoding, keep, back_cookie)
-
-    def _get_content(
-        self,
-        url: str,
-        headers: Dict[str, str],
-        cookies: Optional[Dict[str, str]],
-        proxies: Optional[Dict[str, str]],
-        timeout: float,
-        allow_redirects: bool,
-    ) -> Tuple[bool, Union[bytes, str]]:
-        """获取二进制内容"""
-        for i in range(config.retry):
-            try:
-                response = self.session_g.get(
-                    url,
-                    headers=headers,
-                    cookies=cookies,
-                    proxies=proxies,
-                    timeout=timeout,
-                    verify=False,
-                    allow_redirects=allow_redirects,
-                )
-                if self._check_response(response, url, i):
-                    return True, response.content
-            except Exception as e:
-                self._handle_request_error(e, url, i)
-        return False, f"请求失败! {url}"
-
-    def _get_json(
-        self,
-        url: str,
-        headers: Dict[str, str],
-        cookies: Optional[Dict[str, str]],
-        proxies: Optional[Dict[str, str]],
-        timeout: float,
-        allow_redirects: bool,
-        encoding: str,
-    ) -> Tuple[bool, Union[Dict[str, Any], str]]:
-        """获取JSON响应"""
-        for i in range(config.retry):
-            try:
-                response = self.session_g.get(
-                    url,
-                    headers=headers,
-                    cookies=cookies,
-                    proxies=proxies,
-                    timeout=timeout,
-                    verify=False,
-                    allow_redirects=allow_redirects,
-                )
-                if self._check_response(response, url, i):
-                    response.encoding = encoding
-                    return True, response.json()
-            except Exception as e:
-                self._handle_request_error(e, url, i)
-        return False, f"请求失败! {url}"
-
-    def _get_response(
-        self,
-        url: str,
-        headers: Dict[str, str],
-        cookies: Optional[Dict[str, str]],
-        proxies: Optional[Dict[str, str]],
-        timeout: float,
-        allow_redirects: bool,
-    ) -> Tuple[Any, Union[Any, str]]:
-        """获取完整响应对象"""
-        for i in range(config.retry):
-            try:
-                response = self.session_g.get(
-                    url,
-                    headers=headers,
-                    cookies=cookies,
-                    proxies=proxies,
-                    timeout=timeout,
-                    verify=False,
-                    allow_redirects=allow_redirects,
-                )
-                if self._check_response(response, url, i):
-                    return response.headers, response
-            except Exception as e:
-                self._handle_request_error(e, url, i)
-        return False, f"请求失败! {url}"
-
-    def _get_text(
-        self,
-        url: str,
-        headers: Dict[str, str],
-        cookies: Optional[Dict[str, str]],
-        proxies: Optional[Dict[str, str]],
-        timeout: float,
-        allow_redirects: bool,
-        encoding: str,
-        keep: bool,
-        back_cookie: bool,
-    ) -> Tuple[Any, str]:
-        """获取文本响应"""
-        session = self.session_g if keep else requests
-        for i in range(config.retry):
-            try:
-                response = session.get(
-                    url,
-                    headers=headers,
-                    cookies=cookies,
-                    proxies=proxies,
-                    timeout=timeout,
-                    verify=False,
-                    allow_redirects=allow_redirects,
-                )
-                if self._check_response(response, url, i):
-                    _header = response.cookies if back_cookie else response.headers
-                    response.encoding = encoding
-                    return _header, response.text
-            except Exception as e:
-                self._handle_request_error(e, url, i)
-        return False, f"请求失败! {url}"
-
-    @overload
-    def post_html(
-        self,
-        url: str,
-        *,
-        data: Optional[Dict[str, Any]] = None,
-        json: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
-        cookies: Optional[Dict[str, str]] = None,
-        use_proxy: Union[bool, Optional[Dict[str, str]]] = True,
-        json_data: Literal[True],
-        keep: bool = True,
-    ) -> Union[Tuple[Literal[True], Dict[str, Any]], Tuple[Literal[False], str]]:
-        """mypy 无法根据第一个返回值 narrow 第二个返回值的类型, 需要 cast 避免类型错误"""
-        ...
-
-    @overload
-    def post_html(
-        self,
-        url: str,
-        *,
-        data: Optional[Dict[str, Any]] = None,
-        json: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
-        cookies: Optional[Dict[str, str]] = None,
-        use_proxy: Union[bool, Optional[Dict[str, str]]] = True,
-        json_data: Literal[False] = False,
-        keep: bool = True,
-    ) -> Tuple[bool, str]: ...
-
-    def post_html(
-        self,
-        url: str,
-        *,
-        data: Optional[Dict[str, Any]] = None,
-        json: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
-        cookies: Optional[Dict[str, str]] = None,
-        use_proxy: Union[bool, Optional[Dict[str, str]]] = True,
-        json_data: bool = False,
-        keep: bool = True,
-    ):
-        # 预处理请求参数
-        headers, proxies, timeout = self._prepare_request_params(headers=headers, proxy=use_proxy)
-
-        # 根据参数组合路由到不同的处理子方法
-        if json_data:
-            return self._post_json(url, data, json, headers, cookies, proxies, timeout, keep)
-        else:
-            return self._post_text(url, data, json, headers, cookies, proxies, timeout, keep)
-
-    def _post_json(
-        self,
-        url: str,
-        data: Optional[Dict[str, Any]],
-        json_data: Optional[Dict[str, Any]],
-        headers: Dict[str, str],
-        cookies: Optional[Dict[str, str]],
-        proxies: Optional[Dict[str, str]],
-        timeout: float,
-        keep: bool,
-    ):
-        """发送POST请求并获取JSON响应"""
-        session = self.session_g if keep else requests
-        for i in range(config.retry):
-            try:
-                response = session.post(
-                    url,
-                    data=data,
-                    json=json_data,
-                    headers=headers,
-                    cookies=cookies,
-                    proxies=proxies,
-                    timeout=timeout,
-                    verify=False,
-                )
-                if self._check_response(response, url, i):
-                    return True, response.json()
-            except Exception as e:
-                self._handle_request_error(e, url, i)
-        return False, f"请求失败! {url}"
-
-    def _post_text(
-        self,
-        url: str,
-        data: Optional[Dict[str, Any]],
-        json_data: Optional[Dict[str, Any]],
-        headers: Dict[str, str],
-        cookies: Optional[Dict[str, str]],
-        proxies: Optional[Dict[str, str]],
-        timeout: float,
-        keep: bool,
-    ) -> Tuple[bool, str]:
-        """发送POST请求并获取文本响应"""
-        session = self.session_g if keep else requests
-        for i in range(config.retry):
-            try:
-                response = session.post(
-                    url,
-                    data=data,
-                    json=json_data,
-                    headers=headers,
-                    cookies=cookies,
-                    proxies=proxies,
-                    timeout=timeout,
-                    verify=False,
-                )
-                if self._check_response(response, url, i):
-                    response.encoding = "utf-8"
-                    return True, response.text
-            except Exception as e:
-                self._handle_request_error(e, url, i)
-        return False, f"请求失败! {url}"
-
-    def _check_response(self, response: Any, url: str, retry_index: int) -> bool:
-        """检查响应状态"""
-        if response.status_code > 299:
-            if not (response.status_code == 302 and response.headers.get("Location")):
-                error_info = f"{response.status_code} {url}"
-                signal.add_log(f"🔴 重试 [{retry_index + 1}/{config.retry}] {error_info}")
-                return False
-        else:
-            signal.add_log(f"✅ 成功 {url}")
-        return True
-
-    def _handle_request_error(self, error: Exception, url: str, retry_index: int) -> None:
-        """处理请求异常"""
-        error_info = f"{url}\nError: {error}"
-        signal.add_log(f"[{retry_index + 1}/{config.retry}] {error_info}")
-
-    def _get_filesize(self, url: str) -> Optional[str]:
-        proxies = config.proxies
-        timeout = config.timeout
-        retry_times = config.retry
-        headers = config.headers
-
-        for _ in range(int(retry_times)):
-            try:
-                response = self.session_g.head(url, headers=headers, proxies=proxies, timeout=timeout, verify=False)
-                file_size = response.headers.get("Content-Length")
-                return file_size
-            except Exception:
-                pass
-        return None
-
-    def multi_download(self, url: str, file_path: str) -> bool:
-        # 获取文件大小
-        file_size = self._get_filesize(url)
-
-        # 判断是不是webp文件
-        webp = False
-        if file_path.endswith("jpg") and ".webp" in url:
-            webp = True
-
-        # 没有大小时，不支持分段下载，直接下载；< 2 MB 的直接下载
-        MB = 1024**2
-        if not file_size or int(file_size) <= 2 * MB or webp:
-            result, response = get_html(url, content=True)
-            if result:
-                if webp:
-                    if isinstance(response, bytes):
-                        byte_stream = BytesIO(response)
-                        img = Image.open(byte_stream)
-                        if img.mode == "RGBA":
-                            img = img.convert("RGB")
-                        img.save(file_path, quality=95, subsampling=0)
-                        img.close()
-                else:
-                    with open(file_path, "wb") as f:
-                        if isinstance(response, bytes):
-                            f.write(response)
-                return True
-            return False
-
-        return self._multi_download2(url, file_path, int(file_size))
-
-    def _multi_download2(self, url: str, file_path: str, file_size: int) -> bool:
-        # 分块，每块 1 MB
-        MB = 1024**2
-        file_size = int(file_size)
-        each_size = min(int(1 * MB), file_size)
-        parts = [(s, min(s + each_size, file_size)) for s in range(0, file_size, each_size)]
-        # print(f'分块数：{len(parts)} \n')
-
-        # 先写入一个文件
-        f = open(file_path, "wb")
-        f.truncate(file_size)
-        f.close()
-
-        # 开始下载
-        i = 0
-        task_list = []
-        for part in parts:
-            i += 1
-            start, end = part
-            task_list.append([start, end, i, url, file_path])
-        result = self.pool.map(self._start_download, task_list)
-        for res in result:
-            if not res:
-                # bar.close()
-                return False
-        # bar.close()
-        return True
-
-    def _start_download(self, task) -> bool:
-        start, end, i, url, file_path = task
-
-        proxies = config.proxies
-        timeout = config.timeout
-        retry_times = config.retry
-        headers = config.headers
-        _headers = headers.copy()
-        _headers["Range"] = f"bytes={start}-{end}"
-        for _ in range(int(retry_times)):
-            try:
-                response = self.session_g.get(
-                    url, headers=_headers, proxies=proxies, timeout=timeout, verify=False, stream=True
-                )
-                chunk_size = 128
-                chunks = []
-                for chunk in response.iter_content(chunk_size=chunk_size):
-                    chunks.append(chunk)  # bar.update(chunk_size)
-                self.lock.acquire()
-                with open(file_path, "rb+") as fp:
-                    fp.seek(start)
-                    for chunk in chunks:
-                        fp.write(chunk)
-                    self.lock.release()
-                del chunks
-                return True
-            except Exception:
-                pass
-        return False
-
-    def curl_html(
-        self,
-        url: str,
-        headers: Optional[Dict[str, str]] = None,
-        proxies: Union[bool, Optional[Dict[str, str]]] = True,
-        cookies: Optional[Dict[str, str]] = None,
-    ) -> Tuple[Union[bool, Any], Union[str, Any]]:
-        """
-        curl请求(模拟浏览器指纹)
-        """
-        # 获取代理信息
-        retry_times = config.retry
-        _, proxies, _ = self._prepare_request_params(url, headers, proxies)
-
-        signal.add_log(f"🔎 请求 {url}")
-        error_info = ""
-        for i in range(int(retry_times)):
-            try:
-                response = self.curl_session.get(
-                    url_encode(url), headers=headers, cookies=cookies, proxies=proxies, impersonate="chrome120"
-                )
-                if "amazon" in url:
-                    response.encoding = "Shift_JIS"
-                else:
-                    response.encoding = "UTF-8"
-                if response.status_code == 200:
-                    signal.add_log(f"✅ 成功 {url}")
-                    return response.headers, response.text
-                else:
-                    error_info = f"{response.status_code} {url}"
-                    signal.add_log(f"🔴 重试 [{i + 1}/{retry_times}] {error_info}")
-                    continue
-            except Exception as e:
-                error_info = f"{url}\nError: {e}"
-                signal.add_log(f"[{i + 1}/{retry_times}] {error_info}")
-                continue
-        signal.add_log(f"🔴 请求失败！{error_info}")
-        return False, error_info
-
-
-# web = WebRequests()
-# get_html = web.get_html
-# post_html = web.post_html
-# scraper_html = web.curl_html
-# multi_download = web.multi_download
-# curl_html = web.curl_html
 
 
 def url_encode(url: str) -> str:
@@ -720,9 +190,9 @@ def check_url(url: str, length: bool = False, real_url: bool = False) -> Union[i
 
 def get_avsox_domain() -> str:
     issue_url = "https://tellme.pw/avsox"
-    result, response = get_html(issue_url)
+    response, error = get_text(issue_url)
     domain = "https://avsox.click"
-    if result and isinstance(response, str):
+    if response is not None:
         res = re.findall(r'(https://[^"]+)', response)
         for s in res:
             if s and "https://avsox.com" not in s or "api.qrserver.com" not in s:
@@ -739,57 +209,32 @@ def get_amazon_data(req_url: str) -> Tuple[bool, str]:
         "Host": "www.amazon.co.jp",
         "User-Agent": get_user_agent(),
     }
-    try:
-        result, html_info = curl_html(req_url)
-    except Exception:
-        result, html_info = curl_html(req_url, headers=headers)
+    html_info, error = get_text(req_url, encoding="Shift_JIS")
+    if html_info is None:
+        html_info, error = get_text(req_url, headers=headers, encoding="Shift_JIS")
+    if html_info is None:
         session_id = ""
         ubid_acbjp = ""
-        if x := re.findall(r'sessionId: "([^"]+)', html_info):
+        if x := re.findall(r'sessionId: "([^"]+)', html_info or ""):
             session_id = x[0]
-        if x := re.findall(r"ubid-acbjp=([^ ]+)", html_info):
+        if x := re.findall(r"ubid-acbjp=([^ ]+)", html_info or ""):
             ubid_acbjp = x[0]
         headers_o = {
             "cookie": f"session-id={session_id}; ubid_acbjp={ubid_acbjp}",
         }
         headers.update(headers_o)
-        result, html_info = curl_html(req_url, headers=headers)
-
-    if not result:
-        if "503 http" in html_info:
-            headers = {
-                "Host": "www.amazon.co.jp",
-                "User-Agent": get_user_agent(),
-            }
-            result, html_info = get_html(req_url, headers=headers, keep=False, back_cookie=True)
-
-        if not result:
-            return False, html_info
-
-    return result, html_info
-
-
-if "__main__" == __name__:
-    # 测试下载文件
-    list1 = [
-        "https://issuecdn.baidupcs.com/issue/netdisk/yunguanjia/BaiduNetdisk_7.2.8.9.exe",
-        "https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw015/118abw015_mhb_w.mp4",
-        "https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00016/118abw00016_mhb_w.mp4",
-        "https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00017/118abw00017_mhb_w.mp4",
-        "https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00018/118abw00018_mhb_w.mp4",
-        "https://cc3001.dmm.co.jp/litevideo/freepv/1/118/118abw00019/118abw00019_mhb_w.mp4",
-        "https://www.prestige-av.com/images/corner/goods/prestige/tktabw/018/pb_tktabw-018.jpg",
-        "https://iqq1.one/preview/80/b/3SBqI8OjheI-800.jpg?v=1636404497",
-    ]
-    for each in list1:
-        url = each
-        file_path = each.split("/")[-1]
-        t = threading.Thread(target=multi_download, args=(url, file_path))
-        t.start()
-
-    # 死循环，避免程序程序完后，pool自动关闭
-    while True:
-        pass
+        html_info, error = get_text(req_url, headers=headers, encoding="Shift_JIS")
+    if html_info is None:
+        return False, error
+    if "HTTP 503" in html_info:
+        headers = {
+            "Host": "www.amazon.co.jp",
+            "User-Agent": get_user_agent(),
+        }
+        html_info, error = get_text(req_url, headers=headers, encoding="Shift_JIS")
+    if html_info is None:
+        return False, error
+    return True, html_info
 
 
 def get_imgsize(url):
@@ -886,8 +331,8 @@ def ping_host(host_address: str) -> str:
 def check_version() -> Optional[int]:
     if config.update_check:
         url = "https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
-        _, res_json = get_html(url, json_data=True)
-        if isinstance(res_json, dict):
+        res_json, error = get_json(url)
+        if res_json is not None:
             try:
                 latest_version = res_json["tag_name"]
                 latest_version = int(latest_version)
@@ -935,9 +380,9 @@ def _get_pic_by_google(pic_url):
     google_keyword = config.google_keyword
     req_url = f"https://www.google.com/searchbyimage?sbisrc=2&image_url={pic_url}"
     # req_url = f'https://lens.google.com/uploadbyurl?url={pic_url}&hl=zh-CN&re=df&ep=gisbubu'
-    result, response = get_html(req_url, keep=False)
+    response, error = get_text(req_url)
     big_pic = True
-    if result:
+    if response is not None:
         url_list = re.findall(r'a href="([^"]+isz:l[^"]+)">', response)
         url_list_middle = re.findall(r'a href="([^"]+isz:m[^"]+)">', response)
         if not url_list and url_list_middle:
@@ -945,8 +390,8 @@ def _get_pic_by_google(pic_url):
             big_pic = False
         if url_list:
             req_url = "https://www.google.com" + url_list[0].replace("amp;", "")
-            result, response = get_html(req_url, keep=False)
-            if result:
+            response, error = get_text(req_url)
+            if response is not None:
                 url_list = re.findall(r'\["(http[^"]+)",(\d{3,4}),(\d{3,4})\],[^[]', response)
                 # 优先下载放前面
                 new_url_list = []

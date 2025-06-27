@@ -5,7 +5,7 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web import get_html
+from models.base.web_compat import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -88,9 +88,9 @@ def main(
         debug_info = "番号地址: %s" % real_url
         LogBuffer.info().write(web_info + debug_info)
         # ========================================================================番号详情页
-        result, html_content = get_html(url_search)
-        if not result:
-            debug_info = f"网络请求错误: {html_content}"
+        html_content, error = get_text(url_search)
+        if html_content is None:
+            debug_info = f"网络请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         html_info = etree.fromstring(html_content, etree.HTMLParser())
