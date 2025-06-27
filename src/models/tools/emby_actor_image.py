@@ -11,7 +11,7 @@ from lxml import etree
 from models.base.image import cut_pic, fix_pic
 from models.base.utils import get_used_time
 from models.base.web import get_html
-from models.base.web_compat import get_text
+from models.base.web_compat import get_content, get_text
 from models.config.manager import config
 from models.config.resources import resources
 from models.core.web import download_file_with_filepath
@@ -168,7 +168,7 @@ def _get_gfriends_actor_data():
         if update_data:
             signal.show_log_text("⏳ 开始缓存 Gfriends 最新数据表...")
             filetree_url = f"{raw_url}/master/Filetree.json"
-            result, response = get_html(filetree_url, content=True)
+            result, response = get_content(filetree_url)
             if not result:
                 signal.show_log_text("🔴 Gfriends 数据表获取失败！补全已停止！")
                 return False

@@ -453,7 +453,7 @@ class WebRequests:
         # 没有大小时，不支持分段下载，直接下载；< 2 MB 的直接下载
         MB = 1024**2
         if not file_size or int(file_size) <= 2 * MB or webp:
-            result, response = get_html(url, content=True)
+            result, response = get_content(url)
             if result:
                 if webp:
                     if isinstance(response, bytes):
