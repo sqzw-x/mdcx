@@ -456,6 +456,7 @@ class ConfigSchema:
             timeout=httpx.Timeout(config.timeout),
             default_headers=config.headers,
             log_fn=signal.add_log,
+            ipv4_only=config.ipv4_only,
         )
 
 

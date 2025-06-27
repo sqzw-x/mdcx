@@ -15,23 +15,27 @@ class AsyncWebClient:
         timeout: Optional[httpx.Timeout] = None,
         default_headers: Optional[dict[str, str]] = None,
         log_fn: Optional[Callable[[str], None]] = None,
+        ipv4_only: bool = False,
     ):
         limits = httpx.Limits(max_connections=100, max_keepalive_connections=50, keepalive_expiry=20)
         self.retry = retry
         self.default_headers = default_headers or {}
-        # httpx 不支持为每个请求单独设置代理
+        # httpx 不支持为每个请求单独设置代理, 需要两个客户端
         self.proxy_client = httpx.AsyncClient(
             limits=limits,
             proxy=proxy,
             verify=False,
             timeout=timeout,
             follow_redirects=True,
+            # https://github.com/encode/httpx/discussions/2664
+            transport=httpx.AsyncHTTPTransport(local_address="0.0.0.0") if ipv4_only else None,
         )
         self.no_proxy_client = httpx.AsyncClient(
             limits=limits,
             verify=False,
             timeout=timeout,
             follow_redirects=True,
+            transport=httpx.AsyncHTTPTransport(local_address="0.0.0.0") if ipv4_only else None,
         )
         self.log_fn = log_fn if log_fn is not None else lambda _: None
 
