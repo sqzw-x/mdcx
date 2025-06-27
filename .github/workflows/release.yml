@@ -28,6 +28,9 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       count: ${{ steps.get-new-commits.outputs.count }}
       short_sha: ${{ steps.get-new-commits.outputs.short_sha }}
+      last_commit: ${{ steps.get-dev-info.outputs.LAST_COMMIT }}
+      commits_since_tag: ${{ steps.get-dev-info.outputs.COMMITS_SINCE_TAG }}
+      last_tag: ${{ steps.get-dev-info.outputs.last_tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,6 +40,32 @@ jobs:
         run: |
           echo "count=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_OUTPUT
           echo "short_sha=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_OUTPUT
+
+      - name: Get dev commit info
+        id: get-dev-info
+        if: ${{ env.IS_DEV == 'true' }}
+        run: |
+          # 获取最后一个commit的信息
+          echo 'LAST_COMMIT<<EOF' >> $GITHUB_OUTPUT
+          git log -1 --pretty=format:"**Latest Commit:** %s%n%nAuthor: %an%nDate: %ai%nSHA: %H%n" >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
+          # 获取最后一个tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "No tags found")
+          echo "last_tag=$LAST_TAG" >> $GITHUB_OUTPUT
+
+          # 获取自最后一个tag以来的commit历史
+          echo 'COMMITS_SINCE_TAG<<EOF' >> $GITHUB_OUTPUT
+          if [ "$LAST_TAG" != "No tags found" ]; then
+            echo "**Commits since $LAST_TAG:**" >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+            git log $LAST_TAG..HEAD --pretty=format:"- %s (%an, %ar)" --reverse >> $GITHUB_OUTPUT
+          else
+            echo "**All commits:**" >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_OUTPUT
+            git log --pretty=format:"- %s (%an, %ar)" --reverse >> $GITHUB_OUTPUT
+          fi
+          echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Delete old daily release
         if: ${{ env.IS_DAILY == 'true' && steps.get-new-commits.outputs.count > 0  }}
@@ -163,7 +192,7 @@ jobs:
 
       - name: Get changelog
         id: get-changelog
-        if: ${{ matrix.build == 'macos' }}
+        if: ${{ matrix.build == 'macos' && env.IS_DAILY != 'true' && env.IS_DEV != 'true' }}
         run: |
           echo 'CHANGELOG<<EOF' >> $GITHUB_OUTPUT
           cat changelog.md >> $GITHUB_OUTPUT
@@ -178,8 +207,10 @@ jobs:
           file: dist/MDCx.dmg
           prerelease: ${{ env.IS_DAILY == 'true' || env.IS_DEV == 'true' }}
           body: |
-            ${{ env.IS_DAILY == 'true' && env.IS_DEV == 'true' && github.event.repository.updated_at || steps.get-changelog.outputs.CHANGELOG }}
-          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'dev' || github.ref }}
+            ${{ env.IS_DAILY == 'true' && github.event.repository.updated_at || env.IS_DEV == 'true' && format('{0}
+
+            {1}', needs.init-matrix.outputs.last_commit, needs.init-matrix.outputs.commits_since_tag) || steps.get-changelog.outputs.CHANGELOG }}
+          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.ref }}
 
       - name: Create Release - Windows
         uses: svenstaro/upload-release-action@v2
@@ -189,4 +220,4 @@ jobs:
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ needs.init-matrix.outputs.short_sha }}.exe
           file: dist/MDCx.exe
           prerelease: ${{ env.IS_DAILY == 'true' || env.IS_DEV == 'true' }}
-          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'dev' || github.ref }}
+          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.ref }}
