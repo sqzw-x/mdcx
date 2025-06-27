@@ -32,10 +32,8 @@ def get_content_(
     use_proxy=True,
 ):
     """获取二进制内容的同步包装器"""
-    cookies_dict = cookies or {}
-
     content_data, error = executor.run(
-        config.async_client.get_content(url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
+        config.async_client.get_content(url, headers=headers, cookies=cookies, use_proxy=use_proxy)
     )
     if content_data is not None:
         return True, content_data
@@ -50,10 +48,8 @@ def get_json_(
     use_proxy=True,
 ):
     """获取JSON数据的同步包装器"""
-    cookies_dict = cookies or {}
-
     json_result, error = executor.run(
-        config.async_client.get_json(url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
+        config.async_client.get_json(url, headers=headers, cookies=cookies, use_proxy=use_proxy)
     )
     if json_result is not None:
         return True, json_result
@@ -68,10 +64,8 @@ def get_response_(
     use_proxy=True,
 ):
     """获取响应对象的同步包装器"""
-    cookies_dict = cookies or {}
-
     resp, error = executor.run(
-        config.async_client.request("GET", url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
+        config.async_client.request("GET", url, headers=headers, cookies=cookies, use_proxy=use_proxy)
     )
     if resp is not None:
         return resp.headers, resp
