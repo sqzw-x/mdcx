@@ -10,7 +10,7 @@ import time
 from lxml import etree
 
 from models.base.utils import get_used_time
-from models.base.web_compat import get_text, scraper_html
+from models.base.web_compat import curl_html, get_text
 from models.config.manager import config, manager
 from models.config.resources import resources
 from models.core.file import get_file_info, movie_lists
@@ -19,7 +19,7 @@ from models.signals import signal
 
 
 def _scraper_web(url):
-    result, html = scraper_html(url)
+    result, html = curl_html(url)
     if not result:
         signal.show_log_text(f"请求错误: {html}")
         return ""
@@ -44,7 +44,7 @@ def _get_actor_numbers(actor_url, actor_single_url):
         page_url = f"{actor_url}?page={i}&t=s"
         result, html = get_text(page_url)
         if not result:
-            result, html = scraper_html(page_url)
+            result, html = curl_html(page_url)
         if not result:
             return
         if "pagination-next" not in html or i >= 60:

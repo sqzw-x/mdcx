@@ -2,10 +2,9 @@
 Web 请求兼容层 - 使用异步客户端和执行器提供向后兼容的同步接口
 """
 
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional
 
 from ..config.manager import config
-from ..signals import signal
 from .utils import executor
 
 
@@ -110,13 +109,9 @@ def post_json(
     use_proxy=True,
 ):
     """POST 请求并返回 JSON 数据的同步包装器"""
-    # 处理 cookies
-    cookies_dict = cookies or {}
-
-    # 返回 JSON 数据
     json_result, error = executor.run(
         config.async_client.post_json(
-            url, data=data, json_data=json, headers=headers, cookies=cookies_dict, use_proxy=use_proxy
+            url, data=data, json_data=json, headers=headers, cookies=cookies, use_proxy=use_proxy
         )
     )
     if json_result is not None:
@@ -128,41 +123,28 @@ def post_json(
 def curl_html(
     url: str,
     headers: Optional[Dict[str, str]] = None,
-    proxies: Union[bool, Optional[Dict[str, str]]] = True,
     cookies: Optional[Dict[str, str]] = None,
-) -> Tuple[Union[bool, Any], Union[str, Any]]:
+    use_proxy=True,
+):
     """
     curl请求的同步包装器 (使用普通的 get_text 方法)
     """
-    # 处理代理参数
-    use_proxy = proxies is not False
-
-    # 处理 cookies
-    cookies_dict = cookies or {}
-
-    # 使用 get_text 方法获取内容
+    if "amazon" in url:
+        encoding = "Shift_JIS"
+    else:
+        encoding = "utf-8"
     response, error = executor.run(
-        config.async_client.request("GET", url, headers=headers, cookies=cookies_dict, use_proxy=use_proxy)
+        config.async_client.request("GET", url, headers=headers, cookies=cookies, use_proxy=use_proxy)
     )
 
     if response is None:
         return False, error
     else:
-        if "amazon" in url:
-            response.encoding = "Shift_JIS"
-        else:
-            response.encoding = "UTF-8"
-        if response.status_code == 200:
-            signal.add_log(f"✅ 成功 {url}")
-            return response.headers, response.text
-        else:
-            return False, f"请求失败，状态码: {response.status_code}"
+        response.encoding = encoding
+        return response.headers, response.text
 
 
 def multi_download(self, url: str, file_path: str) -> bool:
     """多线程下载的同步包装器"""
     result = executor.run(config.async_client.download(url, file_path))
     return result
-
-
-scraper_html = curl_html

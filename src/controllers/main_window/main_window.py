@@ -27,9 +27,9 @@ from models.base.utils import _async_raise, add_html, convert_path, get_current_
 from models.base.web import (
     check_theporndb_api_token,
     check_version,
+    curl_html,
     get_avsox_domain,
     ping_host,
-    scraper_html,
 )
 from models.base.web_compat import get_text
 from models.config.consts import IS_WINDOWS, MARK_FILE
@@ -2231,10 +2231,10 @@ class MyMAinWindow(QMainWindow):
                     res_theporndb = check_theporndb_api_token()
                     each[1] = res_theporndb.replace("✅ 连接正常", f"✅ 连接正常{ping_host(host_address)}")
                 elif name == "javlibrary":
-                    proxies = True
+                    use_proxy = True
                     if hasattr(config, f"javlibrary_website"):
-                        proxies = False
-                    result, html_info = scraper_html(each[0], proxies=proxies)
+                        use_proxy = False
+                    result, html_info = curl_html(each[0], use_proxy=use_proxy)
                     if not result:
                         each[1] = "❌ 连接失败 请检查网络或代理设置！ " + html_info
                     elif "Cloudflare" in html_info:
@@ -2242,7 +2242,7 @@ class MyMAinWindow(QMainWindow):
                     else:
                         each[1] = f"✅ 连接正常{ping_host(host_address)}"
                 elif name in ["avsex", "freejavbt", "airav_cc", "airav", "madouqu", "7mmtv"]:
-                    result, html_info = scraper_html(each[0])
+                    result, html_info = curl_html(each[0])
                     if not result:
                         each[1] = "❌ 连接失败 请检查网络或代理设置！ " + html_info
                     elif "Cloudflare" in html_info:
@@ -2359,7 +2359,7 @@ class MyMAinWindow(QMainWindow):
         cookies = config.javdb
         javdb_url = getattr(config, "javdb_website", "https://javdb.com") + "/v/D16Q5?locale=zh"
         try:
-            result, response = scraper_html(javdb_url, headers=header)
+            result, response = curl_html(javdb_url, headers=header)
             if not result:
                 if "Cookie" in response:
                     if cookies != input_cookie:
