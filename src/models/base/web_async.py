@@ -1,5 +1,4 @@
 import asyncio
-import time
 from io import BytesIO
 from typing import Any, Callable, Literal, Optional
 
@@ -94,7 +93,7 @@ class AsyncWebClient:
             error_msg = ""
             for attempt in range(retry_count):
                 try:
-                    self.log_fn(f"🔎 {time.time()} {method} {url}" + f" ({attempt + 1}/{retry_count})" * (attempt != 0))
+                    self.log_fn(f"🔎 {method} {url}" + f" ({attempt + 1}/{retry_count})" * (attempt != 0))
                     resp = await self._client(use_proxy).request(
                         method,
                         url,
