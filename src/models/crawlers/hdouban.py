@@ -7,7 +7,8 @@ import time
 import urllib3
 import zhconv
 
-from models.base.web import get_html, post_html
+from models.base.web import post_html
+from models.base.web_compat import get_json
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -242,7 +243,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
                 # ========================================================================搜索番号
-                result, html_search = get_html(url_search, json_data=True)
+                result, html_search = get_json(url_search)
                 if not result:
                     debug_info = f"网络请求错误: {html_search} "
                     LogBuffer.info().write(web_info + debug_info)

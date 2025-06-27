@@ -10,7 +10,7 @@ import oshash
 import urllib3
 
 from models.base.number import long_name, remove_escape_string
-from models.base.web import get_html
+from models.base.web_compat import get_json
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers import theporndb_movies
@@ -308,7 +308,7 @@ def main(
                     url_hash = f"https://api.theporndb.net/scenes/hash/{hash}"
                     debug_info = f"请求地址: {url_hash} "
                     LogBuffer.info().write(web_info + debug_info)
-                    result, hash_search = get_html(url_hash, headers=headers, json_data=True)
+                    result, hash_search = get_json(url_hash, headers=headers)
 
                     if not result:
                         # 判断返回内容是否有问题
@@ -349,7 +349,7 @@ def main(
                     url_search = f"https://api.theporndb.net/scenes?parse={search_keyword}&per_page=100"
                     debug_info = f"请求地址: {url_search} "
                     LogBuffer.info().write(web_info + debug_info)
-                    result, res_search = get_html(url_search, headers=headers, json_data=True)
+                    result, res_search = get_json(url_search, headers=headers)
 
                     if not result:
                         # 判断返回内容是否有问题
@@ -371,7 +371,7 @@ def main(
         if not hash_data:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            result, res_real = get_html(real_url, headers=headers, json_data=True)
+            result, res_real = get_json(real_url, headers=headers)
             if not result:
                 # 判断返回内容是否有问题
                 debug_info = f"请求错误: {res_real} "

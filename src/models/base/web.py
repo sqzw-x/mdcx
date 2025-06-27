@@ -886,7 +886,7 @@ def ping_host(host_address: str) -> str:
 def check_version() -> Optional[int]:
     if config.update_check:
         url = "https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
-        _, res_json = get_html(url, json_data=True)
+        _, res_json = get_json(url)
         if isinstance(res_json, dict):
             try:
                 latest_version = res_json["tag_name"]

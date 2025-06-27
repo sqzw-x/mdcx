@@ -19,6 +19,7 @@ from lxml import etree
 from models.base.file import copy_file
 from models.base.utils import get_used_time
 from models.base.web import get_html, post_html
+from models.base.web_compat import get_json
 from models.config.manager import config
 from models.config.manual import ManualConfig
 from models.config.resources import resources
@@ -83,7 +84,7 @@ def update_emby_actor_info():
             actor_homepage, actor_person, pic_url, backdrop_url, backdrop_url_0, update_url = _generate_server_url(
                 actor
             )
-            result, res = get_html(actor_person, proxies=False, json_data=True)
+            result, res = get_json(actor_person, proxies=False)
             res = cast(dict, res)
             if not result:
                 signal.show_log_text(
@@ -206,7 +207,7 @@ def show_emby_actor_list(mode):
                 count += 1
             else:
                 # http://192.168.5.191:8096/emby/Persons/梦乃爱华?api_key=ee9a2f2419704257b1dd60b975f2d64e
-                result, res = get_html(actor_person, proxies=False, json_data=True)
+                result, res = get_json(actor_person, proxies=False)
                 if not result:
                     signal.show_log_text(
                         f"\n🔴 {count}/{total} Emby 获取演员信息错误！👩🏻 {actor_name} \n    错误信息: {res}"
@@ -581,7 +582,7 @@ def _search_wiki(actor_info: EMbyActressInfo):
     # https://www.wikidata.org/w/api.php?action=wbsearchentities&search=夢乃あいか&language=zh&format=json
     # https://www.wikidata.org/w/api.php?action=wbsearchentities&search=吉根柚莉愛&language=zh&format=json
     signal.show_log_text(f" 🌐 请求搜索页: {url}")
-    head, res = get_html(url, json_data=True, headers=config.random_headers)
+    head, res = get_json(url, headers=config.random_headers)
     if not head:
         signal.show_log_text(f" 🔴 维基百科搜索结果请求失败！\n    错误信息: {res}")
         return
@@ -595,7 +596,7 @@ def _search_wiki(actor_info: EMbyActressInfo):
                 return
             url = f"https://www.wikidata.org/w/api.php?action=wbsearchentities&search={actor_name_tw}&language=zh&format=json"
             signal.show_log_text(f" 🌐 尝试再次搜索: {url}")
-            head, res = get_html(url, json_data=True)
+            head, res = get_json(url)
             if not head:
                 signal.show_log_text(f" 🔴 维基百科搜索结果请求失败！\n    错误信息: {res}")
                 return
@@ -635,7 +636,7 @@ def _search_wiki(actor_info: EMbyActressInfo):
             # https://m.wikidata.org/wiki/Special:EntityData/Q24836820.json
             # https://m.wikidata.org/wiki/Special:EntityData/Q76283484.json
             signal.show_log_text(f" 🌐 请求 ID 数据: {url}")
-            head, res = get_html(url, json_data=True, headers=config.random_headers)
+            head, res = get_json(url, headers=config.random_headers)
             if not head:
                 signal.show_log_text(f" 🔴 通过 id 获取 wiki url 失败！\n    错误信息: {res}")
                 continue

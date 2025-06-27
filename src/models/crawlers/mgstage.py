@@ -7,6 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_html
+from models.base.web_compat import get_json
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -124,7 +125,7 @@ def get_trailer(html):
     play_url = html.xpath("//a[@class='review-btn']/@href")
     if play_url:
         play_url = play_url[0].replace("/mypage/review.php", "/sampleplayer/sampleRespons.php")
-        result, htmlcode = get_html(play_url, cookies={"adc": "1"}, json_data=True)
+        result, htmlcode = get_json(play_url, cookies={"adc": "1"})
         if result:
             url_temp = re.search(r"(https.+)ism/request", htmlcode.get("url"))
             if url_temp:

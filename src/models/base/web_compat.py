@@ -15,7 +15,6 @@ def get_html(
     cookies: Optional[Dict[str, str]] = None,
     proxies: Union[bool, Optional[Dict[str, str]]] = True,
     allow_redirects: bool = True,
-    json_data: bool = False,
     res: bool = False,
     keep: bool = True,
     timeout: Union[bool, float] = False,
@@ -23,9 +22,7 @@ def get_html(
     back_cookie: bool = False,
 ):
     """GET 请求的同步包装器 - 根据参数调用相应的细分方法"""
-    if json_data:
-        return get_json(url, headers=headers, cookies=cookies, proxies=proxies)
-    elif res:
+    if res:
         return get_response(url, headers=headers, cookies=cookies, proxies=proxies)
     else:
         success, result = get_text(url, headers=headers, cookies=cookies, proxies=proxies, encoding=encoding)

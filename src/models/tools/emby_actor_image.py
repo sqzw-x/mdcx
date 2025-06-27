@@ -10,8 +10,7 @@ from lxml import etree
 
 from models.base.image import cut_pic, fix_pic
 from models.base.utils import get_used_time
-from models.base.web import get_html
-from models.base.web_compat import get_content, get_text
+from models.base.web_compat import get_content, get_json, get_text
 from models.config.manager import config
 from models.config.resources import resources
 from models.core.web import download_file_with_filepath
@@ -56,7 +55,7 @@ def _get_emby_actor_list():
         signal.show_log_text(f"🔴 {server_name} API 密钥未填写！")
         signal.show_log_text("================================================================================")
 
-    result, response = get_html(url, proxies=False, json_data=True)
+    result, response = get_json(url, proxies=False)
     if not result:
         signal.show_log_text(
             f"🔴 {server_name} 连接失败！请检查 {server_name} 地址 和 API 密钥是否正确填写！ {response}"
