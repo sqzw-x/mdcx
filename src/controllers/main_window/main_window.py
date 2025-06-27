@@ -31,7 +31,7 @@ from models.base.web import (
     get_avsox_domain,
     ping_host,
 )
-from models.base.web_compat import get_text
+from models.base.web_compat import get_text_
 from models.config.consts import IS_WINDOWS, MARK_FILE
 from models.config.manager import config, manager
 from models.config.manual import ManualConfig
@@ -2251,7 +2251,7 @@ class MyMAinWindow(QMainWindow):
                         each[1] = f"✅ 连接正常{ping_host(host_address)}"
                 else:
                     try:
-                        result, html_content = get_text(each[0])
+                        result, html_content = get_text_(each[0])
                         if not result:
                             each[1] = "❌ 连接失败 请检查网络或代理设置！ " + str(html_content)
                         else:
@@ -2432,7 +2432,7 @@ class MyMAinWindow(QMainWindow):
         javbus_url = getattr(config, "javbus_website", "https://javbus.com") + "/FSDSS-660"
 
         try:
-            result, response = get_text(javbus_url, headers=headers, cookies=new_cookie)
+            result, response = get_text_(javbus_url, headers=headers, cookies=new_cookie)
 
             if not result:
                 tips = f"❌ 连接失败！请检查网络或代理设置！ {response}"

@@ -7,7 +7,7 @@ import time
 import urllib3
 import zhconv
 
-from models.base.web_compat import get_json, post_json
+from models.base.web_compat import get_json_, post_json_
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -242,7 +242,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
                 # ========================================================================搜索番号
-                result, html_search = get_json(url_search)
+                result, html_search = get_json_(url_search)
                 if not result:
                     debug_info = f"网络请求错误: {html_search} "
                     LogBuffer.info().write(web_info + debug_info)
@@ -285,7 +285,7 @@ def main(
 
             detail_url = "https://api.6dccbca.com/api/movie/detail"
             data = {"id": str(detail_id[0])}
-            result, response = post_json(detail_url, data=data)
+            result, response = post_json_(detail_url, data=data)
             if not result:
                 debug_info = f"网络请求错误: {response}"
                 LogBuffer.info().write(web_info + debug_info)

@@ -7,7 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import check_url
-from models.base.web_compat import get_text
+from models.base.web_compat import get_text_
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -77,7 +77,7 @@ def get_extrafanart(html):
 
 def get_wiki_data():
     url = "https://seesaawiki.jp/av_neme/d/%C9%F1%A5%EF%A5%A4%A5%D5"
-    result, html_search = get_text(url, encoding="euc-jp")
+    result, html_search = get_text_(url, encoding="euc-jp")
     if not result:
         return False
     try:
@@ -187,7 +187,7 @@ def main(
             debug_info = f"搜索页地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_content = get_text(url_search)
+            result, html_content = get_text_(url_search)
             if not result:
                 debug_info = f"网络请求错误: {html_content} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -199,7 +199,7 @@ def main(
                 debug_info = f"中间页地址: {first_url} "
                 LogBuffer.info().write(web_info + debug_info)
 
-                result, html_content = get_text(first_url)
+                result, html_content = get_text_(first_url)
                 if not result:
                     debug_info = f"网络请求错误: {html_content} "
                     LogBuffer.info().write(web_info + debug_info)
@@ -222,7 +222,7 @@ def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_content = get_text(real_url)
+            result, html_content = get_text_(real_url)
             if not result:
                 debug_info = f"网络请求错误: {html_content} "
                 LogBuffer.info().write(web_info + debug_info)

@@ -453,7 +453,7 @@ class WebRequests:
         # 没有大小时，不支持分段下载，直接下载；< 2 MB 的直接下载
         MB = 1024**2
         if not file_size or int(file_size) <= 2 * MB or webp:
-            result, response = get_content(url)
+            result, response = get_content_(url)
             if result:
                 if webp:
                     if isinstance(response, bytes):
@@ -720,7 +720,7 @@ def check_url(url: str, length: bool = False, real_url: bool = False) -> Union[i
 
 def get_avsox_domain() -> str:
     issue_url = "https://tellme.pw/avsox"
-    result, response = get_text(issue_url)
+    result, response = get_text_(issue_url)
     domain = "https://avsox.click"
     if result and isinstance(response, str):
         res = re.findall(r'(https://[^"]+)', response)
@@ -761,7 +761,7 @@ def get_amazon_data(req_url: str) -> Tuple[bool, str]:
                 "Host": "www.amazon.co.jp",
                 "User-Agent": get_user_agent(),
             }
-            result, html_info = get_response(req_url, headers=headers)
+            result, html_info = get_response_(req_url, headers=headers)
 
         if not result:
             return False, html_info
@@ -886,7 +886,7 @@ def ping_host(host_address: str) -> str:
 def check_version() -> Optional[int]:
     if config.update_check:
         url = "https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
-        _, res_json = get_json(url)
+        _, res_json = get_json_(url)
         if isinstance(res_json, dict):
             try:
                 latest_version = res_json["tag_name"]
@@ -935,7 +935,7 @@ def _get_pic_by_google(pic_url):
     google_keyword = config.google_keyword
     req_url = f"https://www.google.com/searchbyimage?sbisrc=2&image_url={pic_url}"
     # req_url = f'https://lens.google.com/uploadbyurl?url={pic_url}&hl=zh-CN&re=df&ep=gisbubu'
-    result, response = get_text(req_url)
+    result, response = get_text_(req_url)
     big_pic = True
     if result:
         url_list = re.findall(r'a href="([^"]+isz:l[^"]+)">', response)
@@ -945,7 +945,7 @@ def _get_pic_by_google(pic_url):
             big_pic = False
         if url_list:
             req_url = "https://www.google.com" + url_list[0].replace("amp;", "")
-            result, response = get_text(req_url)
+            result, response = get_text_(req_url)
             if result:
                 url_list = re.findall(r'\["(http[^"]+)",(\d{3,4}),(\d{3,4})\],[^[]', response)
                 # 优先下载放前面

@@ -8,7 +8,7 @@ from ..config.manager import config
 from .utils import executor
 
 
-def get_text(
+def get_text_(
     url: str,
     headers: Optional[Dict[str, str]] = None,
     cookies: Optional[Dict[str, str]] = None,
@@ -25,7 +25,7 @@ def get_text(
         return True, text
 
 
-def get_content(
+def get_content_(
     url: str,
     headers: Optional[Dict[str, str]] = None,
     cookies: Optional[Dict[str, str]] = None,
@@ -43,7 +43,7 @@ def get_content(
         return False, error
 
 
-def get_json(
+def get_json_(
     url: str,
     headers: Optional[Dict[str, str]] = None,
     cookies: Optional[Dict[str, str]] = None,
@@ -61,7 +61,7 @@ def get_json(
         return False, error
 
 
-def get_response(
+def get_response_(
     url: str,
     headers: Optional[Dict[str, str]] = None,
     cookies: Optional[Dict[str, str]] = None,
@@ -79,7 +79,7 @@ def get_response(
         return False, error
 
 
-def post_text(
+def post_text_(
     url: str,
     *,
     data: Optional[Dict[str, Any]] = None,
@@ -99,7 +99,7 @@ def post_text(
         return False, error
 
 
-def post_json(
+def post_json_(
     url: str,
     *,
     data: Optional[Dict[str, Any]] = None,

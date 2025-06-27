@@ -13,7 +13,7 @@ import zhconv
 
 from ..base.number import get_number_letters
 from ..base.utils import get_used_time, remove_repeat
-from ..base.web_compat import get_text, post_json
+from ..base.web_compat import get_text_, post_json_
 from ..config.manager import config
 from ..config.resources import resources
 from ..signals import signal
@@ -64,7 +64,7 @@ def youdao_translate(title: str, outline: str):
     }
     headers_o = config.headers
     headers.update(headers_o)
-    result, res = post_json(url, data=data, headers=headers)
+    result, res = post_json_(url, data=data, headers=headers)
     if not result:
         return title, outline, f"请求失败！可能是被封了，可尝试更换代理！错误：{res}"
     else:
@@ -154,7 +154,7 @@ def deepl_translate(
     }
 
     if title:
-        result, res = post_json(url, data=params_title)
+        result, res = post_json_(url, data=params_title)
         if not result:
             return title, outline, f"API 接口请求失败！错误：{res}"
         else:
@@ -163,7 +163,7 @@ def deepl_translate(
             else:
                 return title, outline, f"API 接口返回数据异常！返回内容：{res}"
     if outline:
-        result, res = post_json(url, data=params_outline)
+        result, res = post_json_(url, data=params_outline)
         if not result:
             return title, outline, f"API 接口请求失败！错误：{res}"
         else:
@@ -411,7 +411,7 @@ def _get_youdao_key_thread():
     # 获取 js url
     js_url = ""
     youdao_url = "https://fanyi.youdao.com"
-    result, req = get_text(youdao_url)
+    result, req = get_text_(youdao_url)
     if result:
         # https://shared.ydstatic.com/fanyi/newweb/v1.1.11/scripts/newweb/fanyi.min.js
         url_temp = re.search(r"(https://shared.ydstatic.com/fanyi/newweb/.+/scripts/newweb/fanyi.min.js)", req)
@@ -423,7 +423,7 @@ def _get_youdao_key_thread():
         return
 
     # 请求 js url ，获取 youdao key
-    result, req = get_text(js_url)
+    result, req = get_text_(js_url)
     try:
         youdaokey = re.search(r'(?<="fanyideskweb" \+ e \+ i \+ ")[^"]+', req).group(
             0

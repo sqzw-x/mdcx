@@ -6,7 +6,7 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web_compat import get_json, get_text
+from models.base.web_compat import get_json_, get_text_
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -124,7 +124,7 @@ def get_trailer(html):
     play_url = html.xpath("//a[@class='review-btn']/@href")
     if play_url:
         play_url = play_url[0].replace("/mypage/review.php", "/sampleplayer/sampleRespons.php")
-        result, htmlcode = get_json(play_url, cookies={"adc": "1"})
+        result, htmlcode = get_json_(play_url, cookies={"adc": "1"})
         if result:
             url_temp = re.search(r"(https.+)ism/request", htmlcode.get("url"))
             if url_temp:
@@ -179,7 +179,7 @@ def main(
         for real_url in real_url_list:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            result, htmlcode = get_text(real_url, cookies={"adc": "1"})
+            result, htmlcode = get_text_(real_url, cookies={"adc": "1"})
             if not result:
                 debug_info = f"网络请求错误: {htmlcode} "
                 LogBuffer.info().write(web_info + debug_info)

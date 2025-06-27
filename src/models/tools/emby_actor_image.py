@@ -10,7 +10,7 @@ from lxml import etree
 
 from models.base.image import cut_pic, fix_pic
 from models.base.utils import get_used_time
-from models.base.web_compat import get_content, get_json, get_text
+from models.base.web_compat import get_content_, get_json_, get_text_
 from models.config.manager import config
 from models.config.resources import resources
 from models.core.web import download_file_with_filepath
@@ -55,7 +55,7 @@ def _get_emby_actor_list():
         signal.show_log_text(f"🔴 {server_name} API 密钥未填写！")
         signal.show_log_text("================================================================================")
 
-    result, response = get_json(url, use_proxy=False)
+    result, response = get_json_(url, use_proxy=False)
     if not result:
         signal.show_log_text(
             f"🔴 {server_name} 连接失败！请检查 {server_name} 地址 和 API 密钥是否正确填写！ {response}"
@@ -126,7 +126,7 @@ def _get_gfriends_actor_data():
         update_data = False
         signal.show_log_text("⏳ 连接 Gfriends 网络头像库...")
         net_url = f"{gfriends_github}/commits/master/Filetree.json"
-        result, response = get_text(net_url)
+        result, response = get_text_(net_url)
         if not result:
             signal.show_log_text("🔴 Gfriends 查询最新数据更新时间失败！")
             net_float = 0
@@ -167,7 +167,7 @@ def _get_gfriends_actor_data():
         if update_data:
             signal.show_log_text("⏳ 开始缓存 Gfriends 最新数据表...")
             filetree_url = f"{raw_url}/master/Filetree.json"
-            result, response = get_content(filetree_url)
+            result, response = get_content_(filetree_url)
             if not result:
                 signal.show_log_text("🔴 Gfriends 数据表获取失败！补全已停止！")
                 return False
@@ -250,7 +250,7 @@ def _get_graphis_pic(actor_name):
         return pic_path, backdrop_path, ""
 
     # 请求图片
-    result, res = get_text(url)
+    result, res = get_text_(url)
     if not result:
         logs += f"🔴 graphis.ne.jp 请求失败！\n{res}"
         return "", "", logs

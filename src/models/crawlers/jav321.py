@@ -6,7 +6,7 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web import post_text
+from models.base.web import post_text_
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -140,7 +140,7 @@ def main(
         else:
             debug_info = f'搜索地址: {result_url} {{"sn": {number}}}'
             LogBuffer.info().write(web_info + debug_info)
-        result, response = post_text(result_url, data={"sn": number})
+        result, response = post_text_(result_url, data={"sn": number})
         if not result:
             debug_info = f"网络请求错误: {response}"
             LogBuffer.info().write(web_info + debug_info)
