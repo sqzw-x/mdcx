@@ -9,33 +9,6 @@ from ..signals import signal
 from .utils import executor
 
 
-def get_html(
-    url: str,
-    headers: Optional[Dict[str, str]] = None,
-    cookies: Optional[Dict[str, str]] = None,
-    proxies: Union[bool, Optional[Dict[str, str]]] = True,
-    keep: bool = True,
-    timeout: Union[bool, float] = False,
-    encoding: str = "utf-8",
-    back_cookie: bool = False,
-):
-    """
-    目标是全部替换为 get_text, 一些参数不兼容:
-
-    keep: 此参数 False 的原行为是使用裸 requests.get 而不是 session 发出请求
-    timeout: 此参数允许为请求单独设置超时, 可以支持. 但实际上此前项目里只有 getchu 刮削使用此参数, 且设置固定值 40s (首个提交就如此), 似乎不合理
-    back_cookie: 此参数会返回 response.cookies, 只有 get_amazon_data 使用此参数. 可以用 get_response 替代
-    """
-    success, result = get_text(url, headers=headers, cookies=cookies, proxies=proxies, encoding=encoding)
-    if not success:
-        return False, result
-    if back_cookie:
-        # 返回 cookies 和文本
-        cookies_dict = cookies or {}
-        return cookies_dict, result
-    return True, result
-
-
 def get_text(
     url: str,
     headers: Optional[Dict[str, str]] = None,

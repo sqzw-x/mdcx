@@ -7,7 +7,6 @@ from urllib.parse import unquote
 import urllib3
 from lxml import etree
 
-from models.base.web import get_html
 from models.base.web_compat import get_text
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_number_list
@@ -136,7 +135,7 @@ def main(
                 real_url = "https://cnmdb.net/" + each
                 debug_info = f"请求地址: {real_url} "
                 LogBuffer.info().write(web_info + debug_info)
-                result, response = get_html(real_url, keep=False)
+                result, response = get_text(real_url)
                 if result:
                     detail_page = etree.fromstring(response, etree.HTMLParser())
                     result, number, title, actor, real_url, cover_url, studio, series = get_detail_info(
@@ -151,7 +150,7 @@ def main(
                     search_url = f"https://cnmdb.net/s0?q={each}"
                     debug_info = f"请求地址: {search_url} "
                     LogBuffer.info().write(web_info + debug_info)
-                    result, response = get_html(search_url, keep=False)
+                    result, response = get_text(search_url)
                     if not result:
                         debug_info = f"网络请求错误: {response}"
                         LogBuffer.info().write(web_info + debug_info)
