@@ -25,14 +25,13 @@ def update_emby_actor_photo():
     else:
         signal.show_log_text("👩🏻 开始补全 Jellyfin 演员头像...")
     actor_list = _get_emby_actor_list()
-    if actor_list:
-        gfriends_actor_data = _get_gfriends_actor_data()
-        if gfriends_actor_data:
-            _update_emby_actor_photo_execute(actor_list, gfriends_actor_data)
+    gfriends_actor_data = _get_gfriends_actor_data()
+    if gfriends_actor_data:
+        _update_emby_actor_photo_execute(actor_list, gfriends_actor_data)
     signal.reset_buttons_status.emit()
 
 
-def _get_emby_actor_list():
+def _get_emby_actor_list() -> list:
     # 获取 emby 的演员列表
     if "emby" in config.server_type:
         server_name = "Emby"
