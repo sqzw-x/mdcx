@@ -2,6 +2,7 @@
 刮削过程的网络操作
 """
 
+import asyncio
 import os
 import re
 import shutil
@@ -17,7 +18,7 @@ from ..base.file import copy_file, delete_file, move_file, split_path
 from ..base.image import check_pic, cut_thumb_to_poster
 from ..base.utils import get_used_time
 from ..base.web import check_url, get_amazon_data, get_big_pic_by_google, get_imgsize
-from ..base.web_sync import get_json, get_text, multi_download
+from ..base.web_sync import get_text, multi_download
 from ..config.manager import config
 from ..config.manual import ManualConfig
 from ..signals import signal
@@ -63,25 +64,25 @@ def get_yesjav_title(movie_number: str) -> str:
 
 
 def google_translate(title: str, outline: str) -> tuple[str, str, Optional[str]]:
-    e1 = None
-    e2 = None
-    if title:
-        title, e1 = _google_translate(title)
-    if outline:
-        outline, e2 = _google_translate(outline)
-    return title, outline, e1 or e2
+    return config.executor.run(google_translate_async(title, outline))
 
 
-def _google_translate(msg: str) -> tuple[str, str]:
-    try:
-        msg_unquote = urllib.parse.unquote(msg)
-        url = f"https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}"
-        response, error = get_json(url)
-        if response is None:
-            return msg, f"请求失败！可能是被封了，可尝试更换代理！错误：{error}"
-        return "".join([sen[0] for sen in response[0]]), ""
-    except Exception as e:
-        return msg, str(e)
+async def google_translate_async(title: str, outline: str) -> tuple[str, str, Optional[str]]:
+    (r1, e1), (r2, e2) = await asyncio.gather(_google_translate(title), _google_translate(outline))
+    if r1 is None or r2 is None:
+        return "", "", f"google 翻译失败! {e1} {e2}"
+    return r1, r2, None
+
+
+async def _google_translate(msg: str) -> tuple[Optional[str], str]:
+    if not msg:
+        return "", ""
+    msg_unquote = urllib.parse.unquote(msg)
+    url = f"https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}"
+    response, error = await config.async_client.get_json(url)
+    if response is None:
+        return None, error
+    return "".join([sen[0] for sen in response[0]]), ""
 
 
 def download_file_with_filepath(

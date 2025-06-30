@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import random
 import re
@@ -26,6 +27,10 @@ REGEX_KANA = re.compile(r"[\u3040-\u30ff]")  # 平假名/片假名
 
 
 def youdao_translate(title: str, outline: str):
+    return config.executor.run(youdao_translate_async(title, outline))
+
+
+async def youdao_translate_async(title: str, outline: str):
     url = "https://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule"
     msg = f"{title}\n{outline}"
     lts = str(int(time.time() * 1000))
@@ -64,7 +69,7 @@ def youdao_translate(title: str, outline: str):
     }
     headers_o = config.headers
     headers.update(headers_o)
-    res, error = post_json(url, data=data, headers=headers)
+    res, error = await config.async_client.post_json(url, data=data, headers=headers)
     if res is None:
         return title, outline, f"请求失败！可能是被封了，可尝试更换代理！错误：{error}"
     else:
@@ -174,27 +179,37 @@ def deepl_translate(
     return title, outline, None
 
 
+async def deepl_translate_async(
+    title: str,
+    outline: str,
+    ls="JA",
+    json_data: Optional[JsonData] = None,
+):
+    return asyncio.threads.to_thread(deepl_translate, title, outline, ls, json_data)
+
+
 def llm_translate(title: str, outline: str, target_language: str = "简体中文"):
-    r1 = _llm_translate(title, target_language)
-    r2 = _llm_translate(outline, target_language)
+    return config.executor.run(llm_translate_async(title, outline, target_language))
+
+
+async def llm_translate_async(title: str, outline: str, target_language: str = "简体中文"):
+    r1, r2 = await asyncio.gather(_llm_translate(title, target_language), _llm_translate(outline, target_language))
     if r1 is None or r2 is None:
         return "", "", "LLM 翻译失败! 查看网络日志以获取更多信息"
     return r1, r2, None
 
 
-def _llm_translate(text: str, target_language: str = "简体中文") -> Optional[str]:
+async def _llm_translate(text: str, target_language: str = "简体中文") -> Optional[str]:
     """调用 LLM 翻译文本"""
     if not text:
         return ""
-    return config.executor.run(
-        config.llm_client.ask(
-            model=config.llm_model,
-            system_prompt="You are a professional translator.",
-            user_prompt=config.llm_prompt.replace("{content}", text).replace("{lang}", target_language),
-            temperature=config.llm_temperature,
-            max_try=config.llm_max_try,
-            log_fn=signal.add_log,
-        )
+    return await config.llm_client.ask(
+        model=config.llm_model,
+        system_prompt="You are a professional translator.",
+        user_prompt=config.llm_prompt.replace("{content}", text).replace("{lang}", target_language),
+        temperature=config.llm_temperature,
+        max_try=config.llm_max_try,
+        log_fn=signal.add_log,
     )
 
 
