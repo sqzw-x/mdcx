@@ -7,6 +7,8 @@ import random
 import re
 import time
 import traceback
+import urllib.parse
+from typing import Optional
 
 import bs4
 import langid
@@ -18,9 +20,13 @@ from models.config.manager import config
 from models.config.manual import ManualConfig
 from models.config.resources import resources
 from models.core.flags import Flags
-from models.core.translate import deepl_translate, llm_translate, youdao_translate
+from models.core.translate import (
+    deepl_translate_async,
+    llm_translate_async,
+    youdao_translate_async,
+)
 from models.core.utils import get_movie_path_setting
-from models.core.web import download_file_with_filepath, google_translate
+from models.core.web import download_file_with_filepath, google_translate_async
 from models.data_models import EMbyActressInfo
 from models.signals import signal
 from models.tools.actress_db import ActressDB
@@ -58,7 +64,6 @@ def update_emby_actor_info():
 
     actor_list = _get_emby_actor_list()
     futures = []
-    total = len(actor_list)
 
     for i, actor in enumerate(actor_list):
         actor_name = actor.get("Name")
@@ -75,11 +80,12 @@ def update_emby_actor_info():
     for future in futures:
         flag, msg = future.result()
         updated += flag != 0
-        db += flag & 1
-        wiki += flag >> 1
+        wiki += flag & 1
+        db += flag >> 1
+        signal.show_log_text(msg)
 
     signal.show_log_text(
-        f"\n🎉🎉🎉 补全完成！！！ 用时 {get_used_time(start_time)} 秒共更新: {updated} Wiki 获取: {wiki} 数据库: {db}"
+        f"\n🎉🎉🎉 补全完成！！！ 用时 {get_used_time(start_time)} 秒 共更新: {updated} Wiki 获取: {wiki} 数据库: {db}"
     )
 
     if "actor_info_photo" in emby_on:
@@ -101,45 +107,50 @@ async def _process_actor_async(actor: dict, emby_on) -> tuple[int, str]:
         server_id = actor.get("ServerId")
         actor_id = actor.get("Id")
         # 已有资料时跳过
-        _, actor_person, _, _, _, update_url = _generate_server_url(actor)
+        actor_homepage, actor_person, _, _, _, update_url = _generate_server_url(actor)
         res, error = await config.async_client.get_json(actor_person, use_proxy=False)
         if res is None:
-            return 0, f"{actor_name}: Emby/Jellyfin 获取演员信息错误！\n    错误信息: {error}"
+            return 0, f"🔴 {actor_name}: Emby/Jellyfin 获取演员信息错误！\n    错误信息: {error}"
 
         overview = res.get("Overview", "")
         if overview and "无维基百科信息" not in overview and "actor_info_miss" in emby_on:
-            return 0, f"{actor_name}: Emby/Jellyfin 已有演员信息！跳过！"
+            return 0, f"✅ {actor_name}: Emby/Jellyfin 已有演员信息！跳过！"
 
-        # 通过 wiki 及本地数据库获取演员信息
         actor_info = EMbyActressInfo(name=actor_name, server_id=server_id, id=actor_id)
-        db_exist = False
-        wiki_found = False
-
-        if x := await _search_wiki_async(actor_info):
-            if len(x) == 3 and x[0] is not None:  # 成功返回 (url, url_log, "")
-                url, url_log, error = x
-                if not error:  # 成功
-                    result, error = await _get_wiki_detail_async(url, url_log, actor_info)
-                    if result and not error:  # 成功
-                        wiki_found = True
-        if config.use_database:  # todo 避免 wiki 失败时总是查询数据库
-            db_exist = ActressDB.update_actor_info_from_db(actor_info)
+        db_exist = 0
+        wiki_found = 0
+        # wiki
+        logs = []
+        res, msg = await _search_wiki_async(actor_info)
+        logs.append(msg)
+        if res is not None:
+            result, error = await _get_wiki_detail_async(res, msg, actor_info)
+            if result:  # 成功
+                wiki_found = 1
+        # db
+        if config.use_database:
+            if "数据库补全" in overview and "actor_info_miss" in emby_on:  # 已有数据库信息
+                db_exist = 0
+                logs.append(f"{actor_name}: 已有数据库信息")
+            else:
+                db_exist, msg = ActressDB.update_actor_info_from_db(actor_info)
+                logs.append(msg)
+        # summary
+        summary = "\n    " + "\n".join(logs) if logs else ""
         if db_exist or wiki_found:
             res, error = await config.async_client.post_text(update_url, json_data=actor_info.dump(), use_proxy=False)
             if res is not None:
-                # signal.show_log_text(f"\n ✅ 演员信息更新成功！\n 👩🏻 点击查看 {actor_name} 的 Emby 演员主页:")
-                # signal.show_log_text(f" {actor_homepage}")
-                return wiki_found + db_exist << 1, f"{actor_name}: 更新成功 {actor_person}"
+                return (
+                    wiki_found + (db_exist << 1),
+                    f"✅ {actor_name} 更新成功.{summary}\n主页: {actor_homepage}",
+                )
             else:
-                # signal.show_log_text(f"\n 🔴 演员信息更新失败！\n    错误信息: {error}")
-                return 0, f"{actor_name}: 演员信息更新失败！\n    错误信息: {error}"
+                return 0, f"🔴 {actor_name} 更新失败: {error}{summary}"
         else:
-            # signal.show_log_text(f"🔴 {index}/{total} {actor_name}: 未检索到演员信息！跳过！")
-            return 0, f"{actor_name}: 未检索到演员信息！跳过！"
+            return 0, f"🔴 {actor_name}: 未检索到演员信息！跳过！"
 
     except Exception:
-        # signal.show_log_text(traceback.format_exc())
-        return 0, f"{actor_name}: 未知异常: {traceback.format_exc()}"
+        return 0, f"🔴 {actor_name} 未知异常:\n    {traceback.format_exc()}"
 
 
 def show_emby_actor_list(mode):
@@ -297,8 +308,16 @@ def show_emby_actor_list(mode):
         signal.reset_buttons_status.emit()
 
 
-async def _search_wiki_async(actor_info: EMbyActressInfo):
-    """异步版本的_search_wiki函数"""
+async def _search_wiki_async(actor_info: EMbyActressInfo) -> tuple[Optional[str], str]:
+    """
+    搜索维基百科演员信息
+
+    Args:
+        actor_info: 演员信息, 将填充 wiki 解析结果
+
+    Returns:
+        tuple: wiki 详情页 URL, 日志
+    """
     try:
         actor_name = actor_info.name
         # 优先用日文去查找，其次繁体。wiki的搜索很烂，因为跨语言的原因，经常找不到演员
@@ -355,18 +374,12 @@ async def _search_wiki_async(actor_info: EMbyActressInfo):
             res, error = await config.async_client.get_json(url, headers=config.random_headers)
             if res is None:
                 continue
-
             # 获取详细信息并返回URL
-            try:
-                result = _process_wiki_data(res, wiki_id, actor_info, description_en)
-                if result and len(result) >= 3:
-                    if result[0] is not None:  # 成功
-                        return result[0], result[1], result[2]  # url, url_log, error
-                    else:  # 失败
-                        continue
-            except Exception:
+            url, msg = _process_wiki_data(res, wiki_id, actor_info, description_en)
+            if url is None:
+                # todo log
                 continue
-
+            return url, msg
         return None, "未找到匹配的演员信息"
     except Exception as e:
         return None, f"搜索过程发生异常: {str(e)}"
@@ -410,14 +423,13 @@ async def _get_wiki_detail_async(url, url_log, actor_info: EMbyActressInfo) -> t
             return False, "页面内容未命中关键词，识别为非女优或导演"
 
         # 处理维基百科内容
-        result, error = _process_wiki_content(res, url, url_log, actor_info, ja, emby_on)
+        result, error = await _process_wiki_content(res, url, url_log, actor_info, ja, emby_on)
         return result, error
     except Exception as e:
         return False, f"获取维基百科详情时发生异常: {str(e)}"
 
 
-def _process_wiki_data(res, wiki_id, actor_info, description_en):
-    """处理维基百科API数据的辅助函数"""
+def _process_wiki_data(res, wiki_id, actor_info, description_en) -> tuple[Optional[str], str]:
     # 更新 descriptions
     description_zh = ""
     description_ja = ""
@@ -426,9 +438,6 @@ def _process_wiki_data(res, wiki_id, actor_info, description_en):
         if descriptions:
             try:
                 description_zh = descriptions["zh"]["value"]
-            except Exception:
-                pass
-            try:
                 description_ja = descriptions["ja"]["value"]
             except Exception:
                 pass
@@ -448,7 +457,7 @@ def _process_wiki_data(res, wiki_id, actor_info, description_en):
                     if temp_zh:
                         description_zh = temp_zh
                 if not description_ja:
-                    en_ja = {
+                    en_ja: dict[str, str] = {
                         "Japanese AV idol": "日本のAVアイドル",
                         "Japanese pornographic actress": "日本のポルノ女優",
                         "Japanese idol": "日本のアイドル",
@@ -475,33 +484,23 @@ def _process_wiki_data(res, wiki_id, actor_info, description_en):
             tmdb_id = claims["P4985"][0]["mainsnak"]["datavalue"]["value"]
             actor_info.provider_ids["Tmdb"] = tmdb_id
             url_log += f"TheMovieDb: https://www.themoviedb.org/person/{tmdb_id} \n"
-        except Exception:
-            pass
-        try:
+
             imdb_id = claims["P345"][0]["mainsnak"]["datavalue"]["value"]
             actor_info.provider_ids["Imdb"] = imdb_id
             url_log += f"IMDb: https://www.imdb.com/name/{imdb_id} \n"
-        except Exception:
-            pass
-        try:
+
             twitter_id = claims["P2002"][0]["mainsnak"]["datavalue"]["value"]
             actor_info.provider_ids["Twitter"] = twitter_id
             url_log += f"Twitter: https://twitter.com/{twitter_id} \n"
-        except Exception:
-            pass
-        try:
+
             instagram_id = claims["P2003"][0]["mainsnak"]["datavalue"]["value"]
             actor_info.provider_ids["Instagram"] = instagram_id
             url_log += f"Instagram: https://www.instagram.com/{instagram_id} \n"
-        except Exception:
-            pass
-        try:
+
             fanza_id = claims["P9781"][0]["mainsnak"]["datavalue"]["value"]
             actor_info.provider_ids["Fanza"] = fanza_id
             url_log += f"Fanza: https://actress.dmm.co.jp/-/detail/=/actress_id={fanza_id} \n"
-        except Exception:
-            pass
-        try:
+
             xhamster_id = claims["P8720"][0]["mainsnak"]["datavalue"]["value"]
             actor_info.provider_ids["xHamster"] = f"https://xhamster.com/pornstars/{xhamster_id}"
             url_log += f"xHamster: https://xhamster.com/pornstars/{xhamster_id} \n"
@@ -514,8 +513,8 @@ def _process_wiki_data(res, wiki_id, actor_info, description_en):
         if sitelinks:
             jawiki = sitelinks.get("jawiki")
             zhwiki = sitelinks.get("zhwiki")
-            ja_url = jawiki.get("url") if jawiki else ""
-            zh_url = zhwiki.get("url") if zhwiki else ""
+            ja_url: str = jawiki.get("url") if jawiki else ""
+            zh_url: str = zhwiki.get("url") if zhwiki else ""
             url_final = ""
             emby_on = config.emby_on
             if "actor_info_zh_cn" in emby_on:
@@ -563,8 +562,6 @@ def _process_wiki_data(res, wiki_id, actor_info, description_en):
                     actor_info.taglines = [f"{description_en}"]
 
             if url_final:
-                import urllib.parse
-
                 url_unquote = urllib.parse.unquote(url_final)
                 url_log += f"Wikipedia: {url_unquote}"
                 return url_final, url_log
@@ -575,7 +572,7 @@ def _process_wiki_data(res, wiki_id, actor_info, description_en):
         return None, "维基百科数据处理异常"
 
 
-def _process_wiki_content(res, url, url_log, actor_info, ja, emby_on):
+async def _process_wiki_content(res, url, url_log, actor_info, ja, emby_on):
     """处理维基百科页面内容的辅助函数"""
     try:
         res = re.sub(r"<a href=\"#cite_note.*?</a>", "", res)  # 替换[1],[2]等注释
@@ -712,13 +709,13 @@ def _process_wiki_content(res, url, url_log, actor_info, ja, emby_on):
                     if tag_req and langid.classify(tag_req)[0] == "en" and translate_by_list:
                         for each in translate_by_list:
                             if each == "youdao":  # 使用有道翻译
-                                t, o, r = youdao_translate(tag_req, "")
+                                t, o, r = await youdao_translate_async(tag_req, "")
                             elif each == "google":  # 使用 google 翻译
-                                t, o, r = google_translate(tag_req, "")
+                                t, o, r = await google_translate_async(tag_req, "")
                             elif each == "llm":  # 使用 llm 翻译
-                                t, o, r = llm_translate(tag_req, "")
+                                t, o, r = await llm_translate_async(tag_req, "")
                             else:  # 使用deepl翻译
-                                t, o, r = deepl_translate(tag_req, "", ls="EN")
+                                t, o, r = await deepl_translate_async(tag_req, "", ls="EN")
                             if not r:
                                 actor_info.taglines = [t]
                                 tag_req = ""
@@ -727,13 +724,13 @@ def _process_wiki_content(res, url, url_log, actor_info, ja, emby_on):
                 if (overview_req or tag_req) and translate_by_list:
                     for each in translate_by_list:
                         if each == "youdao":  # 使用有道翻译
-                            t, o, r = youdao_translate(tag_req, overview_req)
+                            t, o, r = await youdao_translate_async(tag_req, overview_req)
                         elif each == "google":  # 使用 google 翻译
-                            t, o, r = google_translate(tag_req, overview_req)
+                            t, o, r = await google_translate_async(tag_req, overview_req)
                         elif each == "llm":  # 使用 llm 翻译
-                            t, o, r = llm_translate(tag_req, overview_req)
+                            t, o, r = await llm_translate_async(tag_req, overview_req)
                         else:  # 使用deepl翻译
-                            t, o, r = deepl_translate(tag_req, overview_req)
+                            t, o, r = await deepl_translate_async(tag_req, overview_req)
                         if not r:
                             if tag_req:
                                 actor_info.taglines = [t]
