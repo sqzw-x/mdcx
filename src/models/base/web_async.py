@@ -3,7 +3,23 @@ from io import BytesIO
 from typing import Any, Callable, Literal, Optional
 
 import httpx
+from aiolimiter import AsyncLimiter
 from PIL import Image
+
+
+class AsyncWebLimiters:
+    def __init__(self):
+        self.limiters: dict[str, AsyncLimiter] = {
+            "127.0.0.1": AsyncLimiter(300, 1),
+            "localhost": AsyncLimiter(300, 1),
+        }
+
+    def get(self, key: str, rate: float = 1, period: float = 1) -> AsyncLimiter:
+        return self.limiters.setdefault(key, AsyncLimiter(rate, period))
+
+    def remove(self, key: str):
+        if key in self.limiters:
+            del self.limiters[key]
 
 
 class AsyncWebClient:
@@ -16,6 +32,7 @@ class AsyncWebClient:
         default_headers: Optional[dict[str, str]] = None,
         log_fn: Optional[Callable[[str], None]] = None,
         ipv4_only: bool = False,
+        limiters: Optional[AsyncWebLimiters] = None,
     ):
         limits = httpx.Limits(max_connections=100, max_keepalive_connections=50, keepalive_expiry=20)
         self.retry = retry
@@ -38,6 +55,7 @@ class AsyncWebClient:
             transport=httpx.AsyncHTTPTransport(local_address="0.0.0.0") if ipv4_only else None,
         )
         self.log_fn = log_fn if log_fn is not None else lambda _: None
+        self.limiters = limiters if limiters is not None else AsyncWebLimiters()
 
     def _client(self, use_proxy):
         return self.proxy_client if use_proxy else self.no_proxy_client
@@ -90,7 +108,9 @@ class AsyncWebClient:
             tuple[Optional[httpx.Response], str]: (响应对象, 错误信息)
         """
         try:
+            u = httpx.URL(url)
             headers = self._prepare_headers(url, headers)
+            await self.limiters.get(u.host).acquire()
             retry_count = self.retry
             error_msg = ""
             for attempt in range(retry_count):
@@ -98,7 +118,7 @@ class AsyncWebClient:
                     self.log_fn(f"🔎 {method} {url}" + f" ({attempt + 1}/{retry_count})" * (attempt != 0))
                     resp = await self._client(use_proxy).request(
                         method,
-                        url,
+                        u,
                         headers=headers,
                         cookies=cookies,
                         data=data,
@@ -171,7 +191,7 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[dict[str, Any]], str]:
+    ) -> tuple[Optional[Any], str]:
         """请求JSON数据"""
         response, error = await self.request("GET", url, headers=headers, cookies=cookies, use_proxy=use_proxy)
         if response is None:
@@ -213,7 +233,7 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[dict[str, Any]], str]:
+    ) -> tuple[Optional[Any], str]:
         """POST 请求, 返回响应JSON数据"""
         response, error = await self.request(
             "POST", url, data=data, json_data=json_data, headers=headers, cookies=cookies, use_proxy=use_proxy
