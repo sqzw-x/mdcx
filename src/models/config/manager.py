@@ -47,30 +47,33 @@ class ConfigManager(ManualConfig):
         errors = []
         for section in reader.sections():
             for key, value in reader.items(section):
-                if key not in field_types:
-                    # 特例处理: 支持自定义网站配置
-                    if key.endswith("_website") and key[:-8] in ManualConfig.SUPPORTED_WEBSITES and value:
-                        setattr(self.config, key, value)
+                try:
+                    if key not in field_types:
+                        # 特例处理: 支持自定义网站配置
+                        if key.endswith("_website") and key[:-8] in ManualConfig.SUPPORTED_WEBSITES and value:
+                            setattr(self.config, key, value)
+                            continue
+                        errors.append(f"未知配置: {key} (位于 {section})")
                         continue
-                    errors.append(f"未知配置: {key} (位于 {section})")
-                    continue
-                expected_type = field_types[key]
-                if expected_type is int:
-                    try:
-                        setattr(self.config, key, int(value))
-                    except ValueError:
-                        errors.append(f"类型无效: {key} 应为整数, 得到 {value} (位于 {section})")
-                elif expected_type is float:
-                    try:
-                        setattr(self.config, key, float(value))
-                    except ValueError:
-                        errors.append(f"类型无效: {key} 应为浮点数, 得到 {value} (位于 {section})")
-                elif expected_type is bool:
-                    setattr(self.config, key, self.ini_value_to_bool(value))
-                elif expected_type is str:
-                    setattr(self.config, key, value)
-                else:
-                    errors.append(f"内部错误: {key} 具有未知类型 {expected_type} (位于 {section}), 请联系开发者")
+                    expected_type = field_types[key]
+                    if expected_type is int:
+                        try:
+                            setattr(self.config, key, int(value))
+                        except ValueError:
+                            errors.append(f"类型无效: {key} 应为整数, 得到 {value} (位于 {section})")
+                    elif expected_type is float:
+                        try:
+                            setattr(self.config, key, float(value))
+                        except ValueError:
+                            errors.append(f"类型无效: {key} 应为浮点数, 得到 {value} (位于 {section})")
+                    elif expected_type is bool:
+                        setattr(self.config, key, self.ini_value_to_bool(value))
+                    elif expected_type is str:
+                        setattr(self.config, key, value)
+                    else:
+                        errors.append(f"内部错误: {key} 具有未知类型 {expected_type} (位于 {section}), 请联系开发者")
+                except Exception as e:
+                    errors.append(f"读取配置错误: {key} (位于 {section}) {value=}  {str(e)}")
         return "\n\t".join(errors)
 
     @staticmethod
