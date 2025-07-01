@@ -1989,9 +1989,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_show_pic_actor_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=show_emby_actor_list, args=(self.Ui.comboBox_pic_actor.currentIndex(),))
-            self.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(show_emby_actor_list(self.Ui.comboBox_pic_actor.currentIndex()))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
