@@ -706,18 +706,14 @@ class MyMAinWindow(QMainWindow):
                 return
         if self.Ui.pushButton_start_cap.text() == "■ 停止":
             save_success_list()  # 保存成功列表
-            Flags.stop_flag = True  # 在pool启动前，点停止按钮时，需要用这个来停止启动pool
             Flags.rest_time_convert_ = Flags.rest_time_convert
             Flags.rest_time_convert = 0
             Flags.rest_sleepping = False
             self.Ui.pushButton_start_cap.setText(" ■ 停止中 ")
             self.Ui.pushButton_start_cap2.setText(" ■ 停止中 ")
             signal.show_scrape_info("⛔️ 刮削停止中...")
-            try:  # pool可能还没启动
-                Flags.pool.shutdown(wait=False, cancel_futures=True)
-            except Exception:
-                signal.show_traceback_log(traceback.format_exc())
-            t = threading.Thread(target=self._kill_threads)  # 关闭线程池和扫描线程
+            config.executor.cancel()  # 取消异步任务
+            t = threading.Thread(target=self._kill_threads)  # 关闭线程池
             t.start()
 
     # 显示停止信息

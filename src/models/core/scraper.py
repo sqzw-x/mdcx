@@ -617,10 +617,6 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
                 f'<font color="brown"> 🍯 间歇刮削 已启用，连续刮削 {config.rest_count} 个文件后，将自动休息 {Flags.rest_time_convert} 秒...</font>'
             )
 
-        # 在启动前点了停止按钮
-        if Flags.stop_flag:
-            return
-
         Flags.next_start_time = time.time()
 
         # 创建信号量来限制并发数量

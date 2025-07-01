@@ -67,7 +67,6 @@ class _Flags:
     )  # deep 翻译结果（当没有填写api时，使用第三方翻译模块，作用是实现超时自动退出，避免卡死）
     failed_list: list[list[str]] = field(default_factory=list)  # 失败文件和错误原因记录
     failed_file_list: list[str] = field(default_factory=list)  # 失败文件记录
-    stop_flag: bool = False  # 线程停止标识
     single_file_path: str = ""  # 工具单文件刮削的文件路径
     website_name: str = ""
     scrape_start_time: float = 0.0
@@ -107,7 +106,6 @@ class _Flags:
         self.json_data_dic = {}
         self.img_path = ""
         self.deepl_result = {}
-        self.stop_flag = False
 
 
 Flags = _Flags()

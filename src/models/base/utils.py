@@ -21,78 +21,121 @@ T = TypeVar("T")
 
 
 class AsyncBackgroundExecutor:
-    """将协程提交到后台线程执行的执行器, 可以线程安全的进行异步调用"""
+    """可重用的异步任务执行器, 将协程提交到运行于后台线程的事件循环中执行"""
 
     def __init__(self):
-        self._loop: asyncio.AbstractEventLoop
-        self._thread: threading.Thread
-        self._start_event = threading.Event()
+        self._loop: asyncio.AbstractEventLoop = None  # type: ignore
+        self._thread: threading.Thread = None  # type: ignore
         self._pending_futures: Set[Future] = set()
         self._lock = threading.Lock()
-
-        self._thread = threading.Thread(target=self._run_event_loop, daemon=True, name="AsyncBackgroundThread")
-        self._thread.start()
-        self._start_event.wait()
+        self._running = False
 
     def submit(self, coro: Coroutine[Any, Any, T]) -> Future[T]:
-        """提交任务并返回Future对象"""
+        """提交一个协程到后台线程执行, 返回一个 Future 对象. 此方法线程安全且非阻塞."""
+        self._start_background_thread()
+
         future = asyncio.run_coroutine_threadsafe(coro, self._loop)
+        future.add_done_callback(self._remove_future)
         with self._lock:
             self._pending_futures.add(future)
-        future.add_done_callback(self._remove_future)
         return future
 
     def run(self, coro: Coroutine[Any, Any, T]) -> T:
-        """submit 的同步版本, 等待协程执行完毕并返回结果"""
-        future = asyncio.run_coroutine_threadsafe(coro, self._loop)
-        with self._lock:
-            self._pending_futures.add(future)
-        future.add_done_callback(self._remove_future)
-        return future.result()
+        """submit 的阻塞版本, 等待协程执行完毕并返回结果. 此方法线程安全."""
+        return self.submit(coro).result()
 
     def wait_all(self, timeout=None):
-        """等待所有未完成任务执行完毕"""
+        """等待所有未完成任务执行完毕, 任务异常将作为结果返回. 此方法线程安全."""
         with self._lock:
             current_futures = list(self._pending_futures)
+            if not current_futures:
+                return []
+        try:
+            done, not_done = concurrent.futures.wait(
+                current_futures,
+                timeout=timeout,
+                return_when=concurrent.futures.ALL_COMPLETED,
+            )
+            if not_done:
+                raise TimeoutError(f"{len(not_done)} tasks not completed within timeout")
+            results = []
+            for future in done:
+                try:
+                    results.append(future.result())
+                except Exception as e:
+                    results.append(e)
+            return results
+        except Exception:
+            for future in current_futures:
+                if not future.done():
+                    future.cancel()
+            raise
 
-        if not current_futures:
-            return []
+    def cancel(self):
+        """取消所有任务并释放资源, 此方法线程安全且可重入."""
+        with self._lock:
+            if not self._running:
+                return
 
-        # 使用concurrent.futures等待机制
-        done, not_done = concurrent.futures.wait(
-            current_futures,
-            timeout=timeout,
-            return_when=concurrent.futures.ALL_COMPLETED,
-        )
+            self._running = False
 
-        if not_done:
-            raise TimeoutError(f"{len(not_done)} tasks not completed within timeout")
+            # 取消所有待处理的任务
+            for future in list(self._pending_futures):
+                if not future.done():
+                    future.cancel()
+            self._pending_futures.clear()
 
-        return [f.result() for f in done]
-
-    def shutdown(self):
-        """手动关闭执行器，释放资源"""
-        if hasattr(self, "_loop") and not self._loop.is_closed():
-            self._loop.call_soon_threadsafe(self._loop.stop)
-            while self._loop.is_running():
-                threading.Event().wait(0.1)
-            self._loop.close()
+            if self._loop and not self._loop.is_closed():
+                try:
+                    # 停止事件循环
+                    self._loop.call_soon_threadsafe(self._loop.stop)
+                except RuntimeError:
+                    # 如果事件循环已经停止，忽略错误
+                    pass
 
     def _run_event_loop(self):
-        self._loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self._loop)
-        self._start_event.set()
-        self._loop.run_forever()
+        """运行事件循环的线程函数"""
+        try:
+            self._loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self._loop)
+            self._loop_started.set()
+            self._loop.run_forever()
+        except Exception:
+            # 如果启动失败，设置事件以避免主线程永远等待
+            self._loop_started.set()
+            # 不重新抛出异常，让线程正常结束
+        finally:
+            # 清理资源
+            if self._loop and not self._loop.is_closed():
+                try:
+                    self._loop.close()
+                except Exception:
+                    pass
+            # 重置loop引用
+            self._loop = None  # type: ignore
 
     def _remove_future(self, future):
         """自动移除已完成的任务"""
         with self._lock:
             self._pending_futures.discard(future)
 
+    def _start_background_thread(self):
+        """启动后台线程, 此方法线程安全且可重入"""
+        with self._lock:
+            if self._running:  # 多次调用
+                return
+            self._loop_started = threading.Event()
+            self._thread = threading.Thread(target=self._run_event_loop, daemon=True, name="AsyncBackgroundThread")
+            self._thread.start()
+            self._running = True
+            # 等待事件循环启动
+            if not self._loop_started.wait(timeout=10.0):
+                raise RuntimeError("Failed to start background event loop within 10 seconds")
+
     def __del__(self):
         """析构函数，确保资源被释放"""
         try:
-            self.shutdown()
+            self.cancel()
         except Exception:
             pass  # 忽略析构时的异常
 
