@@ -445,7 +445,7 @@ async def translate_title_outline(json_data: JsonData, movie_number: str):
             if not json_data["cd_part"]:
                 random.shuffle(translate_by_list)
 
-            def _task(each):
+            async def _task(each):
                 if each == "youdao":  # 使用有道翻译
                     t, o, r = await youdao_translate_async(trans_title, trans_outline)
                 elif each == "google":  # 使用 google 翻译
