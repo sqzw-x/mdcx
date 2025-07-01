@@ -24,16 +24,14 @@ class AsyncBackgroundExecutor:
     """可重用的异步任务执行器, 将协程提交到运行于后台线程的事件循环中执行"""
 
     def __init__(self):
-        self._loop: asyncio.AbstractEventLoop = None  # type: ignore
-        self._thread: threading.Thread = None  # type: ignore
+        self._loop: asyncio.AbstractEventLoop
         self._pending_futures: Set[Future] = set()
         self._lock = threading.Lock()
         self._running = False
+        self._start_background_thread()
 
     def submit(self, coro: Coroutine[Any, Any, T]) -> Future[T]:
         """提交一个协程到后台线程执行, 返回一个 Future 对象. 此方法线程安全且非阻塞."""
-        self._start_background_thread()
-
         future = asyncio.run_coroutine_threadsafe(coro, self._loop)
         future.add_done_callback(self._remove_future)
         with self._lock:
@@ -72,26 +70,18 @@ class AsyncBackgroundExecutor:
             raise
 
     def cancel(self):
-        """取消所有任务并释放资源, 此方法线程安全且可重入."""
+        """取消所有任务"""
         with self._lock:
             if not self._running:
                 return
-
             self._running = False
+            _pending_futures = list(self._pending_futures)
 
-            # 取消所有待处理的任务
-            for future in list(self._pending_futures):
-                if not future.done():
-                    future.cancel()
-            self._pending_futures.clear()
-
-            if self._loop and not self._loop.is_closed():
-                try:
-                    # 停止事件循环
-                    self._loop.call_soon_threadsafe(self._loop.stop)
-                except RuntimeError:
-                    # 如果事件循环已经停止，忽略错误
-                    pass
+        # 取消所有待处理的任务
+        for future in _pending_futures:
+            if not future.done():
+                future.cancel()  # 此处会运行 callback _remove_future
+        self._running = True  # 此方法不关闭后台线程和事件循环, 仅取消任务
 
     def _run_event_loop(self):
         """运行事件循环的线程函数"""
@@ -120,22 +110,20 @@ class AsyncBackgroundExecutor:
             self._pending_futures.discard(future)
 
     def _start_background_thread(self):
-        """启动后台线程, 此方法线程安全且可重入"""
-        with self._lock:
-            if self._running:  # 多次调用
-                return
-            self._loop_started = threading.Event()
-            self._thread = threading.Thread(target=self._run_event_loop, daemon=True, name="AsyncBackgroundThread")
-            self._thread.start()
-            self._running = True
-            # 等待事件循环启动
-            if not self._loop_started.wait(timeout=10.0):
-                raise RuntimeError("Failed to start background event loop within 10 seconds")
+        self._loop_started = threading.Event()
+        self._thread = threading.Thread(target=self._run_event_loop, daemon=True, name="AsyncBackgroundThread")
+        self._thread.start()
+        self._running = True
+        # 等待事件循环启动
+        if not self._loop_started.wait(timeout=10.0):
+            raise RuntimeError("Failed to start background event loop within 10 seconds")
 
     def __del__(self):
         """析构函数，确保资源被释放"""
         try:
             self.cancel()
+            self._loop.stop()
+            self._thread.join(timeout=5.0)
         except Exception:
             pass  # 忽略析构时的异常
 

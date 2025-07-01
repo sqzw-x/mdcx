@@ -767,10 +767,7 @@ class MyMAinWindow(QMainWindow):
 
     # 关闭线程池和扫描线程
     def _kill_threads(self):
-        new_thread_list = []
-        [new_thread_list.append(i) for i in self.threads_list]
-        other_name = new_thread_list[-1].getName()
-        Flags.total_kills = len(new_thread_list)
+        Flags.total_kills = len(self.threads_list)
         Flags.now_kill = 0
         start_time = time.time()
         self.set_label_file_path.emit(f"⛔️ 正在停止刮削...\n   正在停止已在运行的任务线程（1/{Flags.total_kills}）...")
@@ -779,23 +776,21 @@ class MyMAinWindow(QMainWindow):
         )
         signal.show_traceback_log(f"⛔️ 正在停止正在运行的任务线程 ({Flags.total_kills}) ...")
         i = 0
-        for each in new_thread_list:
+        for each in self.threads_list:
             i += 1
-            signal.show_traceback_log(f"正在停止线程: {i}/{Flags.total_kills} {each.getName()} ...")
+            signal.show_traceback_log(f"正在停止线程: {i}/{Flags.total_kills} {each.name} ...")
         signal.show_traceback_log(
             "线程正在停止中，请稍后...\n 🍯 停止时间与线程数量及线程正在执行的任务有关，比如正在执行网络请求、文件下载等IO操作时，需要等待其释放资源。。。\n"
         )
         signal.stop = True
-        for each in new_thread_list:  # 线程池的线程
+        for each in self.threads_list:  # 线程池的线程
             kill_a_thread(each)
             while each.is_alive():
                 pass
 
         signal.stop = False
         self.stop_used_time = get_used_time(start_time)
-        signal.show_log_text(
-            f" 🕷 {get_current_time()} 已停止线程：{Flags.total_kills}/{Flags.total_kills} {other_name}"
-        )
+        signal.show_log_text(f" 🕷 {get_current_time()} 已停止线程：{Flags.total_kills}/{Flags.total_kills}")
         signal.show_traceback_log(f"所有线程已停止！！！({self.stop_used_time}s)\n ⛔️ 刮削已手动停止！\n")
         signal.show_log_text(f" ⛔️ {get_current_time()} 所有线程已停止！({self.stop_used_time}s)")
         thread_remain_list = []

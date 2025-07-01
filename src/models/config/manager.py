@@ -466,7 +466,7 @@ class ConfigSchema:
             proxy=config.httpx_proxy,
             retry=config.retry,
             timeout=httpx.Timeout(config.timeout),
-            default_headers=config.headers,
+            default_headers=config.random_headers,
             log_fn=signal.add_log,
             ipv4_only=config.ipv4_only,
         )
