@@ -3,8 +3,6 @@
 此模块不应依赖任何项目代码
 """
 
-import threading
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -20,7 +18,6 @@ class _Flags:
     total_kills: int = 0
     now_kill: int = 0
     success_save_time: float = 0.0
-    pool: ThreadPoolExecutor = None
     next_start_time: float = 0.0
     count_claw: int = 0  # 批量刮削次数
     can_save_remain: bool = False  # 保存剩余任务
@@ -71,7 +68,6 @@ class _Flags:
     website_name: str = ""
     scrape_start_time: float = 0.0
     success_list: set[str] = field(default_factory=set)
-    threads_list: list[threading.Thread] = field(default_factory=list)  # 开启的线程列表
     stop_other: bool = True  # 非刮削线程停止标识
     local_number_flag: str = ""  # 启动后本地数据库是否扫描过
     actor_numbers_dic: dict[str, list[str]] = field(default_factory=dict)  # 每个演员所有番号的字典

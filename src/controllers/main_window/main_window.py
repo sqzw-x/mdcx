@@ -137,6 +137,7 @@ class MyMAinWindow(QMainWindow):
         # endregion
 
         # region 其它属性声明
+        self.threads_list: list[threading.Thread] = []  # 启动的线程列表
         self.start_click_time = None
         self.start_click_pos = None
         self.menu_start = None
@@ -765,13 +766,9 @@ class MyMAinWindow(QMainWindow):
         t.start()
 
     # 关闭线程池和扫描线程
-    def _kill_threads(
-        self,
-    ):
-        thread_list = threading.enumerate()
+    def _kill_threads(self):
         new_thread_list = []
-        [new_thread_list.append(i) for i in thread_list if "MDCx-Pool" in i.getName()]  # 线程池的线程
-        [new_thread_list.append(i) for i in Flags.threads_list]  # 其他开启的线程
+        [new_thread_list.append(i) for i in self.threads_list]
         other_name = new_thread_list[-1].getName()
         Flags.total_kills = len(new_thread_list)
         Flags.now_kill = 0
@@ -790,8 +787,7 @@ class MyMAinWindow(QMainWindow):
         )
         signal.stop = True
         for each in new_thread_list:  # 线程池的线程
-            if "MDCx-Pool" not in each.getName():
-                kill_a_thread(each)
+            kill_a_thread(each)
             while each.is_alive():
                 pass
 
@@ -1556,7 +1552,7 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(
                 target=newtdisk_creat_symlink, args=(bool(self.Ui.checkBox_copy_netdisk_nfo.isChecked()),)
             )
-            Flags.threads_list.append(t)
+            self.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
@@ -1577,7 +1573,7 @@ class MyMAinWindow(QMainWindow):
             self.pushButton_save_config_clicked()
         try:
             t = threading.Thread(target=check_missing_number, args=(True,))
-            Flags.threads_list.append(t)
+            self.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
@@ -1659,7 +1655,7 @@ class MyMAinWindow(QMainWindow):
             self.pushButton_show_log_clicked()  # 点击开始移动按钮后跳转到日志页面
             try:
                 t = threading.Thread(target=self._move_file_thread)
-                Flags.threads_list.append(t)
+                self.threads_list.append(t)
                 t.start()  # 启动线程,即让线程开始执行
             except Exception:
                 signal.show_traceback_log(traceback.format_exc())
@@ -1876,7 +1872,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()
         try:
             t = threading.Thread(target=check_and_clean_files)
-            Flags.threads_list.append(t)
+            self.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
@@ -1887,7 +1883,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
             t = threading.Thread(target=add_sub_for_all_video)
-            Flags.threads_list.append(t)
+            self.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
@@ -1956,7 +1952,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
             t = threading.Thread(target=update_emby_actor_info)
-            Flags.threads_list.append(t)
+            self.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
             signal.show_log_text(traceback.format_exc())
@@ -1967,7 +1963,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
             t = threading.Thread(target=update_emby_actor_photo)
-            Flags.threads_list.append(t)
+            self.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
             signal.show_log_text(traceback.format_exc())
@@ -1978,7 +1974,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
             t = threading.Thread(target=creat_kodi_actors, args=(True,))
-            Flags.threads_list.append(t)
+            self.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
             signal.show_log_text(traceback.format_exc())
@@ -1988,7 +1984,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
             t = threading.Thread(target=creat_kodi_actors, args=(False,))
-            Flags.threads_list.append(t)
+            self.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
             signal.show_log_text(traceback.format_exc())
@@ -1998,7 +1994,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
             t = threading.Thread(target=show_emby_actor_list, args=(self.Ui.comboBox_pic_actor.currentIndex(),))
-            Flags.threads_list.append(t)
+            self.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
             signal.show_log_text(traceback.format_exc())
@@ -2534,7 +2530,7 @@ class MyMAinWindow(QMainWindow):
             "QPushButton#pushButton_start_cap2{color: white;background-color:#4C6EFF;}QPushButton:hover#pushButton_start_cap2{color: white;background-color: rgba(76,110,255,240)}QPushButton:pressed#pushButton_start_cap2{color: white;background-color:#4C6EE0}"
         )
         Flags.file_mode = FileMode.Default
-        Flags.threads_list = []
+        self.threads_list = []
         if len(Flags.failed_list):
             self.Ui.pushButton_scraper_failed_list.setText(f"一键重新刮削当前 {len(Flags.failed_list)} 个失败文件")
         else:
