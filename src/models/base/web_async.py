@@ -115,7 +115,6 @@ class AsyncWebClient:
             error_msg = ""
             for attempt in range(retry_count):
                 try:
-                    self.log_fn(f"🔎 {method} {url}" + f" ({attempt + 1}/{retry_count})" * (attempt != 0))
                     resp = await self._client(use_proxy).request(
                         method,
                         u,
