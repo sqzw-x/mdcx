@@ -7,7 +7,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_dmm_trailer
-from models.base.web_sync import get_text
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -329,7 +329,7 @@ def get_mosaic(title, actor):
     return mosaic
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="jp",
@@ -356,7 +356,7 @@ def main(
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
 
-        html_info, error = get_text(real_url)
+        html_info, error = await config.async_client.get_text(real_url)
         if html_info is None:
             debug_info = f"请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)

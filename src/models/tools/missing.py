@@ -10,7 +10,6 @@ import time
 from lxml import etree
 
 from models.base.utils import get_used_time
-from models.base.web_sync import get_text
 from models.config.manager import config, manager
 from models.config.resources import resources
 from models.core.file import get_file_info, movie_lists
@@ -18,8 +17,8 @@ from models.core.flags import Flags
 from models.signals import signal
 
 
-def _scraper_web(url):
-    html, error = get_text(url)
+async def _scraper_web(url):
+    html, error = await config.async_client.get_text(url)
     if html is None:
         signal.show_log_text(f"请求错误: {error}")
         return ""
@@ -32,7 +31,7 @@ def _scraper_web(url):
     return html
 
 
-def _get_actor_numbers(actor_url, actor_single_url):
+async def _get_actor_numbers(actor_url, actor_single_url):
     """
     获取演员的番号列表
     """
@@ -42,9 +41,9 @@ def _get_actor_numbers(actor_url, actor_single_url):
     i = 1
     while next_page:
         page_url = f"{actor_url}?page={i}&t=s"
-        html, error = get_text(page_url)
+        html, error = await config.async_client.get_text(page_url)
         if html is None:
-            html, error = get_text(page_url)
+            html, error = await config.async_client.get_text(page_url)
         if html is None:
             return
         if "pagination-next" not in html or i >= 60:
@@ -64,7 +63,7 @@ def _get_actor_numbers(actor_url, actor_single_url):
     i = 1
     while next_page:
         page_url = f"{actor_url}?page={i}"
-        html = _scraper_web(page_url)
+        html = await _scraper_web(page_url)
         if len(html) < 1:
             return
         if "pagination-next" not in html or i >= 60:
@@ -100,7 +99,7 @@ def _get_actor_numbers(actor_url, actor_single_url):
         i += 1
 
 
-def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
+async def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
     """
     获取演员缺少的番号列表
     """
@@ -111,7 +110,7 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
     if not Flags.actor_numbers_dic.get(actor_url):
         Flags.actor_numbers_dic[actor_url] = {}
         Flags.actor_numbers_dic[actor_single_url] = {}  # 单体作品
-        _get_actor_numbers(actor_url, actor_single_url)  # 如果字典里没有该演员主页的番号，则从网络获取演员番号
+        await _get_actor_numbers(actor_url, actor_single_url)  # 如果字典里没有该演员主页的番号，则从网络获取演员番号
 
     # 演员信息排版和显示
     actor_info = Flags.actor_numbers_dic.get(actor_url)
@@ -129,7 +128,10 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
             video_number, video_date, video_url, download_info, video_title, single_info = actor_info.get(actor_number)
             if actor_flag:
                 video_url = video_title[:30]
-            number_str = f"{video_date:>13}  {video_number:<10} {single_info}  {download_info:\u3000>5}   {video_url}"
+            space_char = "　"  # 全角空格
+            number_str = (
+                f"{video_date:>13}  {video_number:<10} {single_info}  {download_info:{space_char}>5}   {video_url}"
+            )
             all_list.add(number_str)
             if actor_number not in Flags.local_number_set:
                 not_download_list.add(number_str)
@@ -179,7 +181,7 @@ def _get_actor_missing_numbers(actor_name, actor_url, actor_flag):
             signal.show_log_text("🎉 没有缺少的番号...\n")
 
 
-def check_missing_number(actor_flag):
+async def check_missing_number(actor_flag):
     """
     检查缺失番号
     """
@@ -283,7 +285,7 @@ def check_missing_number(actor_flag):
         signal.show_log_text(
             f"\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n🔍 需要查询的演员：\n   {', '.join(actor_list)}"
         )
-        for actor_name in actor_list:
+        for actor_name in actor_list:  # todo concurrent
             if not actor_name:
                 continue
             if "http" in actor_name:
@@ -294,7 +296,7 @@ def check_missing_number(actor_flag):
                 signal.show_log_text(
                     f"\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 从 JAVDB 获取 [ {actor_name} ] 的所有番号列表..."
                 )
-                _get_actor_missing_numbers(actor_name, actor_url, actor_flag)
+                await _get_actor_missing_numbers(actor_name, actor_url, actor_flag)
             else:
                 signal.show_log_text(
                     f"\n🔴 未找到 [ {actor_name} ] 的主页地址，你可以填写演员的 JAVDB 主页地址替换演员名称..."

@@ -1732,20 +1732,17 @@ def deal_old_files(
     # 抢占图片的处理权
     single_folder_catched = False  # 剧照、剧照副本、主题视频 这些单文件夹的处理权，他们只需要处理一次
     pic_final_catched = False  # 最终图片（poster、thumb、fanart）的处理权
-    with Flags.lock:
-        if thumb_new_path_with_filename not in Flags.pic_catch_set:
-            if thumb_final_path != thumb_new_path_with_filename:
-                if thumb_final_path not in Flags.pic_catch_set:  # 不带文件名的图片的下载权利（下载权利只给它一个）
-                    Flags.pic_catch_set.add(thumb_final_path)
-                    pic_final_catched = True
-            else:
-                pic_final_catched = (
-                    True  # 带文件名的图片，下载权利给每一个。（如果有一个下载好了，未下载的可以直接复制）
-                )
-        # 处理 extrafanart、extrafanart副本、主题视频、附加视频
-        if pic_final_catched and extrafanart_new_path not in Flags.extrafanart_deal_set:
-            Flags.extrafanart_deal_set.add(extrafanart_new_path)
-            single_folder_catched = True
+    if thumb_new_path_with_filename not in Flags.pic_catch_set:
+        if thumb_final_path != thumb_new_path_with_filename:
+            if thumb_final_path not in Flags.pic_catch_set:  # 不带文件名的图片的下载权利（下载权利只给它一个）
+                Flags.pic_catch_set.add(thumb_final_path)
+                pic_final_catched = True
+        else:
+            pic_final_catched = True  # 带文件名的图片，下载权利给每一个。（如果有一个下载好了，未下载的可以直接复制）
+    # 处理 extrafanart、extrafanart副本、主题视频、附加视频
+    if pic_final_catched and extrafanart_new_path not in Flags.extrafanart_deal_set:
+        Flags.extrafanart_deal_set.add(extrafanart_new_path)
+        single_folder_catched = True
     """
     需要考虑旧文件分集情况（带文件名、不带文件名）、旧文件不同扩展名情况，他们如何清理或保留
     需要考虑新文件分集情况（带文件名、不带文件名）

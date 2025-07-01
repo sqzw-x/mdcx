@@ -6,7 +6,6 @@ import urllib3
 from lxml import etree
 
 from models.base.number import is_uncensored
-from models.base.web_sync import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info
@@ -174,7 +173,7 @@ def get_number(html, number):
     return number.replace("FC2-PPV ", "FC2-"), release, runtime, number
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="zh_cn",
@@ -205,7 +204,7 @@ def main(
             search_url = f"{search_url}?search_keyword={search_keyword}&search_type=searchall&op=search"
             debug_info = f"搜索地址: {search_url} "
             LogBuffer.info().write(web_info + debug_info)
-            response, error = get_text(search_url)
+            response, error = await config.async_client.get_text(search_url)
 
             if response is None:
                 debug_info = f"网络请求错误: {error}"
@@ -223,7 +222,7 @@ def main(
                 raise Exception(debug_info)
 
         if real_url:
-            html_content, error = get_text(real_url)
+            html_content, error = await config.async_client.get_text(real_url)
             if html_content is None:
                 debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)

@@ -2,6 +2,7 @@
 爬虫控制, 调用 models.crawlers 中各个网站爬虫
 """
 
+import asyncio
 import re
 from typing import Any, Callable
 
@@ -52,6 +53,47 @@ from ..crawlers import (
 from ..entity.enums import FileMode
 from .flags import Flags
 from .json_data import JsonData, LogBuffer
+
+CRAWLER_FUNCS: dict[str, Callable] = {
+    "official": official.main,
+    "iqqtv": iqqtv_new.main,
+    "avsex": avsex.main,
+    "airav_cc": airav_cc.main,
+    "airav": airav.main,
+    "freejavbt": freejavbt.main,
+    "javbus": javbus.main,
+    "javdb": javdb.main,
+    "jav321": jav321.main,
+    "dmm": dmm.main,
+    "javlibrary": javlibrary_new.main,
+    "xcity": xcity.main,
+    "avsox": avsox.main,
+    "mgstage": mgstage.main,
+    "7mmtv": mmtv.main,
+    "fc2": fc2.main,
+    "fc2hub": fc2hub.main,
+    "fc2club": fc2club.main,
+    "fc2ppvdb": fc2ppvdb.main,
+    "mdtv": mdtv.main,
+    "madouqu": madouqu.main,
+    "hscangku": hscangku.main,
+    "cableav": cableav.main,
+    "getchu": getchu.main,
+    "getchu_dmm": getchu_dmm.main,
+    "mywife": mywife.main,
+    "giga": giga.main,
+    "hdouban": hdouban.main,
+    "lulubar": lulubar.main,
+    "love6": love6.main,
+    "cnmdb": cnmdb.main,
+    "faleno": faleno.main,
+    "fantastica": fantastica.main,
+    "theporndb": theporndb.main,
+    "dahlia": dahlia.main,
+    "prestige": prestige.main,
+    "kin8": kin8.main,
+    "javday": javday.main,
+}
 
 
 def _get_new_website_list(
@@ -134,7 +176,7 @@ def _deal_some_list(field: str, website: str, same_list: list[str]) -> list[str]
     return same_list
 
 
-def _call_crawler(
+async def _call_crawler(
     json_data: JsonData,
     website: str,
     language: str,
@@ -155,49 +197,9 @@ def _call_crawler(
         file_number = short_number
 
     # 爬虫函数映射表
-    crawler_functions: dict[str, Callable] = {
-        "official": official.main,
-        "iqqtv": iqqtv_new.main,
-        "avsex": avsex.main,
-        "airav_cc": airav_cc.main,
-        "airav": airav.main,
-        "freejavbt": freejavbt.main,
-        "javbus": javbus.main,
-        "javdb": javdb.main,
-        "jav321": jav321.main,
-        "dmm": dmm.main,
-        "javlibrary": javlibrary_new.main,
-        "xcity": xcity.main,
-        "avsox": avsox.main,
-        "mgstage": mgstage.main,
-        "7mmtv": mmtv.main,
-        "fc2": fc2.main,
-        "fc2hub": fc2hub.main,
-        "fc2club": fc2club.main,
-        "fc2ppvdb": fc2ppvdb.main,
-        "mdtv": mdtv.main,
-        "madouqu": madouqu.main,
-        "hscangku": hscangku.main,
-        "cableav": cableav.main,
-        "getchu": getchu.main,
-        "getchu_dmm": getchu_dmm.main,
-        "mywife": mywife.main,
-        "giga": giga.main,
-        "hdouban": hdouban.main,
-        "lulubar": lulubar.main,
-        "love6": love6.main,
-        "cnmdb": cnmdb.main,
-        "faleno": faleno.main,
-        "fantastica": fantastica.main,
-        "theporndb": theporndb.main,
-        "dahlia": dahlia.main,
-        "prestige": prestige.main,
-        "kin8": kin8.main,
-        "javday": javday.main,
-    }
 
     # 获取爬虫函数
-    crawler_func = crawler_functions.get(website, javdb.main)
+    crawler_func = CRAWLER_FUNCS.get(website, javdb.main)
 
     # 准备参数
     kwargs = {
@@ -211,10 +213,10 @@ def _call_crawler(
         "org_language": org_language,
     }
 
-    return crawler_func(**kwargs)
+    return await crawler_func(**kwargs)
 
 
-def _decide_websites(
+async def _decide_websites(
     json_data: JsonData,
     number_website_list: list[str],
 ) -> JsonData:
@@ -335,11 +337,11 @@ def _decide_websites(
             request_field_list.pop(1)
         if not wanted_website_new_list:
             request_field_list.pop()
-
+    tasks = []
     for field_name, field_cnname, field_language, website_list in request_field_list:
         if field_name in none_fields:
             continue
-        _call_crawlers(
+        task = _call_crawlers(
             all_json_data,
             json_data,
             website_list,
@@ -351,8 +353,10 @@ def _decide_websites(
             short_number,
             json_data["mosaic"],
         )
-        if field_name == "title" and not json_data["title"]:
-            return json_data
+        tasks.append(task)
+    await asyncio.gather(*tasks)
+    if not json_data["title"]:
+        return json_data
 
     # 处理字段字段：从已请求的网站中，按字段网站优先级取值
     title_website_list = title_jp_website_list
@@ -597,7 +601,7 @@ def _deal_each_field(
             json_data["fields_info"] += "\n     " + f"{field_name:<13}" + f": {'-----'} ({'not found'})"
 
 
-def _call_crawlers(
+async def _call_crawlers(
     all_json_data: dict[str, dict[str, Any]],
     json_data: JsonData,
     website_list: list[str],
@@ -618,12 +622,14 @@ def _call_crawlers(
 
     backup_jsondata = {}
     backup_website = ""
-    for website in website_list:
+
+    async def _task(website: str):
+        nonlocal field_name
         if (website in ["avsox", "mdtv"] and mosaic in ["有码", "无码破解", "流出", "里番", "动漫"]) or (
             website == "mdtv" and mosaic == "无码"
         ):
             if field_name != "title":
-                continue
+                return "continue"
         if field_name in ["title_zh", "outline_zh"]:
             title_language = "zh_cn"
             field_name = field_name.replace("_zh", "")
@@ -637,7 +643,7 @@ def _call_crawlers(
         try:
             web_data_json = all_json_data[website][title_language]
         except Exception:
-            web_data = _call_crawler(
+            web_data = await _call_crawler(
                 json_data, website, title_language, file_number, short_number, mosaic, config.title_language
             )
             all_json_data.update(web_data)
@@ -663,18 +669,25 @@ def _call_crawlers(
                                 LogBuffer.info().write(
                                     f"\n    🔴 {field_cnname} 检测为非日文，跳过！({website})\n     ↳ {web_data_json[field_name]}"
                                 )
-                                continue
+                                return "continue"
                         elif title_language != "jp":
                             LogBuffer.info().write(
                                 f"\n    🔴 {field_cnname} 检测为日文，跳过！({website})\n     ↳ {web_data_json[field_name]}"
                             )
-                            continue
+                            return "continue"
                 elif website == "official":
                     website = all_json_data["official"]["jp"]["source"]
             LogBuffer.info().write(
                 f"\n    🟢 {field_cnname} 获取成功！({website})\n     ↳ {web_data_json[field_name]} "
             )
+            return "break"
+
+    res = await asyncio.gather(_task(website) for website in website_list)
+    for r in res:
+        if r == "break":
             break
+        elif r == "continue":
+            continue
     else:
         if len(backup_jsondata):
             LogBuffer.info().write(
@@ -686,7 +699,7 @@ def _call_crawlers(
             LogBuffer.info().write(f"\n    🔴 {field_cnname} 获取失败！")
 
 
-def _call_specific_crawler(json_data: JsonData, website: str) -> JsonData:
+async def _call_specific_crawler(json_data: JsonData, website: str) -> JsonData:
     file_number = json_data["number"]
     short_number = json_data["short_number"]
     mosaic = json_data["mosaic"]
@@ -719,7 +732,7 @@ def _call_specific_crawler(json_data: JsonData, website: str) -> JsonData:
         studio_language = "zh_cn"
         publisher_language = "zh_cn"
         director_language = "zh_cn"
-    web_data = _call_crawler(json_data, website, title_language, file_number, short_number, mosaic, org_language)
+    web_data = await _call_crawler(json_data, website, title_language, file_number, short_number, mosaic, org_language)
     web_data_json = web_data.get(website, {}).get(title_language)
     json_data.update(web_data_json)
     if not json_data["title"]:
@@ -783,7 +796,7 @@ def _call_specific_crawler(json_data: JsonData, website: str) -> JsonData:
     return json_data
 
 
-def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回元数据
+async def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回元数据
     file_number = json_data["number"]
     file_path = json_data["file_path"]
     short_number = json_data["short_number"]
@@ -814,27 +827,27 @@ def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回
         ):
             json_data["mosaic"] = "国产"
             website_list = config.website_guochan.split(",")
-            json_data = _decide_websites(json_data, website_list)
+            json_data = await _decide_websites(json_data, website_list)
 
         # =======================================================================kin8
         elif file_number.startswith("KIN8"):
             website_name = "kin8"
-            json_data = _call_specific_crawler(json_data, website_name)
+            json_data = await _call_specific_crawler(json_data, website_name)
 
         # =======================================================================同人
         elif file_number.startswith("DLID"):
             website_name = "getchu"
-            json_data = _call_specific_crawler(json_data, website_name)
+            json_data = await _call_specific_crawler(json_data, website_name)
 
         # =======================================================================里番
         elif "getchu" in file_path.lower() or "里番" in file_path or "裏番" in file_path:
             website_name = "getchu_dmm"
-            json_data = _call_specific_crawler(json_data, website_name)
+            json_data = await _call_specific_crawler(json_data, website_name)
 
         # =======================================================================Mywife No.1111
         elif "mywife" in file_path.lower():
             website_name = "mywife"
-            json_data = _call_specific_crawler(json_data, website_name)
+            json_data = await _call_specific_crawler(json_data, website_name)
 
         # =======================================================================FC2-111111
         elif "FC2" in file_number.upper():
@@ -842,7 +855,7 @@ def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回
             if file_number_1:
                 file_number_1.group()
                 website_list = config.website_fc2.split(",")
-                json_data = _decide_websites(json_data, website_list)
+                json_data = await _decide_websites(json_data, website_list)
             else:
                 LogBuffer.error().write(f"未识别到FC2番号：{file_number}")
 
@@ -851,29 +864,29 @@ def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回
             "欧美" in file_path and "东欧美" not in file_path
         ):
             website_list = config.website_oumei.split(",")
-            json_data = _decide_websites(json_data, website_list)
+            json_data = await _decide_websites(json_data, website_list)
 
         # =======================================================================无码抓取:111111-111,n1111,HEYZO-1111,SMD-115
         elif mosaic == "无码" or mosaic == "無碼":
             website_list = config.website_wuma.split(",")
-            json_data = _decide_websites(json_data, website_list)
+            json_data = await _decide_websites(json_data, website_list)
 
         # =======================================================================259LUXU-1111
         elif short_number or "SIRO" in file_number.upper():
             website_list = config.website_suren.split(",")
-            json_data = _decide_websites(json_data, website_list)
+            json_data = await _decide_websites(json_data, website_list)
 
         # =======================================================================ssni00321
         elif re.match(r"\D{2,}00\d{3,}", file_number) and "-" not in file_number and "_" not in file_number:
             website_list = ["dmm"]
-            json_data = _decide_websites(json_data, website_list)
+            json_data = await _decide_websites(json_data, website_list)
 
         # =======================================================================剩下的（含匹配不了）的按有码来刮削
         else:
             website_list = config.website_youma.split(",")
-            json_data = _decide_websites(json_data, website_list)
+            json_data = await _decide_websites(json_data, website_list)
     else:
-        json_data = _call_specific_crawler(json_data, website_name)
+        json_data = await _call_specific_crawler(json_data, website_name)
 
     # ================================================网站请求结束================================================
     # ======================================超时或未找到返回
@@ -952,10 +965,10 @@ def _get_website_name(json_data: JsonData, file_mode: FileMode) -> str:
     return website_name
 
 
-def crawl(json_data: JsonData, file_mode: FileMode) -> JsonData:
+async def crawl(json_data: JsonData, file_mode: FileMode) -> JsonData:
     # 从指定网站获取json_data
     website_name = _get_website_name(json_data, file_mode)
-    json_data = _crawl(json_data, website_name)
+    json_data = await _crawl(json_data, website_name)
     return _deal_json_data(json_data)
 
 

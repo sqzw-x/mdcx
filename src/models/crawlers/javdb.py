@@ -8,7 +8,6 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_dmm_trailer
-from models.base.web_sync import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -198,7 +197,7 @@ def get_wanted(html):
     return str(result[0]) if result else ""
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="jp",
@@ -241,7 +240,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # 先使用scraper方法请求，失败时再使用get请求
-            html_search, error = get_text(url_search, headers=header)
+            html_search, error = await config.async_client.get_text(url_search, headers=header)
             if html_search is None:
                 # 判断返回内容是否有问题
                 if "HTTP 403" in error:
@@ -285,7 +284,7 @@ def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            html_info, error = get_text(real_url, headers=header)
+            html_info, error = await config.async_client.get_text(real_url, headers=header)
             if html_info is None:
                 debug_info = f"请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)

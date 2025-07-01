@@ -5,7 +5,6 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web_sync import get_text
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -123,7 +122,7 @@ def get_real_url(html, number):
     return "", ""
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="jp",
@@ -152,7 +151,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            html_search, error = get_text(url_search)
+            html_search, error = await config.async_client.get_text(url_search)
             if html_search is None:
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -168,7 +167,7 @@ def main(
         if real_url:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            html_content, error = get_text(real_url)
+            html_content, error = await config.async_client.get_text(real_url)
             if html_content is None:
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)

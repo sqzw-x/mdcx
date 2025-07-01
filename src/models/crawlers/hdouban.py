@@ -6,7 +6,6 @@ import time
 import urllib3
 import zhconv
 
-from models.base.web_sync import get_json, post_json
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -182,7 +181,7 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     return number_list, filename_list
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="zh_cn",
@@ -242,7 +241,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
                 # ========================================================================搜索番号
-                html_search, error = get_json(url_search)
+                html_search, error = await config.async_client.get_json(url_search)
                 if html_search is None:
                     debug_info = f"网络请求错误: {error} "
                     LogBuffer.info().write(web_info + debug_info)
@@ -285,7 +284,7 @@ def main(
 
             detail_url = "https://api.6dccbca.com/api/movie/detail"
             data = {"id": str(detail_id[0])}
-            response, error = post_json(detail_url, data=data)
+            response, error = await config.async_client.post_json(detail_url, data=data)
             if response is None:
                 debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)

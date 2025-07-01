@@ -9,8 +9,7 @@ import shutil
 import time
 import traceback
 import urllib.parse
-from concurrent.futures import ThreadPoolExecutor
-from typing import Optional, cast
+from typing import Optional
 
 from lxml import etree
 
@@ -18,7 +17,6 @@ from ..base.file import copy_file, delete_file, move_file, split_path
 from ..base.image import check_pic, cut_thumb_to_poster
 from ..base.utils import get_used_time
 from ..base.web import check_url, get_amazon_data, get_big_pic_by_google, get_imgsize
-from ..base.web_sync import get_text, multi_download
 from ..config.manager import config
 from ..config.manual import ManualConfig
 from ..signals import signal
@@ -27,10 +25,10 @@ from .json_data import ImageContext, JsonData, LogBuffer
 from .utils import convert_half
 
 
-def get_actorname(number: str) -> tuple[bool, str]:
+async def get_actorname(number: str) -> tuple[bool, str]:
     # 获取真实演员名字
     url = f"https://av-wiki.net/?s={number}"
-    res, error = get_text(url)
+    res, error = await config.async_client.get_text(url)
     if res is None:
         return False, f"Error: {error}"
     html_detail = etree.fromstring(res, etree.HTMLParser(encoding="utf-8"))
@@ -44,10 +42,10 @@ def get_actorname(number: str) -> tuple[bool, str]:
     return False, "No Result!"
 
 
-def get_yesjav_title(movie_number: str) -> str:
+async def get_yesjav_title(movie_number: str) -> str:
     yesjav_url = f"http://www.yesjav.info/search.asp?q={movie_number}&"
     movie_title = ""
-    response, error = get_text(yesjav_url)
+    response, error = await config.async_client.get_text(yesjav_url)
     if response is not None:
         parser = etree.HTMLParser(encoding="utf-8")
         html = etree.HTML(response, parser)
@@ -85,7 +83,7 @@ async def _google_translate(msg: str) -> tuple[Optional[str], str]:
     return "".join([sen[0] for sen in response[0]]), ""
 
 
-def download_file_with_filepath(
+async def download_file_with_filepath(
     url: str,
     file_path: str,
     folder_new_path: str,
@@ -96,7 +94,7 @@ def download_file_with_filepath(
     if not os.path.exists(folder_new_path):
         os.makedirs(folder_new_path)
     try:
-        if multi_download(url, file_path):
+        if await config.async_client.download(url, file_path):
             return True
     except Exception:
         pass
@@ -104,9 +102,9 @@ def download_file_with_filepath(
     return False
 
 
-def _mutil_extrafanart_download_thread(task: tuple[JsonData, str, str, str, str]) -> bool:
+async def _mutil_extrafanart_download_thread(task: tuple[JsonData, str, str, str, str]) -> bool:
     json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path, extrafanart_name = task
-    if download_file_with_filepath(extrafanart_url, extrafanart_file_path, extrafanart_folder_path):
+    if await download_file_with_filepath(extrafanart_url, extrafanart_file_path, extrafanart_folder_path):
         if check_pic(extrafanart_file_path):
             return True
     else:
@@ -114,7 +112,7 @@ def _mutil_extrafanart_download_thread(task: tuple[JsonData, str, str, str, str]
     return False
 
 
-def get_big_pic_by_amazon(
+async def get_big_pic_by_amazon(
     json_data: JsonData,
     originaltitle_amazon: str,
     actor_amazon: str,
@@ -131,7 +129,7 @@ def get_big_pic_by_amazon(
             + urllib.parse.quote_plus(urllib.parse.quote_plus(originaltitle_amazon.replace("&", " ") + " [DVD]"))
             + "&ref=nb_sb_noss"
         )
-        result, html_search = get_amazon_data(url_search)
+        result, html_search = await get_amazon_data(url_search)
 
         # 没有结果，尝试拆词，重新搜索
         if (
@@ -258,7 +256,7 @@ def get_big_pic_by_amazon(
                         url_new = "https://www.amazon.co.jp" + re.findall(r"(/dp/[^/]+)", each[1])[0]
                     except Exception:
                         url_new = each[1]
-                    result, html_detail = get_amazon_data(url_new)
+                    result, html_detail = await get_amazon_data(url_new)
                     if result and html_detail:
                         html = etree.fromstring(html_detail, etree.HTMLParser())
                         detail_actor = str(html.xpath('//span[@class="author notFaded"]/a/text()')).replace(" ", "")
@@ -424,7 +422,7 @@ def trailer_download(
         return True
 
 
-def _get_big_thumb(json_data: ImageContext) -> ImageContext:
+async def _get_big_thumb(json_data: ImageContext) -> ImageContext:
     """
     获取背景大图：
     1，官网图片
@@ -457,7 +455,7 @@ def _get_big_thumb(json_data: ImageContext) -> ImageContext:
         # faleno.jp 番号检查
         if re.findall(r"F[A-Z]{2}SS", number):
             req_url = f"https://faleno.jp/top/works/{number_lower_no_line}/"
-            response, error = get_text(req_url)
+            response, error = await config.async_client.get_text(req_url)
             if response is not None:
                 temp_url = re.findall(
                     r'src="((https://cdn.faleno.net/top/wp-content/uploads/[^_]+_)([^?]+))\?output-quality=', response
@@ -510,7 +508,7 @@ def _get_big_thumb(json_data: ImageContext) -> ImageContext:
     pic_url = json_data.get("cover")
     if "google" in config.download_hd_pics:
         if pic_url and json_data["cover_from"] != "theporndb":
-            thumb_url, cover_size = get_big_pic_by_google(pic_url)
+            thumb_url, cover_size = await get_big_pic_by_google(pic_url)
             if thumb_url and cover_size[0] > thumb_width:
                 json_data["cover_size"] = cover_size
                 pic_domain = re.findall(r"://([^/]+)", thumb_url)[0]
@@ -521,7 +519,7 @@ def _get_big_thumb(json_data: ImageContext) -> ImageContext:
     return json_data
 
 
-def _get_big_poster(json_data: JsonData) -> JsonData:
+async def _get_big_poster(json_data: JsonData) -> JsonData:
     start_time = time.time()
 
     # 未勾选下载高清图poster时，返回
@@ -552,7 +550,9 @@ def _get_big_poster(json_data: JsonData) -> JsonData:
         "动漫",
         "動漫",
     ]:
-        hd_pic_url = get_big_pic_by_amazon(json_data, json_data["originaltitle_amazon"], json_data["actor_amazon"])
+        hd_pic_url = await get_big_pic_by_amazon(
+            json_data, json_data["originaltitle_amazon"], json_data["actor_amazon"]
+        )
         if hd_pic_url:
             json_data["poster"] = hd_pic_url
             json_data["poster_from"] = "Amazon"
@@ -570,7 +570,7 @@ def _get_big_poster(json_data: JsonData) -> JsonData:
         official_url = config.official_websites.get(letters)
         if official_url:
             url_search = official_url + "/search/list?keyword=" + number.replace("-", "")
-            html_search, error = get_text(url_search)
+            html_search, error = await config.async_client.get_text(url_search)
             if html_search is not None:
                 poster_url_list = re.findall(r'img class="c-main-bg lazyload" data-src="([^"]+)"', html_search)
                 if poster_url_list:
@@ -590,7 +590,7 @@ def _get_big_poster(json_data: JsonData) -> JsonData:
         and "google" in config.download_hd_pics
         and json_data["poster_from"] != "theporndb"
     ):
-        hd_pic_url, poster_size = get_big_pic_by_google(poster_url, poster=True)
+        hd_pic_url, poster_size = await get_big_pic_by_google(poster_url, poster=True)
         if hd_pic_url:
             if "prestige" in json_data["poster"] or json_data["poster_from"] == "Amazon":
                 poster_width = get_imgsize(poster_url)[0]
@@ -608,7 +608,7 @@ def _get_big_poster(json_data: JsonData) -> JsonData:
     return json_data
 
 
-def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_final_path: str) -> bool:
+async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_final_path: str) -> bool:
     start_time = time.time()
     poster_path = json_data["poster_path"]
     thumb_path = json_data["thumb_path"]
@@ -643,7 +643,7 @@ def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_final_pa
             return True
 
     # 获取高清背景图
-    json_data = _get_big_thumb(json_data)
+    json_data = await _get_big_thumb(json_data)
 
     # 下载图片
     cover_url = json_data.get("cover")
@@ -725,7 +725,7 @@ def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_final_pa
             return False
 
 
-def poster_download(json_data: JsonData, folder_new_path: str, poster_final_path: str) -> bool:
+async def poster_download(json_data: JsonData, folder_new_path: str, poster_final_path: str) -> bool:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -792,7 +792,7 @@ def poster_download(json_data: JsonData, folder_new_path: str, poster_final_path
             return True
 
     # 获取高清 poster
-    json_data = _get_big_poster(json_data)
+    json_data = await _get_big_poster(json_data)
 
     # 下载图片
     poster_url = json_data.get("poster")
@@ -872,7 +872,7 @@ def poster_download(json_data: JsonData, folder_new_path: str, poster_final_path
             return False
 
 
-def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
+async def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
     """
     复制thumb为fanart
     """
@@ -946,7 +946,7 @@ def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
                 return False
 
 
-def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Optional[bool]:
+async def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Optional[bool]:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -988,11 +988,13 @@ def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Optional[
             task_list.append(
                 (json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path_temp, extrafanart_name)
             )
-            task_list = cast(list[tuple[JsonData, str, str, str, str]], task_list)
-        extrafanart_pool = ThreadPoolExecutor(20)  # 剧照下载线程池
-        result = extrafanart_pool.map(_mutil_extrafanart_download_thread, task_list)
-        for res in result:
-            if res:
+
+        # 使用异步并发执行下载任务
+        tasks = [_mutil_extrafanart_download_thread(task) for task in task_list]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        for res in results:
+            if res is True:
                 extrafanart_count_succ += 1
         if extrafanart_count_succ == extrafanart_count:
             if extrafanart_folder_path_temp != extrafanart_folder_path:

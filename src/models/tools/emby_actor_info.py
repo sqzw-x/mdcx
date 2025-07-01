@@ -5,6 +5,7 @@
 import os
 import random
 import re
+import shutil
 import time
 import traceback
 import urllib.parse
@@ -13,9 +14,10 @@ from typing import Optional
 import bs4
 import langid
 import zhconv
+from lxml import etree
 
+from models.base.file import copy_file
 from models.base.utils import executor, get_used_time
-from models.base.web_sync import get_json
 from models.config.manager import config
 from models.config.manual import ManualConfig
 from models.config.resources import resources
@@ -153,7 +155,7 @@ async def _process_actor_async(actor: dict, emby_on) -> tuple[int, str]:
         return 0, f"🔴 {actor_name} 未知异常:\n    {traceback.format_exc()}"
 
 
-def show_emby_actor_list(mode):
+async def show_emby_actor_list(mode):
     signal.change_buttons_status.emit()
     start_time = time.time()
 
@@ -220,7 +222,7 @@ def show_emby_actor_list(mode):
                 count += 1
             else:
                 # http://192.168.5.191:8096/emby/Persons/梦乃爱华?api_key=ee9a2f2419704257b1dd60b975f2d64e
-                res, error = get_json(actor_person, use_proxy=False)
+                res, error = await config.async_client.get_json(actor_person, use_proxy=False)
                 if res is None:
                     signal.show_log_text(
                         f"\n🔴 {count}/{total} Emby 获取演员信息错误！👩🏻 {actor_name} \n    错误信息: {error}"

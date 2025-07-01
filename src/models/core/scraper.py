@@ -1,9 +1,8 @@
+import asyncio
 import os
 import re
-import threading
 import time
 import traceback
-from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
 from PyQt5.QtWidgets import QMessageBox
@@ -52,7 +51,7 @@ from .utils import (
 from .web import extrafanart_download, fanart_download, poster_download, thumb_download, trailer_download
 
 
-def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> tuple[bool, JsonData]:
+async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> tuple[bool, JsonData]:
     # 处理单个文件刮削
     # 初始化所需变量
     start_time = time.time()
@@ -117,7 +116,7 @@ def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> t
         Flags.json_get_set.add(movie_number)
     elif not Flags.json_data_dic.get(movie_number):
         while not Flags.json_data_dic.get(movie_number):
-            time.sleep(1)
+            await asyncio.sleep(1)
 
     json_data_old = Flags.json_data_dic.get(movie_number)
     if (
@@ -164,7 +163,7 @@ def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> t
             json_data_new["mosaic"] = json_data["mosaic"]
         json_data.update(json_data_new)
     elif not nfo_update:
-        json_data = crawl(json_data, file_mode)
+        json_data = await crawl(json_data, file_mode)
 
     # 显示json_data结果或日志
     json_data["failed_folder"] = failed_folder
@@ -176,9 +175,9 @@ def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> t
     if not json_data_old and json_data["nfo_can_translate"]:
         deal_some_field(json_data)  # 处理字段
         replace_special_word(json_data)  # 替换特殊字符
-        translate_title_outline(json_data, movie_number)  # 翻译json_data（标题/介绍）
+        await translate_title_outline(json_data, movie_number)  # 翻译json_data（标题/介绍）
         deal_some_field(json_data)  # 再处理一遍字段，翻译后可能出现要去除的内容
-        translate_actor(json_data)  # 映射输出演员名/信息
+        await translate_actor(json_data)  # 映射输出演员名/信息
         translate_info(json_data)  # 映射输出标签等信息
         replace_word(json_data)
 
@@ -289,14 +288,14 @@ def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> t
     if pic_final_catched:
         if file_can_download:
             # 下载thumb
-            if not thumb_download(json_data, folder_new_path, thumb_final_path):
+            if not await thumb_download(json_data, folder_new_path, thumb_final_path):
                 return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
 
             # 下载艺术图
-            fanart_download(json_data, fanart_final_path)
+            await fanart_download(json_data, fanart_final_path)
 
             # 下载poster
-            if not poster_download(json_data, folder_new_path, poster_final_path):
+            if not await poster_download(json_data, folder_new_path, poster_final_path):
                 return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
 
             # 清理冗余图片
@@ -307,7 +306,7 @@ def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> t
 
             # 下载剧照和剧照副本
             if single_folder_catched:
-                extrafanart_download(json_data, folder_new_path)
+                await extrafanart_download(json_data, folder_new_path)
                 extrafanart_copy2(json_data, folder_new_path)
                 extrafanart_extras_copy(json_data, folder_new_path)
 
@@ -347,12 +346,11 @@ def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> t
     return True, json_data
 
 
-def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
+async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     # 获取顺序
-    with Flags.lock:
-        file_path, count, count_all = task
-        Flags.counting_order += 1
-        count = Flags.counting_order
+    file_path, count, count_all = task
+    Flags.counting_order += 1
+    count = Flags.counting_order
 
     # 名字缩写
     file_name_temp = split_path(file_path)[1]
@@ -366,7 +364,7 @@ def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
         and count - Flags.rest_now_begin_count > config.rest_count
     ):
         _check_stop(file_name_temp)
-        time.sleep(1)
+        await asyncio.sleep(1)
 
     # 非第一个加延时
     Flags.scrape_starting += 1
@@ -387,7 +385,7 @@ def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
         )
         for i in range(remain_time):
             _check_stop(file_name_temp)
-            time.sleep(1)
+            await asyncio.sleep(1)
 
     Flags.scrape_started += 1
     if count > 1 and thread_time != 0:
@@ -421,7 +419,7 @@ def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
 
     # 获取刮削数据
     try:
-        result, json_data = _scrape_one_file(file_path, file_info, file_mode)
+        result, json_data = await _scrape_one_file(file_path, file_info, file_mode)
         if LogBuffer.req().get() != "do_not_update_json_data_dic":
             Flags.json_data_dic.update({movie_number: json_data})
     except Exception as e:
@@ -474,42 +472,43 @@ def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
         signal.show_log_text(str(e))
 
     # 显示刮削结果
-    with Flags.lock:
-        try:
-            Flags.scrape_done += 1
-            count = Flags.scrape_done
-            progress_value = count / count_all * 100
-            progress_percentage = f"{progress_value:.2f}%"
-            used_time = get_used_time(start_time)
-            scrape_info_begin = f"{count:d}/{count_all:d} ({progress_percentage}) round({Flags.count_claw}) {split_path(file_path)[1]}    新的刮削线程"
-            scrape_info_begin = "\n\n\n" + "👇" * 50 + "\n" + scrape_info_begin
-            scrape_info_after = f"\n 🕷 {get_current_time()} {count}/{count_all} {split_path(file_path)[1]} 刮削完成！用时 {used_time} 秒！"
-            signal.show_log_text(scrape_info_begin + LogBuffer.log().get() + scrape_info_after)
-            remain_count = Flags.scrape_started - count
-            if Flags.scrape_started == count_all:
-                signal.show_log_text(f" 🕷 剩余正在刮削的线程：{remain_count}")
-            signal.label_result.emit(f" 刮削中：{remain_count} 成功：{Flags.succ_count} 失败：{Flags.fail_count}")
-            signal.show_scrape_info(f"🔎 已刮削 {count}/{count_all}")
-        except Exception as e:
-            _check_stop(file_name_temp)
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_log_text(traceback.format_exc())
-            signal.show_log_text(str(e))
+    try:
+        Flags.scrape_done += 1
+        count = Flags.scrape_done
+        progress_value = count / count_all * 100
+        progress_percentage = f"{progress_value:.2f}%"
+        used_time = get_used_time(start_time)
+        scrape_info_begin = f"{count:d}/{count_all:d} ({progress_percentage}) round({Flags.count_claw}) {split_path(file_path)[1]}    新的刮削线程"
+        scrape_info_begin = "\n\n\n" + "👇" * 50 + "\n" + scrape_info_begin
+        scrape_info_after = (
+            f"\n 🕷 {get_current_time()} {count}/{count_all} {split_path(file_path)[1]} 刮削完成！用时 {used_time} 秒！"
+        )
+        signal.show_log_text(scrape_info_begin + LogBuffer.log().get() + scrape_info_after)
+        remain_count = Flags.scrape_started - count
+        if Flags.scrape_started == count_all:
+            signal.show_log_text(f" 🕷 剩余正在刮削的线程：{remain_count}")
+        signal.label_result.emit(f" 刮削中：{remain_count} 成功：{Flags.succ_count} 失败：{Flags.fail_count}")
+        signal.show_scrape_info(f"🔎 已刮削 {count}/{count_all}")
+    except Exception as e:
+        _check_stop(file_name_temp)
+        signal.show_traceback_log(traceback.format_exc())
+        signal.show_log_text(traceback.format_exc())
+        signal.show_log_text(str(e))
 
-        # 更新剩余任务
+    # 更新剩余任务
+    try:
+        if file_path:
+            file_path = convert_path(file_path)
         try:
-            if file_path:
-                file_path = convert_path(file_path)
-            try:
-                Flags.remain_list.remove(file_path)
-                Flags.can_save_remain = True
-            except Exception as e1:
-                signal.show_log_text(f"remove:  {file_path}\n {str(e1)}\n {traceback.format_exc()}")
-        except Exception as e:
-            _check_stop(file_name_temp)
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_log_text(traceback.format_exc())
-            signal.show_log_text(str(e))
+            Flags.remain_list.remove(file_path)
+            Flags.can_save_remain = True
+        except Exception as e1:
+            signal.show_log_text(f"remove:  {file_path}\n {str(e1)}\n {traceback.format_exc()}")
+    except Exception as e:
+        _check_stop(file_name_temp)
+        signal.show_traceback_log(traceback.format_exc())
+        signal.show_log_text(traceback.format_exc())
+        signal.show_log_text(str(e))
 
     # 处理间歇刮削
     try:
@@ -521,7 +520,7 @@ def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
                     time_note = f" 🏖 当前还存在 {Flags.scrape_starting - count} 个已经在刮削的任务，等待这些任务结束将进入休息状态...\n"
                     signal.show_log_text(time_note)
                     while not Flags.rest_sleepping:
-                        time.sleep(1)
+                        await asyncio.sleep(1)
                 elif not Flags.rest_sleepping and count < count_all:
                     Flags.rest_sleepping = True  # 开始休眠
                     Flags.rest_next_begin_time = time.time()  # 下一轮倒计时开始时间
@@ -533,13 +532,13 @@ def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
                     ):
                         if Flags.scrape_starting > count:  # 如果突然调大了文件数量，这时跳出休眠
                             break
-                        time.sleep(1)
+                        await asyncio.sleep(1)
                     Flags.rest_now_begin_count = count
                     Flags.rest_sleepping = False  # 休眠结束，下一轮开始
                     Flags.next_start_time = time.time() - config.thread_time
                 else:
                     while Flags.rest_sleepping:
-                        time.sleep(1)
+                        await asyncio.sleep(1)
 
     except Exception as e:
         _check_stop(file_name_temp)
@@ -550,7 +549,7 @@ def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     LogBuffer.clear_thread()
 
 
-def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
+async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
     Flags.reset()
     if movie_list is None:
         movie_list = []
@@ -608,11 +607,11 @@ def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
     if count_all:
         Flags.count_claw += 1
         if config.main_mode == 4:
-            signal.show_log_text(f" 🕷 当前为读取模式，线程数量（{thread_number}），线程延时（0）秒...")
+            signal.show_log_text(f" 🕷 当前为读取模式，并发数（{thread_number}），线程延时（0）秒...")
         else:
             if count_all < thread_number:
                 thread_number = count_all
-            signal.show_log_text(f" 🕷 开启多线程，线程数量（{thread_number}），线程延时（{thread_time}）秒...")
+            signal.show_log_text(f" 🕷 开启异步并发，并发数（{thread_number}），线程延时（{thread_time}）秒...")
         if "rest_scrape" in config.switch_on and config.main_mode != 4:
             signal.show_log_text(
                 f'<font color="brown"> 🍯 间歇刮削 已启用，连续刮削 {config.rest_count} 个文件后，将自动休息 {Flags.rest_time_convert} 秒...</font>'
@@ -622,16 +621,17 @@ def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
         if Flags.stop_flag:
             return
 
-        # 创建线程锁，避免多分集删除或操作相同图片文件的问题
-        Flags.lock = threading.Lock()
-
-        # 创建线程池
         Flags.next_start_time = time.time()
-        Flags.pool = ThreadPoolExecutor(thread_number, "MDCx-Pool")
-        Flags.pool.map(_scrape_exec_thread, task_list)
 
-        # self.extrafanart_pool.shutdown(wait=True)
-        Flags.pool.shutdown(wait=True)
+        # 创建信号量来限制并发数量
+        semaphore = asyncio.Semaphore(thread_number)
+
+        async def limited_scrape_exec_thread(task):
+            async with semaphore:
+                await _scrape_exec_thread(task)
+
+        # 异步并发
+        await asyncio.gather(*[_scrape_exec_thread(task) for task in task_list])
         signal.label_result.emit(f" 刮削中：0 成功：{Flags.succ_count} 失败：{Flags.fail_count}")
         save_success_list()  # 保存成功列表
         if signal.stop:
@@ -696,10 +696,7 @@ def start_new_scrape(file_mode: FileMode, movie_list: Optional[list[str]] = None
     signal.exec_set_processbar.emit(0)
     try:
         Flags.start_time = time.time()
-        t = threading.Thread(target=scrape, name="MDCx-Scrape-Thread", args=(file_mode, movie_list))
-        Flags.threads_list.append(t)
-        Flags.stop_other = False
-        t.start()
+        config.executor.submit(scrape(file_mode, movie_list))
     except Exception:
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())

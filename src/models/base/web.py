@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import re
+import socket
 import threading
 from io import BytesIO
 from typing import List, Optional, Tuple, Union
@@ -30,7 +31,7 @@ from requests.exceptions import (
 from ..config.manager import config
 from ..signals import signal
 from .utils import get_user_agent
-from .web_sync import get_json, get_text
+from .web_sync import get_json_sync
 
 
 def _allowed_gai_family():
@@ -188,9 +189,9 @@ def check_url(url: str, length: bool = False, real_url: bool = False) -> Union[i
     return 0
 
 
-def get_avsox_domain() -> str:
+async def get_avsox_domain() -> str:
     issue_url = "https://tellme.pw/avsox"
-    response, error = get_text(issue_url)
+    response, error = await config.async_client.get_text(issue_url)
     domain = "https://avsox.click"
     if response is not None:
         res = re.findall(r'(https://[^"]+)', response)
@@ -200,7 +201,7 @@ def get_avsox_domain() -> str:
     return domain
 
 
-def get_amazon_data(req_url: str) -> Tuple[bool, str]:
+async def get_amazon_data(req_url: str) -> Tuple[bool, str]:
     """
     获取 Amazon 数据
     """
@@ -209,9 +210,9 @@ def get_amazon_data(req_url: str) -> Tuple[bool, str]:
         "Host": "www.amazon.co.jp",
         "User-Agent": get_user_agent(),
     }
-    html_info, error = get_text(req_url, encoding="Shift_JIS")
+    html_info, error = await config.async_client.get_text(req_url, encoding="Shift_JIS")
     if html_info is None:
-        html_info, error = get_text(req_url, headers=headers, encoding="Shift_JIS")
+        html_info, error = await config.async_client.get_text(req_url, headers=headers, encoding="Shift_JIS")
     if html_info is None:
         session_id = ""
         ubid_acbjp = ""
@@ -223,7 +224,7 @@ def get_amazon_data(req_url: str) -> Tuple[bool, str]:
             "cookie": f"session-id={session_id}; ubid_acbjp={ubid_acbjp}",
         }
         headers.update(headers_o)
-        html_info, error = get_text(req_url, headers=headers, encoding="Shift_JIS")
+        html_info, error = await config.async_client.get_text(req_url, headers=headers, encoding="Shift_JIS")
     if html_info is None:
         return False, error
     if "HTTP 503" in html_info:
@@ -231,7 +232,7 @@ def get_amazon_data(req_url: str) -> Tuple[bool, str]:
             "Host": "www.amazon.co.jp",
             "User-Agent": get_user_agent(),
         }
-        html_info, error = get_text(req_url, headers=headers, encoding="Shift_JIS")
+        html_info, error = await config.async_client.get_text(req_url, headers=headers, encoding="Shift_JIS")
     if html_info is None:
         return False, error
     return True, html_info
@@ -331,7 +332,7 @@ def ping_host(host_address: str) -> str:
 def check_version() -> Optional[int]:
     if config.update_check:
         url = "https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
-        res_json, error = get_json(url)
+        res_json, error = get_json_sync(url)
         if res_json is not None:
             try:
                 latest_version = res_json["tag_name"]
@@ -375,68 +376,68 @@ def check_theporndb_api_token() -> str:
     return tips
 
 
-def _get_pic_by_google(pic_url):
+async def _get_pic_by_google(pic_url):
     google_keyused = config.google_keyused
     google_keyword = config.google_keyword
     req_url = f"https://www.google.com/searchbyimage?sbisrc=2&image_url={pic_url}"
     # req_url = f'https://lens.google.com/uploadbyurl?url={pic_url}&hl=zh-CN&re=df&ep=gisbubu'
-    response, error = get_text(req_url)
+    response, error = await config.async_client.get_text(req_url)
     big_pic = True
-    if response is not None:
-        url_list = re.findall(r'a href="([^"]+isz:l[^"]+)">', response)
-        url_list_middle = re.findall(r'a href="([^"]+isz:m[^"]+)">', response)
-        if not url_list and url_list_middle:
-            url_list = url_list_middle
-            big_pic = False
-        if url_list:
-            req_url = "https://www.google.com" + url_list[0].replace("amp;", "")
-            response, error = get_text(req_url)
-            if response is not None:
-                url_list = re.findall(r'\["(http[^"]+)",(\d{3,4}),(\d{3,4})\],[^[]', response)
-                # 优先下载放前面
-                new_url_list = []
-                for each_url in url_list.copy():
-                    if int(each_url[2]) < 800:
-                        url_list.remove(each_url)
+    if response is None:
+        return "", "", ""
+    url_list = re.findall(r'a href="([^"]+isz:l[^"]+)">', response)
+    url_list_middle = re.findall(r'a href="([^"]+isz:m[^"]+)">', response)
+    if not url_list and url_list_middle:
+        url_list = url_list_middle
+        big_pic = False
+    if url_list:
+        req_url = "https://www.google.com" + url_list[0].replace("amp;", "")
+        response, error = await config.async_client.get_text(req_url)
+    if response is None:
+        return "", "", ""
+    url_list = re.findall(r'\["(http[^"]+)",(\d{3,4}),(\d{3,4})\],[^[]', response)
+    # 优先下载放前面
+    new_url_list = []
+    for each_url in url_list.copy():
+        if int(each_url[2]) < 800:
+            url_list.remove(each_url)
 
-                for each_key in google_keyused:
-                    for each_url in url_list.copy():
-                        if each_key in each_url[0]:
-                            new_url_list.append(each_url)
-                            url_list.remove(each_url)
-                # 只下载关时，追加剩余地址
-                if "goo_only" not in config.download_hd_pics:
-                    new_url_list += url_list
-                # 解析地址
-                for each in new_url_list:
-                    temp_url = each[0]
-                    for temp_keyword in google_keyword:
-                        if temp_keyword in temp_url:
-                            break
-                    else:
-                        h = int(each[1])
-                        w = int(each[2])
-                        if w > h and w / h < 1.4:  # thumb 被拉高时跳过
-                            continue
+    for each_key in google_keyused:
+        for each_url in url_list.copy():
+            if each_key in each_url[0]:
+                new_url_list.append(each_url)
+                url_list.remove(each_url)
+    # 只下载关时，追加剩余地址
+    if "goo_only" not in config.download_hd_pics:
+        new_url_list += url_list
+    # 解析地址
+    for each in new_url_list:
+        temp_url = each[0]
+        for temp_keyword in google_keyword:
+            if temp_keyword in temp_url:
+                break
+        else:
+            h = int(each[1])
+            w = int(each[2])
+            if w > h and w / h < 1.4:  # thumb 被拉高时跳过
+                continue
 
-                        p_url = temp_url.encode("utf-8").decode(
-                            "unicode_escape"
-                        )  # url中的Unicode字符转义，不转义，url请求会失败
-                        if "m.media-amazon.com" in p_url:
-                            p_url = re.sub(r"\._[_]?AC_[^\.]+\.", ".", p_url)
-                            pic_size = get_imgsize(p_url)
-                            if pic_size[0]:
-                                return p_url, pic_size, big_pic
-                        else:
-                            url = check_url(p_url)
-                            if url:
-                                pic_size = (w, h)
-                                return url, pic_size, big_pic
+            p_url = temp_url.encode("utf-8").decode("unicode_escape")  # url中的Unicode字符转义，不转义，url请求会失败
+            if "m.media-amazon.com" in p_url:
+                p_url = re.sub(r"\._[_]?AC_[^\.]+\.", ".", p_url)
+                pic_size = get_imgsize(p_url)
+                if pic_size[0]:
+                    return p_url, pic_size, big_pic
+            else:
+                url = check_url(p_url)
+                if url:
+                    pic_size = (w, h)
+                    return url, pic_size, big_pic
     return "", "", ""
 
 
-def get_big_pic_by_google(pic_url, poster=False):
-    url, pic_size, big_pic = _get_pic_by_google(pic_url)
+async def get_big_pic_by_google(pic_url, poster=False):
+    url, pic_size, big_pic = await _get_pic_by_google(pic_url)
     if not poster:
         if big_pic or (
             pic_size and int(pic_size[0]) > 800 and int(pic_size[1]) > 539
@@ -444,7 +445,7 @@ def get_big_pic_by_google(pic_url, poster=False):
             return url, pic_size
         return "", ""
     if url and int(pic_size[1]) < 1000:  # poster，图片高度小于 1500，重新搜索一次
-        url, pic_size, big_pic = _get_pic_by_google(url)
+        url, pic_size, big_pic = await _get_pic_by_google(url)
     if pic_size and (
         big_pic or "blogger.googleusercontent.com" in url or int(pic_size[1]) > 560
     ):  # poster，大图或高度 > 560 时，使用该图片

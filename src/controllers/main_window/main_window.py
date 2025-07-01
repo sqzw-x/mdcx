@@ -30,7 +30,7 @@ from models.base.web import (
     get_avsox_domain,
     ping_host,
 )
-from models.base.web_sync import get_text
+from models.base.web_sync import get_text_sync
 from models.config.consts import IS_WINDOWS, MARK_FILE
 from models.config.manager import config, manager
 from models.config.manual import ManualConfig
@@ -2233,7 +2233,7 @@ class MyMAinWindow(QMainWindow):
                     use_proxy = True
                     if hasattr(config, "javlibrary_website"):
                         use_proxy = False
-                    html_info, error = get_text(each[0], use_proxy=use_proxy)
+                    html_info, error = get_text_sync(each[0], use_proxy=use_proxy)
                     if html_info is None:
                         each[1] = "❌ 连接失败 请检查网络或代理设置！ " + error
                     elif "Cloudflare" in html_info:
@@ -2241,7 +2241,7 @@ class MyMAinWindow(QMainWindow):
                     else:
                         each[1] = f"✅ 连接正常{ping_host(host_address)}"
                 elif name in ["avsex", "freejavbt", "airav_cc", "airav", "madouqu", "7mmtv"]:
-                    html_info, error = get_text(each[0])
+                    html_info, error = get_text_sync(each[0])
                     if html_info is None:
                         each[1] = "❌ 连接失败 请检查网络或代理设置！ " + error
                     elif "Cloudflare" in html_info:
@@ -2250,7 +2250,7 @@ class MyMAinWindow(QMainWindow):
                         each[1] = f"✅ 连接正常{ping_host(host_address)}"
                 else:
                     try:
-                        html_content, error = get_text(each[0])
+                        html_content, error = get_text_sync(each[0])
                         if html_content is None:
                             each[1] = "❌ 连接失败 请检查网络或代理设置！ " + str(error)
                         else:
@@ -2358,7 +2358,7 @@ class MyMAinWindow(QMainWindow):
         cookies = config.javdb
         javdb_url = getattr(config, "javdb_website", "https://javdb.com") + "/v/D16Q5?locale=zh"
         try:
-            response, error = get_text(javdb_url, headers=header)
+            response, error = get_text_sync(javdb_url, headers=header)
             if response is None:
                 if "Cookie" in error:
                     if cookies != input_cookie:
@@ -2431,7 +2431,7 @@ class MyMAinWindow(QMainWindow):
         javbus_url = getattr(config, "javbus_website", "https://javbus.com") + "/FSDSS-660"
 
         try:
-            response, error = get_text(javbus_url, headers=headers, cookies=new_cookie)
+            response, error = get_text_sync(javbus_url, headers=headers, cookies=new_cookie)
 
             if response is None:
                 tips = f"❌ 连接失败！请检查网络或代理设置！ {error}"

@@ -8,7 +8,6 @@ import urllib
 import urllib3
 from lxml import etree
 
-from models.base.web_sync import get_text
 from models.core.json_data import LogBuffer
 from models.crawlers import getchu_dl
 
@@ -108,14 +107,14 @@ def get_extrafanart(html):
     return result
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="jp",
     **kwargs,
 ):
     if "DLID" in number.upper() or "ITEM" in number.upper() or "GETCHU" in number.upper() or "dl.getchu" in appoint_url:
-        return getchu_dl.main(number, appoint_url, "jp")
+        return await getchu_dl.main(number, appoint_url, "jp")
     start_time = time.time()
     website_name = "getchu"
     getchu_url = "http://www.getchu.com"
@@ -151,7 +150,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            html_search, error = get_text(url_search, encoding="euc-jp")
+            html_search, error = await config.async_client.get_text(url_search, encoding="euc-jp")
             if html_search is None:
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -171,13 +170,13 @@ def main(
             else:
                 debug_info = "搜索结果: 未匹配到番号！"
                 LogBuffer.info().write(web_info + debug_info)
-                return getchu_dl.main(number, appoint_url, "jp")
+                return await getchu_dl.main(number, appoint_url, "jp")
 
         if real_url:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            html_content, error = get_text(real_url, encoding="euc-jp")
+            html_content, error = await config.async_client.get_text(real_url, encoding="euc-jp")
             if html_content is None:
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)

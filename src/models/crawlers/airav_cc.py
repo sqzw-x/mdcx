@@ -7,8 +7,7 @@ import urllib.parse
 import urllib3
 from lxml import etree
 
-from models.base.web_sync import get_text
-from models.config import manager
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.signals import signal
 
@@ -108,8 +107,8 @@ def get_series(html):
     return result
 
 
-def retry_request(real_url, web_info):
-    html_content, error = get_text(real_url)
+async def retry_request(real_url, web_info):
+    html_content, error = await config.async_client.get_text(real_url)
     if html_content is None:
         debug_info = f"网络请求错误: {error} "
         LogBuffer.info().write(web_info + debug_info)
@@ -143,7 +142,7 @@ def get_real_url(html, number):
     return ""
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="zh_cn",
@@ -159,7 +158,7 @@ def main(
     image_cut = "right"
     image_download = False
     mosaic = "有码"
-    airav_url = getattr(manager, "airav_cc_website", "https://airav.io")
+    airav_url = getattr(config, "airav_cc_website", "https://airav.io")
     if language == "zh_cn":
         airav_url += "/cn"
     web_info = "\n       "
@@ -175,7 +174,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            html_search, error = get_text(url_search)
+            html_search, error = await config.async_client.get_text(url_search)
             if html_search is None:
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -205,7 +204,7 @@ def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
             for i in range(3):
-                html_info, title, outline, actor, cover_url, tag, studio = retry_request(real_url, web_info)
+                html_info, title, outline, actor, cover_url, tag, studio = await retry_request(real_url, web_info)
 
                 if cover_url.startswith("/"):  # coverurl 可能是相对路径
                     cover_url = urllib.parse.urljoin(airav_url, cover_url)

@@ -5,7 +5,6 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web_sync import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info, get_number_list
@@ -59,8 +58,8 @@ def get_real_url(html, number_list, hscangku_url):
     return False, "", "", ""
 
 
-def get_redirected_url(url):
-    response, error = get_text(url)
+async def get_redirected_url(url):
+    response, error = await config.async_client.get_text(url)
     if response is None:
         return None
 
@@ -74,7 +73,7 @@ def get_redirected_url(url):
         return None
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="zh_cn",
@@ -99,7 +98,7 @@ def main(
             number_list, filename_list = get_number_list(number, appoint_number, file_path)
             n_list = number_list[:1] + filename_list
             # 处理重定向
-            hscangku_url = get_redirected_url(hscangku_url)
+            hscangku_url = await get_redirected_url(hscangku_url)
             if not hscangku_url:
                 debug_info = "没有正确的 hscangku_url，无法刮削"
                 LogBuffer.info().write(web_info + debug_info)
@@ -109,7 +108,7 @@ def main(
                 # real_url = 'http://hsck860.cc/vodsearch/-------------.html?wd=%E6%9F%9A%E5%AD%90%E7%8C%AB&submit='
                 debug_info = f"请求地址: {real_url} "
                 LogBuffer.info().write(web_info + debug_info)
-                response, error = get_text(real_url)
+                response, error = await config.async_client.get_text(real_url)
 
                 if response is None:
                     debug_info = f"网络请求错误: {error}"
@@ -127,7 +126,7 @@ def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
-        response, error = get_text(real_url)
+        response, error = await config.async_client.get_text(real_url)
 
         if response is None:
             debug_info = f"没有找到数据 {error} "

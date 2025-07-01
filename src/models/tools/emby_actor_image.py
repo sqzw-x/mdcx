@@ -10,28 +10,27 @@ from lxml import etree
 
 from models.base.image import cut_pic, fix_pic
 from models.base.utils import get_used_time
-from models.base.web_sync import get_content, get_json, get_text
 from models.config.manager import config
 from models.config.resources import resources
 from models.core.web import download_file_with_filepath
 from models.signals import signal
 
 
-def update_emby_actor_photo():
+async def update_emby_actor_photo():
     signal.change_buttons_status.emit()
     server_type = config.server_type
     if "emby" in server_type:
         signal.show_log_text("👩🏻 开始补全 Emby 演员头像...")
     else:
         signal.show_log_text("👩🏻 开始补全 Jellyfin 演员头像...")
-    actor_list = _get_emby_actor_list()
-    gfriends_actor_data = _get_gfriends_actor_data()
+    actor_list = await _get_emby_actor_list()
+    gfriends_actor_data = await _get_gfriends_actor_data()
     if gfriends_actor_data:
-        _update_emby_actor_photo_execute(actor_list, gfriends_actor_data)
+        await _update_emby_actor_photo_execute(actor_list, gfriends_actor_data)
     signal.reset_buttons_status.emit()
 
 
-def _get_emby_actor_list() -> list:
+async def _get_emby_actor_list() -> list:
     # 获取 emby 的演员列表
     if "emby" in config.server_type:
         server_name = "Emby"
@@ -54,7 +53,7 @@ def _get_emby_actor_list() -> list:
         signal.show_log_text(f"🔴 {server_name} API 密钥未填写！")
         signal.show_log_text("================================================================================")
 
-    response, error = get_json(url, use_proxy=False)
+    response, error = await config.async_client.get_json(url, use_proxy=False)
     if response is None:
         signal.show_log_text(f"🔴 {server_name} 连接失败！请检查 {server_name} 地址 和 API 密钥是否正确填写！ {error}")
         signal.show_log_text(traceback.format_exc())
@@ -114,7 +113,7 @@ def _generate_server_url(actor_js):
     return actor_homepage, actor_person, pic_url, backdrop_url, backdrop_url_0, update_url
 
 
-def _get_gfriends_actor_data():
+async def _get_gfriends_actor_data():
     emby_on = config.emby_on
     gfriends_github = config.gfriends_github
     raw_url = f"{gfriends_github}".replace("github.com/", "raw.githubusercontent.com/").replace("://www.", "://")
@@ -124,7 +123,7 @@ def _get_gfriends_actor_data():
         update_data = False
         signal.show_log_text("⏳ 连接 Gfriends 网络头像库...")
         net_url = f"{gfriends_github}/commits/master/Filetree.json"
-        response, error = get_text(net_url)
+        response, error = await config.async_client.get_text(net_url)
         if response is None:
             signal.show_log_text("🔴 Gfriends 查询最新数据更新时间失败！")
             net_float = 0
@@ -165,7 +164,7 @@ def _get_gfriends_actor_data():
         if update_data:
             signal.show_log_text("⏳ 开始缓存 Gfriends 最新数据表...")
             filetree_url = f"{raw_url}/master/Filetree.json"
-            response, error = get_content(filetree_url)
+            response, error = await config.async_client.get_content(filetree_url)
             if response is None:
                 signal.show_log_text("🔴 Gfriends 数据表获取失败！补全已停止！")
                 return False
@@ -203,7 +202,7 @@ def _get_gfriends_actor_data():
         return _get_local_actor_photo()
 
 
-def _get_graphis_pic(actor_name):
+async def _get_graphis_pic(actor_name):
     emby_on = config.emby_on
 
     # 生成图片路径和请求地址
@@ -248,7 +247,7 @@ def _get_graphis_pic(actor_name):
         return pic_path, backdrop_path, ""
 
     # 请求图片
-    res, error = get_text(url)
+    res, error = await config.async_client.get_text(url)
     if res is None:
         logs += f"🔴 graphis.ne.jp 请求失败！\n{error}"
         return "", "", logs
@@ -282,7 +281,7 @@ def _get_graphis_pic(actor_name):
     return pic_path, backdrop_path, logs
 
 
-def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
+async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
     start_time = time.time()
     emby_on = config.emby_on
     actor_folder = resources.userdata_path("actor")
@@ -319,7 +318,7 @@ def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
         pic_path, backdrop_path, logs = "", "", ""
         if "actor_photo_net" in emby_on and has_name:
             if "graphis_backdrop" in emby_on or "graphis_face" in emby_on:
-                pic_path, backdrop_path, logs = _get_graphis_pic(jp_name)
+                pic_path, backdrop_path, logs = await _get_graphis_pic(jp_name)
 
         # 要上传的头像图片未找到时
         if not pic_path:
@@ -414,4 +413,5 @@ def _get_local_actor_photo():
 
 
 if __name__ == "__main__":
-    _get_gfriends_actor_data()
+    import asyncio
+    asyncio.run(_get_gfriends_actor_data())

@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 
-import json
 
 from models.crawlers import dmm, getchu
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="jp",
     **kwargs,
 ):
-    json_data_getchu = json.loads(getchu.main(number, appoint_url, "jp"))
+    json_data_getchu = await getchu.main(number, appoint_url, "jp")
     json_data_new = json_data_getchu["getchu"]["jp"]
 
     poster = json_data_new.get("poster")
@@ -20,7 +19,7 @@ def main(
         number = json_data_new["number"]
         if number.startswith("DLID") or "dl.getchu" in appoint_url:
             return json_data_getchu
-    json_data_dmm = json.loads(dmm.main(number, appoint_url, "jp"))
+    json_data_dmm = await dmm.main(number, appoint_url, "jp")
     if json_data_dmm["dmm"]["jp"]["title"]:
         json_data_new.update(json_data_dmm["dmm"]["jp"])
         if poster:  # 使用 getchu 封面
@@ -28,19 +27,13 @@ def main(
         if outline:  # 使用 getchu 简介
             json_data_new["outline"] = outline
             json_data_new["originalplot"] = outline
-    return json.dumps(
-        {
-            "getchu_dmm": {
-                "zh_cn": json_data_new,
-                "zh_tw": json_data_new,
-                "jp": json_data_new,
-            }
-        },
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )
+    return {
+        "getchu_dmm": {
+            "zh_cn": json_data_new,
+            "zh_tw": json_data_new,
+            "jp": json_data_new,
+        }
+    }
 
 
 if __name__ == "__main__":

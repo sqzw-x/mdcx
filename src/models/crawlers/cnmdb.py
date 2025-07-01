@@ -6,7 +6,7 @@ from urllib.parse import unquote
 import urllib3
 from lxml import etree
 
-from models.base.web_sync import get_text
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_number_list
 
@@ -94,7 +94,7 @@ def get_actor_title(title, number, studio):
     return title.strip("."), number, ",".join(actor_list), series
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="zh_cn",
@@ -117,7 +117,7 @@ def main(
         if real_url:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            response, error = get_text(real_url)
+            response, error = await config.async_client.get_text(real_url)
             if response is not None:
                 detail_page = etree.fromstring(response, etree.HTMLParser())
                 result, number, title, actor, real_url, cover_url, studio, series = get_detail_info(
@@ -135,7 +135,7 @@ def main(
                 real_url = "https://cnmdb.net/" + each
                 debug_info = f"请求地址: {real_url} "
                 LogBuffer.info().write(web_info + debug_info)
-                response, error = get_text(real_url)
+                response, error = await config.async_client.get_text(real_url)
                 if response is not None:
                     detail_page = etree.fromstring(response, etree.HTMLParser())
                     result, number, title, actor, real_url, cover_url, studio, series = get_detail_info(
@@ -150,7 +150,7 @@ def main(
                     search_url = f"https://cnmdb.net/s0?q={each}"
                     debug_info = f"请求地址: {search_url} "
                     LogBuffer.info().write(web_info + debug_info)
-                    response, error = get_text(search_url)
+                    response, error = await config.async_client.get_text(search_url)
                     if response is None:
                         debug_info = f"网络请求错误: {error}"
                         LogBuffer.info().write(web_info + debug_info)

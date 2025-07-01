@@ -4,7 +4,6 @@ import time
 import urllib3
 from lxml import etree
 
-from models.base.web_sync import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -58,7 +57,7 @@ def get_video_time(html):  # 获取视频时长
     return video_size_nodes[0] if video_size_nodes else ""
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="jp",
@@ -88,7 +87,7 @@ def main(
         debug_info = "番号地址: %s" % real_url
         LogBuffer.info().write(web_info + debug_info)
         # ========================================================================番号详情页
-        html_content, error = get_text(url_search)
+        html_content, error = await config.async_client.get_text(url_search)
         if html_content is None:
             debug_info = f"网络请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)

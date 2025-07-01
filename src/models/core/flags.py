@@ -22,7 +22,6 @@ class _Flags:
     success_save_time: float = 0.0
     pool: ThreadPoolExecutor = None
     next_start_time: float = 0.0
-    lock: threading.Lock = field(default_factory=threading.Lock)
     count_claw: int = 0  # 批量刮削次数
     can_save_remain: bool = False  # 保存剩余任务
     remain_list: list[str] = field(default_factory=list)

@@ -5,7 +5,6 @@ import time  # yapf: disable # NOQA: E402
 import urllib3
 from lxml import etree
 
-from models.base.web_sync import post_text
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -112,7 +111,7 @@ def getOutline(detail_page):
     return detail_page.xpath("string(/html/body/div[2]/div[1]/div[1]/div[2]/div[3]/div/text())")
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="jp",
@@ -140,7 +139,7 @@ def main(
         else:
             debug_info = f'搜索地址: {result_url} {{"sn": {number}}}'
             LogBuffer.info().write(web_info + debug_info)
-        response, error = post_text(result_url, data={"sn": number})
+        response, error = await config.async_client.post_text(result_url, data={"sn": number})
         if response is None:
             debug_info = f"网络请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)
