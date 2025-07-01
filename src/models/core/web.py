@@ -61,10 +61,6 @@ async def get_yesjav_title(movie_number: str) -> str:
     return movie_title
 
 
-def google_translate(title: str, outline: str) -> tuple[str, str, Optional[str]]:
-    return config.executor.run(google_translate_async(title, outline))
-
-
 async def google_translate_async(title: str, outline: str) -> tuple[str, str, Optional[str]]:
     (r1, e1), (r2, e2) = await asyncio.gather(_google_translate(title), _google_translate(outline))
     if r1 is None or r2 is None:
