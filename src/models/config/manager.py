@@ -45,6 +45,7 @@ class ConfigManager(ManualConfig):
         reader.read(path, encoding="UTF-8")
         field_types = {f.name: f.type for f in fields(ConfigSchema)}
         errors = []
+        unknown_fields = {}  # 原样保留未知字段
         for section in reader.sections():
             for key, value in reader.items(section):
                 try:
@@ -53,6 +54,7 @@ class ConfigManager(ManualConfig):
                         if key.endswith("_website") and key[:-8] in ManualConfig.SUPPORTED_WEBSITES and value:
                             setattr(self.config, key, value)
                             continue
+                        unknown_fields[key] = value
                         errors.append(f"未知配置: {key} (位于 {section})")
                         continue
                     expected_type = field_types[key]
@@ -74,6 +76,7 @@ class ConfigManager(ManualConfig):
                         errors.append(f"内部错误: {key} 具有未知类型 {expected_type} (位于 {section}), 请联系开发者")
                 except Exception as e:
                     errors.append(f"读取配置错误: {key} (位于 {section}) {value=}  {str(e)}")
+        setattr(self.config, "unknown_fields", unknown_fields)
         return "\n\t".join(errors)
 
     @staticmethod
@@ -101,6 +104,10 @@ class ConfigManager(ManualConfig):
         for website in ManualConfig.SUPPORTED_WEBSITES:
             if url := getattr(cfg, f"{website}_website", ""):
                 parser.set("mdcx", f"{website}_website", url)
+        if x := getattr(cfg, "unknown_fields", {}):
+            parser.add_section("unknown_fields")
+            for key, value in x.items():
+                parser.set("unknown_fields", key, value)
         parser.write(buffer)
         return buffer.getvalue()
 
