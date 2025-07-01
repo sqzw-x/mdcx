@@ -40,7 +40,7 @@ from models.tools.emby_actor_image import (
 )
 
 
-def creat_kodi_actors(add: bool):
+async def creat_kodi_actors(add: bool):
     signal.change_buttons_status.emit()
     signal.show_log_text(f"📂 待刮削目录: {get_movie_path_setting()[0]}")
     if add:
@@ -52,7 +52,7 @@ def creat_kodi_actors(add: bool):
         gfriends_actor_data = True
 
     if gfriends_actor_data:
-        _deal_kodi_actors(gfriends_actor_data, add)
+        await _deal_kodi_actors(gfriends_actor_data, add)
     signal.reset_buttons_status.emit()
     signal.show_log_text("================================================================================")
 
@@ -802,7 +802,7 @@ async def _process_wiki_content(res, url, url_log, actor_info, ja, emby_on):
         return False, f"处理维基百科页面内容时发生异常: {str(e)}"
 
 
-def _deal_kodi_actors(gfriends_actor_data, add):
+async def _deal_kodi_actors(gfriends_actor_data, add):
     vedio_path = get_movie_path_setting()[0]
     if vedio_path == "" or not os.path.isdir(vedio_path):
         signal.show_log_text("🔴 待刮削目录不存在！任务已停止！")
@@ -853,7 +853,7 @@ def _deal_kodi_actors(gfriends_actor_data, add):
                                             net_file_name = re.findall(r"^[^?]+", net_file_name)[0]
                                             local_file_path = os.path.join(actor_folder, net_file_name)
                                             if not os.path.isfile(local_file_path):
-                                                if not download_file_with_filepath(
+                                                if not await download_file_with_filepath(
                                                     net_pic_path, local_file_path, actor_folder
                                                 ):
                                                     signal.show_log_text(

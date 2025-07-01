@@ -128,19 +128,15 @@ class AsyncWebClient:
                     # 检查响应状态
                     if resp.status_code >= 300 and not (resp.status_code == 302 and resp.headers.get("Location")):
                         error_msg = f"HTTP {resp.status_code}"
-                        self.log_fn(f"🔴 请求失败 {error_msg}")
                     else:
-                        self.log_fn(f"✅ 请求成功 {url}")
                         return resp, ""
                 except httpx.TimeoutException:
-                    error_msg = "请求超时"
-                    self.log_fn(f"🔴 {error_msg} (尝试 {attempt + 1}/{retry_count})")
+                    error_msg = "超时"
                 except httpx.ConnectError as e:
                     error_msg = f"连接错误: {str(e)}"
-                    self.log_fn(f"🔴 {error_msg} (尝试 {attempt + 1}/{retry_count})")
                 except Exception as e:
                     error_msg = f"请求异常: {str(e)}"
-                    self.log_fn(f"🔴 {error_msg} (尝试 {attempt + 1}/{retry_count})")
+                self.log_fn(f"🔴 {method} {url} 失败: {error_msg} ({attempt + 1}/{retry_count})")
                 # 重试前等待
                 if attempt < retry_count - 1:
                     await asyncio.sleep(attempt * 3 + 2)
@@ -269,10 +265,11 @@ class AsyncWebClient:
         """获取文件大小"""
         response, error = await self.request("HEAD", url, use_proxy=use_proxy)
         if response is None:
-            self.log_fn(f"🔴 获取文件大小失败: {error}")
+            self.log_fn(f"🔴 获取文件大小失败: {url} {error}")
             return None
         if response.status_code < 400:
             return int(response.headers.get("Content-Length"))
+        self.log_fn(f"🔴 获取文件大小失败: {url} HTTP {response.status_code}")
         return None
 
     async def download(self, url: str, file_path: str, *, use_proxy: bool = True) -> bool:
@@ -301,7 +298,7 @@ class AsyncWebClient:
 
         content, error = await self.get_content(url, use_proxy=use_proxy)
         if not content:
-            self.log_fn(f"🔴 下载失败: {error}")
+            self.log_fn(f"🔴 下载失败: {url} {error}")
             return False
         if not webp:
             try:
@@ -309,7 +306,7 @@ class AsyncWebClient:
                     f.write(content)
                 return True
             except Exception as e:
-                self.log_fn(f"🔴 文件写入失败: {str(e)}")
+                self.log_fn(f"🔴 文件写入失败: {url} {file_path} {str(e)}")
                 return False
         try:
             byte_stream = BytesIO(content)
@@ -320,7 +317,7 @@ class AsyncWebClient:
             img.close()
             return True
         except Exception as e:
-            self.log_fn(f"🔴 WebP转换失败: {str(e)}")
+            self.log_fn(f"🔴 WebP转换失败: {url} {file_path} {str(e)}")
             return False
 
     async def _download_chunks(self, url: str, file_path: str, file_size: int, use_proxy: bool = True) -> bool:
@@ -330,14 +327,14 @@ class AsyncWebClient:
         each_size = min(1 * MB, file_size)
         parts = [(s, min(s + each_size, file_size)) for s in range(0, file_size, each_size)]
 
-        self.log_fn(f"📦 分块下载: {len(parts)} 个分块, 总大小: {file_size} bytes")
+        self.log_fn(f"📦 分块下载: {url} {len(parts)} 个分块, 总大小: {file_size} bytes")
 
         # 先创建文件并预分配空间
         try:
             with open(file_path, "wb") as f:
                 f.truncate(file_size)
         except Exception as e:
-            self.log_fn(f"🔴 文件创建失败: {str(e)}")
+            self.log_fn(f"🔴 文件创建失败: {url} {str(e)}")
             return False
 
         # 创建下载任务
@@ -350,19 +347,19 @@ class AsyncWebClient:
 
         # 并发执行所有下载任务
         try:
-            results = await asyncio.gather(*tasks, return_exceptions=True)
+            errors = await asyncio.gather(*tasks, return_exceptions=True)
             # 检查所有任务是否成功
-            for i, result in enumerate(results):
-                if isinstance(result, Exception):
-                    self.log_fn(f"🔴 分块 {i} 下载异常: {str(result)}")
+            for i, err in enumerate(errors):
+                if isinstance(err, Exception):
+                    self.log_fn(f"🔴 分块 {i} 下载失败: {url} {str(err)}")
                     return False
-                elif not result:
-                    self.log_fn(f"🔴 分块 {i} 下载失败")
+                elif err:
+                    self.log_fn(f"🔴 分块 {i} 下载失败: {url} {err}")
                     return False
-            self.log_fn(f"✅ 多分块下载完成: {file_path}")
+            self.log_fn(f"✅ 多分块下载完成: {url} {file_path}")
             return True
         except Exception as e:
-            self.log_fn(f"🔴 并发下载异常: {str(e)}")
+            self.log_fn(f"🔴 并发下载异常: {url} {str(e)}")
             return False
 
     async def _download_chunk(
@@ -374,16 +371,14 @@ class AsyncWebClient:
         end: int,
         chunk_id: int,
         use_proxy: bool = True,
-    ) -> bool:
+    ) -> Optional[str]:
         """下载单个分块"""
         async with semaphore:
             res, error = await self.get_content(url, headers={"Range": f"bytes={start}-{end}"}, use_proxy=use_proxy)
             if res is None:
-                self.log_fn(f"🔴 分块 {chunk_id} 下载失败: {error}")
-                return False
+                return error
         # 写入文件
         with open(file_path, "rb+") as fp:
             fp.seek(start)
             fp.write(res)
-        self.log_fn(f"✅ 分块 {chunk_id} 下载完成 ({start}-{end})")
-        return True
+        return ""

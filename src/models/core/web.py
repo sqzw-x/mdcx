@@ -285,7 +285,7 @@ async def get_big_pic_by_amazon(
     return hd_pic_url
 
 
-def trailer_download(
+async def trailer_download(
     json_data: JsonData,
     folder_new_path: str,
     folder_old_path: str,
@@ -374,7 +374,7 @@ def trailer_download(
         trailer_file_path_temp = trailer_file_path
         if os.path.exists(trailer_file_path):
             trailer_file_path_temp = trailer_file_path + ".[DOWNLOAD].mp4"
-        if download_file_with_filepath(trailer_url, trailer_file_path_temp, trailer_folder_path):
+        if await download_file_with_filepath(trailer_url, trailer_file_path_temp, trailer_folder_path):
             file_size = os.path.getsize(trailer_file_path_temp)
             if file_size >= content_length or "ignore_size" in download_files:
                 LogBuffer.log().write(
@@ -664,7 +664,7 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
                 )
                 continue
             json_data["cover_from"] = cover_from
-            if download_file_with_filepath(cover_url, thumb_final_path_temp, folder_new_path):
+            if await download_file_with_filepath(cover_url, thumb_final_path_temp, folder_new_path):
                 cover_size = check_pic(thumb_final_path_temp)
                 if cover_size:
                     if (
@@ -798,7 +798,7 @@ async def poster_download(json_data: JsonData, folder_new_path: str, poster_fina
         poster_final_path_temp = poster_final_path + ".[DOWNLOAD].jpg"
     if json_data["image_download"]:
         start_time = time.time()
-        if download_file_with_filepath(poster_url, poster_final_path_temp, folder_new_path):
+        if await download_file_with_filepath(poster_url, poster_final_path_temp, folder_new_path):
             poster_size = check_pic(poster_final_path_temp)
             if poster_size:
                 if (

@@ -467,7 +467,7 @@ async def translate_title_outline(json_data: JsonData, movie_number: str):
                     json_data["outline_from"] = each
                     return "break"
 
-            res = await asyncio.gather(_task(each) for each in translate_by_list)
+            res = await asyncio.gather(*[_task(each) for each in translate_by_list])
             for r in res:
                 if r == "break":
                     break

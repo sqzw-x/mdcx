@@ -120,7 +120,7 @@ async def main(
 
     try:
         if not real_url:
-            avsox_url = get_avsox_domain()
+            avsox_url = await get_avsox_domain()
             url_search = f"{avsox_url}/cn/search/{number}"
             debug_info = f"搜索地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)

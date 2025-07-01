@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import re
 import time
+import traceback
 
 import urllib3
 
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
-import traceback
 
 
 def get_actor(page_data):

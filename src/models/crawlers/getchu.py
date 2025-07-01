@@ -3,11 +3,12 @@
 import re
 import time
 import unicodedata
-import urllib
+import urllib.parse
 
 import urllib3
 from lxml import etree
 
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers import getchu_dl
 

@@ -312,7 +312,7 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
 
             # 下载trailer、复制主题视频
             # 因为 trailer也有带文件名，不带文件名两种情况，不能使用pic_final_catched。比如图片不带文件名，trailer带文件名这种场景需要支持每个分集去下载trailer
-            trailer_download(json_data, folder_new_path, folder_old_path, naming_rule)
+            await trailer_download(json_data, folder_new_path, folder_old_path, naming_rule)
             copy_trailer_to_theme_videos(json_data, folder_new_path, naming_rule)
 
     # 生成nfo文件
@@ -426,7 +426,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
         _check_stop(file_name_temp)
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
-        LogBuffer.error().write("c1oreMain error: " + str(e))
+        LogBuffer.error().write("scrape file error: " + str(e))
         LogBuffer.log().write("\n" + traceback.format_exc())
         result = False
 
@@ -668,9 +668,9 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
 
     # auto run after scrape
     if "actor_photo_auto" in config.emby_on:
-        update_emby_actor_photo()
+        await update_emby_actor_photo()
     if config.actor_photo_kodi_auto:
-        creat_kodi_actors(True)
+        await creat_kodi_actors(True)
 
     signal.reset_buttons_status.emit()
     if len(Flags.again_dic):
