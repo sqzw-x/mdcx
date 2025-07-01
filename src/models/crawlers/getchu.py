@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import json
 import re
 import time
 import unicodedata
@@ -113,6 +112,7 @@ def main(
     number,
     appoint_url="",
     language="jp",
+    **kwargs,
 ):
     if "DLID" in number.upper() or "ITEM" in number.upper() or "GETCHU" in number.upper() or "dl.getchu" in appoint_url:
         return getchu_dl.main(number, appoint_url, "jp")
@@ -252,15 +252,8 @@ def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

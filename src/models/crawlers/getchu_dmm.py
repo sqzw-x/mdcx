@@ -9,6 +9,7 @@ def main(
     number,
     appoint_url="",
     language="jp",
+    **kwargs,
 ):
     json_data_getchu = json.loads(getchu.main(number, appoint_url, "jp"))
     json_data_new = json_data_getchu["getchu"]["jp"]

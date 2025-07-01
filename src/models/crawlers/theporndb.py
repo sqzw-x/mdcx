@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import json
 import os.path
 import re
 import time  # yapf: disable # NOQA: E402
@@ -266,6 +265,7 @@ def main(
     language="zh_cn",
     file_path="",
     appoint_number="",
+    **kwargs,
 ):
     if not file_path:
         file_path = number + ".mp4"
@@ -460,15 +460,8 @@ def main(
         )
 
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

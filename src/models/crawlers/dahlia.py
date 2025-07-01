@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import json
 import re
 import time  # yapf: disable # NOQA: E402
 
@@ -104,6 +103,7 @@ def main(
     number,
     appoint_url="",
     language="jp",
+    **kwargs,
 ):
     # https://faleno.jp/top/works/fsdss564/
     # https://dahlia-av.jp/works/dldss177/
@@ -217,15 +217,8 @@ def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

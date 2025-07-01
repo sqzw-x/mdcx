@@ -14,6 +14,7 @@ def main(
     number,
     appoint_url="",
     language="zh_cn",
+    **kwargs,
 ):
     all_language = (
         config.title_language

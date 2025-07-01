@@ -2,7 +2,6 @@
 爬虫控制, 调用 models.crawlers 中各个网站爬虫
 """
 
-import json
 import re
 from typing import Any, Callable
 
@@ -154,7 +153,9 @@ def _call_crawler(
     # 259LUXU-1111， mgstage 和 avsex 之外使用 LUXU-1111（素人番号时，short_number有值，不带前缀数字；反之，short_number为空)
     if short_number and website != "mgstage" and website != "avsex":
         file_number = short_number
-    _: dict[str, Callable] = {
+
+    # 爬虫函数映射表
+    crawler_functions: dict[str, Callable] = {
         "official": official.main,
         "iqqtv": iqqtv_new.main,
         "avsex": avsex.main,
@@ -194,86 +195,23 @@ def _call_crawler(
         "kin8": kin8.main,
         "javday": javday.main,
     }
-    if website == "official":
-        res = json.loads(official.main(file_number, appoint_url, language))
-    elif website == "iqqtv":
-        res = json.loads(iqqtv_new.main(file_number, appoint_url, language))
-    elif website == "avsex":
-        res = json.loads(avsex.main(file_number, appoint_url, language))
-    elif website == "airav_cc":
-        res = json.loads(airav_cc.main(file_number, appoint_url, language))
-    elif website == "airav":
-        res = json.loads(airav.main(file_number, appoint_url, language))
-    elif website == "freejavbt":
-        res = json.loads(freejavbt.main(file_number, appoint_url, language))
-    elif website == "javbus":
-        res = json.loads(javbus.main(file_number, appoint_url, language, mosaic))
-    elif website == "javdb":
-        res = json.loads(javdb.main(file_number, appoint_url, language, org_language))
-    elif website == "jav321":
-        res = json.loads(jav321.main(file_number, appoint_url, language))
-    elif website == "dmm":
-        res = json.loads(dmm.main(file_number, appoint_url, language, file_path))
-    elif website == "javlibrary":
-        res = json.loads(javlibrary_new.main(file_number, appoint_url, language))
-    elif website == "xcity":
-        res = json.loads(xcity.main(file_number, appoint_url, language))
-    elif website == "avsox":
-        res = json.loads(avsox.main(file_number, appoint_url, language))
-    elif website == "mgstage":
-        res = json.loads(mgstage.main(file_number, appoint_url, language, short_number))
-    elif website == "7mmtv":
-        res = json.loads(mmtv.main(file_number, appoint_url, language, file_path))
-    elif website == "fc2":
-        res = json.loads(fc2.main(file_number, appoint_url, language))
-    elif website == "fc2hub":
-        res = json.loads(fc2hub.main(file_number, appoint_url, language))
-    elif website == "fc2club":
-        res = json.loads(fc2club.main(file_number, appoint_url, language))
-    elif website == "fc2ppvdb":
-        res = json.loads(fc2ppvdb.main(file_number, appoint_url, language))
-    elif website == "mdtv":
-        res = json.loads(mdtv.main(file_number, appoint_url, language, file_path, appoint_number))
-    elif website == "madouqu":
-        res = json.loads(madouqu.main(file_number, appoint_url, language, file_path, appoint_number))
-    elif website == "hscangku":
-        res = json.loads(hscangku.main(file_number, appoint_url, language, file_path, appoint_number))
-    elif website == "cableav":
-        res = json.loads(cableav.main(file_number, appoint_url, language, file_path, appoint_number))
-    elif website == "getchu":
-        res = json.loads(getchu.main(file_number, appoint_url, language))
-    elif website == "getchu_dmm":
-        res = json.loads(getchu_dmm.main(file_number, appoint_url, language))
-    elif website == "mywife":
-        res = json.loads(mywife.main(file_number, appoint_url, language))
-    elif website == "giga":
-        res = json.loads(giga.main(file_number, appoint_url, language))
-    elif website == "hdouban":
-        res = json.loads(hdouban.main(file_number, appoint_url, language, file_path, appoint_number, mosaic))
-    elif website == "lulubar":
-        res = json.loads(lulubar.main(file_number, appoint_url, language))
-    elif website == "love6":
-        res = json.loads(love6.main(file_number, appoint_url, language))
-    elif website == "cnmdb":
-        res = json.loads(cnmdb.main(file_number, appoint_url, language, file_path, appoint_number))
-    elif website == "faleno":
-        res = json.loads(faleno.main(file_number, appoint_url, language))
-    elif website == "fantastica":
-        res = json.loads(fantastica.main(file_number, appoint_url, language))
-    elif website == "theporndb":
-        res = json.loads(theporndb.main(file_number, appoint_url, language, file_path))
-    elif website == "dahlia":
-        res = json.loads(dahlia.main(file_number, appoint_url, language))
-    elif website == "prestige":
-        res = json.loads(prestige.main(file_number, appoint_url, language))
-    elif website == "kin8":
-        res = json.loads(kin8.main(file_number, appoint_url, language))
-    elif website == "javday":
-        res = json.loads(javday.main(file_number, appoint_url, language))
-    else:
-        res = json.loads(javdb.main(file_number, appoint_url, language))
 
-    return res
+    # 获取爬虫函数
+    crawler_func = crawler_functions.get(website, javdb.main)
+
+    # 准备参数
+    kwargs = {
+        "number": file_number,
+        "appoint_url": appoint_url,
+        "language": language,
+        "file_path": file_path,
+        "appoint_number": appoint_number,
+        "mosaic": mosaic,
+        "short_number": short_number,
+        "org_language": org_language,
+    }
+
+    return crawler_func(**kwargs)
 
 
 def _decide_websites(
