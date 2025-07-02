@@ -624,7 +624,7 @@ async def _call_crawlers(
     backup_website = ""
 
     async def _task(website: str):
-        nonlocal field_name
+        nonlocal field_name, backup_website
         if (website in ["avsox", "mdtv"] and mosaic in ["有码", "无码破解", "流出", "里番", "动漫"]) or (
             website == "mdtv" and mosaic == "无码"
         ):
@@ -640,14 +640,14 @@ async def _call_crawlers(
         else:
             title_language = getattr(config, field_language)
 
-        try:
-            web_data_json = all_json_data[website][title_language]
-        except Exception:
+        if website not in all_json_data:
             web_data = await _call_crawler(
                 json_data, website, title_language, file_number, short_number, mosaic, config.title_language
             )
             all_json_data.update(web_data)
             web_data_json: dict = all_json_data.get(website, {}).get(title_language, {})
+        else:
+            web_data_json = all_json_data[website][title_language]
 
         if field_cnname == "标题":
             json_data.update(web_data_json)
