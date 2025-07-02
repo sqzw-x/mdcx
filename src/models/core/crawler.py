@@ -682,13 +682,19 @@ async def _call_crawlers(
             )
             return "break"
 
-    res = await asyncio.gather(*[_task(website) for website in website_list])
-    for r in res:  # todo cancel if needed
-        if r == "break":
-            break
-        elif r == "continue":
-            continue
-    else:
+    # 并发执行, 但在获得成功结果时取消其他任务
+    tasks = [asyncio.create_task(_task(website)) for website in website_list]
+
+    try:
+        for task in asyncio.as_completed(tasks):
+            result = await task
+            if result == "break":
+                # 取消所有未完成的任务
+                for t in tasks:
+                    if not t.done():
+                        t.cancel()
+                break
+
         if len(backup_jsondata):
             LogBuffer.info().write(
                 f"\n    🟢 {field_cnname} 使用备用数据！({backup_website})\n     ↳ {backup_jsondata[field_name]} "
@@ -697,6 +703,13 @@ async def _call_crawlers(
                 json_data.update(backup_jsondata)
         else:
             LogBuffer.info().write(f"\n    🔴 {field_cnname} 获取失败！")
+    finally:
+        # 确保所有任务都被取消
+        for task in tasks:
+            if not task.done():
+                task.cancel()
+        # 等待所有任务完成取消
+        await asyncio.gather(*tasks, return_exceptions=True)
 
 
 async def _call_specific_crawler(json_data: JsonData, website: str) -> JsonData:
