@@ -6,7 +6,7 @@ import traceback
 import langid
 from lxml import etree
 
-from ..base.file import delete_file, split_path
+from ..base.file import delete_file_sync, split_path
 from ..base.number import deal_actor_more, get_number_first_letter, get_number_letters
 from ..base.utils import convert_path, get_used_time
 from ..config.manager import config
@@ -37,7 +37,7 @@ def write_nfo(
         # 不下载，不保留时
         if "nfo" not in download_files:
             if "nfo" not in keep_files and os.path.exists(nfo_new_path):
-                delete_file(nfo_new_path)
+                delete_file_sync(nfo_new_path)
             return True
 
         # 保留时，返回
@@ -164,7 +164,7 @@ def write_nfo(
     try:
         if not os.path.exists(folder_new_path):
             os.makedirs(folder_new_path)
-        delete_file(nfo_new_path)  # 避免115出现重复文件
+        delete_file_sync(nfo_new_path)  # 避免115出现重复文件
         with open(nfo_new_path, "w", encoding="UTF-8") as code:
             print('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', file=code)
             print("<movie>", file=code)

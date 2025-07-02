@@ -13,7 +13,7 @@ import traceback
 import unicodedata
 from typing import Optional
 
-from ..base.file import read_link, split_path
+from ..base.file import read_link_sync, split_path
 from ..base.number import get_number_letters
 from ..base.path import get_path
 from ..base.utils import convert_path, get_used_time
@@ -122,7 +122,7 @@ def get_video_size(json_data: JsonData, file_path: str):
     hd_get = config.hd_get
     if os.path.islink(file_path):
         if "symlink_definition" in config.no_escape:
-            file_path = read_link(file_path)
+            file_path = read_link_sync(file_path)
         else:
             hd_get = "path"
     if hd_get == "video":

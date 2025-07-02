@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QDialog, QFileDialog, QPushButton
 
 import models.core.file
 import models.core.image
-from models.base.file import delete_file, split_path
+from models.base.file import delete_file_sync, split_path
 from models.config.manager import config
 from views.posterCutTool import Ui_Dialog_cut_poster
 
@@ -396,7 +396,7 @@ class CutWindow(QDialog):
         img_new_png = img.crop((self.c_x, self.c_y, self.c_x2, self.c_y2))
         try:
             if os.path.exists(self.cut_poster_path):
-                delete_file(self.cut_poster_path)
+                delete_file_sync(self.cut_poster_path)
         except Exception as e:
             self.parent().show_log_text(" 🔴 Failed to remove old poster!\n    " + str(e))
             return False
@@ -409,7 +409,7 @@ class CutWindow(QDialog):
         if "thumb" in config.download_files:
             if thumb_path != img_path:
                 if os.path.exists(thumb_path):
-                    delete_file(thumb_path)
+                    delete_file_sync(thumb_path)
                 img.save(thumb_path, quality=95, subsampling=0)
             # thumb加水印
             if config.thumb_mark == 1:
@@ -421,7 +421,7 @@ class CutWindow(QDialog):
         if ",fanart" in config.download_files:
             if self.cut_fanart_path != img_path:
                 if os.path.exists(self.cut_fanart_path):
-                    delete_file(self.cut_fanart_path)
+                    delete_file_sync(self.cut_fanart_path)
                 img.save(self.cut_fanart_path, quality=95, subsampling=0)
             # fanart加水印
             if config.fanart_mark == 1:

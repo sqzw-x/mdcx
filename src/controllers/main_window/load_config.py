@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QFileDialog
 
-from models.base.file import delete_file
+from models.base.file import delete_file_sync
 from models.base.utils import convert_path
 from models.config.consts import IS_WINDOWS
 from models.config.manager import config, get_new_str, manager
@@ -1139,7 +1139,7 @@ def load_config(self):
             else:
                 self.Ui.checkBox_highdpi_passthrough.setChecked(False)
                 if os.path.isfile("highdpi_passthrough"):
-                    delete_file("highdpi_passthrough")
+                    delete_file_sync("highdpi_passthrough")
         else:
             self.Ui.checkBox_highdpi_passthrough.setEnabled(False)
             if "hide_menu" in switch_on:
@@ -1181,7 +1181,7 @@ def load_config(self):
                 else:
                     self.Ui.checkBox_hide_dock_icon.setChecked(False)
                     if os.path.isfile(hide_dock_flag_file):
-                        delete_file(hide_dock_flag_file)
+                        delete_file_sync(hide_dock_flag_file)
             except Exception:
                 signal.show_traceback_log(f"hide_dock_flag_file: {os.path.realpath('resources/Img/1')}")
                 signal.show_traceback_log(traceback.format_exc())

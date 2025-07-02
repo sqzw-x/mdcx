@@ -13,8 +13,8 @@ from typing import Optional
 
 from lxml import etree
 
-from ..base.file import copy_file, delete_file, move_file, split_path
-from ..base.image import check_pic, cut_thumb_to_poster
+from ..base.file import copy_file_sync, delete_file_sync, move_file_sync, split_path
+from ..base.image import check_pic_sync, cut_thumb_to_poster
 from ..base.utils import get_used_time
 from ..base.web import check_url, get_amazon_data, get_big_pic_by_google, get_imgsize
 from ..config.manager import config
@@ -101,7 +101,7 @@ async def download_file_with_filepath(
 async def _mutil_extrafanart_download_thread(task: tuple[JsonData, str, str, str, str]) -> bool:
     json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path, extrafanart_name = task
     if await download_file_with_filepath(extrafanart_url, extrafanart_file_path, extrafanart_folder_path):
-        if check_pic(extrafanart_file_path):
+        if check_pic_sync(extrafanart_file_path):
             return True
     else:
         LogBuffer.log().write(f"\n 💡 {extrafanart_name} download failed! ( {extrafanart_url} )")
@@ -327,7 +327,7 @@ async def trailer_download(
         if "trailer" not in download_files and "trailer" not in keep_files:
             # 删除目标文件，删除预告片旧文件夹、新文件夹（deal old file时没删除）
             if os.path.exists(trailer_file_path):
-                delete_file(trailer_file_path)
+                delete_file_sync(trailer_file_path)
             if os.path.exists(trailer_old_folder_path):
                 shutil.rmtree(trailer_old_folder_path, ignore_errors=True)
             if trailer_new_folder_path != trailer_old_folder_path and os.path.exists(trailer_new_folder_path):
@@ -352,8 +352,8 @@ async def trailer_download(
     done_trailer_path = Flags.file_done_dic.get(json_data["number"]).get("trailer")
     if not trailer_name and done_trailer_path and os.path.exists(done_trailer_path):
         if os.path.exists(trailer_file_path):
-            delete_file(trailer_file_path)
-        copy_file(done_trailer_path, trailer_file_path)
+            delete_file_sync(trailer_file_path)
+        copy_file_sync(done_trailer_path, trailer_file_path)
         LogBuffer.log().write(f"\n 🍀 Trailer done! (copy trailer)({get_used_time(start_time)}s)")
         return
 
@@ -382,8 +382,8 @@ async def trailer_download(
                 )
                 signal.show_traceback_log(f"✅ {json_data['number']} trailer done!")
                 if trailer_file_path_temp != trailer_file_path:
-                    move_file(trailer_file_path_temp, trailer_file_path)
-                    delete_file(trailer_file_path_temp)
+                    move_file_sync(trailer_file_path_temp, trailer_file_path)
+                    delete_file_sync(trailer_file_path_temp)
                 done_trailer_path = Flags.file_done_dic.get(json_data["number"]).get("trailer")
                 if not done_trailer_path:
                     Flags.file_done_dic[json_data["number"]].update({"trailer": trailer_file_path})
@@ -401,7 +401,7 @@ async def trailer_download(
                 )
 
         # 删除下载失败的文件
-        delete_file(trailer_file_path_temp)
+        delete_file_sync(trailer_file_path_temp)
         LogBuffer.log().write(f"\n 🟠 Trailer download failed! ({trailer_url}) ")
 
     if os.path.exists(trailer_file_path):  # 使用旧文件
@@ -632,7 +632,7 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
             and os.path.exists(done_thumb_path)
             and split_path(done_thumb_path)[0] == split_path(thumb_final_path)[0]
         ):
-            copy_file(done_thumb_path, thumb_final_path)
+            copy_file_sync(done_thumb_path, thumb_final_path)
             LogBuffer.log().write(f"\n 🍀 Thumb done! (copy cd-thumb)({get_used_time(start_time)}s) ")
             json_data["cover_from"] = "copy cd-thumb"
             json_data["thumb_path"] = thumb_final_path
@@ -665,7 +665,7 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
                 continue
             json_data["cover_from"] = cover_from
             if await download_file_with_filepath(cover_url, thumb_final_path_temp, folder_new_path):
-                cover_size = check_pic(thumb_final_path_temp)
+                cover_size = check_pic_sync(thumb_final_path_temp)
                 if cover_size:
                     if (
                         not cover_from.startswith("Google")
@@ -680,8 +680,8 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
                     ):
                         # 图片下载正常，替换旧的 thumb.jpg
                         if thumb_final_path_temp != thumb_final_path:
-                            move_file(thumb_final_path_temp, thumb_final_path)
-                            delete_file(thumb_final_path_temp)
+                            move_file_sync(thumb_final_path_temp, thumb_final_path)
+                            delete_file_sync(thumb_final_path_temp)
                         if json_data["cd_part"]:
                             dic = {"thumb": thumb_final_path}
                             Flags.file_done_dic[json_data["number"]].update(dic)
@@ -692,7 +692,7 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
                         json_data["thumb_path"] = thumb_final_path
                         return True
                     else:
-                        delete_file(thumb_final_path_temp)
+                        delete_file_sync(thumb_final_path_temp)
                         LogBuffer.log().write(
                             f"\n 🟠 检测到 Thumb 分辨率不对{str(cover_size)}! 已删除 ({cover_from})({get_used_time(start_time)}s)"
                         )
@@ -733,7 +733,7 @@ async def poster_download(json_data: JsonData, folder_new_path: str, poster_fina
     # 不下载poster、不保留poster时，返回
     if "poster" not in download_files and "poster" not in keep_files:
         if poster_path:
-            delete_file(poster_path)
+            delete_file_sync(poster_path)
         return True
 
     # 本地有poster时，且勾选保留旧文件时，不下载
@@ -753,7 +753,7 @@ async def poster_download(json_data: JsonData, folder_new_path: str, poster_fina
             and os.path.exists(done_poster_path)
             and split_path(done_poster_path)[0] == split_path(poster_final_path)[0]
         ):
-            copy_file(done_poster_path, poster_final_path)
+            copy_file_sync(done_poster_path, poster_final_path)
             json_data["poster_from"] = "copy cd-poster"
             json_data["poster_path"] = poster_final_path
             LogBuffer.log().write(f"\n 🍀 Poster done! (copy cd-poster)({get_used_time(start_time)}s)")
@@ -780,7 +780,7 @@ async def poster_download(json_data: JsonData, folder_new_path: str, poster_fina
             if "ignore_youma" in download_files:
                 copy_flag = True
         if copy_flag:
-            copy_file(thumb_path, poster_final_path)
+            copy_file_sync(thumb_path, poster_final_path)
             json_data["poster_marked"] = json_data["thumb_marked"]
             json_data["poster_from"] = "copy thumb"
             json_data["poster_path"] = poster_final_path
@@ -799,7 +799,7 @@ async def poster_download(json_data: JsonData, folder_new_path: str, poster_fina
     if json_data["image_download"]:
         start_time = time.time()
         if await download_file_with_filepath(poster_url, poster_final_path_temp, folder_new_path):
-            poster_size = check_pic(poster_final_path_temp)
+            poster_size = check_pic_sync(poster_final_path_temp)
             if poster_size:
                 if (
                     not poster_from.startswith("Google")
@@ -807,8 +807,8 @@ async def poster_download(json_data: JsonData, folder_new_path: str, poster_fina
                     or "media-amazon.com" in poster_url
                 ):
                     if poster_final_path_temp != poster_final_path:
-                        move_file(poster_final_path_temp, poster_final_path)
-                        delete_file(poster_final_path_temp)
+                        move_file_sync(poster_final_path_temp, poster_final_path)
+                        delete_file_sync(poster_final_path_temp)
                     if json_data["cd_part"]:
                         dic = {"poster": poster_final_path}
                         Flags.file_done_dic[json_data["number"]].update(dic)
@@ -817,7 +817,7 @@ async def poster_download(json_data: JsonData, folder_new_path: str, poster_fina
                     LogBuffer.log().write(f"\n 🍀 Poster done! ({poster_from})({get_used_time(start_time)}s)")
                     return True
                 else:
-                    delete_file(poster_final_path_temp)
+                    delete_file_sync(poster_final_path_temp)
                     LogBuffer.log().write(f"\n 🟠 检测到 Poster 分辨率不对{str(poster_size)}! 已删除 ({poster_from})")
 
     # 判断之前有没有 poster 和 thumb
@@ -842,7 +842,7 @@ async def poster_download(json_data: JsonData, folder_new_path: str, poster_fina
         thumb_path = fanart_path
     if cut_thumb_to_poster(json_data, thumb_path, poster_final_path_temp, image_cut):
         # 裁剪成功，替换旧图
-        move_file(poster_final_path_temp, poster_final_path)
+        move_file_sync(poster_final_path_temp, poster_final_path)
         if json_data["cd_part"]:
             dic = {"poster": poster_final_path}
             Flags.file_done_dic[json_data["number"]].update(dic)
@@ -881,7 +881,7 @@ async def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
     # 不保留不下载时删除返回
     if ",fanart" not in keep_files and ",fanart" not in download_files:
         if fanart_path and os.path.exists(fanart_path):
-            delete_file(fanart_path)
+            delete_file_sync(fanart_path)
         return True
 
     # 保留，并且本地存在 fanart.jpg，不下载返回
@@ -902,8 +902,8 @@ async def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
             and split_path(done_fanart_path)[0] == split_path(fanart_final_path)[0]
         ):
             if fanart_path:
-                delete_file(fanart_path)
-            copy_file(done_fanart_path, fanart_final_path)
+                delete_file_sync(fanart_path)
+            copy_file_sync(done_fanart_path, fanart_final_path)
             json_data["fanart_path"] = fanart_final_path
             LogBuffer.log().write(f"\n 🍀 Fanart done! (copy cd-fanart)({get_used_time(start_time)}s)")
             return True
@@ -911,8 +911,8 @@ async def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
     # 复制thumb
     if thumb_path:
         if fanart_path:
-            delete_file(fanart_path)
-        copy_file(thumb_path, fanart_final_path)
+            delete_file_sync(fanart_path)
+        copy_file_sync(thumb_path, fanart_final_path)
         json_data["fanart_path"] = fanart_final_path
         json_data["fanart_marked"] = json_data["thumb_marked"]
         LogBuffer.log().write(f"\n 🍀 Fanart done! (copy thumb)({get_used_time(start_time)}s)")

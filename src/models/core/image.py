@@ -9,7 +9,7 @@ import traceback
 
 from PIL import Image
 
-from ..base.file import check_pic, move_file, split_path
+from ..base.file import check_pic_sync, move_file_sync, split_path
 from ..base.utils import convert_path, get_used_time
 from ..config.manager import config
 from ..config.resources import resources
@@ -54,7 +54,7 @@ def extrafanart_copy2(json_data: JsonData, folder_new_path: str):
         file_new_name = each.replace("fanart", "")
         file_path = os.path.join(extrafanart_copy_path, each)
         file_new_path = os.path.join(extrafanart_copy_path, file_new_name)
-        move_file(file_path, file_new_path)
+        move_file_sync(file_path, file_new_path)
     LogBuffer.log().write(f"\n 🍀 ExtraFanart_copy done! (copy extrafanart)({get_used_time(start_time)}s)")
 
 
@@ -88,7 +88,7 @@ def extrafanart_extras_copy(json_data: JsonData, folder_new_path: str):
         file_new_name = each.replace("jpg", "mp4")
         file_path = os.path.join(extrafanart_extra_path, each)
         file_new_path = os.path.join(extrafanart_extra_path, file_new_name)
-        move_file(file_path, file_new_path)
+        move_file_sync(file_path, file_new_path)
     LogBuffer.log().write(f"\n 🍀 Extrafanart_extras done! (copy extrafanart)({get_used_time(start_time)}s)")
     return True
 
@@ -179,8 +179,8 @@ def _add_to_pic(
         except Exception:
             signal.show_log_text(traceback.format_exc())
         img_subt.close()
-        if check_pic(temp_pic_path):
-            move_file(temp_pic_path, pic_path)
+        if check_pic_sync(temp_pic_path):
+            move_file_sync(temp_pic_path, pic_path)
 
 
 def add_mark_thread(pic_path: str, mark_list: list[str]):

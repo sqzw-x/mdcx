@@ -7,7 +7,7 @@ from typing import Optional
 
 from PyQt5.QtWidgets import QMessageBox
 
-from ..base.file import copy_file, move_file, read_link, split_path
+from ..base.file import copy_file_sync, move_file_sync, read_link_sync, split_path
 from ..base.utils import convert_path, get_current_time, get_real_time, get_used_time
 from ..config.manager import config, manager
 from ..config.resources import resources
@@ -715,7 +715,7 @@ def _failed_file_info_show(count: str, path: str, error_info: str) -> None:
     folder = os.path.dirname(path)
     info_str = f"{'🔴 ' + count + '.':<3} {path} \n    所在目录: {folder} \n    失败原因: {error_info} \n"
     if os.path.islink(path):
-        real_path = read_link(path)
+        real_path = read_link_sync(path)
         real_folder = os.path.dirname(path)
         info_str = (
             f"{count + '.':<3} {path} \n    指向文件: {real_path} \n    "
@@ -813,10 +813,10 @@ def move_sub(
                 sub_new_path = sub_new_path_chs
         if os.path.exists(sub_old_path) and not os.path.exists(sub_new_path):
             if copy_flag:
-                if not copy_file(sub_old_path, sub_new_path):
+                if not copy_file_sync(sub_old_path, sub_new_path):
                     LogBuffer.log().write("\n 🔴 Sub copy failed!")
                     return
-            elif not move_file(sub_old_path, sub_new_path):
+            elif not move_file_sync(sub_old_path, sub_new_path):
                 LogBuffer.log().write("\n 🔴 Sub move failed!")
                 return
         LogBuffer.log().write("\n 🍀 Sub done!")

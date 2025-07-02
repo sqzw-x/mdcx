@@ -17,7 +17,7 @@ import langid
 import zhconv
 from lxml import etree
 
-from models.base.file import copy_file
+from models.base.file import copy_file_sync
 from models.base.utils import executor, get_used_time
 from models.config.manager import config
 from models.config.manual import ManualConfig
@@ -866,7 +866,7 @@ async def _deal_kodi_actors(gfriends_actor_data, add):
                                             local_file_path = net_pic_path
                                         if not os.path.isdir(vedio_actor_folder):
                                             os.mkdir(vedio_actor_folder)
-                                        copy_file(local_file_path, vedio_actor_path)
+                                        copy_file_sync(local_file_path, vedio_actor_path)
                                         signal.show_log_text(f"✅ {actor_name} 头像已创建！ {vedio_actor_path}")
                                         success.add(each)
                                         break

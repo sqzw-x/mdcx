@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from ..base.file import copy_file, move_file, split_path
+from ..base.file import copy_file_sync, move_file_sync, split_path
 from ..config.manager import config
 from ..signals import signal
 from .file import movie_lists
@@ -44,7 +44,7 @@ def add_del_extras(mode: str):
                     file_new_name = file.replace("jpg", "mp4")
                     file_path = os.path.join(extrafanart_copy_folder_path, file)
                     file_new_path = os.path.join(extrafanart_copy_folder_path, file_new_name)
-                    move_file(file_path, file_new_path)
+                    move_file_sync(file_path, file_new_path)
                 signal.show_log_text(f" {count} new extras: \n  {extrafanart_copy_folder_path}")
                 new_count += 1
             else:
@@ -92,7 +92,7 @@ def add_del_theme_videos(mode: str):
             if not os.path.exists(theme_videos_file_path):
                 if not os.path.exists(theme_videos_folder_path):
                     os.mkdir(theme_videos_folder_path)
-                copy_file(trailer_file_path, theme_videos_file_path)
+                copy_file_sync(trailer_file_path, theme_videos_file_path)
                 signal.show_log_text(f" {count} new theme video: \n  {theme_videos_file_path}")
                 new_count += 1
             else:

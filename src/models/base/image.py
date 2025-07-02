@@ -7,7 +7,7 @@ from PyQt5.QtGui import QImageReader, QPixmap
 
 from ..core.json_data import JsonData, LogBuffer
 from ..signals import signal
-from .file import check_pic, copy_file, delete_file
+from .file import check_pic_sync, copy_file_sync, delete_file_sync
 from .utils import get_used_time
 
 
@@ -39,7 +39,7 @@ def get_pixmap(pic_path: str, poster=True, pic_from=""):
                         h = 220
                 msg = f"{pic_from.title()}: {pic_width}*{pic_height}/{pic_file_size}KB"
                 return [True, pix, msg, w, h]
-        delete_file(pic_path)
+        delete_file_sync(pic_path)
         if poster:
             return [False, "", "封面图损坏", 156, 220]
         return [False, "", "缩略图损坏", 328, 220]
@@ -72,7 +72,7 @@ def cut_thumb_to_poster(
 ):
     start_time = time.time()
     if os.path.exists(poster_path):
-        delete_file(poster_path)
+        delete_file_sync(poster_path)
 
     # 打开图片, 获取图片尺寸
     try:
@@ -96,7 +96,7 @@ def cut_thumb_to_poster(
 
     # 不裁剪
     if image_cut == "no":
-        copy_file(thumb_path, poster_path)
+        copy_file_sync(thumb_path, poster_path)
         LogBuffer.log().write(f"\n 🍀 Poster done! (copy thumb)({get_used_time(start_time)}s)")
         json_data["poster_from"] = "copy thumb"
         img.close()
@@ -131,7 +131,7 @@ def cut_thumb_to_poster(
         img_new_png = img_new.crop((ax, ay, bx, by))
         img_new_png.save(poster_path, quality=95, subsampling=0)
         img.close()
-        if check_pic(poster_path):
+        if check_pic_sync(poster_path):
             LogBuffer.log().write(f"\n 🍀 Poster done! ({json_data['poster_from']})({get_used_time(start_time)}s)")
             return True
         LogBuffer.log().write(f"\n 🥺 Poster cut failed! ({json_data['poster_from']})({get_used_time(start_time)}s)")

@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import (
     QTreeWidgetItem,
 )
 
-from models.base.file import _open_file_thread, delete_file, split_path
+from models.base.file import delete_file_sync, open_file_thread, split_path
 from models.base.image import get_pixmap
 from models.base.path import get_path
 from models.base.utils import _async_raise, add_html, convert_path, get_current_time, get_used_time, kill_a_thread
@@ -1079,7 +1079,7 @@ class MyMAinWindow(QMainWindow):
             #     self.setWindowFlags(self.windowFlags() | Qt.WindowDoesNotAcceptFocus)
             #     self.show()
             # 启动线程打开文件
-            t = threading.Thread(target=_open_file_thread, args=(self.file_main_open_path, False))
+            t = threading.Thread(target=open_file_thread, args=(self.file_main_open_path, False))
             t.start()
 
     def main_open_folder_click(self):
@@ -1096,7 +1096,7 @@ class MyMAinWindow(QMainWindow):
             #     self.setWindowFlags(self.windowFlags() | Qt.WindowDoesNotAcceptFocus)
             #     self.show()
             # 启动线程打开文件
-            t = threading.Thread(target=_open_file_thread, args=(self.file_main_open_path, True))
+            t = threading.Thread(target=open_file_thread, args=(self.file_main_open_path, True))
             t.start()
 
     def main_open_nfo_click(self):
@@ -1176,7 +1176,7 @@ class MyMAinWindow(QMainWindow):
             reply = box.exec()
             if reply != QMessageBox.Yes:
                 return
-            delete_file(file_path)
+            delete_file_sync(file_path)
             signal.show_scrape_info(f"💡 已删除文件！{get_current_time()}")
 
     def main_del_folder_click(self):

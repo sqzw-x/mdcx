@@ -1,6 +1,6 @@
 import os
 
-from ..base.file import copy_file, move_file, split_path
+from ..base.file import copy_file_sync, move_file_sync, split_path
 from ..config.manager import config
 from ..entity.enums import FileMode
 from ..signals import signal
@@ -51,7 +51,7 @@ def add_sub_for_all_video():
                     sub_new_path = os.path.join(folder_old_path, sub_file_name)
 
                     if os.path.exists(sub_path):
-                        copy_file(sub_path, sub_new_path)
+                        copy_file_sync(sub_path, sub_new_path)
                         signal.show_log_text(f" 🍀 字幕文件 '{sub_file_name}' 成功复制! ")
                         new_sub_movie_list.append(movie)
                         add_succ = True
@@ -63,14 +63,14 @@ def add_sub_for_all_video():
                 sub_new_path = os.path.join(folder_old_path, (file_name + ".chs" + sub_type))
                 if config.subtitle_add_chs:
                     if ".chs" not in sub_old_path and not os.path.exists(sub_new_path):
-                        move_file(sub_old_path, sub_new_path)
+                        move_file_sync(sub_old_path, sub_new_path)
                         signal.show_log_text(
                             f" 🍀 字幕文件: '{file_name + sub_type}' 已被重命名为: '{file_name + '.chs' + sub_type}' "
                         )
                 else:
                     sub_old_path_no_chs = sub_old_path.replace(".chs", "")
                     if ".chs" in sub_old_path and not os.path.exists(sub_old_path_no_chs):
-                        move_file(sub_old_path, sub_old_path_no_chs)
+                        move_file_sync(sub_old_path, sub_old_path_no_chs)
                         signal.show_log_text(
                             f" 🍀 字幕文件: '{file_name + sub_type}' 已被重命名为: '{split_path(sub_old_path_no_chs)[1]}' "
                         )
