@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import asyncio
 import random
 import re
 import time  # yapf: disable # NOQA: E402
@@ -227,8 +228,7 @@ async def main(
     if javdb_time > 0 and sleep:
         rr = random.randint(int(javdb_time / 2), javdb_time)
         LogBuffer.info().write(f"\n    🌐 javdb (⏱ {rr}S)")
-        for i in range(rr):  # 检查是否手动停止刮削
-            time.sleep(1)
+        await asyncio.sleep(rr)
     else:
         LogBuffer.info().write("\n    🌐 javdb")
 

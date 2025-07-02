@@ -1946,9 +1946,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_save_config_clicked()
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=update_emby_actor_info)
-            self.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(update_emby_actor_info())
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -1957,9 +1955,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_save_config_clicked()
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=update_emby_actor_photo)
-            self.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(update_emby_actor_photo())
         except Exception:
             signal.show_log_text(traceback.format_exc())
 

@@ -2,6 +2,7 @@
 补全emby信息及头像
 """
 
+import asyncio
 import os
 import random
 import re
@@ -57,7 +58,7 @@ async def creat_kodi_actors(add: bool):
     signal.show_log_text("================================================================================")
 
 
-def update_emby_actor_info():
+async def update_emby_actor_info():
     signal.change_buttons_status.emit()
     start_time = time.time()
     emby_on = config.emby_on
@@ -91,12 +92,11 @@ def update_emby_actor_info():
     )
 
     if "actor_info_photo" in emby_on:
-        for i in range(5):
-            signal.show_log_text(f"{5 - i} 秒后开始补全演员头像头像...")
-            time.sleep(1)
+        signal.show_log_text("5 秒后开始补全演员头像头像...")
+        await asyncio.sleep(5)
         signal.show_log_text("\n")
         signal.change_buttons_status.emit()
-        update_emby_actor_photo()
+        await update_emby_actor_photo()
         signal.reset_buttons_status.emit()
     else:
         signal.reset_buttons_status.emit()

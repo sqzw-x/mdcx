@@ -683,7 +683,7 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
         count = 5
         for i in range(count):
             signal.show_log_text(f" {count - i} 秒后将自动退出！")
-            time.sleep(1)
+            await asyncio.sleep(1)
         signal.exec_exit_app.emit()
 
 
