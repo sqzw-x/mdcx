@@ -128,6 +128,7 @@ class AsyncWebClient:
                     if resp.status_code >= 300 and not (resp.status_code == 302 and resp.headers.get("Location")):
                         error_msg = f"HTTP {resp.status_code}"
                     else:
+                        self.log_fn(f"✅ {method} {url} 成功")
                         return resp, ""
                 except httpx.TimeoutException:
                     error_msg = "超时"
