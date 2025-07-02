@@ -683,7 +683,7 @@ async def _call_crawlers(
             return "break"
 
     res = await asyncio.gather(*[_task(website) for website in website_list])
-    for r in res:
+    for r in res:  # todo cancel if needed
         if r == "break":
             break
         elif r == "continue":
