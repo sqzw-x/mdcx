@@ -19,7 +19,7 @@ from ..base.number import (
 )
 from ..base.path import showFilePath
 from ..base.utils import convert_path, get_current_time, get_used_time
-from ..config.consts import IS_WINDOWS
+from ..config.consts import IS_MAC, IS_WINDOWS
 from ..config.manager import config
 from ..config.resources import resources
 from ..entity.enums import FileMode
