@@ -124,9 +124,6 @@ def open_file_thread(
             subprocess.Popen(["xdg-open", file_path])
 
 
-# 异步版本的函数
-
-
 async def delete_file_async(file_path: str):
     """异步删除文件"""
     try:

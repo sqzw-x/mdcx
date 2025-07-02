@@ -706,7 +706,7 @@ class MyMAinWindow(QMainWindow):
             if reply != QMessageBox.Yes:
                 return
         if self.Ui.pushButton_start_cap.text() == "■ 停止":
-            save_success_list()  # 保存成功列表
+            config.executor.run(save_success_list())
             Flags.rest_time_convert_ = Flags.rest_time_convert
             Flags.rest_time_convert = 0
             Flags.rest_sleepping = False
@@ -986,30 +986,12 @@ class MyMAinWindow(QMainWindow):
                 poster_from = json_data["poster_from"]
                 cover_from = json_data["cover_from"]
 
-                self.set_pixmap_thread(poster_path, thumb_path, poster_from, cover_from)
+                config.executor.submit(self._set_pixmap(poster_path, thumb_path, poster_from, cover_from))
         except Exception:
             if not signal.stop:
                 signal.show_traceback_log(traceback.format_exc())
 
-    def set_pixmap_thread(
-        self,
-        poster_path="",
-        thumb_path="",
-        poster_from="",
-        cover_from="",
-    ):
-        t = threading.Thread(
-            target=self._set_pixmap,
-            args=(
-                poster_path,
-                thumb_path,
-                poster_from,
-                cover_from,
-            ),
-        )
-        t.start()
-
-    def _set_pixmap(
+    async def _set_pixmap(
         self,
         poster_path="",
         thumb_path="",
@@ -1019,9 +1001,9 @@ class MyMAinWindow(QMainWindow):
         poster_pix = [False, "", "暂无封面图", 156, 220]
         thumb_pix = [False, "", "暂无缩略图", 328, 220]
         if os.path.exists(poster_path):
-            poster_pix = get_pixmap(poster_path, poster=True, pic_from=poster_from)
+            poster_pix = await get_pixmap(poster_path, poster=True, pic_from=poster_from)
         if os.path.exists(thumb_path):
-            thumb_pix = get_pixmap(thumb_path, poster=False, pic_from=cover_from)
+            thumb_pix = await get_pixmap(thumb_path, poster=False, pic_from=cover_from)
 
         # self.Ui.label_poster_size.setText(poster_pix[2] + '  ' + thumb_pix[2])
         poster_text = poster_pix[2] if poster_pix[2] != "暂无封面图" else ""
@@ -1306,7 +1288,7 @@ class MyMAinWindow(QMainWindow):
             json_data["trailer"] = self.Ui.lineEdit_nfo_trailer.text()
             json_data["website"] = self.Ui.lineEdit_nfo_website.text()
             json_data["country"] = self.Ui.comboBox_nfo.currentText()
-            if write_nfo(json_data, nfo_path, nfo_folder, file_path, edit_mode=True):
+            if config.executor.run(write_nfo(json_data, nfo_path, nfo_folder, file_path, edit_mode=True)):
                 self.Ui.label_save_tips.setText(f"已保存! {get_current_time()}")
                 signal.add_label_info(json_data)
             else:
@@ -1358,7 +1340,7 @@ class MyMAinWindow(QMainWindow):
         reply = box.exec()
         if reply == QMessageBox.Yes:
             Flags.success_list.clear()
-            save_success_list()
+            config.executor.run(save_success_list())
             self.Ui.widget_show_success.hide()
 
     def pushButton_view_success_file_clicked(self):
@@ -1544,11 +1526,7 @@ class MyMAinWindow(QMainWindow):
             self.pushButton_save_config_clicked()
 
         try:
-            t = threading.Thread(
-                target=newtdisk_creat_symlink, args=(bool(self.Ui.checkBox_copy_netdisk_nfo.isChecked()),)
-            )
-            self.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(newtdisk_creat_symlink(self.Ui.checkBox_copy_netdisk_nfo.isChecked()))
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
@@ -1675,7 +1653,7 @@ class MyMAinWindow(QMainWindow):
                 if es[-1] != "/":  # 路径尾部添加“/”，方便后面move_list查找时匹配路径
                     es += "/"
                 escape_folder_new_list.append(es)
-        movie_list = movie_lists(escape_folder_new_list, all_type, movie_path)
+        movie_list = config.executor.run(movie_lists(escape_folder_new_list, all_type, movie_path))
         if not movie_list:
             signal.show_log_text("No movie found!")
             signal.show_log_text("================================================================================")
@@ -1866,9 +1844,7 @@ class MyMAinWindow(QMainWindow):
             self.pushButton_save_config_clicked()
         self.pushButton_show_log_clicked()
         try:
-            t = threading.Thread(target=check_and_clean_files)
-            self.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(check_and_clean_files())
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
@@ -1877,9 +1853,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_add_sub_for_all_video_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=add_sub_for_all_video)
-            self.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_sub_for_all_video())
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
@@ -1889,16 +1863,14 @@ class MyMAinWindow(QMainWindow):
     def pushButton_add_all_extras_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=add_del_extras, args=("add",))
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_del_extras("add"))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
     def pushButton_del_all_extras_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=add_del_extras, args=("del",))
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_del_extras("del"))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -1907,8 +1879,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         self.pushButton_save_config_clicked()
         try:
-            t = threading.Thread(target=add_del_extrafanart_copy, args=("add",))
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_del_extrafanart_copy("add"))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -1916,8 +1887,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         self.pushButton_save_config_clicked()
         try:
-            t = threading.Thread(target=add_del_extrafanart_copy, args=("del",))
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_del_extrafanart_copy("del"))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -1925,16 +1895,14 @@ class MyMAinWindow(QMainWindow):
     def pushButton_add_all_theme_videos_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=add_del_theme_videos, args=("add",))
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_del_theme_videos("add"))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
     def pushButton_del_all_theme_videos_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=add_del_theme_videos, args=("del",))
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_del_theme_videos("del"))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 

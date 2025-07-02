@@ -7,7 +7,7 @@ from typing import Optional
 
 from PyQt5.QtWidgets import QMessageBox
 
-from ..base.file import copy_file_sync, move_file_sync, read_link_sync, split_path
+from ..base.file import copy_file_async, move_file_async, read_link_async, split_path
 from ..base.utils import convert_path, get_current_time, get_real_time, get_used_time
 from ..config.manager import config, manager
 from ..config.resources import resources
@@ -18,7 +18,6 @@ from ..tools.emby_actor_info import creat_kodi_actors
 from .crawler import crawl
 from .file import (
     _clean_empty_fodlers,
-    _pic_some_deal,
     check_file,
     copy_trailer_to_theme_videos,
     creat_folder,
@@ -32,6 +31,7 @@ from .file import (
     move_other_file,
     move_torrent,
     newtdisk_creat_symlink,
+    pic_some_deal,
     save_success_list,
 )
 from .flags import Flags
@@ -74,7 +74,7 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
     json_data["failed_folder"] = failed_folder
 
     # 检查文件大小
-    result, json_data = check_file(json_data, file_path, file_escape_size)
+    result, json_data = await check_file(json_data, file_path, file_escape_size)
     if not result:
         return False, json_data
 
@@ -91,7 +91,7 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
                 show_data_result(json_data, start_time)
                 show_movie_info(json_data)
                 LogBuffer.log().write(f"\n 🙉 [Movie] {file_path}")
-                save_success_list(file_path, file_path)  # 保存成功列表
+                await save_success_list(file_path, file_path)  # 保存成功列表
                 return True, json_data
 
             # 读取模式要不要下载
@@ -182,7 +182,7 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
         replace_word(json_data)
 
     # 更新视频分辨率
-    get_video_size(json_data, file_path)
+    await get_video_size(json_data, file_path)
 
     # 显示json_data内容
     show_movie_info(json_data)
@@ -217,7 +217,7 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
             return False, json_data
 
     # 判断输出文件夹和文件是否已存在，如无则创建输出文件夹
-    if not creat_folder(
+    if not await creat_folder(
         json_data,
         folder_new_path,
         file_path,
@@ -244,9 +244,9 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
     # 视频模式（仅根据刮削数据把电影命名为番号并分类到对应目录名称的文件夹下）
     if config.main_mode == 2:
         # 移动文件
-        if move_movie(json_data, file_path, file_new_path):
+        if await move_movie(json_data, file_path, file_new_path):
             if "sort_del" in config.switch_on:
-                deal_old_files(
+                await deal_old_files(
                     json_data,
                     folder_old_path,
                     folder_new_path,
@@ -261,14 +261,14 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
                     thumb_final_path,
                     fanart_final_path,
                 )  # 清理旧的thumb、poster、fanart、nfo
-            save_success_list(file_path, file_new_path)  # 保存成功列表
+            await save_success_list(file_path, file_new_path)  # 保存成功列表
             return True, json_data
         else:
             # 返回MDCx1_1main, 继续处理下一个文件
             return False, json_data
 
     # 清理旧的thumb、poster、fanart、extrafanart、nfo
-    pic_final_catched, single_folder_catched = deal_old_files(
+    pic_final_catched, single_folder_catched = await deal_old_files(
         json_data,
         folder_old_path,
         folder_new_path,
@@ -299,41 +299,41 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
                 return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
 
             # 清理冗余图片
-            _pic_some_deal(json_data, thumb_final_path, fanart_final_path)
+            await pic_some_deal(json_data, thumb_final_path, fanart_final_path)
 
             # 加水印
-            add_mark(json_data, json_data["poster_marked"], json_data["thumb_marked"], json_data["fanart_marked"])
+            await add_mark(json_data, json_data["poster_marked"], json_data["thumb_marked"], json_data["fanart_marked"])
 
             # 下载剧照和剧照副本
             if single_folder_catched:
                 await extrafanart_download(json_data, folder_new_path)
-                extrafanart_copy2(json_data, folder_new_path)
-                extrafanart_extras_copy(json_data, folder_new_path)
+                await extrafanart_copy2(json_data, folder_new_path)
+                await extrafanart_extras_copy(json_data, folder_new_path)
 
             # 下载trailer、复制主题视频
             # 因为 trailer也有带文件名，不带文件名两种情况，不能使用pic_final_catched。比如图片不带文件名，trailer带文件名这种场景需要支持每个分集去下载trailer
             await trailer_download(json_data, folder_new_path, folder_old_path, naming_rule)
-            copy_trailer_to_theme_videos(json_data, folder_new_path, naming_rule)
+            await copy_trailer_to_theme_videos(json_data, folder_new_path, naming_rule)
 
     # 生成nfo文件
-    write_nfo(json_data, nfo_new_path, folder_new_path, file_path)
+    await write_nfo(json_data, nfo_new_path, folder_new_path, file_path)
 
     # 移动字幕、种子、bif、trailer、其他文件
-    move_sub(json_data, folder_old_path, folder_new_path, file_name, sub_list, naming_rule)
-    move_torrent(json_data, folder_old_path, folder_new_path, file_name, movie_number, naming_rule)
-    move_bif(json_data, folder_old_path, folder_new_path, file_name, naming_rule)
+    await move_sub(json_data, folder_old_path, folder_new_path, file_name, sub_list, naming_rule)
+    await move_torrent(json_data, folder_old_path, folder_new_path, file_name, movie_number, naming_rule)
+    await move_bif(json_data, folder_old_path, folder_new_path, file_name, naming_rule)
     # self.move_trailer_video(json_data, folder_old_path, folder_new_path, file_name, naming_rule)
-    move_other_file(json_data, folder_old_path, folder_new_path, file_name, naming_rule)
+    await move_other_file(json_data, folder_old_path, folder_new_path, file_name, naming_rule)
 
     # 移动文件
-    if not move_movie(json_data, file_path, file_new_path):
+    if not await move_movie(json_data, file_path, file_new_path):
         return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
-    save_success_list(file_path, file_new_path)  # 保存成功列表
+    await save_success_list(file_path, file_new_path)  # 保存成功列表
 
     # 创建软链接及复制文件
     if config.auto_link:
         target_dir = os.path.join(config.localdisk_path, os.path.relpath(folder_new_path, success_folder))
-        newtdisk_creat_symlink("copy_netdisk_nfo" in config.switch_on, folder_new_path, target_dir)
+        await newtdisk_creat_symlink("copy_netdisk_nfo" in config.switch_on, folder_new_path, target_dir)
 
     # json添加封面缩略图路径
     # json_data['number'] = movie_number
@@ -395,7 +395,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     file_mode = Flags.file_mode
 
     # 获取文件基础信息
-    file_info = get_file_info(file_path)
+    file_info = await get_file_info(file_path)
     json_data, movie_number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = file_info
 
     # 显示刮削信息
@@ -460,10 +460,10 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
                     LogBuffer.log().write(
                         "\n 🔴 该问题为权限问题：请尝试以管理员身份运行，同时关闭其他正在运行的Python脚本！"
                     )
-            fail_file_path = move_file_to_failed_folder(json_data, file_path, folder_old_path)
+            fail_file_path = await move_file_to_failed_folder(json_data, file_path, folder_old_path)
             Flags.failed_list.append([fail_file_path, LogBuffer.error().get()])
             Flags.failed_file_list.append(fail_file_path)
-            _failed_file_info_show(str(Flags.fail_count), fail_file_path, LogBuffer.error().get())
+            await _failed_file_info_show(str(Flags.fail_count), fail_file_path, LogBuffer.error().get())
             signal.view_failed_list_settext.emit(f"失败 {Flags.fail_count}")
     except Exception as e:
         _check_stop(file_name_temp)
@@ -586,10 +586,10 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
     # 获取待刮削文件列表的相关信息
     if not movie_list:
         if config.scrape_softlink_path:
-            newtdisk_creat_symlink("copy_netdisk_nfo" in config.switch_on, movie_path, softlink_path)
+            await newtdisk_creat_symlink("copy_netdisk_nfo" in config.switch_on, movie_path, softlink_path)
             movie_path = softlink_path
         signal.show_log_text("\n ⏰ Start time: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-        movie_list = get_movie_list(file_mode, movie_path, escape_folder_list)
+        movie_list = await get_movie_list(file_mode, movie_path, escape_folder_list)
     else:
         signal.show_log_text("\n ⏰ Start time: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     Flags.remain_list = movie_list
@@ -629,12 +629,12 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
         # 异步并发
         await asyncio.gather(*[_scrape_exec_thread(task) for task in task_list])
         signal.label_result.emit(f" 刮削中：0 成功：{Flags.succ_count} 失败：{Flags.fail_count}")
-        save_success_list()  # 保存成功列表
+        await save_success_list()  # 保存成功列表
         if signal.stop:
             return
 
     signal.show_log_text("================================================================================")
-    _clean_empty_fodlers(movie_path, file_mode)
+    await _clean_empty_fodlers(movie_path, file_mode)
     end_time = time.time()
     used_time = str(round((end_time - Flags.start_time), 2))
     if count_all:
@@ -711,11 +711,11 @@ def _check_stop(file_name_temp: str) -> None:
         raise Exception("手动停止刮削")
 
 
-def _failed_file_info_show(count: str, path: str, error_info: str) -> None:
+async def _failed_file_info_show(count: str, path: str, error_info: str) -> None:
     folder = os.path.dirname(path)
     info_str = f"{'🔴 ' + count + '.':<3} {path} \n    所在目录: {folder} \n    失败原因: {error_info} \n"
     if os.path.islink(path):
-        real_path = read_link_sync(path)
+        real_path = await read_link_async(path)
         real_folder = os.path.dirname(path)
         info_str = (
             f"{count + '.':<3} {path} \n    指向文件: {real_path} \n    "
@@ -777,7 +777,7 @@ def again_search() -> None:
     start_new_scrape(FileMode.Again, new_movie_list)
 
 
-def move_sub(
+async def move_sub(
     json_data: JsonData,
     folder_old_path: str,
     folder_new_path: str,
@@ -813,10 +813,10 @@ def move_sub(
                 sub_new_path = sub_new_path_chs
         if os.path.exists(sub_old_path) and not os.path.exists(sub_new_path):
             if copy_flag:
-                if not copy_file_sync(sub_old_path, sub_new_path):
+                if not await copy_file_async(sub_old_path, sub_new_path):
                     LogBuffer.log().write("\n 🔴 Sub copy failed!")
                     return
-            elif not move_file_sync(sub_old_path, sub_new_path):
+            elif not await move_file_async(sub_old_path, sub_new_path):
                 LogBuffer.log().write("\n 🔴 Sub move failed!")
                 return
         LogBuffer.log().write("\n 🍀 Sub done!")

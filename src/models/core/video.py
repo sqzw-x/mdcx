@@ -1,14 +1,14 @@
 import os
 import shutil
 
-from ..base.file import copy_file_sync, move_file_sync, split_path
+from ..base.file import copy_file_async, move_file_async, split_path
 from ..config.manager import config
 from ..signals import signal
 from .file import movie_lists
 from .utils import get_movie_path_setting
 
 
-def add_del_extras(mode: str):
+async def add_del_extras(mode: str):
     """
     添加/删除剧照
     """
@@ -19,7 +19,7 @@ def add_del_extras(mode: str):
     )
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 Checking all videos, Please wait...")
     movie_type = config.media_type
-    movie_list = movie_lists("", movie_type, movie_path)  # 获取所有需要刮削的影片列表
+    movie_list = await movie_lists("", movie_type, movie_path)  # 获取所有需要刮削的影片列表
 
     extrafanart_folder_path_list = []
     for movie in movie_list:
@@ -44,7 +44,7 @@ def add_del_extras(mode: str):
                     file_new_name = file.replace("jpg", "mp4")
                     file_path = os.path.join(extrafanart_copy_folder_path, file)
                     file_new_path = os.path.join(extrafanart_copy_folder_path, file_new_name)
-                    move_file_sync(file_path, file_new_path)
+                    await move_file_async(file_path, file_new_path)
                 signal.show_log_text(f" {count} new extras: \n  {extrafanart_copy_folder_path}")
                 new_count += 1
             else:
@@ -59,7 +59,7 @@ def add_del_extras(mode: str):
     signal.show_log_text("================================================================================")
 
 
-def add_del_theme_videos(mode: str):
+async def add_del_theme_videos(mode: str):
     signal.show_log_text(f"Start {mode} theme videos! \n")
 
     movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = (
@@ -67,7 +67,7 @@ def add_del_theme_videos(mode: str):
     )
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 Checking all videos, Please wait...")
     movie_type = config.media_type
-    movie_list = movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
+    movie_list = await movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
 
     theme_videos_folder_path_dic = {}
     for movie in movie_list:
@@ -92,7 +92,7 @@ def add_del_theme_videos(mode: str):
             if not os.path.exists(theme_videos_file_path):
                 if not os.path.exists(theme_videos_folder_path):
                     os.mkdir(theme_videos_folder_path)
-                copy_file_sync(trailer_file_path, theme_videos_file_path)
+                await copy_file_async(trailer_file_path, theme_videos_file_path)
                 signal.show_log_text(f" {count} new theme video: \n  {theme_videos_file_path}")
                 new_count += 1
             else:

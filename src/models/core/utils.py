@@ -13,7 +13,7 @@ import traceback
 import unicodedata
 from typing import Optional
 
-from ..base.file import read_link_sync, split_path
+from ..base.file import read_link_async, split_path
 from ..base.number import get_number_letters
 from ..base.path import get_path
 from ..base.utils import convert_path, get_used_time
@@ -115,14 +115,14 @@ def _get_video_metadata_ffmpeg(file_path: str) -> tuple[int, str]:
 _get_video_metadata = _get_video_metadata_opencv if has_opencv else _get_video_metadata_ffmpeg
 
 
-def get_video_size(json_data: JsonData, file_path: str):
+async def get_video_size(json_data: JsonData, file_path: str):
     # 获取本地分辨率 同时获取视频编码格式
     definition = ""
     height = 0
     hd_get = config.hd_get
     if os.path.islink(file_path):
         if "symlink_definition" in config.no_escape:
-            file_path = read_link_sync(file_path)
+            file_path = await read_link_async(file_path)
         else:
             hd_get = "path"
     if hd_get == "video":

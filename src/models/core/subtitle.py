@@ -1,6 +1,6 @@
 import os
 
-from ..base.file import copy_file_sync, move_file_sync, split_path
+from ..base.file import copy_file_async, move_file_async, split_path
 from ..config.manager import config
 from ..entity.enums import FileMode
 from ..signals import signal
@@ -9,7 +9,7 @@ from .scraper import start_new_scrape
 from .utils import get_movie_path_setting
 
 
-def add_sub_for_all_video():
+async def add_sub_for_all_video():
     signal.change_buttons_status.emit()
     sub_add = True
     signal.show_log_text("开始检查无字幕视频并为其添加字幕！\n")
@@ -27,14 +27,14 @@ def add_sub_for_all_video():
     else:
         signal.show_log_text(" 如果字幕文件名以 .chs 结尾，将被自动删除！\n")
     movie_type = config.media_type
-    movie_list = movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
+    movie_list = await movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
     sub_type_list = config.sub_type.split("|")  # 本地字幕文件后缀
 
     add_count = 0
     no_sub_count = 0
     new_sub_movie_list = []
     for movie in movie_list:
-        file_info = get_file_info(movie, copy_sub=False)
+        file_info = await get_file_info(movie, copy_sub=False)
         json_data, number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = file_info
         has_sub = json_data["has_sub"]  # 视频中文字幕标识
         if not has_sub:
@@ -51,7 +51,7 @@ def add_sub_for_all_video():
                     sub_new_path = os.path.join(folder_old_path, sub_file_name)
 
                     if os.path.exists(sub_path):
-                        copy_file_sync(sub_path, sub_new_path)
+                        await copy_file_async(sub_path, sub_new_path)
                         signal.show_log_text(f" 🍀 字幕文件 '{sub_file_name}' 成功复制! ")
                         new_sub_movie_list.append(movie)
                         add_succ = True
@@ -63,14 +63,14 @@ def add_sub_for_all_video():
                 sub_new_path = os.path.join(folder_old_path, (file_name + ".chs" + sub_type))
                 if config.subtitle_add_chs:
                     if ".chs" not in sub_old_path and not os.path.exists(sub_new_path):
-                        move_file_sync(sub_old_path, sub_new_path)
+                        await move_file_async(sub_old_path, sub_new_path)
                         signal.show_log_text(
                             f" 🍀 字幕文件: '{file_name + sub_type}' 已被重命名为: '{file_name + '.chs' + sub_type}' "
                         )
                 else:
                     sub_old_path_no_chs = sub_old_path.replace(".chs", "")
                     if ".chs" in sub_old_path and not os.path.exists(sub_old_path_no_chs):
-                        move_file_sync(sub_old_path, sub_old_path_no_chs)
+                        await move_file_async(sub_old_path, sub_old_path_no_chs)
                         signal.show_log_text(
                             f" 🍀 字幕文件: '{file_name + sub_type}' 已被重命名为: '{split_path(sub_old_path_no_chs)[1]}' "
                         )

@@ -226,7 +226,7 @@ class CutWindow(QDialog):
                     sub_list,
                     file_show_name,
                     file_show_path,
-                ) = models.core.file.get_file_info(temp_path, copy_sub=False)
+                ) = config.executor.run(models.core.file.get_file_info(temp_path, copy_sub=False))
 
             self.setWindowTitle(json_data.get("number") + " 封面图片裁剪")  # 设置窗口标题
 

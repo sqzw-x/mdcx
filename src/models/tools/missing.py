@@ -209,7 +209,7 @@ async def check_missing_number(actor_flag):
         )
         all_movie_list = []
         for i in new_movie_path_list:
-            movie_list = movie_lists([""], movie_type, i)  # 获取所有需要刮削的影片列表
+            movie_list = await movie_lists([""], movie_type, i)  # 获取所有需要刮削的影片列表
             all_movie_list.extend(movie_list)
         signal.show_log_text(f"🎉 获取完毕！共找到视频数量（{len(all_movie_list)}）({get_used_time(start_time)}s)")
 
@@ -256,7 +256,7 @@ async def check_missing_number(actor_flag):
                         sub_list,
                         file_show_name,
                         file_show_path,
-                    ) = get_file_info(movie_path, copy_sub=False)
+                    ) = await get_file_info(movie_path, copy_sub=False)
                     has_sub = json_data_temp["has_sub"]  # 视频中文字幕标识
                 cn_word_icon = "🀄️" if has_sub else ""
                 signal.show_log_text(f"   发现新番号：{number:<10} {cn_word_icon}")
