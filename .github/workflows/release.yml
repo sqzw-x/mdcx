@@ -53,7 +53,7 @@ jobs:
         run: |
           # 删除旧的daily_release
           echo "Deleting old daily release..."
-          gh release delete daily_release --yes || echo "No previous daily release found."
+          gh release delete daily_release --cleanup-tag --yes || echo "No previous daily release found."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -61,7 +61,7 @@ jobs:
         if: ${{ env.IS_DEV == 'true' }}
         run: |
           echo "Deleting old dev release..."
-          gh release delete alpha --yes || echo "No previous dev release found."
+          gh release delete alpha --cleanup-tag --yes || echo "No previous dev release found."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
