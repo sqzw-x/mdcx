@@ -627,7 +627,7 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
                 await _scrape_exec_thread(task)
 
         # 异步并发
-        await asyncio.gather(*[_scrape_exec_thread(task) for task in task_list])
+        await asyncio.gather(*[limited_scrape_exec_thread(task) for task in task_list])
         signal.label_result.emit(f" 刮削中：0 成功：{Flags.succ_count} 失败：{Flags.fail_count}")
         await save_success_list()  # 保存成功列表
         if signal.stop:
