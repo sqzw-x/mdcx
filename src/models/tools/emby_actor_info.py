@@ -20,7 +20,7 @@ import zhconv
 from lxml import etree
 
 from models.base.file import copy_file_async
-from models.base.utils import executor, get_used_time
+from models.base.utils import get_used_time
 from models.config.manager import config
 from models.config.manual import ManualConfig
 from models.config.resources import resources
@@ -68,7 +68,7 @@ async def update_emby_actor_info():
     signal.show_log_text(f"👩🏻 开始补全 {server_name} 演员信息...")
 
     actor_list = _get_emby_actor_list()
-    futures = []
+    tasks = []
 
     for i, actor in enumerate(actor_list):
         actor_name = actor.get("Name")
@@ -76,14 +76,14 @@ async def update_emby_actor_info():
         if re.search(r"[ .·・-]", actor_name):
             signal.show_log_text(f"🔍 {actor_name}: 名字含有空格等分隔符，识别为非女优，跳过！")
             continue
-        future = executor.submit(_process_actor_async(actor, emby_on))
-        futures.append(future)
+        task = asyncio.create_task(_process_actor_async(actor, emby_on))
+        tasks.append(task)
 
     db = 0
     wiki = 0
     updated = 0
-    for future in futures:
-        flag, msg = future.result()
+    for task in asyncio.as_completed(tasks):
+        flag, msg = await task
         updated += flag != 0
         wiki += flag & 1
         db += flag >> 1
