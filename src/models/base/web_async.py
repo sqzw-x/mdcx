@@ -2,6 +2,7 @@ import asyncio
 from io import BytesIO
 from typing import Any, Callable, Literal, Optional
 
+import aiofiles
 import httpx
 from aiolimiter import AsyncLimiter
 from PIL import Image
@@ -302,8 +303,8 @@ class AsyncWebClient:
             return False
         if not webp:
             try:
-                with open(file_path, "wb") as f:
-                    f.write(content)
+                async with aiofiles.open(file_path, "wb") as f:
+                    await f.write(content)
                 return True
             except Exception as e:
                 self.log_fn(f"🔴 文件写入失败: {url} {file_path} {str(e)}")
@@ -331,8 +332,8 @@ class AsyncWebClient:
 
         # 先创建文件并预分配空间
         try:
-            with open(file_path, "wb") as f:
-                f.truncate(file_size)
+            async with aiofiles.open(file_path, "wb") as f:
+                await f.truncate(file_size)
         except Exception as e:
             self.log_fn(f"🔴 文件创建失败: {url} {str(e)}")
             return False
@@ -378,7 +379,7 @@ class AsyncWebClient:
             if res is None:
                 return error
         # 写入文件
-        with open(file_path, "rb+") as fp:
-            fp.seek(start)
-            fp.write(res)
+        async with aiofiles.open(file_path, "rb+") as fp:
+            await fp.seek(start)
+            await fp.write(res)
         return ""

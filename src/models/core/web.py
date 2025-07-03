@@ -9,8 +9,11 @@ import shutil
 import time
 import traceback
 import urllib.parse
+from asyncio import to_thread
 from typing import Optional
 
+import aiofiles
+import aiofiles.os
 from lxml import etree
 
 from ..base.file import copy_file_async, delete_file_async, move_file_async, split_path
@@ -87,8 +90,8 @@ async def download_file_with_filepath(
     if not url:
         return False
 
-    if not os.path.exists(folder_new_path):
-        os.makedirs(folder_new_path)
+    if not await aiofiles.os.path.exists(folder_new_path):
+        await aiofiles.os.makedirs(folder_new_path)
     try:
         if await config.async_client.download(url, file_path):
             return True
@@ -313,8 +316,8 @@ async def trailer_download(
         # 不下载不保留时删除返回
         if "trailer" not in download_files and "trailer" not in keep_files:
             # 删除目标文件夹即可，其他文件夹和文件已经删除了
-            if os.path.exists(trailer_folder_path):
-                shutil.rmtree(trailer_folder_path, ignore_errors=True)
+            if await aiofiles.os.path.exists(trailer_folder_path):
+                await to_thread(shutil.rmtree, trailer_folder_path, ignore_errors=True)
             return
 
     else:
@@ -326,32 +329,36 @@ async def trailer_download(
         # 不下载不保留时删除返回
         if "trailer" not in download_files and "trailer" not in keep_files:
             # 删除目标文件，删除预告片旧文件夹、新文件夹（deal old file时没删除）
-            if os.path.exists(trailer_file_path):
+            if await aiofiles.os.path.exists(trailer_file_path):
                 await delete_file_async(trailer_file_path)
-            if os.path.exists(trailer_old_folder_path):
-                shutil.rmtree(trailer_old_folder_path, ignore_errors=True)
-            if trailer_new_folder_path != trailer_old_folder_path and os.path.exists(trailer_new_folder_path):
-                shutil.rmtree(trailer_new_folder_path, ignore_errors=True)
+            if await aiofiles.os.path.exists(trailer_old_folder_path):
+                await to_thread(shutil.rmtree, trailer_old_folder_path, ignore_errors=True)
+            if trailer_new_folder_path != trailer_old_folder_path and await aiofiles.os.path.exists(
+                trailer_new_folder_path
+            ):
+                await to_thread(shutil.rmtree, trailer_new_folder_path, ignore_errors=True)
             return
 
     # 选择保留文件，当存在文件时，不下载。（done trailer path 未设置时，把当前文件设置为 done trailer path，以便其他分集复制）
-    if "trailer" in keep_files and os.path.exists(trailer_file_path):
+    if "trailer" in keep_files and await aiofiles.os.path.exists(trailer_file_path):
         if not Flags.file_done_dic.get(json_data["number"]).get("trailer"):
             Flags.file_done_dic[json_data["number"]].update({"trailer": trailer_file_path})
             # 带文件名时，删除掉新、旧文件夹，用不到了。（其他分集如果没有，可以复制第一个文件的预告片。此时不删，没机会删除了）
             if not trailer_name:
-                if os.path.exists(trailer_old_folder_path):
-                    shutil.rmtree(trailer_old_folder_path, ignore_errors=True)
-                if trailer_new_folder_path != trailer_old_folder_path and os.path.exists(trailer_new_folder_path):
-                    shutil.rmtree(trailer_new_folder_path, ignore_errors=True)
+                if await aiofiles.os.path.exists(trailer_old_folder_path):
+                    await to_thread(shutil.rmtree, trailer_old_folder_path, ignore_errors=True)
+                if trailer_new_folder_path != trailer_old_folder_path and await aiofiles.os.path.exists(
+                    trailer_new_folder_path
+                ):
+                    await to_thread(shutil.rmtree, trailer_new_folder_path, ignore_errors=True)
         LogBuffer.log().write(f"\n 🍀 Trailer done! (old)({get_used_time(start_time)}s) ")
         return True
 
     # 带文件名时，选择下载不保留，或者选择保留但没有预告片，检查是否有其他分集已下载或本地预告片
     # 选择下载不保留，当没有下载成功时，不会删除不保留的文件
     done_trailer_path = Flags.file_done_dic.get(json_data["number"]).get("trailer")
-    if not trailer_name and done_trailer_path and os.path.exists(done_trailer_path):
-        if os.path.exists(trailer_file_path):
+    if not trailer_name and done_trailer_path and await aiofiles.os.path.exists(done_trailer_path):
+        if await aiofiles.os.path.exists(trailer_file_path):
             await delete_file_async(trailer_file_path)
         await copy_file_async(done_trailer_path, trailer_file_path)
         LogBuffer.log().write(f"\n 🍀 Trailer done! (copy trailer)({get_used_time(start_time)}s)")
@@ -365,17 +372,17 @@ async def trailer_download(
     content_length = check_url(trailer_url, length=True)
     if content_length:
         # 创建文件夹
-        if trailer_name == 1 and not os.path.exists(trailer_folder_path):
-            os.makedirs(trailer_folder_path)
+        if trailer_name == 1 and not await aiofiles.os.path.exists(trailer_folder_path):
+            await aiofiles.os.makedirs(trailer_folder_path)
 
         # 开始下载
         download_files = config.download_files
         signal.show_traceback_log(f"🍔 {json_data['number']} download trailer... {trailer_url}")
         trailer_file_path_temp = trailer_file_path
-        if os.path.exists(trailer_file_path):
+        if await aiofiles.os.path.exists(trailer_file_path):
             trailer_file_path_temp = trailer_file_path + ".[DOWNLOAD].mp4"
         if await download_file_with_filepath(trailer_url, trailer_file_path_temp, trailer_folder_path):
-            file_size = os.path.getsize(trailer_file_path_temp)
+            file_size = await aiofiles.os.path.getsize(trailer_file_path_temp)
             if file_size >= content_length or "ignore_size" in download_files:
                 LogBuffer.log().write(
                     f"\n 🍀 Trailer done! ({json_data['trailer_from']} {file_size}/{content_length})({get_used_time(start_time)}s) "
@@ -388,12 +395,12 @@ async def trailer_download(
                 if not done_trailer_path:
                     Flags.file_done_dic[json_data["number"]].update({"trailer": trailer_file_path})
                     if trailer_name == 0:  # 带文件名，已下载成功，删除掉那些不用的文件夹即可
-                        if os.path.exists(trailer_old_folder_path):
-                            shutil.rmtree(trailer_old_folder_path, ignore_errors=True)
-                        if trailer_new_folder_path != trailer_old_folder_path and os.path.exists(
+                        if await aiofiles.os.path.exists(trailer_old_folder_path):
+                            await to_thread(shutil.rmtree, trailer_old_folder_path, ignore_errors=True)
+                        if trailer_new_folder_path != trailer_old_folder_path and await aiofiles.os.path.exists(
                             trailer_new_folder_path
                         ):
-                            shutil.rmtree(trailer_new_folder_path, ignore_errors=True)
+                            await to_thread(shutil.rmtree, trailer_new_folder_path, ignore_errors=True)
                 return True
             else:
                 LogBuffer.log().write(
@@ -404,15 +411,17 @@ async def trailer_download(
         await delete_file_async(trailer_file_path_temp)
         LogBuffer.log().write(f"\n 🟠 Trailer download failed! ({trailer_url}) ")
 
-    if os.path.exists(trailer_file_path):  # 使用旧文件
+    if await aiofiles.os.path.exists(trailer_file_path):  # 使用旧文件
         done_trailer_path = Flags.file_done_dic.get(json_data["number"]).get("trailer")
         if not done_trailer_path:
             Flags.file_done_dic[json_data["number"]].update({"trailer": trailer_file_path})
             if trailer_name == 0:  # 带文件名，已下载成功，删除掉那些不用的文件夹即可
-                if os.path.exists(trailer_old_folder_path):
-                    shutil.rmtree(trailer_old_folder_path, ignore_errors=True)
-                if trailer_new_folder_path != trailer_old_folder_path and os.path.exists(trailer_new_folder_path):
-                    shutil.rmtree(trailer_new_folder_path, ignore_errors=True)
+                if await aiofiles.os.path.exists(trailer_old_folder_path):
+                    await to_thread(shutil.rmtree, trailer_old_folder_path, ignore_errors=True)
+                if trailer_new_folder_path != trailer_old_folder_path and await aiofiles.os.path.exists(
+                    trailer_new_folder_path
+                ):
+                    await to_thread(shutil.rmtree, trailer_new_folder_path, ignore_errors=True)
         LogBuffer.log().write("\n 🟠 Trailer download failed! 将继续使用之前的本地文件！")
         LogBuffer.log().write(f"\n 🍀 Trailer done! (old)({get_used_time(start_time)}s)")
         return True
@@ -629,7 +638,7 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
         done_thumb_path = Flags.file_done_dic.get(json_data["number"]).get("thumb")
         if (
             done_thumb_path
-            and os.path.exists(done_thumb_path)
+            and await aiofiles.os.path.exists(done_thumb_path)
             and split_path(done_thumb_path)[0] == split_path(thumb_final_path)[0]
         ):
             await copy_file_async(done_thumb_path, thumb_final_path)
@@ -651,7 +660,7 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
         cover_list.insert(0, (cover_from, cover_url))
 
         thumb_final_path_temp = thumb_final_path
-        if os.path.exists(thumb_final_path):
+        if await aiofiles.os.path.exists(thumb_final_path):
             thumb_final_path_temp = thumb_final_path + ".[DOWNLOAD].jpg"
         for each in cover_list:
             if not each[1]:
@@ -750,7 +759,7 @@ async def poster_download(json_data: JsonData, folder_new_path: str, poster_fina
         done_poster_path = Flags.file_done_dic.get(json_data["number"]).get("poster")
         if (
             done_poster_path
-            and os.path.exists(done_poster_path)
+            and await aiofiles.os.path.exists(done_poster_path)
             and split_path(done_poster_path)[0] == split_path(poster_final_path)[0]
         ):
             await copy_file_async(done_poster_path, poster_final_path)
@@ -794,7 +803,7 @@ async def poster_download(json_data: JsonData, folder_new_path: str, poster_fina
     poster_url = json_data.get("poster")
     poster_from = json_data.get("poster_from")
     poster_final_path_temp = poster_final_path
-    if os.path.exists(poster_final_path):
+    if await aiofiles.os.path.exists(poster_final_path):
         poster_final_path_temp = poster_final_path + ".[DOWNLOAD].jpg"
     if json_data["image_download"]:
         start_time = time.time()
@@ -880,7 +889,7 @@ async def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
 
     # 不保留不下载时删除返回
     if ",fanart" not in keep_files and ",fanart" not in download_files:
-        if fanart_path and os.path.exists(fanart_path):
+        if fanart_path and await aiofiles.os.path.exists(fanart_path):
             await delete_file_async(fanart_path)
         return True
 
@@ -898,7 +907,7 @@ async def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
         done_fanart_path = Flags.file_done_dic.get(json_data["number"]).get("fanart")
         if (
             done_fanart_path
-            and os.path.exists(done_fanart_path)
+            and await aiofiles.os.path.exists(done_fanart_path)
             and split_path(done_fanart_path)[0] == split_path(fanart_final_path)[0]
         ):
             if fanart_path:
@@ -951,12 +960,12 @@ async def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Opt
 
     # 不下载不保留时删除返回
     if "extrafanart" not in download_files and "extrafanart" not in keep_files:
-        if os.path.exists(extrafanart_folder_path):
-            shutil.rmtree(extrafanart_folder_path, ignore_errors=True)
+        if await aiofiles.os.path.exists(extrafanart_folder_path):
+            await to_thread(shutil.rmtree, extrafanart_folder_path, ignore_errors=True)
         return
 
     # 本地存在 extrafanart_folder，且勾选保留旧文件时，不下载
-    if "extrafanart" in keep_files and os.path.exists(extrafanart_folder_path):
+    if "extrafanart" in keep_files and await aiofiles.os.path.exists(extrafanart_folder_path):
         LogBuffer.log().write(f"\n 🍀 Extrafanart done! (old)({get_used_time(start_time)}s) ")
         return True
 
@@ -967,12 +976,12 @@ async def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Opt
     # 检测链接有效性
     if extrafanart_list and check_url(extrafanart_list[0]):
         extrafanart_folder_path_temp = extrafanart_folder_path
-        if os.path.exists(extrafanart_folder_path_temp):
+        if await aiofiles.os.path.exists(extrafanart_folder_path_temp):
             extrafanart_folder_path_temp = extrafanart_folder_path + "[DOWNLOAD]"
-            if not os.path.exists(extrafanart_folder_path_temp):
-                os.makedirs(extrafanart_folder_path_temp)
+            if not await aiofiles.os.path.exists(extrafanart_folder_path_temp):
+                await aiofiles.os.makedirs(extrafanart_folder_path_temp)
         else:
-            os.makedirs(extrafanart_folder_path_temp)
+            await aiofiles.os.makedirs(extrafanart_folder_path_temp)
 
         extrafanart_count = 0
         extrafanart_count_succ = 0
@@ -994,8 +1003,8 @@ async def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Opt
                 extrafanart_count_succ += 1
         if extrafanart_count_succ == extrafanart_count:
             if extrafanart_folder_path_temp != extrafanart_folder_path:
-                shutil.rmtree(extrafanart_folder_path)
-                os.rename(extrafanart_folder_path_temp, extrafanart_folder_path)
+                await to_thread(shutil.rmtree, extrafanart_folder_path)
+                await aiofiles.os.rename(extrafanart_folder_path_temp, extrafanart_folder_path)
             LogBuffer.log().write(
                 f"\n 🍀 ExtraFanart done! ({json_data['extrafanart_from']} {extrafanart_count_succ}/{extrafanart_count})({get_used_time(start_time)}s)"
             )
@@ -1005,12 +1014,12 @@ async def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Opt
                 f"\n 🟠 ExtraFanart download failed! ({json_data['extrafanart_from']} {extrafanart_count_succ}/{extrafanart_count})({get_used_time(start_time)}s)"
             )
             if extrafanart_folder_path_temp != extrafanart_folder_path:
-                shutil.rmtree(extrafanart_folder_path_temp)
+                await to_thread(shutil.rmtree, extrafanart_folder_path_temp)
             else:
                 LogBuffer.log().write(f"\n 🍀 ExtraFanart done! (incomplete)({get_used_time(start_time)}s)")
                 return False
         LogBuffer.log().write("\n 🟠 ExtraFanart download failed! 将继续使用之前的本地文件！")
-    if os.path.exists(extrafanart_folder_path):  # 使用旧文件
+    if await aiofiles.os.path.exists(extrafanart_folder_path):  # 使用旧文件
         LogBuffer.log().write(f"\n 🍀 ExtraFanart done! (old)({get_used_time(start_time)}s)")
         return True
 

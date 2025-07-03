@@ -12,6 +12,8 @@ import traceback
 import urllib.parse
 from typing import Optional
 
+import aiofiles
+import aiofiles.os
 import bs4
 import langid
 import zhconv
@@ -804,13 +806,13 @@ async def _process_wiki_content(res, url, url_log, actor_info, ja, emby_on):
 
 async def _deal_kodi_actors(gfriends_actor_data, add):
     vedio_path = get_movie_path_setting()[0]
-    if vedio_path == "" or not os.path.isdir(vedio_path):
+    if vedio_path == "" or not await aiofiles.os.path.isdir(vedio_path):
         signal.show_log_text("🔴 待刮削目录不存在！任务已停止！")
         return False
     else:
         actor_folder = resources.userdata_path("actor")
         emby_on = config.emby_on
-        all_files = os.walk(vedio_path)
+        all_files = await asyncio.to_thread(os.walk, vedio_path)
         all_actor = set()
         success = set()
         failed = set()
@@ -822,7 +824,7 @@ async def _deal_kodi_actors(gfriends_actor_data, add):
                 for each_dir in dirs:
                     if each_dir == ".actors":
                         kodi_actor_folder = os.path.join(root, each_dir)
-                        shutil.rmtree(kodi_actor_folder, ignore_errors=True)
+                        await asyncio.to_thread(shutil.rmtree, kodi_actor_folder, ignore_errors=True)
                         signal.show_log_text(f"✅ 头像文件夹已清理！{kodi_actor_folder}")
                         actor_clear.add(kodi_actor_folder)
                 continue
@@ -831,8 +833,8 @@ async def _deal_kodi_actors(gfriends_actor_data, add):
                     nfo_path = os.path.join(root, file)
                     vedio_actor_folder = os.path.join(root, ".actors")
                     try:
-                        with open(nfo_path, encoding="utf-8") as f:
-                            content = f.read()
+                        async with aiofiles.open(nfo_path, encoding="utf-8") as f:
+                            content = await f.read()
                         parser = etree.HTMLParser(encoding="utf-8")
                         xml_nfo = etree.HTML(content.encode("utf-8"), parser)
                         actor_list = xml_nfo.xpath("//actor/name/text()")
@@ -844,7 +846,7 @@ async def _deal_kodi_actors(gfriends_actor_data, add):
                                     net_pic_path = gfriends_actor_data.get(f"{actor_name}.jpg")
                                     if net_pic_path:
                                         vedio_actor_path = os.path.join(vedio_actor_folder, each + ".jpg")
-                                        if os.path.isfile(vedio_actor_path):
+                                        if await aiofiles.os.path.isfile(vedio_actor_path):
                                             if "actor_replace" not in emby_on:
                                                 success.add(each)
                                                 continue
@@ -852,7 +854,7 @@ async def _deal_kodi_actors(gfriends_actor_data, add):
                                             net_file_name = net_pic_path.split("/")[-1]
                                             net_file_name = re.findall(r"^[^?]+", net_file_name)[0]
                                             local_file_path = os.path.join(actor_folder, net_file_name)
-                                            if not os.path.isfile(local_file_path):
+                                            if not await aiofiles.os.path.isfile(local_file_path):
                                                 if not await download_file_with_filepath(
                                                     net_pic_path, local_file_path, actor_folder
                                                 ):
@@ -864,8 +866,8 @@ async def _deal_kodi_actors(gfriends_actor_data, add):
                                                     continue
                                         else:
                                             local_file_path = net_pic_path
-                                        if not os.path.isdir(vedio_actor_folder):
-                                            os.mkdir(vedio_actor_folder)
+                                        if not await aiofiles.os.path.isdir(vedio_actor_folder):
+                                            await aiofiles.os.mkdir(vedio_actor_folder)
                                         await copy_file_async(local_file_path, vedio_actor_path)
                                         signal.show_log_text(f"✅ {actor_name} 头像已创建！ {vedio_actor_path}")
                                         success.add(each)

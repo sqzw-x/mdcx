@@ -8,6 +8,9 @@ import shutil
 import time
 import traceback
 
+import aiofiles
+import aiofiles.os
+
 from ..base.file import copy_file_async, delete_file_async, move_file_async, read_link_async, split_path
 from ..base.number import (
     deal_actor_more,
@@ -29,7 +32,7 @@ from .json_data import JsonData, LogBuffer, MoveContext, new_json_data
 from .utils import get_movie_path_setting, get_new_release, nfd2c
 
 
-def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
+async def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
     # 判断文件是否需清理
     if not config.can_clean:
         return False
@@ -57,11 +60,12 @@ def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
             return True
 
     # 清理的文件大小<=(KB)
-    if os.path.islink(file_path):
-        file_path = os.readlink(file_path)
+    if await aiofiles.os.path.islink(file_path):
+        file_path = await aiofiles.os.readlink(file_path)
     if config.clean_size_list is not None:
         try:  # 路径太长时，此处会报错 FileNotFoundError: [WinError 3] 系统找不到指定的路径。
-            if os.path.getsize(file_path) <= config.clean_size_list * 1024:
+            stat_result = await aiofiles.os.stat(file_path)
+            if stat_result.st_size <= config.clean_size_list * 1024:
                 return True
         except Exception:
             pass
@@ -1123,7 +1127,7 @@ async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path
 
                 # 判断清理文件
                 path = os.path.join(root, f)
-                if _need_clean(path, f, file_type_current):
+                if await _need_clean(path, f, file_type_current):
                     result, error_info = await delete_file_async(path)
                     if result:
                         signal.show_log_text(f" 🗑 Clean: {path} ")
@@ -1446,8 +1450,8 @@ async def get_file_info(
         # 判断nfo中是否有中文字幕、马赛克
         if (not has_sub or not mosaic) and os.path.exists(nfo_old_path):
             try:
-                with open(nfo_old_path, encoding="utf-8") as f:
-                    nfo_content = f.read()
+                async with aiofiles.open(nfo_old_path, encoding="utf-8") as f:
+                    nfo_content = await f.read()
                 if not has_sub:
                     if ">中文字幕</" in nfo_content:
                         c_word = cnword_style  # 中文字幕影片后缀
@@ -1479,8 +1483,8 @@ async def get_file_info(
 
         if not has_sub and os.path.exists(nfo_old_path):
             try:
-                with open(nfo_old_path, encoding="utf-8") as f:
-                    nfo_content = f.read()
+                async with aiofiles.open(nfo_old_path, encoding="utf-8") as f:
+                    nfo_content = await f.read()
                 if "<genre>中文字幕</genre>" in nfo_content or "<tag>中文字幕</tag>" in nfo_content:
                     c_word = cnword_style  # 中文字幕影片后缀
                     has_sub = True
@@ -1631,6 +1635,7 @@ async def _clean_empty_fodlers(path: str, file_mode: FileMode) -> None:
 
 
 def get_success_list() -> None:
+    """This function is intended to be sync"""
     Flags.success_save_time = time.time()
     if os.path.isfile(resources.userdata_path("success.txt")):
         with open(resources.userdata_path("success.txt"), encoding="utf-8", errors="ignore") as f:
@@ -2072,16 +2077,19 @@ async def save_success_list(old_path: str = "", new_path: str = "") -> None:
     if get_used_time(Flags.success_save_time) > 5 or not old_path:
         Flags.success_save_time = time.time()
         try:
-            with open(resources.userdata_path("success.txt"), "w", encoding="utf-8", errors="ignore") as f:
+            async with aiofiles.open(
+                resources.userdata_path("success.txt"), "w", encoding="utf-8", errors="ignore"
+            ) as f:
                 temp = list(Flags.success_list)
                 temp.sort()
-                f.write("\n".join(temp))
+                await f.write("\n".join(temp))
         except Exception as e:
             signal.show_log_text(f"  Save success list Error {str(e)}\n {traceback.format_exc()}")
         signal.view_success_file_settext.emit(f"查看 ({len(Flags.success_list)})")
 
 
 def save_remain_list() -> None:
+    """This function is intended to be sync."""
     if Flags.can_save_remain and "remain_task" in config.switch_on:
         try:
             with open(resources.userdata_path("remain.txt"), "w", encoding="utf-8", errors="ignore") as f:
@@ -2106,7 +2114,7 @@ async def check_and_clean_files() -> None:
             # 判断清理文件
             path = os.path.join(root, f)
             file_type_current = os.path.splitext(f)[1]
-            if _need_clean(path, f, file_type_current):
+            if await _need_clean(path, f, file_type_current):
                 total += 1
                 result, error_info = await delete_file_async(path)
                 if result:

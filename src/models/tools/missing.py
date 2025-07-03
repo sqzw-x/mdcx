@@ -7,6 +7,8 @@ import os
 import re
 import time
 
+import aiofiles
+import aiofiles.os
 from lxml import etree
 
 from models.base.utils import get_used_time
@@ -219,25 +221,26 @@ async def check_missing_number(actor_flag):
             "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 开始获取本地视频的番号信息..."
         )
         local_number_list = resources.userdata_path("number_list.json")
-        if not os.path.exists(local_number_list):
+        if not await aiofiles.os.path.exists(local_number_list):
             signal.show_log_text(
                 "   提示：正在生成本地视频的番号信息数据...（第一次较慢，请耐心等待，以后只需要查找新视频，速度很快）"
             )
-            with open(local_number_list, "w", encoding="utf-8") as f:
-                f.write("{}")
-        with open(local_number_list, encoding="utf-8") as data:
-            json_data = json.load(data)
+            async with aiofiles.open(local_number_list, "w", encoding="utf-8") as f:
+                await f.write("{}")
+        async with aiofiles.open(local_number_list, encoding="utf-8") as data:
+            json_data = json.loads(await data.read())
         for movie_path in all_movie_list:
             nfo_path = os.path.splitext(movie_path)[0] + ".nfo"
             json_data_temp = {}
             number = ""
+            has_sub = False  # 初始化has_sub变量
             if json_data.get(movie_path):
                 number, has_sub = json_data.get(movie_path)
 
             else:
-                if os.path.exists(nfo_path):
-                    with open(nfo_path, encoding="utf-8") as f:
-                        nfo_content = f.read()
+                if await aiofiles.os.path.exists(nfo_path):
+                    async with aiofiles.open(nfo_path, encoding="utf-8") as f:
+                        nfo_content = await f.read()
                     number_result = re.findall(r"<num>(.+)</num>", nfo_content)
                     if number_result:
                         number = number_result[0]
@@ -267,14 +270,15 @@ async def check_missing_number(actor_flag):
             if has_sub:
                 Flags.local_number_cnword_set.add(number)  # 添加到本地有字幕的番号集合
 
-        with open(local_number_list, "w", encoding="utf-8") as f:
-            json.dump(
-                json_data_new,
-                f,
-                ensure_ascii=False,
-                sort_keys=True,
-                indent=4,
-                separators=(",", ": "),
+        async with aiofiles.open(local_number_list, "w", encoding="utf-8") as f:
+            await f.write(
+                json.dumps(
+                    json_data_new,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    indent=4,
+                    separators=(",", ": "),
+                )
             )
         Flags.local_number_flag = new_movie_path_list
         signal.show_log_text(f"🎉 获取完毕！共获取番号数量（{len(json_data_new)}）({get_used_time(start_time_local)}s)")

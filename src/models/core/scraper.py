@@ -83,7 +83,7 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
     json_data["nfo_can_translate"] = True
     nfo_update = False
     if config.main_mode == 4:
-        result, json_data = get_nfo_data(json_data, file_path, movie_number)
+        result, json_data = await get_nfo_data(json_data, file_path, movie_number)
         if result:  # 有nfo
             movie_number = json_data["number"]
             nfo_update = True
