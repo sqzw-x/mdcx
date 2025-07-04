@@ -119,9 +119,9 @@ class ConfigManager(ManualConfig):
     def _get_config_path(self):
         if not os.path.exists(MARK_FILE):  # 标记文件不存在
             self.path = os.path.join(MAIN_PATH, "config.ini")  # 默认配置文件路径
-            # 确保MARK_FILE所在目录存在
+            # 确保 MARK_FILE 所在目录存在
             mark_dir = os.path.dirname(MARK_FILE)
-            if not os.path.exists(mark_dir):  
+            if mark_dir:
                 os.makedirs(mark_dir, exist_ok=True)
             with open(MARK_FILE, "w", encoding="UTF-8") as f:
                 f.write(self.path)
