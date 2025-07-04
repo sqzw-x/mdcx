@@ -357,6 +357,16 @@ class ConfigSchema:
         """处理版本变更"""
         if self.version == ManualConfig.LOCAL_VERSION:
             return
+        # 1. 处理移除的配置项, 其将储存在 unknown_fields 中
+        unknown_fields: dict[str, str] = getattr(self, "unknown_fields", {})
+        if "pic_name" in unknown_fields:  # 重命名为 pic_simple_name
+            self.pic_simple_name = ConfigManager.ini_value_to_bool(unknown_fields["pic_name"])
+            del unknown_fields["pic_name"]
+        if "trailer_name" in unknown_fields:  # 重命名为 trailer_simple_name
+            self.trailer_simple_name = ConfigManager.ini_value_to_bool(unknown_fields["trailer_name"])
+            del unknown_fields["trailer_name"]
+        if "modified_time" in unknown_fields:  # 弃用
+            del unknown_fields["modified_time"]
 
     def init(self):
         self._update()
