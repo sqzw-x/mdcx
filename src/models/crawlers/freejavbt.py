@@ -6,6 +6,7 @@ import time  # yapf: disable # NOQA: E402
 
 import urllib3
 from lxml import etree
+from lxml.html import soupparser
 
 from models.base.web import curl_html, get_dmm_trailer
 from models.core.json_data import LogBuffer
@@ -19,10 +20,19 @@ urllib3.disable_warnings()  # yapf: disable
 
 def get_title(html):
     try:
-        result = html.xpath("//title/text()")[0].split("|")
-        number = result[0]
-        title = result[1].replace(number, "").strip()
-        number = number.strip()
+        # 2025-07-05 number和title之间有竖线可能是以前的格式？目前看是没有的，一般是`ABC-123 xxx | FREE JAV BT` 这种格式
+        raw = html.xpath("//title/text()")[0]
+        raw = raw.replace("| FREE JAV BT", "")
+        result = raw.split("|")
+        if len(result) == 2:
+            number = result[0].strip()
+            title = " ".join(result[1:]).replace(number, "").strip()
+        else:
+            result = raw.split(" ")
+            if len(result) > 2:
+                number = result[0].strip()
+                title = " ".join(result[1:]).strip()
+
         title = (
             title.replace("中文字幕", "")
             .replace("無碼", "")
@@ -368,6 +378,20 @@ def main(
             raise Exception(debug_info)
 
         html_detail = etree.fromstring(html_info, etree.HTMLParser())
+        
+        
+        # docker版本正常，但在macOS会解析失败，猜测是emoji等特殊字符导致的，删除emoji后可解析正常。
+        # 搜索emoji正则: [\u{1F601}-\u{1F64F}\u{2702}-\u{27B0}\u{1F680}-\u{1F6C0}\u{1F170}-\u{1F251}\u{1F600}-\u{1F636}\u{1F681}-\u{1F6C5}\u{1F30D}-\u{1F567}]
+        # 另外，使用`lxml.html.soupparser.fromstring`可以解析成功。
+        if html_detail is None:
+            debug_info = "HTML 解析失败，etree 返回 None"
+            LogBuffer.error().write(web_info + debug_info)
+            # 尝试soupparser
+            html_detail = soupparser.fromstring(html_info)
+            if html_detail is None:
+                debug_info = "HTML 解析失败，soupparser 返回 None"
+                LogBuffer.error().write(web_info + debug_info)
+                raise Exception(debug_info)
 
         # ========================================================================收集信息
         title, number = get_title(html_detail)  # 获取标题并去掉头尾歌手名
