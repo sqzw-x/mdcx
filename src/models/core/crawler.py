@@ -177,7 +177,7 @@ def _deal_some_list(field: str, website: str, same_list: list[str]) -> list[str]
 
 
 async def _call_crawler(
-    json_data: JsonData,
+    task_input: JsonData,
     website: str,
     language: str,
     file_number: str,
@@ -188,9 +188,9 @@ async def _call_crawler(
     """
     获取某个网站数据
     """
-    appoint_number = json_data["appoint_number"]
-    appoint_url = json_data["appoint_url"]
-    file_path = json_data["file_path"]
+    appoint_number = task_input["appoint_number"]
+    appoint_url = task_input["appoint_url"]
+    file_path = task_input["file_path"]
 
     # 259LUXU-1111， mgstage 和 avsex 之外使用 LUXU-1111（素人番号时，short_number有值，不带前缀数字；反之，short_number为空)
     if short_number and website != "mgstage" and website != "avsex":
@@ -217,14 +217,14 @@ async def _call_crawler(
 
 
 async def _decide_websites(
-    json_data: JsonData,
+    task_input: JsonData,
     number_website_list: list[str],
 ) -> JsonData:
     """
     获取一组网站的数据：按照设置的网站组，请求各字段数据，并返回最终的数据
     """
-    file_number = json_data["number"]
-    short_number = json_data["short_number"]
+    file_number = task_input["number"]
+    short_number = task_input["short_number"]
     scrape_like = config.scrape_like
     none_fields = config.none_fields  # 不刮削的字段
 
@@ -343,7 +343,7 @@ async def _decide_websites(
             continue
         task = _call_crawlers(
             all_json_data,
-            json_data,
+            task_input,
             website_list,
             field_name,
             field_cnname,
@@ -351,7 +351,7 @@ async def _decide_websites(
             config,
             file_number,
             short_number,
-            json_data["mosaic"],
+            task_input["mosaic"],
         )
         tasks.append(task)
     await asyncio.gather(*tasks)
@@ -602,7 +602,7 @@ def _deal_each_field(
 
 
 async def _call_crawlers(
-    all_json_data: dict[str, dict[str, Any]],
+    # all_json_data: dict[str, dict[str, Any]],
     json_data: JsonData,
     website_list: list[str],
     field_name: str,
@@ -712,11 +712,11 @@ async def _call_crawlers(
         await asyncio.gather(*tasks, return_exceptions=True)
 
 
-async def _call_specific_crawler(json_data: JsonData, website: str) -> JsonData:
-    file_number = json_data["number"]
-    short_number = json_data["short_number"]
-    mosaic = json_data["mosaic"]
-    json_data["fields_info"] = ""
+async def _call_specific_crawler(task_input: JsonData, website: str) -> JsonData:
+    file_number = task_input["number"]
+    short_number = task_input["short_number"]
+    mosaic = task_input["mosaic"]
+    # task_input["fields_info"] = ""
 
     title_language = config.title_language
     org_language = title_language
@@ -745,52 +745,53 @@ async def _call_specific_crawler(json_data: JsonData, website: str) -> JsonData:
         studio_language = "zh_cn"
         publisher_language = "zh_cn"
         director_language = "zh_cn"
-    web_data = await _call_crawler(json_data, website, title_language, file_number, short_number, mosaic, org_language)
-    web_data_json = web_data.get(website, {}).get(title_language)
-    json_data.update(web_data_json)
-    if not json_data["title"]:
-        return json_data
+    web_data = await _call_crawler(task_input, website, title_language, file_number, short_number, mosaic, org_language)
+    web_data_json = web_data.get(website, {}).get(title_language, {})
+    res = task_input.copy()
+    res.update(web_data_json)
+    if not res["title"]:
+        return res
     if outline_language != title_language:
         web_data_json = web_data[website][outline_language]
         if web_data_json["outline"]:
-            json_data["outline"] = web_data_json["outline"]
+            res["outline"] = web_data_json["outline"]
     if actor_language != title_language:
         web_data_json = web_data[website][actor_language]
         if web_data_json["actor"]:
-            json_data["actor"] = web_data_json["actor"]
+            res["actor"] = web_data_json["actor"]
     if tag_language != title_language:
         web_data_json = web_data[website][tag_language]
         if web_data_json["tag"]:
-            json_data["tag"] = web_data_json["tag"]
+            res["tag"] = web_data_json["tag"]
     if series_language != title_language:
         web_data_json = web_data[website][series_language]
         if web_data_json["series"]:
-            json_data["series"] = web_data_json["series"]
+            res["series"] = web_data_json["series"]
     if studio_language != title_language:
         web_data_json = web_data[website][studio_language]
         if web_data_json["studio"]:
-            json_data["studio"] = web_data_json["studio"]
+            res["studio"] = web_data_json["studio"]
     if publisher_language != title_language:
         web_data_json = web_data[website][publisher_language]
         if web_data_json["publisher"]:
-            json_data["publisher"] = web_data_json["publisher"]
+            res["publisher"] = web_data_json["publisher"]
     if director_language != title_language:
         web_data_json = web_data[website][director_language]
         if web_data_json["director"]:
-            json_data["director"] = web_data_json["director"]
-    if json_data["cover"]:
-        json_data["cover_list"] = [(website, json_data["cover"])]
+            res["director"] = web_data_json["director"]
+    if res["cover"]:
+        res["cover_list"] = [(website, res["cover"])]
 
     # 加入来源信息
-    json_data["outline_from"] = website
-    json_data["poster_from"] = website
-    json_data["cover_from"] = website
-    json_data["extrafanart_from"] = website
-    json_data["trailer_from"] = website
-    json_data["fields_info"] = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
+    res["outline_from"] = website
+    res["poster_from"] = website
+    res["cover_from"] = website
+    res["extrafanart_from"] = website
+    res["trailer_from"] = website
+    res["fields_info"] = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
 
     if short_number:
-        json_data["number"] = file_number
+        res["number"] = file_number
 
     temp_actor = (
         web_data[website]["jp"]["actor"]
@@ -799,35 +800,33 @@ async def _call_specific_crawler(json_data: JsonData, website: str) -> JsonData:
         + ","
         + web_data[website]["zh_tw"]["actor"]
     )
-    json_data["actor_amazon"] = []
-    [json_data["actor_amazon"].append(i) for i in temp_actor.split(",") if i and i not in json_data["actor_amazon"]]
-    json_data["all_actor"] = json_data["all_actor"] if json_data.get("all_actor") else web_data_json["actor"]
-    json_data["all_actor_photo"] = (
-        json_data["all_actor_photo"] if json_data.get("all_actor_photo") else web_data_json["actor_photo"]
-    )
+    res["actor_amazon"] = []
+    [res["actor_amazon"].append(i) for i in temp_actor.split(",") if i and i not in res["actor_amazon"]]
+    res["all_actor"] = res["all_actor"] if res.get("all_actor") else web_data_json["actor"]
+    res["all_actor_photo"] = res["all_actor_photo"] if res.get("all_actor_photo") else web_data_json["actor_photo"]
 
-    return json_data
+    return res
 
 
-async def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON返回元数据
-    file_number = json_data["number"]
-    file_path = json_data["file_path"]
-    short_number = json_data["short_number"]
-    appoint_number = json_data["appoint_number"]
-    appoint_url = json_data["appoint_url"]
-    has_sub = json_data["has_sub"]
-    c_word = json_data["c_word"]
-    leak = json_data["leak"]
-    wuma = json_data["wuma"]
-    youma = json_data["youma"]
-    cd_part = json_data["cd_part"]
-    destroyed = json_data["destroyed"]
-    mosaic = json_data["mosaic"]
-    version = json_data["version"]
-    json_data["title"] = ""
-    json_data["fields_info"] = ""
-    json_data["all_actor"] = ""
-    json_data["all_actor_photo"] = {}
+async def _crawl(task_input: JsonData, website_name: str) -> JsonData:  # 从JSON返回元数据
+    file_number = task_input["number"]
+    file_path = task_input["file_path"]
+    short_number = task_input["short_number"]
+    appoint_number = task_input["appoint_number"]
+    appoint_url = task_input["appoint_url"]
+    has_sub = task_input["has_sub"]
+    c_word = task_input["c_word"]
+    leak = task_input["leak"]
+    wuma = task_input["wuma"]
+    youma = task_input["youma"]
+    cd_part = task_input["cd_part"]
+    destroyed = task_input["destroyed"]
+    mosaic = task_input["mosaic"]
+    version = task_input["version"]
+    # task_input["title"] = ""
+    # task_input["fields_info"] = ""
+    # task_input["all_actor"] = ""
+    # task_input["all_actor_photo"] = {}
     # ================================================网站规则添加开始================================================
 
     if website_name == "all":  # 从全部网站刮削
@@ -838,29 +837,29 @@ async def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON
             or (re.search(r"([^A-Z]|^)MD[A-Z-]*\d{4,}", file_number) and "MDVR" not in file_number)
             or re.search(r"MKY-[A-Z]+-\d{3,}", file_number)
         ):
-            json_data["mosaic"] = "国产"
+            task_input["mosaic"] = "国产"
             website_list = config.website_guochan.split(",")
-            json_data = await _decide_websites(json_data, website_list)
+            res = await _decide_websites(task_input, website_list)
 
         # =======================================================================kin8
         elif file_number.startswith("KIN8"):
             website_name = "kin8"
-            json_data = await _call_specific_crawler(json_data, website_name)
+            res = await _call_specific_crawler(task_input, website_name)
 
         # =======================================================================同人
         elif file_number.startswith("DLID"):
             website_name = "getchu"
-            json_data = await _call_specific_crawler(json_data, website_name)
+            res = await _call_specific_crawler(task_input, website_name)
 
         # =======================================================================里番
         elif "getchu" in file_path.lower() or "里番" in file_path or "裏番" in file_path:
             website_name = "getchu_dmm"
-            json_data = await _call_specific_crawler(json_data, website_name)
+            res = await _call_specific_crawler(task_input, website_name)
 
         # =======================================================================Mywife No.1111
         elif "mywife" in file_path.lower():
             website_name = "mywife"
-            json_data = await _call_specific_crawler(json_data, website_name)
+            res = await _call_specific_crawler(task_input, website_name)
 
         # =======================================================================FC2-111111
         elif "FC2" in file_number.upper():
@@ -868,108 +867,109 @@ async def _crawl(json_data: JsonData, website_name: str) -> JsonData:  # 从JSON
             if file_number_1:
                 file_number_1.group()
                 website_list = config.website_fc2.split(",")
-                json_data = await _decide_websites(json_data, website_list)
+                res = await _decide_websites(task_input, website_list)
             else:
                 LogBuffer.error().write(f"未识别到FC2番号：{file_number}")
+                res = task_input.copy()
 
         # =======================================================================sexart.15.06.14
         elif re.search(r"[^.]+\.\d{2}\.\d{2}\.\d{2}", file_number) or (
             "欧美" in file_path and "东欧美" not in file_path
         ):
             website_list = config.website_oumei.split(",")
-            json_data = await _decide_websites(json_data, website_list)
+            res = await _decide_websites(task_input, website_list)
 
         # =======================================================================无码抓取:111111-111,n1111,HEYZO-1111,SMD-115
         elif mosaic == "无码" or mosaic == "無碼":
             website_list = config.website_wuma.split(",")
-            json_data = await _decide_websites(json_data, website_list)
+            res = await _decide_websites(task_input, website_list)
 
         # =======================================================================259LUXU-1111
         elif short_number or "SIRO" in file_number.upper():
             website_list = config.website_suren.split(",")
-            json_data = await _decide_websites(json_data, website_list)
+            res = await _decide_websites(task_input, website_list)
 
         # =======================================================================ssni00321
         elif re.match(r"\D{2,}00\d{3,}", file_number) and "-" not in file_number and "_" not in file_number:
             website_list = ["dmm"]
-            json_data = await _decide_websites(json_data, website_list)
+            res = await _decide_websites(task_input, website_list)
 
         # =======================================================================剩下的（含匹配不了）的按有码来刮削
         else:
             website_list = config.website_youma.split(",")
-            json_data = await _decide_websites(json_data, website_list)
+            res = await _decide_websites(task_input, website_list)
     else:
-        json_data = await _call_specific_crawler(json_data, website_name)
+        res = await _call_specific_crawler(task_input, website_name)
 
     # ================================================网站请求结束================================================
     # ======================================超时或未找到返回
-    if json_data["title"] == "":
-        return json_data
+    if res["title"] == "":
+        return res
 
-    number = json_data["number"]
+    number = res["number"]
     if appoint_number:
         number = appoint_number
 
     # 马赛克
     if leak:
-        json_data["mosaic"] = "无码流出"
+        res["mosaic"] = "无码流出"
     elif destroyed:
-        json_data["mosaic"] = "无码破解"
+        res["mosaic"] = "无码破解"
     elif wuma:
-        json_data["mosaic"] = "无码"
+        res["mosaic"] = "无码"
     elif youma:
-        json_data["mosaic"] = "有码"
+        res["mosaic"] = "有码"
     elif mosaic:
-        json_data["mosaic"] = mosaic
-    if not json_data.get("mosaic"):
+        res["mosaic"] = mosaic
+    if not res.get("mosaic"):
         if is_uncensored(number):
-            json_data["mosaic"] = "无码"
+            res["mosaic"] = "无码"
         else:
-            json_data["mosaic"] = "有码"
-    print(number, cd_part, json_data["mosaic"], LogBuffer.req().get().strip("-> "))
+            res["mosaic"] = "有码"
+    print(number, cd_part, res["mosaic"], LogBuffer.req().get().strip("-> "))
 
     # 车牌字母
     letters = get_number_letters(number)
 
     # 原标题，用于amazon搜索
-    originaltitle = json_data.get("originaltitle") if json_data.get("originaltitle") else ""
-    json_data["originaltitle_amazon"] = originaltitle
-    for each in json_data["actor_amazon"]:  # 去除演员名，避免搜索不到
+    originaltitle = res.get("originaltitle") if res.get("originaltitle") else ""
+    res["originaltitle_amazon"] = originaltitle
+    for each in res["actor_amazon"]:  # 去除演员名，避免搜索不到
         try:
             end_actor = re.compile(rf" {each}$")
-            json_data["originaltitle_amazon"] = re.sub(end_actor, "", json_data["originaltitle_amazon"])
+            res["originaltitle_amazon"] = re.sub(end_actor, "", res["originaltitle_amazon"])
         except Exception:
             pass
 
     # VR 时下载小封面
     if "VR" in number:
-        json_data["image_download"] = True
+        res["image_download"] = True
 
     # 返回处理后的json_data
-    json_data["number"] = number
-    json_data["letters"] = letters
-    json_data["has_sub"] = has_sub
-    json_data["c_word"] = c_word
-    json_data["leak"] = leak
-    json_data["wuma"] = wuma
-    json_data["youma"] = youma
-    json_data["cd_part"] = cd_part
-    json_data["destroyed"] = destroyed
-    json_data["version"] = version
-    json_data["file_path"] = file_path
-    json_data["appoint_number"] = appoint_number
-    json_data["appoint_url"] = appoint_url
+    res["number"] = number
+    res["letters"] = letters
+    res["has_sub"] = has_sub
+    res["c_word"] = c_word
+    res["leak"] = leak
+    res["wuma"] = wuma
+    res["youma"] = youma
+    res["cd_part"] = cd_part
+    res["destroyed"] = destroyed
+    res["version"] = version
+    res["file_path"] = file_path
+    res["appoint_number"] = appoint_number
+    res["appoint_url"] = appoint_url
 
-    return json_data
+    return res
 
 
-def _get_website_name(json_data: JsonData, file_mode: FileMode) -> str:
+def _get_website_name(task_input: JsonData, file_mode: FileMode) -> str:
     # 获取刮削网站
     website_name = "all"
     if file_mode == FileMode.Single:  # 刮削单文件（工具页面）
         website_name = Flags.website_name
     elif file_mode == FileMode.Again:  # 重新刮削
-        website_temp = json_data["website_name"]
+        website_temp = task_input["website_name"]
         if website_temp:
             website_name = website_temp
     elif config.scrape_like == "single":
@@ -978,11 +978,11 @@ def _get_website_name(json_data: JsonData, file_mode: FileMode) -> str:
     return website_name
 
 
-async def crawl(json_data: JsonData, file_mode: FileMode) -> JsonData:
+async def crawl(task_input: JsonData, file_mode: FileMode) -> JsonData:
     # 从指定网站获取json_data
-    website_name = _get_website_name(json_data, file_mode)
-    json_data = await _crawl(json_data, website_name)
-    return _deal_json_data(json_data)
+    website_name = _get_website_name(task_input, file_mode)
+    res = await _crawl(task_input, website_name)
+    return _deal_json_data(res)
 
 
 def _deal_json_data(json_data: JsonData) -> JsonData:
