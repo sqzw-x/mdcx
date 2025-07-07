@@ -41,7 +41,7 @@ class ConfigManager(ManualConfig):
             f.write(self.format_ini(self.config))
 
     def _read_file(self, path):
-        reader = RawConfigParser()
+        reader = RawConfigParser(interpolation=None)
         reader.read(path, encoding="UTF-8")
         field_types = {f.name: f.type for f in fields(ConfigSchema)}
         errors = []
@@ -92,7 +92,7 @@ class ConfigManager(ManualConfig):
     @staticmethod
     def format_ini(cfg: "ConfigSchema"):
         buffer = StringIO()
-        parser = ConfigParser()
+        parser = ConfigParser(interpolation=None)
         parser.add_section("mdcx")
         for field in fields(cfg):
             value = getattr(cfg, field.name)
