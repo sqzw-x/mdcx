@@ -108,14 +108,13 @@ def getTag(response):  # 获取演员
 
 
 def getOutline(detail_page):
-    # 修复路径，避免简介含有垃圾信息 "*根据分发方式，内容可能会有所不同”
+    # 修复路径，避免简介含有垃圾信息 "*根据分发方式，内容可能会有所不同"
     return detail_page.xpath("string(/html/body/div[2]/div[1]/div[1]/div[2]/div[3]/div/text())")
 
 
 async def main(
     number,
     appoint_url="",
-    language="jp",
     **kwargs,
 ):
     start_time = time.time()
@@ -236,7 +235,7 @@ async def main(
                 "source": "jav321",
                 "website": website,
                 "actor_photo": actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": poster_url,
                 "extrafanart": extrafanart,
                 "trailer": "",
@@ -257,7 +256,7 @@ async def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}

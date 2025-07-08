@@ -111,7 +111,6 @@ def get_extrafanart(html):
 async def main(
     number,
     appoint_url="",
-    language="jp",
     **kwargs,
 ):
     if "DLID" in number.upper() or "ITEM" in number.upper() or "GETCHU" in number.upper() or "dl.getchu" in appoint_url:
@@ -226,7 +225,7 @@ async def main(
                     "publisher": publisher,
                     "source": "getchu",
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": cover_url,
                     "extrafanart": extrafanart,
                     "trailer": "",
@@ -248,7 +247,7 @@ async def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}

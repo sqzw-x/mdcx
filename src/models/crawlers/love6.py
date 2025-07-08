@@ -137,7 +137,6 @@ def get_webnumber(html, number):
 async def main(
     number,
     appoint_url="",
-    language="jp",
     **kwargs,
 ):
     start_time = time.time()
@@ -226,7 +225,7 @@ async def main(
                     "publisher": publisher,
                     "source": "love6",
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": poster,
                     "extrafanart": extrafanart,
                     "trailer": trailer,
@@ -248,7 +247,7 @@ async def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}

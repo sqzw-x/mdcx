@@ -102,7 +102,6 @@ def get_trailer(html):  # 获取预览片
 async def main(
     number,
     appoint_url="",
-    language="jp",
     **kwargs,
 ):
     # https://faleno.jp/top/works/fsdss564/
@@ -190,7 +189,7 @@ async def main(
                 "publisher": publisher,
                 "source": "dahlia",
                 "actor_photo": actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": poster_url,
                 "extrafanart": extrafanart,
                 "trailer": trailer,
@@ -213,7 +212,7 @@ async def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}

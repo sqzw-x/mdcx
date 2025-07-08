@@ -79,7 +79,6 @@ def get_real_url(html, number_list):
 async def main(
     number,
     appoint_url="",
-    language="zh_cn",
     file_path="",
     appoint_number="",
     **kwargs,
@@ -154,7 +153,7 @@ async def main(
                 "source": "madouqu",
                 "website": real_url,
                 "actor_photo": actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": "",
                 "extrafanart": "",
                 "trailer": "",
@@ -176,7 +175,7 @@ async def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}

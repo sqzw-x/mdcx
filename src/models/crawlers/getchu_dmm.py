@@ -7,7 +7,6 @@ from models.crawlers import dmm, getchu
 async def main(
     number,
     appoint_url="",
-    language="jp",
     **kwargs,
 ):
     json_data_getchu = await getchu.main(number, appoint_url, "jp")

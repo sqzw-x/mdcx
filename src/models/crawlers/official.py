@@ -115,7 +115,6 @@ def get_cover(html):
 async def main(
     number,
     appoint_url="",
-    language="",
     **kwargs,
 ):
     start_time = time.time()
@@ -127,7 +126,7 @@ async def main(
         if not official_url:
             raise Exception("不在官网番号前缀列表中")
         elif official_url == "https://www.prestige-av.com":
-            return await prestige.main(number, appoint_url, language="jp")
+            return await prestige.main(number, appoint_url)
         website_name = official_url.split(".")[-2].replace("https://", "")
         LogBuffer.req().write(f"-> {website_name}")
         real_url = appoint_url
@@ -205,7 +204,7 @@ async def main(
                     "publisher": publisher,
                     "source": website_name,
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": poster,
                     "extrafanart": extrafanart,
                     "trailer": trailer,
@@ -228,7 +227,7 @@ async def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {

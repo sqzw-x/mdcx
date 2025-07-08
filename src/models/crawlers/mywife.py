@@ -126,7 +126,6 @@ async def get_number_data(number):
 async def main(
     number,
     appoint_url="",
-    language="jp",
     **kwargs,
 ):
     global seesaawiki_request_fail_flag
@@ -280,7 +279,7 @@ async def main(
                     "publisher": publisher,
                     "source": "mywife",
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": poster,
                     "extrafanart": extrafanart,
                     "trailer": trailer,
@@ -302,7 +301,7 @@ async def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}

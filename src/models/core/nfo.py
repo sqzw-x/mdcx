@@ -62,7 +62,7 @@ async def write_nfo(
         "publisher",
         "tag",
         "website",
-        "cover",
+        "thumb",
         "poster",
         "trailer",
     ]
@@ -102,7 +102,7 @@ async def write_nfo(
     release = json_data_nfo["release"]
     tag = json_data_nfo["tag"]
     number = json_data_nfo["number"]
-    cover = json_data_nfo["cover"]
+    cover = json_data_nfo["thumb"]
     poster = json_data_nfo["poster"]
     website = json_data_nfo["website"]
     series = json_data_nfo["series"]
@@ -414,7 +414,7 @@ async def get_nfo_data(
     json_data["source"] = "nfo"
     LogBuffer.req().write(local_nfo_path)
     json_data["poster_from"] = "local"
-    json_data["cover_from"] = "local"
+    json_data["thumb_from"] = "local"
     json_data["extrafanart_from"] = "local"
     json_data["trailer_from"] = "local"
 
@@ -588,9 +588,9 @@ async def get_nfo_data(
     json_data["studio"] = studio
     json_data["publisher"] = publisher
     json_data["website"] = website
-    json_data["cover"] = cover
+    json_data["thumb"] = cover
     if cover:
-        json_data["cover_list"].append(("local", cover))
+        json_data["thumb_list"].append(("local", cover))
     json_data["poster"] = poster
     json_data["trailer"] = trailer
     json_data["wanted"] = wanted

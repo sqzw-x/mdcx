@@ -444,16 +444,16 @@ async def _get_big_thumb(json_data: ImageContext) -> ImageContext:
     thumb_width = 0
 
     # faleno.jp 番号检查，都是大图，返回即可
-    if json_data["cover_from"] in ["faleno", "dahlia"]:
-        if json_data["cover"]:
-            LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({json_data['cover_from']})({get_used_time(start_time)}s)")
+    if json_data["thumb_from"] in ["faleno", "dahlia"]:
+        if json_data["thumb"]:
+            LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({json_data['thumb_from']})({get_used_time(start_time)}s)")
         json_data["poster_big"] = True
         return json_data
 
     # prestige 图片有的是大图，需要检测图片分辨率
-    elif json_data["cover_from"] in ["prestige", "mgstage"]:
-        if json_data["cover"]:
-            thumb_width, h = get_imgsize(json_data["cover"])
+    elif json_data["thumb_from"] in ["prestige", "mgstage"]:
+        if json_data["thumb"]:
+            thumb_width, h = get_imgsize(json_data["thumb"])
 
     # 片商官网查询
     elif "official" in config.download_hd_pics:
@@ -466,9 +466,9 @@ async def _get_big_thumb(json_data: ImageContext) -> ImageContext:
                     r'src="((https://cdn.faleno.net/top/wp-content/uploads/[^_]+_)([^?]+))\?output-quality=', response
                 )
                 if temp_url:
-                    json_data["cover"] = temp_url[0][0]
+                    json_data["thumb"] = temp_url[0][0]
                     json_data["poster"] = temp_url[0][1] + "2125.jpg"
-                    json_data["cover_from"] = "faleno"
+                    json_data["thumb_from"] = "faleno"
                     json_data["poster_from"] = "faleno"
                     json_data["poster_big"] = True
                     trailer_temp = re.findall(r'class="btn09"><a class="pop_sample" href="([^"]+)', response)
@@ -486,8 +486,8 @@ async def _get_big_thumb(json_data: ImageContext) -> ImageContext:
             req_url = f"https://km-produce.com/img/title1/{number_lower_line}.jpg"
             real_url = check_url(req_url)
             if real_url:
-                json_data["cover"] = real_url
-                json_data["cover_from"] = "km-produce"
+                json_data["thumb"] = real_url
+                json_data["thumb_from"] = "km-produce"
                 LogBuffer.log().write(f"\n 🖼 HD Thumb found! (km-produce)({get_used_time(start_time)}s)")
                 return json_data
 
@@ -501,25 +501,25 @@ async def _get_big_thumb(json_data: ImageContext) -> ImageContext:
                 if number_letter == "docvr":
                     req_url = f"https://www.prestige-av.com/api/media/goods/doc/{number_letter}/{number_num}/pb_{number_lower_line}.jpg"
                 if get_imgsize(req_url)[0] >= 800:
-                    json_data["cover"] = req_url
+                    json_data["thumb"] = req_url
                     json_data["poster"] = req_url.replace("/pb_", "/pf_")
-                    json_data["cover_from"] = "prestige"
+                    json_data["thumb_from"] = "prestige"
                     json_data["poster_from"] = "prestige"
                     json_data["poster_big"] = True
                     LogBuffer.log().write(f"\n 🖼 HD Thumb found! (prestige)({get_used_time(start_time)}s)")
                     return json_data
 
     # 使用google以图搜图
-    pic_url = json_data.get("cover")
+    pic_url = json_data.get("thumb")
     if "google" in config.download_hd_pics:
-        if pic_url and json_data["cover_from"] != "theporndb":
+        if pic_url and json_data["thumb_from"] != "theporndb":
             thumb_url, cover_size = await get_big_pic_by_google(pic_url)
             if thumb_url and cover_size[0] > thumb_width:
-                json_data["cover_size"] = cover_size
+                json_data["thumb_size"] = cover_size
                 pic_domain = re.findall(r"://([^/]+)", thumb_url)[0]
-                json_data["cover_from"] = f"Google({pic_domain})"
-                json_data["cover"] = thumb_url
-                LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({json_data['cover_from']})({get_used_time(start_time)}s)")
+                json_data["thumb_from"] = f"Google({pic_domain})"
+                json_data["thumb"] = thumb_url
+                LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({json_data['thumb_from']})({get_used_time(start_time)}s)")
 
     return json_data
 
@@ -643,7 +643,7 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
         ):
             await copy_file_async(done_thumb_path, thumb_final_path)
             LogBuffer.log().write(f"\n 🍀 Thumb done! (copy cd-thumb)({get_used_time(start_time)}s) ")
-            json_data["cover_from"] = "copy cd-thumb"
+            json_data["thumb_from"] = "copy cd-thumb"
             json_data["thumb_path"] = thumb_final_path
             return True
 
@@ -651,10 +651,10 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
     json_data = await _get_big_thumb(json_data)
 
     # 下载图片
-    cover_url = json_data.get("cover")
-    cover_from = json_data.get("cover_from")
+    cover_url = json_data.get("thumb")
+    cover_from = json_data.get("thumb_from")
     if cover_url:
-        cover_list = json_data["cover_list"]
+        cover_list = json_data["thumb_list"]
         while (cover_from, cover_url) in cover_list:
             cover_list.remove((cover_from, cover_url))
         cover_list.insert(0, (cover_from, cover_url))
@@ -672,17 +672,17 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
                     f"\n 🟠 检测到 Thumb 图片失效! 跳过！({cover_from})({get_used_time(start_time)}s) " + each[1]
                 )
                 continue
-            json_data["cover_from"] = cover_from
+            json_data["thumb_from"] = cover_from
             if await download_file_with_filepath(cover_url, thumb_final_path_temp, folder_new_path):
                 cover_size = await check_pic_async(thumb_final_path_temp)
                 if cover_size:
                     if (
                         not cover_from.startswith("Google")
-                        or cover_size == json_data["cover_size"]
+                        or cover_size == json_data["thumb_size"]
                         or (
                             cover_size[0] >= 800
                             and abs(
-                                cover_size[0] / cover_size[1] - json_data["cover_size"][0] / json_data["cover_size"][1]
+                                cover_size[0] / cover_size[1] - json_data["thumb_size"][0] / json_data["thumb_size"][1]
                             )
                             <= 0.1
                         )

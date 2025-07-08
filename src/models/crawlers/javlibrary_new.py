@@ -41,7 +41,7 @@ async def main(
     dic = json_data_zh["javlibrary"][language]
     dic["originaltitle"] = json_data["javlibrary"]["jp"]["originaltitle"]
     dic["originalplot"] = json_data["javlibrary"]["jp"]["originalplot"]
-    json_data["javlibrary"].update({"zh_cn": dic, "zh_tw": dic})
+    json_data["javlibrary"].update({language: dic})
     return json_data
 
 

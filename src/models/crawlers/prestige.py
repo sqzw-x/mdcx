@@ -62,7 +62,6 @@ def get_real_url(html_search, number):
 async def main(
     number,
     appoint_url="",
-    language="jp",
     **kwargs,
 ):
     start_time = time.time()
@@ -180,7 +179,7 @@ async def main(
                     "publisher": publisher,
                     "source": "prestige",
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": poster,
                     "extrafanart": extrafanart,
                     "trailer": trailer,
@@ -202,7 +201,7 @@ async def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {

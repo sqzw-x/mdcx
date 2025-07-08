@@ -60,7 +60,6 @@ def get_video_time(html):  # 获取视频时长
 async def main(
     number,
     appoint_url="",
-    language="jp",
     **kwargs,
 ):
     """
@@ -136,7 +135,7 @@ async def main(
                 "source": "fc2",
                 "website": real_url,
                 "actor_photo": {actor: ""},
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": cover_url,
                 "extrafanart": "",
                 "trailer": video_url,
@@ -157,7 +156,7 @@ async def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}

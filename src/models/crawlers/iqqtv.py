@@ -274,7 +274,7 @@ async def main(
                 "source": "iqqtv",
                 "website": real_url,
                 "actor_photo": actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": "",
                 "extrafanart": extrafanart,
                 "trailer": "",
@@ -296,7 +296,7 @@ async def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {language: dic}}

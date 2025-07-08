@@ -73,21 +73,21 @@ class MoveContext(TypedDict):
 class ImageContext(TypedDict):
     cd_part: str
 
-    cover_size: tuple[int, int]
+    thumb_size: tuple[int, int]
     poster_big: bool
     image_cut: str
     # poster_marked: bool
     # thumb_marked: bool
     # fanart_marked: bool
-    cover_list: list[tuple[str, str]]
+    thumb_list: list[tuple[str, str]]
     poster_path: str
     thumb_path: str
     fanart_path: str
-    cover: str
+    thumb: str
     poster: str
     trailer: str
     extrafanart: str
-    cover_from: str
+    thumb_from: str
     poster_from: str
     trailer_from: str
 
@@ -111,7 +111,7 @@ class MovieData(TypedDict):
     version: int
     image_download: bool
     outline_from: str
-    cover_from: str
+    thumb_from: str
     extrafanart_from: str
     trailer_from: str
     short_number: str
@@ -215,17 +215,17 @@ def new_json_data() -> JsonData:
     return {
         "definition": "",
         "actor": "",
-        "cover_size": (0, 0),
+        "thumb_size": (0, 0),
         "poster_big": False,
         "image_cut": "",
         "poster_marked": True,
         "thumb_marked": True,
         "fanart_marked": True,
-        "cover_list": [],
+        "thumb_list": [],
         "poster_path": "",
         "thumb_path": "",
         "fanart_path": "",
-        "cover": "",
+        "thumb": "",
         "poster": "",
         "extrafanart": "",
         "actor_amazon": [],
@@ -245,7 +245,7 @@ def new_json_data() -> JsonData:
         "version": 0,
         "image_download": False,
         "outline_from": "",
-        "cover_from": "",
+        "thumb_from": "",
         "poster_from": "",
         "extrafanart_from": "",
         "trailer_from": "",

@@ -903,7 +903,7 @@ class MyMAinWindow(QMainWindow):
                     "destroyed": "",
                     "actor_href": "",
                     "definition": "",
-                    "cover_from": "",
+                    "thumb_from": "",
                     "poster_from": "",
                     "extrafanart_from": "",
                     "trailer_from": "",
@@ -984,7 +984,7 @@ class MyMAinWindow(QMainWindow):
                         thumb_path = fanart_path
 
                 poster_from = json_data["poster_from"]
-                cover_from = json_data["cover_from"]
+                cover_from = json_data["thumb_from"]
 
                 config.executor.submit(self._set_pixmap(poster_path, thumb_path, poster_from, cover_from))
         except Exception:
@@ -1214,7 +1214,7 @@ class MyMAinWindow(QMainWindow):
             release = json_data.get("release")
             tag = json_data.get("tag")
             number = json_data.get("number")
-            cover = json_data.get("cover")
+            cover = json_data.get("thumb")
             poster = json_data.get("poster")
             website = json_data.get("website")
             series = json_data.get("series")
@@ -1284,7 +1284,7 @@ class MyMAinWindow(QMainWindow):
             json_data["studio"] = self.Ui.lineEdit_nfo_studio.text()
             json_data["publisher"] = self.Ui.lineEdit_nfo_publisher.text()
             json_data["poster"] = self.Ui.lineEdit_nfo_poster.text()
-            json_data["cover"] = self.Ui.lineEdit_nfo_cover.text()
+            json_data["thumb"] = self.Ui.lineEdit_nfo_cover.text()
             json_data["trailer"] = self.Ui.lineEdit_nfo_trailer.text()
             json_data["website"] = self.Ui.lineEdit_nfo_website.text()
             json_data["country"] = self.Ui.comboBox_nfo.currentText()

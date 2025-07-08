@@ -261,9 +261,7 @@ def get_year(release):
 async def main(
     number,
     appoint_url="",
-    language="zh_cn",
     file_path="",
-    appoint_number="",
     **kwargs,
 ):
     if not file_path:
@@ -430,7 +428,7 @@ async def main(
                 "source": "theporndb",
                 "actor_photo": actor_photo,
                 "all_actor_photo": all_actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": poster_url,
                 "extrafanart": [],
                 "trailer": trailer,
@@ -453,9 +451,7 @@ async def main(
         return await theporndb_movies.main(
             number,
             appoint_url=appoint_url,
-            language="zh_cn",
             file_path=file_path,
-            appoint_number=appoint_number,
         )
 
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}

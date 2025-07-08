@@ -184,7 +184,6 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
 async def main(
     number,
     appoint_url="",
-    language="zh_cn",
     file_path="",
     appoint_number="",
     mosaic="",
@@ -335,7 +334,7 @@ async def main(
                     "publisher": studio,
                     "source": "hdouban",
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": poster,
                     "extrafanart": extrafanart,
                     "trailer": trailer,
@@ -357,7 +356,7 @@ async def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
