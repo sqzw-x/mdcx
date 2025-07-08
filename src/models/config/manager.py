@@ -464,20 +464,18 @@ class ConfigSchema:
 
         # 依赖于 config 的类不能作为全局变量, 必须在 config 内构建, 以在 config 更新后正确重建
         self.async_client = AsyncWebClient(
-            proxy=config.httpx_proxy,
-            retry=config.retry,
-            timeout=httpx.Timeout(config.timeout),
-            default_headers=config.random_headers,
+            proxy=self.httpx_proxy,
+            retry=self.retry,
+            timeout=self.timeout,
             log_fn=signal.add_log,
-            ipv4_only=config.ipv4_only,
         )
 
         self.llm_client = LLMClient(
-            client=self.async_client,
-            api_key=config.llm_key,
-            base_url=config.llm_url,
-            timeout=httpx.Timeout(config.timeout, read=None),
-            rate=(max(config.llm_max_req_sec, 1), max(1, 1 / config.llm_max_req_sec)),
+            api_key=self.llm_key,
+            base_url=self.llm_url,
+            proxy=self.httpx_proxy,
+            timeout=httpx.Timeout(self.timeout, read=None),  # 只设置连接超时, 不限制 llm 生成时间
+            rate=(max(self.llm_max_req_sec, 1), max(1, 1 / self.llm_max_req_sec)),
         )
         self.executor = executor  # 方便通过 config 访问 executor
 

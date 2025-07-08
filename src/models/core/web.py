@@ -696,7 +696,7 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
                             Flags.file_done_dic[json_data["number"]].update(dic)
                         json_data["thumb_marked"] = False  # 表示还没有走加水印流程
                         LogBuffer.log().write(
-                            f"\n 🍀 Thumb done! ({json_data['cover_from']})({get_used_time(start_time)}s) "
+                            f"\n 🍀 Thumb done! ({json_data['thumb_from']})({get_used_time(start_time)}s) "
                         )
                         json_data["thumb_path"] = thumb_final_path
                         return True

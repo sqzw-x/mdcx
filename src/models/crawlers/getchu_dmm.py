@@ -7,9 +7,10 @@ from models.crawlers import dmm, getchu
 async def main(
     number,
     appoint_url="",
+    file_path="",
     **kwargs,
 ):
-    json_data_getchu = await getchu.main(number, appoint_url, "jp")
+    json_data_getchu = await getchu.main(number, appoint_url)
     json_data_new = json_data_getchu["getchu"]["jp"]
 
     poster = json_data_new.get("poster")
@@ -18,7 +19,7 @@ async def main(
         number = json_data_new["number"]
         if number.startswith("DLID") or "dl.getchu" in appoint_url:
             return json_data_getchu
-    json_data_dmm = await dmm.main(number, appoint_url, "jp")
+    json_data_dmm = await dmm.main(number, appoint_url, file_path)
     if json_data_dmm["dmm"]["jp"]["title"]:
         json_data_new.update(json_data_dmm["dmm"]["jp"])
         if poster:  # 使用 getchu 封面

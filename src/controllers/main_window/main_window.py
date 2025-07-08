@@ -2097,7 +2097,7 @@ class MyMAinWindow(QMainWindow):
                 "mgstage": ["https://www.mgstage.com", ""],
                 "getchu": ["http://www.getchu.com", ""],
                 "theporndb": ["https://api.theporndb.net", ""],
-                "avsox": [get_avsox_domain(), ""],
+                "avsox": [config.executor.run(get_avsox_domain()), ""],
                 "xcity": ["https://xcity.jp", ""],
                 "7mmtv": ["https://7mmtv.sx", ""],
                 "mdtv": ["https://www.mdpjzip.xyz", ""],

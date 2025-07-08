@@ -114,7 +114,7 @@ async def main(
     **kwargs,
 ):
     if "DLID" in number.upper() or "ITEM" in number.upper() or "GETCHU" in number.upper() or "dl.getchu" in appoint_url:
-        return await getchu_dl.main(number, appoint_url, "jp")
+        return await getchu_dl.main(number, appoint_url)
     start_time = time.time()
     website_name = "getchu"
     getchu_url = "http://www.getchu.com"
@@ -170,7 +170,7 @@ async def main(
             else:
                 debug_info = "搜索结果: 未匹配到番号！"
                 LogBuffer.info().write(web_info + debug_info)
-                return await getchu_dl.main(number, appoint_url, "jp")
+                return await getchu_dl.main(number, appoint_url)
 
         if real_url:
             debug_info = f"番号地址: {real_url} "

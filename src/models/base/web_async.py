@@ -1,10 +1,15 @@
 import asyncio
+import random
 from io import BytesIO
-from typing import Any, Callable, Literal, Optional
+from typing import Any, Callable, Optional
 
 import aiofiles
 import httpx
 from aiolimiter import AsyncLimiter
+from curl_cffi import AsyncSession, Response
+from curl_cffi.requests.exceptions import ConnectionError, RequestException, Timeout
+from curl_cffi.requests.session import HttpMethod
+from curl_cffi.requests.utils import not_set
 from PIL import Image
 
 
@@ -15,7 +20,7 @@ class AsyncWebLimiters:
             "localhost": AsyncLimiter(300, 1),
         }
 
-    def get(self, key: str, rate: float = 1, period: float = 1) -> AsyncLimiter:
+    def get(self, key: str, rate: float = 5, period: float = 1) -> AsyncLimiter:
         return self.limiters.setdefault(key, AsyncLimiter(rate, period))
 
     def remove(self, key: str):
@@ -29,42 +34,27 @@ class AsyncWebClient:
         *,
         proxy: Optional[str] = None,
         retry: int = 3,
-        timeout: Optional[httpx.Timeout] = None,
-        default_headers: Optional[dict[str, str]] = None,
+        timeout: float,
         log_fn: Optional[Callable[[str], None]] = None,
-        ipv4_only: bool = False,
         limiters: Optional[AsyncWebLimiters] = None,
     ):
-        limits = httpx.Limits(max_connections=100, max_keepalive_connections=50, keepalive_expiry=20)
         self.retry = retry
-        self.default_headers = default_headers or {}
-        # httpx 不支持为每个请求单独设置代理, 需要两个客户端
-        self.proxy_client = httpx.AsyncClient(
-            limits=limits,
-            proxy=proxy,
+        self.proxy = proxy
+        self.curl_session = AsyncSession(
+            max_clients=50,
             verify=False,
+            max_redirects=20,
             timeout=timeout,
-            follow_redirects=True,
-            # https://github.com/encode/httpx/discussions/2664
-            transport=httpx.AsyncHTTPTransport(local_address="0.0.0.0") if ipv4_only else None,
+            impersonate=random.choice(["chrome123", "chrome124", "chrome131", "chrome136", "firefox133", "firefox135"]),
         )
-        self.no_proxy_client = httpx.AsyncClient(
-            limits=limits,
-            verify=False,
-            timeout=timeout,
-            follow_redirects=True,
-            transport=httpx.AsyncHTTPTransport(local_address="0.0.0.0") if ipv4_only else None,
-        )
+
         self.log_fn = log_fn if log_fn is not None else lambda _: None
         self.limiters = limiters if limiters is not None else AsyncWebLimiters()
-
-    def _client(self, use_proxy):
-        return self.proxy_client if use_proxy else self.no_proxy_client
 
     def _prepare_headers(self, url: Optional[str] = None, headers: Optional[dict[str, str]] = None) -> dict[str, str]:
         """预处理请求头"""
         if not headers:
-            headers = self.default_headers.copy()
+            headers = {}
 
         # 根据URL设置特定的Referer
         if url:
@@ -83,7 +73,7 @@ class AsyncWebClient:
 
     async def request(
         self,
-        method: Literal["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
+        method: HttpMethod,
         url: str,
         *,
         headers: Optional[dict[str, str]] = None,
@@ -92,7 +82,7 @@ class AsyncWebClient:
         data: Optional[dict[str, Any]] = None,
         json_data: Optional[dict[str, Any]] = None,
         timeout: Optional[httpx.Timeout] = None,
-    ):
+    ) -> tuple[Optional[Response], str]:
         """
         执行请求的通用方法
 
@@ -106,7 +96,7 @@ class AsyncWebClient:
             timeout: 请求超时时间, 覆盖客户端默认值
 
         Returns:
-            tuple[Optional[httpx.Response], str]: (响应对象, 错误信息)
+            tuple[Optional[Response], str]: (响应对象, 错误信息)
         """
         try:
             u = httpx.URL(url)
@@ -116,14 +106,15 @@ class AsyncWebClient:
             error_msg = ""
             for attempt in range(retry_count):
                 try:
-                    resp = await self._client(use_proxy).request(
+                    resp: Response = await self.curl_session.request(
                         method,
-                        u,
+                        url,
+                        proxy=self.proxy if use_proxy else None,
                         headers=headers,
                         cookies=cookies,
                         data=data,
                         json=json_data,
-                        timeout=timeout or httpx.USE_CLIENT_DEFAULT,
+                        timeout=timeout or not_set,
                     )
                     # 检查响应状态
                     if resp.status_code >= 300 and not (resp.status_code == 302 and resp.headers.get("Location")):
@@ -131,19 +122,21 @@ class AsyncWebClient:
                     else:
                         self.log_fn(f"✅ {method} {url} 成功")
                         return resp, ""
-                except httpx.TimeoutException:
+                except Timeout:
                     error_msg = "超时"
-                except httpx.ConnectError as e:
+                except ConnectionError as e:
                     error_msg = f"连接错误: {str(e)}"
+                except RequestException as e:
+                    error_msg = f"请求异常: {str(e)} {e.code}"
                 except Exception as e:
-                    error_msg = f"请求异常: {str(e)}"
+                    error_msg = f"curl-cffi 异常: {str(e)}"
                 self.log_fn(f"🔴 {method} {url} 失败: {error_msg} ({attempt + 1}/{retry_count})")
                 # 重试前等待
                 if attempt < retry_count - 1:
                     await asyncio.sleep(attempt * 3 + 2)
             return None, f"{method} {url} 失败: {error_msg}"
         except Exception as e:
-            error_msg = f"{method} {url} 发生未知错误:  {str(e)}"
+            error_msg = f"{method} {url} 未知错误:  {str(e)}"
             self.log_fn(f"🔴 {error_msg}")
             return None, error_msg
 

@@ -4,7 +4,7 @@
 
 import asyncio
 import re
-from typing import Callable
+from typing import Callable, TypedDict
 
 import langid
 
@@ -53,48 +53,123 @@ from ..crawlers import (
 )
 from ..entity.enums import FileMode
 from .flags import Flags
-from .json_data import JsonData, LogBuffer
+from .json_data import JsonData, LogBuffer, new_json_data
+
+
+class CrawlersResult(TypedDict):
+    """
+    爬虫结果类型，包含所有可能的元数据字段. (注释由 AI 生成, 仅供参考)
+    """
+
+    # 基本信息
+    number: str  # 番号
+    short_number: str  # 素人番号的短形式（不带前缀数字）
+    title: str  # 标题
+    originaltitle: str  # 原始标题（日文）
+    originaltitle_amazon: str  # 用于 Amazon 搜索的原始标题
+    outline: str  # 简介
+    originalplot: str  # 原始简介（日文）
+    # 演员信息
+    actor: str  # 演员名称，逗号分隔
+    all_actor: str  # 所有来源的演员名称
+    all_actor_photo: dict  # 演员照片信息
+    actor_amazon: list[str]  # 用于 Amazon 搜索的演员名称
+    amazon_orginaltitle_actor: str  # 用于 Amazon 搜索的原始标题中的演员
+    # 元数据信息
+    tag: str  # 标签，逗号分隔
+    release: str  # 发行日期
+    year: str  # 发行年份
+    runtime: str  # 片长（分钟）
+    score: str  # 评分
+    series: str  # 系列
+    director: str  # 导演
+    studio: str  # 制作商
+    publisher: str  # 发行商
+    # 图片与视频
+    thumb: str  # 缩略图URL
+    thumb_list: list  # 所有来源的缩略图URL列表
+    poster: str  # 海报URL
+    extrafanart: list[str]  # 额外剧照URL列表
+    trailer: str  # 预告片URL
+    image_download: bool  # 是否需要下载图片
+    # 马赛克类型
+    mosaic: str
+    letters: str  # 番号字母部分
+    # 标志信息
+    has_sub: bool  # 是否有字幕
+    c_word: str  # 中文字幕标识
+    leak: str  # 是否是无码流出
+    wuma: str  # 是否是无码
+    youma: str  # 是否是有码
+    cd_part: str  # CD分集信息
+    destroyed: str  # 是否是无码破解
+    version: int  # 版本信息
+    # 文件路径与指定信息
+    file_path: str  # 文件路径
+    appoint_number: str  # 指定番号
+    appoint_url: str  # 指定URL
+    # 其他信息
+    javdbid: str  # JavDB ID
+    fields_info: str  # 字段来源信息
+    naming_media: str  # 媒体命名规则
+    naming_file: str  # 文件命名规则
+    folder_name: str  # 文件夹命名规则
+    # 字段来源信息
+    poster_from: str
+    thumb_from: str
+    extrafanart_from: str
+    trailer_from: str
+    outline_from: str
+    website_name: str  # 使用的网站名称
+
 
 CRAWLER_FUNCS: dict[str, Callable] = {
-    "official": official.main,
-    "iqqtv": iqqtv_new.main,
-    "avsex": avsex.main,
-    "airav_cc": airav_cc.main,
-    "airav": airav.main,
-    "freejavbt": freejavbt.main,
-    "javbus": javbus.main,
-    "javdb": javdb.main,
-    "jav321": jav321.main,
-    "dmm": dmm.main,
-    "javlibrary": javlibrary_new.main,
-    "xcity": xcity.main,
-    "avsox": avsox.main,
-    "mgstage": mgstage.main,
     "7mmtv": mmtv.main,
-    "fc2": fc2.main,
-    "fc2hub": fc2hub.main,
-    "fc2club": fc2club.main,
-    "fc2ppvdb": fc2ppvdb.main,
-    "mdtv": mdtv.main,
-    "madouqu": madouqu.main,
-    "hscangku": hscangku.main,
+    "airav_cc": airav_cc.main,  # lang
+    "airav": airav.main,  # lang
+    "avsex": avsex.main,
+    "avsox": avsox.main,
     "cableav": cableav.main,
-    "getchu": getchu.main,
-    "getchu_dmm": getchu_dmm.main,
-    "mywife": mywife.main,
-    "giga": giga.main,
-    "hdouban": hdouban.main,
-    "lulubar": lulubar.main,
-    "love6": love6.main,
     "cnmdb": cnmdb.main,
+    "dahlia": dahlia.main,
+    "dmm": dmm.main,
     "faleno": faleno.main,
     "fantastica": fantastica.main,
-    "theporndb": theporndb.main,
-    "dahlia": dahlia.main,
-    "prestige": prestige.main,
-    "kin8": kin8.main,
+    "fc2": fc2.main,
+    "fc2club": fc2club.main,
+    "fc2hub": fc2hub.main,
+    "fc2ppvdb": fc2ppvdb.main,
+    "freejavbt": freejavbt.main,
+    "getchu_dmm": getchu_dmm.main,
+    "getchu": getchu.main,
+    "giga": giga.main,
+    "hdouban": hdouban.main,
+    "hscangku": hscangku.main,
+    "iqqtv": iqqtv_new.main,  # lang
+    "jav321": jav321.main,
+    "javbus": javbus.main,
     "javday": javday.main,
+    "javdb": javdb.main,
+    "javlibrary": javlibrary_new.main,  # lang
+    "kin8": kin8.main,
+    "love6": love6.main,
+    "lulubar": lulubar.main,
+    "madouqu": madouqu.main,
+    "mdtv": mdtv.main,
+    "mgstage": mgstage.main,
+    "mywife": mywife.main,
+    "official": official.main,
+    "prestige": prestige.main,
+    "theporndb": theporndb.main,
+    "xcity": xcity.main,
 }
+
+MULTI_LANGUAGE_WEBSITES = [  # 支持多语言, language 参数有意义
+    "airav_cc",
+    "airav",
+    "iqqtv",
+    "javlibrary",
+]
 
 
 def clean_list(raw: list[str]) -> list[str]:
@@ -158,13 +233,12 @@ async def _call_crawler(
 async def _call_crawlers(
     task_input: JsonData,
     number_website_list: list[str],
-) -> JsonData:
+) -> CrawlersResult:
     """
     获取一组网站的数据：按照设置的网站组，请求各字段数据，并返回最终的数据
     """
     number = task_input["number"]
     short_number = task_input["short_number"]
-    mosaic = task_input["mosaic"]
     scrape_like = config.scrape_like
     none_fields = config.none_fields  # 不单独刮削的字段
     use_official = "official" in config.website_set  # 优先使用官方网站
@@ -222,15 +296,47 @@ async def _call_crawlers(
             del all_field_websites["outline_zh"]
         if config.title_language == "jp" and "title_zh" in all_field_websites:
             del all_field_websites["title_zh"]
-    # 各字段语言
-    all_field_languages = {field: getattr(config, f"{field}_language", "zh") for field in all_fields}
+
+    # 各字段语言, 未指定则默认为 "any"
+    all_field_languages = {field: getattr(config, f"{field}_language", "any") for field in all_fields}
+    all_field_languages["title_zh"] = config.title_language
+    all_field_languages["outline_zh"] = config.outline_language
+
+    # 处理配置项中没有的字段
+    # originaltitle 的网站优先级同 title, 语言为 jp
+    all_field_websites["originaltitle"] = all_field_websites.get("title", number_website_list)
+    all_field_languages["originaltitle"] = "jp"
+    all_field_websites["originalplot"] = all_field_websites.get("outline", number_website_list)
+    all_field_languages["originalplot"] = "jp"
+
     # 所有需要请求的 (网站, 语言) 对
-    all_websites = (
-        (website, all_field_languages[field]) for field, websites in all_field_websites.items() for website in websites
-    )
+    website_lang_pairs: set[tuple[str, str]] = set()
+    # 各字段的取值优先级 (网站, 语言) 对
+    all_field_website_lang_pairs: dict[str, list[tuple[str, str]]] = {}
+    for field, websites in all_field_websites.items():
+        language = all_field_languages[field]
+        all_field_website_lang_pairs[field] = []
+        for website in websites:
+            pair = (website, language)
+            if website not in MULTI_LANGUAGE_WEBSITES:
+                pair = (website, "")  # 单语言网站, 语言参数无意义
+            website_lang_pairs.add(pair)
+            all_field_website_lang_pairs[field].append(pair)
+    for w in MULTI_LANGUAGE_WEBSITES:
+        if (w, "any") in website_lang_pairs and all(
+            (w, lang) not in website_lang_pairs for lang in ["jp", "zh_cn", "zh_tw"]
+        ):
+            # 如果多语言网站只有 any 语言, 则添加一个其他语言
+            website_lang_pairs.add((w, "jp"))
+    # iqqtv 请求其它语言时会得到 jp 语言的数据, 可减少一次请求
+    if ("iqqtv", "zh_cn") in website_lang_pairs or ("iqqtv", "zh_tw") in website_lang_pairs:
+        website_lang_pairs.remove(("iqqtv", "jp"))
 
     tasks = []
-    for website, language in all_websites:
+    for website, language in website_lang_pairs:
+        if language == "any":
+            # 非多语言网站不会有 any, 多语言网站至少有一个其它语言, 因此可跳过 any
+            continue
         tasks.append(_call_crawler(task_input, website, language, config.title_language))
     res: list[dict[str, dict[str, dict]]] = await asyncio.gather(*tasks)
 
@@ -238,63 +344,56 @@ async def _call_crawlers(
     all_res: dict[tuple[str, str], dict] = {}
     for website_data in res:
         for website, datas in website_data.items():
-            for lang, data in datas.items():
-                key = (website, lang)
+            if website not in MULTI_LANGUAGE_WEBSITES:
+                # 单语言网站, 只取第一个语言的数据
+                key = (website, "")
                 if key in all_res:
-                    raise ValueError(f"Duplicate data for {key} found in crawler results.")
-                all_res[key] = data
+                    print(f"Duplicate data for {key} found in crawler results.")
+                all_res[key] = next(iter(datas.values()))
+            else:
+                for lang, data in datas.items():
+                    key = (website, lang)
+                    if key in all_res:
+                        print(f"Duplicate data for {key} found in crawler results.")
+                    all_res[key] = data
+                    if (website, "any") not in all_res:
+                        # 如果没有 any 语言的数据, 则添加
+                        all_res[(website, "any")] = data
 
     # 按优先级合并
-    # 处理配置项和返回值的不匹配字段
-    # 1. originaltitle 的取值优先级对应 title, 语言为 jp
-    all_field_websites["originaltitle"] = all_field_websites.get("title", number_website_list)
-    all_field_languages["originaltitle"] = "jp"
-    # 2. originalplot 的取值优先级对应 outline
-    all_field_websites["originalplot"] = all_field_websites.get("outline", number_website_list)
-    all_field_languages["originalplot"] = "jp"
-    # 2. 当语言非 jp 时, 最终 title 的取值优先级为 title 和 title_zh, 且需检查所有语言
+    # 当语言非 jp 时, 也允许 title 从 title_zh 来源获取
     if config.title_language != "jp":
-        all_field_websites["title"] += all_field_websites.get("title_zh", [])
-        all_field_languages["title"] = "all"
-    # 3. 当语言非 jp 时, 最终 outline 的取值优先级为 outline 和 outline_zh, 且需检查所有语言
+        all_field_website_lang_pairs["title"] += all_field_website_lang_pairs.get("title_zh", [])
     if config.outline_language != "jp":
-        all_field_websites["outline"] += all_field_websites.get("outline_zh", [])
-        all_field_languages["outline"] = "all"
+        all_field_website_lang_pairs["outline"] += all_field_website_lang_pairs.get("outline_zh", [])
+    # 无优先级设置的字段的默认配置
+    default_website_lang_pairs = [
+        (w, "") if w not in MULTI_LANGUAGE_WEBSITES else (w, "any") for w in number_website_list
+    ]
 
-    reduced: dict = {"number": number, "short_number": short_number, "mosaic": mosaic, "fields_info": ""}
+    reduced: CrawlersResult = new_json_data()  # 验证 JsonData 和 CrawlersResult 一致, 初始化所有字段
+    reduced.update(task_input)  # 复制输入数据
+
     for field in ManualConfig.CRAWLER_DATA_FIELDS:  # 与 CONFIG_DATA_FIELDS 不完全一致
-        if field not in all_field_websites:
-            # 没有设定此字段的优先级和语言, 则任意取值
-            sources = [(w, lang) for w in number_website_list for lang in ["jp", "zh_cn", "zh_tw"]]
-        else:
-            sources = [(w, all_field_languages[field]) for w in all_field_websites[field]]
-
+        sources = all_field_website_lang_pairs.get(field, default_website_lang_pairs)
         LogBuffer.info().write(
             f"\n\n    🙋🏻‍ {field} \n    ====================================\n"
-            f"    🌐 来源优先级：{' -> '.join(i[0] for i in sources)}"
+            f"    🌐 来源优先级：{' -> '.join(i[0] + f'({i[1]})' * bool(i[1]) for i in sources)}"
         )
         for website, language in sources:
-            if language == "all":
-                site_data = (
-                    all_res.get((website, "jp"), {})
-                    or all_res.get((website, "zh_cn"), {})
-                    or all_res.get((website, "zh_tw"), {})
-                )
-            else:
-                site_data = all_res.get((website, language), {})
-
-            if not site_data.get("title", "") or not site_data.get(field, ""):
+            site_data = all_res.get((website, language), {})
+            if not site_data or not site_data.get("title", "") or not site_data.get(field, ""):
                 LogBuffer.info().write(f"\n    🔴 {website} (失败)")
                 continue
-
             if config.scrape_like != "speed":
                 if field in ["title", "outline", "originaltitle", "originalplot"]:
+                    lang = all_field_languages.get(field, "jp")
                     if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:  # why?
                         if langid.classify(site_data[field])[0] != "ja":
-                            if language == "jp":
+                            if lang == "jp":
                                 LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为非日文，跳过！)")
                                 continue
-                        elif language != "jp":
+                        elif lang != "jp":
                             LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为日文，跳过！)")
                             continue
             # 添加来源信息
@@ -305,7 +404,7 @@ async def _call_crawlers(
                 reduced["image_download"] = site_data["image_download"]
             elif field == "thumb":
                 # 记录所有 thumb url 以便后续下载
-                reduced["thumb_list"] = reduced.get("thumb_list", []).append((website, site_data["thumb"]))
+                reduced["thumb_list"].append((website, site_data["thumb"]))
             elif field == "actor":
                 if isinstance(site_data["actor"], list):
                     # 处理 actor 为列表的情况
@@ -313,17 +412,16 @@ async def _call_crawlers(
                 reduced["all_actor"] = reduced.get("all_actor", site_data["actor"])
                 reduced["all_actor_photo"] = reduced.get("all_actor_photo", site_data.get("actor_photo", ""))
                 # 记录所有网站的 actor 用于 Amazon 搜图, 因为有的网站 actor 不对
-                reduced["actor_amazon"] = reduced.get("actor_amazon", []).extend(site_data["actor"].split(","))
+                reduced["actor_amazon"].extend(site_data["actor"].split(","))
             elif field == "originaltitle" and site_data.get("actor", ""):
                 reduced["amazon_orginaltitle_actor"] = site_data["actor"].split(",")[0]
 
             reduced[field] = site_data[field]
-            reduced["fields_info"] += f"\n     {field:<13}: {website} ({language})"
+            reduced["fields_info"] += f"\n     {field:<13}: {website}" + f" ({language})" * bool(language)
             LogBuffer.info().write(f"\n    🟢 {website} (成功)\n     ↳ {reduced[field]}")
             break
         else:  # 所有来源都无此字段
-            reduced[field] = None
-            reduced["fields_info"] += "\n     {field:<13}: {'-----'} ({'not found'})"
+            reduced["fields_info"] += f"\n     {field:<13}: {'-----'} ({'not found'})"
 
     # 处理 year
     if reduced.get("year", "") and (r := re.search(r"\d{4}", reduced.get("release", ""))):
@@ -334,9 +432,7 @@ async def _call_crawlers(
         reduced["number"] = number
 
     # 处理 javdbid
-    r = all_res.get(("javdb", "jp"), {}) or all_res.get(("javdb", "zh_cn"), {}) or all_res.get(("javdb", "zh_tw"), {})
-    if r and "javdbid" in r:
-        reduced["javdbid"] = r["javdbid"]
+    reduced["javdbid"] = all_res.get(("javdb", ""), {}).get("javdbid", "")
 
     # todo 由于异步, 此处日志混乱. 需移除 LogBuffer.req(), 改为返回日志信息
     reduced["fields_info"] = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}{reduced['fields_info']}"
@@ -344,7 +440,7 @@ async def _call_crawlers(
     return reduced
 
 
-async def _call_specific_crawler(task_input: JsonData, website: str) -> JsonData:
+async def _call_specific_crawler(task_input: JsonData, website: str) -> CrawlersResult:
     file_number = task_input["number"]
     short_number = task_input["short_number"]
 
@@ -439,7 +535,7 @@ async def _call_specific_crawler(task_input: JsonData, website: str) -> JsonData
     return res
 
 
-async def _crawl(task_input: JsonData, website_name: str) -> JsonData:  # 从JSON返回元数据
+async def _crawl(task_input: JsonData, website_name: str) -> CrawlersResult:  # 从JSON返回元数据
     file_number = task_input["number"]
     file_path = task_input["file_path"]
     short_number = task_input["short_number"]
@@ -563,14 +659,15 @@ async def _crawl(task_input: JsonData, website_name: str) -> JsonData:  # 从JSO
     letters = get_number_letters(number)
 
     # 原标题，用于amazon搜索
-    originaltitle = res.get("originaltitle") if res.get("originaltitle") else ""
+    originaltitle = res.get("originaltitle", "")
     res["originaltitle_amazon"] = originaltitle
-    for each in res["actor_amazon"]:  # 去除演员名，避免搜索不到
-        try:
-            end_actor = re.compile(rf" {each}$")
-            res["originaltitle_amazon"] = re.sub(end_actor, "", res["originaltitle_amazon"])
-        except Exception:
-            pass
+    if res.get("actor_amazon", []):
+        for each in res["actor_amazon"]:  # 去除演员名，避免搜索不到
+            try:
+                end_actor = re.compile(rf" {each}$")
+                res["originaltitle_amazon"] = re.sub(end_actor, "", res["originaltitle_amazon"])
+            except Exception:
+                pass
 
     # VR 时下载小封面
     if "VR" in number:
@@ -609,14 +706,14 @@ def _get_website_name(task_input: JsonData, file_mode: FileMode) -> str:
     return website_name
 
 
-async def crawl(task_input: JsonData, file_mode: FileMode) -> JsonData:
+async def crawl(task_input: JsonData, file_mode: FileMode) -> CrawlersResult:
     # 从指定网站获取json_data
     website_name = _get_website_name(task_input, file_mode)
     res = await _crawl(task_input, website_name)
     return _deal_res(res)
 
 
-def _deal_res(res: JsonData) -> JsonData:
+def _deal_res(res: CrawlersResult) -> CrawlersResult:
     # 标题为空返回
     title = res["title"]
     if not title:

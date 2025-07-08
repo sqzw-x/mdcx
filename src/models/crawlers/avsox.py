@@ -183,7 +183,7 @@ async def main(
                 "website": real_url,
                 "thumb": cover_url,
                 "poster": poster_url,
-                "extrafanart": "",
+                "extrafanart": [],
                 "trailer": "",
                 "image_download": image_download,
                 "image_cut": image_cut,

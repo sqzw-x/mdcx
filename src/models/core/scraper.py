@@ -163,7 +163,8 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
             json_data_new["mosaic"] = json_data["mosaic"]
         json_data.update(json_data_new)
     elif not nfo_update:
-        json_data = await crawl(json_data, file_mode)
+        res = await crawl(json_data, file_mode)
+        json_data.update(**res)
 
     # 显示json_data结果或日志
     json_data["failed_folder"] = failed_folder

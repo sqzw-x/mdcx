@@ -273,7 +273,7 @@ async def main(
                     "actor_photo": actor_photo,
                     "thumb": cover_url,
                     "poster": "",
-                    "extrafanart": "",
+                    "extrafanart": [],
                     "trailer": "",
                     "image_download": False,
                     "image_cut": "right",

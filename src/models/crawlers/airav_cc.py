@@ -203,21 +203,15 @@ async def main(
 
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            for i in range(3):
-                html_info, title, outline, actor, cover_url, tag, studio = await retry_request(real_url, web_info)
 
-                if cover_url.startswith("/"):  # coverurl 可能是相对路径
-                    cover_url = urllib.parse.urljoin(airav_url, cover_url)
+            html_info, title, outline, actor, cover_url, tag, studio = await retry_request(real_url, web_info)
 
-                temp_str = title + outline + actor + tag + studio
-                if "�" not in temp_str:
-                    break
-                else:
-                    debug_info = f"{number} 请求 airav_cc 返回内容存在乱码 �，尝试第 {(i + 1)}/3 次请求"
-                    signal.add_log(debug_info)
-                    LogBuffer.info().write(web_info + debug_info)
-            else:
-                debug_info = f"{number} 已请求三次，返回内容仍存在乱码 � ！视为失败！"
+            if cover_url.startswith("/"):  # coverurl 可能是相对路径
+                cover_url = urllib.parse.urljoin(airav_url, cover_url)
+
+            temp_str = title + outline + actor + tag + studio
+            if "�" in temp_str:
+                debug_info = f"{number} 请求 airav_cc 返回内容存在乱码 �"
                 signal.add_log(debug_info)
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)

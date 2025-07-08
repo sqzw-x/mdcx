@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-
-
-from models.config.manager import config
 from models.crawlers import iqqtv
 
 
@@ -11,27 +8,16 @@ async def main(
     language="zh_cn",
     **kwargs,
 ):
-    all_language = (
-        config.title_language
-        + config.outline_language
-        + config.actor_language
-        + config.tag_language
-        + config.series_language
-        + config.studio_language
-    )
     appoint_url = appoint_url.replace("/cn/", "/jp/").replace("iqqtv.cloud/player", "iqqtv.cloud/jp/player")
     json_data = await iqqtv.main(number, appoint_url, "jp")
-    if not json_data["iqqtv"]["jp"]["title"]:
+    if not json_data["iqqtv"]["jp"]["title"] or language == "jp":
         json_data["iqqtv"]["zh_cn"] = json_data["iqqtv"]["jp"]
         json_data["iqqtv"]["zh_tw"] = json_data["iqqtv"]["jp"]
         return json_data
 
-    if "zh_cn" in all_language:
-        language = "zh_cn"
+    if language == "zh_cn":
         appoint_url = json_data["iqqtv"]["jp"]["website"].replace("/jp/", "/cn/")
-
-    if "zh_tw" in all_language:
-        language = "zh_tw"
+    elif language == "zh_tw":
         appoint_url = json_data["iqqtv"]["jp"]["website"].replace("/jp/", "/")
 
     json_data_zh = await iqqtv.main(number, appoint_url, language)
