@@ -4,12 +4,13 @@
 
 import asyncio
 import re
-from typing import Any, Callable
+from typing import Callable
 
 import langid
 
 from ..base.number import get_number_letters, is_uncensored
 from ..config.manager import config
+from ..config.manual import ManualConfig
 from ..crawlers import (
     airav,
     airav_cc,
@@ -96,73 +97,13 @@ CRAWLER_FUNCS: dict[str, Callable] = {
 }
 
 
-def _get_new_website_list(
-    field_website_list: list[str],
-    number_website_list: list[str],
-    file_number: str,
-    short_number: str,
-    field: str,
-    all: bool = False,
-) -> list[str]:
-    whole_fields = config.whole_fields  # 继续补全的字段
-    field_website_list = [i for i in field_website_list if i.strip()]  # 去空
-    number_website_list = [i for i in number_website_list if i.strip()]  # 去空
-    same_list = [i for i in field_website_list if i in number_website_list]  # 取交集
-    if (
-        field in whole_fields or field == "title" or all
-    ):  # 取剩余未相交网站， trailer 不取未相交网站，title 默认取未相交网站
-        if field != "trailer":
-            diff_list = [i for i in number_website_list if i not in field_website_list]
-            same_list.extend(diff_list)
-    dic_escape = {
-        "title": config.title_website_exclude.split(","),
-        "outline": config.outline_website_exclude.split(","),
-        "actor": config.actor_website_exclude.split(","),
-        "thumb": config.thumb_website_exclude.split(","),
-        "poster": config.poster_website_exclude.split(","),
-        "extrafanart": config.extrafanart_website_exclude.split(","),
-        "trailer": config.trailer_website_exclude.split(","),
-        "tag": config.tag_website_exclude.split(","),
-        "release": config.release_website_exclude.split(","),
-        "runtime": config.runtime_website_exclude.split(","),
-        "score": config.score_website_exclude.split(","),
-        "director": config.director_website_exclude.split(","),
-        "series": config.series_website_exclude.split(","),
-        "studio": config.studio_website_exclude.split(","),
-        "publisher": config.publisher_website_exclude.split(","),
-    }  # 根据字段排除的网站
-
-    escape_list = dic_escape.get(field)
-    if escape_list:
-        same_list = [i for i in same_list if i not in escape_list]  # 根据字段排除一些不含这些字段的网站
-
-    # mgstage 素人番号检查
-    if short_number:
-        not_frist_field_list = ["title", "actor"]  # 这些字段以外，素人把 mgstage 放在第一位
-        if field not in not_frist_field_list and "mgstage" in same_list:
-            same_list.remove("mgstage")
-            same_list.insert(0, "mgstage")
-
-    # faleno.jp 番号检查 dldss177 dhla009
-    elif re.findall(r"F[A-Z]{2}SS", file_number):
-        same_list = _deal_some_list(field, "faleno", same_list)
-
-    # dahlia-av.jp 番号检查
-    elif file_number.startswith("DLDSS") or file_number.startswith("DHLA"):
-        same_list = _deal_some_list(field, "dahlia", same_list)
-
-    # fantastica 番号检查 FAVI、FAAP、FAPL、FAKG、FAHO、FAVA、FAKY、FAMI、FAIT、FAKA、FAMO、FASO、FAIH、FASH、FAKS、FAAN
-    elif (
-        re.search(r"FA[A-Z]{2}-?\d+", file_number.upper())
-        or file_number.upper().startswith("CLASS")
-        or file_number.upper().startswith("FADRV")
-        or file_number.upper().startswith("FAPRO")
-        or file_number.upper().startswith("FAKWM")
-        or file_number.upper().startswith("PDS")
-    ):
-        same_list = _deal_some_list(field, "fantastica", same_list)
-
-    return same_list
+def clean_list(raw: list[str]) -> list[str]:
+    """清理列表，去除空值和重复值, 保持原有顺序"""
+    cleaned = []
+    for item in raw:
+        if item.strip() and item not in cleaned:
+            cleaned.append(item.strip())
+    return cleaned
 
 
 def _deal_some_list(field: str, website: str, same_list: list[str]) -> list[str]:
@@ -180,30 +121,28 @@ async def _call_crawler(
     task_input: JsonData,
     website: str,
     language: str,
-    file_number: str,
-    short_number: str,
-    mosaic: str,
     org_language: str,
-) -> dict[str, Any]:
+) -> dict[str, dict[str, dict]]:
     """
     获取某个网站数据
     """
     appoint_number = task_input["appoint_number"]
     appoint_url = task_input["appoint_url"]
     file_path = task_input["file_path"]
+    number = task_input["number"]
+    mosaic = task_input["mosaic"]
+    short_number = task_input["short_number"]
 
     # 259LUXU-1111， mgstage 和 avsex 之外使用 LUXU-1111（素人番号时，short_number有值，不带前缀数字；反之，short_number为空)
     if short_number and website != "mgstage" and website != "avsex":
-        file_number = short_number
-
-    # 爬虫函数映射表
+        number = short_number
 
     # 获取爬虫函数
     crawler_func = CRAWLER_FUNCS.get(website, javdb.main)
 
     # 准备参数
     kwargs = {
-        "number": file_number,
+        "number": number,
         "appoint_url": appoint_url,
         "language": language,
         "file_path": file_path,
@@ -216,507 +155,198 @@ async def _call_crawler(
     return await crawler_func(**kwargs)
 
 
-async def _decide_websites(
+async def _call_crawlers(
     task_input: JsonData,
     number_website_list: list[str],
 ) -> JsonData:
     """
     获取一组网站的数据：按照设置的网站组，请求各字段数据，并返回最终的数据
     """
-    file_number = task_input["number"]
+    number = task_input["number"]
     short_number = task_input["short_number"]
+    mosaic = task_input["mosaic"]
     scrape_like = config.scrape_like
-    none_fields = config.none_fields  # 不刮削的字段
+    none_fields = config.none_fields  # 不单独刮削的字段
+    use_official = "official" in config.website_set  # 优先使用官方网站
+
+    def get_field_websites(field: str) -> list[str]:
+        """获取指定字段的网站取值优先级列表"""
+        # 指定字段网站列表
+        field_no_zh = field.replace("_zh", "")  # 去除 _zh 后缀的字段名
+        field_list = clean_list(getattr(config, f"{field}_website", "").split(","))
+        # 与指定类型网站列表取交集
+        field_list = [i for i in field_list if i in number_website_list]
+        if use_official:
+            field_list.insert(0, "official")
+        # 指定字段排除网站列表
+        field_ex_list = clean_list(getattr(config, f"{field_no_zh}_website_exclude", "").split(","))
+        # 所有设定的本字段来源失败时, 是否继续使用类型网站补全
+        include_others = field == "title" or field in config.whole_fields
+        if include_others and field != "trailer":  # 取剩余未相交网站， trailer 不取未相交网站
+            field_list.extend([i for i in number_website_list if i not in field_list])
+        # 排除指定网站
+        field_list = [i for i in field_list if i not in field_ex_list]
+        # 特殊处理
+        # mgstage 素人番号检查
+        if short_number:
+            not_frist_field_list = ["title", "actor"]  # 这些字段以外，素人把 mgstage 放在第一位
+            if field not in not_frist_field_list and "mgstage" in field_list:
+                field_list.remove("mgstage")
+                field_list.insert(0, "mgstage")
+        # faleno.jp 番号检查 dldss177 dhla009
+        elif re.findall(r"F[A-Z]{2}SS", number):
+            field_list = _deal_some_list(field, "faleno", field_list)
+        # dahlia-av.jp 番号检查
+        elif number.startswith("DLDSS") or number.startswith("DHLA"):
+            field_list = _deal_some_list(field, "dahlia", field_list)
+        # fantastica 番号检查 FAVI、FAAP、FAPL、FAKG、FAHO、FAVA、FAKY、FAMI、FAIT、FAKA、FAMO、FASO、FAIH、FASH、FAKS、FAAN
+        elif (
+            re.search(r"FA[A-Z]{2}-?\d+", number.upper())
+            or number.upper().startswith("CLASS")
+            or number.upper().startswith("FADRV")
+            or number.upper().startswith("FAPRO")
+            or number.upper().startswith("FAKWM")
+            or number.upper().startswith("PDS")
+        ):
+            field_list = _deal_some_list(field, "fantastica", field_list)
+        return field_list
 
     # 获取使用的网站
-    title_jp_website_list = config.title_website.split(",")
-    title_zh_website_list = config.title_zh_website.split(",")
-    outline_jp_website_list = config.outline_website.split(",")
-    outline_zh_website_list = config.outline_zh_website.split(",")
-    actor_website_list = config.actor_website.split(",")
-    thumb_website_list = config.thumb_website.split(",")
-    poster_website_list = config.poster_website.split(",")
-    extrafanart_website_list = config.extrafanart_website.split(",")
-    trailer_website_list = config.trailer_website.split(",")
-    tag_website_list = config.tag_website.split(",")
-    release_website_list = config.release_website.split(",")
-    runtime_website_list = config.runtime_website.split(",")
-    score_website_list = config.score_website.split(",")
-    director_website_list = config.director_website.split(",")
-    series_website_list = config.series_website.split(",")
-    studio_website_list = config.studio_website.split(",")
-    publisher_website_list = config.publisher_website.split(",")
-    wanted_website_list = config.wanted_website.split(",")
-    title_jp_website_new_list = _get_new_website_list(
-        title_jp_website_list, number_website_list, file_number, short_number, "title"
-    )
-    title_zh_website_new_list = _get_new_website_list(
-        title_zh_website_list, number_website_list, file_number, short_number, "title_zh"
-    )
-    outline_jp_website_new_list = _get_new_website_list(
-        outline_jp_website_list, number_website_list, file_number, short_number, "outline"
-    )
-    outline_zh_website_new_list = _get_new_website_list(
-        outline_zh_website_list, number_website_list, file_number, short_number, "outline_zh"
-    )
-    actor_website_new_list = _get_new_website_list(
-        actor_website_list, number_website_list, file_number, short_number, "actor"
-    )
-    thumb_website_new_list = _get_new_website_list(
-        thumb_website_list, number_website_list, file_number, short_number, "thumb"
-    )
-    poster_website_new_list = _get_new_website_list(
-        poster_website_list, number_website_list, file_number, short_number, "poster"
-    )
-    extrafanart_website_new_list = _get_new_website_list(
-        extrafanart_website_list, number_website_list, file_number, short_number, "extrafanart"
-    )
-    trailer_website_new_list = _get_new_website_list(
-        trailer_website_list, number_website_list, file_number, short_number, "trailer"
-    )
-    tag_website_new_list = _get_new_website_list(
-        tag_website_list, number_website_list, file_number, short_number, "tag"
-    )
-    release_website_new_list = _get_new_website_list(
-        release_website_list, number_website_list, file_number, short_number, "release"
-    )
-    runtime_website_new_list = _get_new_website_list(
-        runtime_website_list, number_website_list, file_number, short_number, "runtime"
-    )
-    score_website_new_list = _get_new_website_list(
-        score_website_list, number_website_list, file_number, short_number, "score"
-    )
-    director_website_new_list = _get_new_website_list(
-        director_website_list, number_website_list, file_number, short_number, "director"
-    )
-    series_website_new_list = _get_new_website_list(
-        series_website_list, number_website_list, file_number, short_number, "series"
-    )
-    studio_website_new_list = _get_new_website_list(
-        studio_website_list, number_website_list, file_number, short_number, "studio"
-    )
-    publisher_website_new_list = _get_new_website_list(
-        publisher_website_list, number_website_list, file_number, short_number, "publisher"
-    )
-    wanted_website_new_list = _get_new_website_list(
-        wanted_website_list, number_website_list, file_number, short_number, "wanted"
+    all_fields = [f for f in ManualConfig.CONFIG_DATA_FIELDS if f not in none_fields]  # 去除不专门刮削的字段
+    if scrape_like == "speed":  # 快速模式
+        all_field_websites = {field: number_website_list for field in all_fields}
+    else:  # 全部模式
+        # 各字段网站列表
+        all_field_websites = {field: get_field_websites(field) for field in all_fields}
+        if config.outline_language == "jp" and "outline_zh" in all_field_websites:
+            del all_field_websites["outline_zh"]
+        if config.title_language == "jp" and "title_zh" in all_field_websites:
+            del all_field_websites["title_zh"]
+    # 各字段语言
+    all_field_languages = {field: getattr(config, f"{field}_language", "zh") for field in all_fields}
+    # 所有需要请求的 (网站, 语言) 对
+    all_websites = (
+        (website, all_field_languages[field]) for field, websites in all_field_websites.items() for website in websites
     )
 
-    # 初始化变量
-    all_json_data = {}
-
-    # 生成各字段及请求网站列表，并请求数据
-    if scrape_like == "speed":
-        request_field_list = [("title", "标题", "title_language", number_website_list)]
-    else:
-        if "official" in config.website_set:
-            title_jp_website_new_list.insert(0, "official")
-        request_field_list = [
-            ("title", "标题", "title_language", title_jp_website_new_list),
-            ("title_zh", "中文标题", "title_language", title_zh_website_new_list),
-            ("outline", "简介", "outline_language", outline_jp_website_new_list),
-            ("outline_zh", "中文简介", "outline_language", outline_zh_website_new_list),
-            ("actor", "演员", "actor_language", actor_website_new_list),
-            ("cover", "背景图", "title_language", thumb_website_new_list),
-            ("poster", "封面图", "title_language", poster_website_new_list),
-            ("extrafanart", "剧照", "title_language", extrafanart_website_new_list),
-            ("tag", "标签", "tag_language", tag_website_new_list),
-            ("release", "发行日期", "title_language", release_website_new_list),
-            ("runtime", "时长", "title_language", runtime_website_new_list),
-            ("score", "评分", "title_language", score_website_new_list),
-            ("director", "导演", "director_language", director_website_new_list),
-            ("series", "系列", "series_language", series_website_new_list),
-            ("studio", "片商", "studio_language", studio_website_new_list),
-            ("publisher", "发行商", "publisher_language", publisher_website_new_list),
-            ("trailer", "预告片", "title_language", trailer_website_new_list),
-            ("wanted", "想看人数", "title_language", wanted_website_new_list),
-        ]
-        if config.outline_language == "jp":
-            request_field_list.pop(3)
-        if config.title_language == "jp":
-            request_field_list.pop(1)
-        if not wanted_website_new_list:
-            request_field_list.pop()
     tasks = []
-    for field_name, field_cnname, field_language, website_list in request_field_list:
-        if field_name in none_fields:
-            continue
-        task = _call_crawlers(
-            all_json_data,
-            task_input,
-            website_list,
-            field_name,
-            field_cnname,
-            field_language,
-            config,
-            file_number,
-            short_number,
-            task_input["mosaic"],
-        )
-        tasks.append(task)
-    await asyncio.gather(*tasks)
-    if not json_data["title"]:
-        return json_data
+    for website, language in all_websites:
+        tasks.append(_call_crawler(task_input, website, language, config.title_language))
+    res: list[dict[str, dict[str, dict]]] = await asyncio.gather(*tasks)
 
-    # 处理字段字段：从已请求的网站中，按字段网站优先级取值
-    title_website_list = title_jp_website_list
-    outline_website_list = outline_jp_website_list
-    number_website_list = [i for i in number_website_list if i in all_json_data.keys()]
-    new_number_website_list = number_website_list
-    if "official" in all_json_data.keys() and all_json_data["official"]["jp"]["title"]:
-        official_website_name = all_json_data["official"]["jp"]["source"]
-        new_number_website_list = [official_website_name] + number_website_list
-        title_jp_website_list = [official_website_name] + title_jp_website_list
-        outline_jp_website_list = [official_website_name] + outline_jp_website_list
+    # 合并结果
+    all_res: dict[tuple[str, str], dict] = {}
+    for website_data in res:
+        for website, datas in website_data.items():
+            for lang, data in datas.items():
+                key = (website, lang)
+                if key in all_res:
+                    raise ValueError(f"Duplicate data for {key} found in crawler results.")
+                all_res[key] = data
+
+    # 按优先级合并
+    # 处理配置项和返回值的不匹配字段
+    # 1. originaltitle 的取值优先级对应 title, 语言为 jp
+    all_field_websites["originaltitle"] = all_field_websites.get("title", number_website_list)
+    all_field_languages["originaltitle"] = "jp"
+    # 2. originalplot 的取值优先级对应 outline
+    all_field_websites["originalplot"] = all_field_websites.get("outline", number_website_list)
+    all_field_languages["originalplot"] = "jp"
+    # 2. 当语言非 jp 时, 最终 title 的取值优先级为 title 和 title_zh, 且需检查所有语言
     if config.title_language != "jp":
-        title_website_list = title_zh_website_list + title_jp_website_list
+        all_field_websites["title"] += all_field_websites.get("title_zh", [])
+        all_field_languages["title"] = "all"
+    # 3. 当语言非 jp 时, 最终 outline 的取值优先级为 outline 和 outline_zh, 且需检查所有语言
     if config.outline_language != "jp":
-        outline_website_list = outline_zh_website_list + outline_jp_website_list
-    title_website_new_list = _get_new_website_list(
-        title_website_list, new_number_website_list, file_number, short_number, "title", all=True
-    )
-    title_jp_website_new_list = _get_new_website_list(
-        title_jp_website_list, new_number_website_list, file_number, short_number, "title", all=True
-    )
-    outline_website_new_list = _get_new_website_list(
-        outline_website_list, new_number_website_list, file_number, short_number, "outline", all=True
-    )
-    outline_jp_website_new_list = _get_new_website_list(
-        outline_jp_website_list, new_number_website_list, file_number, short_number, "outline", all=True
-    )
-    actor_website_new_list = _get_new_website_list(
-        actor_website_list, number_website_list, file_number, short_number, "actor", all=True
-    )
-    thumb_website_new_list = _get_new_website_list(
-        thumb_website_list, number_website_list, file_number, short_number, "thumb", all=True
-    )
-    poster_website_new_list = _get_new_website_list(
-        poster_website_list, number_website_list, file_number, short_number, "poster", all=True
-    )
-    extrafanart_website_new_list = _get_new_website_list(
-        extrafanart_website_list, number_website_list, file_number, short_number, "extrafanart", all=True
-    )
-    tag_website_new_list = _get_new_website_list(
-        tag_website_list, number_website_list, file_number, short_number, "tag", all=True
-    )
-    release_website_new_list = _get_new_website_list(
-        release_website_list, number_website_list, file_number, short_number, "release", all=True
-    )
-    runtime_website_new_list = _get_new_website_list(
-        runtime_website_list, number_website_list, file_number, short_number, "runtime", all=True
-    )
-    score_website_new_list = _get_new_website_list(
-        score_website_list, number_website_list, file_number, short_number, "score", all=True
-    )
-    director_website_new_list = _get_new_website_list(
-        director_website_list, number_website_list, file_number, short_number, "director", all=True
-    )
-    series_website_new_list = _get_new_website_list(
-        series_website_list, number_website_list, file_number, short_number, "series", all=True
-    )
-    studio_website_new_list = _get_new_website_list(
-        studio_website_list, number_website_list, file_number, short_number, "studio", all=True
-    )
-    publisher_website_new_list = _get_new_website_list(
-        publisher_website_list, number_website_list, file_number, short_number, "publisher", all=True
-    )
-    trailer_website_new_list = _get_new_website_list(
-        trailer_website_list, number_website_list, file_number, short_number, "trailer", all=True
-    )
-    wanted_website_new_list = _get_new_website_list(
-        wanted_website_list, number_website_list, file_number, short_number, "wanted"
-    )
-    deal_field_list = [
-        ("title", "标题", "title_language", title_website_new_list),
-        ("originaltitle", "原标题", "outline_language", title_jp_website_new_list),
-        ("outline", "简介", "outline_language", outline_website_new_list),
-        ("originalplot", "原简介", "outline_language", outline_jp_website_new_list),
-        ("actor", "演员", "actor_language", actor_website_new_list),
-        ("cover", "背景图", "title_language", thumb_website_new_list),
-        ("poster", "封面图", "title_language", poster_website_new_list),
-        ("extrafanart", "剧照", "title_language", extrafanart_website_new_list),
-        ("tag", "标签", "tag_language", tag_website_new_list),
-        ("release", "发行日期", "title_language", release_website_new_list),
-        ("runtime", "时长", "title_language", runtime_website_new_list),
-        ("score", "评分", "title_language", score_website_new_list),
-        ("director", "导演", "director_language", director_website_new_list),
-        ("series", "系列", "series_language", series_website_new_list),
-        ("studio", "片商", "studio_language", studio_website_new_list),
-        ("publisher", "发行商", "publisher_language", publisher_website_new_list),
-        ("trailer", "预告片", "title_language", trailer_website_new_list),
-        ("wanted", "想看人数", "title_language", wanted_website_list),
-    ]
-    if not wanted_website_new_list or (scrape_like == "speed" and json_data["source"] not in wanted_website_new_list):
-        deal_field_list.pop()
+        all_field_websites["outline"] += all_field_websites.get("outline_zh", [])
+        all_field_languages["outline"] = "all"
 
-    for field_name, field_cnname, field_language, website_list in deal_field_list:
-        _deal_each_field(all_json_data, json_data, website_list, field_name, field_cnname, field_language, config)
+    reduced: dict = {"number": number, "short_number": short_number, "mosaic": mosaic, "fields_info": ""}
+    for field in ManualConfig.CRAWLER_DATA_FIELDS:  # 与 CONFIG_DATA_FIELDS 不完全一致
+        if field not in all_field_websites:
+            # 没有设定此字段的优先级和语言, 则任意取值
+            sources = [(w, lang) for w in number_website_list for lang in ["jp", "zh_cn", "zh_tw"]]
+        else:
+            sources = [(w, all_field_languages[field]) for w in all_field_websites[field]]
 
-    # 把已刮削成功网站的 cover url 按照 cover 网站优先级，保存为一个列表，第一个图片下载失败时，可以使用其他图片下载
-    cover_list = []
-    for each_website in thumb_website_new_list:
-        if each_website in all_json_data.keys() and all_json_data[each_website]["jp"]["title"]:
-            temp_url = all_json_data[each_website]["jp"]["cover"]
-            if temp_url not in cover_list:
-                cover_list.append([each_website, temp_url])
-    if not cover_list:
-        json_data["cover"] = ""  # GBBH-1041 背景图图挂了
-    json_data["cover_list"] = cover_list
+        LogBuffer.info().write(
+            f"\n\n    🙋🏻‍ {field} \n    ====================================\n"
+            f"    🌐 来源优先级：{' -> '.join(i[0] for i in sources)}"
+        )
+        for website, language in sources:
+            if language == "all":
+                site_data = (
+                    all_res.get((website, "jp"), {})
+                    or all_res.get((website, "zh_cn"), {})
+                    or all_res.get((website, "zh_tw"), {})
+                )
+            else:
+                site_data = all_res.get((website, language), {})
 
-    # 把已刮削成功网站的 actor，保存为一个列表，用于 Amazon 搜图，因为有的网站 actor 不对，比如 MOPP-023 javbus错的
-    actor_amazon_list = []
-    actor_amazon_list_cn = []
-    actor_amazon_list_tw = []
-    actor_new_website = []
-    [
-        actor_new_website.append(i)
-        for i in title_jp_website_new_list + title_website_new_list + actor_website_new_list
-        if i not in actor_new_website
-    ]
-    for each_website in actor_new_website:
-        if each_website in all_json_data.keys() and all_json_data[each_website]["jp"]["title"]:
-            temp_actor = all_json_data[each_website]["jp"]["actor"]
-            if temp_actor:
-                actor_amazon_list.extend(temp_actor.split(","))
-                if all_json_data[each_website]["zh_cn"]["title"]:
-                    actor_amazon_list_cn.extend(all_json_data[each_website]["zh_cn"]["actor"].split(","))
-                if all_json_data[each_website]["zh_tw"]["title"]:
-                    actor_amazon_list_tw.extend(all_json_data[each_website]["zh_tw"]["actor"].split(","))
-    actor_amazon_list = actor_amazon_list + actor_amazon_list_cn + actor_amazon_list_tw
-    actor_amazon = []
-    [actor_amazon.append(i.strip()) for i in actor_amazon_list if i.strip() and i.strip() not in actor_amazon]
-    if "素人" in actor_amazon:
-        actor_amazon.remove("素人")
-    json_data["actor_amazon"] = actor_amazon
+            if not site_data.get("title", "") or not site_data.get(field, ""):
+                LogBuffer.info().write(f"\n    🔴 {website} (失败)")
+                continue
+
+            if config.scrape_like != "speed":
+                if field in ["title", "outline", "originaltitle", "originalplot"]:
+                    if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:  # why?
+                        if langid.classify(site_data[field])[0] != "ja":
+                            if language == "jp":
+                                LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为非日文，跳过！)")
+                                continue
+                        elif language != "jp":
+                            LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为日文，跳过！)")
+                            continue
+            # 添加来源信息
+            if field in ["poster", "thumb", "extrafanart", "trailer", "outline"]:
+                reduced[field + "_from"] = website
+
+            if field == "poster":
+                reduced["image_download"] = site_data["image_download"]
+            elif field == "thumb":
+                # 记录所有 thumb url 以便后续下载
+                reduced["thumb_list"] = reduced.get("thumb_list", []).append((website, site_data["thumb"]))
+            elif field == "actor":
+                if isinstance(site_data["actor"], list):
+                    # 处理 actor 为列表的情况
+                    site_data["actor"] = ",".join(site_data["actor"])
+                reduced["all_actor"] = reduced.get("all_actor", site_data["actor"])
+                reduced["all_actor_photo"] = reduced.get("all_actor_photo", site_data.get("actor_photo", ""))
+                # 记录所有网站的 actor 用于 Amazon 搜图, 因为有的网站 actor 不对
+                reduced["actor_amazon"] = reduced.get("actor_amazon", []).extend(site_data["actor"].split(","))
+            elif field == "originaltitle" and site_data.get("actor", ""):
+                reduced["amazon_orginaltitle_actor"] = site_data["actor"].split(",")[0]
+
+            reduced[field] = site_data[field]
+            reduced["fields_info"] += f"\n     {field:<13}: {website} ({language})"
+            LogBuffer.info().write(f"\n    🟢 {website} (成功)\n     ↳ {reduced[field]}")
+            break
+        else:  # 所有来源都无此字段
+            reduced[field] = None
+            reduced["fields_info"] += "\n     {field:<13}: {'-----'} ({'not found'})"
 
     # 处理 year
-    release = json_data["release"]
-    if release and (r := re.search(r"\d{4}", release)):
-        json_data["year"] = r.group()
+    if reduced.get("year", "") and (r := re.search(r"\d{4}", reduced.get("release", ""))):
+        reduced["year"] = r.group()
 
     # 处理 number：素人影片时使用有数字前缀的number
     if short_number:
-        json_data["number"] = file_number
+        reduced["number"] = number
 
-    json_data["fields_info"] = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}{json_data['fields_info']}"
-    if "javdb" in all_json_data and "javdbid" in all_json_data["javdb"]["jp"]:
-        json_data["javdbid"] = all_json_data["javdb"]["jp"]["javdbid"]
-    else:
-        json_data["javdbid"] = ""
-    return json_data
+    # 处理 javdbid
+    r = all_res.get(("javdb", "jp"), {}) or all_res.get(("javdb", "zh_cn"), {}) or all_res.get(("javdb", "zh_tw"), {})
+    if r and "javdbid" in r:
+        reduced["javdbid"] = r["javdbid"]
 
+    # todo 由于异步, 此处日志混乱. 需移除 LogBuffer.req(), 改为返回日志信息
+    reduced["fields_info"] = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}{reduced['fields_info']}"
 
-def _deal_each_field(
-    all_json_data: dict[str, dict[str, Any]],
-    json_data: JsonData,
-    website_list: list[str],
-    field_name: str,
-    field_cnname: str,
-    field_language: str,
-    config: Any,
-) -> None:
-    """
-    按照设置的网站顺序处理字段
-    """
-    if config.scrape_like == "speed":
-        website_list = [json_data["source"]]
-
-    elif "official" in config.website_set:
-        if all_json_data["official"]["jp"]["title"]:
-            if field_name not in ["title", "originaltitle", "outline", "originalplot", "wanted", "score"]:
-                website_list.insert(0, all_json_data["official"]["jp"]["source"])
-
-    if not website_list:
-        return
-
-    backup_data = ""
-    LogBuffer.info().write(
-        f"\n\n    🙋🏻‍ {field_cnname} \n    ====================================\n    🌐 来源优先级：{' -> '.join(website_list)}"
-    )
-    backup_website = ""
-    title_language = getattr(config, field_language, "jp")
-    for website in website_list:
-        if website not in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "mdtv", "madouqu", "lulubar"]:
-            title_language = "jp"
-        elif (
-            field_name == "originaltitle"
-            or field_name == "originalplot"
-            or field_name == "trailer"
-            or field_name == "wanted"
-        ):
-            title_language = "jp"
-        try:
-            web_data_json = all_json_data[website][title_language]
-        except Exception:
-            continue
-
-        if web_data_json["title"] and web_data_json[field_name]:
-            if not len(backup_data):
-                backup_data = web_data_json[field_name]
-                backup_website = website
-
-            if config.scrape_like != "speed":
-                if field_name in ["title", "outline", "originaltitle", "originalplot"]:
-                    if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:
-                        if langid.classify(web_data_json[field_name])[0] != "ja":
-                            if title_language == "jp":
-                                LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为非日文，跳过！)")
-                                continue
-                        elif title_language != "jp":
-                            LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为日文，跳过！)")
-                            continue
-            if field_name == "poster":
-                json_data["poster_from"] = website
-                json_data["image_download"] = web_data_json["image_download"]
-            elif field_name == "cover":
-                json_data["cover_from"] = website
-            elif field_name == "extrafanart":
-                json_data["extrafanart_from"] = website
-            elif field_name == "trailer":
-                json_data["trailer_from"] = website
-            elif field_name == "outline":
-                json_data["outline_from"] = website
-            elif field_name == "actor":
-                json_data["all_actor"] = (
-                    json_data["all_actor"] if json_data.get("all_actor") else web_data_json["actor"]
-                )
-                json_data["all_actor_photo"] = (
-                    json_data["all_actor_photo"] if json_data.get("all_actor_photo") else web_data_json["actor_photo"]
-                )
-            elif field_name == "originaltitle":
-                if web_data_json["actor"]:
-                    json_data["amazon_orginaltitle_actor"] = web_data_json["actor"].split(",")[0]
-            json_data[field_name] = web_data_json[field_name]
-            json_data["fields_info"] += "\n     " + "%-13s" % field_name + f": {website} ({title_language})"
-            LogBuffer.info().write(f"\n    🟢 {website} (成功)\n     ↳ {json_data[field_name]}")
-            break
-        else:
-            LogBuffer.info().write(f"\n    🔴 {website} (失败)")
-    else:
-        if len(backup_data):
-            json_data[field_name] = backup_data
-            json_data["fields_info"] += "\n     " + f"{field_name:<13}" + f": {backup_website} ({title_language})"
-            LogBuffer.info().write(f"\n    🟢 {backup_website} (使用备用数据)\n     ↳ {backup_data}")
-        else:
-            json_data["fields_info"] += "\n     " + f"{field_name:<13}" + f": {'-----'} ({'not found'})"
-
-
-async def _call_crawlers(
-    # all_json_data: dict[str, dict[str, Any]],
-    json_data: JsonData,
-    website_list: list[str],
-    field_name: str,
-    field_cnname: str,
-    field_language: str,
-    config: Any,
-    file_number: str,
-    short_number: str,
-    mosaic: str,
-) -> None:  # 4
-    """
-    按照设置的网站顺序获取各个字段信息
-    """
-    if "official" in config.website_set:
-        if field_name not in ["title", "title_zh", "outline_zh", "wanted", "score"]:
-            website_list.insert(0, "official")
-
-    backup_jsondata = {}
-    backup_website = ""
-
-    async def _task(website: str):
-        nonlocal field_name, backup_website
-        if (website in ["avsox", "mdtv"] and mosaic in ["有码", "无码破解", "流出", "里番", "动漫"]) or (
-            website == "mdtv" and mosaic == "无码"
-        ):
-            if field_name != "title":
-                return "continue"
-        if field_name in ["title_zh", "outline_zh"]:
-            title_language = "zh_cn"
-            field_name = field_name.replace("_zh", "")
-        elif field_name in ["originaltitle", "originalplot", "trailer", "wanted"]:
-            title_language = "jp"
-        elif website not in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "mdtv", "madouqu", "lulubar"]:
-            title_language = "jp"
-        else:
-            title_language = getattr(config, field_language)
-
-        if website not in all_json_data:
-            web_data = await _call_crawler(
-                json_data, website, title_language, file_number, short_number, mosaic, config.title_language
-            )
-            all_json_data.update(web_data)
-            web_data_json: dict = all_json_data.get(website, {}).get(title_language, {})
-        else:
-            web_data_json = all_json_data[website][title_language]
-
-        if field_cnname == "标题":
-            json_data.update(web_data_json)
-        if web_data_json["title"] and web_data_json[field_name]:
-            if not len(backup_jsondata):
-                backup_jsondata.update(web_data_json)
-                backup_website = website
-            if field_cnname == "标题":
-                json_data["outline_from"] = website
-                json_data["poster_from"] = website
-                json_data["cover_from"] = website
-                json_data["extrafanart_from"] = website
-                json_data["trailer_from"] = website
-            if config.scrape_like != "speed":
-                if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:
-                    if field_name in ["title", "outline", "originaltitle", "originalplot"]:
-                        if langid.classify(web_data_json[field_name])[0] != "ja":
-                            if title_language == "jp":
-                                LogBuffer.info().write(
-                                    f"\n    🔴 {field_cnname} 检测为非日文，跳过！({website})\n     ↳ {web_data_json[field_name]}"
-                                )
-                                return "continue"
-                        elif title_language != "jp":
-                            LogBuffer.info().write(
-                                f"\n    🔴 {field_cnname} 检测为日文，跳过！({website})\n     ↳ {web_data_json[field_name]}"
-                            )
-                            return "continue"
-                elif website == "official":
-                    website = all_json_data["official"]["jp"]["source"]
-            LogBuffer.info().write(
-                f"\n    🟢 {field_cnname} 获取成功！({website})\n     ↳ {web_data_json[field_name]} "
-            )
-            return "break"
-
-    # 并发执行, 但在获得成功结果时取消其他任务
-    tasks = [asyncio.create_task(_task(website)) for website in website_list]
-
-    try:
-        for task in asyncio.as_completed(tasks):
-            result = await task
-            if result == "break":
-                # 取消所有未完成的任务
-                for t in tasks:
-                    if not t.done():
-                        t.cancel()
-                break
-
-        if len(backup_jsondata):
-            LogBuffer.info().write(
-                f"\n    🟢 {field_cnname} 使用备用数据！({backup_website})\n     ↳ {backup_jsondata[field_name]} "
-            )
-            if field_cnname == "标题":
-                json_data.update(backup_jsondata)
-        else:
-            LogBuffer.info().write(f"\n    🔴 {field_cnname} 获取失败！")
-    finally:
-        # 确保所有任务都被取消
-        for task in tasks:
-            if not task.done():
-                task.cancel()
-        # 等待所有任务完成取消
-        await asyncio.gather(*tasks, return_exceptions=True)
+    return reduced
 
 
 async def _call_specific_crawler(task_input: JsonData, website: str) -> JsonData:
     file_number = task_input["number"]
     short_number = task_input["short_number"]
-    mosaic = task_input["mosaic"]
-    # task_input["fields_info"] = ""
 
     title_language = config.title_language
     org_language = title_language
@@ -745,7 +375,7 @@ async def _call_specific_crawler(task_input: JsonData, website: str) -> JsonData
         studio_language = "zh_cn"
         publisher_language = "zh_cn"
         director_language = "zh_cn"
-    web_data = await _call_crawler(task_input, website, title_language, file_number, short_number, mosaic, org_language)
+    web_data = await _call_crawler(task_input, website, title_language, org_language)
     web_data_json = web_data.get(website, {}).get(title_language, {})
     res = task_input.copy()
     res.update(web_data_json)
@@ -779,15 +409,16 @@ async def _call_specific_crawler(task_input: JsonData, website: str) -> JsonData
         web_data_json = web_data[website][director_language]
         if web_data_json["director"]:
             res["director"] = web_data_json["director"]
-    if res["cover"]:
-        res["cover_list"] = [(website, res["cover"])]
+    if res["thumb"]:
+        res["thumb_list"] = [(website, res["thumb"])]
 
     # 加入来源信息
     res["outline_from"] = website
     res["poster_from"] = website
-    res["cover_from"] = website
+    res["thumb_from"] = website
     res["extrafanart_from"] = website
     res["trailer_from"] = website
+    # todo
     res["fields_info"] = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
 
     if short_number:
@@ -839,7 +470,7 @@ async def _crawl(task_input: JsonData, website_name: str) -> JsonData:  # 从JSO
         ):
             task_input["mosaic"] = "国产"
             website_list = config.website_guochan.split(",")
-            res = await _decide_websites(task_input, website_list)
+            res = await _call_crawlers(task_input, website_list)
 
         # =======================================================================kin8
         elif file_number.startswith("KIN8"):
@@ -867,7 +498,7 @@ async def _crawl(task_input: JsonData, website_name: str) -> JsonData:  # 从JSO
             if file_number_1:
                 file_number_1.group()
                 website_list = config.website_fc2.split(",")
-                res = await _decide_websites(task_input, website_list)
+                res = await _call_crawlers(task_input, website_list)
             else:
                 LogBuffer.error().write(f"未识别到FC2番号：{file_number}")
                 res = task_input.copy()
@@ -877,27 +508,27 @@ async def _crawl(task_input: JsonData, website_name: str) -> JsonData:  # 从JSO
             "欧美" in file_path and "东欧美" not in file_path
         ):
             website_list = config.website_oumei.split(",")
-            res = await _decide_websites(task_input, website_list)
+            res = await _call_crawlers(task_input, website_list)
 
         # =======================================================================无码抓取:111111-111,n1111,HEYZO-1111,SMD-115
         elif mosaic == "无码" or mosaic == "無碼":
             website_list = config.website_wuma.split(",")
-            res = await _decide_websites(task_input, website_list)
+            res = await _call_crawlers(task_input, website_list)
 
         # =======================================================================259LUXU-1111
         elif short_number or "SIRO" in file_number.upper():
             website_list = config.website_suren.split(",")
-            res = await _decide_websites(task_input, website_list)
+            res = await _call_crawlers(task_input, website_list)
 
         # =======================================================================ssni00321
         elif re.match(r"\D{2,}00\d{3,}", file_number) and "-" not in file_number and "_" not in file_number:
             website_list = ["dmm"]
-            res = await _decide_websites(task_input, website_list)
+            res = await _call_crawlers(task_input, website_list)
 
         # =======================================================================剩下的（含匹配不了）的按有码来刮削
         else:
             website_list = config.website_youma.split(",")
-            res = await _decide_websites(task_input, website_list)
+            res = await _call_crawlers(task_input, website_list)
     else:
         res = await _call_specific_crawler(task_input, website_name)
 
@@ -982,18 +613,18 @@ async def crawl(task_input: JsonData, file_mode: FileMode) -> JsonData:
     # 从指定网站获取json_data
     website_name = _get_website_name(task_input, file_mode)
     res = await _crawl(task_input, website_name)
-    return _deal_json_data(res)
+    return _deal_res(res)
 
 
-def _deal_json_data(json_data: JsonData) -> JsonData:
+def _deal_res(res: JsonData) -> JsonData:
     # 标题为空返回
-    title = json_data["title"]
+    title = res["title"]
     if not title:
-        return json_data
+        return res
 
     # 演员
-    json_data["actor"] = (
-        str(json_data["actor"])
+    res["actor"] = (
+        str(res["actor"])
         .strip(" [ ]")
         .replace("'", "")
         .replace(", ", ",")
@@ -1004,7 +635,7 @@ def _deal_json_data(json_data: JsonData) -> JsonData:
 
     # 标签
     tag = (
-        str(json_data["tag"]).strip(" [ ]").replace("'", "").replace(", ", ",")
+        str(res["tag"]).strip(" [ ]").replace("'", "").replace(", ", ",")
     )  # 列表转字符串（避免个别网站刮削返回的是列表）
     tag = re.sub(r",\d+[kKpP],", ",", tag)
     tag_rep_word = [",HD高画质", ",HD高畫質", ",高画质", ",高畫質"]
@@ -1012,14 +643,14 @@ def _deal_json_data(json_data: JsonData) -> JsonData:
         if tag.endswith(each):
             tag = tag.replace(each, "")
         tag = tag.replace(each + ",", ",")
-    json_data["tag"] = tag
+    res["tag"] = tag
 
     # poster图
-    if not json_data.get("poster"):
-        json_data["poster"] = ""
+    if not res.get("poster"):
+        res["poster"] = ""
 
     # 发行日期
-    release = json_data["release"]
+    release = res["release"]
     if release:
         release = release.replace("/", "-").strip(". ")
         if len(release) < 10:
@@ -1029,15 +660,15 @@ def _deal_json_data(json_data: JsonData) -> JsonData:
                 r_month = "0" + r_month if len(r_month) == 1 else r_month
                 r_day = "0" + r_day if len(r_day) == 1 else r_day
                 release = r_year + "-" + r_month + "-" + r_day
-    json_data["release"] = release
+    res["release"] = release
 
     # 评分
-    if json_data["score"]:
-        json_data["score"] = "%.1f" % float(json_data.get("score"))
+    if res.get("score", ""):
+        res["score"] = "%.1f" % float(res.get("score", 0))
 
     # publisher
-    if not json_data.get("publisher"):
-        json_data["publisher"] = json_data["studio"]
+    if not res.get("publisher", ""):
+        res["publisher"] = res["studio"]
 
     # 字符转义，避免显示问题
     key_word = [
@@ -1073,13 +704,13 @@ def _deal_json_data(json_data: JsonData) -> JsonData:
     }
     for each in key_word:
         for key, value in rep_word.items():
-            json_data[each] = json_data[each].replace(key, value)
+            res[each] = res[each].replace(key, value)
 
     # 命名规则
     naming_media = config.naming_media
     naming_file = config.naming_file
     folder_name = config.folder_name
-    json_data["naming_media"] = naming_media
-    json_data["naming_file"] = naming_file
-    json_data["folder_name"] = folder_name
-    return json_data
+    res["naming_media"] = naming_media
+    res["naming_file"] = naming_file
+    res["folder_name"] = folder_name
+    return res
