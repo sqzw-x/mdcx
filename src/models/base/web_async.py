@@ -105,6 +105,8 @@ class AsyncWebClient:
             retry_count = self.retry
             error_msg = ""
             for attempt in range(retry_count):
+                # 采用保守的重试策略, 除特定状态码外不进行重试
+                retry = False
                 try:
                     resp: Response = await self.curl_session.request(
                         method,
@@ -119,17 +121,24 @@ class AsyncWebClient:
                     # 检查响应状态
                     if resp.status_code >= 300 and not (resp.status_code == 302 and resp.headers.get("Location")):
                         error_msg = f"HTTP {resp.status_code}"
+                        retry = resp.status_code in (
+                            408,  # Request Timeout
+                            429,  # Too Many Requests
+                            504,  # Gateway Timeout
+                        )
                     else:
                         self.log_fn(f"✅ {method} {url} 成功")
                         return resp, ""
                 except Timeout:
-                    error_msg = "超时"
+                    error_msg = "连接超时"
                 except ConnectionError as e:
                     error_msg = f"连接错误: {str(e)}"
                 except RequestException as e:
                     error_msg = f"请求异常: {str(e)} {e.code}"
                 except Exception as e:
                     error_msg = f"curl-cffi 异常: {str(e)}"
+                if not retry:
+                    break
                 self.log_fn(f"🔴 {method} {url} 失败: {error_msg} ({attempt + 1}/{retry_count})")
                 # 重试前等待
                 if attempt < retry_count - 1:
