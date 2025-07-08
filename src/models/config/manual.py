@@ -1,6 +1,6 @@
 class ManualConfig:
     # 表示运行时版本, 用于检查更新以及向后兼容配置文件
-    LOCAL_VERSION = 120250627
+    LOCAL_VERSION = 120250708
 
     # 支持的网站, 用于支持自定义域名
     SUPPORTED_WEBSITES = [

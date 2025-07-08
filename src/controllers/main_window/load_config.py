@@ -31,7 +31,7 @@ def load_config(self):
     self.Ui = cast("Ui_MDCx", self.Ui)
     errors = manager.read_config()
     if errors:
-        signal.show_log_text(f"⚠️ 读取配置文件出错:\n{errors}\n这不会阻止程序运行, 无效配置将使用默认值")
+        signal.show_log_text(f"⚠️ 读取配置文件出错:\n\t{errors}\n💡 这不会阻止程序运行, 无效配置将使用默认值\n")
     config.init()
     config_folder = manager.data_folder
     config_file = manager.file

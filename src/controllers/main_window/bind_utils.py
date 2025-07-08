@@ -26,8 +26,7 @@ def get_checkboxes(*component_value_pairs: Tuple[Union[QCheckBox, QRadioButton, 
     """
     result = ""
     for condition, value in component_value_pairs:
-        # 如果条件是 QCheckBox 对象，调用 isChecked()
-        if isinstance(condition, QCheckBox):
+        if not isinstance(condition, bool):
             condition = condition.isChecked()
         # 如果条件为真，添加对应的值
         if condition:
