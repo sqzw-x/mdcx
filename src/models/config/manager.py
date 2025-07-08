@@ -5,12 +5,21 @@ from configparser import ConfigParser, RawConfigParser
 from dataclasses import dataclass, fields
 from io import StringIO
 
-from ..base.utils import get_random_headers, get_user_agent, singleton
+from ..base.utils import get_random_headers, get_user_agent
 from .consts import MAIN_PATH, MARK_FILE
 from .manual import ManualConfig
 
 
-@singleton
+def ini_value_to_bool(value: str) -> bool:
+    """将 ini 配置文件中的字符串值转换为布尔值"""
+    if value.lower() in ["true", "1", "yes", "on"]:
+        return True
+    elif value.lower() in ["false", "0", "no", "off"]:
+        return False
+    else:
+        return bool(value)
+
+
 class ConfigManager(ManualConfig):
     def __init__(self):
         self._get_config_path()
@@ -38,7 +47,7 @@ class ConfigManager(ManualConfig):
         with open(MARK_FILE, "w", encoding="UTF-8") as f:
             f.write(self.path)
         with open(self.path, "w", encoding="UTF-8") as f:
-            f.write(self.format_ini(self.config))
+            f.write(self.config.format_ini())
 
     def _read_file(self, path):
         reader = RawConfigParser(interpolation=None)
@@ -69,7 +78,7 @@ class ConfigManager(ManualConfig):
                         except ValueError:
                             errors.append(f"类型无效: {key} 应为浮点数, 得到 {value} (位于 {section})")
                     elif expected_type is bool:
-                        setattr(self.config, key, self.ini_value_to_bool(value))
+                        setattr(self.config, key, ini_value_to_bool(value))
                     elif expected_type is str:
                         setattr(self.config, key, value)
                     else:
@@ -79,42 +88,10 @@ class ConfigManager(ManualConfig):
         setattr(self.config, "unknown_fields", unknown_fields)
         return "\n\t".join(errors)
 
-    @staticmethod
-    def ini_value_to_bool(value: str) -> bool:
-        """将 ini 配置文件中的字符串值转换为布尔值"""
-        if value.lower() in ["true", "1", "yes", "on"]:
-            return True
-        elif value.lower() in ["false", "0", "no", "off"]:
-            return False
-        else:
-            return bool(value)
-
-    @staticmethod
-    def format_ini(cfg: "ConfigSchema"):
-        buffer = StringIO()
-        parser = ConfigParser(interpolation=None)
-        parser.add_section("mdcx")
-        for field in fields(cfg):
-            value = getattr(cfg, field.name)
-            if isinstance(value, bool):
-                value = "true" if value else "false"
-            else:
-                value = str(value)
-            parser.set("mdcx", field.name, value)
-        for website in ManualConfig.SUPPORTED_WEBSITES:
-            if url := getattr(cfg, f"{website}_website", ""):
-                parser.set("mdcx", f"{website}_website", url)
-        if x := getattr(cfg, "unknown_fields", {}):
-            parser.add_section("unknown_fields")
-            for key, value in x.items():
-                parser.set("unknown_fields", key, value)
-        parser.write(buffer)
-        return buffer.getvalue()
-
     def init_config(self):
         """写入默认配置"""
         with open(self.path, "w", encoding="UTF-8") as f:
-            f.write(self.format_ini(ConfigSchema()))
+            f.write(ConfigSchema().format_ini())
 
     def _get_config_path(self):
         if not os.path.exists(MARK_FILE):  # 标记文件不存在
@@ -360,10 +337,10 @@ class ConfigSchema:
         # 1. 处理移除的配置项, 其将储存在 unknown_fields 中
         unknown_fields: dict[str, str] = getattr(self, "unknown_fields", {})
         if "pic_name" in unknown_fields:  # 重命名为 pic_simple_name
-            self.pic_simple_name = ConfigManager.ini_value_to_bool(unknown_fields["pic_name"])
+            self.pic_simple_name = ini_value_to_bool(unknown_fields["pic_name"])
             del unknown_fields["pic_name"]
         if "trailer_name" in unknown_fields:  # 重命名为 trailer_simple_name
-            self.trailer_simple_name = ConfigManager.ini_value_to_bool(unknown_fields["trailer_name"])
+            self.trailer_simple_name = ini_value_to_bool(unknown_fields["trailer_name"])
             del unknown_fields["trailer_name"]
         if "modified_time" in unknown_fields:  # 弃用
             del unknown_fields["modified_time"]
@@ -467,6 +444,27 @@ class ConfigSchema:
         [new_str_list.append(i1) for i1 in all_str_list if i1 not in new_str_list]  # 补全
         new_str = ",".join(new_str_list)
         self.suffix_sort = new_str
+
+    def format_ini(self):
+        buffer = StringIO()
+        parser = ConfigParser(interpolation=None)
+        parser.add_section("mdcx")
+        for field in fields(self):
+            value = getattr(self, field.name)
+            if isinstance(value, bool):
+                value = "true" if value else "false"
+            else:
+                value = str(value)
+            parser.set("mdcx", field.name, value)
+        for website in ManualConfig.SUPPORTED_WEBSITES:
+            if url := getattr(self, f"{website}_website", ""):
+                parser.set("mdcx", f"{website}_website", url)
+        if x := getattr(self, "unknown_fields", {}):
+            parser.add_section("unknown_fields")
+            for key, value in x.items():
+                parser.set("unknown_fields", key, value)
+        parser.write(buffer)
+        return buffer.getvalue()
 
 
 manager = ConfigManager()
