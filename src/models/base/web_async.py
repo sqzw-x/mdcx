@@ -37,10 +37,12 @@ class AsyncWebClient:
         timeout: float,
         log_fn: Optional[Callable[[str], None]] = None,
         limiters: Optional[AsyncWebLimiters] = None,
+        loop=None,
     ):
         self.retry = retry
         self.proxy = proxy
         self.curl_session = AsyncSession(
+            loop=loop,
             max_clients=50,
             verify=False,
             max_redirects=20,

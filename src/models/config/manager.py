@@ -464,6 +464,7 @@ class ConfigSchema:
 
         # 依赖于 config 的类不能作为全局变量, 必须在 config 内构建, 以在 config 更新后正确重建
         self.async_client = AsyncWebClient(
+            loop=executor._loop,
             proxy=self.httpx_proxy,
             retry=self.retry,
             timeout=self.timeout,
