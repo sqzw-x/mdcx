@@ -5,7 +5,7 @@ import threading
 import time
 import traceback
 import urllib
-from typing import Optional
+from typing import Optional, cast
 
 import deepl
 import langid
@@ -13,7 +13,7 @@ import zhconv
 
 from ..base.number import get_number_letters
 from ..base.utils import get_used_time, remove_repeat
-from ..base.web import get_html, post_html
+from ..base.web_sync import get_text, post_json
 from ..config.manager import config
 from ..config.resources import resources
 from ..signals import signal
@@ -64,11 +64,11 @@ def youdao_translate(title: str, outline: str):
     }
     headers_o = config.headers
     headers.update(headers_o)
-    result, res = post_html(url, data=data, headers=headers, json_data=True)
-    if not result:
-        return title, outline, f"请求失败！可能是被封了，可尝试更换代理！错误：{res}"
+    res, error = post_json(url, data=data, headers=headers)
+    if res is None:
+        return title, outline, f"请求失败！可能是被封了，可尝试更换代理！错误：{error}"
     else:
-        assert not isinstance(res, str)
+        res = cast(dict, res)
         translateResult = res.get("translateResult")
         if not translateResult:
             return title, outline, f"返回数据未找到翻译结果！返回内容：{res}"
@@ -154,24 +154,48 @@ def deepl_translate(
     }
 
     if title:
-        result, res = post_html(url, data=params_title, json_data=True)
-        if not result:
-            return title, outline, f"API 接口请求失败！错误：{res}"
+        res, error = post_json(url, data=params_title)
+        if res is None:
+            return title, outline, f"API 接口请求失败！错误：{error}"
         else:
             if "translations" in res:
                 title = res["translations"][0]["text"]
             else:
                 return title, outline, f"API 接口返回数据异常！返回内容：{res}"
     if outline:
-        result, res = post_html(url, data=params_outline, json_data=True)
-        if not result:
-            return title, outline, f"API 接口请求失败！错误：{res}"
+        res, error = post_json(url, data=params_outline)
+        if res is None:
+            return title, outline, f"API 接口请求失败！错误：{error}"
         else:
             if "translations" in res:
                 outline = res["translations"][0]["text"]
             else:
                 return title, outline, f"API 接口返回数据异常！返回内容：{res}"
-    return title, outline, ""
+    return title, outline, None
+
+
+def llm_translate(title: str, outline: str, target_language: str = "简体中文"):
+    r1 = _llm_translate(title, target_language)
+    r2 = _llm_translate(outline, target_language)
+    if r1 is None or r2 is None:
+        return "", "", "LLM 翻译失败! 查看网络日志以获取更多信息"
+    return r1, r2, None
+
+
+def _llm_translate(text: str, target_language: str = "简体中文") -> Optional[str]:
+    """调用 LLM 翻译文本"""
+    if not text:
+        return ""
+    return config.executor.run(
+        config.llm_client.ask(
+            model=config.llm_model,
+            system_prompt="You are a professional translator.",
+            user_prompt=config.llm_prompt.replace("{content}", text).replace("{lang}", target_language),
+            temperature=config.llm_temperature,
+            max_try=config.llm_max_try,
+            log_fn=signal.add_log,
+        )
+    )
 
 
 def translate_info(json_data: JsonData):
@@ -411,8 +435,8 @@ def _get_youdao_key_thread():
     # 获取 js url
     js_url = ""
     youdao_url = "https://fanyi.youdao.com"
-    result, req = get_html(youdao_url)
-    if result:
+    req, error = get_text(youdao_url)
+    if req is not None:
         # https://shared.ydstatic.com/fanyi/newweb/v1.1.11/scripts/newweb/fanyi.min.js
         url_temp = re.search(r"(https://shared.ydstatic.com/fanyi/newweb/.+/scripts/newweb/fanyi.min.js)", req)
         if url_temp:
@@ -423,7 +447,10 @@ def _get_youdao_key_thread():
         return
 
     # 请求 js url ，获取 youdao key
-    result, req = get_html(js_url)
+    req, error = get_text(js_url)
+    if req is None:
+        signal.show_traceback_log("youdao js content get failed!!!")
+        return
     try:
         youdaokey = re.search(r'(?<="fanyideskweb" \+ e \+ i \+ ")[^"]+', req).group(
             0
@@ -500,6 +527,8 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
                     t, o, r = youdao_translate(trans_title, trans_outline)
                 elif each == "google":  # 使用 google 翻译
                     t, o, r = google_translate(trans_title, trans_outline)
+                elif each == "llm":  # 使用 llm 翻译
+                    t, o, r = llm_translate(trans_title, trans_outline)
                 else:  # 使用deepl翻译
                     t, o, r = deepl_translate(trans_title, trans_outline, "JA", json_data)
                 if r:
