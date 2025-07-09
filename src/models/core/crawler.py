@@ -248,7 +248,6 @@ async def _call_crawlers(
     short_number = task_input["short_number"]
     scrape_like = config.scrape_like
     none_fields = config.none_fields  # 不单独刮削的字段
-    use_official = "official" in config.website_set  # 优先使用官方网站
 
     def get_field_websites(field: str) -> list[str]:
         """获取指定字段的网站取值优先级列表"""
@@ -257,8 +256,6 @@ async def _call_crawlers(
         field_list = clean_list(getattr(config, f"{field}_website", "").split(","))
         # 与指定类型网站列表取交集
         field_list = [i for i in field_list if i in number_website_list]
-        if use_official:
-            field_list.insert(0, "official")
         # 指定字段排除网站列表
         field_ex_list = clean_list(getattr(config, f"{field_no_zh}_website_exclude", "").split(","))
         # 所有设定的本字段来源失败时, 是否继续使用类型网站补全
@@ -662,6 +659,8 @@ async def _crawl(task_input: JsonData, website_name: str) -> CrawlersResult:  # 
         # =======================================================================剩下的（含匹配不了）的按有码来刮削
         else:
             website_list = config.website_youma.split(",")
+            if "official" in config.website_set:  # 优先使用官方网站
+                website_list.insert(0, "official")
             res = await _call_crawlers(task_input, website_list)
     else:
         res = await _call_specific_crawler(task_input, website_name)
