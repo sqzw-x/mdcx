@@ -83,6 +83,28 @@ class AsyncBackgroundExecutor:
                 future.cancel()  # 此处会运行 callback _remove_future
         self._running = True  # 此方法不关闭后台线程和事件循环, 仅取消任务
 
+    def cancel_async(self):
+        """取消所有任务. cancel 的非阻塞版本
+
+        提交一个新的任务到事件循环中去取消其他任务
+        """
+        with self._lock:
+            if not self._running:
+                return
+            _pending_futures = list(self._pending_futures)
+            if not _pending_futures:
+                return
+
+        # 创建一个异步任务来取消所有待处理任务
+        async def _cancel_all():
+            for future in _pending_futures:
+                if not future.done():
+                    future.cancel()
+            return True
+
+        # 提交取消任务到事件循环
+        return self.submit(_cancel_all())
+
     def _run_event_loop(self):
         """运行事件循环的线程函数"""
         try:

@@ -713,7 +713,7 @@ class MyMAinWindow(QMainWindow):
             self.Ui.pushButton_start_cap.setText(" ■ 停止中 ")
             self.Ui.pushButton_start_cap2.setText(" ■ 停止中 ")
             signal.show_scrape_info("⛔️ 刮削停止中...")
-            config.executor.cancel()  # 取消异步任务
+            config.executor.cancel_async()  # 取消异步任务
             t = threading.Thread(target=self._kill_threads)  # 关闭线程池
             t.start()
 
