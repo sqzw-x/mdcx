@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-import json
 import re
 import time
+import traceback
 
 import urllib3
 
-from models.base.web_sync import get_json
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
-import traceback
 
 
 def get_actor(page_data):
@@ -60,10 +59,10 @@ def get_real_url(html_search, number):
     return ""
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="jp",
+    **kwargs,
 ):
     start_time = time.time()
     website_name = "prestige"
@@ -89,7 +88,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            html_search, error = get_json(search_url)
+            html_search, error = await config.async_client.get_json(search_url)
             if html_search is None:
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -106,7 +105,7 @@ def main(
             # 'https://www.prestige-av.com/api/product/2e4a2de8-7275-4803-bb07-7585fd4f2ff3'
             debug_info = f"番号地址: {real_url.replace('api/product', 'goods')} "
             LogBuffer.info().write(web_info + debug_info)
-            page_data, error = get_json(real_url)
+            page_data, error = await config.async_client.get_json(real_url)
             if page_data is None:
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -180,7 +179,7 @@ def main(
                     "publisher": publisher,
                     "source": "prestige",
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": poster,
                     "extrafanart": extrafanart,
                     "trailer": trailer,
@@ -202,22 +201,15 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {
         "official": {"zh_cn": dic, "zh_tw": dic, "jp": dic},
         website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic},
     }
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

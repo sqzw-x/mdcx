@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json
+import asyncio
 import random
 import re
 import time  # yapf: disable # NOQA: E402
@@ -9,7 +9,6 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_dmm_trailer
-from models.base.web_sync import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -129,9 +128,9 @@ def get_extrafanart(html):  # 获取封面链接
     return extrafanart_list
 
 
-def get_trailer(html):  # 获取预览片
+async def get_trailer(html):  # 获取预览片
     trailer_url_list = html.xpath("//video[@id='preview-video']/source/@src")
-    return get_dmm_trailer(trailer_url_list[0]) if trailer_url_list else ""
+    return await get_dmm_trailer(trailer_url_list[0]) if trailer_url_list else ""
 
 
 def get_director(html):
@@ -199,11 +198,11 @@ def get_wanted(html):
     return str(result[0]) if result else ""
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="jp",
     org_language="zh_cn",
+    **kwargs,
 ):
     global sleep
     start_time = time.time()
@@ -228,8 +227,7 @@ def main(
     if javdb_time > 0 and sleep:
         rr = random.randint(int(javdb_time / 2), javdb_time)
         LogBuffer.info().write(f"\n    🌐 javdb (⏱ {rr}S)")
-        for i in range(rr):  # 检查是否手动停止刮削
-            time.sleep(1)
+        await asyncio.sleep(rr)
     else:
         LogBuffer.info().write("\n    🌐 javdb")
 
@@ -241,7 +239,7 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # 先使用scraper方法请求，失败时再使用get请求
-            html_search, error = get_text(url_search, headers=header)
+            html_search, error = await config.async_client.get_text(url_search, headers=header)
             if html_search is None:
                 # 判断返回内容是否有问题
                 if "HTTP 403" in error:
@@ -285,7 +283,7 @@ def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            html_info, error = get_text(real_url, headers=header)
+            html_info, error = await config.async_client.get_text(real_url, headers=header)
             if html_info is None:
                 debug_info = f"请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
@@ -368,7 +366,7 @@ def main(
             studio = get_studio(html_detail)
             publisher = get_publisher(html_detail)
             extrafanart = get_extrafanart(html_detail)
-            trailer = get_trailer(html_detail)
+            trailer = await get_trailer(html_detail)
             website = get_website(real_url, javdb_url)
             wanted = get_wanted(html_info)
             title_rep = ["第一集", "第二集", " - 上", " - 下", " 上集", " 下集", " -上", " -下"]
@@ -395,7 +393,7 @@ def main(
                     "source": "javdb",
                     "actor_photo": actor_photo,
                     "all_actor_photo": all_actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": poster_url,
                     "extrafanart": extrafanart,
                     "trailer": trailer,
@@ -420,19 +418,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

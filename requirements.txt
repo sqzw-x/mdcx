@@ -14,6 +14,7 @@ deepl-translate==1.2.0
 ping3==4.0.4
 oshash==0.1.1
 numpy==1.26.4
-curl-cffi==0.6.0b9
+curl-cffi==0.11.4
 openai==1.91.0
 aiolimiter==1.2.1
+aiofiles==24.1.0

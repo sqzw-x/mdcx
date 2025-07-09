@@ -1,9 +1,32 @@
 import asyncio
+import random
 from io import BytesIO
-from typing import Any, Callable, Literal, Optional
+from typing import Any, Callable, Optional
 
+import aiofiles
 import httpx
+from aiolimiter import AsyncLimiter
+from curl_cffi import AsyncSession, Response
+from curl_cffi.requests.exceptions import ConnectionError, RequestException, Timeout
+from curl_cffi.requests.session import HttpMethod
+from curl_cffi.requests.utils import not_set
 from PIL import Image
+
+
+class AsyncWebLimiters:
+    def __init__(self):
+        self.limiters: dict[str, AsyncLimiter] = {
+            "127.0.0.1": AsyncLimiter(300, 1),
+            "localhost": AsyncLimiter(300, 1),
+        }
+
+    def get(self, key: str, rate: float = 5, period: float = 1) -> AsyncLimiter:
+        """默认对所有域名启用 5 req/s 的速率限制"""
+        return self.limiters.setdefault(key, AsyncLimiter(rate, period))
+
+    def remove(self, key: str):
+        if key in self.limiters:
+            del self.limiters[key]
 
 
 class AsyncWebClient:
@@ -12,40 +35,29 @@ class AsyncWebClient:
         *,
         proxy: Optional[str] = None,
         retry: int = 3,
-        timeout: Optional[httpx.Timeout] = None,
-        default_headers: Optional[dict[str, str]] = None,
+        timeout: float,
         log_fn: Optional[Callable[[str], None]] = None,
-        ipv4_only: bool = False,
+        limiters: Optional[AsyncWebLimiters] = None,
+        loop=None,
     ):
-        limits = httpx.Limits(max_connections=100, max_keepalive_connections=50, keepalive_expiry=20)
         self.retry = retry
-        self.default_headers = default_headers or {}
-        # httpx 不支持为每个请求单独设置代理, 需要两个客户端
-        self.proxy_client = httpx.AsyncClient(
-            limits=limits,
-            proxy=proxy,
+        self.proxy = proxy
+        self.curl_session = AsyncSession(
+            loop=loop,
+            max_clients=50,
             verify=False,
+            max_redirects=20,
             timeout=timeout,
-            follow_redirects=True,
-            # https://github.com/encode/httpx/discussions/2664
-            transport=httpx.AsyncHTTPTransport(local_address="0.0.0.0") if ipv4_only else None,
+            impersonate=random.choice(["chrome123", "chrome124", "chrome131", "chrome136", "firefox133", "firefox135"]),
         )
-        self.no_proxy_client = httpx.AsyncClient(
-            limits=limits,
-            verify=False,
-            timeout=timeout,
-            follow_redirects=True,
-            transport=httpx.AsyncHTTPTransport(local_address="0.0.0.0") if ipv4_only else None,
-        )
-        self.log_fn = log_fn if log_fn is not None else lambda _: None
 
-    def _client(self, use_proxy):
-        return self.proxy_client if use_proxy else self.no_proxy_client
+        self.log_fn = log_fn if log_fn is not None else lambda _: None
+        self.limiters = limiters if limiters is not None else AsyncWebLimiters()
 
     def _prepare_headers(self, url: Optional[str] = None, headers: Optional[dict[str, str]] = None) -> dict[str, str]:
         """预处理请求头"""
         if not headers:
-            headers = self.default_headers.copy()
+            headers = {}
 
         # 根据URL设置特定的Referer
         if url:
@@ -64,7 +76,7 @@ class AsyncWebClient:
 
     async def request(
         self,
-        method: Literal["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
+        method: HttpMethod,
         url: str,
         *,
         headers: Optional[dict[str, str]] = None,
@@ -73,7 +85,7 @@ class AsyncWebClient:
         data: Optional[dict[str, Any]] = None,
         json_data: Optional[dict[str, Any]] = None,
         timeout: Optional[httpx.Timeout] = None,
-    ):
+    ) -> tuple[Optional[Response], str]:
         """
         执行请求的通用方法
 
@@ -87,46 +99,56 @@ class AsyncWebClient:
             timeout: 请求超时时间, 覆盖客户端默认值
 
         Returns:
-            tuple[Optional[httpx.Response], str]: (响应对象, 错误信息)
+            tuple[Optional[Response], str]: (响应对象, 错误信息)
         """
         try:
+            u = httpx.URL(url)
             headers = self._prepare_headers(url, headers)
+            await self.limiters.get(u.host).acquire()
             retry_count = self.retry
             error_msg = ""
             for attempt in range(retry_count):
+                # 采用保守的重试策略, 除特定状态码外不进行重试
+                retry = False
                 try:
-                    self.log_fn(f"🔎 {method} {url}" + f" ({attempt + 1}/{retry_count})" * (attempt != 0))
-                    resp = await self._client(use_proxy).request(
+                    resp: Response = await self.curl_session.request(
                         method,
                         url,
+                        proxy=self.proxy if use_proxy else None,
                         headers=headers,
                         cookies=cookies,
                         data=data,
                         json=json_data,
-                        timeout=timeout or httpx.USE_CLIENT_DEFAULT,
+                        timeout=timeout or not_set,
                     )
                     # 检查响应状态
                     if resp.status_code >= 300 and not (resp.status_code == 302 and resp.headers.get("Location")):
                         error_msg = f"HTTP {resp.status_code}"
-                        self.log_fn(f"🔴 请求失败 {error_msg}")
+                        retry = resp.status_code in (
+                            408,  # Request Timeout
+                            429,  # Too Many Requests
+                            504,  # Gateway Timeout
+                        )
                     else:
-                        self.log_fn(f"✅ 请求成功 {url}")
+                        self.log_fn(f"✅ {method} {url} 成功")
                         return resp, ""
-                except httpx.TimeoutException:
-                    error_msg = "请求超时"
-                    self.log_fn(f"🔴 {error_msg} (尝试 {attempt + 1}/{retry_count})")
-                except httpx.ConnectError as e:
+                except Timeout:
+                    error_msg = "连接超时"
+                except ConnectionError as e:
                     error_msg = f"连接错误: {str(e)}"
-                    self.log_fn(f"🔴 {error_msg} (尝试 {attempt + 1}/{retry_count})")
+                except RequestException as e:
+                    error_msg = f"请求异常: {str(e)} {e.code}"
                 except Exception as e:
-                    error_msg = f"请求异常: {str(e)}"
-                    self.log_fn(f"🔴 {error_msg} (尝试 {attempt + 1}/{retry_count})")
+                    error_msg = f"curl-cffi 异常: {str(e)}"
+                if not retry:
+                    break
+                self.log_fn(f"🔴 {method} {url} 失败: {error_msg} ({attempt + 1}/{retry_count})")
                 # 重试前等待
                 if attempt < retry_count - 1:
                     await asyncio.sleep(attempt * 3 + 2)
             return None, f"{method} {url} 失败: {error_msg}"
         except Exception as e:
-            error_msg = f"{method} {url} 发生未知错误:  {str(e)}"
+            error_msg = f"{method} {url} 未知错误:  {str(e)}"
             self.log_fn(f"🔴 {error_msg}")
             return None, error_msg
 
@@ -171,7 +193,7 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[dict[str, Any]], str]:
+    ) -> tuple[Optional[Any], str]:
         """请求JSON数据"""
         response, error = await self.request("GET", url, headers=headers, cookies=cookies, use_proxy=use_proxy)
         if response is None:
@@ -213,7 +235,7 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[dict[str, Any]], str]:
+    ) -> tuple[Optional[Any], str]:
         """POST 请求, 返回响应JSON数据"""
         response, error = await self.request(
             "POST", url, data=data, json_data=json_data, headers=headers, cookies=cookies, use_proxy=use_proxy
@@ -249,10 +271,11 @@ class AsyncWebClient:
         """获取文件大小"""
         response, error = await self.request("HEAD", url, use_proxy=use_proxy)
         if response is None:
-            self.log_fn(f"🔴 获取文件大小失败: {error}")
+            self.log_fn(f"🔴 获取文件大小失败: {url} {error}")
             return None
         if response.status_code < 400:
             return int(response.headers.get("Content-Length"))
+        self.log_fn(f"🔴 获取文件大小失败: {url} HTTP {response.status_code}")
         return None
 
     async def download(self, url: str, file_path: str, *, use_proxy: bool = True) -> bool:
@@ -281,15 +304,15 @@ class AsyncWebClient:
 
         content, error = await self.get_content(url, use_proxy=use_proxy)
         if not content:
-            self.log_fn(f"🔴 下载失败: {error}")
+            self.log_fn(f"🔴 下载失败: {url} {error}")
             return False
         if not webp:
             try:
-                with open(file_path, "wb") as f:
-                    f.write(content)
+                async with aiofiles.open(file_path, "wb") as f:
+                    await f.write(content)
                 return True
             except Exception as e:
-                self.log_fn(f"🔴 文件写入失败: {str(e)}")
+                self.log_fn(f"🔴 文件写入失败: {url} {file_path} {str(e)}")
                 return False
         try:
             byte_stream = BytesIO(content)
@@ -300,7 +323,7 @@ class AsyncWebClient:
             img.close()
             return True
         except Exception as e:
-            self.log_fn(f"🔴 WebP转换失败: {str(e)}")
+            self.log_fn(f"🔴 WebP转换失败: {url} {file_path} {str(e)}")
             return False
 
     async def _download_chunks(self, url: str, file_path: str, file_size: int, use_proxy: bool = True) -> bool:
@@ -310,14 +333,14 @@ class AsyncWebClient:
         each_size = min(1 * MB, file_size)
         parts = [(s, min(s + each_size, file_size)) for s in range(0, file_size, each_size)]
 
-        self.log_fn(f"📦 分块下载: {len(parts)} 个分块, 总大小: {file_size} bytes")
+        self.log_fn(f"📦 分块下载: {url} {len(parts)} 个分块, 总大小: {file_size} bytes")
 
         # 先创建文件并预分配空间
         try:
-            with open(file_path, "wb") as f:
-                f.truncate(file_size)
+            async with aiofiles.open(file_path, "wb") as f:
+                await f.truncate(file_size)
         except Exception as e:
-            self.log_fn(f"🔴 文件创建失败: {str(e)}")
+            self.log_fn(f"🔴 文件创建失败: {url} {str(e)}")
             return False
 
         # 创建下载任务
@@ -330,19 +353,19 @@ class AsyncWebClient:
 
         # 并发执行所有下载任务
         try:
-            results = await asyncio.gather(*tasks, return_exceptions=True)
+            errors = await asyncio.gather(*tasks, return_exceptions=True)
             # 检查所有任务是否成功
-            for i, result in enumerate(results):
-                if isinstance(result, Exception):
-                    self.log_fn(f"🔴 分块 {i} 下载异常: {str(result)}")
+            for i, err in enumerate(errors):
+                if isinstance(err, Exception):
+                    self.log_fn(f"🔴 分块 {i} 下载失败: {url} {str(err)}")
                     return False
-                elif not result:
-                    self.log_fn(f"🔴 分块 {i} 下载失败")
+                elif err:
+                    self.log_fn(f"🔴 分块 {i} 下载失败: {url} {err}")
                     return False
-            self.log_fn(f"✅ 多分块下载完成: {file_path}")
+            self.log_fn(f"✅ 多分块下载完成: {url} {file_path}")
             return True
         except Exception as e:
-            self.log_fn(f"🔴 并发下载异常: {str(e)}")
+            self.log_fn(f"🔴 并发下载异常: {url} {str(e)}")
             return False
 
     async def _download_chunk(
@@ -354,16 +377,14 @@ class AsyncWebClient:
         end: int,
         chunk_id: int,
         use_proxy: bool = True,
-    ) -> bool:
+    ) -> Optional[str]:
         """下载单个分块"""
         async with semaphore:
             res, error = await self.get_content(url, headers={"Range": f"bytes={start}-{end}"}, use_proxy=use_proxy)
             if res is None:
-                self.log_fn(f"🔴 分块 {chunk_id} 下载失败: {error}")
-                return False
+                return error
         # 写入文件
-        with open(file_path, "rb+") as fp:
-            fp.seek(start)
-            fp.write(res)
-        self.log_fn(f"✅ 分块 {chunk_id} 下载完成 ({start}-{end})")
-        return True
+        async with aiofiles.open(file_path, "rb+") as fp:
+            await fp.seek(start)
+            await fp.write(res)
+        return ""

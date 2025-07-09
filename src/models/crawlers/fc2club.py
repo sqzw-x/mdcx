@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-import json
 import re
 import time  # yapf: disable # NOQA: E402
 
 import urllib3
 from lxml import etree
 
-from models.base.web_sync import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -109,10 +107,10 @@ def getMosaic(html):  # 获取马赛克
     return mosaic
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="jp",
+    **kwargs,
 ):
     start_time = time.time()
     website_name = "fc2club"
@@ -134,7 +132,7 @@ def main(
         LogBuffer.info().write(web_info + debug_info)
 
         # ========================================================================搜索番号
-        html_content, error = get_text(real_url)
+        html_content, error = await config.async_client.get_text(real_url)
         if html_content is None:
             debug_info = f"网络请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)
@@ -175,7 +173,7 @@ def main(
                 "source": "fc2club",
                 "website": str(real_url).strip("[]"),
                 "actor_photo": actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": "",
                 "extrafanart": extrafanart,
                 "trailer": "",
@@ -196,19 +194,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

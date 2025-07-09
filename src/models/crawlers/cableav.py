@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import json
 import re
 import time
 
@@ -7,7 +6,6 @@ import urllib3
 import zhconv
 from lxml import etree
 
-from models.base.web_sync import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info, get_number_list
@@ -55,12 +53,12 @@ def get_real_url(html, number_list):
     return False, "", "", ""
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="zh_cn",
     file_path="",
     appoint_number="",
+    **kwargs,
 ):
     start_time = time.time()
     website_name = "cableav"
@@ -83,7 +81,7 @@ def main(
                 # real_url = 'https://cableav.tv/s?s=%E6%9F%9A%E5%AD%90%E7%8C%AB'
                 debug_info = f"请求地址: {real_url} "
                 LogBuffer.info().write(web_info + debug_info)
-                response, error = get_text(real_url)
+                response, error = await config.async_client.get_text(real_url)
                 if response is None:
                     debug_info = f"网络请求错误: {error}"
                     LogBuffer.info().write(web_info + debug_info)
@@ -100,7 +98,7 @@ def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
-        response, error = get_text(real_url)
+        response, error = await config.async_client.get_text(real_url)
 
         if response is None:
             debug_info = f"没有找到数据 {error} "
@@ -132,9 +130,9 @@ def main(
                 "source": "cableav",
                 "website": real_url,
                 "actor_photo": actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": "",
-                "extrafanart": "",
+                "extrafanart": [],
                 "trailer": "",
                 "image_download": False,
                 "image_cut": "no",
@@ -154,19 +152,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

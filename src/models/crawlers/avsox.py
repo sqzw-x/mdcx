@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import json
 import re
 import time  # yapf: disable # NOQA: E402
 
@@ -7,7 +6,7 @@ import urllib3
 from lxml import etree
 
 from models.base.web import get_avsox_domain
-from models.base.web_sync import get_text
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -99,10 +98,10 @@ def get_real_url(number, html):
     return page_url, i
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="jp",
+    **kwargs,
 ):
     start_time = time.time()
     website_name = "avsox"
@@ -120,11 +119,11 @@ def main(
 
     try:
         if not real_url:
-            avsox_url = get_avsox_domain()
+            avsox_url = await get_avsox_domain()
             url_search = f"{avsox_url}/cn/search/{number}"
             debug_info = f"搜索地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
-            response, error = get_text(url_search)
+            response, error = await config.async_client.get_text(url_search)
             if response is None:
                 debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
@@ -141,7 +140,7 @@ def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
-        htmlcode, error = get_text(real_url)
+        htmlcode, error = await config.async_client.get_text(real_url)
         if htmlcode is None:
             debug_info = f"网络请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)
@@ -182,9 +181,9 @@ def main(
                 "publisher": studio,
                 "source": "avsox",
                 "website": real_url,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": poster_url,
-                "extrafanart": "",
+                "extrafanart": [],
                 "trailer": "",
                 "image_download": image_download,
                 "image_cut": image_cut,
@@ -204,19 +203,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

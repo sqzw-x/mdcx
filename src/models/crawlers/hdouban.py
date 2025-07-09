@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import json
 import os
 import re
 import time
@@ -7,7 +6,6 @@ import time
 import urllib3
 import zhconv
 
-from models.base.web_sync import get_json, post_json
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -183,13 +181,13 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     return number_list, filename_list
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="zh_cn",
     file_path="",
     appoint_number="",
     mosaic="",
+    **kwargs,
 ):
     start_time = time.time()
     number = number.strip()
@@ -242,7 +240,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
                 # ========================================================================搜索番号
-                html_search, error = get_json(url_search)
+                html_search, error = await config.async_client.get_json(url_search)
                 if html_search is None:
                     debug_info = f"网络请求错误: {error} "
                     LogBuffer.info().write(web_info + debug_info)
@@ -285,7 +283,7 @@ def main(
 
             detail_url = "https://api.6dccbca.com/api/movie/detail"
             data = {"id": str(detail_id[0])}
-            response, error = post_json(detail_url, data=data)
+            response, error = await config.async_client.post_json(detail_url, data=data)
             if response is None:
                 debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
@@ -336,7 +334,7 @@ def main(
                     "publisher": studio,
                     "source": "hdouban",
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": poster,
                     "extrafanart": extrafanart,
                     "trailer": trailer,
@@ -358,19 +356,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

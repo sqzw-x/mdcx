@@ -7,7 +7,7 @@ import zhconv
 from lxml import etree
 from PyQt5.QtGui import QFontDatabase
 
-from ..base.file import copy_file
+from ..base.file import copy_file_sync
 from ..base.utils import singleton
 from ..signals import signal
 from .consts import IS_PYINSTALLER, MAIN_PATH
@@ -170,10 +170,10 @@ class Resources:
         actor_map_local_path = self.userdata_path("mapping_actor.xml")
         info_map_local_path = self.userdata_path("mapping_info.xml")
         if not os.path.exists(actor_map_local_path):
-            if not copy_file(self.actor_map_backup_path, actor_map_local_path):
+            if not copy_file_sync(self.actor_map_backup_path, actor_map_local_path):
                 actor_map_local_path = self.actor_map_backup_path
         if not os.path.exists(info_map_local_path):
-            if not copy_file(self.info_map_backup_path, info_map_local_path):
+            if not copy_file_sync(self.info_map_backup_path, info_map_local_path):
                 info_map_local_path = self.info_map_backup_path
         try:
             parser = etree.HTMLParser(encoding="utf-8")
@@ -196,19 +196,19 @@ class Resources:
         if not os.path.isdir(mark_folder):
             os.makedirs(mark_folder)
         if not os.path.isfile(self.icon_4k_path):
-            copy_file(self.mark_4k, self.icon_4k_path)
+            copy_file_sync(self.mark_4k, self.icon_4k_path)
         if not os.path.isfile(self.icon_8k_path):
-            copy_file(self.mark_8k, self.icon_8k_path)
+            copy_file_sync(self.mark_8k, self.icon_8k_path)
         if not os.path.isfile(self.icon_sub_path):
-            copy_file(self.mark_sub, self.icon_sub_path)
+            copy_file_sync(self.mark_sub, self.icon_sub_path)
         if not os.path.isfile(self.icon_youma_path):
-            copy_file(self.mark_youma, self.icon_youma_path)
+            copy_file_sync(self.mark_youma, self.icon_youma_path)
         if not os.path.isfile(self.icon_umr_path):
-            copy_file(self.mark_umr, self.icon_umr_path)
+            copy_file_sync(self.mark_umr, self.icon_umr_path)
         if not os.path.isfile(self.icon_leak_path):
-            copy_file(self.mark_leak, self.icon_leak_path)
+            copy_file_sync(self.mark_leak, self.icon_leak_path)
         if not os.path.isfile(self.icon_wuma_path):
-            copy_file(self.mark_wuma, self.icon_wuma_path)
+            copy_file_sync(self.mark_wuma, self.icon_wuma_path)
 
 
 resources = Resources()

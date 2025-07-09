@@ -1,6 +1,6 @@
 class ManualConfig:
     # 表示运行时版本, 用于检查更新以及向后兼容配置文件
-    LOCAL_VERSION = 120250627
+    LOCAL_VERSION = 120250708
 
     # 支持的网站, 用于支持自定义域名
     SUPPORTED_WEBSITES = [
@@ -41,7 +41,49 @@ class ManualConfig:
         "xcity",
     ]
 
-    # 刮削过程所需预设值
+    # 可配置的字段
+    CONFIG_DATA_FIELDS = [
+        "title",
+        "title_zh",  # 根据语言设置, 分别对应 title 和 originaltitle
+        "outline",
+        "outline_zh",
+        "actor",
+        "thumb",  # 在 nfo 相关配置中为 cover
+        "poster",
+        "extrafanart",
+        "tag",
+        "release",
+        "runtime",
+        "score",
+        "director",
+        "series",
+        "studio",
+        "publisher",
+        "trailer",
+        "wanted",
+    ]
+    # 爬虫返回的字段
+    CRAWLER_DATA_FIELDS = [
+        "title",
+        "originaltitle",
+        "outline",
+        "originalplot",
+        "actor",
+        "thumb",
+        "poster",
+        "extrafanart",
+        "tag",
+        "release",
+        "runtime",
+        "score",
+        "director",
+        "series",
+        "studio",
+        "publisher",
+        "trailer",
+        "wanted",
+        "year",
+    ]
     OUMEI_NAME = {
         "wgp": "WhenGirlsPlay",
         "18og": "18OnlyGirls",

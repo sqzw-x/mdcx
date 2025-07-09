@@ -1,7 +1,7 @@
+import asyncio
 import hashlib
 import random
 import re
-import threading
 import time
 import traceback
 import urllib
@@ -13,19 +13,18 @@ import zhconv
 
 from ..base.number import get_number_letters
 from ..base.utils import get_used_time, remove_repeat
-from ..base.web_sync import get_text, post_json
 from ..config.manager import config
 from ..config.resources import resources
 from ..signals import signal
 from .flags import Flags
 from .json_data import JsonData, LogBuffer
-from .web import get_actorname, get_yesjav_title, google_translate
+from .web import get_actorname, get_yesjav_title, google_translate_async
 
 deepl_result = {}
 REGEX_KANA = re.compile(r"[\u3040-\u30ff]")  # 平假名/片假名
 
 
-def youdao_translate(title: str, outline: str):
+async def youdao_translate_async(title: str, outline: str):
     url = "https://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule"
     msg = f"{title}\n{outline}"
     lts = str(int(time.time() * 1000))
@@ -64,7 +63,7 @@ def youdao_translate(title: str, outline: str):
     }
     headers_o = config.headers
     headers.update(headers_o)
-    res, error = post_json(url, data=data, headers=headers)
+    res, error = await config.async_client.post_json(url, data=data, headers=headers)
     if res is None:
         return title, outline, f"请求失败！可能是被封了，可尝试更换代理！错误：{error}"
     else:
@@ -95,26 +94,7 @@ def youdao_translate(title: str, outline: str):
     return title, outline.strip("\n"), ""
 
 
-def _deepl_trans_thread(
-    ls: str,
-    title: str,
-    outline: str,
-    json_data: JsonData,
-):
-    global deepl_result
-    result = ""
-    try:
-        if title:
-            title = deepl.translate(source_language=ls, target_language="ZH", text=title)
-        if outline:
-            outline = deepl.translate(source_language=ls, target_language="ZH", text=outline)
-    except Exception as e:
-        result = f"网页接口请求失败! 错误：{e}"
-        print(title, outline, f"网页接口请求失败! 错误：{e}")
-    deepl_result[json_data["file_path"]] = (title, outline, result)
-
-
-def deepl_translate(
+async def deepl_translate_async(
     title: str,
     outline: str,
     ls="JA",
@@ -123,24 +103,14 @@ def deepl_translate(
     global deepl_result
     deepl_key = config.deepl_key
     if not deepl_key:
-        if json_data:
-            t_deepl = threading.Thread(target=_deepl_trans_thread, args=(ls, title, outline, json_data))
-            t_deepl.setDaemon(True)
-            t_deepl.start()
-            t_deepl.join(timeout=config.timeout)
-            t, o, r = title, outline, "翻译失败或超时！"
-            if deepl_result.get(json_data["file_path"]):
-                t, o, r = deepl_result[json_data["file_path"]]
-            return t, o, r
-        else:
-            try:
-                if title:
-                    title = deepl.translate(source_language=ls, target_language="ZH", text=title)
-                if outline:
-                    outline = deepl.translate(source_language=ls, target_language="ZH", text=outline)
-                return title, outline, ""
-            except Exception as e:
-                return title, outline, f"网页接口请求失败! 错误：{e}"
+        try:  # todo 改为异步请求, 避免使用 sdk
+            if title:
+                title = deepl.translate(source_language=ls, target_language="ZH", text=title)
+            if outline:
+                outline = deepl.translate(source_language=ls, target_language="ZH", text=outline)
+            return title, outline, ""
+        except Exception as e:
+            return title, outline, f"网页接口请求失败! 错误：{e}"
 
     deepl_url = "https://api-free.deepl.com" if ":fx" in deepl_key else "https://api.deepl.com"
     url = f"{deepl_url}/v2/translate?auth_key={deepl_key}&source_lang={ls}&target_lang=ZH"
@@ -154,7 +124,7 @@ def deepl_translate(
     }
 
     if title:
-        res, error = post_json(url, data=params_title)
+        res, error = await config.async_client.post_json(url, data=params_title)
         if res is None:
             return title, outline, f"API 接口请求失败！错误：{error}"
         else:
@@ -163,7 +133,7 @@ def deepl_translate(
             else:
                 return title, outline, f"API 接口返回数据异常！返回内容：{res}"
     if outline:
-        res, error = post_json(url, data=params_outline)
+        res, error = await config.async_client.post_json(url, data=params_outline)
         if res is None:
             return title, outline, f"API 接口请求失败！错误：{error}"
         else:
@@ -174,27 +144,24 @@ def deepl_translate(
     return title, outline, None
 
 
-def llm_translate(title: str, outline: str, target_language: str = "简体中文"):
-    r1 = _llm_translate(title, target_language)
-    r2 = _llm_translate(outline, target_language)
+async def llm_translate_async(title: str, outline: str, target_language: str = "简体中文"):
+    r1, r2 = await asyncio.gather(_llm_translate(title, target_language), _llm_translate(outline, target_language))
     if r1 is None or r2 is None:
         return "", "", "LLM 翻译失败! 查看网络日志以获取更多信息"
     return r1, r2, None
 
 
-def _llm_translate(text: str, target_language: str = "简体中文") -> Optional[str]:
+async def _llm_translate(text: str, target_language: str = "简体中文") -> Optional[str]:
     """调用 LLM 翻译文本"""
     if not text:
         return ""
-    return config.executor.run(
-        config.llm_client.ask(
-            model=config.llm_model,
-            system_prompt="You are a professional translator.",
-            user_prompt=config.llm_prompt.replace("{content}", text).replace("{lang}", target_language),
-            temperature=config.llm_temperature,
-            max_try=config.llm_max_try,
-            log_fn=signal.add_log,
-        )
+    return await config.llm_client.ask(
+        model=config.llm_model,
+        system_prompt="You are a professional translator.",
+        user_prompt=config.llm_prompt.replace("{content}", text).replace("{lang}", target_language),
+        temperature=config.llm_temperature,
+        max_try=config.llm_max_try,
+        log_fn=signal.add_log,
     )
 
 
@@ -343,7 +310,7 @@ def translate_info(json_data: JsonData):
     return json_data
 
 
-def translate_actor(json_data: JsonData):
+async def translate_actor(json_data: JsonData):
     # 网络请求真实的演员名字
     actor_realname = config.actor_realname
     mosaic = json_data["mosaic"]
@@ -355,7 +322,7 @@ def translate_actor(json_data: JsonData):
         if mosaic != "国产" and (
             number.startswith("FC2") or number.startswith("SIRO") or re.search(r"\d{3,}[A-Z]{3,}-", number)
         ):
-            result, temp_actor = get_actorname(json_data["number"])
+            result, temp_actor = await get_actorname(json_data["number"])
             if result:
                 actor: str = json_data["actor"]
                 all_actor: str = json_data["all_actor"]
@@ -422,52 +389,7 @@ def translate_actor(json_data: JsonData):
     return json_data
 
 
-def get_youdao_key():
-    try:
-        t = threading.Thread(target=_get_youdao_key_thread)
-        t.start()  # 启动线程,即让线程开始执行
-    except Exception:
-        signal.show_traceback_log(traceback.format_exc())
-        signal.show_log_text(traceback.format_exc())
-
-
-def _get_youdao_key_thread():
-    # 获取 js url
-    js_url = ""
-    youdao_url = "https://fanyi.youdao.com"
-    req, error = get_text(youdao_url)
-    if req is not None:
-        # https://shared.ydstatic.com/fanyi/newweb/v1.1.11/scripts/newweb/fanyi.min.js
-        url_temp = re.search(r"(https://shared.ydstatic.com/fanyi/newweb/.+/scripts/newweb/fanyi.min.js)", req)
-        if url_temp:
-            js_url = url_temp.group(1)
-    if not js_url:
-        signal.show_log_text(" ⚠️ youdao js url get failed!!!")
-        signal.show_traceback_log("youdao js url get failed!!!")
-        return
-
-    # 请求 js url ，获取 youdao key
-    req, error = get_text(js_url)
-    if req is None:
-        signal.show_traceback_log("youdao js content get failed!!!")
-        return
-    try:
-        youdaokey = re.search(r'(?<="fanyideskweb" \+ e \+ i \+ ")[^"]+', req).group(
-            0
-        )  # sign: n.md5("fanyideskweb" + e + i + "Ygy_4c=r#e#4EX^NUGUc5")
-    except Exception:
-        try:
-            youdaokey = re.search(r'(?<="fanyideskweb"\+e\+i\+")[^"]+', req).group(0)
-        except Exception as e:
-            youdaokey = "Ygy_4c=r#e#4EX^NUGUc5"
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_traceback_log("🔴 有道翻译接口key获取失败！" + str(e))
-            signal.show_log_text(traceback.format_exc())
-            signal.show_log_text(" 🔴 有道翻译接口key获取失败！请检查网页版有道是否正常！" + str(e))
-    return youdaokey
-
-
-def translate_title_outline(json_data: JsonData, movie_number: str):
+async def translate_title_outline(json_data: JsonData, movie_number: str):
     title_language = config.title_language
     title_translate = config.title_translate
     outline_language = config.outline_language
@@ -501,7 +423,7 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
         # 匹配网络高质量标题（yesjav， 可在线更新）
         if not movie_title and title_yesjav and json_data_title_language == "ja":
             start_time = time.time()
-            movie_title = get_yesjav_title(movie_number)
+            movie_title = await get_yesjav_title(movie_number)
             if movie_title and langid.classify(movie_title)[0] != "ja":
                 json_data["title"] = movie_title
                 LogBuffer.log().write(f"\n 🆈 Yesjav title done!({get_used_time(start_time)}s)")
@@ -522,15 +444,16 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
             translate_by_list = Flags.translate_by_list.copy()
             if not json_data["cd_part"]:
                 random.shuffle(translate_by_list)
-            for each in translate_by_list:
+
+            async def _task(each):
                 if each == "youdao":  # 使用有道翻译
-                    t, o, r = youdao_translate(trans_title, trans_outline)
+                    t, o, r = await youdao_translate_async(trans_title, trans_outline)
                 elif each == "google":  # 使用 google 翻译
-                    t, o, r = google_translate(trans_title, trans_outline)
+                    t, o, r = await google_translate_async(trans_title, trans_outline)
                 elif each == "llm":  # 使用 llm 翻译
-                    t, o, r = llm_translate(trans_title, trans_outline)
+                    t, o, r = await llm_translate_async(trans_title, trans_outline)
                 else:  # 使用deepl翻译
-                    t, o, r = deepl_translate(trans_title, trans_outline, "JA", json_data)
+                    t, o, r = await deepl_translate_async(trans_title, trans_outline, "JA", json_data)
                 if r:
                     LogBuffer.log().write(
                         f"\n 🔴 Translation failed!({each.capitalize()})({get_used_time(start_time)}s) Error: {r}"
@@ -542,6 +465,11 @@ def translate_title_outline(json_data: JsonData, movie_number: str):
                         json_data["outline"] = o
                     LogBuffer.log().write(f"\n 🍀 Translation done!({each.capitalize()})({get_used_time(start_time)}s)")
                     json_data["outline_from"] = each
+                    return "break"
+
+            res = await asyncio.gather(*[_task(each) for each in translate_by_list])
+            for r in res:
+                if r == "break":
                     break
             else:
                 translate_by = translate_by.strip(",").capitalize()

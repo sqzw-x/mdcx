@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-import json
 import re
 import time  # yapf: disable # NOQA: E402
 
 import urllib3
 from lxml import etree
 
-from models.base.web_sync import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 
@@ -175,7 +173,7 @@ def getTag(html):  # 获取标签
     return result
 
 
-def get_real_url(
+async def get_real_url(
     number,
     url_type,
     javbus_url,
@@ -193,7 +191,7 @@ def get_real_url(
     debug_info = f"搜索地址: {url_search} "
     LogBuffer.info().write(debug_info)
     # ========================================================================搜索番号
-    html_search, error = get_text(url_search, headers=headers)
+    html_search, error = await config.async_client.get_text(url_search, headers=headers)
     # 判断是否需要登录
     if html_search is None:
         debug_info = f"网络请求错误: {error} "
@@ -221,11 +219,11 @@ def get_real_url(
     raise Exception(debug_info)
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="jp",
     mosaic="",
+    **kwargs,
 ):
     start_time = time.time()
     website_name = "javbus"
@@ -255,7 +253,7 @@ def main(
             # 欧美去搜索，其他尝试直接拼接地址，没有结果时再搜索
             if "." in number or re.search(r"[-_]\d{2}[-_]\d{2}[-_]\d{2}", number):  # 欧美影片
                 number = number.replace("-", ".").replace("_", ".")
-                real_url = get_real_url(number, "us", javbus_url, json_log, headers, cookie)
+                real_url = await get_real_url(number, "us", javbus_url, json_log, headers, cookie)
             else:
                 real_url = javbus_url + "/" + number
                 if number.upper().startswith("CWP") or number.upper().startswith("LAF"):
@@ -266,7 +264,7 @@ def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(debug_info)
-        htmlcode, error = get_text(real_url, headers=headers)
+        htmlcode, error = await config.async_client.get_text(real_url, headers=headers)
 
         # 判断是否需要登录
         if htmlcode is None:
@@ -295,13 +293,13 @@ def main(
 
             # 无码搜索结果
             elif mosaic == "无码" or mosaic == "無碼":
-                real_url = get_real_url(number, "uncensored", javbus_url, json_log, headers, cookie)
+                real_url = await get_real_url(number, "uncensored", javbus_url, json_log, headers, cookie)
 
             # 有码搜索结果
             else:
-                real_url = get_real_url(number, "censored", javbus_url, json_log, headers, cookie)
+                real_url = await get_real_url(number, "censored", javbus_url, json_log, headers, cookie)
 
-            htmlcode, error = get_text(real_url, headers=headers)
+            htmlcode, error = await config.async_client.get_text(real_url, headers=headers)
             if htmlcode is None:
                 debug_info = "未匹配到番号！"
                 LogBuffer.info().write(debug_info)
@@ -362,7 +360,7 @@ def main(
                 "source": "javbus",
                 "website": real_url,
                 "actor_photo": actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": poster_url,
                 "extrafanart": extrafanart,
                 "trailer": "",
@@ -381,19 +379,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

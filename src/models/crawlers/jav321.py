@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-import json
 import re
 import time  # yapf: disable # NOQA: E402
 
 import urllib3
 from lxml import etree
 
-from models.base.web_sync import post_text
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 
 urllib3.disable_warnings()  # yapf: disable
@@ -109,14 +108,14 @@ def getTag(response):  # 获取演员
 
 
 def getOutline(detail_page):
-    # 修复路径，避免简介含有垃圾信息 "*根据分发方式，内容可能会有所不同”
+    # 修复路径，避免简介含有垃圾信息 "*根据分发方式，内容可能会有所不同"
     return detail_page.xpath("string(/html/body/div[2]/div[1]/div[1]/div[2]/div[3]/div/text())")
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="jp",
+    **kwargs,
 ):
     start_time = time.time()
     website_name = "jav321"
@@ -140,7 +139,7 @@ def main(
         else:
             debug_info = f'搜索地址: {result_url} {{"sn": {number}}}'
             LogBuffer.info().write(web_info + debug_info)
-        response, error = post_text(result_url, data={"sn": number})
+        response, error = await config.async_client.post_text(result_url, data={"sn": number})
         if response is None:
             debug_info = f"网络请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)
@@ -236,7 +235,7 @@ def main(
                 "source": "jav321",
                 "website": website,
                 "actor_photo": actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": poster_url,
                 "extrafanart": extrafanart,
                 "trailer": "",
@@ -257,19 +256,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

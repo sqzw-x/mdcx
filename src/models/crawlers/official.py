@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import json
 import re
 import time  # yapf: disable # NOQA: E402
 
@@ -7,7 +6,6 @@ import urllib3
 from lxml import etree
 
 from models.base.number import get_number_letters
-from models.base.web_sync import get_text
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers import prestige
@@ -114,10 +112,10 @@ def get_cover(html):
     return (result.pop(0), result) if result else ("", [])
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="",
+    **kwargs,
 ):
     start_time = time.time()
 
@@ -128,7 +126,7 @@ def main(
         if not official_url:
             raise Exception("不在官网番号前缀列表中")
         elif official_url == "https://www.prestige-av.com":
-            return prestige.main(number, appoint_url, language="jp")
+            return await prestige.main(number, appoint_url)
         website_name = official_url.split(".")[-2].replace("https://", "")
         LogBuffer.req().write(f"-> {website_name}")
         real_url = appoint_url
@@ -143,7 +141,7 @@ def main(
         LogBuffer.info().write(web_info + debug_info)
 
         # ========================================================================搜索番号
-        html_search, error = get_text(url_search)
+        html_search, error = await config.async_client.get_text(url_search)
         if html_search is None:
             debug_info = f"网络请求错误: {error} "
             LogBuffer.info().write(web_info + debug_info)
@@ -159,7 +157,7 @@ def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            html_content, error = get_text(real_url)
+            html_content, error = await config.async_client.get_text(real_url)
             if html_content is None:
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -206,7 +204,7 @@ def main(
                     "publisher": publisher,
                     "source": website_name,
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": poster,
                     "extrafanart": extrafanart,
                     "trailer": trailer,
@@ -229,22 +227,15 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {
         "official": {"zh_cn": dic, "zh_tw": dic, "jp": dic},
         website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic},
     }
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

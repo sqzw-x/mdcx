@@ -1,5 +1,6 @@
+import asyncio
 import threading
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 
 class LogBuffer:
@@ -13,21 +14,43 @@ class LogBuffer:
         return LogBuffer.global_buffer
 
     @staticmethod
+    def _get_task_id() -> Optional[int]:
+        """获取当前协程的 Task ID，如果在协程环境下运行则返回 Task ID，否则返回线程 ID"""
+        try:
+            # 尝试获取当前协程
+            task = asyncio.current_task()
+            if task is not None:
+                # 使用 Task 对象的 id 作为唯一标识符
+                return id(task)
+        except RuntimeError:
+            # 如果不在协程环境中，会抛出 RuntimeError
+            pass
+
+        # 如果不是协程或获取失败，则回退到使用线程 ID
+        return threading.current_thread().ident
+
+    @staticmethod
     def _get_buffer(category: str) -> "LogBuffer":
-        pid = threading.current_thread().ident
-        if pid is None:
+        task_id = LogBuffer._get_task_id()
+        if task_id is None:
             return LogBuffer._global_buffer()
-        if pid not in LogBuffer.all_buffers:
-            LogBuffer.all_buffers[pid] = {}
-        if category not in LogBuffer.all_buffers[pid]:
-            LogBuffer.all_buffers[pid][category] = LogBuffer()
-        return LogBuffer.all_buffers[pid][category]
+        if task_id not in LogBuffer.all_buffers:
+            LogBuffer.all_buffers[task_id] = {}
+        if category not in LogBuffer.all_buffers[task_id]:
+            LogBuffer.all_buffers[task_id][category] = LogBuffer()
+        return LogBuffer.all_buffers[task_id][category]
+
+    @staticmethod
+    def clear_task():
+        """清除当前任务（线程或协程）的日志缓冲区"""
+        task_id = LogBuffer._get_task_id()
+        if task_id is not None:
+            LogBuffer.all_buffers.pop(task_id, None)
 
     @staticmethod
     def clear_thread():
-        pid = threading.current_thread().ident
-        if pid is not None:
-            LogBuffer.all_buffers.pop(pid, None)
+        """兼容旧版 API，实际上调用 clear_task()"""
+        LogBuffer.clear_task()
 
     @staticmethod
     def log() -> "LogBuffer":
@@ -48,7 +71,17 @@ class LogBuffer:
     def __init__(self):
         self.buffer = []
 
-    def write(self, message):
+    def write(self, message, with_task_name=False):
+        """
+        写入日志消息
+
+        Args:
+            message: 日志消息
+            with_task_name: 是否在日志消息前添加任务名称
+        """
+        if with_task_name:
+            task_name = LogBuffer.get_task_name()
+            message = f"[{task_name}] {message}"
         self.buffer.append(message)
 
     def get(self):
@@ -62,6 +95,18 @@ class LogBuffer:
     def clear(self):
         self.buffer.clear()
 
+    @staticmethod
+    def get_task_name() -> str:
+        """获取当前任务的名称（线程名或协程名）"""
+        try:
+            task = asyncio.current_task()
+            if task:
+                return task.get_name()
+        except RuntimeError:
+            pass
+
+        return threading.current_thread().name or "unknown"
+
 
 class MoveContext(TypedDict):
     dont_move_movie: bool
@@ -73,21 +118,21 @@ class MoveContext(TypedDict):
 class ImageContext(TypedDict):
     cd_part: str
 
-    cover_size: tuple[int, int]
+    thumb_size: tuple[int, int]
     poster_big: bool
     image_cut: str
     # poster_marked: bool
     # thumb_marked: bool
     # fanart_marked: bool
-    cover_list: list[tuple[str, str]]
+    thumb_list: list[tuple[str, str]]
     poster_path: str
     thumb_path: str
     fanart_path: str
-    cover: str
+    thumb: str
     poster: str
     trailer: str
-    extrafanart: str
-    cover_from: str
+    extrafanart: list[str]
+    thumb_from: str
     poster_from: str
     trailer_from: str
 
@@ -111,7 +156,7 @@ class MovieData(TypedDict):
     version: int
     image_download: bool
     outline_from: str
-    cover_from: str
+    thumb_from: str
     extrafanart_from: str
     trailer_from: str
     short_number: str
@@ -215,19 +260,19 @@ def new_json_data() -> JsonData:
     return {
         "definition": "",
         "actor": "",
-        "cover_size": (0, 0),
+        "thumb_size": (0, 0),
         "poster_big": False,
         "image_cut": "",
         "poster_marked": True,
         "thumb_marked": True,
         "fanart_marked": True,
-        "cover_list": [],
+        "thumb_list": [],
         "poster_path": "",
         "thumb_path": "",
         "fanart_path": "",
-        "cover": "",
+        "thumb": "",
         "poster": "",
-        "extrafanart": "",
+        "extrafanart": [],
         "actor_amazon": [],
         "actor_href": "",
         "all_actor": "",
@@ -245,7 +290,7 @@ def new_json_data() -> JsonData:
         "version": 0,
         "image_download": False,
         "outline_from": "",
-        "cover_from": "",
+        "thumb_from": "",
         "poster_from": "",
         "extrafanart_from": "",
         "trailer_from": "",
