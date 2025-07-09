@@ -168,7 +168,7 @@ async def main(
                 poster = number_data["poster"]
                 real_url = number_data["website"]
                 if "mywife.cc" not in real_url:
-                    web_url = check_url(real_url, real_url=True)
+                    web_url = await check_url(real_url, real_url=True)
                     real_url = re.sub(r"\?.*$", "", web_url) if web_url else ""
 
         if not real_url:

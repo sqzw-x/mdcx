@@ -128,9 +128,9 @@ def get_extrafanart(html):  # 获取封面链接
     return extrafanart_list
 
 
-def get_trailer(html):  # 获取预览片
+async def get_trailer(html):  # 获取预览片
     trailer_url_list = html.xpath("//video[@id='preview-video']/source/@src")
-    return get_dmm_trailer(trailer_url_list[0]) if trailer_url_list else ""
+    return await get_dmm_trailer(trailer_url_list[0]) if trailer_url_list else ""
 
 
 def get_director(html):
@@ -366,7 +366,7 @@ async def main(
             studio = get_studio(html_detail)
             publisher = get_publisher(html_detail)
             extrafanart = get_extrafanart(html_detail)
-            trailer = get_trailer(html_detail)
+            trailer = await get_trailer(html_detail)
             website = get_website(real_url, javdb_url)
             wanted = get_wanted(html_info)
             title_rep = ["第一集", "第二集", " - 上", " - 下", " 上集", " 下集", " -上", " -下"]

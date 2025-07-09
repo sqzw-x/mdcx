@@ -369,7 +369,7 @@ async def trailer_download(
         return
 
     # 下载预告片,检测链接有效性
-    content_length = check_url(trailer_url, length=True)
+    content_length = await check_url(trailer_url, length=True)
     if content_length:
         # 创建文件夹
         if trailer_name == 1 and not await aiofiles.os.path.exists(trailer_folder_path):
@@ -484,7 +484,7 @@ async def _get_big_thumb(json_data: ImageContext) -> ImageContext:
         prestige_key = ["abp", "abw", "aka", "prdvr", "pvrbst", "sdvr", "docvr"]
         if number_letter in kmp_key:
             req_url = f"https://km-produce.com/img/title1/{number_lower_line}.jpg"
-            real_url = check_url(req_url)
+            real_url = await check_url(req_url)
             if real_url:
                 json_data["thumb"] = real_url
                 json_data["thumb_from"] = "km-produce"
@@ -666,7 +666,7 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
             if not each[1]:
                 continue
             cover_from, cover_url = each
-            cover_url = check_url(cover_url)
+            cover_url = await check_url(cover_url)
             if not cover_url:
                 LogBuffer.log().write(
                     f"\n 🟠 检测到 Thumb 图片失效! 跳过！({cover_from})({get_used_time(start_time)}s) " + each[1]
@@ -974,7 +974,7 @@ async def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Opt
         return True
 
     # 检测链接有效性
-    if extrafanart_list and check_url(extrafanart_list[0]):
+    if extrafanart_list and await check_url(extrafanart_list[0]):
         extrafanart_folder_path_temp = extrafanart_folder_path
         if await aiofiles.os.path.exists(extrafanart_folder_path_temp):
             extrafanart_folder_path_temp = extrafanart_folder_path + "[DOWNLOAD]"

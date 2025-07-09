@@ -21,6 +21,7 @@ class AsyncWebLimiters:
         }
 
     def get(self, key: str, rate: float = 5, period: float = 1) -> AsyncLimiter:
+        """默认对所有域名启用 5 req/s 的速率限制"""
         return self.limiters.setdefault(key, AsyncLimiter(rate, period))
 
     def remove(self, key: str):

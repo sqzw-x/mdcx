@@ -325,9 +325,9 @@ def get_extrafanart(html):  # 获取封面链接
     return extrafanart_list
 
 
-def get_trailer(html):  # 获取预览片
+async def get_trailer(html):  # 获取预览片
     trailer_url_list = html.xpath("//video[@id='preview-video']/source/@src")
-    return get_dmm_trailer(trailer_url_list[0]) if trailer_url_list else ""
+    return await get_dmm_trailer(trailer_url_list[0]) if trailer_url_list else ""
 
 
 def get_mosaic(title, actor):
@@ -378,8 +378,7 @@ async def main(
             raise Exception(debug_info)
 
         html_detail = etree.fromstring(html_info, etree.HTMLParser())
-        
-        
+
         # docker版本正常，但在macOS会解析失败，猜测是emoji等特殊字符导致的，删除emoji后可解析正常。
         # 搜索emoji正则: [\u{1F601}-\u{1F64F}\u{2702}-\u{27B0}\u{1F680}-\u{1F6C0}\u{1F170}-\u{1F251}\u{1F600}-\u{1F636}\u{1F681}-\u{1F6C5}\u{1F30D}-\u{1F567}]
         # 另外，使用`lxml.html.soupparser.fromstring`可以解析成功。
@@ -416,7 +415,7 @@ async def main(
         studio = get_studio(html_detail)
         publisher = get_publisher(html_detail)
         extrafanart = get_extrafanart(html_detail)
-        trailer = get_trailer(html_detail)
+        trailer = await get_trailer(html_detail)
         website = real_url
         mosaic = get_mosaic(title, actor)
         try:

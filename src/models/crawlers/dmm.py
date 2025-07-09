@@ -99,11 +99,11 @@ def get_tag(html):
     return str(result).strip(" ['']").replace("', '", ",")
 
 
-def get_cover(html):
+async def get_cover(html):
     temp_result = html.xpath('//meta[@property="og:image"]/@content')
     if temp_result:
         result = re.sub(r"pics.dmm.co.jp", r"awsimgsrc.dmm.co.jp/pics_dig", temp_result[0])
-        if check_url(result):
+        if await check_url(result):
             return result.replace("ps.jpg", "pl.jpg")
         else:
             return temp_result[0].replace("ps.jpg", "pl.jpg")
@@ -171,7 +171,7 @@ async def get_trailer(htmlcode, real_url):
     elif vr_cid:
         cid = vr_cid[0]
         temp_url = f"https://cc3001.dmm.co.jp/vrsample/{cid[:1]}/{cid[:3]}/{cid}/{cid}vrlite.mp4"
-        trailer_url = check_url(temp_url)
+        trailer_url = await check_url(temp_url)
     return trailer_url
 
 
@@ -312,7 +312,7 @@ async def get_tv_jp_data(real_url):
             trailer_url = api_data["sampleMovie"]["url"].replace("hlsvideo", "litevideo")
             cid = re.findall(r"([^/]+)/playlist.m3u8", trailer_url)[0]
             trailer = trailer_url.replace("playlist.m3u8", cid + "_sm_w.mp4")
-            trailer = get_dmm_trailer(trailer)
+            trailer = await get_dmm_trailer(trailer)
 
         except Exception:
             trailer = ""
@@ -403,7 +403,7 @@ async def get_tv_com_data(number):
             trailer_url = api_data["sampleMovie"]["url"].replace("hlsvideo", "litevideo")
             cid = re.findall(r"([^/]+)/playlist.m3u8", trailer_url)[0]
             trailer = trailer_url.replace("playlist.m3u8", cid + "_sm_w.mp4")
-            trailer = get_dmm_trailer(trailer)
+            trailer = await get_dmm_trailer(trailer)
 
         except Exception:
             trailer = ""
@@ -622,7 +622,7 @@ async def main(
                 raise Exception(debug_info)
             try:
                 actor = get_actor(html)  # 获取演员
-                cover_url = get_cover(html)  # 获取 cover
+                cover_url = await get_cover(html)  # 获取 cover
                 outline = get_ountline(html)
                 tag = get_tag(html)
                 release = get_release(html)
