@@ -250,12 +250,18 @@ async def _call_crawlers(
     none_fields = config.none_fields  # 不单独刮削的字段
 
     def get_field_websites(field: str) -> list[str]:
-        """获取指定字段的网站取值优先级列表"""
+        """
+        获取指定字段的来源优先级列表
+
+        field_websites = (config.{field}_website - config.{field}_website_exclude) ∩ (number_website_list)
+        """
         # 指定字段网站列表
         field_no_zh = field.replace("_zh", "")  # 去除 _zh 后缀的字段名
         field_list = clean_list(getattr(config, f"{field}_website", "").split(","))
         # 与指定类型网站列表取交集
         field_list = [i for i in field_list if i in number_website_list]
+        if "official" in config.website_set:  # 优先使用官方网站
+            field_list.insert(0, "official")
         # 指定字段排除网站列表
         field_ex_list = clean_list(getattr(config, f"{field_no_zh}_website_exclude", "").split(","))
         # 所有设定的本字段来源失败时, 是否继续使用类型网站补全
