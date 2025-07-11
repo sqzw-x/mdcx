@@ -724,11 +724,13 @@ def load_config(self):
             config.show_moword,
             (self.Ui.checkBox_foldername_mosaic, "folder"),  # 显示版本命名字符-视频目录名
             (self.Ui.checkBox_filename_mosaic, "file"),  # 显示版本命名字符-视频文件名
+            (self.Ui.checkBox_title_mosaic, "title"),  # 显示版本命名字符-Emby视频标题
         )
         set_checkboxes(
             config.show_4k,
             (self.Ui.checkBox_foldername_4k, "folder"),  # 显示4k-视频目录名
             (self.Ui.checkBox_filename_4k, "file"),  # 显示4k-视频文件名
+            (self.Ui.checkBox_title_4k, "title"),  # 显示4k-Emby视频标题
         )
         set_radio_buttons(
             config.cd_name,  # 分集命名规则
@@ -785,6 +787,7 @@ def load_config(self):
         self.Ui.lineEdit_cnword_style.setText(str(config.cnword_style).strip("^"))  # 中文字幕字符样式
         self.Ui.checkBox_foldername.setChecked(config.folder_cnword)  # 显示中文字幕字符-视频目录名
         self.Ui.checkBox_filename.setChecked(config.file_cnword)  # 显示中文字幕字符-视频文件名
+        self.Ui.checkBox_title.setChecked(config.title_cnword)  # 显示中文字幕字符-Emby视频标题
         self.Ui.lineEdit_sub_folder.setText(convert_path(config.subtitle_folder))  # 外挂字幕文件目录
         set_radio_buttons(
             config.subtitle_add,  # 自动添加字幕

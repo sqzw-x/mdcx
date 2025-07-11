@@ -14086,9 +14086,9 @@ title （标题）, originaltitle （原标题）, actor （女演员）, all_ac
           <widget class="QCheckBox" name="checkBox_filename_mosaic">
            <property name="geometry">
             <rect>
-             <x>410</x>
+             <x>340</x>
              <y>440</y>
-             <width>206</width>
+             <width>100</width>
              <height>30</height>
             </rect>
            </property>
@@ -14106,6 +14106,31 @@ title （标题）, originaltitle （原标题）, actor （女演员）, all_ac
            </property>
            <property name="text">
             <string>视频文件名</string>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_title_mosaic">
+           <property name="geometry">
+            <rect>
+             <x>520</x>
+             <y>440</y>
+             <width>100</width>
+             <height>30</height>
+            </rect>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Emby视频标题</string>
            </property>
           </widget>
          </widget>
@@ -14931,9 +14956,9 @@ title （标题）, originaltitle （原标题）, actor （女演员）, all_ac
           <widget class="QCheckBox" name="checkBox_filename_4k">
            <property name="geometry">
             <rect>
-             <x>420</x>
-             <y>221</y>
-             <width>206</width>
+             <x>355</x>
+             <y>220</y>
+             <width>100</width>
              <height>30</height>
             </rect>
            </property>
@@ -14998,6 +15023,31 @@ title （标题）, originaltitle （原标题）, actor （女演员）, all_ac
            </property>
            <property name="text">
             <string>视频目录名</string>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_title_4k">
+           <property name="geometry">
+            <rect>
+             <x>540</x>
+             <y>220</y>
+             <width>100</width>
+             <height>30</height>
+            </rect>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Emby视频标题</string>
            </property>
           </widget>
          </widget>
@@ -16953,6 +17003,25 @@ title （标题）, originaltitle （原标题）, actor （女演员）, all_ac
                 </property>
                 <property name="text">
                  <string>视频文件名</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBox_title">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Emby视频标题</string>
                 </property>
                </widget>
               </item>

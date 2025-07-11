@@ -396,10 +396,12 @@ def save_config(self):
     config.show_moword = get_checkboxes(
         (self.Ui.checkBox_foldername_mosaic, "folder"),
         (self.Ui.checkBox_filename_mosaic, "file"),
+        (self.Ui.checkBox_title_mosaic, "title"),
     )
     config.show_4k = get_checkboxes(
         (self.Ui.checkBox_foldername_4k, "folder"),
         (self.Ui.checkBox_filename_4k, "file"),
+        (self.Ui.checkBox_title_4k, "title"),
     )
 
     # 分集命名规则
@@ -437,6 +439,7 @@ def save_config(self):
     config.cnword_style = self.Ui.lineEdit_cnword_style.text()  # 中文字幕字符样式
     config.folder_cnword = get_checkbox(self.Ui.checkBox_foldername)
     config.file_cnword = get_checkbox(self.Ui.checkBox_filename)
+    config.title_cnword = get_checkbox(self.Ui.checkBox_title)
     config.subtitle_folder = self.Ui.lineEdit_sub_folder.text()  # 字幕文件目录
     config.subtitle_add = get_checkbox(self.Ui.radioButton_add_sub_on)
     config.subtitle_add_chs = get_checkbox(self.Ui.checkBox_sub_add_chs)

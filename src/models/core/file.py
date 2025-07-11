@@ -26,7 +26,7 @@ from ..entity.enums import FileMode
 from ..signals import signal
 from .flags import Flags
 from .json_data import JsonData, LogBuffer, MoveContext, new_json_data
-from .utils import get_movie_path_setting, get_new_release, nfd2c
+from .utils import get_movie_path_setting, get_new_release, nfd2c, _render_name_template
 
 
 def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
@@ -547,9 +547,8 @@ def move_movie(json_data: MoveContext, file_path: str, file_new_path: str) -> bo
 
 
 def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -> str:
-    folder_name = config.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
+    folder_name: str = config.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
     folder_path, file_name = split_path(file_path)  # 当前文件的目录和文件名
-    filename = os.path.splitext(file_name)[0]
 
     # 更新模式 或 读取模式
     if config.main_mode == 3 or config.main_mode == 4:
@@ -580,123 +579,11 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -
         json_data["folder_name"] = ""
         return success_folder
 
-    # 获取文件信息
-    destroyed = json_data["destroyed"]
-    leak = json_data["leak"]
-    wuma = json_data["wuma"]
-    youma = json_data["youma"]
-    m_word = destroyed + leak + wuma + youma
-    c_word = json_data["c_word"]
-    title = json_data["title"]
-    originaltitle = json_data["originaltitle"]
-    studio = json_data["studio"]
-    publisher = json_data["publisher"]
-    year = json_data["year"]
-    outline = json_data["outline"]
-    runtime = json_data["runtime"]
-    director = json_data["director"]
-    actor = json_data["actor"]
-    release = json_data["release"]
-    number = json_data["number"]
-    series = json_data["series"]
-    mosaic = json_data["mosaic"]
-    definition = json_data["definition"]
-    letters = json_data["letters"]
-
-    # 国产使用title作为number会出现重复，此处去除title，避免重复(需要注意titile繁体情况)
-    if not number:
-        number = title
-    if number == title and "number" in folder_name and "title" in folder_name:
-        folder_name = folder_name.replace("originaltitle", "").replace("title", "")
-
-    # 是否勾选目录名添加字幕标识
-    cnword = c_word
-    if not config.folder_cnword:
-        c_word = ""
-
-    # 是否勾选目录名添加4k标识
-    temp_4k = ""
-    if "folder" in config.show_4k:
-        definition = json_data["definition"]
-        if definition == "8K" or definition == "UHD8" or definition == "4K" or definition == "UHD":
-            temp_definition = definition.replace("UHD8", "UHD")
-            temp_4k = f"-{temp_definition}"
-
-    # 是否勾选目录名添加版本字符标识
-    moword = m_word
-    if "folder" not in config.show_moword:
-        m_word = ""
-
-    # 判断后缀字段顺序
-    suffix_sort_list = config.suffix_sort.split(",")
-    for each in suffix_sort_list:
-        if each == "moword":
-            number += m_word
-        elif each == "cnword":
-            number += c_word
-        elif each == "definition":
-            number += temp_4k
-
-    # 生成number
-    first_letter = get_number_first_letter(number)
-
-    # 特殊情况处理
-    score = str(json_data["score"])
-    if not series:
-        series = "未知系列"
-    if not actor:
-        actor = config.actor_no_name
-    if not year:
-        year = "0000"
-    if not score:
-        score = "0.0"
-    release = get_new_release(release)
-
-    # 获取演员
-    first_actor = actor.split(",").pop(0)
-    all_actor = deal_actor_more(json_data["all_actor"])
-    actor = deal_actor_more(actor)
-
-    # 替换字段里的文件夹分隔符
-    fields = [originaltitle, title, number, director, actor, release, series, studio, publisher, cnword, outline]
-    for i in range(len(fields)):
-        fields[i] = fields[i].replace("/", "-").replace("\\", "-").strip(". ")
-    originaltitle, title, number, director, actor, release, series, studio, publisher, cnword, outline = fields
-
-    # 更新4k
-    if definition == "8K" or definition == "UHD8" or definition == "4K" or definition == "UHD":
-        temp_4k = definition.replace("UHD8", "UHD")
-
-    # 替换文件夹名称
-    repl_list = [
-        ["4K", temp_4k.strip("-")],
-        ["originaltitle", originaltitle],
-        ["title", title],
-        ["outline", outline],
-        ["number", number],
-        ["first_actor", first_actor],
-        ["all_actor", all_actor],
-        ["actor", actor],
-        ["release", release],
-        ["year", str(year)],
-        ["runtime", str(runtime)],
-        ["director", director],
-        ["series", series],
-        ["studio", studio],
-        ["publisher", publisher],
-        ["mosaic", mosaic],
-        ["definition", definition.replace("UHD8", "UHD")],
-        ["cnword", cnword],
-        ["moword", moword],
-        ["first_letter", first_letter],
-        ["letters", letters],
-        ["filename", filename],
-        ["wanted", str(json_data["wanted"])],
-        ["score", str(score)],
-    ]
-    folder_new_name = folder_name
-    for each_key in repl_list:
-        folder_new_name = folder_new_name.replace(each_key[0], each_key[1])
+    show_4k = "folder" in config.show_4k
+    show_cnword = config.folder_cnword
+    show_moword = "folder" in config.show_moword
+    should_escape_result = True
+    folder_new_name, folder_name, number, originaltitle, outline, title = _render_name_template(folder_name, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result)
 
     # 去除各种乱七八糟字符后，文件夹名为空时，使用number显示
     folder_name_temp = re.sub(r'[\\/:*?"<>|\r\n]+', "", folder_new_name)
@@ -749,7 +636,6 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -
 def _generate_file_name(file_path: str, json_data: JsonData) -> str:
     file_full_name = split_path(file_path)[1]
     file_name, file_ex = os.path.splitext(file_full_name)
-    filename = file_name
 
     # 如果成功后不重命名，则返回原来名字
     if not config.success_file_rename:
@@ -757,123 +643,13 @@ def _generate_file_name(file_path: str, json_data: JsonData) -> str:
 
     # 获取文件信息
     cd_part = json_data["cd_part"]
-    destroyed = json_data["destroyed"]
-    leak = json_data["leak"]
-    wuma = json_data["wuma"]
-    youma = json_data["youma"]
-    m_word = destroyed + leak + wuma + youma
-    c_word = json_data["c_word"]
-    title = json_data["title"]
-    originaltitle = json_data["originaltitle"]
-    studio = json_data["studio"]
-    publisher = json_data["publisher"]
-    year = json_data["year"]
-    outline = json_data["outline"]
-    runtime = json_data["runtime"]
-    director = json_data["director"]
-    actor = json_data["actor"]
-    release = json_data["release"]
-    number = json_data["number"]
-    series = json_data["series"]
-    mosaic = json_data["mosaic"]
-    definition = json_data["definition"]
-    letters = json_data["letters"]
 
-    # 国产使用title作为number会出现重复，此处去除title，避免重复(需要注意titile繁体情况)
-    naming_file = config.naming_file
-    if not number:
-        number = title
-    if number == title and "number" in naming_file and "title" in naming_file:
-        naming_file = naming_file.replace("originaltitle", "").replace("title", "")
-    file_name = naming_file
+    show_4k = "file" in config.show_4k
+    show_cnword = config.file_cnword
+    show_moword = "file" in config.show_moword
+    should_escape_result = True
+    file_name, naming_file, number, originaltitle, outline, title = _render_name_template(config.naming_file, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result)
 
-    # 是否勾选文件名添加4k标识
-    temp_4k = ""
-    if "file" in config.show_4k:
-        definition = json_data["definition"]
-        if definition == "8K" or definition == "UHD8" or definition == "4K" or definition == "UHD":
-            temp_definition = definition.replace("UHD8", "UHD")
-            temp_4k = f"-{temp_definition}"
-
-    # 判断是否勾选文件名添加字幕标识
-    cnword = c_word
-    if not config.file_cnword:
-        c_word = ""
-
-    # 判断是否勾选文件名添加版本标识
-    moword = m_word
-    if "file" not in config.show_moword:
-        m_word = ""
-
-    # 判断后缀字段顺序
-    suffix_sort_list = config.suffix_sort.split(",")
-    for each in suffix_sort_list:
-        if each == "moword":
-            number += m_word
-        elif each == "cnword":
-            number += c_word
-        elif each == "definition":
-            number += temp_4k
-
-    # 生成number
-    first_letter = get_number_first_letter(number)
-
-    # 处理异常情况
-    score = json_data["score"]
-    if not series:
-        series = "未知系列"
-    if not actor:
-        actor = config.actor_no_name
-    if not year:
-        year = "0000"
-    if not score:
-        score = "0.0"
-    release = get_new_release(release)
-
-    # 获取演员
-    first_actor = actor.split(",").pop(0)
-    all_actor = deal_actor_more(json_data["all_actor"])
-    actor = deal_actor_more(actor)
-
-    # 替换字段里的文件夹分隔符
-    fields = [originaltitle, title, number, director, actor, release, series, studio, publisher, cnword, outline]
-    for i in range(len(fields)):
-        fields[i] = fields[i].replace("/", "-").replace("\\", "-").strip(". ")
-    originaltitle, title, number, director, actor, release, series, studio, publisher, cnword, outline = fields
-
-    # 更新4k
-    if definition == "8K" or definition == "UHD8" or definition == "4K" or definition == "UHD":
-        temp_4k = definition.replace("UHD8", "UHD")
-
-    # 替换文件名
-    repl_list = [
-        ["4K", temp_4k.strip("-")],
-        ["originaltitle", originaltitle],
-        ["title", title],
-        ["outline", outline],
-        ["number", number],
-        ["first_actor", first_actor],
-        ["all_actor", all_actor],
-        ["actor", actor],
-        ["release", release],
-        ["year", str(year)],
-        ["runtime", str(runtime)],
-        ["director", director],
-        ["series", series],
-        ["studio", studio],
-        ["publisher", publisher],
-        ["mosaic", mosaic],
-        ["definition", definition.replace("UHD8", "UHD")],
-        ["cnword", cnword],
-        ["moword", moword],
-        ["first_letter", first_letter],
-        ["letters", letters],
-        ["filename", filename],
-        ["wanted", str(json_data["wanted"])],
-        ["score", str(score)],
-    ]
-    for each_key in repl_list:
-        file_name = file_name.replace(each_key[0], each_key[1])
     file_name += cd_part
 
     # 去除各种乱七八糟字符后，文件名为空时，使用number显示
