@@ -405,7 +405,7 @@ def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str,
     )
 
 
-def _render_name_template(template: str, file_path: str, json_data: JsonData, show_4k: bool, show_cnword: bool, show_moword: bool, should_escape_result: bool):
+def render_name_template(template: str, file_path: str, json_data: JsonData, show_4k: bool, show_cnword: bool, show_moword: bool, should_escape_result: bool):
     """
     将模板字符串替换成实际值
 

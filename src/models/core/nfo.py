@@ -13,7 +13,7 @@ from ..config.manager import config
 from ..config.manual import ManualConfig
 from ..signals import signal
 from .json_data import JsonData, LogBuffer
-from .utils import get_new_release, _render_name_template
+from .utils import get_new_release, render_name_template
 
 
 def write_nfo(
@@ -87,7 +87,7 @@ def write_nfo(
     show_moword = "title" in config.show_moword
     # 获取在媒体文件中显示的规则，不需要过滤Windows异常字符
     should_escape_result = False
-    nfo_title, *_ = _render_name_template(config.naming_media, file_path, json_data_nfo, show_4k, show_cnword, show_moword, should_escape_result)
+    nfo_title, *_ = render_name_template(config.naming_media, file_path, json_data_nfo, show_4k, show_cnword, show_moword, should_escape_result)
 
     # 获取字段
     # 只有nfo的title用替换后的，其他字段用原始的
