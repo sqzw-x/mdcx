@@ -247,7 +247,7 @@ class ConfigSchema:
     naming_media: str = r"number title"
     prevent_char: str = r""
     fields_rule: str = r"del_actor,del_char,"
-    suffix_sort: str = r"mosaic,cnword,definition"
+    suffix_sort: str = r"moword,cnword,definition"
     actor_no_name: str = r"未知演员"
     release_rule: str = r"YYYY-MM-DD"
     folder_name_max: int = 60
@@ -436,8 +436,9 @@ class ConfigSchema:
         self.official_websites = official_websites_dic
 
         # 字段命名规则-后缀字段顺序
-        all_str_list = ["mosaic", "cnword", "definition"]
+        all_str_list = ["moword", "cnword", "definition"]
         read_str_list = re.split(r"[,，]", self.suffix_sort)
+        read_str_list = [i1.replace("mosaic", "moword") for i1 in read_str_list]  # 更新旧版的mosaic为moword，避免旧配置出错
         new_str_list1 = [i1 for i1 in read_str_list if i1 in all_str_list]  # 去除不在list中的字符
         new_str_list = []
         [new_str_list.append(i1) for i1 in new_str_list1 if i1 not in new_str_list]  # 去重

@@ -630,7 +630,7 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -
     # 判断后缀字段顺序
     suffix_sort_list = config.suffix_sort.split(",")
     for each in suffix_sort_list:
-        if each == "mosaic":
+        if each == "moword":
             number += m_word
         elif each == "cnword":
             number += c_word
@@ -808,7 +808,7 @@ def _generate_file_name(file_path: str, json_data: JsonData) -> str:
     # 判断后缀字段顺序
     suffix_sort_list = config.suffix_sort.split(",")
     for each in suffix_sort_list:
-        if each == "mosaic":
+        if each == "moword":
             number += m_word
         elif each == "cnword":
             number += c_word
@@ -1510,7 +1510,7 @@ def get_file_info(file_path: str, copy_sub: bool = True) -> tuple[JsonData, str,
         file_show_name = movie_number
         suffix_sort_list = config.suffix_sort.split(",")
         for each in suffix_sort_list:
-            if each == "mosaic":
+            if each == "moword":
                 file_show_name += destroyed + leak + wuma + youma
             elif each == "cnword":
                 file_show_name += c_word

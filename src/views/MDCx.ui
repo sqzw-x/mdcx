@@ -14394,7 +14394,8 @@ title （标题）, originaltitle （原标题）, actor （女演员）, all_ac
                <string notr="true">color: rgb(8, 128, 128);</string>
               </property>
               <property name="text">
-               <string>比如mosaic(马赛克),cnword(字幕)将显示为: 番号-流出-C</string>
+               <string>比如moword(自定义的无码标识),cnword(字幕)将显示为: 番号-流出-C
+此处只控制顺序，需要在对应位置（如“添加 4K 字符”）勾选才能控制是否显示</string>
               </property>
              </widget>
             </item>
