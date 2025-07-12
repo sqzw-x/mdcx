@@ -305,7 +305,7 @@ def translate_info(json_data: JsonData):
 
     if tag_language == "zh_cn":
         tag = zhconv.convert(tag, "zh-cn")
-    else:
+    elif tag_language == "zh_tw":
         tag = zhconv.convert(tag, "zh-hant")
 
     # tag去重/去空/排序
