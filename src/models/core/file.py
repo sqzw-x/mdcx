@@ -546,7 +546,7 @@ def move_movie(json_data: MoveContext, file_path: str, file_new_path: str) -> bo
         return False
 
 
-def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -> str:
+def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -> tuple[str, str]:
     folder_name: str = config.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
     folder_path, file_name = split_path(file_path)  # 当前文件的目录和文件名
 
@@ -577,7 +577,7 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -
     # 当根据刮削模式得到的视频目录名为空时，使用成功输出目录
     if not folder_name:
         json_data["folder_name"] = ""
-        return success_folder
+        return success_folder, folder_name
 
     show_4k = "folder" in config.show_4k
     show_cnword = config.folder_cnword
@@ -630,10 +630,10 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -
 
     json_data["folder_name"] = folder_new_name
 
-    return folder_new_path.strip().replace(" /", "/")
+    return folder_new_path.strip().replace(" /", "/"), folder_name
 
 
-def _generate_file_name(file_path: str, json_data: JsonData) -> str:
+def _generate_file_name(file_path: str, json_data: JsonData, folder_name_template: str) -> str:
     file_full_name = split_path(file_path)[1]
     file_name, file_ex = os.path.splitext(file_full_name)
 
@@ -656,6 +656,14 @@ def _generate_file_name(file_path: str, json_data: JsonData) -> str:
     show_moword = "file" in config.show_moword
     should_escape_result = True
     file_name, file_name_template, number, originaltitle, outline, title = render_name_template(file_name_template, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result)
+
+    # 当“视频文件名”和“视频目录名”相同，且没有设置防屏蔽字符时，视为想要分集命名，
+    # 此时直接修改文件名开头为目录名，避免因为长度限制处理导致文件名开头与目录名不一致的问题。
+    # 注意应该放在_render_name_template处理后，保证folder_name_template和file_name_template就算被处理也相同。
+    if folder_name_template == file_name_template and not config.prevent_char:
+        file_name = json_data["folder_name"]
+        file_name += cd_part
+        return file_name
 
     file_name += cd_part
 
@@ -720,10 +728,10 @@ def get_output_name(
     json_data: JsonData, file_path: str, success_folder: str, file_ex: str
 ) -> tuple[str, str, str, str, str, str, str, str, str, str]:
     # =====================================================================================更新输出文件夹名
-    folder_new_path = _get_folder_path(file_path, success_folder, json_data)
+    folder_new_path, foldername_template = _get_folder_path(file_path, success_folder, json_data)
     folder_new_path = _deal_path_name(folder_new_path)
     # =====================================================================================更新实体文件命名规则
-    naming_rule = _generate_file_name(file_path, json_data)
+    naming_rule = _generate_file_name(file_path, json_data, foldername_template)
     naming_rule = _deal_path_name(naming_rule)
     # =====================================================================================生成文件和nfo新路径
     file_new_name = naming_rule + file_ex.lower()
