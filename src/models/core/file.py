@@ -2,6 +2,7 @@
 包括刮削过程所需的文件及路径相关操作, 不一定有实际 IO
 """
 
+import asyncio
 import os
 import re
 import shutil
@@ -11,7 +12,16 @@ import traceback
 import aiofiles
 import aiofiles.os
 
-from ..base.file import copy_file_async, delete_file_async, move_file_async, read_link_async, split_path
+from ..base.file import (
+    copy_file_async,
+    copy_file_sync,
+    delete_file_async,
+    delete_file_sync,
+    move_file_async,
+    read_link_async,
+    read_link_sync,
+    split_path,
+)
 from ..base.number import (
     deal_actor_more,
     get_file_number,
@@ -32,7 +42,7 @@ from .json_data import JsonData, LogBuffer, MoveContext, new_json_data
 from .utils import get_movie_path_setting, get_new_release, nfd2c
 
 
-async def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
+def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
     # 判断文件是否需清理
     if not config.can_clean:
         return False
@@ -60,11 +70,11 @@ async def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
             return True
 
     # 清理的文件大小<=(KB)
-    if await aiofiles.os.path.islink(file_path):
-        file_path = await aiofiles.os.readlink(file_path)
+    if os.path.islink(file_path):
+        file_path = os.readlink(file_path)
     if config.clean_size_list is not None:
         try:  # 路径太长时，此处会报错 FileNotFoundError: [WinError 3] 系统找不到指定的路径。
-            stat_result = await aiofiles.os.stat(file_path)
+            stat_result = os.stat(file_path)
             if stat_result.st_size <= config.clean_size_list * 1024:
                 return True
         except Exception:
@@ -101,13 +111,14 @@ async def creat_folder(
             return True
 
     # 如果不存在目标文件夹，则创建文件夹
-    elif not os.path.isdir(folder_new_path):
+
+    elif not await aiofiles.os.path.isdir(folder_new_path):
         try:
-            os.makedirs(folder_new_path)
+            await aiofiles.os.makedirs(folder_new_path)
             LogBuffer.log().write("\n 🍀 Folder done! (new)")
             return True
         except Exception as e:
-            if not os.path.exists(folder_new_path):
+            if not await aiofiles.os.path.exists(folder_new_path):
                 LogBuffer.log().write(f"\n 🔴 Failed to create folder! \n    {str(e)}")
                 if len(folder_new_path) > 250:
                     LogBuffer.log().write("\n    可能是目录名过长！！！建议限制目录名长度！！！越小越好！！！")
@@ -122,7 +133,7 @@ async def creat_folder(
     convert_file_new_path = convert_path(file_new_path).lower()
 
     # 当目标文件存在，是软链接时
-    if os.path.islink(file_new_path):
+    if await aiofiles.os.path.islink(file_new_path):
         # 路径相同，是自己
         if convert_file_path == convert_file_new_path:
             json_data["dont_move_movie"] = True
@@ -134,15 +145,15 @@ async def creat_folder(
         return True
 
     # 当目标文件存在，不是软链接时
-    elif os.path.exists(file_new_path):
+    elif await aiofiles.os.path.exists(file_new_path):
         # 待刮削的文件不是软链接
-        if not os.path.islink(file_path):
+        if not await aiofiles.os.path.islink(file_path):
             # 如果路径相同，则代表已经在成功文件夹里，不是重复文件（大小写不敏感）
             if convert_file_path == convert_file_new_path:
                 json_data["dont_move_movie"] = True
-                if os.path.exists(thumb_new_path_with_filename):
+                if await aiofiles.os.path.exists(thumb_new_path_with_filename):
                     json_data["thumb_path"] = thumb_new_path_with_filename
-                if os.path.exists(poster_new_path_with_filename):
+                if await aiofiles.os.path.exists(poster_new_path_with_filename):
                     json_data["poster_path"] = poster_new_path_with_filename
                 return True
 
@@ -150,7 +161,7 @@ async def creat_folder(
             else:
                 try:
                     # 当都指向同一个文件时(此处路径不能用小写，因为Linux大小写敏感)
-                    if os.stat(file_path).st_ino == os.stat(file_new_path).st_ino:
+                    if (await aiofiles.os.stat(file_path)).st_ino == (await aiofiles.os.stat(file_new_path)).st_ino:
                         # 硬链接开时，不需要处理
                         if config.soft_link == 2:
                             json_data["dont_move_movie"] = True
@@ -211,7 +222,7 @@ async def move_trailer_video(
     for media_type in media_type_list:
         trailer_old_path = os.path.join(folder_old_path, (file_name + "-trailer" + media_type))
         trailer_new_path = os.path.join(folder_new_path, (naming_rule + "-trailer" + media_type))
-        if os.path.exists(trailer_old_path) and not os.path.exists(trailer_new_path):
+        if await aiofiles.os.path.exists(trailer_old_path) and not await aiofiles.os.path.exists(trailer_new_path):
             await move_file_async(trailer_old_path, trailer_new_path)
             LogBuffer.log().write("\n 🍀 Trailer done!")
 
@@ -228,7 +239,11 @@ async def move_bif(
         return
     bif_old_path = os.path.join(folder_old_path, (file_name + "-320-10.bif"))
     bif_new_path = os.path.join(folder_new_path, (naming_rule + "-320-10.bif"))
-    if bif_old_path != bif_new_path and os.path.exists(bif_old_path) and not os.path.exists(bif_new_path):
+    if (
+        bif_old_path != bif_new_path
+        and await aiofiles.os.path.exists(bif_old_path)
+        and not await aiofiles.os.path.exists(bif_new_path)
+    ):
         await move_file_async(bif_old_path, bif_new_path)
         LogBuffer.log().write("\n 🍀 Bif done!")
 
@@ -252,37 +267,37 @@ async def move_torrent(
     torrent_file1_new_path = os.path.join(folder_new_path, (naming_rule + ".torrent"))
     torrent_file2_new_path = os.path.join(folder_new_path, (movie_number + ".torrent"))
     if (
-        os.path.exists(torrent_file1)
+        await aiofiles.os.path.exists(torrent_file1)
         and torrent_file1 != torrent_file1_new_path
-        and not os.path.exists(torrent_file1_new_path)
+        and not await aiofiles.os.path.exists(torrent_file1_new_path)
     ):
         await move_file_async(torrent_file1, torrent_file1_new_path)
         LogBuffer.log().write("\n 🍀 Torrent done!")
 
     if torrent_file2 != torrent_file1:
         if (
-            os.path.exists(torrent_file2)
+            await aiofiles.os.path.exists(torrent_file2)
             and torrent_file2 != torrent_file2_new_path
-            and not os.path.exists(torrent_file2_new_path)
+            and not await aiofiles.os.path.exists(torrent_file2_new_path)
         ):
             await move_file_async(torrent_file2, torrent_file2_new_path)
             LogBuffer.log().write("\n 🍀 Torrent done!")
 
 
 async def check_file(json_data: JsonData, file_path: str, file_escape_size: float) -> tuple[bool, JsonData]:
-    if os.path.islink(file_path):
+    if await aiofiles.os.path.islink(file_path):
         file_path = await read_link_async(file_path)
         if "check_symlink" not in config.no_escape:
             return True, json_data
 
-    if not os.path.exists(file_path):
+    if not await aiofiles.os.path.exists(file_path):
         LogBuffer.error().write("文件不存在")
         LogBuffer.req().write("do_not_update_json_data_dic")
         json_data["outline"] = split_path(file_path)[1]
         json_data["tag"] = file_path
         return False, json_data
     if "no_skip_small_file" not in config.no_escape:
-        file_size = os.path.getsize(file_path) / float(1024 * 1024)
+        file_size = await aiofiles.os.path.getsize(file_path) / float(1024 * 1024)
         if file_size < file_escape_size:
             LogBuffer.error().write(
                 f"文件小于 {file_escape_size} MB 被过滤!（实际大小 {round(file_size, 2)} MB）已跳过刮削！"
@@ -303,12 +318,12 @@ async def copy_trailer_to_theme_videos(json_data: JsonData, folder_new_path: str
 
     # 不保留不下载主题视频时，删除
     if "theme_videos" not in download_files and "theme_videos" not in keep_files:
-        if os.path.exists(theme_videos_folder_path):
+        if await aiofiles.os.path.exists(theme_videos_folder_path):
             shutil.rmtree(theme_videos_folder_path, ignore_errors=True)
         return
 
     # 保留主题视频并存在时返回
-    if "theme_videos" in keep_files and os.path.exists(theme_videos_folder_path):
+    if "theme_videos" in keep_files and await aiofiles.os.path.exists(theme_videos_folder_path):
         LogBuffer.log().write(f"\n 🍀 Theme video done! (old)({get_used_time(start_time)}s) ")
         return
 
@@ -324,13 +339,13 @@ async def copy_trailer_to_theme_videos(json_data: JsonData, folder_new_path: str
         trailer_file_path = os.path.join(trailer_folder, "trailer.mp4")
     else:
         trailer_file_path = os.path.join(folder_new_path, naming_rule + "-trailer.mp4")
-    if not os.path.exists(trailer_file_path):
+    if not await aiofiles.os.path.exists(trailer_file_path):
         return
 
     # 存在预告片时复制
-    if not os.path.exists(theme_videos_folder_path):
-        os.makedirs(theme_videos_folder_path)
-    if os.path.exists(theme_videos_new_path):
+    if not await aiofiles.os.path.exists(theme_videos_folder_path):
+        await aiofiles.os.makedirs(theme_videos_folder_path)
+    if await aiofiles.os.path.exists(theme_videos_new_path):
         await delete_file_async(theme_videos_new_path)
     await copy_file_async(trailer_file_path, theme_videos_new_path)
     LogBuffer.log().write("\n 🍀 Theme video done! (copy trailer)")
@@ -362,7 +377,7 @@ async def move_other_file(
     elif not config.success_file_move and not config.success_file_rename:
         return
 
-    files = os.listdir(folder_old_path)
+    files = await aiofiles.os.listdir(folder_old_path)
     for old_file in files:
         if os.path.splitext(old_file)[1].lower() in config.media_type:
             continue
@@ -372,8 +387,8 @@ async def move_other_file(
                 old_file_new_path = os.path.join(folder_new_path, old_file)
                 if (
                     old_file_old_path != old_file_new_path
-                    and os.path.exists(old_file_old_path)
-                    and not os.path.exists(old_file_new_path)
+                    and await aiofiles.os.path.exists(old_file_old_path)
+                    and not await aiofiles.os.path.exists(old_file_new_path)
                 ):
                     await move_file_async(old_file_old_path, old_file_new_path)
                     LogBuffer.log().write(f"\n 🍀 Move {old_file} done!")
@@ -393,9 +408,9 @@ async def move_file_to_failed_folder(
         return file_path
 
     # 创建failed文件夹
-    if config.failed_file_move == 1 and not os.path.exists(failed_folder):
+    if config.failed_file_move == 1 and not await aiofiles.os.path.exists(failed_folder):
         try:
-            os.makedirs(failed_folder)
+            await aiofiles.os.makedirs(failed_folder)
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
@@ -408,7 +423,7 @@ async def move_file_to_failed_folder(
 
     # 重复改名
     file_new_path = convert_path(os.path.join(failed_folder, file_full_name))
-    while os.path.exists(file_new_path) and file_new_path != convert_path(file_path):
+    while await aiofiles.os.path.exists(file_new_path) and file_new_path != convert_path(file_path):
         file_new_path = file_new_path.replace(file_ext, "@" + file_ext)
 
     # 移动
@@ -423,13 +438,13 @@ async def move_file_to_failed_folder(
 
         # 同步移动预告片
         trailer_new_path = file_new_path.replace(file_ext, "-trailer.mp4")
-        if not os.path.exists(trailer_new_path):
+        if not await aiofiles.os.path.exists(trailer_new_path):
             try:
                 has_trailer = False
-                if os.path.exists(trailer_old_path_with_filename):
+                if await aiofiles.os.path.exists(trailer_old_path_with_filename):
                     has_trailer = True
                     await move_file_async(trailer_old_path_with_filename, trailer_new_path)
-                elif os.path.exists(trailer_old_path_no_filename):
+                elif await aiofiles.os.path.exists(trailer_old_path_no_filename):
                     has_trailer = True
                     await move_file_async(trailer_old_path_no_filename, trailer_new_path)
                 if has_trailer:
@@ -445,7 +460,7 @@ async def move_file_to_failed_folder(
         for sub in sub_type_new_list:
             sub_old_path = file_path.replace(os.path.splitext(file_path)[1], sub)
             sub_new_path = file_new_path.replace(os.path.splitext(file_new_path)[1], sub)
-            if os.path.exists(sub_old_path) and not os.path.exists(sub_new_path):
+            if await aiofiles.os.path.exists(sub_old_path) and not await aiofiles.os.path.exists(sub_new_path):
                 result, error_info = await move_file_async(sub_old_path, sub_new_path)
                 if not result:
                     LogBuffer.log().write(f"\n 🔴 Failed to move sub to the failed folder!\n     {error_info}")
@@ -475,12 +490,12 @@ async def move_movie(json_data: MoveContext, file_path: str, file_new_path: str)
     if config.soft_link == 1:
         temp_path = file_path
         # 自身是软链接时，获取真实路径
-        if os.path.islink(file_path):
+        if await aiofiles.os.path.islink(file_path):
             file_path = await read_link_async(file_path)  # delete_file(temp_path)
         # 删除目标路径存在的文件，否则会创建失败，
         await delete_file_async(file_new_path)
         try:
-            os.symlink(file_path, file_new_path)
+            await aiofiles.os.symlink(file_path, file_new_path)
             json_data["file_path"] = file_new_path
             LogBuffer.log().write(
                 f"\n 🍀 Softlink done! \n    Softlink file: {file_new_path} \n    Source file: {file_path}"
@@ -503,7 +518,7 @@ async def move_movie(json_data: MoveContext, file_path: str, file_new_path: str)
     elif config.soft_link == 2:
         try:
             await delete_file_async(file_new_path)
-            os.link(file_path, file_new_path)
+            await aiofiles.os.link(file_path, file_new_path)
             json_data["file_path"] = file_new_path
             LogBuffer.log().write(
                 f"\n 🍀 HardLink done! \n    HadrLink file: {file_new_path} \n    Source file: {file_path}"
@@ -532,7 +547,7 @@ async def move_movie(json_data: MoveContext, file_path: str, file_new_path: str)
     result, error_info = await move_file_async(file_path, file_new_path)
     if result:
         LogBuffer.log().write(f"\n 🍀 Movie done! \n 🙉 [Movie] {file_new_path}")
-        if os.path.islink(file_new_path):
+        if await aiofiles.os.path.islink(file_new_path):
             LogBuffer.log().write(
                 f"\n    It's a symlink file! Source file: \n    {await read_link_async(file_new_path)}"  # win 不能用os.path.realpath()，返回的结果不准
             )
@@ -542,7 +557,7 @@ async def move_movie(json_data: MoveContext, file_path: str, file_new_path: str)
         if "are the same file" in error_info.lower():  # 大小写不同，win10 用raidrive 挂载 google drive 改名会出错
             if json_data["cd_part"]:
                 temp_folder, temp_file = split_path(file_new_path)
-                if temp_file not in os.listdir(temp_folder):
+                if temp_file not in await aiofiles.os.listdir(temp_folder):
                     await move_file_async(file_path, file_new_path + ".MDCx.tmp")
                     await move_file_async(file_new_path + ".MDCx.tmp", file_new_path)
             LogBuffer.log().write(f"\n 🍀 Movie done! \n 🙉 [Movie] {file_new_path}")
@@ -1002,9 +1017,16 @@ async def newtdisk_creat_symlink(copy_flag: bool, netdisk_path: str = "", local_
     signal.show_log_text("\n ⏰ Start time: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     signal.show_log_text(f" 📁 Source path: {netdisk_path} \n 📁 Softlink path: {local_path} \n")
     try:
-        if netdisk_path and local_path:
-            copy_exts = [".nfo", ".jpg", ".png"] + config.sub_type.split("|")
-            file_exts = config.media_type.lower().split("|") + copy_exts + config.sub_type.split("|")
+        if not netdisk_path or not local_path:
+            signal.show_log_text(f" 🔴 网盘目录和本地目录不能为空！请重新设置！({get_used_time(start_time)}s)")
+            signal.show_log_text("================================================================================")
+            if from_tool:
+                signal.reset_buttons_status.emit()
+            return
+        copy_exts = [".nfo", ".jpg", ".png"] + config.sub_type.split("|")
+        file_exts = config.media_type.lower().split("|") + copy_exts + config.sub_type.split("|")
+
+        def task():
             total = 0
             copy_num = 0
             link_num = 0
@@ -1049,38 +1071,38 @@ async def newtdisk_creat_symlink(copy_flag: bool, netdisk_path: str = "", local_
                     if ext in copy_exts:  # 直接复制的文件
                         if not copy_flag:
                             continue
-                        await copy_file_async(net_file, local_file)
+                        copy_file_sync(net_file, local_file)
                         signal.show_log_text(f" {total} 🍀 Copy done!\n {net_file} ")
                         copy_num += 1
-                    else:
-                        # 不对原文件进行有效性检查以减小可能的网络 IO 开销
-                        if net_file in done:
-                            signal.show_log_text(
-                                f" {total} 🟠 Link skip! Source file already linked, this file is duplicate!\n {net_file} "
-                            )
-                            skip_num += 1
-                            continue
-                        done.add(net_file)
+                        continue
+                    # 不对原文件进行有效性检查以减小可能的网络 IO 开销
+                    if net_file in done:
+                        signal.show_log_text(
+                            f" {total} 🟠 Link skip! Source file already linked, this file is duplicate!\n {net_file} "
+                        )
+                        skip_num += 1
+                        continue
+                    done.add(net_file)
 
-                        try:
-                            os.symlink(net_file, local_file)
-                            signal.show_log_text(f" {total} 🍀 Link done!\n {net_file} ")
-                            link_num += 1
-                        except Exception as e:
-                            print(traceback.format_exc())
-                            error_info = ""
-                            if "symbolic link privilege not held" in str(e):
-                                error_info = "   \n没有创建权限，请尝试管理员权限！或按照教程开启用户权限： https://www.jianshu.com/p/0e307bfe8770"
-                            signal.show_log_text(f" {total} 🔴 Link failed!{error_info} \n {net_file} ")
-                            signal.show_log_text(traceback.format_exc())
-                            fail_num += 1
+                    try:
+                        os.symlink(net_file, local_file)
+                        signal.show_log_text(f" {total} 🍀 Link done!\n {net_file} ")
+                        link_num += 1
+                    except Exception as e:
+                        print(traceback.format_exc())
+                        error_info = ""
+                        if "symbolic link privilege not held" in str(e):
+                            error_info = "   \n没有创建权限，请尝试管理员权限！或按照教程开启用户权限： https://www.jianshu.com/p/0e307bfe8770"
+                        signal.show_log_text(f" {total} 🔴 Link failed!{error_info} \n {net_file} ")
+                        signal.show_log_text(traceback.format_exc())
+                        fail_num += 1
+            return total, copy_num, link_num, skip_num, fail_num
 
-            signal.show_log_text(
-                f"\n 🎉🎉🎉 All finished!!!({get_used_time(start_time)}s) Total {total} , "
-                f"Linked {link_num} , Copied {copy_num} , Skiped {skip_num} , Failed {fail_num} "
-            )
-        else:
-            signal.show_log_text(f" 🔴 网盘目录和本地目录不能为空！请重新设置！({get_used_time(start_time)}s)")
+        total, copy_num, link_num, skip_num, fail_num = await asyncio.to_thread(task)
+        signal.show_log_text(
+            f"\n 🎉🎉🎉 All finished!!!({get_used_time(start_time)}s) Total {total} , "
+            f"Linked {link_num} , Copied {copy_num} , Skiped {skip_num} , Failed {fail_num} "
+        )
     except Exception:
         print(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
@@ -1096,92 +1118,98 @@ async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path
     file_type = movie_type.split("|")
     skip_list = ["skip", ".skip", ".ignore"]
     not_skip_success = bool("skip_success_file" not in config.no_escape)
-    i = 100
-    skip = 0
-    skip_repeat_softlink = 0
+
     signal.show_traceback_log("🔎 遍历待刮削目录....")
-    for root, dirs, files in os.walk(movie_path):
-        # 文件夹是否在排除目录
-        root = os.path.join(root, "").replace("\\", "/")
-        if "behind the scenes" in root or root in escape_folder_list:
-            dirs[:] = []  # 忽略当前文件夹子目录
-            continue
 
-        # 文件夹是否存在跳过文件
-        for skip_key in skip_list:
-            if skip_key in files:
-                dirs[:] = []
-                break
-        else:
-            # 处理文件列表
-            for f in files:
-                file_name, file_type_current = os.path.splitext(f)
+    def task():
+        i = 100
+        skip = 0
+        skip_repeat_softlink = 0
+        for root, dirs, files in os.walk(movie_path):
+            # 文件夹是否在排除目录
+            root = os.path.join(root, "").replace("\\", "/")
+            if "behind the scenes" in root or root in escape_folder_list:
+                dirs[:] = []  # 忽略当前文件夹子目录
+                continue
 
-                # 跳过隐藏文件、预告片、主题视频
-                if re.search(r"^\..+", file_name):
-                    continue
-                if "trailer." in f or "trailers." in f:
-                    continue
-                if "theme_video." in f:
-                    continue
+            # 文件夹是否存在跳过文件
+            for skip_key in skip_list:
+                if skip_key in files:
+                    dirs[:] = []
+                    break
+            else:
+                # 处理文件列表
+                for f in files:
+                    file_name, file_type_current = os.path.splitext(f)
 
-                # 判断清理文件
-                path = os.path.join(root, f)
-                if await _need_clean(path, f, file_type_current):
-                    result, error_info = await delete_file_async(path)
-                    if result:
-                        signal.show_log_text(f" 🗑 Clean: {path} ")
-                    else:
-                        signal.show_log_text(f" 🗑 Clean error: {error_info} ")
-                    continue
+                    # 跳过隐藏文件、预告片、主题视频
+                    if re.search(r"^\..+", file_name):
+                        continue
+                    if "trailer." in f or "trailers." in f:
+                        continue
+                    if "theme_video." in f:
+                        continue
 
-                # 添加文件
-                temp_total = []
-                if file_type_current.lower() in file_type:
-                    if os.path.islink(path):
-                        real_path = await read_link_async(path)
-                        # 清理失效的软链接文件
-                        if "check_symlink" in config.no_escape and not os.path.exists(real_path):
-                            result, error_info = await delete_file_async(path)
-                            if result:
-                                signal.show_log_text(f" 🗑 Clean dead link: {path} ")
+                    # 判断清理文件
+                    path = os.path.join(root, f)
+                    if _need_clean(path, f, file_type_current):
+                        result, error_info = delete_file_sync(path)
+                        if result:
+                            signal.show_log_text(f" 🗑 Clean: {path} ")
+                        else:
+                            signal.show_log_text(f" 🗑 Clean error: {error_info} ")
+                        continue
+
+                    # 添加文件
+                    temp_total = []
+                    if file_type_current.lower() in file_type:
+                        if os.path.islink(path):
+                            real_path = read_link_sync(path)
+                            # 清理失效的软链接文件
+                            if "check_symlink" in config.no_escape and not os.path.exists(real_path):
+                                result, error_info = delete_file_sync(path)
+                                if result:
+                                    signal.show_log_text(f" 🗑 Clean dead link: {path} ")
+                                else:
+                                    signal.show_log_text(f" 🗑 Clean dead link error: {error_info} ")
+                                continue
+                            if real_path in temp_total:
+                                skip_repeat_softlink += 1
+                                delete_file_sync(path)
+                                continue
                             else:
-                                signal.show_log_text(f" 🗑 Clean dead link error: {error_info} ")
-                            continue
-                        if real_path in temp_total:
+                                temp_total.append(real_path)
+
+                        if path in temp_total:
                             skip_repeat_softlink += 1
-                            await delete_file_async(path)
                             continue
                         else:
-                            temp_total.append(real_path)
+                            temp_total.append(path)
+                        # mac 转换成 NFC，因为mac平台nfc和nfd指向同一个文件，windows平台指向不同文件
+                        if not IS_WINDOWS:
+                            path = nfd2c(path)
+                        new_path = convert_path(path)
+                        if not_skip_success or new_path not in Flags.success_list:
+                            total.append(new_path)
+                        else:
+                            skip += 1
 
-                    if path in temp_total:
-                        skip_repeat_softlink += 1
-                        continue
-                    else:
-                        temp_total.append(path)
-                    # mac 转换成 NFC，因为mac平台nfc和nfd指向同一个文件，windows平台指向不同文件
-                    if not IS_WINDOWS:
-                        path = nfd2c(path)
-                    new_path = convert_path(path)
-                    if not_skip_success or new_path not in Flags.success_list:
-                        total.append(new_path)
-                    else:
-                        skip += 1
+            found_count = len(total)
+            if found_count >= i:
+                i = found_count + 100
+                signal.show_traceback_log(
+                    f"✅ Found ({found_count})! "
+                    f"Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! "
+                    f"({get_used_time(start_time)}s)... Still searching, please wait... \u3000"
+                )
+                signal.show_log_text(
+                    f"    {get_current_time()} Found ({found_count})! "
+                    f"Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! "
+                    f"({get_used_time(start_time)}s)... Still searching, please wait... \u3000"
+                )
+        return total, skip, skip_repeat_softlink
 
-        found_count = len(total)
-        if found_count >= i:
-            i = found_count + 100
-            signal.show_traceback_log(
-                f"✅ Found ({found_count})! "
-                f"Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! "
-                f"({get_used_time(start_time)}s)... Still searching, please wait... \u3000"
-            )
-            signal.show_log_text(
-                f"    {get_current_time()} Found ({found_count})! "
-                f"Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! "
-                f"({get_used_time(start_time)}s)... Still searching, please wait... \u3000"
-            )
+    total, skip, skip_repeat_softlink = await asyncio.to_thread(task)
 
     total.sort()
     signal.show_traceback_log(
@@ -1238,7 +1266,7 @@ async def get_file_info(
 
     # 软链接时，获取原身路径(用来查询原身文件目录是否有字幕)
     file_ori_path_no_ex = ""
-    if os.path.islink(file_path):
+    if await aiofiles.os.path.islink(file_path):
         file_ori_path = await read_link_async(file_path)
         file_ori_path_no_ex = os.path.splitext(file_ori_path)[0]
 
@@ -1419,17 +1447,17 @@ async def get_file_info(
             sub_type_chs = ".chs" + sub_type
             sub_path_chs = os.path.join(folder_path, (file_name + sub_type_chs))
             sub_path = os.path.join(folder_path, (file_name + sub_type))
-            if os.path.exists(sub_path_chs):
+            if await aiofiles.os.path.exists(sub_path_chs):
                 sub_list.append(sub_type_chs)
                 c_word = cnword_style  # 中文字幕影片后缀
                 has_sub = True
-            if os.path.exists(sub_path):
+            if await aiofiles.os.path.exists(sub_path):
                 sub_list.append(sub_type)
                 c_word = cnword_style  # 中文字幕影片后缀
                 has_sub = True
             if file_ori_path_no_ex:  # 原身路径
                 sub_path2 = file_ori_path_no_ex + sub_type
-                if os.path.exists(sub_path2):
+                if await aiofiles.os.path.exists(sub_path2):
                     c_word = cnword_style  # 中文字幕影片后缀
                     has_sub = True
 
@@ -1448,7 +1476,7 @@ async def get_file_info(
                         break
 
         # 判断nfo中是否有中文字幕、马赛克
-        if (not has_sub or not mosaic) and os.path.exists(nfo_old_path):
+        if (not has_sub or not mosaic) and await aiofiles.os.path.exists(nfo_old_path):
             try:
                 async with aiofiles.open(nfo_old_path, encoding="utf-8") as f:
                     nfo_content = await f.read()
@@ -1481,7 +1509,7 @@ async def get_file_info(
             except Exception:
                 signal.show_traceback_log(traceback.format_exc())
 
-        if not has_sub and os.path.exists(nfo_old_path):
+        if not has_sub and await aiofiles.os.path.exists(nfo_old_path):
             try:
                 async with aiofiles.open(nfo_old_path, encoding="utf-8") as f:
                     nfo_content = await f.read()
@@ -1507,7 +1535,7 @@ async def get_file_info(
                         sub_type = ".chs" + sub_type
                     sub_new_path = os.path.join(folder_path, sub_file_name)
                     for sub_path in sub_path_list:
-                        if os.path.exists(sub_path):
+                        if await aiofiles.os.path.exists(sub_path):
                             await copy_file_async(sub_path, sub_new_path)
                             LogBuffer.log().write(f"\n\n 🍉 Sub file '{sub_file_name}' copied successfully! ")
                             sub_list.append(sub_type)
@@ -1558,7 +1586,7 @@ async def get_movie_list(file_mode: FileMode, movie_path: str, escape_folder_lis
     movie_list = []
     if file_mode == FileMode.Default:  # 刮削默认视频目录的文件
         movie_path = convert_path(movie_path)
-        if not os.path.exists(movie_path):
+        if not await aiofiles.os.path.exists(movie_path):
             signal.show_log_text("\n 🔴 Movie folder does not exist!")
         else:
             signal.show_log_text(" 🖥 Movie path: " + movie_path)
@@ -1580,7 +1608,7 @@ async def get_movie_list(file_mode: FileMode, movie_path: str, escape_folder_lis
 
     elif file_mode == FileMode.Single:  # 刮削单文件（工具页面）
         file_path = Flags.single_file_path.strip()
-        if not os.path.exists(file_path):
+        if not await aiofiles.os.path.exists(file_path):
             signal.show_log_text(" 🔴 Movie file does not exist!")
         else:
             movie_list.append(file_path)  # 把文件路径添加到movie_list
@@ -1601,7 +1629,12 @@ async def _clean_empty_fodlers(path: str, file_mode: FileMode) -> None:
         escape_folder_list = ""
     else:
         escape_folder_list = get_movie_path_setting()[3]
-    if os.path.exists(path):
+    if not await aiofiles.os.path.exists(path):
+        signal.show_log_text(f" 🍀 Clean done!({get_used_time(start_time)}s)")
+        signal.show_log_text("=" * 80)
+        return
+
+    def task():
         all_info = os.walk(path, topdown=True)
         all_folder_list = []
         for root, dirs, files in all_info:
@@ -1619,9 +1652,9 @@ async def _clean_empty_fodlers(path: str, file_mode: FileMode) -> None:
             hidden_file_mac = os.path.join(folder, ".DS_Store")
             hidden_file_windows = os.path.join(folder, "Thumbs.db")
             if os.path.exists(hidden_file_mac):
-                await delete_file_async(hidden_file_mac)  # 删除隐藏文件
+                delete_file_sync(hidden_file_mac)  # 删除隐藏文件
             if os.path.exists(hidden_file_windows):
-                await delete_file_async(hidden_file_windows)  # 删除隐藏文件
+                delete_file_sync(hidden_file_windows)  # 删除隐藏文件
             try:
                 if not os.listdir(folder):
                     os.rmdir(folder)
@@ -1630,6 +1663,7 @@ async def _clean_empty_fodlers(path: str, file_mode: FileMode) -> None:
                 signal.show_traceback_log(traceback.format_exc())
                 signal.show_log_text(f" 🔴 Delete empty folder error: {str(e)}")
 
+    await asyncio.to_thread(task)
     signal.show_log_text(f" 🍀 Clean done!({get_used_time(start_time)}s)")
     signal.show_log_text("=" * 80)
 
@@ -1730,10 +1764,10 @@ async def deal_old_files(
     main_mode = config.main_mode
     if main_mode == 2 and "sort_del" in config.switch_on:
         for each in file_path_list:
-            if os.path.exists(each):
+            if await aiofiles.os.path.exists(each):
                 await delete_file_async(each)
         for each in folder_path_list:
-            if os.path.isdir(each):
+            if await aiofiles.os.path.isdir(each):
                 shutil.rmtree(each, ignore_errors=True)
         return False, False
 
@@ -1789,17 +1823,23 @@ async def deal_old_files(
         # 图片最终路径等于已下载路径时，图片是已下载的，不需要处理
         if (
             done_poster_path
-            and os.path.exists(done_poster_path)
+            and await aiofiles.os.path.exists(done_poster_path)
             and split_path(done_poster_path)[0] == split_path(poster_final_path)[0]
         ):  # 如果存在已下载完成的文件，尝试复制
             done_poster_path_copy = False  # 标记未复制！此处不复制，在poster download中复制
-        elif os.path.exists(poster_final_path):
+        elif await aiofiles.os.path.exists(poster_final_path):
             pass  # windows、mac大小写不敏感，暂不解决
-        elif poster_new_path_with_filename != poster_final_path and os.path.exists(poster_new_path_with_filename):
+        elif poster_new_path_with_filename != poster_final_path and await aiofiles.os.path.exists(
+            poster_new_path_with_filename
+        ):
             await move_file_async(poster_new_path_with_filename, poster_final_path)
-        elif poster_old_path_with_filename != poster_final_path and os.path.exists(poster_old_path_with_filename):
+        elif poster_old_path_with_filename != poster_final_path and await aiofiles.os.path.exists(
+            poster_old_path_with_filename
+        ):
             await move_file_async(poster_old_path_with_filename, poster_final_path)
-        elif poster_old_path_no_filename != poster_final_path and os.path.exists(poster_old_path_no_filename):
+        elif poster_old_path_no_filename != poster_final_path and await aiofiles.os.path.exists(
+            poster_old_path_no_filename
+        ):
             await move_file_async(poster_old_path_no_filename, poster_final_path)
         else:
             poster_exists = False
@@ -1807,15 +1847,15 @@ async def deal_old_files(
         if poster_exists:
             Flags.file_done_dic[json_data["number"]].update({"local_poster": poster_final_path})
             # 清理旧图片
-            if poster_old_path_with_filename.lower() != poster_final_path.lower() and os.path.exists(
+            if poster_old_path_with_filename.lower() != poster_final_path.lower() and await aiofiles.os.path.exists(
                 poster_old_path_with_filename
             ):
                 await delete_file_async(poster_old_path_with_filename)
-            if poster_old_path_no_filename.lower() != poster_final_path.lower() and os.path.exists(
+            if poster_old_path_no_filename.lower() != poster_final_path.lower() and await aiofiles.os.path.exists(
                 poster_old_path_no_filename
             ):
                 await delete_file_async(poster_old_path_no_filename)
-            if poster_new_path_with_filename.lower() != poster_final_path.lower() and os.path.exists(
+            if poster_new_path_with_filename.lower() != poster_final_path.lower() and await aiofiles.os.path.exists(
                 poster_new_path_with_filename
             ):
                 await delete_file_async(poster_new_path_with_filename)
@@ -1832,17 +1872,23 @@ async def deal_old_files(
         # 图片最终路径等于已下载路径时，图片是已下载的，不需要处理
         if (
             done_thumb_path
-            and os.path.exists(done_thumb_path)
+            and await aiofiles.os.path.exists(done_thumb_path)
             and split_path(done_thumb_path)[0] == split_path(thumb_final_path)[0]
         ):
             done_thumb_path_copy = False  # 标记未复制！此处不复制，在 thumb download中复制
-        elif os.path.exists(thumb_final_path):
+        elif await aiofiles.os.path.exists(thumb_final_path):
             pass
-        elif thumb_new_path_with_filename != thumb_final_path and os.path.exists(thumb_new_path_with_filename):
+        elif thumb_new_path_with_filename != thumb_final_path and await aiofiles.os.path.exists(
+            thumb_new_path_with_filename
+        ):
             await move_file_async(thumb_new_path_with_filename, thumb_final_path)
-        elif thumb_old_path_with_filename != thumb_final_path and os.path.exists(thumb_old_path_with_filename):
+        elif thumb_old_path_with_filename != thumb_final_path and await aiofiles.os.path.exists(
+            thumb_old_path_with_filename
+        ):
             await move_file_async(thumb_old_path_with_filename, thumb_final_path)
-        elif thumb_old_path_no_filename != thumb_final_path and os.path.exists(thumb_old_path_no_filename):
+        elif thumb_old_path_no_filename != thumb_final_path and await aiofiles.os.path.exists(
+            thumb_old_path_no_filename
+        ):
             await move_file_async(thumb_old_path_no_filename, thumb_final_path)
         else:
             thumb_exists = False
@@ -1850,15 +1896,15 @@ async def deal_old_files(
         if thumb_exists:
             Flags.file_done_dic[json_data["number"]].update({"local_thumb": thumb_final_path})
             # 清理旧图片
-            if thumb_old_path_with_filename.lower() != thumb_final_path.lower() and os.path.exists(
+            if thumb_old_path_with_filename.lower() != thumb_final_path.lower() and await aiofiles.os.path.exists(
                 thumb_old_path_with_filename
             ):
                 await delete_file_async(thumb_old_path_with_filename)
-            if thumb_old_path_no_filename.lower() != thumb_final_path.lower() and os.path.exists(
+            if thumb_old_path_no_filename.lower() != thumb_final_path.lower() and await aiofiles.os.path.exists(
                 thumb_old_path_no_filename
             ):
                 await delete_file_async(thumb_old_path_no_filename)
-            if thumb_new_path_with_filename.lower() != thumb_final_path.lower() and os.path.exists(
+            if thumb_new_path_with_filename.lower() != thumb_final_path.lower() and await aiofiles.os.path.exists(
                 thumb_new_path_with_filename
             ):
                 await delete_file_async(thumb_new_path_with_filename)
@@ -1875,17 +1921,23 @@ async def deal_old_files(
         # 图片最终路径等于已下载路径时，图片是已下载的，不需要处理
         if (
             done_fanart_path
-            and os.path.exists(done_fanart_path)
+            and await aiofiles.os.path.exists(done_fanart_path)
             and split_path(done_fanart_path)[0] == split_path(fanart_final_path)[0]
         ):
             done_fanart_path_copy = False  # 标记未复制！此处不复制，在 fanart download中复制
-        elif os.path.exists(fanart_final_path):
+        elif await aiofiles.os.path.exists(fanart_final_path):
             pass
-        elif fanart_new_path_with_filename != fanart_final_path and os.path.exists(fanart_new_path_with_filename):
+        elif fanart_new_path_with_filename != fanart_final_path and await aiofiles.os.path.exists(
+            fanart_new_path_with_filename
+        ):
             await move_file_async(fanart_new_path_with_filename, fanart_final_path)
-        elif fanart_old_path_with_filename != fanart_final_path and os.path.exists(fanart_old_path_with_filename):
+        elif fanart_old_path_with_filename != fanart_final_path and await aiofiles.os.path.exists(
+            fanart_old_path_with_filename
+        ):
             await move_file_async(fanart_old_path_with_filename, fanart_final_path)
-        elif fanart_old_path_no_filename != fanart_final_path and os.path.exists(fanart_old_path_no_filename):
+        elif fanart_old_path_no_filename != fanart_final_path and await aiofiles.os.path.exists(
+            fanart_old_path_no_filename
+        ):
             await move_file_async(fanart_old_path_no_filename, fanart_final_path)
         else:
             fanart_exists = False
@@ -1893,15 +1945,15 @@ async def deal_old_files(
         if fanart_exists:
             Flags.file_done_dic[json_data["number"]].update({"local_fanart": fanart_final_path})
             # 清理旧图片
-            if fanart_old_path_with_filename.lower() != fanart_final_path.lower() and os.path.exists(
+            if fanart_old_path_with_filename.lower() != fanart_final_path.lower() and await aiofiles.os.path.exists(
                 fanart_old_path_with_filename
             ):
                 await delete_file_async(fanart_old_path_with_filename)
-            if fanart_old_path_no_filename.lower() != fanart_final_path.lower() and os.path.exists(
+            if fanart_old_path_no_filename.lower() != fanart_final_path.lower() and await aiofiles.os.path.exists(
                 fanart_old_path_no_filename
             ):
                 await delete_file_async(fanart_old_path_no_filename)
-            if fanart_new_path_with_filename.lower() != fanart_final_path.lower() and os.path.exists(
+            if fanart_new_path_with_filename.lower() != fanart_final_path.lower() and await aiofiles.os.path.exists(
                 fanart_new_path_with_filename
             ):
                 await delete_file_async(fanart_new_path_with_filename)
@@ -1918,10 +1970,10 @@ async def deal_old_files(
 
     # nfo 处理
     try:
-        if os.path.exists(nfo_new_path):
-            if nfo_old_path.lower() != nfo_new_path.lower() and os.path.exists(nfo_old_path):
+        if await aiofiles.os.path.exists(nfo_new_path):
+            if nfo_old_path.lower() != nfo_new_path.lower() and await aiofiles.os.path.exists(nfo_old_path):
                 await delete_file_async(nfo_old_path)
-        elif nfo_old_path != nfo_new_path and os.path.exists(nfo_old_path):
+        elif nfo_old_path != nfo_new_path and await aiofiles.os.path.exists(nfo_old_path):
             await move_file_async(nfo_old_path, nfo_new_path)
     except Exception:
         signal.show_log_text(traceback.format_exc())
@@ -1929,48 +1981,52 @@ async def deal_old_files(
     # trailer
     if trailer_name:  # 预告片名字不含视频文件名
         # trailer最终路径等于已下载路径时，trailer是已下载的，不需要处理
-        if os.path.exists(trailer_new_file_path):
-            if os.path.exists(trailer_old_file_path_with_filename):
+        if await aiofiles.os.path.exists(trailer_new_file_path):
+            if await aiofiles.os.path.exists(trailer_old_file_path_with_filename):
                 await delete_file_async(trailer_old_file_path_with_filename)
-            elif os.path.exists(trailer_new_file_path_with_filename):
+            elif await aiofiles.os.path.exists(trailer_new_file_path_with_filename):
                 await delete_file_async(trailer_new_file_path_with_filename)
-        elif trailer_old_file_path != trailer_new_file_path and os.path.exists(trailer_old_file_path):
-            if not os.path.exists(trailer_new_folder_path):
-                os.makedirs(trailer_new_folder_path)
+        elif trailer_old_file_path != trailer_new_file_path and await aiofiles.os.path.exists(trailer_old_file_path):
+            if not await aiofiles.os.path.exists(trailer_new_folder_path):
+                await aiofiles.os.makedirs(trailer_new_folder_path)
             await move_file_async(trailer_old_file_path, trailer_new_file_path)
-        elif os.path.exists(trailer_new_file_path_with_filename):
-            if not os.path.exists(trailer_new_folder_path):
-                os.makedirs(trailer_new_folder_path)
+        elif await aiofiles.os.path.exists(trailer_new_file_path_with_filename):
+            if not await aiofiles.os.path.exists(trailer_new_folder_path):
+                await aiofiles.os.makedirs(trailer_new_folder_path)
             await move_file_async(trailer_new_file_path_with_filename, trailer_new_file_path)
-        elif os.path.exists(trailer_old_file_path_with_filename):
-            if not os.path.exists(trailer_new_folder_path):
-                os.makedirs(trailer_new_folder_path)
+        elif await aiofiles.os.path.exists(trailer_old_file_path_with_filename):
+            if not await aiofiles.os.path.exists(trailer_new_folder_path):
+                await aiofiles.os.makedirs(trailer_new_folder_path)
             await move_file_async(trailer_old_file_path_with_filename, trailer_new_file_path)
 
         # 删除旧文件夹，用不到了
-        if trailer_old_folder_path != trailer_new_folder_path and os.path.exists(trailer_old_folder_path):
+        if trailer_old_folder_path != trailer_new_folder_path and await aiofiles.os.path.exists(
+            trailer_old_folder_path
+        ):
             shutil.rmtree(trailer_old_folder_path, ignore_errors=True)
         # 删除带文件名文件，用不到了
-        if os.path.exists(trailer_old_file_path_with_filename):
+        if await aiofiles.os.path.exists(trailer_old_file_path_with_filename):
             await delete_file_async(trailer_old_file_path_with_filename)
-        if trailer_new_file_path_with_filename != trailer_old_file_path_with_filename and os.path.exists(
+        if trailer_new_file_path_with_filename != trailer_old_file_path_with_filename and await aiofiles.os.path.exists(
             trailer_new_file_path_with_filename
         ):
             await delete_file_async(trailer_new_file_path_with_filename)
     else:
         # 目标文件带文件名
-        if os.path.exists(trailer_new_file_path_with_filename):
-            if trailer_old_file_path_with_filename != trailer_new_file_path_with_filename and os.path.exists(
-                trailer_old_file_path_with_filename
+        if await aiofiles.os.path.exists(trailer_new_file_path_with_filename):
+            if (
+                trailer_old_file_path_with_filename != trailer_new_file_path_with_filename
+                and await aiofiles.os.path.exists(trailer_old_file_path_with_filename)
             ):
                 await delete_file_async(trailer_old_file_path_with_filename)
-        elif trailer_old_file_path_with_filename != trailer_new_file_path_with_filename and os.path.exists(
-            trailer_old_file_path_with_filename
+        elif (
+            trailer_old_file_path_with_filename != trailer_new_file_path_with_filename
+            and await aiofiles.os.path.exists(trailer_old_file_path_with_filename)
         ):
             await move_file_async(trailer_old_file_path_with_filename, trailer_new_file_path_with_filename)
-        elif os.path.exists(trailer_old_file_path):
+        elif await aiofiles.os.path.exists(trailer_old_file_path):
             await move_file_async(trailer_old_file_path, trailer_new_file_path_with_filename)
-        elif trailer_new_file_path != trailer_old_file_path and os.path.exists(trailer_new_file_path):
+        elif trailer_new_file_path != trailer_old_file_path and await aiofiles.os.path.exists(trailer_new_file_path):
             await move_file_async(trailer_new_file_path, trailer_new_file_path_with_filename)
         else:
             trailer_exists = False
@@ -1978,60 +2034,67 @@ async def deal_old_files(
         if trailer_exists:
             Flags.file_done_dic[json_data["number"]].update({"local_trailer": trailer_new_file_path_with_filename})
             # 删除旧、新文件夹，用不到了(分集使用local trailer复制即可)
-            if os.path.exists(trailer_old_folder_path):
+            if await aiofiles.os.path.exists(trailer_old_folder_path):
                 shutil.rmtree(trailer_old_folder_path, ignore_errors=True)
-            if trailer_new_folder_path != trailer_old_folder_path and os.path.exists(trailer_new_folder_path):
+            if trailer_new_folder_path != trailer_old_folder_path and await aiofiles.os.path.exists(
+                trailer_new_folder_path
+            ):
                 shutil.rmtree(trailer_new_folder_path, ignore_errors=True)
             # 删除带文件名旧文件，用不到了
-            if trailer_old_file_path_with_filename != trailer_new_file_path_with_filename and os.path.exists(
-                trailer_old_file_path_with_filename
+            if (
+                trailer_old_file_path_with_filename != trailer_new_file_path_with_filename
+                and await aiofiles.os.path.exists(trailer_old_file_path_with_filename)
             ):
                 await delete_file_async(trailer_old_file_path_with_filename)
         else:
             local_trailer = Flags.file_done_dic.get(json_data["number"], {}).get("local_trailer")
-            if local_trailer and os.path.exists(local_trailer):
+            if local_trailer and await aiofiles.os.path.exists(local_trailer):
                 await copy_file_async(local_trailer, trailer_new_file_path_with_filename)
 
     # 处理 extrafanart、extrafanart副本、主题视频、附加视频
     if single_folder_catched:
         # 处理 extrafanart
         try:
-            if os.path.exists(extrafanart_new_path):
-                if extrafanart_old_path.lower() != extrafanart_new_path.lower() and os.path.exists(
+            if await aiofiles.os.path.exists(extrafanart_new_path):
+                if extrafanart_old_path.lower() != extrafanart_new_path.lower() and await aiofiles.os.path.exists(
                     extrafanart_old_path
                 ):
                     shutil.rmtree(extrafanart_old_path, ignore_errors=True)
-            elif os.path.exists(extrafanart_old_path):
+            elif await aiofiles.os.path.exists(extrafanart_old_path):
                 await move_file_async(extrafanart_old_path, extrafanart_new_path)
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
         # extrafanart副本
         try:
-            if os.path.exists(extrafanart_copy_new_path):
-                if extrafanart_copy_old_path.lower() != extrafanart_copy_new_path.lower() and os.path.exists(
-                    extrafanart_copy_old_path
+            if await aiofiles.os.path.exists(extrafanart_copy_new_path):
+                if (
+                    extrafanart_copy_old_path.lower() != extrafanart_copy_new_path.lower()
+                    and await aiofiles.os.path.exists(extrafanart_copy_old_path)
                 ):
                     shutil.rmtree(extrafanart_copy_old_path, ignore_errors=True)
-            elif os.path.exists(extrafanart_copy_old_path):
+            elif await aiofiles.os.path.exists(extrafanart_copy_old_path):
                 await move_file_async(extrafanart_copy_old_path, extrafanart_copy_new_path)
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
         # 主题视频
-        if os.path.exists(theme_videos_new_path):
-            if theme_videos_old_path.lower() != theme_videos_new_path.lower() and os.path.exists(theme_videos_old_path):
+        if await aiofiles.os.path.exists(theme_videos_new_path):
+            if theme_videos_old_path.lower() != theme_videos_new_path.lower() and await aiofiles.os.path.exists(
+                theme_videos_old_path
+            ):
                 shutil.rmtree(theme_videos_old_path, ignore_errors=True)
-        elif os.path.exists(theme_videos_old_path):
+        elif await aiofiles.os.path.exists(theme_videos_old_path):
             await move_file_async(theme_videos_old_path, theme_videos_new_path)
 
         # 附加视频
-        if os.path.exists(extrafanart_extra_new_path):
-            if extrafanart_extra_old_path.lower() != extrafanart_extra_new_path.lower() and os.path.exists(
-                extrafanart_extra_old_path
+        if await aiofiles.os.path.exists(extrafanart_extra_new_path):
+            if (
+                extrafanart_extra_old_path.lower() != extrafanart_extra_new_path.lower()
+                and await aiofiles.os.path.exists(extrafanart_extra_old_path)
             ):
                 shutil.rmtree(extrafanart_extra_old_path, ignore_errors=True)
-        elif os.path.exists(extrafanart_extra_old_path):
+        elif await aiofiles.os.path.exists(extrafanart_extra_old_path):
             await move_file_async(extrafanart_extra_old_path, extrafanart_extra_new_path)
 
     return pic_final_catched, single_folder_catched
@@ -2043,11 +2106,11 @@ async def pic_some_deal(json_data: JsonData, thumb_final_path: str, fanart_final
     """
     # 不保存thumb时，清理 thumb
     if "thumb" not in config.download_files and "thumb" not in config.keep_files:
-        if os.path.exists(fanart_final_path):
+        if await aiofiles.os.path.exists(fanart_final_path):
             Flags.file_done_dic[json_data["number"]].update({"thumb": fanart_final_path})
         else:
             Flags.file_done_dic[json_data["number"]].update({"thumb": ""})
-        if os.path.exists(thumb_final_path):
+        if await aiofiles.os.path.exists(thumb_final_path):
             await delete_file_async(thumb_final_path)
             LogBuffer.log().write("\n 🍀 Thumb delete done!")
 
@@ -2071,7 +2134,7 @@ async def save_success_list(old_path: str = "", new_path: str = "") -> None:
             Flags.success_list.add(convert_path(old_path))
         else:
             Flags.success_list.add(convert_path(new_path))
-            if os.path.islink(new_path):
+            if await aiofiles.os.path.islink(new_path):
                 Flags.success_list.add(convert_path(old_path))
                 Flags.success_list.add(convert_path(await read_link_async(new_path)))
     if get_used_time(Flags.success_save_time) > 5 or not old_path:
@@ -2109,14 +2172,15 @@ async def check_and_clean_files() -> None:
     total = 0
     succ = 0
     fail = 0
+    # 只有主界面点击会运行此函数, 因此此 walk 无需后台执行
     for root, dirs, files in os.walk(movie_path, topdown=True):
         for f in files:
             # 判断清理文件
             path = os.path.join(root, f)
             file_type_current = os.path.splitext(f)[1]
-            if await _need_clean(path, f, file_type_current):
+            if _need_clean(path, f, file_type_current):
                 total += 1
-                result, error_info = await delete_file_async(path)
+                result, error_info = delete_file_sync(path)
                 if result:
                     succ += 1
                     signal.show_log_text(f" 🗑 Clean: {path} ")

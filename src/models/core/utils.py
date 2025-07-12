@@ -14,6 +14,8 @@ import traceback
 import unicodedata
 from typing import Optional
 
+import aiofiles.os
+
 from ..base.file import read_link_async, split_path
 from ..base.number import get_number_letters
 from ..base.path import get_path
@@ -121,7 +123,7 @@ async def get_video_size(json_data: JsonData, file_path: str):
     definition = ""
     height = 0
     hd_get = config.hd_get
-    if os.path.islink(file_path):
+    if await aiofiles.os.path.islink(file_path):
         if "symlink_definition" in config.no_escape:
             file_path = await read_link_async(file_path)
         else:

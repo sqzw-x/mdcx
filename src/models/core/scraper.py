@@ -5,6 +5,7 @@ import time
 import traceback
 from typing import Optional
 
+import aiofiles.os
 from PyQt5.QtWidgets import QMessageBox
 
 from ..base.file import copy_file_async, move_file_async, read_link_async, split_path
@@ -341,7 +342,7 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
     json_data["poster_path"] = poster_final_path
     json_data["thumb_path"] = thumb_final_path
     json_data["fanart_path"] = fanart_final_path
-    if not os.path.exists(thumb_final_path) and os.path.exists(fanart_final_path):
+    if not await aiofiles.os.path.exists(thumb_final_path) and await aiofiles.os.path.exists(fanart_final_path):
         json_data["thumb_path"] = fanart_final_path
 
     return True, json_data
@@ -715,7 +716,7 @@ def _check_stop(file_name_temp: str) -> None:
 async def _failed_file_info_show(count: str, path: str, error_info: str) -> None:
     folder = os.path.dirname(path)
     info_str = f"{'🔴 ' + count + '.':<3} {path} \n    所在目录: {folder} \n    失败原因: {error_info} \n"
-    if os.path.islink(path):
+    if await aiofiles.os.path.islink(path):
         real_path = await read_link_async(path)
         real_folder = os.path.dirname(path)
         info_str = (
@@ -726,6 +727,7 @@ async def _failed_file_info_show(count: str, path: str, error_info: str) -> None
 
 
 def get_remain_list() -> bool:
+    """This function is intended to be sync."""
     remain_list_path = resources.userdata_path("remain.txt")
     if os.path.isfile(remain_list_path):
         with open(remain_list_path, encoding="utf-8", errors="ignore") as f:
@@ -812,7 +814,7 @@ async def move_sub(
         if config.subtitle_add_chs:
             if ".chs" not in sub:
                 sub_new_path = sub_new_path_chs
-        if os.path.exists(sub_old_path) and not os.path.exists(sub_new_path):
+        if await aiofiles.os.path.exists(sub_old_path) and not await aiofiles.os.path.exists(sub_new_path):
             if copy_flag:
                 if not await copy_file_async(sub_old_path, sub_new_path):
                     LogBuffer.log().write("\n 🔴 Sub copy failed!")

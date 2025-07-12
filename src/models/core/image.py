@@ -7,6 +7,7 @@ import shutil
 import time
 import traceback
 
+import aiofiles.os
 from PIL import Image
 
 from ..base.file import check_pic_async, move_file_async, split_path
@@ -29,12 +30,12 @@ async def extrafanart_copy2(json_data: JsonData, folder_new_path: str):
 
     # 如果不保留，不下载，删除返回
     if "extrafanart_copy" not in keep_files and "extrafanart_copy" not in download_files:
-        if os.path.exists(extrafanart_copy_path):
+        if await aiofiles.os.path.exists(extrafanart_copy_path):
             shutil.rmtree(extrafanart_copy_path, ignore_errors=True)
         return
 
     # 如果保留，并且存在，返回
-    if "extrafanart_copy" in keep_files and os.path.exists(extrafanart_copy_path):
+    if "extrafanart_copy" in keep_files and await aiofiles.os.path.exists(extrafanart_copy_path):
         LogBuffer.log().write(f"\n 🍀 Extrafanart_copy done! (old)({get_used_time(start_time)}s) ")
         return
 
@@ -42,14 +43,14 @@ async def extrafanart_copy2(json_data: JsonData, folder_new_path: str):
     if "extrafanart_copy" not in download_files:
         return
 
-    if not os.path.exists(extrafanart_path):
+    if not await aiofiles.os.path.exists(extrafanart_path):
         return
 
-    if os.path.exists(extrafanart_copy_path):
+    if await aiofiles.os.path.exists(extrafanart_copy_path):
         shutil.rmtree(extrafanart_copy_path, ignore_errors=True)
     shutil.copytree(extrafanart_path, extrafanart_copy_path)
 
-    filelist = os.listdir(extrafanart_copy_path)
+    filelist = await aiofiles.os.listdir(extrafanart_copy_path)
     for each in filelist:
         file_new_name = each.replace("fanart", "")
         file_path = os.path.join(extrafanart_copy_path, each)
@@ -66,24 +67,24 @@ async def extrafanart_extras_copy(json_data: JsonData, folder_new_path: str):
     extrafanart_extra_path = convert_path(os.path.join(folder_new_path, "behind the scenes"))
 
     if "extrafanart_extras" not in download_files and "extrafanart_extras" not in keep_files:
-        if os.path.exists(extrafanart_extra_path):
+        if await aiofiles.os.path.exists(extrafanart_extra_path):
             shutil.rmtree(extrafanart_extra_path, ignore_errors=True)
         return True
 
-    if "extrafanart_extras" in keep_files and os.path.exists(extrafanart_extra_path):
+    if "extrafanart_extras" in keep_files and await aiofiles.os.path.exists(extrafanart_extra_path):
         LogBuffer.log().write(f"\n 🍀 Extrafanart_extras done! (old)({get_used_time(start_time)}s)")
         return True
 
     if "extrafanart_extras" not in download_files:
         return True
 
-    if not os.path.exists(extrafanart_path):
+    if not await aiofiles.os.path.exists(extrafanart_path):
         return False
 
-    if os.path.exists(extrafanart_extra_path):
+    if await aiofiles.os.path.exists(extrafanart_extra_path):
         shutil.rmtree(extrafanart_extra_path)
     shutil.copytree(extrafanart_path, extrafanart_extra_path)
-    filelist = os.listdir(extrafanart_extra_path)
+    filelist = await aiofiles.os.listdir(extrafanart_extra_path)
     for each in filelist:
         file_new_name = each.replace("jpg", "mp4")
         file_path = os.path.join(extrafanart_extra_path, each)
@@ -303,7 +304,7 @@ async def add_del_extrafanart_copy(mode: str):
     for movie in movie_list:
         movie_file_folder_path = split_path(movie)[0]
         extrafanart_folder_path = os.path.join(movie_file_folder_path, "extrafanart")
-        if os.path.exists(extrafanart_folder_path):
+        if await aiofiles.os.path.exists(extrafanart_folder_path):
             extrafanart_folder_path_list.append(movie_file_folder_path)
     extrafanart_folder_path_list = list(set(extrafanart_folder_path_list))
     extrafanart_folder_path_list.sort()
@@ -315,14 +316,14 @@ async def add_del_extrafanart_copy(mode: str):
         extrafanart_copy_folder_path = os.path.join(each, extrafanart_folder)
         count += 1
         if mode == "add":
-            if not os.path.exists(extrafanart_copy_folder_path):
+            if not await aiofiles.os.path.exists(extrafanart_copy_folder_path):
                 shutil.copytree(extrafanart_folder_path, extrafanart_copy_folder_path)
                 signal.show_log_text(f" {count} new copy: \n  {extrafanart_copy_folder_path}")
                 new_count += 1
             else:
                 signal.show_log_text(f" {count} old copy: \n  {extrafanart_copy_folder_path}")
         else:
-            if os.path.exists(extrafanart_copy_folder_path):
+            if await aiofiles.os.path.exists(extrafanart_copy_folder_path):
                 shutil.rmtree(extrafanart_copy_folder_path, ignore_errors=True)
                 signal.show_log_text(f" {count} del copy: \n  {extrafanart_copy_folder_path}")
                 new_count += 1

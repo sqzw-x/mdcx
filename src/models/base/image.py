@@ -1,7 +1,7 @@
-import os
 import time
 import traceback
 
+import aiofiles.os
 from PIL import Image, ImageFilter
 from PyQt5.QtGui import QImageReader, QPixmap
 
@@ -21,7 +21,7 @@ async def get_pixmap(pic_path: str, poster=True, pic_from=""):
             pix = QPixmap(img)
             pic_width = img.size().width()
             pic_height = img.size().height()
-            pic_file_size = int(os.path.getsize(pic_path) / 1024)
+            pic_file_size = int(await aiofiles.os.path.getsize(pic_path) / 1024)
             if pic_width and pic_height:
                 if poster:
                     if pic_width / pic_height > 156 / 220:
@@ -48,22 +48,6 @@ async def get_pixmap(pic_path: str, poster=True, pic_from=""):
         return [False, "", "加载失败", 156, 220]
 
 
-def fix_size(path: str, naming_rule: str):
-    poster_path = os.path.join(path, (naming_rule + "-poster.jpg"))
-    try:
-        if os.path.exists(poster_path):
-            pic = Image.open(poster_path)
-            (width, height) = pic.size
-            if not 2 / 3 - 0.05 <= width / height <= 2 / 3 + 0.05:  # 仅处理会过度拉伸的图片
-                fixed_pic = pic.resize((int(width), int(3 / 2 * width)))  # 拉伸图片
-                fixed_pic = fixed_pic.filter(ImageFilter.GaussianBlur(radius=50))  # 高斯模糊
-                fixed_pic.paste(pic, (0, int((3 / 2 * width - height) / 2)))  # 粘贴原图
-                fixed_pic.save(poster_path, quality=95, subsampling=0)
-            pic.close()
-    except Exception:
-        signal.show_log_text(f"{traceback.format_exc()}\n Pic: {poster_path}")
-
-
 async def cut_thumb_to_poster(
     json_data: JsonData,
     thumb_path: str,
@@ -71,7 +55,7 @@ async def cut_thumb_to_poster(
     image_cut="",
 ):
     start_time = time.time()
-    if os.path.exists(poster_path):
+    if await aiofiles.os.path.exists(poster_path):
         await delete_file_async(poster_path)
 
     # 打开图片, 获取图片尺寸

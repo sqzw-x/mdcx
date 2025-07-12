@@ -402,6 +402,7 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
 
 
 def _get_local_actor_photo():
+    """This function is intended to be sync."""
     actor_photo_folder = config.actor_photo_folder
     if actor_photo_folder == "" or not os.path.isdir(actor_photo_folder):
         signal.show_log_text("🔴 本地头像库文件夹不存在！补全已停止！")

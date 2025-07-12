@@ -1,5 +1,7 @@
 import os
 
+import aiofiles.os
+
 from ..base.file import copy_file_async, move_file_async, split_path
 from ..config.manager import config
 from ..entity.enums import FileMode
@@ -13,7 +15,7 @@ async def add_sub_for_all_video():
     signal.change_buttons_status.emit()
     sub_add = True
     signal.show_log_text("开始检查无字幕视频并为其添加字幕！\n")
-    if config.subtitle_folder == "" or not os.path.exists(config.subtitle_folder):
+    if config.subtitle_folder == "" or not await aiofiles.os.path.exists(config.subtitle_folder):
         sub_add = False
         signal.show_log_text("字幕文件夹不存在！\n只能检查无字幕视频，无法添加字幕！")
         signal.show_log_text("================================================================================")
@@ -50,7 +52,7 @@ async def add_sub_for_all_video():
                         sub_file_name = file_name + ".chs" + sub_type
                     sub_new_path = os.path.join(folder_old_path, sub_file_name)
 
-                    if os.path.exists(sub_path):
+                    if await aiofiles.os.path.exists(sub_path):
                         await copy_file_async(sub_path, sub_new_path)
                         signal.show_log_text(f" 🍀 字幕文件 '{sub_file_name}' 成功复制! ")
                         new_sub_movie_list.append(movie)
@@ -62,14 +64,14 @@ async def add_sub_for_all_video():
                 sub_old_path = os.path.join(folder_old_path, (file_name + sub_type))
                 sub_new_path = os.path.join(folder_old_path, (file_name + ".chs" + sub_type))
                 if config.subtitle_add_chs:
-                    if ".chs" not in sub_old_path and not os.path.exists(sub_new_path):
+                    if ".chs" not in sub_old_path and not await aiofiles.os.path.exists(sub_new_path):
                         await move_file_async(sub_old_path, sub_new_path)
                         signal.show_log_text(
                             f" 🍀 字幕文件: '{file_name + sub_type}' 已被重命名为: '{file_name + '.chs' + sub_type}' "
                         )
                 else:
                     sub_old_path_no_chs = sub_old_path.replace(".chs", "")
-                    if ".chs" in sub_old_path and not os.path.exists(sub_old_path_no_chs):
+                    if ".chs" in sub_old_path and not await aiofiles.os.path.exists(sub_old_path_no_chs):
                         await move_file_async(sub_old_path, sub_old_path_no_chs)
                         signal.show_log_text(
                             f" 🍀 字幕文件: '{file_name + sub_type}' 已被重命名为: '{split_path(sub_old_path_no_chs)[1]}' "
