@@ -148,7 +148,9 @@ class ConfigSchema:
     update_mode: str = r"c"
     update_a_folder: str = r"actor"
     update_b_folder: str = r"number actor"
+    update_c_filetemplate: str = r"number"
     update_d_folder: str = r"number actor"
+    update_titletemplate: str = r"number title"
     soft_link: int = 0
     success_file_move: bool = True
     failed_file_move: bool = True
@@ -240,6 +242,8 @@ class ConfigSchema:
     nfo_tag_series: str = r"系列: series"
     nfo_tag_studio: str = r"片商: studio"
     nfo_tag_publisher: str = r"发行: publisher"
+    nfo_tag_actor: str = r"actor"
+    nfo_tag_actor_contains: str = r""
 
     # Name_Rule
     folder_name: str = r"actor/number actor"
@@ -344,6 +348,8 @@ class ConfigSchema:
             del unknown_fields["trailer_name"]
         if "modified_time" in unknown_fields:  # 弃用
             del unknown_fields["modified_time"]
+        if "nfo_can_translate" in unknown_fields:  # 弃用
+            del unknown_fields["nfo_can_translate"]
 
     def init(self):
         self._update()
@@ -445,6 +451,12 @@ class ConfigSchema:
         [new_str_list.append(i1) for i1 in all_str_list if i1 not in new_str_list]  # 补全
         new_str = ",".join(new_str_list)
         self.suffix_sort = new_str
+
+        # NFO 演员名白名单
+        self.nfo_tag_actor_contains_list = (
+            re.split(r"[|｜]", self.nfo_tag_actor_contains)
+            if self.nfo_tag_actor_contains else []
+        )
 
     def format_ini(self):
         buffer = StringIO()

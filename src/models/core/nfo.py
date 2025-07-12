@@ -29,21 +29,21 @@ def write_nfo(
     outline_show = config.outline_show
 
     if not edit_mode:
-        # 读取模式，有nfo，并且没有勾选更新 nfo 信息
-        if not json_data["nfo_can_translate"]:
-            LogBuffer.log().write(f"\n 🍀 Nfo done! (old)({get_used_time(start_time)}s)")
-            return True
-
+        # 不写nfo
         # 不下载，不保留时
         if "nfo" not in download_files:
             if "nfo" not in keep_files and os.path.exists(nfo_new_path):
                 delete_file(nfo_new_path)
             return True
 
-        # 保留时，返回
-        if "nfo" in keep_files and os.path.exists(nfo_new_path):
-            LogBuffer.log().write(f"\n 🍀 Nfo done! (old)({get_used_time(start_time)}s)")
-            return True
+        LogBuffer.log().write(f"\n 🍀 Nfo done! (old)({get_used_time(start_time)}s)")
+        return True
+
+
+    if config.main_mode == 3 or config.main_mode == 4:
+        nfo_title_template = config.update_titletemplate
+    else:
+        nfo_title_template = config.naming_media
 
     # 字符转义，避免emby无法解析
     json_data_nfo = json_data.copy()
@@ -87,7 +87,7 @@ def write_nfo(
     show_moword = False
     # 获取在媒体文件中显示的规则，不需要过滤Windows异常字符
     should_escape_result = False
-    nfo_title, *_ = render_name_template(config.naming_media, file_path, json_data_nfo, show_4k, show_cnword, show_moword, should_escape_result)
+    nfo_title, *_ = render_name_template(nfo_title_template, file_path, json_data_nfo, show_4k, show_cnword, show_moword, should_escape_result)
 
     # 获取字段
     # 只有nfo的title用替换后的，其他字段用原始的
@@ -518,7 +518,7 @@ def get_nfo_data(
 
     # 返回数据
     json_data["title"] = title
-    if config.title_language == "jp" and "read_translate_again" in config.read_mode and originaltitle:
+    if config.title_language == "jp" and "read_should_write_nfo" in config.read_mode and originaltitle:
         json_data["title"] = originaltitle
     json_data["originaltitle"] = originaltitle
     if originaltitle and langid.classify(originaltitle)[0] == "ja":
@@ -530,7 +530,7 @@ def get_nfo_data(
     json_data["actor"] = actor
     json_data["all_actor"] = actor
     json_data["outline"] = outline
-    if config.outline_language == "jp" and "read_translate_again" in config.read_mode and originalplot:
+    if config.outline_language == "jp" and "read_should_write_nfo" in config.read_mode and originalplot:
         json_data["outline"] = originalplot
     json_data["originalplot"] = originalplot
     json_data["tag"] = tag
