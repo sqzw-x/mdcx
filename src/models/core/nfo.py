@@ -82,9 +82,9 @@ def write_nfo(
         for each in key_word:
             json_data_nfo[each] = str(json_data_nfo[each]).replace(key, value)
 
-    show_4k = "title" in config.show_4k
-    show_cnword = config.title_cnword
-    show_moword = "title" in config.show_moword
+    show_4k = False
+    show_cnword = False
+    show_moword = False
     # 获取在媒体文件中显示的规则，不需要过滤Windows异常字符
     should_escape_result = False
     nfo_title, *_ = render_name_template(config.naming_media, file_path, json_data_nfo, show_4k, show_cnword, show_moword, should_escape_result)

@@ -272,7 +272,6 @@ class ConfigSchema:
     cnword_style: str = r"^-C^"
     folder_cnword: bool = True
     file_cnword: bool = True
-    title_cnword: bool = True
     subtitle_folder: str = r""
     subtitle_add: bool = False
     subtitle_add_chs: bool = True
