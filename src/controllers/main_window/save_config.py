@@ -195,6 +195,8 @@ def save_config(self):
     config.nfo_tag_series = self.Ui.lineEdit_nfo_tag_series.text()  # nfo_tag_series 格式
     config.nfo_tag_studio = self.Ui.lineEdit_nfo_tag_studio.text()  # nfo_tag_studio 格式
     config.nfo_tag_publisher = self.Ui.lineEdit_nfo_tag_publisher.text()  # nfo_tag_publisher 格式
+    config.nfo_tag_actor = self.Ui.lineEdit_nfo_tag_actor.text()  # nfo_tag_actor 格式
+    config.nfo_tag_actor_contains = self.Ui.lineEdit_nfo_tag_actor_contains.text().strip(" |｜")  # nfo_tag_actor_contains 格式
 
     config.whole_fields = get_checkboxes(
         (self.Ui.radioButton_outline_more, "outline"),
