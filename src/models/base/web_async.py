@@ -85,6 +85,7 @@ class AsyncWebClient:
         data: Optional[dict[str, Any]] = None,
         json_data: Optional[dict[str, Any]] = None,
         timeout: Optional[httpx.Timeout] = None,
+        stream: bool = False,
     ) -> tuple[Optional[Response], str]:
         """
         执行请求的通用方法
@@ -120,6 +121,7 @@ class AsyncWebClient:
                         data=data,
                         json=json_data,
                         timeout=timeout or not_set,
+                        stream=stream,
                     )
                     # 检查响应状态
                     if resp.status_code >= 300 and not (resp.status_code == 302 and resp.headers.get("Location")):

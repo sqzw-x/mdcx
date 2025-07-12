@@ -218,7 +218,7 @@ async def get_big_pic_by_amazon(
                                 if each_actor in temp_detail_url:
                                     actor_result_list.add(url)
                                     if "写真付き" not in pic_title:  # NACR-206
-                                        w, h = get_imgsize(url)
+                                        w, h = await get_imgsize(url)
                                         if w > 600 or not w:
                                             hd_pic_url = url
                                             return hd_pic_url
@@ -233,7 +233,7 @@ async def get_big_pic_by_amazon(
             if len(actor_result_list):
                 pic_w = 0
                 for each in actor_result_list:
-                    new_pic_w = get_imgsize(each)[0]
+                    new_pic_w, _ = await get_imgsize(each)
                     if new_pic_w > pic_w:
                         if new_pic_w >= 1770 or (1750 > new_pic_w > 600):  # 不要小图 FCDSS-001，截短的图（1758/1759）
                             pic_w = new_pic_w
@@ -269,7 +269,7 @@ async def get_big_pic_by_amazon(
                         all_info = detail_actor + detail_info_1 + detail_info_2 + detail_info_3
                         for each_actor in actor_amazon:
                             if each_actor in all_info:
-                                w, h = get_imgsize(each[0])
+                                w, h = await get_imgsize(each[0])
                                 if w > 720 or not w:
                                     return each[0]
                                 else:
@@ -453,7 +453,7 @@ async def _get_big_thumb(json_data: ImageContext) -> ImageContext:
     # prestige 图片有的是大图，需要检测图片分辨率
     elif json_data["thumb_from"] in ["prestige", "mgstage"]:
         if json_data["thumb"]:
-            thumb_width, h = get_imgsize(json_data["thumb"])
+            thumb_width, h = await get_imgsize(json_data["thumb"])
 
     # 片商官网查询
     elif "official" in config.download_hd_pics:
@@ -500,7 +500,7 @@ async def _get_big_thumb(json_data: ImageContext) -> ImageContext:
                 req_url = f"https://www.prestige-av.com/api/media/goods/prestige/{number_letter}/{number_num}/pb_{number_lower_line}.jpg"
                 if number_letter == "docvr":
                     req_url = f"https://www.prestige-av.com/api/media/goods/doc/{number_letter}/{number_num}/pb_{number_lower_line}.jpg"
-                if get_imgsize(req_url)[0] >= 800:
+                if (await get_imgsize(req_url))[0] >= 800:
                     json_data["thumb"] = req_url
                     json_data["poster"] = req_url.replace("/pb_", "/pf_")
                     json_data["thumb_from"] = "prestige"
@@ -532,7 +532,7 @@ async def _get_big_poster(json_data: JsonData) -> JsonData:
         return json_data
 
     # 如果有大图时，直接下载
-    if json_data.get("poster_big") and get_imgsize(json_data["poster"])[1] > 600:
+    if json_data.get("poster_big") and (await get_imgsize(json_data["poster"]))[1] > 600:
         json_data["image_download"] = True
         LogBuffer.log().write(f"\n 🖼 HD Poster found! ({json_data['poster_from']})({get_used_time(start_time)}s)")
         return json_data
@@ -584,7 +584,7 @@ async def _get_big_poster(json_data: JsonData) -> JsonData:
                     json_data["poster"] = poster_url
                     json_data["poster_from"] = official_url.split(".")[-2].replace("https://", "")
                     # vr作品或者官网图片高度大于500时，下载封面图开
-                    if "VR" in number.upper() or get_imgsize(poster_url)[1] > 500:
+                    if "VR" in number.upper() or (await get_imgsize(poster_url))[1] > 500:
                         json_data["image_download"] = True
 
     # 使用google以图搜图，放在最后是因为有时有错误，比如 kawd-943
@@ -598,7 +598,7 @@ async def _get_big_poster(json_data: JsonData) -> JsonData:
         hd_pic_url, poster_size = await get_big_pic_by_google(poster_url, poster=True)
         if hd_pic_url:
             if "prestige" in json_data["poster"] or json_data["poster_from"] == "Amazon":
-                poster_width = get_imgsize(poster_url)[0]
+                poster_width, _ = await get_imgsize(poster_url)
             if poster_size[0] > poster_width:
                 json_data["poster"] = hd_pic_url
                 json_data["poster_size"] = poster_size

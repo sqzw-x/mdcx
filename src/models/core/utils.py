@@ -4,6 +4,7 @@
     此模块不应依赖 models.core 中除 flags 外的任何其他模块
 """
 
+import asyncio
 import json
 import os
 import re
@@ -127,7 +128,7 @@ async def get_video_size(json_data: JsonData, file_path: str):
             hd_get = "path"
     if hd_get == "video":
         try:
-            height, codec_fourcc = _get_video_metadata(file_path)
+            height, codec_fourcc = await asyncio.to_thread(_get_video_metadata, file_path)
         except Exception as e:
             signal.show_log_text(f" 🔴 无法获取视频分辨率! 文件地址: {file_path}  错误信息: {e}")
     elif hd_get == "path":

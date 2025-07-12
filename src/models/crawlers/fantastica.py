@@ -179,7 +179,7 @@ async def main(
             trailer = ""
             mosaic = "有码"
             if not poster and extrafanart:
-                w, h = get_imgsize(extrafanart[0])
+                w, h = await get_imgsize(extrafanart[0])
                 if w > h:
                     poster = extrafanart[0]
                     image_download = True

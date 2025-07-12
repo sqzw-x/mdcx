@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import asyncio
 import re
 import socket
 import threading
@@ -165,26 +166,21 @@ async def get_amazon_data(req_url: str) -> Tuple[bool, str]:
     return True, html_info
 
 
-def get_imgsize(url):
-    proxies = config.proxies
-    timeout = config.timeout
-    retry_times = config.retry
-    headers = config.headers
-
-    for _ in range(int(retry_times)):
+async def get_imgsize(url) -> tuple[int, int]:
+    response, err = await config.async_client.request("GET", url, stream=True)
+    if response is None or response.status_code != 200:
+        return 0, 0
+    file_head = BytesIO()
+    chunk_size = 1024 * 10
+    for chunk in response.iter_content(chunk_size):
+        file_head.write(chunk)
+        response.close()
         try:
-            response = requests.get(url, headers=headers, proxies=proxies, timeout=timeout, verify=False, stream=True)
-            if response.status_code == 200:
-                file_head = BytesIO()
-                chunk_size = 1024 * 10
-                for chunk in response.iter_content(chunk_size):
-                    file_head.write(chunk)
-                    response.close()
-                    try:
-                        img = Image.open(file_head)
-                        return img.size
-                    except Exception:
-                        return 0, 0
+
+            def _get_size():
+                return Image.open(file_head).size
+
+            await asyncio.to_thread(_get_size)
         except Exception:
             return 0, 0
     return 0, 0
@@ -378,7 +374,7 @@ async def _get_pic_by_google(pic_url):
             p_url = temp_url.encode("utf-8").decode("unicode_escape")  # url中的Unicode字符转义，不转义，url请求会失败
             if "m.media-amazon.com" in p_url:
                 p_url = re.sub(r"\._[_]?AC_[^\.]+\.", ".", p_url)
-                pic_size = get_imgsize(p_url)
+                pic_size = await get_imgsize(p_url)
                 if pic_size[0]:
                     return p_url, pic_size, big_pic
             else:
