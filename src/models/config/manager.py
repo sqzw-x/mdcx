@@ -346,6 +346,8 @@ class ConfigSchema:
             del unknown_fields["trailer_name"]
         if "modified_time" in unknown_fields:  # 弃用
             del unknown_fields["modified_time"]
+        if "nfo_can_translate" in unknown_fields:  # 弃用
+            del unknown_fields["nfo_can_translate"]
 
     def init(self):
         self._update()

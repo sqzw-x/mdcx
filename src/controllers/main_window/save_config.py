@@ -294,7 +294,7 @@ def save_config(self):
         (self.Ui.checkBox_read_has_nfo_update, "has_nfo_update"),
         (self.Ui.checkBox_read_no_nfo_scrape, "no_nfo_scrape"),
         (self.Ui.checkBox_read_download_file_again, "read_download_again"),
-        (self.Ui.checkBox_read_translate_again, "read_translate_again"),
+        (self.Ui.checkBox_read_should_write_nfo, "read_should_write_nfo"),
     )
     # update 模式设置
     if self.Ui.radioButton_update_c.isChecked():
