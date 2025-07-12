@@ -462,6 +462,10 @@ def load_config(self):
         self.Ui.lineEdit_nfo_tag_studio.setText(str(nfo_tag_studio))
         nfo_tag_publisher = str(config.nfo_tag_publisher)  # nfo_tag_publisher
         self.Ui.lineEdit_nfo_tag_publisher.setText(str(nfo_tag_publisher))
+        nfo_tag_actor = str(config.nfo_tag_actor)  # nfo_tag_actor
+        self.Ui.lineEdit_nfo_tag_actor.setText(str(nfo_tag_actor))
+        nfo_tag_actor_contains = str(config.nfo_tag_actor_contains)  # nfo_tag_actor_contains
+        self.Ui.lineEdit_nfo_tag_actor_contains.setText(str(nfo_tag_actor_contains))
 
         nfo_include_new = config.nfo_include_new  # 写入nfo的字段
         # region nfo_include_new

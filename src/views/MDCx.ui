@@ -19007,7 +19007,7 @@ line-height:50px</string>
               </item>
              </layout>
             </item>
-            <item row="20" column="1">
+            <item row="23" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_114">
               <item>
                <widget class="QCheckBox" name="checkBox_nfo_genre">
@@ -19065,7 +19065,7 @@ line-height:50px</string>
               </item>
              </layout>
             </item>
-            <item row="22" column="1">
+            <item row="25" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_108">
               <item>
                <widget class="QCheckBox" name="checkBox_nfo_poster">
@@ -19222,7 +19222,7 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
-            <item row="21" column="0">
+            <item row="24" column="0">
              <widget class="QLabel" name="label_388">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -19513,7 +19513,7 @@ line-height:50px</string>
               </item>
              </layout>
             </item>
-            <item row="21" column="1">
+            <item row="24" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_138">
               <item>
                <widget class="QCheckBox" name="checkBox_nfo_studio">
@@ -19892,7 +19892,7 @@ line-height:50px</string>
               </item>
              </layout>
             </item>
-            <item row="20" column="0">
+            <item row="23" column="0">
              <widget class="QLabel" name="label_334">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -20215,7 +20215,7 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
-            <item row="22" column="0">
+            <item row="25" column="0">
              <widget class="QLabel" name="label_150">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -20240,7 +20240,221 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
+            <item row="19" column="0">
+             <widget class="QLabel" name="label_433">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
             <item row="19" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_161">
+              <item>
+               <widget class="QLabel" name="label_423">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(8, 128, 128);</string>
+                </property>
+                <property name="text">
+                 <string>标签中演员的格式：</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_nfo_tag_actor">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"> font: &quot;Courier&quot;;
+ border: 1px solid rgba(0,0,0, 50);
+ border-radius: 15px;
+</string>
+                </property>
+                <property name="text">
+                 <string>actor</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="20" column="0">
+             <widget class="QLabel" name="label_434">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="20" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_162">
+              <item>
+               <widget class="QLabel" name="label_424">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(8, 128, 128);</string>
+                </property>
+                <property name="text">
+                 <string>演员名白名单：</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_nfo_tag_actor_contains">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"> font: &quot;Courier&quot;;
+ border: 1px solid rgba(0,0,0, 50);
+ border-radius: 15px;
+</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="21" column="0">
+             <widget class="QLabel" name="label_435">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="21" column="1">
+             <widget class="QLabel" name="label_432">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(8, 128, 128);</string>
+              </property>
+              <property name="text">
+               <string>仅在白名单内的演员名才会被添加至标签（多个内容以｜分割），留空表示全部添加</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="22" column="1">
              <widget class="QLabel" name="label_428">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
@@ -20268,7 +20482,7 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
-            <item row="19" column="0">
+            <item row="22" column="0">
              <widget class="QLabel" name="label_429">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
