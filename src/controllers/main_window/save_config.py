@@ -648,6 +648,26 @@ def save_config(self):
     manager.save_config()
     config.init()
 
+    # 刮削偏好
+    scrape_like = config.scrape_like
+    if "speed" in scrape_like:
+        Flags.scrape_like_text = "速度优先"
+    elif "single" in scrape_like:
+        Flags.scrape_like_text = "指定网站"
+    else:
+        Flags.scrape_like_text = "字段优先"
+
+    main_mode = int(config.main_mode)  # 刮削模式
+    mode_mapping = {
+        1: ("common", "正常模式"),
+        2: ("sort", "整理模式"),
+        3: ("update", "更新模式"),
+        4: ("read", "读取模式"),
+    }
+
+    mode_key, mode_text = mode_mapping.get(main_mode, ("common", "正常模式"))
+    Flags.main_mode_text = mode_text
+
     try:
         scrape_like_text = Flags.scrape_like_text
         if config.scrape_like == "single":

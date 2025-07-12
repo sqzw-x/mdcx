@@ -11512,7 +11512,8 @@ class Ui_MDCx(object):
         self.label_122.setText(_translate("MDCx", "在视频目录创建「trailers」文件夹，多分集共用一个「trailer.mp4」"))
         self.groupBox_40.setTitle(_translate("MDCx", "字段命名规则"))
         self.label_407.setText(_translate("MDCx", "演员："))
-        self.label_146.setText(_translate("MDCx", "比如mosaic(马赛克),cnword(字幕)将显示为: 番号-流出-C"))
+        self.label_146.setText(_translate("MDCx", "比如moword(自定义的无码标识),cnword(字幕)将显示为: 番号-流出-C\n"
+"此处只控制顺序，需要在对应位置（如“添加 4K 字符”）勾选才能控制是否显示"))
         self.checkBox_number_del_num.setText(
             _translate("MDCx", "去除素人番号前缀数字（比如：259LUXU-1488 将修改为 LUXU-1488，建议保留）")
         )

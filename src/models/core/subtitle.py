@@ -81,7 +81,8 @@ def add_sub_for_all_video():
                     file_cnword = config.file_cnword
                     folder_name = config.folder_name
                     naming_file = config.naming_file
-                    if folder_cnword or file_cnword or "cnword" in folder_name or "cnword" in naming_file:
+                    naming_media = config.naming_media
+                    if folder_cnword or file_cnword or "cnword" in folder_name or "cnword" in naming_file or "cnword" in naming_media:
                         new_sub_movie_list.append(movie)
 
     signal.show_log_text(f"\nDone! \n成功添加字幕影片数量: {add_count} \n仍无字幕影片数量: {no_sub_count - add_count} ")

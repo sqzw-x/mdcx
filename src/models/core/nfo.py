@@ -13,7 +13,7 @@ from ..config.manager import config
 from ..config.manual import ManualConfig
 from ..signals import signal
 from .json_data import JsonData, LogBuffer
-from .utils import get_new_release
+from .utils import get_new_release, render_name_template
 
 
 def write_nfo(
@@ -81,14 +81,27 @@ def write_nfo(
     for key, value in rep_word.items():
         for each in key_word:
             json_data_nfo[each] = str(json_data_nfo[each]).replace(key, value)
+
+    show_4k = False
+    show_cnword = False
+    show_moword = False
+    # 获取在媒体文件中显示的规则，不需要过滤Windows异常字符
+    should_escape_result = False
+    nfo_title, *_ = render_name_template(config.naming_media, file_path, json_data_nfo, show_4k, show_cnword, show_moword, should_escape_result)
+
     # 获取字段
+    # 只有nfo的title用替换后的，其他字段用原始的
     nfo_include_new = config.nfo_include_new
+    destroyed = json_data_nfo["destroyed"]
+    leak = json_data_nfo["leak"]
+    wuma = json_data_nfo["wuma"]
+    youma = json_data_nfo["youma"]
+    m_word = destroyed + leak + wuma + youma
     c_word = json_data_nfo["c_word"]
     cd_part = json_data_nfo["cd_part"]
     originaltitle = json_data_nfo["originaltitle"]
     originalplot = json_data_nfo["originalplot"]
     title = json_data_nfo["title"]
-    originaltitle = json_data_nfo["originaltitle"]
     studio = json_data_nfo["studio"]
     publisher = json_data_nfo["publisher"]
     year = json_data_nfo["year"]
@@ -106,58 +119,7 @@ def write_nfo(
     mosaic = json_data_nfo["mosaic"]
     definition = json_data_nfo["definition"]
     trailer = json_data_nfo["trailer"]
-    letters = json_data_nfo["letters"]
-    all_actor = json_data["all_actor"]
-    temp_release = get_new_release(release)
-    file_full_name = split_path(file_path)[1]
-    filename = os.path.splitext(file_full_name)[0]
-    definition = json_data["definition"]
-    temp_4k = ""
-    if definition == "8K" or definition == "UHD8" or definition == "4K" or definition == "UHD":
-        temp_4k = definition.replace("UHD8", "UHD")
-
-    # 获取在媒体文件中显示的规则，不需要过滤Windows异常字符
-    # 国产使用title作为number会出现重复，此处去除title，避免重复(需要注意titile繁体情况)
-    nfo_title = config.naming_media
-    if not number:
-        number = title
-    # 默认emby视频标题配置为 [number title]，国产重复时需去掉一个，去重需注意空格也应一起去掉，否则国产的nfo标题中会多一个空格
-    # 读取nfo title信息会去掉前面的number和空格以保留title展示出来，同时number和标题一致时，去掉number的逻辑变成去掉整个标题导致读取失败，见426行
-    if number == title and "number" in nfo_title and "title" in nfo_title:
-        nfo_title = nfo_title.replace("originaltitle", "").replace("title", "").strip()
-    first_letter = get_number_first_letter(number)
-
-    # 处理演员
-    first_actor = actor.split(",").pop(0)
-    temp_all_actor = deal_actor_more(json_data["all_actor"])
-    temp_actor = deal_actor_more(actor)
-
-    repl_list = [
-        ["4K", temp_4k],
-        ["originaltitle", originaltitle],
-        ["title", title],
-        ["outline", outline],
-        ["number", number],
-        ["first_actor", first_actor],
-        ["all_actor", temp_all_actor],
-        ["actor", temp_actor],
-        ["release", temp_release],
-        ["year", year],
-        ["runtime", runtime],
-        ["director", director],
-        ["series", series],
-        ["studio", studio],
-        ["publisher", publisher],
-        ["mosaic", mosaic],
-        ["definition", definition.replace("UHD8", "UHD")],
-        ["cnword", c_word],
-        ["first_letter", first_letter],
-        ["letters", letters],
-        ["filename", filename],
-        ["wanted", json_data["wanted"]],
-    ]
-    for each_key in repl_list:
-        nfo_title = nfo_title.replace(each_key[0], each_key[1])
+    all_actor = json_data_nfo["all_actor"]
 
     tag = re.split(r"[,，]", tag)  # tag str转list
 

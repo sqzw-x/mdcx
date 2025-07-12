@@ -1359,7 +1359,7 @@ class MyMAinWindow(QMainWindow):
         if reply == QMessageBox.Yes:
             with open(resources.userdata_path("success.txt"), "w", encoding="utf-8", errors="ignore") as f:
                 f.write(self.Ui.textBrowser_show_success_list.toPlainText().replace("暂无成功刮削的文件", "").strip())
-                get_success_list()
+            get_success_list()
             self.Ui.widget_show_success.hide()
 
     def pushButton_success_list_clear_clicked(self):
