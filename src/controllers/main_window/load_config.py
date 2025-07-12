@@ -590,7 +590,9 @@ def load_config(self):
 
         self.Ui.lineEdit_update_a_folder.setText(str(config.update_a_folder))  # 更新模式 - a 目录
         self.Ui.lineEdit_update_b_folder.setText(str(config.update_b_folder))  # 更新模式 - b 目录
+        self.Ui.lineEdit_update_c_filetemplate.setText(str(config.update_c_filetemplate))  # 更新模式 - c 文件名
         self.Ui.lineEdit_update_d_folder.setText(str(config.update_d_folder))  # 更新模式 - d 目录
+        self.Ui.lineEdit_update_titletemplate.setText(str(config.update_titletemplate))  # 更新模式 - emby视频标题
 
         set_radio_buttons(
             config.soft_link,  # 软链接

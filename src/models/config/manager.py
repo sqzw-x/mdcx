@@ -148,7 +148,9 @@ class ConfigSchema:
     update_mode: str = r"c"
     update_a_folder: str = r"actor"
     update_b_folder: str = r"number actor"
+    update_c_filetemplate: str = r"number"
     update_d_folder: str = r"number actor"
+    update_titletemplate: str = r"number title"
     soft_link: int = 0
     success_file_move: bool = True
     failed_file_move: bool = True

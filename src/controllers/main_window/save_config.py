@@ -307,7 +307,9 @@ def save_config(self):
         config.update_mode = "c"
     config.update_a_folder = self.Ui.lineEdit_update_a_folder.text()  # 更新模式 - a 目录
     config.update_b_folder = self.Ui.lineEdit_update_b_folder.text()  # 更新模式 - b 目录
+    config.update_c_filetemplate = self.Ui.lineEdit_update_c_filetemplate.text()  # 更新模式 - c 文件命名规则
     config.update_d_folder = self.Ui.lineEdit_update_d_folder.text()  # 更新模式 - d 目录
+    config.update_titletemplate = self.Ui.lineEdit_update_titletemplate.text()  # 更新模式 - emby视频标题
     # 链接模式设置
     if self.Ui.radioButton_soft_on.isChecked():  # 软链接开
         config.soft_link = 1

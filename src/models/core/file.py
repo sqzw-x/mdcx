@@ -641,6 +641,13 @@ def _generate_file_name(file_path: str, json_data: JsonData) -> str:
     if not config.success_file_rename:
         return file_name
 
+    # 更新模式 或 读取模式
+    if config.main_mode == 3 or config.main_mode == 4:
+        file_name_template = config.update_c_filetemplate
+    # 正常模式 或 整理模式
+    else:
+        file_name_template = config.naming_file
+
     # 获取文件信息
     cd_part = json_data["cd_part"]
 
@@ -648,7 +655,7 @@ def _generate_file_name(file_path: str, json_data: JsonData) -> str:
     show_cnword = config.file_cnword
     show_moword = "file" in config.show_moword
     should_escape_result = True
-    file_name, naming_file, number, originaltitle, outline, title = render_name_template(config.naming_file, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result)
+    file_name, file_name_template, number, originaltitle, outline, title = render_name_template(file_name_template, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result)
 
     file_name += cd_part
 
@@ -671,19 +678,19 @@ def _generate_file_name(file_path: str, json_data: JsonData) -> str:
 
         # 如果没有防屏蔽字符，截短标题或者简介，这样不影响其他字段阅读
         if not prevent_char:
-            if "originaltitle" in naming_file:
+            if "originaltitle" in file_name_template:
                 LogBuffer.log().write(
                     f"\n 💡 当前文件名长度：{len(file_name)}，"
                     f"最大允许长度：{file_name_max}，文件命名时将去除原标题后{abs(cut_index)}个字符!"
                 )
                 file_name = file_name.replace(originaltitle, originaltitle[:cut_index])
-            elif "title" in naming_file:
+            elif "title" in file_name_template:
                 LogBuffer.log().write(
                     f"\n 💡 当前文件名长度：{len(file_name)}，"
                     f"最大允许长度：{file_name_max}，文件命名时将去除标题后{abs(cut_index)}个字符!"
                 )
                 file_name = file_name.replace(title, title[:cut_index])
-            elif "outline" in naming_file:
+            elif "outline" in file_name_template:
                 LogBuffer.log().write(
                     f"\n 💡 当前文件名长度：{len(file_name)}，"
                     f"最大允许长度：{file_name_max}，文件命名时将去除简介后{abs(cut_index)}个字符!"
