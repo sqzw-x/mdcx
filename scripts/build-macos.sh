@@ -62,6 +62,11 @@ do
       shift
       shift
       ;;
+    --app-name|-n)
+      APP_NAME="$2"
+      shift
+      shift
+      ;;
     --create-dmg|-dmg)
       CREATE_DMG=true
       shift
@@ -86,6 +91,7 @@ do
       echo "Usage: build-macos.sh [options]"
       echo "Options:"
       echo "  --version, -v       指定版本号。如果未指定，将使用 src/models/config/manual.py 文件中的 LOCAL_VERSION"
+      echo "  --app-name, -n      指定应用名称。默认为 'MDCx'"
       echo "  --create-dmg, -dmg  创建 DMG 文件。默认为 false"
       echo "  --debug, -d         启用调试模式，显示详细的调试信息"
       echo "  --verbose           启用详细输出模式"
@@ -205,14 +211,23 @@ else
 fi
 
 
-appName="MDCx"
+# 设置应用名称
+log_step "确定应用名称..."
+if [ -z "$APP_NAME" ]; then
+  APP_NAME="MDCx"
+  log_info "✓ 使用默认应用名称: $APP_NAME"
+else
+  log_info "✓ 使用指定的应用名称: $APP_NAME"
+fi
+
+appName="$APP_NAME"
 log_debug "应用名称: $appName"
 
 # 生成 .spec 文件
 log_step "生成 PyInstaller .spec 文件..."
 
 pyi-makespec \
-  --name MDCx \
+  --name "$appName" \
   --osx-bundle-identifier com.mdcuniverse.mdcx \
   -F -w main.py \
   -p "./src" \
@@ -273,7 +288,7 @@ insertAfterLine() {
 # 修改 .spec 文件以添加版本信息
 log_step "修改 .spec 文件，添加版本信息..."
 
-# Add `info_plist` to `MDCx.spec` file
+# Add `info_plist` to `$appName.spec` file
 INFO_PLIST=$(cat <<EOF
     info_plist={
         'CFBundleShortVersionString': '$APP_VERSION',
@@ -282,21 +297,21 @@ INFO_PLIST=$(cat <<EOF
 EOF
 )
 
-if [ ! -f "MDCx.spec" ]; then
-  log_error "❌ MDCx.spec 文件不存在!"
+if [ ! -f "$appName.spec" ]; then
+  log_error "❌ $appName.spec 文件不存在!"
   exit 1
 fi
 
-log_debug "正在修改 MDCx.spec 文件..."
-LINE=$(findLine "MDCx.spec" "bundle_identifier")
+log_debug "正在修改 $appName.spec 文件..."
+LINE=$(findLine "$appName.spec" "bundle_identifier")
 
 if [ -z "$LINE" ]; then
-  log_error "❌ 在 MDCx.spec 文件中未找到 'bundle_identifier' 关键字!"
+  log_error "❌ 在 $appName.spec 文件中未找到 'bundle_identifier' 关键字!"
   exit 1
 fi
 
-NEW_CONTENT=$(insertAfterLine "MDCx.spec" $LINE "$INFO_PLIST")
-printf "%b" "$NEW_CONTENT" > MDCx.spec
+NEW_CONTENT=$(insertAfterLine "$appName.spec" $LINE "$INFO_PLIST")
+printf "%b" "$NEW_CONTENT" > "$appName.spec"
 
 if [ $? -eq 0 ]; then
   log_info "✓ .spec 文件修改成功，已添加版本信息"
@@ -308,7 +323,7 @@ fi
 # 显示修改后的关键部分（调试模式）
 if [ "$DEBUG_MODE" = true ]; then
   log_debug "修改后的 .spec 文件关键部分:"
-  grep -A 5 -B 2 "info_plist" MDCx.spec || true
+  grep -A 5 -B 2 "info_plist" "$appName.spec" || true
 fi
 
 
@@ -319,7 +334,7 @@ log_info "正在使用 PyInstaller 构建 $appName.app..."
 # 记录开始时间
 build_start_time=$(date +%s)
 
-pyinstaller MDCx.spec
+pyinstaller "$appName.spec"
 
 
 build_end_time=$(date +%s)

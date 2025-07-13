@@ -165,7 +165,7 @@ jobs:
           if [ -n "${{ github.event.inputs.tag }}" ]; then
             version="${{ github.event.inputs.tag }}"
           fi
-          bash scripts/build-macos.sh --create-dmg --version "$version"
+          bash scripts/build-macos.sh --create-dmg --version "$version" -n "${{ env.IS_DEV == 'true' && 'MDCx-dev' || env.IS_DAILY == 'true' && 'MDCx-daily' || 'MDCx' }}"
 
       - name: Build Windows app - Windows
         if: ${{ matrix.build == 'windows' }}
