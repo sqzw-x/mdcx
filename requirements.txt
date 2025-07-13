@@ -5,6 +5,7 @@ PyQt5==5.15.6
 zhconv==1.4.3
 langid==1.1.6
 opencv-contrib-python-headless==4.7.0.68
+numpy==1.26.4 # 避免安装 numpy 2 导致 opencv 不兼容
 ping3==4.0.4
 oshash==0.1.1
 curl-cffi==0.11.4
