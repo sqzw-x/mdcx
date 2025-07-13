@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
 
 
-import urllib3
-
 from models.config.manager import config
 from models.crawlers import javlibrary
-
-urllib3.disable_warnings()  # yapf: disable
 
 
 async def main(

@@ -2,17 +2,11 @@
 import re
 import time
 
-import urllib3
 from lxml import etree
 
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info, get_number_list
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
 
 
 def get_actor_photo(actor):
@@ -59,18 +53,15 @@ def get_real_url(html, number_list, hscangku_url):
 
 
 async def get_redirected_url(url):
-    response, error = await config.async_client.get_text(url)
+    response, err = await config.async_client.get_text(url)
     if response is None:
-        return None
-
-    if redirected_url := re.search(r'"(https?://.*?)"', response):
-        redirected_url = redirected_url.group(1)
-        http = urllib3.PoolManager()
-        response = http.request("GET", f"{redirected_url}{url}&p=", redirect=False)
-        final_url = response.get_redirect_location()
-        return final_url if final_url else None
-    else:
-        return None
+        return
+    if (redirected_url := re.search(r'"(https?://.*?)"', response)) is None:
+        return
+    redirected_url = redirected_url.group(1)
+    response, err = await config.async_client.request("GET", f"{redirected_url}{url}&p=", allow_redirects=False)
+    if response and response.redirect_url:
+        return response.redirect_url
 
 
 async def main(

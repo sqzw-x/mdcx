@@ -1,19 +1,13 @@
 #!/usr/bin/python
 import json
 import re
-import time  # yapf: disable # NOQA: E402
+import time
 
-import urllib3
 from lxml import etree
 
 from models.base.web import check_url, get_dmm_trailer
 from models.config.manager import config
 from models.core.json_data import LogBuffer
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
 
 
 def get_title(html):

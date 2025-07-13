@@ -3,17 +3,11 @@ import re
 import time
 from datetime import datetime
 
-import urllib3
 from lxml import etree
 
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info, get_number_list
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
 
 
 def get_actor_photo(actor):

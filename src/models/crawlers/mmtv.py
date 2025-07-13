@@ -2,18 +2,12 @@
 import re
 import time
 
-import urllib3
 from lxml import etree
 
 from models.base.number import is_uncensored
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import Function.config as cf
 
 
 def get_actor_photo(actor):
@@ -284,7 +278,6 @@ async def main(
                 raise Exception(debug_info)
 
     except Exception as e:
-        # import traceback
         # print(traceback.format_exc())
         LogBuffer.error().write(str(e))
         dic = {

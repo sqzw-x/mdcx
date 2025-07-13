@@ -4,16 +4,10 @@ import time
 import unicodedata
 import urllib
 
-import urllib3
 from lxml import etree
 
 from models.config.manager import config
 from models.core.json_data import LogBuffer
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
 
 
 def get_title(html):

@@ -1,7 +1,7 @@
 import asyncio
 import random
 from io import BytesIO
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 import aiofiles
 import httpx
@@ -82,10 +82,11 @@ class AsyncWebClient:
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
         use_proxy: bool = True,
-        data: Optional[dict[str, Any]] = None,
+        data: Optional[Union[dict[str, str], list[tuple], str, BytesIO, bytes]] = None,
         json_data: Optional[dict[str, Any]] = None,
         timeout: Optional[httpx.Timeout] = None,
         stream: bool = False,
+        allow_redirects: bool = True,
     ) -> tuple[Optional[Response], str]:
         """
         执行请求的通用方法
@@ -122,6 +123,7 @@ class AsyncWebClient:
                         json=json_data,
                         timeout=timeout or not_set,
                         stream=stream,
+                        allow_redirects=allow_redirects,
                     )
                     # 检查响应状态
                     if resp.status_code >= 300 and not (resp.status_code == 302 and resp.headers.get("Location")):
@@ -209,7 +211,7 @@ class AsyncWebClient:
         self,
         url: str,
         *,
-        data: Optional[dict[str, Any]] = None,
+        data: Optional[Union[dict[str, str], list[tuple], str, BytesIO, bytes]] = None,
         json_data: Optional[dict[str, Any]] = None,
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
@@ -232,7 +234,7 @@ class AsyncWebClient:
         self,
         url: str,
         *,
-        data: Optional[dict[str, Any]] = None,
+        data: Optional[Union[dict[str, str], list[tuple], str, BytesIO, bytes]] = None,
         json_data: Optional[dict[str, Any]] = None,
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,
@@ -254,7 +256,7 @@ class AsyncWebClient:
         self,
         url: str,
         *,
-        data: Optional[dict[str, Any]] = None,
+        data: Optional[Union[dict[str, str], list[tuple], str, BytesIO, bytes]] = None,
         json_data: Optional[dict[str, Any]] = None,
         headers: Optional[dict[str, str]] = None,
         cookies: Optional[dict[str, str]] = None,

@@ -5,9 +5,8 @@ import re
 import time
 import traceback
 import urllib
-from typing import Optional, cast
+from typing import Literal, Optional, Union, cast
 
-import deepl
 import langid
 import zhconv
 
@@ -97,51 +96,40 @@ async def youdao_translate_async(title: str, outline: str):
 async def deepl_translate_async(
     title: str,
     outline: str,
-    ls="JA",
-    json_data: Optional[JsonData] = None,
+    ls: Union[Literal["JA"], Literal["EN"]] = "JA",
 ):
-    global deepl_result
+    """DeepL 翻译接口"""
+    r1, r2 = await asyncio.gather(_deepl_translate(title, ls), _deepl_translate(outline, ls))
+    if r1 is None or r2 is None:
+        return "", "", "DeepL 翻译失败! 查看网络日志以获取更多信息"
+    return r1, r2, None
+
+
+async def _deepl_translate(text: str, source_lang: Union[Literal["JA"], Literal["EN"]] = "JA") -> Optional[str]:
+    """调用 DeepL API 翻译文本"""
+    if not text:
+        return ""
+
     deepl_key = config.deepl_key
     if not deepl_key:
-        try:  # todo 改为异步请求, 避免使用 sdk
-            if title:
-                title = deepl.translate(source_language=ls, target_language="ZH", text=title)
-            if outline:
-                outline = deepl.translate(source_language=ls, target_language="ZH", text=outline)
-            return title, outline, ""
-        except Exception as e:
-            return title, outline, f"网页接口请求失败! 错误：{e}"
+        return None
 
+    # 确定 API URL, 免费版本的 key 包含 ":fx" 后缀，付费版本的 key 不包含 ":fx" 后缀
     deepl_url = "https://api-free.deepl.com" if ":fx" in deepl_key else "https://api.deepl.com"
-    url = f"{deepl_url}/v2/translate?auth_key={deepl_key}&source_lang={ls}&target_lang=ZH"
-    params_title = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "text": title,
-    }
-    params_outline = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "text": outline,
-    }
-
-    if title:
-        res, error = await config.async_client.post_json(url, data=params_title)
-        if res is None:
-            return title, outline, f"API 接口请求失败！错误：{error}"
-        else:
-            if "translations" in res:
-                title = res["translations"][0]["text"]
-            else:
-                return title, outline, f"API 接口返回数据异常！返回内容：{res}"
-    if outline:
-        res, error = await config.async_client.post_json(url, data=params_outline)
-        if res is None:
-            return title, outline, f"API 接口请求失败！错误：{error}"
-        else:
-            if "translations" in res:
-                outline = res["translations"][0]["text"]
-            else:
-                return title, outline, f"API 接口返回数据异常！返回内容：{res}"
-    return title, outline, None
+    url = f"{deepl_url}/v2/translate"
+    # 构造请求头
+    headers = {"Content-Type": "application/json", "Authorization": f"DeepL-Auth-Key {deepl_key}"}
+    # 构造请求体
+    data = {"text": [text], "source_lang": source_lang, "target_lang": "ZH"}
+    res, error = await config.async_client.post_json(url, json_data=data, headers=headers)
+    if res is None:
+        signal.add_log(f"DeepL API 请求失败: {error}")
+        return None
+    if "translations" in res and len(res["translations"]) > 0:
+        return res["translations"][0]["text"]
+    else:
+        signal.add_log(f"DeepL API 返回数据异常: {res}")
+        return None
 
 
 async def llm_translate_async(title: str, outline: str, target_language: str = "简体中文"):

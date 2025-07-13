@@ -2,18 +2,11 @@
 import re
 import time
 
-import urllib3
 from lxml import etree
 
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
-# import Function.config as cf
 
 
 def get_actor_photo(actor):

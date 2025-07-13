@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 import asyncio
 import re
-import socket
 import threading
 from io import BytesIO
 from typing import List, Literal, Optional, Tuple, overload
 from urllib.parse import quote
 
-import requests
-import urllib3.util.connection as urllib3_cn
 from PIL import Image
 from ping3 import ping
 
@@ -16,21 +13,6 @@ from ..config.manager import config
 from ..signals import signal
 from .utils import get_user_agent
 from .web_sync import get_json_sync
-
-
-def _allowed_gai_family():
-    """
-    https://github.com/shazow/urllib3/blob/master/urllib3/util/connection.py
-    """
-    family = socket.AF_INET
-    return family
-
-
-try:
-    if config.ipv4_only:
-        urllib3_cn.allowed_gai_family = _allowed_gai_family
-except Exception:
-    urllib3_cn.allowed_gai_family = _allowed_gai_family
 
 
 def url_encode(url: str) -> str:
@@ -294,33 +276,30 @@ def check_version() -> Optional[int]:
 
 def check_theporndb_api_token() -> str:
     tips = "✅ 连接正常! "
-    headers = config.headers
-    proxies = config.proxies
-    timeout = config.timeout
     api_token = config.theporndb_api_token
     url = "https://api.theporndb.net/scenes/hash/8679fcbdd29fa735"
     headers = {
         "Authorization": f"Bearer {api_token}",
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "User-Agent": get_user_agent(),
     }
     if not api_token:
         tips = "❌ 未填写 API Token，影响欧美刮削！可在「设置」-「网络」添加！"
     else:
-        try:
-            response = requests.get(url, headers=headers, proxies=proxies, timeout=timeout, verify=False)
-            if response.status_code == 401 and "Unauthenticated" in str(response.text):
-                tips = "❌ API Token 错误！影响欧美刮削！请到「设置」-「网络」中修改。"
-            elif response.status_code == 200:
-                if response.json().get("data"):
-                    tips = "✅ 连接正常！"
-                else:
-                    tips = "❌ 返回数据异常！"
+        response, err = config.executor.run(config.async_client.request("GET", url, headers=headers))
+        if response is None:
+            tips = f"❌ ThePornDB 连接失败: {err}"
+            signal.show_log_text(tips)
+            return tips
+        if response.status_code == 401 and "Unauthenticated" in str(response.text):
+            tips = "❌ API Token 错误！影响欧美刮削！请到「设置」-「网络」中修改。"
+        elif response.status_code == 200:
+            if response.json().get("data"):
+                tips = "✅ 连接正常！"
             else:
-                tips = f"❌ 连接失败！请检查网络或代理设置！ {response.status_code} {response.text}"
-        except Exception as e:
-            tips = f"❌ 连接失败!请检查网络或代理设置！ {e}"
+                tips = "❌ 返回数据异常！"
+        else:
+            tips = f"❌ 连接失败！请检查网络或代理设置！ {response.status_code} {response.text}"
     signal.show_log_text(tips.replace("❌", " ❌ ThePornDB").replace("✅", " ✅ ThePornDB"))
     return tips
 

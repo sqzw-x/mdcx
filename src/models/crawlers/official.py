@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 import re
-import time  # yapf: disable # NOQA: E402
+import time
 
-import urllib3
 from lxml import etree
 
 from models.base.number import get_number_letters
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers import prestige
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
 
 
 def get_title(html):
@@ -85,11 +79,10 @@ def get_release(html):
 
 
 def get_year(release):
-    try:
-        result = str(re.search(r"\d{4}", release).group())
+    if r := re.search(r"\d{4}", release):
+        result = r.group()
         return result
-    except Exception:
-        return release
+    return release
 
 
 def get_tag(html):

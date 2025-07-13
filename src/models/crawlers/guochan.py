@@ -3,16 +3,9 @@
 import os.path
 import re
 
-import urllib3
 import zhconv
 
 from models.base.number import remove_escape_string
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
-# import Function.config as cf
 
 
 def get_lable_list():

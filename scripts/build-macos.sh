@@ -219,8 +219,6 @@ pyi-makespec \
   --add-data "resources:resources" \
   --add-data "libs:." \
   --icon resources/Img/MDCx.icns \
-  --hidden-import socks \
-  --hidden-import urllib3 \
   --hidden-import _cffi_backend \
   --collect-all curl_cffi
 

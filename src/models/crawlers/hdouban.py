@@ -3,16 +3,10 @@ import os
 import re
 import time
 
-import urllib3
 import zhconv
 
 from models.config.manager import config
 from models.core.json_data import LogBuffer
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
 
 
 def get_api_actor(actor_list):

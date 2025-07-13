@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 import os.path
 import re
-import time  # yapf: disable # NOQA: E402
+import time
 import traceback
 from difflib import SequenceMatcher
 
 import oshash
-import urllib3
 
 from models.base.number import long_name, remove_escape_string
 from models.config.manager import config
 from models.core.json_data import LogBuffer
-
-urllib3.disable_warnings()  # yapf: disable
 
 
 def similarity(a, b):

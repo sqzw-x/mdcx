@@ -8,7 +8,6 @@ import traceback
 
 import aiofiles
 import aiofiles.os
-import requests
 from lxml import etree
 
 from models.base.image import cut_pic, fix_pic
@@ -375,7 +374,7 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
         # 清理旧图片（backdrop可以多张，不清理会一直累积）
         if actor_backdrop_imagetages:
             for _ in range(len(actor_backdrop_imagetages)):
-                requests.delete(backdrop_url_0)
+                await config.async_client.request("DELETE", backdrop_url_0)
 
         # 上传头像到 emby
         r, err = await _upload_actor_photo(pic_url, pic_path)

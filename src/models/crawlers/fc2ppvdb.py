@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 import time
 
-import urllib3
 from lxml import etree
 
 from models.config.manager import config
 from models.core.json_data import LogBuffer
-
-# 禁用SSL警告
-urllib3.disable_warnings()
 
 
 def get_title(html):  # 获取标题
