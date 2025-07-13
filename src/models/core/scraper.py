@@ -132,8 +132,10 @@ def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> t
     if "." in movie_number or json_data["mosaic"] in ["国产"]:
         pass
     elif movie_number not in Flags.json_get_set:
+        # 第一次遇到该番号，刮削
         Flags.json_get_set.add(movie_number)
     elif not Flags.json_data_dic.get(movie_number):
+        # 已经获取过该番号的json_data（如同一番号的其他集），但已刮削字典中找不到，说明第一次遇到它的线程还没刮削完，等它结束。
         while not Flags.json_data_dic.get(movie_number):
             time.sleep(1)
 
@@ -441,6 +443,8 @@ def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     try:
         result, json_data = _scrape_one_file(file_path, file_info, file_mode)
         if LogBuffer.req().get() != "do_not_update_json_data_dic":
+            if config.main_mode == 4:
+                movie_number = json_data["number"]  # 读取模式且存在nfo时，可能会导致movie_number改变，需要更新
             Flags.json_data_dic.update({movie_number: json_data})
     except Exception as e:
         _check_stop(file_name_temp)
