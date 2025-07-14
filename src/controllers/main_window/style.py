@@ -217,11 +217,11 @@ def set_style(self):
             background-color: rgba(240, 245, 240, 240);
             border: 0px solid rgba(0,0,0,150);
         }}
-        QLineEdit{{
+        QLineEdit, QPlainTextEdit, QTextEdit, QDoubleSpinBox, QSpinBox{{
             font-size:14px;
             background:white;
             border-radius:10px;
-            border: 1px solid rgba(20,20,20,200);
+            border: 1px solid rgba(0,0,0,50);
             padding: 2px;
         }}
         QTextEdit#textEdit_nfo_outline,#textEdit_nfo_originalplot,#textEdit_nfo_tag{{
@@ -455,7 +455,7 @@ def set_dark_style(self):
             background-color: rgba(180, 180, 180, 20);
             border-radius: 10px;
         }
-        QPushButton#pushButton_scrape_note,#pushButton_field_tips_website,#pushButton_field_tips_nfo,#pushButton_check_javdb_cookie{
+        QPushButton#pushButton_scrape_note,#pushButton_field_tips_website,#pushButton_field_tips_nfo{
             color: black;
         }
         """)
@@ -512,11 +512,11 @@ def set_dark_style(self):
             background-color: #18222D;
             border: 0px solid rgba(0,0,0,150);
         }}
-        QLineEdit{{
+        QLineEdit, QPlainTextEdit, QTextEdit, QDoubleSpinBox, QSpinBox{{
             font-size:13px;
             background:#18222D;
             border-radius:20px;
-            border: 1px solid rgba(240,240,240,200);
+            border: 1px solid rgba(0,0,0,50);
             padding: 2px;
         }}
         QTextEdit#textEdit_nfo_outline,#textEdit_nfo_originalplot,#textEdit_nfo_tag{{
