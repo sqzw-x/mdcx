@@ -385,6 +385,19 @@ async def main(
                 LogBuffer.error().write(web_info + debug_info)
                 raise Exception(debug_info)
 
+        # docker版本正常，但在macOS会解析失败，猜测是emoji等特殊字符导致的，删除emoji后可解析正常。
+        # 搜索emoji正则: [\u{1F601}-\u{1F64F}\u{2702}-\u{27B0}\u{1F680}-\u{1F6C0}\u{1F170}-\u{1F251}\u{1F600}-\u{1F636}\u{1F681}-\u{1F6C5}\u{1F30D}-\u{1F567}]
+        # 另外，使用`lxml.html.soupparser.fromstring`可以解析成功。
+        if html_detail is None:
+            debug_info = "HTML 解析失败，etree 返回 None"
+            LogBuffer.error().write(web_info + debug_info)
+            # 尝试soupparser
+            html_detail = soupparser.fromstring(html_info)
+            if html_detail is None:
+                debug_info = "HTML 解析失败，soupparser 返回 None"
+                LogBuffer.error().write(web_info + debug_info)
+                raise Exception(debug_info)
+
         # ========================================================================收集信息
         title, number = get_title(html_detail)  # 获取标题并去掉头尾歌手名
         if not title or "single-video-info col-12" not in html_info:

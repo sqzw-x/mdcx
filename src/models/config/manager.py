@@ -263,7 +263,7 @@ class ConfigSchema:
     naming_media: str = r"number title"
     prevent_char: str = r""
     fields_rule: str = r"del_actor,del_char,"
-    suffix_sort: str = r"mosaic,cnword,definition"
+    suffix_sort: str = r"moword,cnword,definition"
     actor_no_name: str = r"未知演员"
     release_rule: str = r"YYYY-MM-DD"
     folder_name_max: int = 60
@@ -360,6 +360,8 @@ class ConfigSchema:
             del unknown_fields["trailer_name"]
         if "modified_time" in unknown_fields:  # 弃用
             del unknown_fields["modified_time"]
+        # 2. 处理更名的配置项
+        self.suffix_sort = self.suffix_sort.replace("mosaic", "moword")
 
     def init(self):
         self._update()
@@ -453,7 +455,7 @@ class ConfigSchema:
         self.official_websites = official_websites_dic
 
         # 字段命名规则-后缀字段顺序
-        all_str_list = ["mosaic", "cnword", "definition"]
+        all_str_list = ["moword", "cnword", "definition"]
         read_str_list = re.split(r"[,，]", self.suffix_sort)
         new_str_list1 = [i1 for i1 in read_str_list if i1 in all_str_list]  # 去除不在list中的字符
         new_str_list = []
