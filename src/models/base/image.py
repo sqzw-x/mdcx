@@ -1,3 +1,4 @@
+import os
 import time
 import traceback
 
@@ -5,9 +6,10 @@ import aiofiles.os
 from PIL import Image, ImageFilter
 from PyQt5.QtGui import QImageReader, QPixmap
 
+from ..config.manager import config
 from ..core.json_data import JsonData, LogBuffer
 from ..signals import signal
-from .file import check_pic_async, copy_file_async, delete_file_async
+from .file import check_pic_async, copy_file_sync, delete_file_async, delete_file_sync
 from .utils import get_used_time
 
 
@@ -48,15 +50,15 @@ async def get_pixmap(pic_path: str, poster=True, pic_from=""):
         return [False, "", "加载失败", 156, 220]
 
 
-async def cut_thumb_to_poster(
+def cut_thumb_to_poster(
     json_data: JsonData,
     thumb_path: str,
     poster_path: str,
     image_cut="",
 ):
     start_time = time.time()
-    if await aiofiles.os.path.exists(poster_path):
-        await delete_file_async(poster_path)
+    if os.path.exists(poster_path):
+        delete_file_sync(poster_path)
 
     # 打开图片, 获取图片尺寸
     try:
@@ -80,7 +82,7 @@ async def cut_thumb_to_poster(
 
     # 不裁剪
     if image_cut == "no":
-        await copy_file_async(thumb_path, poster_path)
+        copy_file_sync(thumb_path, poster_path)
         LogBuffer.log().write(f"\n 🍀 Poster done! (copy thumb)({get_used_time(start_time)}s)")
         json_data["poster_from"] = "copy thumb"
         img.close()
@@ -115,7 +117,7 @@ async def cut_thumb_to_poster(
         img_new_png = img_new.crop((ax, ay, bx, by))
         img_new_png.save(poster_path, quality=95, subsampling=0)
         img.close()
-        if await check_pic_async(poster_path):
+        if config.executor.run(check_pic_async(poster_path)):
             LogBuffer.log().write(f"\n 🍀 Poster done! ({json_data['poster_from']})({get_used_time(start_time)}s)")
             return True
         LogBuffer.log().write(f"\n 🥺 Poster cut failed! ({json_data['poster_from']})({get_used_time(start_time)}s)")

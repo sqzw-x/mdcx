@@ -849,7 +849,7 @@ async def poster_download(json_data: JsonData, folder_new_path: str, poster_fina
     poster_final_path_temp = poster_final_path + ".[CUT].jpg"
     if fanart_path:
         thumb_path = fanart_path
-    if await cut_thumb_to_poster(json_data, thumb_path, poster_final_path_temp, image_cut):
+    if await asyncio.to_thread(cut_thumb_to_poster, json_data, thumb_path, poster_final_path_temp, image_cut):
         # 裁剪成功，替换旧图
         await move_file_async(poster_final_path_temp, poster_final_path)
         if json_data["cd_part"]:
