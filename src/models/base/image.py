@@ -158,39 +158,44 @@ def cut_thumb_to_poster(
 
 def cut_pic(pic_path: str):
     # 打开图片, 获取图片尺寸
+    img = None
+    img_new = None
+    img_new_png = None
     try:
         img = Image.open(pic_path)  # 返回一个Image对象
-    except Exception:
-        signal.show_log_text(f"{traceback.format_exc()}\n Pic: {pic_path}")
-        return
 
-    w, h = img.size
-    prop = h / w
+        w, h = img.size
+        prop = h / w
 
-    # 判断裁剪方式
-    if prop < 1.4:  # 胖，裁剪左右
-        ax = int((w - h / 1.5) / 2)
-        ay = 0
-        bx = int(ax + h / 1.5)
-        by = int(h)
-    elif prop > 1.6:  # 瘦，裁剪上下
-        ax = 0
-        ay = int((h - 1.5 * w) / 2)
-        bx = int(w)
-        by = int(h - ay)
-    else:
-        img.close()
-        return
+        # 判断裁剪方式
+        if prop < 1.4:  # 胖，裁剪左右
+            ax = int((w - h / 1.5) / 2)
+            ay = 0
+            bx = int(ax + h / 1.5)
+            by = int(h)
+        elif prop > 1.6:  # 瘦，裁剪上下
+            ax = 0
+            ay = int((h - 1.5 * w) / 2)
+            bx = int(w)
+            by = int(h - ay)
+        else:
+            img.close()
+            return
 
-    # 裁剪并保存
-    try:
+        # 裁剪并保存
         img_new = img.convert("RGB")
         img_new_png = img_new.crop((ax, ay, bx, by))
         img_new_png.save(pic_path, quality=95, subsampling=0)
-        img.close()
     except Exception:
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
+    finally:
+        if img_new_png:
+            img_new_png.close()
+        if img_new:
+            img_new.close()
+        if img:
+            img.close()
 
 
 def fix_pic(pic_path: str, new_path: str):
