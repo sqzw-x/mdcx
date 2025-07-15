@@ -353,7 +353,7 @@ async def translate_actor(json_data: JsonData):
         if each_actor:
             actor_data = resources.get_actor_data(each_actor)
             new_actor = actor_data.get(actor_language)
-            if not REGEX_KANA.search(new_actor):
+            if new_actor and not REGEX_KANA.search(new_actor):
                 if actor_language == "zh_cn":
                     new_actor = zhconv.convert(new_actor, "zh-cn")
                 elif actor_language == "zh_tw":
@@ -441,7 +441,7 @@ async def translate_title_outline(json_data: JsonData, movie_number: str):
                 elif each == "llm":  # 使用 llm 翻译
                     t, o, r = await llm_translate_async(trans_title, trans_outline)
                 else:  # 使用deepl翻译
-                    t, o, r = await deepl_translate_async(trans_title, trans_outline, "JA", json_data)
+                    t, o, r = await deepl_translate_async(trans_title, trans_outline, "JA")
                 if r:
                     LogBuffer.log().write(
                         f"\n 🔴 Translation failed!({each.capitalize()})({get_used_time(start_time)}s) Error: {r}"
