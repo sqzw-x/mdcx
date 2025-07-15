@@ -1,5 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <info>
+      <!-- 说明：可使用文本编辑器打开本文件后自行编辑。
+keyword：用于匹配标签/导演/系列/制作/发行的关键词，每个名字前后都需要用逗号隔开。当其中包含刮削得到的关键词时，可以输出对应语言的词。
+zh_cn/zh_tw/jp：指对应语言输出的词，按设置的对应语言输出。当输出词为“删除”时表示：遇到该关键词时，在对应内容中删除该关键词-->
       <a zh_cn="删除" zh_tw="删除" jp="删除" keyword=",成人奖," />
       <a zh_cn="删除" zh_tw="删除" jp="删除" keyword=",觸摸打字,触摸打字," />
       <a zh_cn="删除" zh_tw="删除" jp="删除" keyword=",10枚組," />
@@ -348,5 +351,4 @@
       <a zh_cn="PREMIUM" zh_tw="PREMIUM" jp="PREMIUM" keyword=",PREMIUM,プレミアム," />
       <a zh_cn="WANZ" zh_tw="WANZ" jp="WANZ" keyword=",WANZ,ワンズファクトリー," />
       <a zh_cn="MAX-A" zh_tw="MAX-A" jp="MAX-A" keyword=",MAX-A,マックスエー," />
-
 </info>

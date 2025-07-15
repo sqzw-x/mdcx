@@ -1,6 +1,8 @@
+import asyncio
 import os
 import time
 import traceback
+from typing import cast
 
 import aiofiles.os
 from PIL import Image, ImageFilter
@@ -60,63 +62,63 @@ def cut_thumb_to_poster(
     if os.path.exists(poster_path):
         delete_file_sync(poster_path)
 
+    img = None
+    img_new = None
+    img_new_png = None
     # 打开图片, 获取图片尺寸
     try:
         img = Image.open(thumb_path)  # 返回一个Image对象
-    except Exception:
-        signal.show_log_text(f"{traceback.format_exc()}\n Pic: {thumb_path}")
-        return False
+        img = cast(Image.Image, img)
 
-    w, h = img.size
-    prop = h / w
+        w, h = img.size
+        prop = h / w
 
-    # 判断裁剪方式
-    if not image_cut:
-        if prop >= 1.4:
-            image_cut = "no"
-        elif prop >= 1:
-            image_cut = "center"
-        else:
-            image_cut = "right"
-        json_data["image_cut"] = image_cut
-
-    # 不裁剪
-    if image_cut == "no":
-        copy_file_sync(thumb_path, poster_path)
-        LogBuffer.log().write(f"\n 🍀 Poster done! (copy thumb)({get_used_time(start_time)}s)")
-        json_data["poster_from"] = "copy thumb"
-        img.close()
-        return True
-
-    # 中间裁剪
-    elif image_cut == "center":
-        json_data["poster_from"] = "thumb center"
-        ax = int((w - h / 1.5) / 2)
-        ay = 0
-        bx = ax + int(h / 1.5)
-        by = int(h)
-
-    # 右边裁剪
-    else:
-        json_data["poster_from"] = "thumb right"
-        ax, ay, bx, by = w / 1.9, 0, w, h
-        if w == 800:
-            if h == 439:
-                ax, ay, bx, by = 420, 0, w, h
-            elif h >= 499 and h <= 503:
-                ax, ay, bx, by = 437, 0, w, h
+        # 判断裁剪方式
+        if not image_cut:
+            if prop >= 1.4:
+                image_cut = "no"
+            elif prop >= 1:
+                image_cut = "center"
             else:
-                ax, ay, bx, by = 421, 0, w, h
-        elif w == 840:
-            if h == 472:
-                ax, ay, bx, by = 473, 0, 788, h
+                image_cut = "right"
+            json_data["image_cut"] = image_cut
 
-    # 裁剪并保存
-    try:
+        # 不裁剪
+        if image_cut == "no":
+            copy_file_sync(thumb_path, poster_path)
+            LogBuffer.log().write(f"\n 🍀 Poster done! (copy thumb)({get_used_time(start_time)}s)")
+            json_data["poster_from"] = "copy thumb"
+            img.close()
+            return True
+
+        # 中间裁剪
+        elif image_cut == "center":
+            json_data["poster_from"] = "thumb center"
+            ax = int((w - h / 1.5) / 2)
+            ay = 0
+            bx = ax + int(h / 1.5)
+            by = int(h)
+
+        # 右边裁剪
+        else:
+            json_data["poster_from"] = "thumb right"
+            ax, ay, bx, by = w / 1.9, 0, w, h
+            if w == 800:
+                if h == 439:
+                    ax, ay, bx, by = 420, 0, w, h
+                elif h >= 499 and h <= 503:
+                    ax, ay, bx, by = 437, 0, w, h
+                else:
+                    ax, ay, bx, by = 421, 0, w, h
+            elif w == 840:
+                if h == 472:
+                    ax, ay, bx, by = 473, 0, 788, h
+
+        # 裁剪并保存
         img_new = img.convert("RGB")
+        img_new = cast(Image.Image, img_new)
         img_new_png = img_new.crop((ax, ay, bx, by))
         img_new_png.save(poster_path, quality=95, subsampling=0)
-        img.close()
         if config.executor.run(check_pic_async(poster_path)):
             LogBuffer.log().write(f"\n 🍀 Poster done! ({json_data['poster_from']})({get_used_time(start_time)}s)")
             return True
@@ -126,48 +128,67 @@ def cut_thumb_to_poster(
             f"\n 🥺 Poster failed! ({json_data['poster_from']})({get_used_time(start_time)}s)\n    {str(e)}"
         )
         signal.show_traceback_log(traceback.format_exc())
-        signal.show_log_text(traceback.format_exc())
+        signal.show_log_text(f"{traceback.format_exc()}\n Pic: {thumb_path}")
+        return False
+    finally:
+        if img_new_png:
+            img_new_png.close()
+        if img_new:
+            img_new.close()
+        if img:
+            img.close()
     return False
 
 
 def cut_pic(pic_path: str):
     # 打开图片, 获取图片尺寸
+    img = None
+    img_new = None
+    img_new_png = None
     try:
         img = Image.open(pic_path)  # 返回一个Image对象
-    except Exception:
-        signal.show_log_text(f"{traceback.format_exc()}\n Pic: {pic_path}")
-        return
 
-    w, h = img.size
-    prop = h / w
+        w, h = img.size
+        prop = h / w
 
-    # 判断裁剪方式
-    if prop < 1.4:  # 胖，裁剪左右
-        ax = int((w - h / 1.5) / 2)
-        ay = 0
-        bx = int(ax + h / 1.5)
-        by = int(h)
-    elif prop > 1.6:  # 瘦，裁剪上下
-        ax = 0
-        ay = int((h - 1.5 * w) / 2)
-        bx = int(w)
-        by = int(h - ay)
-    else:
-        img.close()
-        return
+        # 判断裁剪方式
+        if prop < 1.4:  # 胖，裁剪左右
+            ax = int((w - h / 1.5) / 2)
+            ay = 0
+            bx = int(ax + h / 1.5)
+            by = int(h)
+        elif prop > 1.6:  # 瘦，裁剪上下
+            ax = 0
+            ay = int((h - 1.5 * w) / 2)
+            bx = int(w)
+            by = int(h - ay)
+        else:
+            img.close()
+            return
 
-    # 裁剪并保存
-    try:
+        # 裁剪并保存
         img_new = img.convert("RGB")
         img_new_png = img_new.crop((ax, ay, bx, by))
         img_new_png.save(pic_path, quality=95, subsampling=0)
-        img.close()
     except Exception:
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
+    finally:
+        if img_new_png:
+            img_new_png.close()
+        if img_new:
+            img_new.close()
+        if img:
+            img.close()
+
+
+async def fix_pic_async(pic_path: str, new_path: str):
+    await asyncio.to_thread(fix_pic, pic_path, new_path)
 
 
 def fix_pic(pic_path: str, new_path: str):
+    pic = None
+    fixed_pic = None
     try:
         pic = Image.open(pic_path)
         (w, h) = pic.size
@@ -190,7 +211,11 @@ def fix_pic(pic_path: str, new_path: str):
         fixed_pic.paste(pic, (foreground_x, foreground_y))  # 粘贴原图
         fixed_pic = fixed_pic.convert("RGB")
         fixed_pic.save(new_path, quality=95, subsampling=0)
-        pic.close()
     except Exception:
         signal.show_log_text(f"{traceback.format_exc()}\n Pic: {pic_path}")
         signal.show_traceback_log(traceback.format_exc())
+    finally:
+        if pic is not None:
+            pic.close()
+        if fixed_pic is not None:
+            fixed_pic.close()

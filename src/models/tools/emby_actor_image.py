@@ -10,7 +10,7 @@ import aiofiles
 import aiofiles.os
 from lxml import etree
 
-from models.base.image import cut_pic, fix_pic
+from models.base.image import cut_pic, fix_pic_async
 from models.base.utils import get_used_time
 from models.config.manager import config
 from models.config.resources import resources
@@ -274,7 +274,7 @@ async def _get_graphis_pic(actor_name):
             logs += "🍊 使用 graphis.ne.jp 头像！ "
             if "graphis_backdrop" not in emby_on:
                 if not has_backdrop:
-                    fix_pic(pic_path, backdrop_path)
+                    await fix_pic_async(pic_path, backdrop_path)
                 return pic_path, backdrop_path, logs
         else:
             logs += "🔴 graphis.ne.jp 头像获取失败！ "
@@ -282,7 +282,7 @@ async def _get_graphis_pic(actor_name):
     if not has_backdrop and "graphis_backdrop" in emby_on:
         if await download_file_with_filepath(big_pic, backdrop_path, actor_folder):
             logs += "🍊 使用 graphis.ne.jp 背景！ "
-            fix_pic(backdrop_path, backdrop_path)
+            await fix_pic_async(backdrop_path, backdrop_path)
         else:
             logs += "🔴 graphis.ne.jp 背景获取失败！ "
             backdrop_path = ""
@@ -366,10 +366,10 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
         if not backdrop_path:
             backdrop_path = pic_path.replace(".jpg", "-big.jpg")
             if not await aiofiles.os.path.isfile(backdrop_path):
-                fix_pic(pic_path, backdrop_path)
+                await fix_pic_async(pic_path, backdrop_path)
 
         # 检查图片尺寸并裁剪为2:3
-        cut_pic(pic_path)
+        await asyncio.to_thread(cut_pic, pic_path)
 
         # 清理旧图片（backdrop可以多张，不清理会一直累积）
         if actor_backdrop_imagetages:

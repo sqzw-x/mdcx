@@ -82,7 +82,8 @@ def filter_xml_file(input_file: str, output_file: Optional[str] = None, backup: 
 
     # 解析XML文件
     try:
-        tree = ET.parse(input_file)
+        parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True))
+        tree = ET.parse(input_file, parser)
         root = tree.getroot()
     except ET.ParseError as e:
         raise ValueError(f"XML解析错误: {e}")
@@ -114,16 +115,6 @@ def filter_xml_file(input_file: str, output_file: Optional[str] = None, backup: 
 
     # 保存过滤后的XML
     tree.write(output_file, encoding="utf-8", xml_declaration=True)
-
-    # 格式化输出，保持原始格式
-    with open(output_file, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    # 简单的格式化：在每个<a>标签前添加缩进
-    content = content.replace("<a ", "  <a ")
-
-    with open(output_file, "w", encoding="utf-8") as f:
-        f.write(content)
 
     return total_count, filtered_count
 
