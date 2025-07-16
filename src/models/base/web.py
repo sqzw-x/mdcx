@@ -159,7 +159,8 @@ async def get_imgsize(url) -> tuple[int, int]:
             file_head.write(await chunk)
             try:
                 def _get_size():
-                    return Image.open(file_head).size
+                    with Image.open(file_head) as img:
+                        return img.size
                 return await asyncio.to_thread(_get_size)
             except Exception:
                 # 如果解析失败，继续下载更多数据
