@@ -149,22 +149,27 @@ async def get_amazon_data(req_url: str) -> Tuple[bool, str]:
 
 
 async def get_imgsize(url) -> tuple[int, int]:
-    response, err = await config.async_client.request("GET", url, stream=True)
+    response, _ = await config.async_client.request("GET", url, stream=True)
     if response is None or response.status_code != 200:
         return 0, 0
     file_head = BytesIO()
     chunk_size = 1024 * 10
-    for chunk in response.iter_content(chunk_size):
-        file_head.write(chunk)
+    try:
+        for chunk in response.iter_content(chunk_size):
+            file_head.write(await chunk)
+            try:
+                def _get_size():
+                    with Image.open(file_head) as img:
+                        return img.size
+                return await asyncio.to_thread(_get_size)
+            except Exception:
+                # 如果解析失败，继续下载更多数据
+                continue
+    except Exception:
+        return 0, 0
+    finally:
         response.close()
-        try:
 
-            def _get_size():
-                return Image.open(file_head).size
-
-            await asyncio.to_thread(_get_size)
-        except Exception:
-            return 0, 0
     return 0, 0
 
 
