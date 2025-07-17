@@ -17,8 +17,8 @@ from mdcx.config.extend import get_movie_path_setting
 from mdcx.config.manager import config
 from mdcx.config.resources import resources
 from mdcx.models.core.web import download_file_with_filepath
-from mdcx.models.data_models import EMbyActressInfo
 from mdcx.models.tools.actress_db import ActressDB
+from mdcx.models.tools.emby import EMbyActressInfo
 from mdcx.models.tools.emby_actor_image import (
     _generate_server_url,
     _get_emby_actor_list,

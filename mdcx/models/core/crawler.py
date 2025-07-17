@@ -52,7 +52,7 @@ from mdcx.crawlers import (
 )
 from mdcx.models.base.number import get_number_letters, is_uncensored
 from mdcx.models.core.flags import Flags
-from mdcx.models.entity.enums import FileMode
+from mdcx.models.enums import FileMode
 from mdcx.models.json_data import JsonData, new_json_data
 from mdcx.models.log_buffer import LogBuffer
 

@@ -51,7 +51,7 @@ from mdcx.models.core.web import (
     thumb_download,
     trailer_download,
 )
-from mdcx.models.entity.enums import FileMode
+from mdcx.models.enums import FileMode
 from mdcx.models.json_data import JsonData
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.tools.emby_actor_image import update_emby_actor_photo

@@ -6,7 +6,7 @@
 from dataclasses import dataclass, field
 from typing import Any
 
-from mdcx.models.entity.enums import FileMode
+from mdcx.models.enums import FileMode
 
 
 @dataclass

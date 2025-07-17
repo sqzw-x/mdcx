@@ -7,7 +7,7 @@ from mdcx.config.manager import config
 from mdcx.models.base.file import movie_lists
 from mdcx.models.core.file import get_file_info
 from mdcx.models.core.scraper import start_new_scrape
-from mdcx.models.entity.enums import FileMode
+from mdcx.models.enums import FileMode
 from mdcx.signals import signal
 from mdcx.utils import split_path
 from mdcx.utils.file import copy_file_async, move_file_async

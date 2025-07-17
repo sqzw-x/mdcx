@@ -49,7 +49,7 @@ from mdcx.models.core.subtitle import add_sub_for_all_video
 from mdcx.models.core.utils import deal_url
 from mdcx.models.core.video import add_del_extras, add_del_theme_videos
 from mdcx.models.core.web import show_netstatus
-from mdcx.models.entity.enums import FileMode
+from mdcx.models.enums import FileMode
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.tools.actress_db import ActressDB
 from mdcx.models.tools.emby_actor_image import update_emby_actor_photo

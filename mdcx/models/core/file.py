@@ -19,7 +19,7 @@ from mdcx.models.base.file import (
 from mdcx.models.base.number import get_file_number, get_number_letters, is_uncensored, remove_escape_string
 from mdcx.models.core.flags import Flags
 from mdcx.models.core.utils import Input_11, render_name_template
-from mdcx.models.entity.enums import FileMode
+from mdcx.models.enums import FileMode
 from mdcx.models.json_data import JsonData, MoveContext, new_json_data
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.signals import signal

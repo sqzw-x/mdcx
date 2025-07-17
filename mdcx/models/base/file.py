@@ -13,7 +13,7 @@ from mdcx.config.manager import config
 from mdcx.config.resources import resources
 from mdcx.consts import IS_WINDOWS
 from mdcx.models.core.flags import Flags
-from mdcx.models.entity.enums import FileMode
+from mdcx.models.enums import FileMode
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.signals import signal
 from mdcx.utils import convert_path, get_current_time, get_used_time, nfd2c, split_path

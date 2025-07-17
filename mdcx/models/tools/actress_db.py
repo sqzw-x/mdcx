@@ -8,7 +8,7 @@ import sqlite3
 import traceback
 
 from mdcx.config.manager import config
-from mdcx.models.data_models import EMbyActressInfo
+from mdcx.models.tools.emby import EMbyActressInfo
 from mdcx.signals import signal
 
 
