@@ -5,7 +5,7 @@ import time
 from lxml import etree
 
 from mdcx.config.manager import config
-from mdcx.models.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
+from mdcx.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
 from mdcx.models.log_buffer import LogBuffer
 
 

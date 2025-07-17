@@ -2,10 +2,11 @@
 import re
 import time
 
+import zhconv
 from lxml import etree
 
 from mdcx.config.manager import config
-from mdcx.models.crawlers.guochan import get_extra_info, get_number_list
+from mdcx.crawlers.guochan import get_extra_info, get_number_list
 from mdcx.models.log_buffer import LogBuffer
 
 
@@ -18,31 +19,25 @@ def get_actor_photo(actor):
     return data
 
 
-def get_detail_info(
-    html,
-    real_url,
-    number,
-    file_path,
-):
-    href = re.split(r"[/.]", real_url)[-2]
-    title_h1 = html.xpath(
-        '//h3[@class="title" and not(contains(normalize-space(.), "目录")) and not(contains(normalize-space(.), "为你推荐"))]/text()'
-    )
+def get_detail_info(html, number, file_path):
+    title_h1 = html.xpath('//div[@class="entry-content "]/p/text()')
     title = title_h1[0].replace(number + " ", "").strip() if title_h1 else number
     actor = get_extra_info(title, file_path, info_type="actor")
-    tag = get_extra_info(title, file_path, info_type="tag")
-    cover_url = html.xpath(f'//a[@data-original and contains(@href,"{href}")]/@data-original')
+    tmp_tag = html.xpath('//header//div[@class="categories-wrap"]/a/text()')
+    # 标签转简体
+    tag = zhconv.convert(tmp_tag[0], "zh-cn") if tmp_tag else ""
+    cover_url = html.xpath(f'//meta[@property="og:image"]/@content')
     cover_url = cover_url[0] if cover_url else ""
 
     return number, title, actor, cover_url, tag
 
 
-def get_real_url(html, number_list, hscangku_url):
-    item_list = html.xpath('//a[@class="stui-vodlist__thumb lazyload"]')
+def get_real_url(html, number_list):
+    item_list = html.xpath('//h3[contains(@class,"title")]//a[@href and @title]')
     for each in item_list:
-        # href="/vodplay/41998-1-1.html"
-        detail_url = hscangku_url + each.get("href")
-        title = each.xpath("@title")[0]
+        # href="https://cableav.tv/Xq1Sg3SvZPk/"
+        detail_url = each.get("href")
+        title = each.xpath("text()")[0]
         if title and detail_url:
             for n in number_list:
                 temp_n = re.sub(r"[\W_]", "", n).upper()
@@ -50,18 +45,6 @@ def get_real_url(html, number_list, hscangku_url):
                 if temp_n in temp_title:
                     return True, n, title, detail_url
     return False, "", "", ""
-
-
-async def get_redirected_url(url):
-    response, err = await config.async_client.get_text(url)
-    if response is None:
-        return
-    if (redirected_url := re.search(r'"(https?://.*?)"', response)) is None:
-        return
-    redirected_url = redirected_url.group(1)
-    response, err = await config.async_client.request("GET", f"{redirected_url}{url}&p=", allow_redirects=False)
-    if response and response.redirect_url:
-        return response.redirect_url
 
 
 async def main(
@@ -72,41 +55,34 @@ async def main(
     **kwargs,
 ):
     start_time = time.time()
-    website_name = "hscangku"
+    website_name = "cableav"
     LogBuffer.req().write(f"-> {website_name}")
     title = ""
     cover_url = ""
     web_info = "\n       "
-    LogBuffer.info().write(" \n    🌐 hscangku")
+    LogBuffer.info().write(" \n    🌐 cableav")
     debug_info = ""
     real_url = appoint_url
-    hscangku_url = getattr(config, "hscangku_website", "http://hsck.net")
+    cableav_url = getattr(config, "cableav_website", "https://cableav.tv")
 
     try:
         if not real_url:
             # 处理番号
             number_list, filename_list = get_number_list(number, appoint_number, file_path)
             n_list = number_list[:1] + filename_list
-            # 处理重定向
-            hscangku_url = await get_redirected_url(hscangku_url)
-            if not hscangku_url:
-                debug_info = "没有正确的 hscangku_url，无法刮削"
-                LogBuffer.info().write(web_info + debug_info)
-                raise Exception(debug_info)
             for each in n_list:
-                real_url = f"{hscangku_url}/vodsearch/-------------.html?wd={each}&submit="
-                # real_url = 'http://hsck860.cc/vodsearch/-------------.html?wd=%E6%9F%9A%E5%AD%90%E7%8C%AB&submit='
+                real_url = f"{cableav_url}/?s={each}"
+                # real_url = 'https://cableav.tv/s?s=%E6%9F%9A%E5%AD%90%E7%8C%AB'
                 debug_info = f"请求地址: {real_url} "
                 LogBuffer.info().write(web_info + debug_info)
                 response, error = await config.async_client.get_text(real_url)
-
                 if response is None:
                     debug_info = f"网络请求错误: {error}"
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 search_page = etree.fromstring(response, etree.HTMLParser())
-                result, number, title, real_url = get_real_url(search_page, n_list, hscangku_url)
-                # real_url = 'http://hsck860.cc/vodsearch/-------------.html?wd=%E6%9F%9A%E5%AD%90%E7%8C%AB&submit='
+                result, number, title, real_url = get_real_url(search_page, n_list)
+                # real_url = 'https://cableav.tv/hyfaqwfjhio'
                 if result:
                     break
             else:
@@ -124,7 +100,7 @@ async def main(
             raise Exception(debug_info)
 
         detail_page = etree.fromstring(response, etree.HTMLParser())
-        number, title, actor, cover_url, tag = get_detail_info(detail_page, real_url, number, file_path)
+        number, title, actor, cover_url, tag = get_detail_info(detail_page, number, file_path)
         actor_photo = get_actor_photo(actor)
 
         try:
@@ -145,7 +121,7 @@ async def main(
                 "director": "",
                 "studio": "",
                 "publisher": "",
-                "source": "hscangku",
+                "source": "cableav",
                 "website": real_url,
                 "actor_photo": actor_photo,
                 "thumb": cover_url,
@@ -180,8 +156,8 @@ async def main(
 
 if __name__ == "__main__":
     # yapf: disable
-    # print(main('大像传媒之淫蕩刺青女學徒', file_path='大像传媒之淫蕩刺青女學徒'))
-    # print(main('冠希传媒GX-017强上弟弟的巨乳姐姐', file_path='冠希传媒GX-017强上弟弟的巨乳姐姐'))
-    # print(main('[SWAG]XHX-0014宅男的公仔幻化成人', file_path='[SWAG]XHX-0014宅男的公仔幻化成人'))
-    # print(main('IDG5401'))
-    print(main('大像传媒之長腿癡女代表情慾作-米歐', file_path='大像传媒之長腿癡女代表情慾作-米歐'))
+    # print(main('SSN010'))
+    # print(main('國產AV 麻豆傳媒 MD0312 清純嫩穴賣身葬父 露露', file_path='國產AV 麻豆傳媒 MD0312 清純嫩穴賣身葬父 露露'))
+    # print(main('國產AV 大象傳媒 DA002 性感魅惑色兔兔 李娜娜', file_path='國產AV 大象傳媒 DA002 性感魅惑色兔兔 李娜娜'))
+    # print(main('韓國高端攝影頂 Yeha 私拍福利', file_path='韓國高端攝影頂 Yeha 私拍福利'))
+    print(main('EMTC-005', file_path='國產AV 愛神傳媒 EMTC005 怒操高冷社長秘書 米歐'))

@@ -2,7 +2,7 @@
 
 
 from mdcx.config.manager import config
-from mdcx.models.crawlers import javlibrary
+from mdcx.crawlers import javlibrary
 
 
 async def main(

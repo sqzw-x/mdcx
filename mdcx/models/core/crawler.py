@@ -10,9 +10,7 @@ import langid
 
 from mdcx.config.manager import config
 from mdcx.config.manual import ManualConfig
-from mdcx.models.base.number import get_number_letters, is_uncensored
-from mdcx.models.core.flags import Flags
-from mdcx.models.crawlers import (
+from mdcx.crawlers import (
     airav,
     airav_cc,
     avsex,
@@ -52,6 +50,8 @@ from mdcx.models.crawlers import (
     theporndb,
     xcity,
 )
+from mdcx.models.base.number import get_number_letters, is_uncensored
+from mdcx.models.core.flags import Flags
 from mdcx.models.entity.enums import FileMode
 from mdcx.models.json_data import JsonData, new_json_data
 from mdcx.models.log_buffer import LogBuffer

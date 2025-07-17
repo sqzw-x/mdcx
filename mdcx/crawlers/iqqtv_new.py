@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from mdcx.models.crawlers import iqqtv
+from mdcx.crawlers import iqqtv
 
 
 async def main(
