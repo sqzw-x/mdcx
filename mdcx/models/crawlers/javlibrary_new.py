@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from mdcx.models.config.manager import config
+from mdcx.config.manager import config
 from mdcx.models.crawlers import javlibrary
 
 

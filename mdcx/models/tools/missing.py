@@ -11,9 +11,9 @@ import aiofiles
 import aiofiles.os
 from lxml import etree
 
+from mdcx.config.manager import config, manager
+from mdcx.config.resources import resources
 from mdcx.models.base.file import movie_lists
-from mdcx.models.config.manager import config, manager
-from mdcx.models.config.resources import resources
 from mdcx.models.core.file import get_file_info
 from mdcx.models.core.flags import Flags
 from mdcx.signals import signal

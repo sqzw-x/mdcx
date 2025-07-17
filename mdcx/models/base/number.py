@@ -2,8 +2,8 @@ import os
 import re
 import unicodedata
 
-from mdcx.models.config.manager import config
-from mdcx.models.config.manual import ManualConfig
+from mdcx.config.manager import config
+from mdcx.config.manual import ManualConfig
 
 
 def is_uncensored(number: str) -> bool:

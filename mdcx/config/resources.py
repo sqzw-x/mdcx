@@ -7,13 +7,12 @@ import zhconv
 from lxml import etree
 from PyQt5.QtGui import QFontDatabase
 
+from mdcx.config.manager import manager
+from mdcx.config.manual import ManualConfig
+from mdcx.consts import IS_PYINSTALLER, MAIN_PATH
+from mdcx.signals import signal
 from mdcx.utils import singleton
 from mdcx.utils.file import copy_file_sync
-
-from ...signals import signal
-from .consts import IS_PYINSTALLER, MAIN_PATH
-from .manager import manager
-from .manual import ManualConfig
 
 
 @singleton

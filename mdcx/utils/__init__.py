@@ -19,7 +19,7 @@ from concurrent.futures import Future
 from threading import Thread
 from typing import Any, Coroutine, Set, TypeVar
 
-from mdcx.models.config.consts import IS_NFC
+from mdcx.consts import IS_NFC
 
 T = TypeVar("T")
 

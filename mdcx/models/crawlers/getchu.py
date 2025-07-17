@@ -7,7 +7,7 @@ import urllib.parse
 
 from lxml import etree
 
-from mdcx.models.config.manager import config
+from mdcx.config.manager import config
 from mdcx.models.crawlers import getchu_dl
 from mdcx.models.log_buffer import LogBuffer
 

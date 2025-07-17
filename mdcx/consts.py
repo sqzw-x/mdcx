@@ -37,10 +37,10 @@ todo 已验证符合预期:
 - [ ] docker?
 """
 try:  # 从源代码运行时, 为 main.py 所在目录, 根据此文件路径确定, 若移动此文件需修改
-    MAIN_PATH = realpath(__file__)
-    i = 4
+    MAIN_PATH = realpath(__file__)  # mdcx/consts.py
+    i = 2
     if "__compiled__" in globals():  # nuitka 编译
-        i = 3
+        i = 1
     for _ in range(i):
         MAIN_PATH = dirname(MAIN_PATH)
 except Exception:

@@ -11,16 +11,15 @@ from typing import cast
 import aiofiles.os
 from PIL import Image
 
+from mdcx.config.extend import get_movie_path_setting
+from mdcx.config.manager import config
+from mdcx.config.resources import resources
+from mdcx.models.base.file import movie_lists
+from mdcx.models.json_data import JsonData
+from mdcx.models.log_buffer import LogBuffer
+from mdcx.signals import signal
 from mdcx.utils import convert_path, get_used_time, split_path
 from mdcx.utils.file import check_pic_async, copy_file_sync, delete_file_sync, move_file_async
-
-from ...signals import signal
-from ..base.file import movie_lists
-from ..config.extend import get_movie_path_setting
-from ..config.manager import config
-from ..config.resources import resources
-from ..json_data import JsonData
-from ..log_buffer import LogBuffer
 
 
 async def extrafanart_copy2(folder_new_path: str):

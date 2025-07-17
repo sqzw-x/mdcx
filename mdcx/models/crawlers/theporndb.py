@@ -7,8 +7,8 @@ from difflib import SequenceMatcher
 
 import oshash
 
+from mdcx.config.manager import config
 from mdcx.models.base.number import long_name, remove_escape_string
-from mdcx.models.config.manager import config
 from mdcx.models.crawlers import theporndb_movies
 from mdcx.models.log_buffer import LogBuffer
 

@@ -1,8 +1,7 @@
 from typing import Dict, Optional
 
+from mdcx.config.manager import config
 from mdcx.utils import executor
-
-from ..config.manager import config
 
 
 def get_text_sync(

@@ -7,7 +7,7 @@ from PyQt5.QtCore import QPoint, QRect, Qt
 from PyQt5.QtGui import QCursor, QPixmap
 from PyQt5.QtWidgets import QDialog, QFileDialog, QPushButton
 
-from mdcx.models.config.manager import config
+from mdcx.config.manager import config
 from mdcx.utils import split_path
 from mdcx.utils.file import delete_file_sync
 from mdcx.views.posterCutTool import Ui_Dialog_cut_poster

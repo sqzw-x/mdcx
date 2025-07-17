@@ -5,7 +5,7 @@ from urllib.parse import unquote
 
 from lxml import etree
 
-from mdcx.models.config.manager import config
+from mdcx.config.manager import config
 from mdcx.models.crawlers.guochan import get_number_list
 from mdcx.models.log_buffer import LogBuffer
 

@@ -5,7 +5,7 @@ import time
 
 import zhconv
 
-from mdcx.models.config.manager import config
+from mdcx.config.manager import config
 from mdcx.models.log_buffer import LogBuffer
 
 

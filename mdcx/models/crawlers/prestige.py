@@ -3,7 +3,7 @@ import re
 import time
 import traceback
 
-from mdcx.models.config.manager import config
+from mdcx.config.manager import config
 from mdcx.models.log_buffer import LogBuffer
 
 

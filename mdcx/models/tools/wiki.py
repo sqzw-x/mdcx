@@ -7,9 +7,9 @@ import bs4
 import langid
 import zhconv
 
-from mdcx.models.config.manager import config
-from mdcx.models.config.manual import ManualConfig
-from mdcx.models.config.resources import resources
+from mdcx.config.manager import config
+from mdcx.config.manual import ManualConfig
+from mdcx.config.resources import resources
 from mdcx.models.core.flags import Flags
 from mdcx.models.core.translate import (
     deepl_translate_async,

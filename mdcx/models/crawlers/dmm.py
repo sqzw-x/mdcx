@@ -5,8 +5,8 @@ import time
 
 from lxml import etree
 
+from mdcx.config.manager import config
 from mdcx.models.base.web import check_url, get_dmm_trailer
-from mdcx.models.config.manager import config
 from mdcx.models.log_buffer import LogBuffer
 
 

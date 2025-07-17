@@ -6,14 +6,13 @@ from typing import TYPE_CHECKING, cast
 
 from PyQt5.QtCore import Qt
 
-from mdcx.models.config.extend import get_movie_path_setting
-from mdcx.models.config.manager import config, manager
+from mdcx.config.extend import get_movie_path_setting
+from mdcx.config.manager import config, manager
+from mdcx.controllers.main_window.bind_utils import get_checkbox, get_checkboxes, get_radio_buttons
 from mdcx.models.core.flags import Flags
 from mdcx.models.tools.actress_db import ActressDB
 from mdcx.signals import signal
 from mdcx.utils import convert_path
-
-from .bind_utils import get_checkbox, get_checkboxes, get_radio_buttons
 
 if TYPE_CHECKING:
     from views.MDCx import Ui_MDCx

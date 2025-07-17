@@ -4,8 +4,8 @@ import time
 
 from lxml import etree
 
+from mdcx.config.manager import config
 from mdcx.models.base.web import check_url
-from mdcx.models.config.manager import config
 from mdcx.models.log_buffer import LogBuffer
 
 seesaawiki_request_fail_flag = False

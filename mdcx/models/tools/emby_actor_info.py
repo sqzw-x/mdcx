@@ -13,23 +13,22 @@ import aiofiles
 import aiofiles.os
 from lxml import etree
 
-from mdcx.utils import get_used_time
-from mdcx.utils.file import copy_file_async
-
-from ...signals import signal
-from ..config.extend import get_movie_path_setting
-from ..config.manager import config
-from ..config.resources import resources
-from ..core.web import download_file_with_filepath
-from ..data_models import EMbyActressInfo
-from .actress_db import ActressDB
-from .emby_actor_image import (
+from mdcx.config.extend import get_movie_path_setting
+from mdcx.config.manager import config
+from mdcx.config.resources import resources
+from mdcx.models.core.web import download_file_with_filepath
+from mdcx.models.data_models import EMbyActressInfo
+from mdcx.models.tools.actress_db import ActressDB
+from mdcx.models.tools.emby_actor_image import (
     _generate_server_url,
     _get_emby_actor_list,
     _get_gfriends_actor_data,
     update_emby_actor_photo,
 )
-from .wiki import get_detail, search_wiki
+from mdcx.models.tools.wiki import get_detail, search_wiki
+from mdcx.signals import signal
+from mdcx.utils import get_used_time
+from mdcx.utils.file import copy_file_async
 
 
 async def creat_kodi_actors(add: bool):

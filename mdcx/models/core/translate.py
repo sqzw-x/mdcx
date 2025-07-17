@@ -10,16 +10,15 @@ from typing import Literal, Optional, Union, cast
 import langid
 import zhconv
 
+from mdcx.config.manager import config
+from mdcx.config.resources import resources
+from mdcx.models.base.number import get_number_letters
+from mdcx.models.core.flags import Flags
+from mdcx.models.core.web import get_actorname, get_yesjav_title, google_translate_async
+from mdcx.models.json_data import JsonData
+from mdcx.models.log_buffer import LogBuffer
+from mdcx.signals import signal
 from mdcx.utils import get_used_time, remove_repeat
-
-from ...signals import signal
-from ..base.number import get_number_letters
-from ..config.manager import config
-from ..config.resources import resources
-from ..json_data import JsonData
-from ..log_buffer import LogBuffer
-from .flags import Flags
-from .web import get_actorname, get_yesjav_title, google_translate_async
 
 deepl_result = {}
 REGEX_KANA = re.compile(r"[\u3040-\u30ff]")  # 平假名/片假名

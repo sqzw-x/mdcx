@@ -4,8 +4,8 @@ import time
 
 from lxml import etree
 
+from mdcx.config.manager import config
 from mdcx.models.base.number import get_number_letters
-from mdcx.models.config.manager import config
 from mdcx.models.crawlers import prestige
 from mdcx.models.log_buffer import LogBuffer
 

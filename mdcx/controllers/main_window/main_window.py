@@ -20,6 +20,16 @@ from PyQt5.QtWidgets import (
     QTreeWidgetItem,
 )
 
+from mdcx.config.extend import get_movie_path_setting
+from mdcx.config.manager import config, manager
+from mdcx.config.manual import ManualConfig
+from mdcx.config.resources import resources
+from mdcx.consts import IS_WINDOWS, MARK_FILE
+from mdcx.controllers.cut_window import CutWindow
+from mdcx.controllers.main_window.init import Init_QSystemTrayIcon, Init_Singal, Init_Ui, init_QTreeWidget
+from mdcx.controllers.main_window.load_config import load_config
+from mdcx.controllers.main_window.save_config import save_config
+from mdcx.controllers.main_window.style import set_dark_style, set_style
 from mdcx.models.base.file import (
     check_and_clean_files,
     get_success_list,
@@ -29,18 +39,8 @@ from mdcx.models.base.file import (
     save_success_list,
 )
 from mdcx.models.base.image import get_pixmap
-from mdcx.models.base.web import (
-    check_theporndb_api_token,
-    check_version,
-    get_avsox_domain,
-    ping_host,
-)
+from mdcx.models.base.web import check_theporndb_api_token, check_version, get_avsox_domain, ping_host
 from mdcx.models.base.web_sync import get_text_sync
-from mdcx.models.config.consts import IS_WINDOWS, MARK_FILE
-from mdcx.models.config.extend import get_movie_path_setting
-from mdcx.models.config.manager import config, manager
-from mdcx.models.config.manual import ManualConfig
-from mdcx.models.config.resources import resources
 from mdcx.models.core.flags import Flags
 from mdcx.models.core.image import add_del_extrafanart_copy
 from mdcx.models.core.nfo import write_nfo
@@ -56,24 +56,10 @@ from mdcx.models.tools.emby_actor_image import update_emby_actor_photo
 from mdcx.models.tools.emby_actor_info import creat_kodi_actors, show_emby_actor_list, update_emby_actor_info
 from mdcx.models.tools.missing import check_missing_number
 from mdcx.signals import signal
-from mdcx.utils import (
-    _async_raise,
-    add_html,
-    convert_path,
-    get_current_time,
-    get_used_time,
-    kill_a_thread,
-    split_path,
-)
+from mdcx.utils import _async_raise, add_html, convert_path, get_current_time, get_used_time, kill_a_thread, split_path
 from mdcx.utils.file import delete_file_sync, open_file_thread
 from mdcx.utils.path import get_path
 from mdcx.views.MDCx import Ui_MDCx
-
-from ..cut_window import CutWindow
-from .init import Init_QSystemTrayIcon, Init_Singal, Init_Ui, init_QTreeWidget
-from .load_config import load_config
-from .save_config import save_config
-from .style import set_dark_style, set_style
 
 
 class MyMAinWindow(QMainWindow):

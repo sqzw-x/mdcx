@@ -7,13 +7,12 @@ from io import StringIO
 
 import httpx
 
+from mdcx.config.manual import ManualConfig
+from mdcx.consts import MAIN_PATH, MARK_FILE
+from mdcx.models.base.llm import LLMClient
+from mdcx.models.base.web_async import AsyncWebClient
+from mdcx.signals import signal
 from mdcx.utils import executor, get_random_headers, get_user_agent
-
-from ...signals import signal
-from ..base.llm import LLMClient
-from ..base.web_async import AsyncWebClient
-from .consts import MAIN_PATH, MARK_FILE
-from .manual import ManualConfig
 
 
 def ini_value_to_bool(value: str) -> bool:

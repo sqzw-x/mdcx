@@ -8,10 +8,11 @@ from typing import Callable, TypedDict
 
 import langid
 
-from ..base.number import get_number_letters, is_uncensored
-from ..config.manager import config
-from ..config.manual import ManualConfig
-from ..crawlers import (
+from mdcx.config.manager import config
+from mdcx.config.manual import ManualConfig
+from mdcx.models.base.number import get_number_letters, is_uncensored
+from mdcx.models.core.flags import Flags
+from mdcx.models.crawlers import (
     airav,
     airav_cc,
     avsex,
@@ -51,10 +52,9 @@ from ..crawlers import (
     theporndb,
     xcity,
 )
-from ..entity.enums import FileMode
-from ..json_data import JsonData, new_json_data
-from ..log_buffer import LogBuffer
-from .flags import Flags
+from mdcx.models.entity.enums import FileMode
+from mdcx.models.json_data import JsonData, new_json_data
+from mdcx.models.log_buffer import LogBuffer
 
 
 class CrawlersResult(TypedDict):

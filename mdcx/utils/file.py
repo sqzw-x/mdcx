@@ -7,7 +7,7 @@ import traceback
 import aiofiles.os
 from PIL import Image
 
-from mdcx.models.config.consts import IS_MAC, IS_WINDOWS
+from mdcx.consts import IS_MAC, IS_WINDOWS
 from mdcx.signals import signal
 from mdcx.utils import split_path
 

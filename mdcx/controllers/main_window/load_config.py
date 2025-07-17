@@ -8,16 +8,15 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QFileDialog
 
-from mdcx.models.config.consts import IS_WINDOWS
-from mdcx.models.config.extend import get_movie_path_setting
-from mdcx.models.config.manager import config, get_new_str, manager
-from mdcx.models.config.resources import resources
+from mdcx.config.extend import get_movie_path_setting
+from mdcx.config.manager import config, get_new_str, manager
+from mdcx.config.resources import resources
+from mdcx.consts import IS_WINDOWS
+from mdcx.controllers.main_window.bind_utils import set_checkboxes, set_radio_buttons
 from mdcx.models.core.flags import Flags
 from mdcx.signals import signal
 from mdcx.utils import convert_path
 from mdcx.utils.file import delete_file_sync
-
-from .bind_utils import set_checkboxes, set_radio_buttons
 
 if TYPE_CHECKING:
     from views.MDCx import Ui_MDCx

@@ -1,10 +1,9 @@
 import os
 import re
 
+from mdcx.config.manager import config, manager
 from mdcx.utils import convert_path, nfd2c, split_path
 from mdcx.utils.path import get_path
-
-from .manager import config, manager
 
 
 def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str, str]:

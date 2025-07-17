@@ -9,11 +9,10 @@ from urllib.parse import quote
 from PIL import Image
 from ping3 import ping
 
+from mdcx.config.manager import config
+from mdcx.models.base.web_sync import get_json_sync
+from mdcx.signals import signal
 from mdcx.utils import get_user_agent
-
-from ...signals import signal
-from ..config.manager import config
-from .web_sync import get_json_sync
 
 
 def url_encode(url: str) -> str:
