@@ -158,9 +158,11 @@ async def get_imgsize(url) -> tuple[int, int]:
         for chunk in response.iter_content(chunk_size):
             file_head.write(await chunk)
             try:
+
                 def _get_size():
                     with Image.open(file_head) as img:
                         return img.size
+
                 return await asyncio.to_thread(_get_size)
             except Exception:
                 # 如果解析失败，继续下载更多数据
@@ -317,7 +319,7 @@ async def _get_pic_by_google(pic_url):
     response, error = await config.async_client.get_text(req_url)
     big_pic = True
     if response is None:
-        return "", "", ""
+        return "", (0, 0), False
     url_list = re.findall(r'a href="([^"]+isz:l[^"]+)">', response)
     url_list_middle = re.findall(r'a href="([^"]+isz:m[^"]+)">', response)
     if not url_list and url_list_middle:
@@ -327,7 +329,7 @@ async def _get_pic_by_google(pic_url):
         req_url = "https://www.google.com" + url_list[0].replace("amp;", "")
         response, error = await config.async_client.get_text(req_url)
     if response is None:
-        return "", "", ""
+        return "", (0, 0), False
     url_list = re.findall(r'\["(http[^"]+)",(\d{3,4}),(\d{3,4})\],[^[]', response)
     # 优先下载放前面
     new_url_list = []
@@ -366,17 +368,17 @@ async def _get_pic_by_google(pic_url):
                 if url:
                     pic_size = (w, h)
                     return url, pic_size, big_pic
-    return "", "", ""
+    return "", (0, 0), False
 
 
-async def get_big_pic_by_google(pic_url, poster=False):
+async def get_big_pic_by_google(pic_url, poster=False) -> tuple[str, tuple[int, int]]:
     url, pic_size, big_pic = await _get_pic_by_google(pic_url)
     if not poster:
         if big_pic or (
             pic_size and int(pic_size[0]) > 800 and int(pic_size[1]) > 539
         ):  # cover 有大图时或者图片高度 > 800 时使用该图片
             return url, pic_size
-        return "", ""
+        return "", (0, 0)
     if url and int(pic_size[1]) < 1000:  # poster，图片高度小于 1500，重新搜索一次
         url, pic_size, big_pic = await _get_pic_by_google(url)
     if pic_size and (
@@ -384,4 +386,4 @@ async def get_big_pic_by_google(pic_url, poster=False):
     ):  # poster，大图或高度 > 560 时，使用该图片
         return url, pic_size
     else:
-        return "", ""
+        return "", (0, 0)

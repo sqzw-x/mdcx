@@ -73,7 +73,6 @@ class _Flags:
     actor_numbers_dic: dict[str, list[str]] = field(default_factory=dict)  # 每个演员所有番号的字典
     local_number_set: set[str] = field(default_factory=set)  # 本地所有番号的集合
     local_number_cnword_set: set[str] = field(default_factory=set)  # 本地所有有字幕的番号的集合
-    current_proxy: str = ""
     log_txt: Any = None  # 日志文件对象
     scrape_like_text: str = ""
     main_mode_text: str = ""

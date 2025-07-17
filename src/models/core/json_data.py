@@ -135,6 +135,7 @@ class ImageContext(TypedDict):
     thumb_from: str
     poster_from: str
     trailer_from: str
+    poster_size: tuple[int, int]
 
 
 class ActorData(TypedDict):
@@ -151,7 +152,6 @@ class MovieData(TypedDict):
     definition: str
     title: str
     outline: str
-    failed_folder: str
     folder_name: str
     version: int
     image_download: bool
@@ -197,10 +197,8 @@ class MovieData(TypedDict):
 
 
 class InternalStateData(TypedDict):
-    failed_folder: str
     version: int
     image_download: bool  # 爬虫返回
-    nfo_can_translate: bool  # 内部状态
     # 内部状态, 控制是否加水印
     poster_marked: bool
     thumb_marked: bool
@@ -261,6 +259,7 @@ def new_json_data() -> JsonData:
         "definition": "",
         "actor": "",
         "thumb_size": (0, 0),
+        "poster_size": (0, 0),
         "poster_big": False,
         "image_cut": "",
         "poster_marked": True,
@@ -282,10 +281,8 @@ def new_json_data() -> JsonData:
         "file_path": "",
         "del_file_path": False,
         "dont_move_movie": False,
-        "nfo_can_translate": False,
         "title": "",
         "outline": "",
-        "failed_folder": "",
         "folder_name": "",
         "version": 0,
         "image_download": False,

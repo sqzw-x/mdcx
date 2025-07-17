@@ -10,7 +10,7 @@ import time
 import traceback
 import urllib.parse
 from asyncio import to_thread
-from typing import Optional
+from typing import Optional, TypedDict
 
 import aiofiles
 import aiofiles.os
@@ -24,7 +24,7 @@ from ..config.manager import config
 from ..config.manual import ManualConfig
 from ..signals import signal
 from .flags import Flags
-from .json_data import ImageContext, JsonData, LogBuffer
+from .json_data import JsonData, LogBuffer
 from .utils import convert_half
 
 
@@ -111,10 +111,17 @@ async def _mutil_extrafanart_download_thread(task: tuple[JsonData, str, str, str
     return False
 
 
+class AmazonInput(TypedDict):
+    number: str
+    poster: str
+    poster_from: str
+    amazon_orginaltitle_actor: str
+
+
 async def get_big_pic_by_amazon(
-    json_data: JsonData,
+    json_data: AmazonInput,
     originaltitle_amazon: str,
-    actor_amazon: str,
+    actor_amazon: list[str],
 ) -> str:
     if not originaltitle_amazon or not actor_amazon:
         return ""
@@ -288,8 +295,14 @@ async def get_big_pic_by_amazon(
     return hd_pic_url
 
 
+class Input_1(TypedDict):
+    number: str
+    trailer: str
+    trailer_from: str
+
+
 async def trailer_download(
-    json_data: JsonData,
+    json_data: Input_1,
     folder_new_path: str,
     folder_old_path: str,
     naming_rule: str,
@@ -427,7 +440,27 @@ async def trailer_download(
         return True
 
 
-async def _get_big_thumb(json_data: ImageContext) -> ImageContext:
+class ThumbDownInput(TypedDict):
+    number: str
+    poster_path: str
+    thumb_path: str
+    fanart_path: str
+    thumb_list: list[tuple[str, str]]
+    thumb_from: str
+    thumb_size: tuple[int, int]
+    cd_part: str
+    thumb_marked: bool
+    letters: str
+    thumb: str
+    poster: str
+    poster_from: str
+    poster_big: bool
+    trailer: str
+    trailer_from: str
+    thumb_size: tuple[int, int]
+
+
+async def _get_big_thumb(json_data: ThumbDownInput) -> ThumbDownInput:
     """
     获取背景大图：
     1，官网图片
@@ -524,7 +557,27 @@ async def _get_big_thumb(json_data: ImageContext) -> ImageContext:
     return json_data
 
 
-async def _get_big_poster(json_data: JsonData) -> JsonData:
+class PosterInput(TypedDict):
+    number: str
+    letters: str
+    mosaic: str
+    poster: str
+    poster_from: str
+    originaltitle_amazon: str
+    poster_big: bool
+    image_download: bool
+    poster_path: str
+    thumb_path: str
+    fanart_path: str
+    amazon_orginaltitle_actor: str
+    actor_amazon: list[str]
+    poster_size: tuple[int, int]
+    cd_part: str
+    thumb_marked: bool
+    poster_marked: bool
+
+
+async def _get_big_poster(json_data: PosterInput) -> PosterInput:
     start_time = time.time()
 
     # 未勾选下载高清图poster时，返回
@@ -613,7 +666,7 @@ async def _get_big_poster(json_data: JsonData) -> JsonData:
     return json_data
 
 
-async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_final_path: str) -> bool:
+async def thumb_download(json_data: ThumbDownInput, folder_new_path: str, thumb_final_path: str) -> bool:
     start_time = time.time()
     poster_path = json_data["poster_path"]
     thumb_path = json_data["thumb_path"]
@@ -730,7 +783,7 @@ async def thumb_download(json_data: ImageContext, folder_new_path: str, thumb_fi
             return False
 
 
-async def poster_download(json_data: JsonData, folder_new_path: str, poster_final_path: str) -> bool:
+async def poster_download(json_data: PosterInput, folder_new_path: str, poster_final_path: str) -> bool:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -1044,12 +1097,3 @@ def show_netstatus() -> None:
             f" 当前网络状态：✅ 已启用代理\n   类型： {proxy_type}    地址：{proxy}    超时时间：{str(timeout)}    重试次数：{str(retry_count)}"
         )
     signal.show_net_info("=" * 80)
-
-
-def check_proxyChange() -> None:
-    new_proxy = (config.type, config.proxy, config.timeout, config.retry)
-    if Flags.current_proxy:
-        if new_proxy != Flags.current_proxy:
-            signal.show_net_info("\n🌈 代理设置已改变：")
-            show_netstatus()
-    Flags.current_proxy = new_proxy

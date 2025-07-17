@@ -59,7 +59,34 @@ def replace_word(json_data: JsonData):
             json_data[field] = json_data[field].replace(each, "").strip(":， ").strip()
 
 
-def show_movie_info(json_data: JsonData):
+class ShowData(TypedDict):
+    number: str
+    letters: str
+    has_sub: bool
+    cd_part: str
+    mosaic: str
+    title: str
+    originaltitle: str
+    actor: str
+    all_actor: str
+    outline: str
+    originalplot: str
+    tag: str
+    release: str
+    year: str
+    runtime: str
+    score: str
+    wanted: str
+    series: str
+    director: str
+    studio: str
+    publisher: str
+    trailer: str
+    website: str
+    javdbid: str
+
+
+def show_movie_info(json_data: ShowData):
     if not config.show_data_log:  # 调试模式打开时显示详细日志
         return
     for key in ManualConfig.SHOW_KEY:

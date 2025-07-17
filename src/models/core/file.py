@@ -33,7 +33,7 @@ from ..entity.enums import FileMode
 from ..signals import signal
 from .flags import Flags
 from .json_data import JsonData, LogBuffer, MoveContext, new_json_data
-from .utils import get_movie_path_setting, nfd2c, render_name_template
+from .utils import Input_11, get_movie_path_setting, nfd2c, render_name_template
 
 
 def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
@@ -221,9 +221,7 @@ async def move_trailer_video(
             LogBuffer.log().write("\n 🍀 Trailer done!")
 
 
-async def move_bif(
-    json_data: JsonData, folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str
-) -> None:
+async def move_bif(folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str) -> None:
     # 更新模式 或 读取模式
     if config.main_mode == 3 or config.main_mode == 4:
         if config.update_mode == "c" and not config.success_file_rename:
@@ -242,9 +240,7 @@ async def move_bif(
         LogBuffer.log().write("\n 🍀 Bif done!")
 
 
-async def move_torrent(
-    json_data: JsonData, folder_old_path: str, folder_new_path: str, file_name: str, movie_number: str, naming_rule: str
-) -> None:
+async def move_torrent(folder_old_path: str, folder_new_path: str, file_name: str, movie_number: str, naming_rule: str):
     # 更新模式 或 读取模式
     if config.main_mode == 3 or config.main_mode == 4:
         if config.update_mode == "c" and not config.success_file_rename:
@@ -278,18 +274,21 @@ async def move_torrent(
             LogBuffer.log().write("\n 🍀 Torrent done!")
 
 
-async def check_file(json_data: JsonData, file_path: str, file_escape_size: float) -> tuple[bool, JsonData]:
+class CheckFileData(TypedDict):
+    outline: str
+    tag: str
+
+
+async def check_file(file_path: str, file_escape_size: float) -> bool:
     if await aiofiles.os.path.islink(file_path):
         file_path = await read_link_async(file_path)
         if "check_symlink" not in config.no_escape:
-            return True, json_data
+            return True
 
     if not await aiofiles.os.path.exists(file_path):
         LogBuffer.error().write("文件不存在")
         LogBuffer.req().write("do_not_update_json_data_dic")
-        json_data["outline"] = split_path(file_path)[1]
-        json_data["tag"] = file_path
-        return False, json_data
+        return False
     if "no_skip_small_file" not in config.no_escape:
         file_size = await aiofiles.os.path.getsize(file_path) / float(1024 * 1024)
         if file_size < file_escape_size:
@@ -297,13 +296,11 @@ async def check_file(json_data: JsonData, file_path: str, file_escape_size: floa
                 f"文件小于 {file_escape_size} MB 被过滤!（实际大小 {round(file_size, 2)} MB）已跳过刮削！"
             )
             LogBuffer.req().write("do_not_update_json_data_dic")
-            json_data["outline"] = split_path(file_path)[1]
-            json_data["tag"] = file_path
-            return False, json_data
-    return True, json_data
+            return False
+    return True
 
 
-async def copy_trailer_to_theme_videos(json_data: JsonData, folder_new_path: str, naming_rule: str) -> None:
+async def copy_trailer_to_theme_videos(folder_new_path: str, naming_rule: str) -> None:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -352,9 +349,7 @@ async def copy_trailer_to_theme_videos(json_data: JsonData, folder_new_path: str
         LogBuffer.log().write("\n 🍀 Trailer delete done!")
 
 
-async def move_other_file(
-    json_data: JsonData, folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str
-) -> None:
+async def move_other_file(number: str, folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str):
     # 软硬链接模式不移动
     if config.soft_link != 0:
         return
@@ -375,7 +370,7 @@ async def move_other_file(
     for old_file in files:
         if os.path.splitext(old_file)[1].lower() in config.media_type:
             continue
-        if json_data["number"] in old_file or file_name in old_file or naming_rule in old_file:
+        if number in old_file or file_name in old_file or naming_rule in old_file:
             if "-cd" not in old_file.lower():  # 避免多分集时，其他分级的内容被移走
                 old_file_old_path = os.path.join(folder_old_path, old_file)
                 old_file_new_path = os.path.join(folder_new_path, old_file)
@@ -388,13 +383,7 @@ async def move_other_file(
                     LogBuffer.log().write(f"\n 🍀 Move {old_file} done!")
 
 
-async def move_file_to_failed_folder(
-    json_data: JsonData,
-    file_path: str,
-    folder_old_path: str,
-) -> str:
-    failed_folder = json_data["failed_folder"]
-
+async def move_file_to_failed_folder(failed_folder: str, file_path: str, folder_old_path: str) -> str:
     # 更新模式、读取模式，不移动失败文件；不移动文件-关时，不移动； 软硬链接开时，不移动
     main_mode = config.main_mode
     if main_mode == 3 or main_mode == 4 or not config.failed_file_move or config.soft_link != 0:
@@ -425,7 +414,6 @@ async def move_file_to_failed_folder(
         await move_file_async(file_path, file_new_path)
         LogBuffer.log().write("\n 🔴 Move file to the failed folder!")
         LogBuffer.log().write(f"\n 🙊 [Movie] {file_new_path}")
-        json_data["file_path"] = file_new_path
         error_info = LogBuffer.error().get()
         LogBuffer.error().clear()
         LogBuffer.error().write(error_info.replace(file_path, file_new_path))
@@ -561,7 +549,11 @@ async def move_movie(json_data: MoveContext, file_path: str, file_new_path: str)
         return False
 
 
-def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -> str:
+class Input_3(Input_11):
+    folder_name: str
+
+
+def _get_folder_path(file_path: str, success_folder: str, json_data: Input_3) -> str:
     folder_name: str = config.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
     folder_path, file_name = split_path(file_path)  # 当前文件的目录和文件名
 
@@ -650,7 +642,11 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -
     return folder_new_path.strip().replace(" /", "/")
 
 
-def _generate_file_name(file_path: str, json_data: JsonData) -> str:
+class Input_4(Input_11):
+    cd_part: str
+
+
+def _generate_file_name(file_path: str, json_data: Input_4) -> str:
     file_full_name = split_path(file_path)[1]
     file_name, file_ex = os.path.splitext(file_full_name)
 
@@ -728,8 +724,13 @@ def _generate_file_name(file_path: str, json_data: JsonData) -> str:
     return file_name
 
 
+class Input_5(Input_11):
+    folder_name: str
+    cd_part: str
+
+
 def get_output_name(
-    json_data: JsonData, file_path: str, success_folder: str, file_ex: str
+    json_data: Input_5, file_path: str, success_folder: str, file_ex: str
 ) -> tuple[str, str, str, str, str, str, str, str, str, str]:
     # =====================================================================================更新输出文件夹名
     folder_new_path = _get_folder_path(file_path, success_folder, json_data)
@@ -1021,7 +1022,6 @@ async def get_file_info(
     file_path: str, copy_sub: bool = True
 ) -> tuple[FileInfo, str, str, str, str, list[str], str, str]:
     json_data: FileInfo = new_json_data()
-    json_data["version"] = config.version
     movie_number = ""
     has_sub = False
     c_word = ""
@@ -1468,8 +1468,18 @@ def get_success_list() -> None:
     signal.view_success_file_settext.emit(f"查看 ({len(Flags.success_list)})")
 
 
+class Input_2(TypedDict):
+    number: str
+    poster_marked: bool
+    thumb_marked: bool
+    fanart_marked: bool
+    poster_path: str
+    thumb_path: str
+    fanart_path: str
+
+
 async def deal_old_files(
-    json_data: JsonData,
+    json_data: Input_2,
     folder_old_path: str,
     folder_new_path: str,
     file_path: str,
@@ -1887,16 +1897,16 @@ async def deal_old_files(
     return pic_final_catched, single_folder_catched
 
 
-async def pic_some_deal(json_data: JsonData, thumb_final_path: str, fanart_final_path: str) -> None:
+async def pic_some_deal(number: str, thumb_final_path: str, fanart_final_path: str) -> None:
     """
     thumb、poster、fanart 删除冗余的图片
     """
     # 不保存thumb时，清理 thumb
     if "thumb" not in config.download_files and "thumb" not in config.keep_files:
         if await aiofiles.os.path.exists(fanart_final_path):
-            Flags.file_done_dic[json_data["number"]].update({"thumb": fanart_final_path})
+            Flags.file_done_dic[number].update({"thumb": fanart_final_path})
         else:
-            Flags.file_done_dic[json_data["number"]].update({"thumb": ""})
+            Flags.file_done_dic[number].update({"thumb": ""})
         if await aiofiles.os.path.exists(thumb_final_path):
             await delete_file_async(thumb_final_path)
             LogBuffer.log().write("\n 🍀 Thumb delete done!")

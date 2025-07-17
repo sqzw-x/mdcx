@@ -15,7 +15,6 @@ from models.config.manager import config, get_new_str, manager
 from models.config.resources import resources
 from models.core.flags import Flags
 from models.core.utils import get_movie_path_setting
-from models.core.web import check_proxyChange
 from models.signals import signal
 
 from .bind_utils import set_checkboxes, set_radio_buttons
@@ -1211,8 +1210,6 @@ def load_config(self):
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
         try:
-            # 更新代理信息
-            check_proxyChange()
             # 界面自动调整
             self._windows_auto_adjust()
         except Exception:

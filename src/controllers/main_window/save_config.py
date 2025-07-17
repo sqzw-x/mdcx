@@ -696,7 +696,6 @@ def save_config(self):
     except Exception:
         signal.show_traceback_log(traceback.format_exc())
     try:
-        check_proxyChange()  # 更新代理信息
         self._windows_auto_adjust()  # 界面自动调整
     except Exception:
         signal.show_traceback_log(traceback.format_exc())

@@ -47,7 +47,6 @@ class NfoData(TypedDict):
     poster_path: str
     thumb_path: str
     fanart_path: str
-    nfo_can_translate: bool  # 是否可以翻译nfo内容
     cd_part: str  # CD分卷信息
     country: str  # 国家代码
     outline_from: str  # 剧情简介来源
@@ -67,6 +66,7 @@ async def write_nfo(
     folder_new_path: str,
     file_path: str,
     edit_mode=False,
+    nfo_can_translate: bool = False,
 ) -> bool:
     start_time = time.time()
     download_files = config.download_files
@@ -75,7 +75,7 @@ async def write_nfo(
 
     if not edit_mode:
         # 读取模式，有nfo，并且没有勾选更新 nfo 信息
-        if not json_data["nfo_can_translate"]:
+        if not nfo_can_translate:
             LogBuffer.log().write(f"\n 🍀 Nfo done! (old)({get_used_time(start_time)}s)")
             return True
 
@@ -401,14 +401,26 @@ async def write_nfo(
         return False
 
 
-async def get_nfo_data(
-    json_data: NfoData,
-    file_path: str,
-    movie_number: str,
-):
+class ReadNfoData(NfoData):
+    source: str
+    poster_from: str
+    thumb_from: str
+    extrafanart_from: str
+    trailer_from: str
+    poster_path: str
+    thumb_path: str
+    fanart_path: str
+    outline_from: str
+    tag_only: str
+    thumb_list: list[tuple[str, str]]
+    actor_amazon: list[str]
+
+
+async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfoData]:
     local_nfo_path = os.path.splitext(file_path)[0] + ".nfo"
     local_nfo_name = split_path(local_nfo_path)[1]
     file_folder = split_path(file_path)[0]
+    json_data: ReadNfoData = {}
     json_data["source"] = "nfo"
     LogBuffer.req().write(local_nfo_path)
     json_data["poster_from"] = "local"

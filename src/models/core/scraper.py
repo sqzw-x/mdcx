@@ -3,7 +3,7 @@ import os
 import re
 import time
 import traceback
-from typing import Optional
+from typing import Optional, cast
 
 import aiofiles.os
 from PyQt5.QtWidgets import QMessageBox
@@ -62,31 +62,27 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
 
     # 获取文件信息
     json_data, movie_number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = file_info
+    json_data = cast(JsonData, json_data)
 
     # 获取设置的媒体目录、失败目录、成功目录
-    (
-        _,
-        success_folder,
-        failed_folder,
-        _,
-        _,
-        _,
-    ) = get_movie_path_setting(file_path)
-    json_data["failed_folder"] = failed_folder
+    _, success_folder, *_ = get_movie_path_setting(file_path)
 
     # 检查文件大小
-    result, json_data = await check_file(json_data, file_path, file_escape_size)
+    result = await check_file(file_path, file_escape_size)
     if not result:
+        json_data["outline"] = split_path(file_path)[1]
+        json_data["tag"] = file_path
         return False, json_data
 
     # 读取模式
     file_can_download = True
-    json_data["nfo_can_translate"] = True
+    nfo_can_translate = True
     nfo_update = False
     if config.main_mode == 4:
-        result, json_data = await get_nfo_data(json_data, file_path, movie_number)
+        result, nfo_data = await get_nfo_data(file_path, movie_number)
+        json_data.update(dict(nfo_data))
         if result:  # 有nfo
-            movie_number = json_data["number"]
+            movie_number = nfo_data["number"]
             nfo_update = True
             if "has_nfo_update" not in read_mode:  # 不更新并返回
                 show_data_result(json_data, start_time)
@@ -101,10 +97,10 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
 
             # 读取模式要不要翻译
             if "read_translate_again" not in read_mode:
-                json_data["nfo_can_translate"] = False
+                nfo_can_translate = False
             else:
                 # 启用翻译时，tag使用纯tag的内容
-                json_data["tag"] = json_data["tag_only"]
+                json_data["tag"] = nfo_data["tag_only"]
         else:
             if "no_nfo_scrape" not in read_mode:  # 无nfo，没有勾选「无nfo时，刮削并执行更新模式」
                 return False, json_data
@@ -168,13 +164,12 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
         json_data.update(**res)
 
     # 显示json_data结果或日志
-    json_data["failed_folder"] = failed_folder
     if not show_data_result(json_data, start_time):
         return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
 
     # 映射或翻译
     # 当不存在已刮削数据，或者读取模式允许翻译映射时才进行映射翻译
-    if not json_data_old and json_data["nfo_can_translate"]:
+    if not json_data_old and nfo_can_translate:
         deal_some_field(json_data)  # 处理字段
         replace_special_word(json_data)  # 替换特殊字符
         await translate_title_outline(json_data, movie_number)  # 翻译json_data（标题/介绍）
@@ -301,7 +296,7 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
                 return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
 
             # 清理冗余图片
-            await pic_some_deal(json_data, thumb_final_path, fanart_final_path)
+            await pic_some_deal(json_data["number"], thumb_final_path, fanart_final_path)
 
             # 加水印
             await add_mark(json_data, json_data["poster_marked"], json_data["thumb_marked"], json_data["fanart_marked"])
@@ -315,17 +310,20 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
             # 下载trailer、复制主题视频
             # 因为 trailer也有带文件名，不带文件名两种情况，不能使用pic_final_catched。比如图片不带文件名，trailer带文件名这种场景需要支持每个分集去下载trailer
             await trailer_download(json_data, folder_new_path, folder_old_path, naming_rule)
-            await copy_trailer_to_theme_videos(json_data, folder_new_path, naming_rule)
+            await copy_trailer_to_theme_videos(folder_new_path, naming_rule)
 
     # 生成nfo文件
-    await write_nfo(json_data, nfo_new_path, folder_new_path, file_path)
+    await write_nfo(
+        json_data, nfo_new_path, folder_new_path, file_path, edit_mode=False, nfo_can_translate=nfo_can_translate
+    )
 
     # 移动字幕、种子、bif、trailer、其他文件
-    await move_sub(json_data, folder_old_path, folder_new_path, file_name, sub_list, naming_rule)
-    await move_torrent(json_data, folder_old_path, folder_new_path, file_name, movie_number, naming_rule)
-    await move_bif(json_data, folder_old_path, folder_new_path, file_name, naming_rule)
+    if json_data["has_sub"]:
+        await move_sub(folder_old_path, folder_new_path, file_name, sub_list, naming_rule)
+    await move_torrent(folder_old_path, folder_new_path, file_name, movie_number, naming_rule)
+    await move_bif(folder_old_path, folder_new_path, file_name, naming_rule)
     # self.move_trailer_video(json_data, folder_old_path, folder_new_path, file_name, naming_rule)
-    await move_other_file(json_data, folder_old_path, folder_new_path, file_name, naming_rule)
+    await move_other_file(json_data["number"], folder_old_path, folder_new_path, file_name, naming_rule)
 
     # 移动文件
     if not await move_movie(json_data, file_path, file_new_path):
@@ -462,7 +460,8 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
                     LogBuffer.log().write(
                         "\n 🔴 该问题为权限问题：请尝试以管理员身份运行，同时关闭其他正在运行的Python脚本！"
                     )
-            fail_file_path = await move_file_to_failed_folder(json_data, file_path, folder_old_path)
+            _, _, failed_folder, *_ = get_movie_path_setting(file_path)
+            fail_file_path = await move_file_to_failed_folder(failed_folder, file_path, folder_old_path)
             Flags.failed_list.append([fail_file_path, LogBuffer.error().get()])
             Flags.failed_file_list.append(fail_file_path)
             await _failed_file_info_show(str(Flags.fail_count), fail_file_path, LogBuffer.error().get())
@@ -781,7 +780,6 @@ def again_search() -> None:
 
 
 async def move_sub(
-    json_data: JsonData,
     folder_old_path: str,
     folder_new_path: str,
     file_name: str,
@@ -789,10 +787,6 @@ async def move_sub(
     naming_rule: str,
 ) -> None:
     copy_flag = False
-
-    # 没有字幕，返回
-    if not json_data["has_sub"]:
-        return
 
     # 更新模式 或 读取模式
     if config.main_mode > 2:
