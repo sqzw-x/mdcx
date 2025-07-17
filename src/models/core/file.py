@@ -8,6 +8,7 @@ import re
 import shutil
 import time
 import traceback
+from typing import TypedDict
 
 import aiofiles
 import aiofiles.os
@@ -998,10 +999,28 @@ async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path
     return total
 
 
+class FileInfo(TypedDict):
+    # file_path: str
+    # file_show_path: str
+    # file_name: str
+    # file_ex: str
+    # sub_list: list[str]
+    number: str
+    cd_part: str
+    has_sub: bool
+    c_word: str
+    destroyed: str
+    leak: str
+    wuma: str
+    youma: str
+    mosaic: str
+    _4K: str
+
+
 async def get_file_info(
     file_path: str, copy_sub: bool = True
-) -> tuple[JsonData, str, str, str, str, list[str], str, str]:
-    json_data = new_json_data()
+) -> tuple[FileInfo, str, str, str, str, list[str], str, str]:
+    json_data: FileInfo = new_json_data()
     json_data["version"] = config.version
     movie_number = ""
     has_sub = False
@@ -1345,11 +1364,6 @@ async def get_file_info(
     json_data["wuma"] = wuma
     json_data["youma"] = youma
     json_data["mosaic"] = mosaic
-    json_data["_4K"] = ""
-    json_data["tag"] = ""
-    json_data["actor_href"] = ""
-    json_data["all_actor"] = ""
-    json_data["definition"] = ""
     json_data["file_path"] = convert_path(file_path)
 
     return json_data, movie_number, folder_path, file_name, file_ex, sub_list, file_show_name, file_show_path

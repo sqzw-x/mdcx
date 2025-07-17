@@ -12,7 +12,7 @@ import shutil
 import subprocess
 import traceback
 import unicodedata
-from typing import Optional
+from typing import Optional, TypedDict
 
 import aiofiles.os
 
@@ -408,10 +408,41 @@ def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str,
     )
 
 
+class Input_11(TypedDict):
+    """
+    输入数据类型定义
+    用于 render_name_template 函数的输入参数类型提示
+    """
+
+    destroyed: str
+    leak: str
+    wuma: str
+    youma: str
+    c_word: str
+    title: str
+    originaltitle: str
+    studio: str
+    publisher: str
+    year: str
+    outline: str
+    runtime: str
+    director: str
+    actor: str
+    release: str
+    number: str
+    series: str
+    mosaic: str
+    definition: str
+    letters: str
+    wanted: str
+    all_actor: str
+    score: str
+
+
 def render_name_template(
     template: str,
     file_path: str,
-    json_data: JsonData,
+    json_data: Input_11,
     show_4k: bool,
     show_cnword: bool,
     show_moword: bool,

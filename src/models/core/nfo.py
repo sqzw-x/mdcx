@@ -3,24 +3,66 @@ import re
 import time
 import traceback
 from io import StringIO
+from typing import TypedDict
 
 import aiofiles
 import aiofiles.os
 import langid
-from lxml import etree
+import lxml.etree as etree
 
 from ..base.file import delete_file_async, split_path
-from ..base.number import deal_actor_more, get_number_first_letter, get_number_letters
+from ..base.number import get_number_letters
 from ..base.utils import convert_path, get_used_time
 from ..config.manager import config
 from ..config.manual import ManualConfig
 from ..signals import signal
-from .json_data import JsonData, LogBuffer
-from .utils import get_new_release, render_name_template
+from .json_data import LogBuffer
+from .utils import render_name_template
+
+
+class NfoData(TypedDict):
+    title: str
+    originaltitle: str
+    originaltitle_amazon: str
+    number: str
+    letters: str
+    actor: str
+    all_actor: str
+    outline: str
+    originalplot: str
+    tag: str
+    release: str
+    year: str
+    runtime: str
+    score: str
+    director: str
+    series: str
+    studio: str
+    publisher: str
+    website: str
+    thumb: str
+    poster: str
+    trailer: str
+    wanted: str
+    poster_path: str
+    thumb_path: str
+    fanart_path: str
+    nfo_can_translate: bool  # 是否可以翻译nfo内容
+    cd_part: str  # CD分卷信息
+    country: str  # 国家代码
+    outline_from: str  # 剧情简介来源
+    mosaic: str
+    # for render_name_template
+    destroyed: str
+    leak: str
+    wuma: str
+    youma: str
+    c_word: str
+    definition: str
 
 
 async def write_nfo(
-    json_data: JsonData,
+    json_data: NfoData,
     nfo_new_path: str,
     folder_new_path: str,
     file_path: str,
@@ -90,17 +132,13 @@ async def write_nfo(
     show_moword = False
     # 获取在媒体文件中显示的规则，不需要过滤Windows异常字符
     should_escape_result = False
-    nfo_title, *_ = render_name_template(config.naming_media, file_path, json_data_nfo, show_4k, show_cnword, show_moword, should_escape_result)
+    nfo_title, *_ = render_name_template(
+        config.naming_media, file_path, json_data_nfo, show_4k, show_cnword, show_moword, should_escape_result
+    )
 
     # 获取字段
     # 只有nfo的title用替换后的，其他字段用原始的
     nfo_include_new = config.nfo_include_new
-    destroyed = json_data_nfo["destroyed"]
-    leak = json_data_nfo["leak"]
-    wuma = json_data_nfo["wuma"]
-    youma = json_data_nfo["youma"]
-    m_word = destroyed + leak + wuma + youma
-    c_word = json_data_nfo["c_word"]
     cd_part = json_data_nfo["cd_part"]
     originaltitle = json_data_nfo["originaltitle"]
     originalplot = json_data_nfo["originalplot"]
@@ -119,8 +157,6 @@ async def write_nfo(
     poster = json_data_nfo["poster"]
     website = json_data_nfo["website"]
     series = json_data_nfo["series"]
-    mosaic = json_data_nfo["mosaic"]
-    definition = json_data_nfo["definition"]
     trailer = json_data_nfo["trailer"]
     all_actor = json_data_nfo["all_actor"]
 
@@ -366,7 +402,7 @@ async def write_nfo(
 
 
 async def get_nfo_data(
-    json_data: JsonData,
+    json_data: NfoData,
     file_path: str,
     movie_number: str,
 ):
