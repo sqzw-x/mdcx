@@ -1,9 +1,7 @@
-$env:PYTHONPATH = "$PWD\src"
-
 uv run python -m PyInstaller -n MDCx -F --noupx `
 -i resources/Img/MDCx.ico `
 -w main.py `
--p "./src" `
+-p "./mdcx" `
 --add-data "resources:resources" `
 --add-data "libs:." `
 --hidden-import _cffi_backend `

@@ -6,7 +6,7 @@ echo "Output File: $FileName"
 pyi-makespec -n "$FileName" -F \
 -i resources/Img/MDCx.ico \
 -w main.py \
--p "./src" \
+-p "./mdcx" \
 --add-data "resources:resources" \
 --add-data "libs:." \
 --hidden-import _cffi_backend \

@@ -49,69 +49,32 @@ ARM64(AArch64) 架构: 可本地构建. 若欲使用 GitHub Actions 构建, 需 
 * Windows 10/11
 * macOS 10.15.7+
 
-### 准备源码
-
-* 方式1: 下载 [仓库源码](https://github.com/sqzw-x/mdcx/archive/refs/heads/master.zip) 或 [Release源码](https://github.com/sqzw-x/mdcx/archive/refs/tags/daily_release.zip)，下载后解压
-
-* 方式2: git克隆项目
-
-  ```bash
-  git clone https://github.com/sqzw-x/mdcx.git
-  ```
-
-### 运行
-
-#### Windows
-
-* cmd
-
-```batch
-cd /d D:\dev\mdcx
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-set PYTHONPATH=.\src;%PYTHONPATH%
-python main.py
+```bash
+git clone https://github.com/sqzw-x/mdcx.git
 ```
-
-* powershell
-
-```powershell
-cd D:\dev\mdcx
-python -m venv venv
-venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-$env:PYTHONPATH = "./src;$env:PYTHONPATH"
-python main.py
-```
-
-#### macOS
 
 ```bash
-cd /path/to/mdcx
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements-mac.txt
-export PYTHONPATH=./src:$PYTHONPATH
-python main.py
+uv init -p 3.9
+uv pip install -r requirements.txt
+uv run main.py
 ```
 
 ### 如何添加新配置项
 
 1. 在 `models.config.manager.ConfigSchema` 类中添加配置键及默认值, 支持 str, int, float, bool 类型
-2. 现在可以通过 `from models.config.manager import config` 导入配置, 并通过 `config.<key>` 访问配置项
-3. 按下一节所述在设置界面中添加对应的控件, 修改 `src/controllers/main_window/` 目录下 `load_config.py` 及 `save_config.py`, 以实现 UI 绑定
+2. 现在可以通过 `from mdcx.models.config.manager import config` 导入配置, 并通过 `config.<key>` 访问配置项
+3. 按下一节所述在设置界面中添加对应的控件, 修改 `mdcx/controllers/main_window/` 目录下 `load_config.py` 及 `save_config.py`, 以实现 UI 绑定
 
 ### 如何修改图形界面
 
-* `src/views/MDCx.ui` 定义了主窗口, `src/views/posterCutTool.ui` 是图片裁剪窗口, 可使用 Qt Designer 或 Qt Creator 编辑
-* 修改后运行 `pyuic5 src\views\MDCx.ui -o src\views\MDCx.py` 生成对应的 Python 代码
-* 如需设置控件事件等, 需修改 `src.controllers.main_window.init.Init_Singal`
-* 所有事件处理函数均在 `src/controllers/main_window/main_window.py`
+* `mdcx/views/MDCx.ui` 定义了主窗口, `mdcx/views/posterCutTool.ui` 是图片裁剪窗口, 可使用 Qt Designer 或 Qt Creator 编辑
+* 修改后运行 `pyuic5 mdcx\views\MDCx.ui -o mdcx\views\MDCx.py` 生成对应的 Python 代码
+* 如需设置控件事件等, 需修改 `mdcx.controllers.main_window.init.Init_Singal`
+* 所有事件处理函数均在 `mdcx/controllers/main_window/main_window.py`
 
 ### 代码结构说明
 
-* `src/models` 中包括全部业务逻辑, 其中:
+* `mdcx/models` 中包括全部业务逻辑, 其中:
 * `config` 目录包括配置管理相关的代码
 * `base` 目录包括基本的功能函数, 它们耦合度较低
 * `core` 包括核心功能实现, 其中 `scraper.py` 包括刮削过程的实现

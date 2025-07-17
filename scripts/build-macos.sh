@@ -90,7 +90,7 @@ do
     --help|-h)
       echo "Usage: build-macos.sh [options]"
       echo "Options:"
-      echo "  --version, -v       指定版本号。如果未指定，将使用 src/models/config/manual.py 文件中的 LOCAL_VERSION"
+      echo "  --version, -v       指定版本号。如果未指定，将使用 mdcx/models/config/manual.py 文件中的 LOCAL_VERSION"
       echo "  --app-name, -n      指定应用名称。默认为 'MDCx'"
       echo "  --create-dmg, -dmg  创建 DMG 文件。默认为 false"
       echo "  --debug, -d         启用调试模式，显示详细的调试信息"
@@ -109,7 +109,7 @@ done
 
 # 从Python文件获取应用版本
 getAppVersionFromConfig () {
-  local configPath="src/models/config/manual.py"
+  local configPath="mdcx/models/config/manual.py"
   log_debug "尝试从配置文件获取版本: $configPath"
   
   if [[ -f "$configPath" ]]; then
@@ -166,7 +166,7 @@ check_required_files() {
   
   local required_files=(
     "main.py"
-    "src"
+    "mdcx"
     "resources/Img/MDCx.icns"
     "resources"
     "libs"
@@ -198,10 +198,10 @@ check_required_files
 # 检查APP_VERSION
 log_step "确定应用版本..."
 if [ -z "$APP_VERSION" ]; then
-  log_info "APP_VERSION 未设置，尝试从 src/models/config/manual.py 获取..."
+  log_info "APP_VERSION 未设置，尝试从 mdcx/models/config/manual.py 获取..."
   APP_VERSION=$(getAppVersionFromConfig)
   if [ -z "$APP_VERSION" ]; then
-    log_error "❌ APP_VERSION 未设置且无法从 src/models/config/manual.py 中找到!"
+    log_error "❌ APP_VERSION 未设置且无法从 mdcx/models/config/manual.py 中找到!"
     exit 1
   else
     log_info "✓ APP_VERSION 设置为: $APP_VERSION"
@@ -230,7 +230,7 @@ pyi-makespec \
   --name "$appName" \
   --osx-bundle-identifier com.mdcuniverse.mdcx \
   -F -w main.py \
-  -p "./src" \
+  -p "./mdcx" \
   --add-data "resources:resources" \
   --add-data "libs:." \
   --icon resources/Img/MDCx.icns \
