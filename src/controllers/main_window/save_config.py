@@ -10,7 +10,6 @@ from models.base.utils import convert_path
 from models.config.manager import config, manager
 from models.core.flags import Flags
 from models.core.utils import get_movie_path_setting
-from models.core.web import check_proxyChange
 from models.signals import signal
 from models.tools.actress_db import ActressDB
 

@@ -20,7 +20,7 @@ from .json_data import JsonData, LogBuffer
 from .utils import get_movie_path_setting
 
 
-async def extrafanart_copy2(json_data: JsonData, folder_new_path: str):
+async def extrafanart_copy2(folder_new_path: str):
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -59,7 +59,7 @@ async def extrafanart_copy2(json_data: JsonData, folder_new_path: str):
     LogBuffer.log().write(f"\n 🍀 ExtraFanart_copy done! (copy extrafanart)({get_used_time(start_time)}s)")
 
 
-async def extrafanart_extras_copy(json_data: JsonData, folder_new_path: str):
+async def extrafanart_extras_copy(folder_new_path: str):
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -94,13 +94,7 @@ async def extrafanart_extras_copy(json_data: JsonData, folder_new_path: str):
     return True
 
 
-async def _add_to_pic(
-    pic_path: str,
-    img_pic: Image.Image,
-    mark_size: int,
-    count: int,
-    mark_name: str,
-):
+async def _add_to_pic(pic_path: str, img_pic: Image.Image, mark_size: int, count: int, mark_name: str):
     # 获取水印图片，生成水印
     mark_fixed = config.mark_fixed
     mark_pos_corner = config.mark_pos_corner
@@ -235,12 +229,7 @@ async def add_mark_thread(pic_path: str, mark_list: list[str]):
     img_pic.close()
 
 
-async def add_mark(
-    json_data: JsonData,
-    poster_marked=False,
-    thumb_marked=False,
-    fanart_marked=False,
-):
+async def add_mark(json_data: JsonData, poster_marked=False, thumb_marked=False, fanart_marked=False):
     download_files = config.download_files
     mark_type = config.mark_type.lower()
     has_sub = json_data["has_sub"]

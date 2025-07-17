@@ -304,8 +304,8 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
             # 下载剧照和剧照副本
             if single_folder_catched:
                 await extrafanart_download(json_data, folder_new_path)
-                await extrafanart_copy2(json_data, folder_new_path)
-                await extrafanart_extras_copy(json_data, folder_new_path)
+                await extrafanart_copy2(folder_new_path)
+                await extrafanart_extras_copy(folder_new_path)
 
             # 下载trailer、复制主题视频
             # 因为 trailer也有带文件名，不带文件名两种情况，不能使用pic_final_catched。比如图片不带文件名，trailer带文件名这种场景需要支持每个分集去下载trailer
