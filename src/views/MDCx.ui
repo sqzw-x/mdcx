@@ -1261,22 +1261,17 @@
        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot;
         &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
         &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot;
-        /&gt;&lt;style type=&quot;text/css&quot;&gt;
+        /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
         p, li { white-space: pre-wrap; }
-        &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.AppleSystemUIFont';
-        font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
-        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
-        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
-        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        hr { height: 1px; border-width: 0; }
+        li.unchecked::marker { content: &quot;\2610&quot;; }
+        li.checked::marker { content: &quot;\2612&quot;; }
+        &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Microsoft YaHei UI';
+        font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
+        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="textInteractionFlags">
        <set>Qt::TextBrowserInteraction</set>
@@ -1329,22 +1324,19 @@
        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot;
         &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
         &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot;
-        /&gt;&lt;style type=&quot;text/css&quot;&gt;
+        /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
         p, li { white-space: pre-wrap; }
-        &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.AppleSystemUIFont';
-        font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+        hr { height: 1px; border-width: 0; }
+        li.unchecked::marker { content: &quot;\2610&quot;; }
+        li.checked::marker { content: &quot;\2612&quot;; }
+        &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Microsoft YaHei UI';
+        font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
-        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="textInteractionFlags">
        <set>Qt::TextBrowserInteraction</set>
@@ -1436,22 +1428,19 @@
        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot;
         &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
         &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot;
-        /&gt;&lt;style type=&quot;text/css&quot;&gt;
+        /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
         p, li { white-space: pre-wrap; }
-        &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.AppleSystemUIFont';
-        font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+        hr { height: 1px; border-width: 0; }
+        li.unchecked::marker { content: &quot;\2610&quot;; }
+        li.checked::marker { content: &quot;\2612&quot;; }
+        &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Microsoft YaHei UI';
+        font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
-        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="textInteractionFlags">
        <set>Qt::TextBrowserInteraction</set>
@@ -4338,8 +4327,7 @@
                  <string />
                 </property>
                 <property name="icon">
-                 <iconset theme="system-help">
-                  <normaloff>.</normaloff>.</iconset>
+                 <iconset theme="system-help" />
                 </property>
                 <property name="iconSize">
                  <size>
@@ -4467,7 +4455,7 @@
                      <layout class="QHBoxLayout" name="horizontalLayout_128">
                       <item>
                        <widget class="QCheckBox"
-                        name="checkBox_read_translate_again">
+                        name="checkBox_read_update_nfo">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -4481,7 +4469,7 @@
                          </size>
                         </property>
                         <property name="text">
-                         <string>重新翻译映射 nfo 的信息</string>
+                         <string>允许更新 nfo 文件</string>
                         </property>
                        </widget>
                       </item>
@@ -4497,7 +4485,8 @@
                          <string notr="true">color: rgb(8, 128, 128);</string>
                         </property>
                         <property name="text">
-                         <string>将按「设置」-「翻译」，更新 nfo 信息</string>
+                         <string>将按 下方「Emby视频标题」、「设置」-「翻译」、
+                          「设置」-「NFO」等的设置项，利用本地 nfo 更新 nfo 信息</string>
                         </property>
                        </widget>
                       </item>
@@ -4560,7 +4549,7 @@
                    </size>
                   </property>
                   <property name="text">
-                   <string>本地之前刮削失败的文件，重新刮削（按更新模式规则）</string>
+                   <string>本地之前刮削失败的文件和没有nfo的文件，重新刮削（按更新模式规则）</string>
                   </property>
                  </widget>
                 </item>
@@ -4629,8 +4618,7 @@
                  <string />
                 </property>
                 <property name="icon">
-                 <iconset theme="system-help">
-                  <normaloff>.</normaloff>.</iconset>
+                 <iconset theme="system-help" />
                 </property>
                 <property name="iconSize">
                  <size>
@@ -4753,8 +4741,7 @@
                  <string />
                 </property>
                 <property name="icon">
-                 <iconset theme="system-help">
-                  <normaloff>.</normaloff>.</iconset>
+                 <iconset theme="system-help" />
                 </property>
                 <property name="iconSize">
                  <size>
@@ -4906,8 +4893,7 @@
                  <string />
                 </property>
                 <property name="icon">
-                 <iconset theme="system-help">
-                  <normaloff>.</normaloff>.</iconset>
+                 <iconset theme="system-help" />
                 </property>
                 <property name="iconSize">
                  <size>
@@ -4938,7 +4924,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>1500</y>
+            <y>1540</y>
             <width>701</width>
             <height>111</height>
            </rect>
@@ -5036,7 +5022,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>1630</y>
+            <y>1670</y>
             <width>701</width>
             <height>111</height>
            </rect>
@@ -5131,7 +5117,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>1760</y>
+            <y>1800</y>
             <width>701</width>
             <height>111</height>
            </rect>
@@ -5228,7 +5214,7 @@
             <x>30</x>
             <y>700</y>
             <width>701</width>
-            <height>421</height>
+            <height>461</height>
            </rect>
           </property>
           <property name="minimumSize">
@@ -5252,11 +5238,11 @@
              <x>50</x>
              <y>60</y>
              <width>631</width>
-             <height>241</height>
+             <height>294</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_5">
-            <item row="5" column="0">
+            <item row="6" column="0">
              <widget class="QLabel" name="label_219">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -5284,7 +5270,7 @@
               </property>
              </widget>
             </item>
-            <item row="5" column="1">
+            <item row="6" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_51">
               <item>
                <widget class="QLabel" name="label_218">
@@ -5354,7 +5340,7 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
+            <item row="5" column="1">
              <widget class="QLabel" name="label_20">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -5370,7 +5356,61 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="2" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_156">
+              <item>
+               <widget class="QLabel" name="label_278">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>80</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::RightToLeft</enum>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="text">
+                 <string>C文件命名规则 </string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_update_c_filetemplate">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"> font: &quot;Courier&quot;;
+                  border: 1px solid rgba(0,0,0, 50);
+                  border-radius: 15px;
+</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="3" column="0">
              <widget class="QLabel" name="label_220">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -5398,7 +5438,7 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="3" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_48">
               <item>
                <widget class="QLabel" name="label_210">
@@ -5487,7 +5527,7 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
+            <item row="5" column="0">
              <widget class="QRadioButton" name="radioButton_update_d_c">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -5531,7 +5571,7 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
+            <item row="4" column="0">
              <widget class="QLabel" name="label_221">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -5559,7 +5599,7 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
+            <item row="4" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_60">
               <item>
                <widget class="QCheckBox" name="checkBox_update_a">
@@ -5582,6 +5622,60 @@
               </item>
               <item>
                <widget class="QLineEdit" name="lineEdit_update_a_folder">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"> font: &quot;Courier&quot;;
+                  border: 1px solid rgba(0,0,0, 50);
+                  border-radius: 15px;
+                 </string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="8" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_157">
+              <item>
+               <widget class="QLabel" name="label_294">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>80</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::RightToLeft</enum>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="text">
+                 <string>Emby视频标题 </string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_update_titletemplate">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -5632,7 +5726,7 @@
            <property name="geometry">
             <rect>
              <x>50</x>
-             <y>310</y>
+             <y>360</y>
              <width>631</width>
              <height>101</height>
             </rect>
@@ -5699,7 +5793,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>1370</y>
+            <y>1410</y>
             <width>701</width>
             <height>111</height>
            </rect>
@@ -6156,7 +6250,7 @@
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>1140</y>
+            <y>1180</y>
             <width>701</width>
             <height>211</height>
            </rect>
@@ -6340,8 +6434,7 @@
                  <string />
                 </property>
                 <property name="icon">
-                 <iconset theme="system-help">
-                  <normaloff>.</normaloff>.</iconset>
+                 <iconset theme="system-help" />
                 </property>
                 <property name="iconSize">
                  <size>
@@ -6445,8 +6538,7 @@
                  <string />
                 </property>
                 <property name="icon">
-                 <iconset theme="system-help">
-                  <normaloff>.</normaloff>.</iconset>
+                 <iconset theme="system-help" />
                 </property>
                 <property name="iconSize">
                  <size>
@@ -12577,7 +12669,7 @@
                <string notr="true">color: rgb(8, 128, 128);</string>
               </property>
               <property name="text">
-               <string>指在 nfo 文件中的标题格式，在 Emby 中作为视频标题显示，命名字段同上</string>
+               <string>指在 nfo 文件中的标题(title)格式，在 Emby 中作为视频标题显示，命名字段同上</string>
               </property>
              </widget>
             </item>
@@ -14463,7 +14555,8 @@
                <string notr="true">color: rgb(8, 128, 128);</string>
               </property>
               <property name="text">
-               <string>比如mosaic(马赛克),cnword(字幕)将显示为: 番号-流出-C</string>
+               <string>比如moword(自定义的无码标识),cnword(字幕)将显示为: 番号-流出-C
+                此处只控制顺序，需要在对应位置（如“添加 4K 字符”）勾选才能控制是否显示</string>
               </property>
              </widget>
             </item>
@@ -19318,7 +19411,7 @@
               </item>
              </layout>
             </item>
-            <item row="20" column="1">
+            <item row="23" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_114">
               <item>
                <widget class="QCheckBox" name="checkBox_nfo_genre">
@@ -19376,7 +19469,7 @@
               </item>
              </layout>
             </item>
-            <item row="22" column="1">
+            <item row="25" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_108">
               <item>
                <widget class="QCheckBox" name="checkBox_nfo_poster">
@@ -19533,7 +19626,7 @@
               </property>
              </widget>
             </item>
-            <item row="21" column="0">
+            <item row="24" column="0">
              <widget class="QLabel" name="label_388">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -19824,7 +19917,7 @@
               </item>
              </layout>
             </item>
-            <item row="21" column="1">
+            <item row="24" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_138">
               <item>
                <widget class="QCheckBox" name="checkBox_nfo_studio">
@@ -20203,7 +20296,7 @@
               </item>
              </layout>
             </item>
-            <item row="20" column="0">
+            <item row="23" column="0">
              <widget class="QLabel" name="label_334">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -20526,7 +20619,7 @@
               </property>
              </widget>
             </item>
-            <item row="22" column="0">
+            <item row="25" column="0">
              <widget class="QLabel" name="label_150">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -20551,7 +20644,221 @@
               </property>
              </widget>
             </item>
+            <item row="19" column="0">
+             <widget class="QLabel" name="label_433">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string />
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
             <item row="19" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_161">
+              <item>
+               <widget class="QLabel" name="label_423">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(8, 128, 128);</string>
+                </property>
+                <property name="text">
+                 <string>标签中演员的格式：</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_nfo_tag_actor">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"> font: &quot;Courier&quot;;
+                  border: 1px solid rgba(0,0,0, 50);
+                  border-radius: 15px;
+</string>
+                </property>
+                <property name="text">
+                 <string>actor</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="20" column="0">
+             <widget class="QLabel" name="label_434">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string />
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="20" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_162">
+              <item>
+               <widget class="QLabel" name="label_424">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(8, 128, 128);</string>
+                </property>
+                <property name="text">
+                 <string>演员名白名单：</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_nfo_tag_actor_contains">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"> font: &quot;Courier&quot;;
+                  border: 1px solid rgba(0,0,0, 50);
+                  border-radius: 15px;
+</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="21" column="0">
+             <widget class="QLabel" name="label_435">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string />
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="21" column="1">
+             <widget class="QLabel" name="label_432">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(8, 128, 128);</string>
+              </property>
+              <property name="text">
+               <string>仅在白名单内的演员名才会被添加至标签（多个内容以｜分割），留空表示全部添加</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="22" column="1">
              <widget class="QLabel" name="label_428">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
@@ -20579,7 +20886,7 @@
               </property>
              </widget>
             </item>
-            <item row="19" column="0">
+            <item row="22" column="0">
              <widget class="QLabel" name="label_429">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -22469,8 +22776,8 @@
                <enum>Qt::RightToLeft</enum>
               </property>
               <property name="text">
-               <string>
-                &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;JavDB：&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>javdb：
+                （登录状态）</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -22555,8 +22862,8 @@
                <enum>Qt::RightToLeft</enum>
               </property>
               <property name="text">
-               <string>
-                &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;JavBus：&lt;/p&gt;&lt;p&gt;（登录状态）&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>javbus：
+                （登录状态）</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -24801,28 +25108,27 @@
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot;
          &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
          &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot;
-         /&gt;&lt;style type=&quot;text/css&quot;&gt;
+         /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style
+         type=&quot;text/css&quot;&gt;
          p, li { white-space: pre-wrap; }
-         &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.AppleSystemUIFont';
-         font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+         hr { height: 1px; border-width: 0; }
+         li.unchecked::marker { content: &quot;\2610&quot;; }
+         li.checked::marker { content: &quot;\2612&quot;; }
+         &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Microsoft YaHei UI';
+         font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
          &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-         margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-         style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-         &lt;/span&gt;&lt;/p&gt;
+         margin-right:0px;
+         -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
          &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-         margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-         style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-         &lt;/span&gt;&lt;/p&gt;
-         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-         margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-         style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-         &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         margin-right:0px;
+         -qt-block-indent:0; text-indent:0px;&quot;&gt;
+         &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="overwriteMode">
         <bool>false</bool>
        </property>
        <property name="textInteractionFlags">
-        <set>Qt::NoTextInteraction</set>
+        <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextEditable|Qt::TextEditorInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
        </property>
        <property name="openExternalLinks">
         <bool>true</bool>
@@ -24948,28 +25254,27 @@
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot;
          &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
          &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot;
-         /&gt;&lt;style type=&quot;text/css&quot;&gt;
+         /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style
+         type=&quot;text/css&quot;&gt;
          p, li { white-space: pre-wrap; }
-         &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.AppleSystemUIFont';
-         font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+         hr { height: 1px; border-width: 0; }
+         li.unchecked::marker { content: &quot;\2610&quot;; }
+         li.checked::marker { content: &quot;\2612&quot;; }
+         &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Microsoft YaHei UI';
+         font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
          &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-         margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-         style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-         &lt;/span&gt;&lt;/p&gt;
+         margin-right:0px;
+         -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
          &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-         margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-         style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-         &lt;/span&gt;&lt;/p&gt;
-         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-         margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-         style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-         &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         margin-right:0px;
+         -qt-block-indent:0; text-indent:0px;&quot;&gt;
+         &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="overwriteMode">
         <bool>false</bool>
        </property>
        <property name="textInteractionFlags">
-        <set>Qt::NoTextInteraction</set>
+        <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse|Qt::TextBrowserInteraction|Qt::TextEditable|Qt::TextEditorInteraction|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
        </property>
        <property name="openExternalLinks">
         <bool>true</bool>
@@ -25044,632 +25349,585 @@
        <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot;
         &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
         &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot;
-        /&gt;&lt;style type=&quot;text/css&quot;&gt;
+        /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
         p, li { white-space: pre-wrap; }
-        &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.AppleSystemUIFont';
-        font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+        hr { height: 1px; border-width: 0; }
+        li.unchecked::marker { content: &quot;\2610&quot;; }
+        li.checked::marker { content: &quot;\2612&quot;; }
+        &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Microsoft YaHei UI';
+        font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;·
+        Movie_Data_Capture 项目地址：https://github.com/yoshiko2/Movie_Data_Capture&lt;/span&gt;
+        &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;·
-        Movie_Data_Capture
-        项目地址：https://github.com/yoshiko2/Movie_Data_Capture&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;·
+        AVDC-GUI 项目地址：https://github.com/moyy996/AVDC&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;·
-        AVDC-GUI 项目地址：https://github.com/moyy996/AVDC&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
-        &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;·
-        MDCx-docker 项目地址：https://github.com/northsea4/mdcx-docker&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;·
+        MDCx-docker 项目地址：https://github.com/northsea4/mdcx-docker&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;使用说明
-        （内容来自 AVDC-GUI ：https://github.com/moyy996/AVDC ）&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;使用说明
+        （内容来自 AVDC-GUI ：https://github.com/moyy996/AVDC ）&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;目录&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;目录&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;一、功能简介&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;一、功能简介&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;二、项目简介&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;二、项目简介&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;三、常见番号命名参考&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;三、常见番号命名参考&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;四、设置说明&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;四、设置说明&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        &lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        &lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;一、功能简介&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;一、功能简介&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        日本电影元数据抓取工具/刮削器，配合本地影片管理软件EMBY,KODI，PLEX等管理本地影片，该软件起到分类与元数据抓取作用，利用元数据信息来分类，供本地影片分类整理使用。&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        日本电影元数据抓取工具/刮削器，配合本地影片管理软件EMBY,KODI，PLEX等管理本地影片，该软件起到分类与元数据抓取作用，利用元数据信息来分类，供本地影片分类整理使用。&lt;/span&gt;
+        &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        &lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        &lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;二、项目简介&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;二、项目简介&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt; Gui
-        made by moyy996，Core made by yoshiko2&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        Gui
+        made by moyy996，Core made by yoshiko2&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        命令行版项目地址：https://github.com/yoshiko2/Movie_Data_Capture&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        命令行版项目地址：https://github.com/yoshiko2/Movie_Data_Capture&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        GUI版项目地址：https://github.com/moyy996/AVDC&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        GUI版项目地址：https://github.com/moyy996/AVDC&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        GUI版EXE下载地址：https://github.com/moyy996/AVDC/releases&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        GUI版EXE下载地址：https://github.com/moyy996/AVDC/releases&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        &lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        &lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;三、常见番号命名参考&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;三、常见番号命名参考&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;不区分大小写、刮削前尽量命名规范！！！！&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;不区分大小写、刮削前尽量命名规范！！！！&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;3.1.标准有码&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;3.1.标准有码&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        Javdb、Javbus:SSNI-111&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        Javdb、Javbus:SSNI-111&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        Dmm：ssni00111&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        Dmm：ssni00111&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;3.2.无码&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;3.2.无码&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        Javdb、Javbus、Avsox:111111-1111、111111_111、HEYZO-1111、n1111&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        Javdb、Javbus、Avsox:111111-1111、111111_111、HEYZO-1111、n1111&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;3.3.素人&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;3.3.素人&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        Mgstage:259LUXU-1111&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        Mgstage:259LUXU-1111&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        Javdb:LUXU-1111&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        Javdb:LUXU-1111&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        Fc2club:FC2-111111、FC2-PPV-111111、FC2PPV-111111&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        Fc2club:FC2-111111、FC2-PPV-111111、FC2PPV-111111&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;3.4.欧美&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;3.4.欧美&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        Javdb、Javbus:sexart.11.11.11(系列.年.月.日)&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        Javdb、Javbus:sexart.11.11.11(系列.年.月.日)&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;3.5.自带字幕影片&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;3.5.自带字幕影片&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        可以把电影命名为类似ssni-xxx-c.mp4,ssni-xxx-C.mp4，abp-xxx-CD1-C.mp4 的规则。&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        可以把电影命名为类似ssni-xxx-c.mp4,ssni-xxx-C.mp4，abp-xxx-CD1-C.mp4 的规则。&lt;/span&gt;
+        &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;3.6.多集影片&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;3.6.多集影片&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
         可以把多集电影按照集数后缀命名为类似ssni-xxx-cd1.mp4, ssni-xxx-cd2.mp4,
         abp-xxx-CD1-C.mp4的规则，只要含有-CDn/-cdn类似命名规则，即可使用分集功能.**不支持-A -B -1
-        -2,容易跟字幕的-C混淆**.&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        -2,容易跟字幕的-C混淆**.&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;3.7.多集、字幕顺序&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;3.7.多集、字幕顺序&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        abp-xxx-CD1-C.mp4，分集在前，字幕在后，字幕必须与拓展名靠近，-C.mp4.&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        abp-xxx-CD1-C.mp4，分集在前，字幕在后，字幕必须与拓展名靠近，-C.mp4.&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;3.8.外挂字幕文件&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;3.8.外挂字幕文件&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        字幕文件名必须与影片文件名一致，才可以一起移动到新目录，目前支持srt ass sub类型的字幕文件。&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        字幕文件名必须与影片文件名一致，才可以一起移动到新目录，目前支持srt ass sub类型的字幕文件。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        &lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        &lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;四、设置说明&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;四、设置说明&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;详细的说明：
-        https://github.com/moyy996/AVDC/blob/master/README.md&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;详细的说明：
+        https://github.com/moyy996/AVDC/blob/master/README.md&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;4.1.刮削模式/整理模式&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;4.1.刮削模式/整理模式&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        1、刮削模式：通过番号刮削数据，包括元数据、封面图、缩略图、背景图。&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        1、刮削模式：通过番号刮削数据，包括元数据、封面图、缩略图、背景图。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        2、整理模式：仅根据女优把电影命名为番号并分类到女优名称的文件夹下。&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        2、整理模式：仅根据女优把电影命名为番号并分类到女优名称的文件夹下。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;4.2.软链接模式：使用此模式，要以管理员身份运行。&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;4.2.软链接模式：使用此模式，要以管理员身份运行。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        刮削完不移动视频，而是在相应目录创建软链接（类似于快捷方式），方便PT下载完既想刮削又想继续上传的仓鼠党同志。&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        刮削完不移动视频，而是在相应目录创建软链接（类似于快捷方式），方便PT下载完既想刮削又想继续上传的仓鼠党同志。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        但是，只能在媒体库展示，不能在媒体库播放。&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        但是，只能在媒体库展示，不能在媒体库播放。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;4.3.调试模式&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;4.3.调试模式&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        输出番号的元数据，包括封面，导演，演员，简介等。&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        输出番号的元数据，包括封面，导演，演员，简介等。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;4.4.排除目录&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;4.4.排除目录&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        在多层目录刮削时排除所填目录。&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        在多层目录刮削时排除所填目录。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;4.5.视频目录&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;4.5.视频目录&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        要整理的视频的目录，会遍历此目录下的所有视频，包括子目录中。&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        要整理的视频的目录，会遍历此目录下的所有视频，包括子目录中。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;4.6.命名规则&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;4.6.命名规则&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        1、目录命名：存放视频数据的目录名，支持多层目录，支持自定义符号，例：[actor]/studio/number-【title】。&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        1、目录命名：存放视频数据的目录名，支持多层目录，支持自定义符号，例：[actor]/studio/number-【title】。&lt;/span&gt;
+        &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        2、视频标题（媒体库中）：nfo中的标题命名。例：number-[title]。可以自定义符号。&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        2、视频标题（媒体库中）：nfo中的标题命名。例：number-[title]。可以自定义符号。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        3、视频标题（本地文件）：本地视频、图片的命名。例：number-[title]。可以自定义符号。&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        3、视频标题（本地文件）：本地视频、图片的命名。例：number-[title]。可以自定义符号。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        4、可选项为title（片名）、actor（演员）、studio（制作商）、director（导演）、release（发售日）、year（发行年份）、number（番号）、runtime（时长）、series（系列）、publisher（发行商）&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        4、可选项为title（片名）、actor（演员）、studio（制作商）、director（导演）、release（发售日）、year（发行年份）、number（番号）、runtime（时长）、series（系列）、publisher（发行商）&lt;/span&gt;
+        &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;4.7.代理设置&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;4.7.代理设置&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        1、代理&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        1、代理&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        proxy=127.0.0.1:1080&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei
-        UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        proxy=127.0.0.1:1080&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        proxy行设置本地代理地址和端口，支持Shadowxxxx/X,V2XXX本地代理端口，代理软件开全局模式
-        ,建议使用日本代理。&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        proxy行设置本地代理地址和端口，支持Shadowxxxx/X,V2XXX本地代理端口，代理软件开全局模式 ,建议使用日本代理。&lt;/span&gt;
+        &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
         如果一直报Connect Failed! Please check your Proxy or
-        Network!错误，请检查端口号是否正确，或者把proxy=后面的地址和端口删除，并开启代理软件全局模式，或者重启电脑，代理软件，网卡。&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        Network!错误，请检查端口号是否正确，或者把proxy=后面的地址和端口删除，并开启代理软件全局模式，或者重启电脑，代理软件，网卡。&lt;/span&gt;
+        &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        2、连接超时重试设置&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        2、连接超时重试设置&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        timeout=10 &lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        timeout=10 &lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        10为超时重试时间 单位：秒，可选范围3-10&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        10为超时重试时间 单位：秒，可选范围3-10&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        3、连接重试次数设置&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        3、连接重试次数设置&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        retry=3 &lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        retry=3
+        &lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        3即为重试次数，可选范围2-5&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        3即为重试次数，可选范围2-5&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;4.8.媒体库选择&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;4.8.媒体库选择&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        如果是PLEX，请安装插件：XBMCnfoMoviesImporter&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        如果是PLEX，请安装插件：XBMCnfoMoviesImporter&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;4.9.排除指定字符和目录，字符串&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;4.9.排除指定字符和目录，字符串&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        1、排除字符:指定字符删除，例如排除字符： \()，删除创建文件夹时的\()字符&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        1、排除字符:指定字符删除，例如排除字符： \()，删除创建文件夹时的\()字符&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        2、排除目录:指定目录，例如排除目录： failed,JAV_output，多目录刮削时跳过failed,JAV_output&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        2、排除目录:指定目录，例如排除目录： failed,JAV_output，多目录刮削时跳过failed,JAV_output&lt;/span&gt;
+        &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        3、排除字符串:提取番号时，先删除指定字符串，提高成功率，字符串之间用','隔开。&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        3、排除字符串:提取番号时，先删除指定字符串，提高成功率，字符串之间用','隔开。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;4.10.网站选择&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;4.10.网站选择&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        可以使用所有网站，或者指定网站（avsox,javbus,dmm,javdb,fc2club，mgstage）进行刮削。&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        可以使用所有网站，或者指定网站（avsox,javbus,dmm,javdb,fc2club，mgstage）进行刮削。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        仅使用javdb进行刮削，尽量不要用，刮削30左右会被JAVDB封IP一段时间。&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        仅使用javdb进行刮削，尽量不要用，刮削30左右会被JAVDB封IP一段时间。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;4.11.保存日志&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;4.11.保存日志&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        开启后日志保存在程序目录的Log目录下的txt文件内，每次运行会产生一个txt文件，txt文件可以删除，不影响程序运行。&lt;/span&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        开启后日志保存在程序目录的Log目录下的txt文件内，每次运行会产生一个txt文件，txt文件可以删除，不影响程序运行。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt;&lt;br /&gt;
-        &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei
-        UI';&quot;&gt;4.12.失败后移动文件&lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft
-        YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI';
+        font-size:13pt;&quot;&gt;4.12.失败后移动文件&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        如果刮削不到影片信息，可选择不移动视频，或者自动移动到失败输出目录中。&lt;/span&gt;&lt;span style=&quot;
-        font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        如果刮削不到影片信息，可选择不移动视频，或者自动移动到失败输出目录中。&lt;/span&gt; &lt;/p&gt;
         &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px;
-        margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span
-        style=&quot; font-family:'Consolas,PingFang SC,Microsoft YaHei UI';&quot;&gt;
-        &lt;/span&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI';
-        font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        margin-right:0px;
+        -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot;
+        font-family:'Consolas','PingFang SC','Microsoft YaHei UI'; font-size:13pt;&quot;&gt;
+        &lt;/span&gt; &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
     </widget>
