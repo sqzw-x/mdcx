@@ -212,8 +212,20 @@ def translate_info(json_data: JsonData):
 
     # 添加演员
     if "actor" in tag_include and json_data["actor"]:
-        tag = json_data["actor"] + "," + tag
-        tag = tag.strip(",")
+        actor = json_data["actor"]
+        actor_list: list = actor.split(",")
+
+        for each_actor in actor_list:
+            should_add = True
+            if len(config.nfo_tag_actor_contains_list) > 0:
+                # 按白名单筛选演员名
+                should_add = each_actor in config.nfo_tag_actor_contains_list
+
+            if should_add:
+                # 按要求修改演员命名格式
+                nfo_tag_actor = config.nfo_tag_actor.replace("actor", each_actor)
+                if nfo_tag_actor:
+                    tag = nfo_tag_actor + "," + tag
 
     # 添加番号前缀
     letters = json_data["letters"]
@@ -284,7 +296,7 @@ def translate_info(json_data: JsonData):
 
     if tag_language == "zh_cn":
         tag = zhconv.convert(tag, "zh-cn")
-    else:
+    elif tag_language == "zh_tw":
         tag = zhconv.convert(tag, "zh-hant")
 
     # tag去重/去空/排序

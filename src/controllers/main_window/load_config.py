@@ -451,6 +451,8 @@ def load_config(self):
         self.Ui.lineEdit_nfo_tag_series.setText(config.nfo_tag_series)
         self.Ui.lineEdit_nfo_tag_studio.setText(config.nfo_tag_studio)
         self.Ui.lineEdit_nfo_tag_publisher.setText(config.nfo_tag_publisher)
+        self.Ui.lineEdit_nfo_tag_actor.setText(config.nfo_tag_actor)
+        self.Ui.lineEdit_nfo_tag_actor_contains.setText(config.nfo_tag_actor_contains)
 
         # 写入nfo的字段
         nfo_include_new = config.nfo_include_new
@@ -567,7 +569,7 @@ def load_config(self):
             read_mode,
             (self.Ui.checkBox_read_has_nfo_update, "has_nfo_update"),
             (self.Ui.checkBox_read_download_file_again, "read_download_again"),
-            (self.Ui.checkBox_read_translate_again, "read_translate_again"),
+            (self.Ui.checkBox_read_update_nfo, "read_update_nfo"),
             (self.Ui.checkBox_read_no_nfo_scrape, "no_nfo_scrape"),
         )
         # endregion
@@ -595,6 +597,10 @@ def load_config(self):
         self.Ui.lineEdit_update_b_folder.setText(config.update_b_folder)
         # 更新模式 - d 目录
         self.Ui.lineEdit_update_d_folder.setText(config.update_d_folder)
+        # 更新模式 - c 文件名
+        self.Ui.lineEdit_update_c_filetemplate.setText(config.update_c_filetemplate)
+        # 更新模式 - emby视频标题
+        self.Ui.lineEdit_update_titletemplate.setText(config.update_titletemplate)
 
         # 软链接
         set_radio_buttons(

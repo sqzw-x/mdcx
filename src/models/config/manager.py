@@ -153,7 +153,9 @@ class ConfigSchema:
     update_mode: str = r"c"
     update_a_folder: str = r"actor"
     update_b_folder: str = r"number actor"
+    update_c_filetemplate: str = r"number"
     update_d_folder: str = r"number actor"
+    update_titletemplate: str = r"number title"
     soft_link: int = 0
     success_file_move: bool = True
     failed_file_move: bool = True
@@ -256,6 +258,8 @@ class ConfigSchema:
     nfo_tag_series: str = r"系列: series"
     nfo_tag_studio: str = r"片商: studio"
     nfo_tag_publisher: str = r"发行: publisher"
+    nfo_tag_actor: str = r"actor"
+    nfo_tag_actor_contains: str = r""
 
     # name
     folder_name: str = r"actor/number actor"
@@ -360,7 +364,8 @@ class ConfigSchema:
             del unknown_fields["trailer_name"]
         if "modified_time" in unknown_fields:  # 弃用
             del unknown_fields["modified_time"]
-        # 2. 处理更名的配置项
+        # 2. 处理更名的配置字段
+        self.read_mode = self.read_mode.replace("read_translate_again", "read_update_nfo")
         self.suffix_sort = self.suffix_sort.replace("mosaic", "moword")
 
     def init(self):
@@ -457,12 +462,20 @@ class ConfigSchema:
         # 字段命名规则-后缀字段顺序
         all_str_list = ["moword", "cnword", "definition"]
         read_str_list = re.split(r"[,，]", self.suffix_sort)
+        read_str_list = [
+            i1.replace("mosaic", "moword") for i1 in read_str_list
+        ]  # 更新旧版的mosaic为moword，避免旧配置出错
         new_str_list1 = [i1 for i1 in read_str_list if i1 in all_str_list]  # 去除不在list中的字符
         new_str_list = []
         [new_str_list.append(i1) for i1 in new_str_list1 if i1 not in new_str_list]  # 去重
         [new_str_list.append(i1) for i1 in all_str_list if i1 not in new_str_list]  # 补全
         new_str = ",".join(new_str_list)
         self.suffix_sort = new_str
+
+        # NFO 演员名白名单
+        self.nfo_tag_actor_contains_list = (
+            re.split(r"[|｜]", self.nfo_tag_actor_contains) if self.nfo_tag_actor_contains else []
+        )
 
         # 依赖于 config 的类不能作为全局变量, 必须在 config 内构建, 以在 config 更新后正确重建
         self.async_client = AsyncWebClient(

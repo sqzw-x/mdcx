@@ -79,15 +79,13 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
     if not result:
         return False, json_data
 
+    is_nfo_existed = False
     # 读取模式
     file_can_download = True
-    json_data["nfo_can_translate"] = True
-    nfo_update = False
     if config.main_mode == 4:
-        result, json_data = await get_nfo_data(json_data, file_path, movie_number)
-        if result:  # 有nfo
+        is_nfo_existed, json_data = await get_nfo_data(json_data, file_path, movie_number)
+        if is_nfo_existed:  # 有nfo
             movie_number = json_data["number"]
-            nfo_update = True
             if "has_nfo_update" not in read_mode:  # 不更新并返回
                 show_data_result(json_data, start_time)
                 show_movie_info(json_data)
@@ -95,27 +93,51 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
                 await save_success_list(file_path, file_path)  # 保存成功列表
                 return True, json_data
 
-            # 读取模式要不要下载
+            # 读取模式要不要下载图片等文件
             if "read_download_again" not in read_mode:
                 file_can_download = False
 
-            # 读取模式要不要翻译
-            if "read_translate_again" not in read_mode:
-                json_data["nfo_can_translate"] = False
-            else:
-                # 启用翻译时，tag使用纯tag的内容
+            if "read_update_nfo" in read_mode:
+                # 使用本地nfo再次更新nfo（包括title、tag、翻译等）时，tag使用纯tag的内容
                 json_data["tag"] = json_data["tag_only"]
         else:
             if "no_nfo_scrape" not in read_mode:  # 无nfo，没有勾选「无nfo时，刮削并执行更新模式」
                 return False, json_data
+
+    # 判断是否write_nfo
+    update_nfo = True
+    # 不写nfo的情况：
+    if config.main_mode == 2 and "sort_del" in config.switch_on:
+        # 2模式勾选“删除本地已下载的nfo文件”（暂无效，会直接return）
+        update_nfo = False
+    elif config.main_mode in [1, 2, 3] or (
+        config.main_mode == 4 and not is_nfo_existed and "no_nfo_scrape" in read_mode
+    ):
+        # 1、2、3模式，或4模式启用了“本地之前刮削失败和没有nfo的文件重新刮削”（变量命名有点问题，存在"no_nfo_scrape"意思其实是要刮削）
+        # 且
+        if "nfo" not in config.download_files:
+            # [下载]处不勾选下载nfo时
+            update_nfo = False
+        if "nfo" in config.keep_files and is_nfo_existed:
+            # [下载]处勾选保留nfo且nfo存在时
+            update_nfo = False
+    elif config.main_mode == 4:
+        # 4（读取）模式默认不写nfo
+        update_nfo = False
+        # 除非
+        if is_nfo_existed and "has_nfo_update" in read_mode and "read_update_nfo" in read_mode:
+            # 启用"允许(使用本地 nfo)更新 nfo 文件"时
+            update_nfo = True
 
     # 刮削json_data
     # 获取已刮削的json_data
     if "." in movie_number or json_data["mosaic"] in ["国产"]:
         pass
     elif movie_number not in Flags.json_get_set:
+        # 第一次遇到该番号，刮削
         Flags.json_get_set.add(movie_number)
     elif not Flags.json_data_dic.get(movie_number):
+        # 已经获取过该番号的json_data（如同一番号的其他集），但已刮削字典中找不到，说明第一次遇到它的线程还没刮削完，等它结束。
         while not Flags.json_data_dic.get(movie_number):
             await asyncio.sleep(1)
 
@@ -163,7 +185,7 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
         elif "破解" in json_data["mosaic"] or "流出" in json_data["mosaic"]:
             json_data_new["mosaic"] = json_data["mosaic"]
         json_data.update(json_data_new)
-    elif not nfo_update:
+    elif not is_nfo_existed:
         res = await crawl(json_data, file_mode)
         json_data.update(**res)
 
@@ -173,8 +195,8 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
         return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
 
     # 映射或翻译
-    # 当不存在已刮削数据，或者读取模式允许翻译映射时才进行映射翻译
-    if not json_data_old and json_data["nfo_can_translate"]:
+    # 当不存在已刮削数据，或者读取模式允许更新nfo时才进行映射翻译
+    if not json_data_old and update_nfo:
         deal_some_field(json_data)  # 处理字段
         replace_special_word(json_data)  # 替换特殊字符
         await translate_title_outline(json_data, movie_number)  # 翻译json_data（标题/介绍）
@@ -318,7 +340,7 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
             await copy_trailer_to_theme_videos(json_data, folder_new_path, naming_rule)
 
     # 生成nfo文件
-    await write_nfo(json_data, nfo_new_path, folder_new_path, file_path)
+    await write_nfo(json_data, nfo_new_path, folder_new_path, file_path, update_nfo)
 
     # 移动字幕、种子、bif、trailer、其他文件
     await move_sub(json_data, folder_old_path, folder_new_path, file_name, sub_list, naming_rule)
@@ -423,6 +445,8 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     try:
         result, json_data = await _scrape_one_file(file_path, file_info, file_mode)
         if LogBuffer.req().get() != "do_not_update_json_data_dic":
+            if config.main_mode == 4:
+                movie_number = json_data["number"]  # 读取模式且存在nfo时，可能会导致movie_number改变，需要更新
             Flags.json_data_dic.update({movie_number: json_data})
     except Exception as e:
         _check_stop(file_name_temp)
