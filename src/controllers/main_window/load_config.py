@@ -462,6 +462,10 @@ def load_config(self):
         self.Ui.lineEdit_nfo_tag_studio.setText(str(nfo_tag_studio))
         nfo_tag_publisher = str(config.nfo_tag_publisher)  # nfo_tag_publisher
         self.Ui.lineEdit_nfo_tag_publisher.setText(str(nfo_tag_publisher))
+        nfo_tag_actor = str(config.nfo_tag_actor)  # nfo_tag_actor
+        self.Ui.lineEdit_nfo_tag_actor.setText(str(nfo_tag_actor))
+        nfo_tag_actor_contains = str(config.nfo_tag_actor_contains)  # nfo_tag_actor_contains
+        self.Ui.lineEdit_nfo_tag_actor_contains.setText(str(nfo_tag_actor_contains))
 
         nfo_include_new = config.nfo_include_new  # 写入nfo的字段
         # region nfo_include_new
@@ -567,7 +571,7 @@ def load_config(self):
             read_mode,
             (self.Ui.checkBox_read_has_nfo_update, "has_nfo_update"),
             (self.Ui.checkBox_read_download_file_again, "read_download_again"),
-            (self.Ui.checkBox_read_translate_again, "read_translate_again"),
+            (self.Ui.checkBox_read_update_nfo, "read_update_nfo"),
             (self.Ui.checkBox_read_no_nfo_scrape, "no_nfo_scrape"),
         )
         # endregion
@@ -590,7 +594,9 @@ def load_config(self):
 
         self.Ui.lineEdit_update_a_folder.setText(str(config.update_a_folder))  # 更新模式 - a 目录
         self.Ui.lineEdit_update_b_folder.setText(str(config.update_b_folder))  # 更新模式 - b 目录
+        self.Ui.lineEdit_update_c_filetemplate.setText(str(config.update_c_filetemplate))  # 更新模式 - c 文件名
         self.Ui.lineEdit_update_d_folder.setText(str(config.update_d_folder))  # 更新模式 - d 目录
+        self.Ui.lineEdit_update_titletemplate.setText(str(config.update_titletemplate))  # 更新模式 - emby视频标题
 
         set_radio_buttons(
             config.soft_link,  # 软链接

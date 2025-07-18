@@ -4432,7 +4432,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
                     <item row="1" column="0">
                      <layout class="QHBoxLayout" name="horizontalLayout_128">
                       <item>
-                       <widget class="QCheckBox" name="checkBox_read_translate_again">
+                        <widget class="QCheckBox" name="checkBox_read_update_nfo">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                           <horstretch>0</horstretch>
@@ -4446,7 +4446,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
                          </size>
                         </property>
                         <property name="text">
-                         <string>重新翻译映射 nfo 的信息</string>
+                         <string>允许更新 nfo 文件</string>
                         </property>
                        </widget>
                       </item>
@@ -4462,7 +4462,8 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
                          <string notr="true">color: rgb(8, 128, 128);</string>
                         </property>
                         <property name="text">
-                         <string>将按「设置」-「翻译」，更新 nfo 信息</string>
+                         <string>将按 下方「Emby视频标题」、「设置」-「翻译」、
+「设置」-「NFO」等的设置项，利用本地 nfo 更新 nfo 信息</string>
                         </property>
                        </widget>
                       </item>
@@ -4524,7 +4525,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
                    </size>
                   </property>
                   <property name="text">
-                   <string>本地之前刮削失败的文件，重新刮削（按更新模式规则）</string>
+                   <string>本地之前刮削失败的文件和没有nfo的文件，重新刮削（按更新模式规则）</string>
                   </property>
                  </widget>
                 </item>
@@ -4896,7 +4897,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>1500</y>
+            <y>1540</y>
             <width>701</width>
             <height>111</height>
            </rect>
@@ -4994,7 +4995,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>1630</y>
+            <y>1670</y>
             <width>701</width>
             <height>111</height>
            </rect>
@@ -5089,7 +5090,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>1760</y>
+            <y>1800</y>
             <width>701</width>
             <height>111</height>
            </rect>
@@ -5186,7 +5187,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
             <x>30</x>
             <y>700</y>
             <width>701</width>
-            <height>421</height>
+            <height>461</height>
            </rect>
           </property>
           <property name="minimumSize">
@@ -5210,11 +5211,11 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
              <x>50</x>
              <y>60</y>
              <width>631</width>
-             <height>241</height>
+             <height>294</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_5">
-            <item row="5" column="0">
+            <item row="6" column="0">
              <widget class="QLabel" name="label_219">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -5242,7 +5243,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="1">
+            <item row="6" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_51">
               <item>
                <widget class="QLabel" name="label_218">
@@ -5312,7 +5313,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
+            <item row="5" column="1">
              <widget class="QLabel" name="label_20">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -5328,7 +5329,61 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="2" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_156">
+              <item>
+               <widget class="QLabel" name="label_278">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>80</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::RightToLeft</enum>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="text">
+                 <string>C文件命名规则  </string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_update_c_filetemplate">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"> font: &quot;Courier&quot;;
+ border: 1px solid rgba(0,0,0, 50);
+ border-radius: 15px;
+</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="3" column="0">
              <widget class="QLabel" name="label_220">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -5356,7 +5411,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="3" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_48">
               <item>
                <widget class="QLabel" name="label_210">
@@ -5445,7 +5500,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
+            <item row="5" column="0">
              <widget class="QRadioButton" name="radioButton_update_d_c">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -5489,7 +5544,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
+            <item row="4" column="0">
              <widget class="QLabel" name="label_221">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -5517,7 +5572,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
+            <item row="4" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_60">
               <item>
                <widget class="QCheckBox" name="checkBox_update_a">
@@ -5540,6 +5595,60 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
               </item>
               <item>
                <widget class="QLineEdit" name="lineEdit_update_a_folder">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"> font: &quot;Courier&quot;;
+ border: 1px solid rgba(0,0,0, 50);
+ border-radius: 15px;
+</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="8" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_157">
+              <item>
+               <widget class="QLabel" name="label_294">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>80</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::RightToLeft</enum>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="text">
+                 <string>Emby视频标题  </string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_update_titletemplate">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -5590,7 +5699,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
            <property name="geometry">
             <rect>
              <x>50</x>
-             <y>310</y>
+             <y>360</y>
              <width>631</width>
              <height>101</height>
             </rect>
@@ -5608,7 +5717,8 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
             <string>&lt;p style='line-height:20px'&gt;⚠️ 保留文件：请到 设置 &gt; 下载 &gt; 保留旧文件 或 下载，设置要保留或更新的文件内容&lt;br&gt;
 ⚠️ 跳过文件：在视频目录新建一个名为 skip 的空文件，即可自动跳过该目录及子目录（所有模式均有效）&lt;br&gt;
 ⚠️ 移动文件：失败时不移动文件，成功时按更新模式规则移动&lt;br&gt;
-⚠️ 重命名文件：在「成功后重命名文件」中设置是否重命名，命名规则同「命名」-「视频文件名」&lt;/p&gt;</string>
+⚠️ 重命名文件：在「成功后重命名文件」中设置是否重命名，命名规则同「命名」-「视频文件名」&lt;br/&gt;
+⚠️ 命名规则：读取模式下会使用本地nfo中的title字段，注意命名规则是否应该改成originaltitle&lt;/p&gt;</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -5656,7 +5766,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>1370</y>
+            <y>1410</y>
             <width>701</width>
             <height>111</height>
            </rect>
@@ -6113,7 +6223,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
           <property name="geometry">
            <rect>
             <x>30</x>
-            <y>1140</y>
+            <y>1180</y>
             <width>701</width>
             <height>211</height>
            </rect>
@@ -12515,7 +12625,7 @@ title （标题）, originaltitle （原标题）, actor （女演员）, all_ac
                <string notr="true">color: rgb(8, 128, 128);</string>
               </property>
               <property name="text">
-               <string>指在 nfo 文件中的标题格式，在 Emby 中作为视频标题显示，命名字段同上</string>
+               <string>指在 nfo 文件中的标题(title)格式，在 Emby 中作为视频标题显示，命名字段同上</string>
               </property>
              </widget>
             </item>
@@ -18897,7 +19007,7 @@ line-height:50px</string>
               </item>
              </layout>
             </item>
-            <item row="20" column="1">
+            <item row="23" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_114">
               <item>
                <widget class="QCheckBox" name="checkBox_nfo_genre">
@@ -18955,7 +19065,7 @@ line-height:50px</string>
               </item>
              </layout>
             </item>
-            <item row="22" column="1">
+            <item row="25" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_108">
               <item>
                <widget class="QCheckBox" name="checkBox_nfo_poster">
@@ -19112,7 +19222,7 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
-            <item row="21" column="0">
+            <item row="24" column="0">
              <widget class="QLabel" name="label_388">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -19403,7 +19513,7 @@ line-height:50px</string>
               </item>
              </layout>
             </item>
-            <item row="21" column="1">
+            <item row="24" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_138">
               <item>
                <widget class="QCheckBox" name="checkBox_nfo_studio">
@@ -19782,7 +19892,7 @@ line-height:50px</string>
               </item>
              </layout>
             </item>
-            <item row="20" column="0">
+            <item row="23" column="0">
              <widget class="QLabel" name="label_334">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -20105,7 +20215,7 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
-            <item row="22" column="0">
+            <item row="25" column="0">
              <widget class="QLabel" name="label_150">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -20130,7 +20240,221 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
+            <item row="19" column="0">
+             <widget class="QLabel" name="label_433">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
             <item row="19" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_161">
+              <item>
+               <widget class="QLabel" name="label_423">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(8, 128, 128);</string>
+                </property>
+                <property name="text">
+                 <string>标签中演员的格式：</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_nfo_tag_actor">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"> font: &quot;Courier&quot;;
+ border: 1px solid rgba(0,0,0, 50);
+ border-radius: 15px;
+</string>
+                </property>
+                <property name="text">
+                 <string>actor</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="20" column="0">
+             <widget class="QLabel" name="label_434">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="20" column="1">
+             <layout class="QHBoxLayout" name="horizontalLayout_162">
+              <item>
+               <widget class="QLabel" name="label_424">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(8, 128, 128);</string>
+                </property>
+                <property name="text">
+                 <string>演员名白名单：</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_nfo_tag_actor_contains">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"> font: &quot;Courier&quot;;
+ border: 1px solid rgba(0,0,0, 50);
+ border-radius: 15px;
+</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="21" column="0">
+             <widget class="QLabel" name="label_435">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>130</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="21" column="1">
+             <widget class="QLabel" name="label_432">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="layoutDirection">
+               <enum>Qt::LeftToRight</enum>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color: rgb(8, 128, 128);</string>
+              </property>
+              <property name="text">
+               <string>仅在白名单内的演员名才会被添加至标签（多个内容以｜分割），留空表示全部添加</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="22" column="1">
              <widget class="QLabel" name="label_428">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
@@ -20158,7 +20482,7 @@ line-height:50px</string>
               </property>
              </widget>
             </item>
-            <item row="19" column="0">
+            <item row="22" column="0">
              <widget class="QLabel" name="label_429">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
