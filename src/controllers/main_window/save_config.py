@@ -196,7 +196,9 @@ def save_config(self):
     config.nfo_tag_studio = self.Ui.lineEdit_nfo_tag_studio.text()  # nfo_tag_studio 格式
     config.nfo_tag_publisher = self.Ui.lineEdit_nfo_tag_publisher.text()  # nfo_tag_publisher 格式
     config.nfo_tag_actor = self.Ui.lineEdit_nfo_tag_actor.text()  # nfo_tag_actor 格式
-    config.nfo_tag_actor_contains = self.Ui.lineEdit_nfo_tag_actor_contains.text().strip(" |｜")  # nfo_tag_actor_contains 格式
+    config.nfo_tag_actor_contains = self.Ui.lineEdit_nfo_tag_actor_contains.text().strip(
+        " |｜"
+    )  # nfo_tag_actor_contains 格式
 
     config.whole_fields = get_checkboxes(
         (self.Ui.radioButton_outline_more, "outline"),
@@ -296,7 +298,7 @@ def save_config(self):
         (self.Ui.checkBox_read_has_nfo_update, "has_nfo_update"),
         (self.Ui.checkBox_read_no_nfo_scrape, "no_nfo_scrape"),
         (self.Ui.checkBox_read_download_file_again, "read_download_again"),
-        (self.Ui.checkBox_read_should_write_nfo, "read_should_write_nfo"),
+        (self.Ui.checkBox_read_update_nfo, "read_update_nfo"),
     )
     # update 模式设置
     if self.Ui.radioButton_update_c.isChecked():

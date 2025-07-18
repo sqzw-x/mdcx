@@ -4432,7 +4432,7 @@ QPushButton:pressed{ background-color: rgba(255, 255, 255, 10);}</string>
                     <item row="1" column="0">
                      <layout class="QHBoxLayout" name="horizontalLayout_128">
                       <item>
-                       <widget class="QCheckBox" name="checkBox_read_should_write_nfo">
+                        <widget class="QCheckBox" name="checkBox_read_update_nfo">
                         <property name="sizePolicy">
                          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                           <horstretch>0</horstretch>

@@ -7,13 +7,13 @@ import langid
 from lxml import etree
 
 from ..base.file import delete_file, split_path
-from ..base.number import deal_actor_more, get_number_first_letter, get_number_letters
+from ..base.number import get_number_letters
 from ..base.utils import convert_path, get_used_time
 from ..config.manager import config
 from ..config.manual import ManualConfig
 from ..signals import signal
 from .json_data import JsonData, LogBuffer
-from .utils import get_new_release, render_name_template
+from .utils import render_name_template
 
 
 def write_nfo(
@@ -38,7 +38,6 @@ def write_nfo(
 
         LogBuffer.log().write(f"\n 🍀 Nfo done! (old)({get_used_time(start_time)}s)")
         return True
-
 
     if config.main_mode == 3 or config.main_mode == 4:
         nfo_title_template = config.update_titletemplate
@@ -87,7 +86,9 @@ def write_nfo(
     show_moword = False
     # 获取在媒体文件中显示的规则，不需要过滤Windows异常字符
     should_escape_result = False
-    nfo_title, *_ = render_name_template(nfo_title_template, file_path, json_data_nfo, show_4k, show_cnword, show_moword, should_escape_result)
+    nfo_title, *_ = render_name_template(
+        nfo_title_template, file_path, json_data_nfo, show_4k, show_cnword, show_moword, should_escape_result
+    )
 
     # 获取字段
     # 只有nfo的title用替换后的，其他字段用原始的
@@ -518,7 +519,7 @@ def get_nfo_data(
 
     # 返回数据
     json_data["title"] = title
-    if config.title_language == "jp" and "read_should_write_nfo" in config.read_mode and originaltitle:
+    if config.title_language == "jp" and "read_update_nfo" in config.read_mode and originaltitle:
         json_data["title"] = originaltitle
     json_data["originaltitle"] = originaltitle
     if originaltitle and langid.classify(originaltitle)[0] == "ja":
@@ -530,7 +531,7 @@ def get_nfo_data(
     json_data["actor"] = actor
     json_data["all_actor"] = actor
     json_data["outline"] = outline
-    if config.outline_language == "jp" and "read_should_write_nfo" in config.read_mode and originalplot:
+    if config.outline_language == "jp" and "read_update_nfo" in config.read_mode and originalplot:
         json_data["outline"] = originalplot
     json_data["originalplot"] = originalplot
     json_data["tag"] = tag

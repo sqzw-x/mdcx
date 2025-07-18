@@ -571,7 +571,7 @@ def load_config(self):
             read_mode,
             (self.Ui.checkBox_read_has_nfo_update, "has_nfo_update"),
             (self.Ui.checkBox_read_download_file_again, "read_download_again"),
-            (self.Ui.checkBox_read_should_write_nfo, "read_should_write_nfo"),
+            (self.Ui.checkBox_read_update_nfo, "read_update_nfo"),
             (self.Ui.checkBox_read_no_nfo_scrape, "no_nfo_scrape"),
         )
         # endregion

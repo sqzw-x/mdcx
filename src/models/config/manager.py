@@ -348,8 +348,8 @@ class ConfigSchema:
             del unknown_fields["trailer_name"]
         if "modified_time" in unknown_fields:  # 弃用
             del unknown_fields["modified_time"]
-        if "nfo_can_translate" in unknown_fields:  # 弃用
-            del unknown_fields["nfo_can_translate"]
+        # 2. 处理子项重命名
+        self.read_mode = self.read_mode.replace("read_translate_again", "read_update_nfo")
 
     def init(self):
         self._update()
@@ -444,7 +444,9 @@ class ConfigSchema:
         # 字段命名规则-后缀字段顺序
         all_str_list = ["moword", "cnword", "definition"]
         read_str_list = re.split(r"[,，]", self.suffix_sort)
-        read_str_list = [i1.replace("mosaic", "moword") for i1 in read_str_list]  # 更新旧版的mosaic为moword，避免旧配置出错
+        read_str_list = [
+            i1.replace("mosaic", "moword") for i1 in read_str_list
+        ]  # 更新旧版的mosaic为moword，避免旧配置出错
         new_str_list1 = [i1 for i1 in read_str_list if i1 in all_str_list]  # 去除不在list中的字符
         new_str_list = []
         [new_str_list.append(i1) for i1 in new_str_list1 if i1 not in new_str_list]  # 去重
@@ -454,8 +456,7 @@ class ConfigSchema:
 
         # NFO 演员名白名单
         self.nfo_tag_actor_contains_list = (
-            re.split(r"[|｜]", self.nfo_tag_actor_contains)
-            if self.nfo_tag_actor_contains else []
+            re.split(r"[|｜]", self.nfo_tag_actor_contains) if self.nfo_tag_actor_contains else []
         )
 
     def format_ini(self):
