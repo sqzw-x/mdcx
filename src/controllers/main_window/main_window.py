@@ -2162,7 +2162,7 @@ class MyMAinWindow(QMainWindow):
                 "cableav": ["https://cableav.tv", ""],
                 "lulubar": ["https://lulubar.co", ""],
                 "love6": ["https://love6.tv", ""],
-                "yesjav": ["http://www.yesjav.info", ""],
+                "yesjav": ["http://www.yesjav101.com", ""],
                 "fc2": ["https://adult.contents.fc2.com", ""],
                 "fc2club": ["https://fc2club.top", ""],
                 "fc2hub": ["https://javten.com", ""],

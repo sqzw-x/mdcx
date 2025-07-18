@@ -43,7 +43,7 @@ def get_actorname(number: str) -> tuple[bool, str]:
 
 
 def get_yesjav_title(movie_number: str) -> str:
-    yesjav_url = f"http://www.yesjav.info/search.asp?q={movie_number}&"
+    yesjav_url = f"http://www.yesjav101.com/search.asp?q={movie_number}&"
     movie_title = ""
     result, response = get_html(yesjav_url)
     if result and response:
