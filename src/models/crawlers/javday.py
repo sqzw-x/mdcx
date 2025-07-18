@@ -1,21 +1,12 @@
 #!/usr/bin/env python3
-import json
 import re
 import time
 
-import urllib3
 from lxml import etree
 
-from models.base.web import get_html
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
-# import Function.config as cf
 
 
 def get_actor_photo(actor):
@@ -194,12 +185,12 @@ def get_real_title(
     return title.replace(" x ", "").replace(" X ", "").strip(" -.")
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="zh_cn",
     file_path="",
     appoint_number="",
+    **kwargs,
 ):
     lable_list = get_lable_list()
     start_time = time.time()
@@ -223,9 +214,9 @@ def main(
                 testNumberUrl = javday_url + f"/videos/{number}/"
                 debug_info = f'搜索地址: {testNumberUrl} {{"wd": {number}}}'
                 LogBuffer.info().write(web_info + debug_info)
-                result, html_content = get_html(testNumberUrl)
-                if not result:
-                    debug_info = f"网络请求错误: {html_content}"
+                html_content, error = await config.async_client.get_text(testNumberUrl)
+                if html_content is None:
+                    debug_info = f"网络请求错误: {error}"
                     LogBuffer.info().write(web_info + debug_info)
                 else:
                     if "你似乎來到了沒有視頻存在的荒原" in html_content:
@@ -277,9 +268,9 @@ def main(
                     "source": "javday",
                     "website": real_url,
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": "",
-                    "extrafanart": "",
+                    "extrafanart": [],
                     "trailer": "",
                     "image_download": False,
                     "image_cut": "no",
@@ -299,19 +290,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

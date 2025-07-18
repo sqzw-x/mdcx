@@ -165,7 +165,7 @@ jobs:
           if [ -n "${{ github.event.inputs.tag }}" ]; then
             version="${{ github.event.inputs.tag }}"
           fi
-          bash scripts/build-macos.sh --create-dmg --version "$version"
+          bash scripts/build-macos.sh --create-dmg --version "$version" -n "${{ env.IS_DEV == 'true' && 'MDCx-dev' || env.IS_DAILY == 'true' && 'MDCx-daily' || 'MDCx' }}"
 
       - name: Build Windows app - Windows
         if: ${{ matrix.build == 'windows' }}
@@ -199,7 +199,7 @@ jobs:
         with:
           overwrite: true
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ needs.init-matrix.outputs.short_sha }}.dmg
-          file: dist/MDCx.dmg
+          file: dist/${{ env.IS_DEV == 'true' && 'MDCx-dev' || env.IS_DAILY == 'true' && 'MDCx-daily' || 'MDCx' }}.dmg
           prerelease: ${{ env.IS_DAILY == 'true' || env.IS_DEV == 'true' }}
           body: |
             ${{ env.IS_DAILY == 'true' && github.event.repository.updated_at || env.IS_DEV == 'true' && steps.get-dev-msg.outputs.DEV_MESSAGE || steps.get-changelog.outputs.CHANGELOG }}

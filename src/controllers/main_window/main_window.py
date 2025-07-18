@@ -20,7 +20,7 @@ from PyQt5.QtWidgets import (
     QTreeWidgetItem,
 )
 
-from models.base.file import _open_file_thread, delete_file, split_path
+from models.base.file import delete_file_sync, open_file_thread, split_path
 from models.base.image import get_pixmap
 from models.base.path import get_path
 from models.base.utils import _async_raise, add_html, convert_path, get_current_time, get_used_time, kill_a_thread
@@ -29,8 +29,8 @@ from models.base.web import (
     check_version,
     get_avsox_domain,
     ping_host,
-    scraper_html,
 )
+from models.base.web_sync import get_text_sync
 from models.config.consts import IS_WINDOWS, MARK_FILE
 from models.config.manager import config, manager
 from models.config.manual import ManualConfig
@@ -51,7 +51,7 @@ from models.core.scraper import again_search, get_remain_list, start_new_scrape
 from models.core.subtitle import add_sub_for_all_video
 from models.core.utils import deal_url, get_movie_path_setting
 from models.core.video import add_del_extras, add_del_theme_videos
-from models.core.web import get_html, show_netstatus
+from models.core.web import show_netstatus
 from models.entity.enums import FileMode
 from models.signals import signal
 from models.tools.actress_db import ActressDB
@@ -137,6 +137,7 @@ class MyMAinWindow(QMainWindow):
         # endregion
 
         # region 其它属性声明
+        self.threads_list: list[threading.Thread] = []  # 启动的线程列表
         self.start_click_time = None
         self.start_click_pos = None
         self.menu_start = None
@@ -705,19 +706,15 @@ class MyMAinWindow(QMainWindow):
             if reply != QMessageBox.Yes:
                 return
         if self.Ui.pushButton_start_cap.text() == "■ 停止":
-            save_success_list()  # 保存成功列表
-            Flags.stop_flag = True  # 在pool启动前，点停止按钮时，需要用这个来停止启动pool
+            config.executor.run(save_success_list())
             Flags.rest_time_convert_ = Flags.rest_time_convert
             Flags.rest_time_convert = 0
             Flags.rest_sleepping = False
             self.Ui.pushButton_start_cap.setText(" ■ 停止中 ")
             self.Ui.pushButton_start_cap2.setText(" ■ 停止中 ")
             signal.show_scrape_info("⛔️ 刮削停止中...")
-            try:  # pool可能还没启动
-                Flags.pool.shutdown(wait=False, cancel_futures=True)
-            except Exception:
-                signal.show_traceback_log(traceback.format_exc())
-            t = threading.Thread(target=self._kill_threads)  # 关闭线程池和扫描线程
+            config.executor.cancel_async()  # 取消异步任务
+            t = threading.Thread(target=self._kill_threads)  # 关闭线程池
             t.start()
 
     # 显示停止信息
@@ -769,15 +766,8 @@ class MyMAinWindow(QMainWindow):
         t.start()
 
     # 关闭线程池和扫描线程
-    def _kill_threads(
-        self,
-    ):
-        thread_list = threading.enumerate()
-        new_thread_list = []
-        [new_thread_list.append(i) for i in thread_list if "MDCx-Pool" in i.getName()]  # 线程池的线程
-        [new_thread_list.append(i) for i in Flags.threads_list]  # 其他开启的线程
-        other_name = new_thread_list[-1].getName()
-        Flags.total_kills = len(new_thread_list)
+    def _kill_threads(self):
+        Flags.total_kills = len(self.threads_list)
         Flags.now_kill = 0
         start_time = time.time()
         self.set_label_file_path.emit(f"⛔️ 正在停止刮削...\n   正在停止已在运行的任务线程（1/{Flags.total_kills}）...")
@@ -786,24 +776,21 @@ class MyMAinWindow(QMainWindow):
         )
         signal.show_traceback_log(f"⛔️ 正在停止正在运行的任务线程 ({Flags.total_kills}) ...")
         i = 0
-        for each in new_thread_list:
+        for each in self.threads_list:
             i += 1
-            signal.show_traceback_log(f"正在停止线程: {i}/{Flags.total_kills} {each.getName()} ...")
+            signal.show_traceback_log(f"正在停止线程: {i}/{Flags.total_kills} {each.name} ...")
         signal.show_traceback_log(
             "线程正在停止中，请稍后...\n 🍯 停止时间与线程数量及线程正在执行的任务有关，比如正在执行网络请求、文件下载等IO操作时，需要等待其释放资源。。。\n"
         )
         signal.stop = True
-        for each in new_thread_list:  # 线程池的线程
-            if "MDCx-Pool" not in each.getName():
-                kill_a_thread(each)
+        for each in self.threads_list:  # 线程池的线程
+            kill_a_thread(each)
             while each.is_alive():
                 pass
 
         signal.stop = False
         self.stop_used_time = get_used_time(start_time)
-        signal.show_log_text(
-            f" 🕷 {get_current_time()} 已停止线程：{Flags.total_kills}/{Flags.total_kills} {other_name}"
-        )
+        signal.show_log_text(f" 🕷 {get_current_time()} 已停止线程：{Flags.total_kills}/{Flags.total_kills}")
         signal.show_traceback_log(f"所有线程已停止！！！({self.stop_used_time}s)\n ⛔️ 刮削已手动停止！\n")
         signal.show_log_text(f" ⛔️ {get_current_time()} 所有线程已停止！({self.stop_used_time}s)")
         thread_remain_list = []
@@ -916,7 +903,7 @@ class MyMAinWindow(QMainWindow):
                     "destroyed": "",
                     "actor_href": "",
                     "definition": "",
-                    "cover_from": "",
+                    "thumb_from": "",
                     "poster_from": "",
                     "extrafanart_from": "",
                     "trailer_from": "",
@@ -997,32 +984,14 @@ class MyMAinWindow(QMainWindow):
                         thumb_path = fanart_path
 
                 poster_from = json_data["poster_from"]
-                cover_from = json_data["cover_from"]
+                cover_from = json_data["thumb_from"]
 
-                self.set_pixmap_thread(poster_path, thumb_path, poster_from, cover_from)
+                config.executor.submit(self._set_pixmap(poster_path, thumb_path, poster_from, cover_from))
         except Exception:
             if not signal.stop:
                 signal.show_traceback_log(traceback.format_exc())
 
-    def set_pixmap_thread(
-        self,
-        poster_path="",
-        thumb_path="",
-        poster_from="",
-        cover_from="",
-    ):
-        t = threading.Thread(
-            target=self._set_pixmap,
-            args=(
-                poster_path,
-                thumb_path,
-                poster_from,
-                cover_from,
-            ),
-        )
-        t.start()
-
-    def _set_pixmap(
+    async def _set_pixmap(
         self,
         poster_path="",
         thumb_path="",
@@ -1032,9 +1001,9 @@ class MyMAinWindow(QMainWindow):
         poster_pix = [False, "", "暂无封面图", 156, 220]
         thumb_pix = [False, "", "暂无缩略图", 328, 220]
         if os.path.exists(poster_path):
-            poster_pix = get_pixmap(poster_path, poster=True, pic_from=poster_from)
+            poster_pix = await get_pixmap(poster_path, poster=True, pic_from=poster_from)
         if os.path.exists(thumb_path):
-            thumb_pix = get_pixmap(thumb_path, poster=False, pic_from=cover_from)
+            thumb_pix = await get_pixmap(thumb_path, poster=False, pic_from=cover_from)
 
         # self.Ui.label_poster_size.setText(poster_pix[2] + '  ' + thumb_pix[2])
         poster_text = poster_pix[2] if poster_pix[2] != "暂无封面图" else ""
@@ -1092,7 +1061,7 @@ class MyMAinWindow(QMainWindow):
             #     self.setWindowFlags(self.windowFlags() | Qt.WindowDoesNotAcceptFocus)
             #     self.show()
             # 启动线程打开文件
-            t = threading.Thread(target=_open_file_thread, args=(self.file_main_open_path, False))
+            t = threading.Thread(target=open_file_thread, args=(self.file_main_open_path, False))
             t.start()
 
     def main_open_folder_click(self):
@@ -1109,7 +1078,7 @@ class MyMAinWindow(QMainWindow):
             #     self.setWindowFlags(self.windowFlags() | Qt.WindowDoesNotAcceptFocus)
             #     self.show()
             # 启动线程打开文件
-            t = threading.Thread(target=_open_file_thread, args=(self.file_main_open_path, True))
+            t = threading.Thread(target=open_file_thread, args=(self.file_main_open_path, True))
             t.start()
 
     def main_open_nfo_click(self):
@@ -1189,7 +1158,7 @@ class MyMAinWindow(QMainWindow):
             reply = box.exec()
             if reply != QMessageBox.Yes:
                 return
-            delete_file(file_path)
+            delete_file_sync(file_path)
             signal.show_scrape_info(f"💡 已删除文件！{get_current_time()}")
 
     def main_del_folder_click(self):
@@ -1245,7 +1214,7 @@ class MyMAinWindow(QMainWindow):
             release = json_data.get("release")
             tag = json_data.get("tag")
             number = json_data.get("number")
-            cover = json_data.get("cover")
+            cover = json_data.get("thumb")
             poster = json_data.get("poster")
             website = json_data.get("website")
             series = json_data.get("series")
@@ -1315,11 +1284,11 @@ class MyMAinWindow(QMainWindow):
             json_data["studio"] = self.Ui.lineEdit_nfo_studio.text()
             json_data["publisher"] = self.Ui.lineEdit_nfo_publisher.text()
             json_data["poster"] = self.Ui.lineEdit_nfo_poster.text()
-            json_data["cover"] = self.Ui.lineEdit_nfo_cover.text()
+            json_data["thumb"] = self.Ui.lineEdit_nfo_cover.text()
             json_data["trailer"] = self.Ui.lineEdit_nfo_trailer.text()
             json_data["website"] = self.Ui.lineEdit_nfo_website.text()
             json_data["country"] = self.Ui.comboBox_nfo.currentText()
-            if write_nfo(json_data, nfo_path, nfo_folder, file_path, edit_mode=True):
+            if config.executor.run(write_nfo(json_data, nfo_path, nfo_folder, file_path, edit_mode=True)):
                 self.Ui.label_save_tips.setText(f"已保存! {get_current_time()}")
                 signal.add_label_info(json_data)
             else:
@@ -1371,7 +1340,7 @@ class MyMAinWindow(QMainWindow):
         reply = box.exec()
         if reply == QMessageBox.Yes:
             Flags.success_list.clear()
-            save_success_list()
+            config.executor.run(save_success_list())
             self.Ui.widget_show_success.hide()
 
     def pushButton_view_success_file_clicked(self):
@@ -1557,11 +1526,7 @@ class MyMAinWindow(QMainWindow):
             self.pushButton_save_config_clicked()
 
         try:
-            t = threading.Thread(
-                target=newtdisk_creat_symlink, args=(bool(self.Ui.checkBox_copy_netdisk_nfo.isChecked()),)
-            )
-            Flags.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(newtdisk_creat_symlink(self.Ui.checkBox_copy_netdisk_nfo.isChecked()))
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
@@ -1581,7 +1546,7 @@ class MyMAinWindow(QMainWindow):
             self.pushButton_save_config_clicked()
         try:
             t = threading.Thread(target=check_missing_number, args=(True,))
-            Flags.threads_list.append(t)
+            self.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
@@ -1663,7 +1628,7 @@ class MyMAinWindow(QMainWindow):
             self.pushButton_show_log_clicked()  # 点击开始移动按钮后跳转到日志页面
             try:
                 t = threading.Thread(target=self._move_file_thread)
-                Flags.threads_list.append(t)
+                self.threads_list.append(t)
                 t.start()  # 启动线程,即让线程开始执行
             except Exception:
                 signal.show_traceback_log(traceback.format_exc())
@@ -1688,7 +1653,7 @@ class MyMAinWindow(QMainWindow):
                 if es[-1] != "/":  # 路径尾部添加“/”，方便后面move_list查找时匹配路径
                     es += "/"
                 escape_folder_new_list.append(es)
-        movie_list = movie_lists(escape_folder_new_list, all_type, movie_path)
+        movie_list = config.executor.run(movie_lists(escape_folder_new_list, all_type, movie_path))
         if not movie_list:
             signal.show_log_text("No movie found!")
             signal.show_log_text("================================================================================")
@@ -1879,9 +1844,7 @@ class MyMAinWindow(QMainWindow):
             self.pushButton_save_config_clicked()
         self.pushButton_show_log_clicked()
         try:
-            t = threading.Thread(target=check_and_clean_files)
-            Flags.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(check_and_clean_files())
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
@@ -1890,9 +1853,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_add_sub_for_all_video_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=add_sub_for_all_video)
-            Flags.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_sub_for_all_video())
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
@@ -1902,16 +1863,14 @@ class MyMAinWindow(QMainWindow):
     def pushButton_add_all_extras_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=add_del_extras, args=("add",))
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_del_extras("add"))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
     def pushButton_del_all_extras_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=add_del_extras, args=("del",))
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_del_extras("del"))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -1920,8 +1879,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         self.pushButton_save_config_clicked()
         try:
-            t = threading.Thread(target=add_del_extrafanart_copy, args=("add",))
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_del_extrafanart_copy("add"))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -1929,8 +1887,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         self.pushButton_save_config_clicked()
         try:
-            t = threading.Thread(target=add_del_extrafanart_copy, args=("del",))
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_del_extrafanart_copy("del"))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -1938,16 +1895,14 @@ class MyMAinWindow(QMainWindow):
     def pushButton_add_all_theme_videos_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=add_del_theme_videos, args=("add",))
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_del_theme_videos("add"))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
     def pushButton_del_all_theme_videos_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=add_del_theme_videos, args=("del",))
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(add_del_theme_videos("del"))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -1959,9 +1914,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_save_config_clicked()
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=update_emby_actor_info)
-            Flags.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(update_emby_actor_info())
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -1970,9 +1923,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_save_config_clicked()
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=update_emby_actor_photo)
-            Flags.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(update_emby_actor_photo())
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -1981,9 +1932,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_save_config_clicked()
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=creat_kodi_actors, args=(True,))
-            Flags.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(creat_kodi_actors(True))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -1991,9 +1940,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_del_actor_folder_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=creat_kodi_actors, args=(False,))
-            Flags.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(creat_kodi_actors(False))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -2001,9 +1948,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_show_pic_actor_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            t = threading.Thread(target=show_emby_actor_list, args=(self.Ui.comboBox_pic_actor.currentIndex(),))
-            Flags.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
+            config.executor.submit(show_emby_actor_list(self.Ui.comboBox_pic_actor.currentIndex()))
         except Exception:
             signal.show_log_text(traceback.format_exc())
 
@@ -2152,7 +2097,7 @@ class MyMAinWindow(QMainWindow):
                 "mgstage": ["https://www.mgstage.com", ""],
                 "getchu": ["http://www.getchu.com", ""],
                 "theporndb": ["https://api.theporndb.net", ""],
-                "avsox": [get_avsox_domain(), ""],
+                "avsox": [config.executor.run(get_avsox_domain()), ""],
                 "xcity": ["https://xcity.jp", ""],
                 "7mmtv": ["https://7mmtv.sx", ""],
                 "mdtv": ["https://www.mdpjzip.xyz", ""],
@@ -2230,29 +2175,29 @@ class MyMAinWindow(QMainWindow):
                     res_theporndb = check_theporndb_api_token()
                     each[1] = res_theporndb.replace("✅ 连接正常", f"✅ 连接正常{ping_host(host_address)}")
                 elif name == "javlibrary":
-                    proxies = True
-                    if hasattr(config, f"javlibrary_website"):
-                        proxies = False
-                    result, html_info = scraper_html(each[0], proxies=proxies)
-                    if not result:
-                        each[1] = "❌ 连接失败 请检查网络或代理设置！ " + html_info
+                    use_proxy = True
+                    if hasattr(config, "javlibrary_website"):
+                        use_proxy = False
+                    html_info, error = get_text_sync(each[0], use_proxy=use_proxy)
+                    if html_info is None:
+                        each[1] = "❌ 连接失败 请检查网络或代理设置！ " + error
                     elif "Cloudflare" in html_info:
                         each[1] = "❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)"
                     else:
                         each[1] = f"✅ 连接正常{ping_host(host_address)}"
                 elif name in ["avsex", "freejavbt", "airav_cc", "airav", "madouqu", "7mmtv"]:
-                    result, html_info = scraper_html(each[0])
-                    if not result:
-                        each[1] = "❌ 连接失败 请检查网络或代理设置！ " + html_info
+                    html_info, error = get_text_sync(each[0])
+                    if html_info is None:
+                        each[1] = "❌ 连接失败 请检查网络或代理设置！ " + error
                     elif "Cloudflare" in html_info:
                         each[1] = "❌ 连接失败 (被 Cloudflare 5 秒盾拦截！)"
                     else:
                         each[1] = f"✅ 连接正常{ping_host(host_address)}"
                 else:
                     try:
-                        result, html_content = get_html(each[0])
-                        if not result:
-                            each[1] = "❌ 连接失败 请检查网络或代理设置！ " + str(html_content)
+                        html_content, error = get_text_sync(each[0])
+                        if html_content is None:
+                            each[1] = "❌ 连接失败 请检查网络或代理设置！ " + str(error)
                         else:
                             if name == "dmm":
                                 if re.findall("このページはお住まいの地域からご利用になれません", html_content):
@@ -2358,9 +2303,9 @@ class MyMAinWindow(QMainWindow):
         cookies = config.javdb
         javdb_url = getattr(config, "javdb_website", "https://javdb.com") + "/v/D16Q5?locale=zh"
         try:
-            result, response = scraper_html(javdb_url, headers=header)
-            if not result:
-                if "Cookie" in response:
+            response, error = get_text_sync(javdb_url, headers=header)
+            if response is None:
+                if "Cookie" in error:
                     if cookies != input_cookie:
                         tips = "❌ Cookie 已过期！"
                     else:
@@ -2431,10 +2376,10 @@ class MyMAinWindow(QMainWindow):
         javbus_url = getattr(config, "javbus_website", "https://javbus.com") + "/FSDSS-660"
 
         try:
-            result, response = get_html(javbus_url, headers=headers, cookies=new_cookie)
+            response, error = get_text_sync(javbus_url, headers=headers, cookies=new_cookie)
 
-            if not result:
-                tips = f"❌ 连接失败！请检查网络或代理设置！ {response}"
+            if response is None:
+                tips = f"❌ 连接失败！请检查网络或代理设置！ {error}"
             elif "lostpasswd" in response:
                 if input_cookie:
                     tips = "❌ Cookie 无效！"
@@ -2470,38 +2415,6 @@ class MyMAinWindow(QMainWindow):
             if (self.windowFlags() | Qt.WindowDoesNotAcceptFocus) == self.windowFlags():
                 self.setWindowFlags(self.windowFlags() & ~Qt.WindowDoesNotAcceptFocus)
                 self.show()
-
-    # 申明
-    def show_statement(self):
-        if not self.statement:
-            return
-        msg = """申明
-————————————————————————————————————————————————————————————————
-当你查阅、下载了本项目源代码或二进制程序，即代表你接受了以下条款
-
-    · 本项目和项目成果仅供技术，学术交流和Python3性能测试使用
-    · 用户必须确保获取影片的途径在用户当地是合法的
-    · 运行时和运行后所获取的元数据和封面图片等数据的版权，归版权持有人持有
-    · 本项目贡献者编写该项目旨在学习Python3 ，提高编程水平
-    · 本项目不提供任何影片下载的线索
-    · 请勿提供运行时和运行后获取的数据提供给可能有非法目的的第三方，例如用于非法交易、侵犯未成年人的权利等
-    · 用户仅能在自己的私人计算机或者测试环境中使用该工具，禁止将获取到的数据用于商业目的或其他目的，如销售、传播等
-    · 用户在使用本项目和项目成果前，请用户了解并遵守当地法律法规，如果本项目及项目成果使用过程中存在违反当地法律法规的行为，请勿使用该项目及项目成果
-    · 法律后果及使用后果由使用者承担
-    · GPL LICENSE
-    · 若用户不同意上述条款任意一条，请勿使用本项目和项目成果
-        """
-        box = QMessageBox(QMessageBox.Warning, "申明", msg)
-        box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        box.button(QMessageBox.Yes).setText("同意")
-        box.button(QMessageBox.No).setText("不同意")
-        box.setDefaultButton(QMessageBox.No)
-        reply = box.exec()
-        if reply == QMessageBox.No:
-            os._exit(0)
-        else:
-            self.statement -= 1
-            self.save_config()
 
     def change_buttons_status(self):
         Flags.stop_other = True
@@ -2570,7 +2483,7 @@ class MyMAinWindow(QMainWindow):
             "QPushButton#pushButton_start_cap2{color: white;background-color:#4C6EFF;}QPushButton:hover#pushButton_start_cap2{color: white;background-color: rgba(76,110,255,240)}QPushButton:pressed#pushButton_start_cap2{color: white;background-color:#4C6EE0}"
         )
         Flags.file_mode = FileMode.Default
-        Flags.threads_list = []
+        self.threads_list = []
         if len(Flags.failed_list):
             self.Ui.pushButton_scraper_failed_list.setText(f"一键重新刮削当前 {len(Flags.failed_list)} 个失败文件")
         else:

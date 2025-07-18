@@ -1,20 +1,12 @@
 #!/usr/bin/env python3
-import json
 import os
 import re
 import time
 
-import urllib3
 import zhconv
 
-from models.base.web import get_html, post_html
 from models.config.manager import config
 from models.core.json_data import LogBuffer
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
 
 
 def get_api_actor(actor_list):
@@ -183,13 +175,13 @@ def get_number_list(file_name, number, appoint_number):  # 处理国产番号
     return number_list, filename_list
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="zh_cn",
     file_path="",
     appoint_number="",
     mosaic="",
+    **kwargs,
 ):
     start_time = time.time()
     number = number.strip()
@@ -242,9 +234,9 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
                 # ========================================================================搜索番号
-                result, html_search = get_html(url_search, json_data=True)
-                if not result:
-                    debug_info = f"网络请求错误: {html_search} "
+                html_search, error = await config.async_client.get_json(url_search)
+                if html_search is None:
+                    debug_info = f"网络请求错误: {error} "
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 try:
@@ -285,9 +277,9 @@ def main(
 
             detail_url = "https://api.6dccbca.com/api/movie/detail"
             data = {"id": str(detail_id[0])}
-            result, response = post_html(detail_url, data=data, json_data=True)
-            if not result:
-                debug_info = f"网络请求错误: {response}"
+            response, error = await config.async_client.post_json(detail_url, data=data)
+            if response is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             res = response["data"]
@@ -336,7 +328,7 @@ def main(
                     "publisher": studio,
                     "source": "hdouban",
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": poster,
                     "extrafanart": extrafanart,
                     "trailer": trailer,
@@ -358,19 +350,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

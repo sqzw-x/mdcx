@@ -1,20 +1,12 @@
 #!/usr/bin/env python3
-import json
 import re
 import time
 
-import urllib3
 from lxml import etree
 
-from models.base.web import curl_html
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info, get_number_list
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
 
 
 def get_actor_photo(actor):
@@ -60,26 +52,24 @@ def get_real_url(html, number_list, hscangku_url):
     return False, "", "", ""
 
 
-def get_redirected_url(url):
-    result, response = curl_html(url)
-    if not result:
-        return None
-
-    if redirected_url := re.search(r'"(https?://.*?)"', response).group(1):
-        http = urllib3.PoolManager()
-        response = http.request("GET", f"{redirected_url}{url}&p=", redirect=False)
-        final_url = response.get_redirect_location()
-        return final_url if final_url else None
-    else:
-        return None
+async def get_redirected_url(url):
+    response, err = await config.async_client.get_text(url)
+    if response is None:
+        return
+    if (redirected_url := re.search(r'"(https?://.*?)"', response)) is None:
+        return
+    redirected_url = redirected_url.group(1)
+    response, err = await config.async_client.request("GET", f"{redirected_url}{url}&p=", allow_redirects=False)
+    if response and response.redirect_url:
+        return response.redirect_url
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="zh_cn",
     file_path="",
     appoint_number="",
+    **kwargs,
 ):
     start_time = time.time()
     website_name = "hscangku"
@@ -98,7 +88,7 @@ def main(
             number_list, filename_list = get_number_list(number, appoint_number, file_path)
             n_list = number_list[:1] + filename_list
             # 处理重定向
-            hscangku_url = get_redirected_url(hscangku_url)
+            hscangku_url = await get_redirected_url(hscangku_url)
             if not hscangku_url:
                 debug_info = "没有正确的 hscangku_url，无法刮削"
                 LogBuffer.info().write(web_info + debug_info)
@@ -108,10 +98,10 @@ def main(
                 # real_url = 'http://hsck860.cc/vodsearch/-------------.html?wd=%E6%9F%9A%E5%AD%90%E7%8C%AB&submit='
                 debug_info = f"请求地址: {real_url} "
                 LogBuffer.info().write(web_info + debug_info)
-                result, response = curl_html(real_url)
+                response, error = await config.async_client.get_text(real_url)
 
-                if not result:
-                    debug_info = f"网络请求错误: {response}"
+                if response is None:
+                    debug_info = f"网络请求错误: {error}"
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 search_page = etree.fromstring(response, etree.HTMLParser())
@@ -126,10 +116,10 @@ def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
-        result, response = curl_html(real_url)
+        response, error = await config.async_client.get_text(real_url)
 
-        if not result:
-            debug_info = f"没有找到数据 {response} "
+        if response is None:
+            debug_info = f"没有找到数据 {error} "
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -158,9 +148,9 @@ def main(
                 "source": "hscangku",
                 "website": real_url,
                 "actor_photo": actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": "",
-                "extrafanart": "",
+                "extrafanart": [],
                 "trailer": "",
                 "image_download": False,
                 "image_cut": "no",
@@ -180,19 +170,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

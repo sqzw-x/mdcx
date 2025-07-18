@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
 
-import json
-
-import urllib3
 
 from models.config.manager import config
 from models.crawlers import javlibrary
 
-urllib3.disable_warnings()  # yapf: disable
 
-
-def main(
+async def main(
     number,
     appoint_url="",
     language="zh_cn",
+    **kwargs,
 ):
     all_language = (
         config.title_language
@@ -24,17 +20,11 @@ def main(
         + config.studio_language
     )
     appoint_url = appoint_url.replace("/cn/", "/ja/").replace("/tw/", "/ja/")
-    json_data = json.loads(javlibrary.main(number, appoint_url, "jp"))
+    json_data = await javlibrary.main(number, appoint_url, "jp")
     if not json_data["javlibrary"]["jp"]["title"]:
         json_data["javlibrary"]["zh_cn"] = json_data["javlibrary"]["jp"]
         json_data["javlibrary"]["zh_tw"] = json_data["javlibrary"]["jp"]
-        return json.dumps(
-            json_data,
-            ensure_ascii=False,
-            sort_keys=False,
-            indent=4,
-            separators=(",", ": "),
-        )
+        return json_data
 
     if "zh_cn" in all_language:
         language = "zh_cn"
@@ -43,20 +33,12 @@ def main(
         language = "zh_tw"
         appoint_url = json_data["javlibrary"]["jp"]["website"].replace("/ja/", "/tw/")
 
-    json_data_zh = json.loads(javlibrary.main(number, appoint_url, language))
+    json_data_zh = await javlibrary.main(number, appoint_url, language)
     dic = json_data_zh["javlibrary"][language]
     dic["originaltitle"] = json_data["javlibrary"]["jp"]["originaltitle"]
     dic["originalplot"] = json_data["javlibrary"]["jp"]["originalplot"]
-    json_data["javlibrary"].update({"zh_cn": dic, "zh_tw": dic})
-
-    js = json.dumps(
-        json_data,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
-    return js
+    json_data["javlibrary"].update({language: dic})
+    return json_data
 
 
 if __name__ == "__main__":

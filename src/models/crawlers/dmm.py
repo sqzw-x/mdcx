@@ -1,18 +1,13 @@
 #!/usr/bin/python
 import json
 import re
-import time  # yapf: disable # NOQA: E402
+import time
 
-import urllib3
 from lxml import etree
 
-from models.base.web import check_url, get_dmm_trailer, get_html, post_html
+from models.base.web import check_url, get_dmm_trailer
+from models.config.manager import config
 from models.core.json_data import LogBuffer
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
 
 
 def get_title(html):
@@ -98,11 +93,11 @@ def get_tag(html):
     return str(result).strip(" ['']").replace("', '", ",")
 
 
-def get_cover(html):
+async def get_cover(html):
     temp_result = html.xpath('//meta[@property="og:image"]/@content')
     if temp_result:
         result = re.sub(r"pics.dmm.co.jp", r"awsimgsrc.dmm.co.jp/pics_dig", temp_result[0])
-        if check_url(result):
+        if await check_url(result):
             return result.replace("ps.jpg", "pl.jpg")
         else:
             return temp_result[0].replace("ps.jpg", "pl.jpg")
@@ -146,7 +141,7 @@ def get_score(html):
     return result[0].replace("\\n", "").replace("\n", "").replace("点", "") if result else ""
 
 
-def get_trailer(htmlcode, real_url):
+async def get_trailer(htmlcode, real_url):
     trailer_url = ""
     normal_cid = re.findall(r"onclick=\"sampleplay\('.+cid=([^/]+)/", htmlcode)
     vr_cid = re.findall(r"https://www.dmm.co.jp/digital/-/vr-sample-player/=/cid=([^/]+)", htmlcode)
@@ -157,7 +152,9 @@ def get_trailer(htmlcode, real_url):
         else:
             url = f"https://www.dmm.com/service/digitalapi/-/html5_player/=/cid={cid}/mtype=AhRVShI_/service=digital/floor=videoa/mode=/"
 
-        result, htmlcode = get_html(url)
+        htmlcode, error = await config.async_client.get_text(url)
+        if htmlcode is None:
+            return ""
         try:
             var_params = re.findall(r" = ({[^;]+)", htmlcode)[0].replace(r"\/", "/")
             trailer_url = json.loads(var_params).get("bitrates")[-1].get("src")
@@ -168,7 +165,7 @@ def get_trailer(htmlcode, real_url):
     elif vr_cid:
         cid = vr_cid[0]
         temp_url = f"https://cc3001.dmm.co.jp/vrsample/{cid[:1]}/{cid[:3]}/{cid}/{cid}vrlite.mp4"
-        trailer_url = check_url(temp_url)
+        trailer_url = await check_url(temp_url)
     return trailer_url
 
 
@@ -245,7 +242,7 @@ def get_real_url(
 
 
 # invalid API
-def get_tv_jp_data(real_url):
+async def get_tv_jp_data(real_url):
     cid = re.findall(r"content=([^&/]+)", real_url)[0]
     headers = {
         "Content-Type": "application/json",
@@ -258,10 +255,10 @@ def get_tv_jp_data(real_url):
         "query": "query GetFanzaTvContentDetail($id: ID!, $device: Device!, $isLoggedIn: Boolean!, $playDevice: PlayDevice!) {\n  fanzaTV(device: $device) {\n    content(id: $id) {\n      __typename\n      id\n      contentType\n      shopName\n      shopOption\n      shopType\n      title\n      description\n      packageImage\n      packageLargeImage\n      noIndex\n      ppvShopName\n      viewingRights(device: $playDevice) @include(if: $isLoggedIn) {\n        isStreamable\n        __typename\n      }\n      startDeliveryAt\n      endDeliveryAt\n      isBeingDelivered\n      hasBookmark @include(if: $isLoggedIn)\n      sampleMovie {\n        url\n        thumbnail\n        __typename\n      }\n      samplePictures {\n        image\n        imageLarge\n        __typename\n      }\n      actresses {\n        id\n        name\n        __typename\n      }\n      histrions {\n        id\n        name\n        __typename\n      }\n      directors {\n        id\n        name\n        __typename\n      }\n      series {\n        id\n        name\n        __typename\n      }\n      maker {\n        id\n        name\n        __typename\n      }\n      label {\n        id\n        name\n        __typename\n      }\n      genres {\n        id\n        name\n        __typename\n      }\n      playInfo(withResume: $isLoggedIn, device: $device) {\n        parts {\n          contentId\n          number\n          duration\n          resumePoint\n          __typename\n        }\n        resumePartNumber\n        highestQualityName\n        duration\n        __typename\n      }\n      reviewSummary {\n        averagePoint\n        reviewerCount\n        reviewCommentCount\n        __typename\n      }\n      reviews(first: 5) {\n        edges {\n          node {\n            id\n            reviewerName\n            reviewerId\n            title\n            point\n            hasSpoiler\n            comment\n            date\n            postEvaluationCount\n            helpfulVoteCount\n            isReviewerPurchased\n            __typename\n          }\n          __typename\n        }\n        pageInfo {\n          endCursor\n          hasNextPage\n          __typename\n        }\n        total\n        __typename\n      }\n      fanzaTvRecommendations: itemBasedRecommendations(\n        device: $device\n        shop: FANZA_TV\n        limit: 30\n      ) {\n        id\n        title\n        packageImage\n        averageReviewPoint\n        price\n        salePrice\n        __typename\n      }\n      fanzaPpvRecommendations: itemBasedRecommendations(\n        device: $device\n        shop: VIDEO\n        limit: 30\n      ) {\n        id\n        title\n        packageImage\n        averageReviewPoint\n        price\n        salePrice\n        __typename\n      }\n    }\n    userBasedRecommendations(place: DETAIL_PAGE, limit: 30) @include(if: $isLoggedIn) {\n      id\n      title\n      packageImage\n      averageReviewPoint\n      price\n      salePrice\n      __typename\n    }\n    __typename\n  }\n}\n",
     }
 
-    result, response = post_html(
-        "https://api.tv.dmm.co.jp/graphql", headers=headers, json=data, json_data=True, keep=False
+    response, error = await config.async_client.post_json(
+        "https://api.tv.dmm.co.jp/graphql", headers=headers, json=data
     )
-    if result and response.get("data"):
+    if response and response.get("data"):
         api_data = response["data"]["fanzaTV"]["content"]
         title = api_data["title"]
         outline = api_data["description"]
@@ -309,7 +306,7 @@ def get_tv_jp_data(real_url):
             trailer_url = api_data["sampleMovie"]["url"].replace("hlsvideo", "litevideo")
             cid = re.findall(r"([^/]+)/playlist.m3u8", trailer_url)[0]
             trailer = trailer_url.replace("playlist.m3u8", cid + "_sm_w.mp4")
-            trailer = get_dmm_trailer(trailer)
+            trailer = await get_dmm_trailer(trailer)
 
         except Exception:
             trailer = ""
@@ -335,7 +332,7 @@ def get_tv_jp_data(real_url):
         return False, "未找到数据", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
 
 
-def get_tv_com_data(number):
+async def get_tv_com_data(number):
     headers = {
         "Content-Type": "application/json",
         "content-length": "10501",
@@ -354,10 +351,8 @@ def get_tv_com_data(number):
         "query": "query GetVideo($seasonId: ID!, $contentId: ID!, $device: Device!, $playDevice: PlayDevice!, $isLoggedIn: Boolean!, $isContentId: Boolean!) {\n  video(id: $seasonId) {\n    id\n    seasonType\n    hasBookmark @include(if: $isLoggedIn)\n    titleName\n    seasonName\n    highlight(format: HTML)\n    description(format: HTML)\n    notices(format: HTML)\n    packageImage\n    productionYear\n    isNewArrival\n    isPublic\n    isExclusive\n    isBeingDelivered\n    viewingTypes\n    campaign {\n      name\n      endAt\n      __typename\n    }\n    rating {\n      category\n      __typename\n    }\n    casts {\n      castName\n      actorName\n      person {\n        id\n        __typename\n      }\n      __typename\n    }\n    staffs {\n      roleName\n      staffName\n      person {\n        id\n        __typename\n      }\n      __typename\n    }\n    categories {\n      name\n      id\n      __typename\n    }\n    genres {\n      name\n      id\n      __typename\n    }\n    copyright\n    relatedItems(device: $device) {\n      videos {\n        seasonId\n        video {\n          id\n          titleName\n          packageImage\n          isNewArrival\n          isExclusive\n          __typename\n        }\n        __typename\n      }\n      books {\n        seriesId\n        title\n        thumbnail\n        url\n        __typename\n      }\n      mono {\n        banner\n        url\n        __typename\n      }\n      scratch {\n        banner\n        url\n        __typename\n      }\n      onlineCrane {\n        banner\n        url\n        __typename\n      }\n      __typename\n    }\n    ... on VideoSeason {\n      ...CommonVideoSeason\n      __typename\n    }\n    ... on VideoLegacySeason {\n      ...CommonVideoLegacySeason\n      __typename\n    }\n    ... on VideoStageSeason {\n      ...CommonVideoStageSeason\n      __typename\n    }\n    ... on VideoSpotLiveSeason {\n      ...CommonVideoSpotLiveSeason\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment CommonVideoSeason on VideoSeason {\n  __typename\n  metaDescription: description(format: PLAIN)\n  keyVisualImage\n  keyVisualWithoutLogoImage\n  reviewSummary {\n    averagePoint\n    reviewerCount\n    reviewCommentCount\n    __typename\n  }\n  relatedSeasons {\n    id\n    title\n    __typename\n  }\n  upcomingEpisode {\n    svodProduct {\n      startDeliveryAt\n      __typename\n    }\n    __typename\n  }\n  continueWatching @include(if: $isLoggedIn) {\n    resumePoint\n    contentId\n    content {\n      episodeImage\n      episodeTitle\n      episodeNumber\n      episodeNumberName\n      viewingRights(device: $playDevice) {\n        isStreamable\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  priceSummary {\n    lowestPrice\n    discountedLowestPrice\n    __typename\n  }\n  episode(id: $contentId) @include(if: $isContentId) {\n    id\n    episodeTitle\n    episodeImage\n    episodeNumber\n    episodeNumberName\n    episodeDetail\n    playInfo {\n      highestQuality\n      isSupportHDR\n      highestAudioChannelLayout\n      duration\n      audioRenditions\n      textRenditions\n      __typename\n    }\n    viewingRights(device: $playDevice) {\n      isDownloadable\n      isStreamable\n      __typename\n    }\n    ppvExpiration @include(if: $isLoggedIn) {\n      expirationType\n      viewingExpiration\n      viewingStartExpiration\n      startDeliveryAt\n      __typename\n    }\n    freeProduct {\n      contentId\n      __typename\n    }\n    ppvProducts {\n      ...VideoPPVProductTag\n      __typename\n    }\n    svodProduct {\n      startDeliveryAt\n      __typename\n    }\n    __typename\n  }\n  episodes(type: MAIN, first: 1) {\n    edges {\n      node {\n        id\n        sampleMovie\n        episodeTitle\n        episodeNumber\n        episodeNumberName\n        playInfo {\n          highestQuality\n          isSupportHDR\n          highestAudioChannelLayout\n          duration\n          audioRenditions\n          textRenditions\n          __typename\n        }\n        viewingRights(device: $playDevice) {\n          isDownloadable\n          isStreamable\n          downloadableFiles @include(if: $isLoggedIn) {\n            quality {\n              name\n              displayName\n              displayPriority\n              __typename\n            }\n            totalFileSize\n            parts {\n              partNumber\n              fileSize\n              __typename\n            }\n            __typename\n          }\n          __typename\n        }\n        ppvExpiration @include(if: $isLoggedIn) {\n          expirationType\n          viewingExpiration\n          viewingStartExpiration\n          startDeliveryAt\n          __typename\n        }\n        freeProduct {\n          contentId\n          __typename\n        }\n        ppvProducts {\n          ...VideoPPVProductTag\n          __typename\n        }\n        svodProduct {\n          startDeliveryAt\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    total\n    __typename\n  }\n  purchasedContents(first: 1) @include(if: $isLoggedIn) {\n    edges {\n      node {\n        id\n        __typename\n      }\n      __typename\n    }\n    total\n    __typename\n  }\n  specialEpisode: episodes(type: SPECIAL, first: 1) {\n    total\n    __typename\n  }\n  pvEpisode: episodes(type: PV, first: 1) {\n    edges {\n      node {\n        id\n        sampleMovie\n        playInfo {\n          duration\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    total\n    __typename\n  }\n}\n\nfragment VideoPPVProductTag on VideoPPVProduct {\n  id\n  isOnSale\n  isBeingDelivered\n  isPurchased @include(if: $isLoggedIn)\n  price {\n    price\n    salePrice\n    __typename\n  }\n  __typename\n}\n\nfragment CommonVideoLegacySeason on VideoLegacySeason {\n  __typename\n  metaDescription: description(format: PLAIN)\n  packageLargeImage\n  reviewSummary {\n    averagePoint\n    reviewerCount\n    reviewCommentCount\n    __typename\n  }\n  sampleMovie {\n    url\n    thumbnail\n    __typename\n  }\n  samplePictures {\n    image\n    imageLarge\n    __typename\n  }\n  sampleMovie {\n    url\n    thumbnail\n    __typename\n  }\n  reviewSummary {\n    averagePoint\n    __typename\n  }\n  priceSummary {\n    lowestPrice\n    discountedLowestPrice\n    __typename\n  }\n  continueWatching @include(if: $isLoggedIn) {\n    partNumber\n    resumePoint\n    contentId\n    content {\n      playInfo {\n        parts {\n          contentId\n          __typename\n        }\n        __typename\n      }\n      viewingRights(device: $playDevice) {\n        isStreamable\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  content {\n    id\n    contentType\n    viewingRights(device: $playDevice) {\n      isStreamable\n      isDownloadable\n      downloadableFiles @include(if: $isLoggedIn) {\n        quality {\n          name\n          displayName\n          displayPriority\n          __typename\n        }\n        totalFileSize\n        parts {\n          partNumber\n          fileSize\n          __typename\n        }\n        __typename\n      }\n      windowsURLSchemes: appURLSchemes(app: WINDOWS_VR) @include(if: $isLoggedIn) {\n        partNumber\n        url\n        __typename\n      }\n      iosURLSchemes: appURLSchemes(app: IOS_VR) @include(if: $isLoggedIn) {\n        partNumber\n        url\n        __typename\n      }\n      androidURLSchemes: appURLSchemes(app: ANDROID_VR) @include(if: $isLoggedIn) {\n        partNumber\n        url\n        __typename\n      }\n      __typename\n    }\n    playInfo {\n      duration\n      audioRenditions\n      textRenditions\n      highestQuality\n      isSupportHDR\n      highestAudioChannelLayout\n      parts {\n        contentId\n        number\n        __typename\n      }\n      __typename\n    }\n    ppvExpiration @include(if: $isLoggedIn) {\n      expirationType\n      viewingExpiration\n      viewingStartExpiration\n      startDeliveryAt\n      __typename\n    }\n    freeProduct {\n      contentId\n      __typename\n    }\n    ppvProducts {\n      ...VideoPPVProductTag\n      __typename\n    }\n    svodProduct {\n      startDeliveryAt\n      __typename\n    }\n    __typename\n  }\n  series {\n    id\n    name\n    __typename\n  }\n}\n\nfragment CommonVideoStageSeason on VideoStageSeason {\n  __typename\n  metaDescription: description(format: PLAIN)\n  keyVisualImage\n  keyVisualWithoutLogoImage\n  reviewSummary {\n    averagePoint\n    reviewerCount\n    reviewCommentCount\n    __typename\n  }\n  priceSummary {\n    lowestPrice\n    discountedLowestPrice\n    __typename\n  }\n  allPerformances {\n    performanceDate\n    contents {\n      id\n      episodeTitle\n      priority\n      startLivePerformanceAt\n      ppvProducts {\n        ...VideoPPVProductTag\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  purchasedContents(first: 1) @include(if: $isLoggedIn) {\n    edges {\n      node {\n        id\n        __typename\n      }\n      __typename\n    }\n    total\n    __typename\n  }\n}\n\nfragment CommonVideoSpotLiveSeason on VideoSpotLiveSeason {\n  __typename\n  metaDescription: description(format: PLAIN)\n  keyVisualImage\n  keyVisualWithoutLogoImage\n  episodes(type: MAIN, first: 1) {\n    edges {\n      node {\n        id\n        episodeTitle\n        episodeNumber\n        episodeNumberName\n        viewingRights(device: $playDevice) {\n          isStreamable\n          __typename\n        }\n        ppvExpiration @include(if: $isLoggedIn) {\n          expirationType\n          viewingExpiration\n          viewingStartExpiration\n          startDeliveryAt\n          __typename\n        }\n        freeProduct {\n          contentId\n          __typename\n        }\n        ppvProducts {\n          ...VideoPPVProductTag\n          __typename\n        }\n        svodProduct {\n          startDeliveryAt\n          __typename\n        }\n        playInfo {\n          audioRenditions\n          textRenditions\n          duration\n          highestQuality\n          isSupportHDR\n          highestAudioChannelLayout\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n",
     }
 
-    result, response = post_html(
-        "https://api.tv.dmm.com/graphql", headers=headers, json=data, json_data=True, keep=False
-    )
-    if result and response.get("data"):
+    response, error = await config.async_client.post_json("https://api.tv.dmm.com/graphql", headers=headers, json=data)
+    if response and response.get("data"):
         api_data = response["data"]["video"]
         title = api_data["titleName"]
         outline = api_data["description"]
@@ -402,7 +397,7 @@ def get_tv_com_data(number):
             trailer_url = api_data["sampleMovie"]["url"].replace("hlsvideo", "litevideo")
             cid = re.findall(r"([^/]+)/playlist.m3u8", trailer_url)[0]
             trailer = trailer_url.replace("playlist.m3u8", cid + "_sm_w.mp4")
-            trailer = get_dmm_trailer(trailer)
+            trailer = await get_dmm_trailer(trailer)
 
         except Exception:
             trailer = ""
@@ -428,11 +423,11 @@ def get_tv_com_data(number):
         return False, "未找到数据", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="jp",
     file_path="",
+    **kwargs,
 ):
     start_time = time.time()
     website_name = "dmm"
@@ -471,9 +466,9 @@ def main(
     try:
         # tv.dmm未屏蔽非日本ip，此处请求页面，看是否可以访问
         if "tv.dmm." not in real_url:
-            result, htmlcode = get_html(real_url, cookies=cookies)
-            if not result:  # 请求失败
-                debug_info = f"网络请求错误: {htmlcode} "
+            htmlcode, error = await config.async_client.get_text(real_url, cookies=cookies)
+            if htmlcode is None:  # 请求失败
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -494,9 +489,9 @@ def main(
                         real_url = f"https://www.dmm.co.jp/search/=/searchstr={number_no_00}/sort=ranking/"  # 不带00，旧作 snis-027
                         debug_info = f"再次搜索地址: {real_url} "
                         LogBuffer.info().write(web_info + debug_info)
-                        result, htmlcode = get_html(real_url, cookies=cookies)
-                        if not result:  # 请求失败
-                            debug_info = f"网络请求错误: {htmlcode} "
+                        htmlcode, error = await config.async_client.get_text(real_url, cookies=cookies)
+                        if htmlcode is None:  # 请求失败
+                            debug_info = f"网络请求错误: {error} "
                             LogBuffer.info().write(web_info + debug_info)
                             raise Exception(debug_info)
                         # html = etree.fromstring(htmlcode, etree.HTMLParser())
@@ -510,9 +505,9 @@ def main(
                     real_url = f"https://www.dmm.com/search/=/searchstr={number_no_00}/sort=ranking/"
                     debug_info = f"再次搜索地址: {real_url} "
                     LogBuffer.info().write(web_info + debug_info)
-                    result, htmlcode = get_html(real_url, cookies=cookies)
-                    if not result:  # 请求失败
-                        debug_info = f"网络请求错误: {htmlcode} "
+                    htmlcode, error = await config.async_client.get_text(real_url, cookies=cookies)
+                    if htmlcode is None:  # 请求失败
+                        debug_info = f"网络请求错误: {error} "
                         LogBuffer.info().write(web_info + debug_info)
                         raise Exception(debug_info)
                     # html = etree.fromstring(htmlcode, etree.HTMLParser())
@@ -570,7 +565,7 @@ def main(
                 extrafanart,
                 trailer,
                 year,
-            ) = get_tv_com_data(number_00)
+            ) = await get_tv_com_data(number_00)
             if not result:
                 debug_info = f"数据获取失败: {title} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -593,18 +588,18 @@ def main(
                 extrafanart,
                 trailer,
                 year,
-            ) = get_tv_jp_data(real_url)
+            ) = await get_tv_jp_data(real_url)
             if not result:
                 debug_info = f"数据获取失败: {title} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
         else:
-            result, htmlcode = get_html(real_url, cookies=cookies)
-            html = etree.fromstring(htmlcode, etree.HTMLParser())
-            if not result:
-                debug_info = f"网络请求错误: {htmlcode} "
+            htmlcode, error = await config.async_client.get_text(real_url, cookies=cookies)
+            if htmlcode is None:
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
+            html = etree.fromstring(htmlcode, etree.HTMLParser())
 
             # 分析详情页
             if "404 Not Found" in str(
@@ -621,7 +616,7 @@ def main(
                 raise Exception(debug_info)
             try:
                 actor = get_actor(html)  # 获取演员
-                cover_url = get_cover(html)  # 获取 cover
+                cover_url = await get_cover(html)  # 获取 cover
                 outline = get_ountline(html)
                 tag = get_tag(html)
                 release = get_release(html)
@@ -634,7 +629,7 @@ def main(
                 publisher = get_publisher(html, studio)
                 extrafanart = get_extrafanart(html)
                 poster_url = get_poster(html, cover_url)
-                trailer = get_trailer(htmlcode, real_url)
+                trailer = await get_trailer(htmlcode, real_url)
                 mosaic = get_mosaic(html)
             except Exception as e:
                 # print(traceback.format_exc())
@@ -664,7 +659,7 @@ def main(
                 "source": "dmm",
                 "website": real_url,
                 "actor_photo": actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": poster_url,
                 "extrafanart": extrafanart,
                 "trailer": trailer,
@@ -686,13 +681,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(dic, ensure_ascii=False, sort_keys=False, indent=4, separators=(",", ": "))  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

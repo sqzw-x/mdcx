@@ -1,59 +1,32 @@
 #!/usr/bin/env python3
-
-import json
-
-from models.config.manager import config
 from models.crawlers import iqqtv
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="zh_cn",
+    **kwargs,
 ):
-    all_language = (
-        config.title_language
-        + config.outline_language
-        + config.actor_language
-        + config.tag_language
-        + config.series_language
-        + config.studio_language
-    )
     appoint_url = appoint_url.replace("/cn/", "/jp/").replace("iqqtv.cloud/player", "iqqtv.cloud/jp/player")
-    json_data = json.loads(iqqtv.main(number, appoint_url, "jp"))
-    if not json_data["iqqtv"]["jp"]["title"]:
+    json_data = await iqqtv.main(number, appoint_url, "jp")
+    if not json_data["iqqtv"]["jp"]["title"] or language == "jp":
         json_data["iqqtv"]["zh_cn"] = json_data["iqqtv"]["jp"]
         json_data["iqqtv"]["zh_tw"] = json_data["iqqtv"]["jp"]
-        return json.dumps(
-            json_data,
-            ensure_ascii=False,
-            sort_keys=False,
-            indent=4,
-            separators=(",", ": "),
-        )
+        return json_data
 
-    if "zh_cn" in all_language:
-        language = "zh_cn"
+    if language == "zh_cn":
         appoint_url = json_data["iqqtv"]["jp"]["website"].replace("/jp/", "/cn/")
-
-    if "zh_tw" in all_language:
-        language = "zh_tw"
+    elif language == "zh_tw":
         appoint_url = json_data["iqqtv"]["jp"]["website"].replace("/jp/", "/")
 
-    json_data_zh = json.loads(iqqtv.main(number, appoint_url, language))
+    json_data_zh = await iqqtv.main(number, appoint_url, language)
     dic = json_data_zh["iqqtv"][language]
     dic["originaltitle"] = json_data["iqqtv"]["jp"]["originaltitle"]
     dic["originalplot"] = json_data["iqqtv"]["jp"]["originalplot"]
-    json_data["iqqtv"].update({"zh_cn": dic, "zh_tw": dic})
+    json_data["iqqtv"].update({language: dic})
 
-    js = json.dumps(
-        json_data,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
-    return js
+    return json_data
 
 
 if __name__ == "__main__":

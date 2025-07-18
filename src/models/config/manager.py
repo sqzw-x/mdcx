@@ -5,7 +5,12 @@ from configparser import ConfigParser, RawConfigParser
 from dataclasses import dataclass, fields
 from io import StringIO
 
-from ..base.utils import get_random_headers, get_user_agent
+import httpx
+
+from ..base.llm import LLMClient
+from ..base.utils import executor, get_random_headers, get_user_agent
+from ..base.web_async import AsyncWebClient
+from ..signals import signal
 from .consts import MAIN_PATH, MARK_FILE
 from .manual import ManualConfig
 
@@ -213,8 +218,17 @@ class ConfigSchema:
     publisher_website: str = r"javbus"
     publisher_website_exclude: str = r"airav,airav_cc,avsex,iqqtv,lulubar"
     wanted_website: str = r"javlibrary,javdb"
+
+    # translate
     translate_by: str = r"youdao,google,deepl,"
     deepl_key: str = r""
+    llm_url: str = r"https://api.llm.com/v1"
+    llm_model: str = r"gpt-3.5-turbo"
+    llm_key: str = r""
+    llm_prompt: str = "Please translate the following text to {lang}. Output only the translation without any explanation.\n{content}"  # 原文-{content} 目标语言-{lang}
+    llm_max_req_sec: float = 1  # 每秒请求次数限制
+    llm_max_try: int = 5
+    llm_temperature: float = 0.2
     title_language: str = r"zh_cn"
     title_sehua: bool = True
     title_yesjav: bool = False
@@ -237,6 +251,8 @@ class ConfigSchema:
     studio_translate: bool = True
     publisher_language: str = r"zh_cn"
     publisher_translate: bool = True
+
+    # nfo
     nfo_include_new: str = r"sorttitle,originaltitle,title_cd,outline,plot_,originalplot,release_,releasedate,premiered,country,mpaa,customrating,year,runtime,wanted,score,criticrating,actor,director,series,tag,genre,series_set,studio,maker,publisher,label,poster,cover,trailer,website,"
     nfo_tagline: str = r"发行日期 release"
     nfo_tag_series: str = r"系列: series"
@@ -245,7 +261,7 @@ class ConfigSchema:
     nfo_tag_actor: str = r"actor"
     nfo_tag_actor_contains: str = r""
 
-    # Name_Rule
+    # name
     folder_name: str = r"actor/number actor"
     naming_file: str = r"number"
     naming_media: str = r"number title"
@@ -348,24 +364,26 @@ class ConfigSchema:
             del unknown_fields["trailer_name"]
         if "modified_time" in unknown_fields:  # 弃用
             del unknown_fields["modified_time"]
-        # 2. 处理子项重命名
+        # 2. 处理更名的配置字段
         self.read_mode = self.read_mode.replace("read_translate_again", "read_update_nfo")
+        self.suffix_sort = self.suffix_sort.replace("mosaic", "moword")
 
     def init(self):
         self._update()
         # 获取proxies
-        if self.type == "http":
-            self.proxies = {
-                "http": "http://" + self.proxy,
-                "https": "http://" + self.proxy,
-            }
-        elif self.type == "socks5":
-            self.proxies = {
-                "http": "socks5h://" + self.proxy,
-                "https": "socks5h://" + self.proxy,
-            }
+        if any(schema in self.proxy for schema in ["http://", "https://", "socks5://", "socks5h://"]):
+            self.proxy = self.proxy.strip()
         else:
+            self.proxy = "http://" + self.proxy.strip()
+        if self.type == "no":  # todo type 现在只需要 bool
             self.proxies = None
+            self.httpx_proxy = None
+        else:
+            self.proxies = {
+                "http": self.proxy,
+                "https": self.proxy,
+            }
+            self.httpx_proxy = self.proxy
 
         self.ipv4_only = "ipv4_only" in self.switch_on
         self.theporndb_no_hash = "theporndb_no_hash" in self.switch_on
@@ -458,6 +476,24 @@ class ConfigSchema:
         self.nfo_tag_actor_contains_list = (
             re.split(r"[|｜]", self.nfo_tag_actor_contains) if self.nfo_tag_actor_contains else []
         )
+
+        # 依赖于 config 的类不能作为全局变量, 必须在 config 内构建, 以在 config 更新后正确重建
+        self.async_client = AsyncWebClient(
+            loop=executor._loop,
+            proxy=self.httpx_proxy,
+            retry=self.retry,
+            timeout=self.timeout,
+            log_fn=signal.add_log,
+        )
+
+        self.llm_client = LLMClient(
+            api_key=self.llm_key,
+            base_url=self.llm_url,
+            proxy=self.httpx_proxy,
+            timeout=httpx.Timeout(self.timeout, read=None),  # 只设置连接超时, 不限制 llm 生成时间
+            rate=(max(self.llm_max_req_sec, 1), max(1, 1 / self.llm_max_req_sec)),
+        )
+        self.executor = executor  # 方便通过 config 访问 executor
 
     def format_ini(self):
         buffer = StringIO()

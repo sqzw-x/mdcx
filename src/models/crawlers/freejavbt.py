@@ -1,21 +1,14 @@
 #!/usr/bin/env python3
 
-import json
 import re
-import time  # yapf: disable # NOQA: E402
+import time
 
-import urllib3
 from lxml import etree
 from lxml.html import soupparser
 
-from models.base.web import curl_html, get_dmm_trailer
+from models.base.web import get_dmm_trailer
+from models.config.manager import config
 from models.core.json_data import LogBuffer
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
-# import Function.config as cf
 
 
 def get_title(html):
@@ -325,9 +318,9 @@ def get_extrafanart(html):  # 获取封面链接
     return extrafanart_list
 
 
-def get_trailer(html):  # 获取预览片
+async def get_trailer(html):  # 获取预览片
     trailer_url_list = html.xpath("//video[@id='preview-video']/source/@src")
-    return get_dmm_trailer(trailer_url_list[0]) if trailer_url_list else ""
+    return await get_dmm_trailer(trailer_url_list[0]) if trailer_url_list else ""
 
 
 def get_mosaic(title, actor):
@@ -339,10 +332,10 @@ def get_mosaic(title, actor):
     return mosaic
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="jp",
+    **kwargs,
 ):
     # https://freejavbt.com/VRKM-565
     start_time = time.time()
@@ -365,9 +358,9 @@ def main(
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
 
-        result, html_info = curl_html(real_url)
-        if not result:
-            debug_info = f"请求错误: {html_info}"
+        html_info, error = await config.async_client.get_text(real_url)
+        if html_info is None:
+            debug_info = f"请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -378,8 +371,20 @@ def main(
             raise Exception(debug_info)
 
         html_detail = etree.fromstring(html_info, etree.HTMLParser())
-        
-        
+
+        # docker版本正常，但在macOS会解析失败，猜测是emoji等特殊字符导致的，删除emoji后可解析正常。
+        # 搜索emoji正则: [\u{1F601}-\u{1F64F}\u{2702}-\u{27B0}\u{1F680}-\u{1F6C0}\u{1F170}-\u{1F251}\u{1F600}-\u{1F636}\u{1F681}-\u{1F6C5}\u{1F30D}-\u{1F567}]
+        # 另外，使用`lxml.html.soupparser.fromstring`可以解析成功。
+        if html_detail is None:
+            debug_info = "HTML 解析失败，etree 返回 None"
+            LogBuffer.error().write(web_info + debug_info)
+            # 尝试soupparser
+            html_detail = soupparser.fromstring(html_info)
+            if html_detail is None:
+                debug_info = "HTML 解析失败，soupparser 返回 None"
+                LogBuffer.error().write(web_info + debug_info)
+                raise Exception(debug_info)
+
         # docker版本正常，但在macOS会解析失败，猜测是emoji等特殊字符导致的，删除emoji后可解析正常。
         # 搜索emoji正则: [\u{1F601}-\u{1F64F}\u{2702}-\u{27B0}\u{1F680}-\u{1F6C0}\u{1F170}-\u{1F251}\u{1F600}-\u{1F636}\u{1F681}-\u{1F6C5}\u{1F30D}-\u{1F567}]
         # 另外，使用`lxml.html.soupparser.fromstring`可以解析成功。
@@ -416,7 +421,7 @@ def main(
         studio = get_studio(html_detail)
         publisher = get_publisher(html_detail)
         extrafanart = get_extrafanart(html_detail)
-        trailer = get_trailer(html_detail)
+        trailer = await get_trailer(html_detail)
         website = real_url
         mosaic = get_mosaic(title, actor)
         try:
@@ -440,7 +445,7 @@ def main(
                 "source": "freejavbt",
                 "actor_photo": actor_photo,
                 "all_actor_photo": all_actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": poster_url,
                 "extrafanart": extrafanart,
                 "trailer": trailer,
@@ -463,19 +468,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

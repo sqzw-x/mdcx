@@ -1,18 +1,21 @@
+import asyncio
 import os
 import time
 import traceback
 from typing import cast
 
+import aiofiles.os
 from PIL import Image, ImageFilter
 from PyQt5.QtGui import QImageReader, QPixmap
 
+from ..config.manager import config
 from ..core.json_data import JsonData, LogBuffer
 from ..signals import signal
-from .file import check_pic, copy_file, delete_file
+from .file import check_pic_async, copy_file_sync, delete_file_async, delete_file_sync
 from .utils import get_used_time
 
 
-def get_pixmap(pic_path: str, poster=True, pic_from=""):
+async def get_pixmap(pic_path: str, poster=True, pic_from=""):
     try:
         # 使用 QImageReader 加载，适合加载大文件，pixmap适合显示
         # 判断是否可读取
@@ -22,7 +25,7 @@ def get_pixmap(pic_path: str, poster=True, pic_from=""):
             pix = QPixmap(img)
             pic_width = img.size().width()
             pic_height = img.size().height()
-            pic_file_size = int(os.path.getsize(pic_path) / 1024)
+            pic_file_size = int(await aiofiles.os.path.getsize(pic_path) / 1024)
             if pic_width and pic_height:
                 if poster:
                     if pic_width / pic_height > 156 / 220:
@@ -40,32 +43,13 @@ def get_pixmap(pic_path: str, poster=True, pic_from=""):
                         h = 220
                 msg = f"{pic_from.title()}: {pic_width}*{pic_height}/{pic_file_size}KB"
                 return [True, pix, msg, w, h]
-        delete_file(pic_path)
+        await delete_file_async(pic_path)
         if poster:
             return [False, "", "封面图损坏", 156, 220]
         return [False, "", "缩略图损坏", 328, 220]
     except Exception:
         signal.show_log_text(traceback.format_exc())
         return [False, "", "加载失败", 156, 220]
-
-
-def fix_size(path: str, naming_rule: str):
-    poster_path = os.path.join(path, (naming_rule + "-poster.jpg"))
-    pic = None
-    try:
-        if os.path.exists(poster_path):
-            pic = Image.open(poster_path)
-            (width, height) = pic.size
-            if not 2 / 3 - 0.05 <= width / height <= 2 / 3 + 0.05:  # 仅处理会过度拉伸的图片
-                fixed_pic = pic.resize((int(width), int(3 / 2 * width)))  # 拉伸图片
-                fixed_pic = fixed_pic.filter(ImageFilter.GaussianBlur(radius=50))  # 高斯模糊
-                fixed_pic.paste(pic, (0, int((3 / 2 * width - height) / 2)))  # 粘贴原图
-                fixed_pic.save(poster_path, quality=95, subsampling=0)
-    except Exception:
-        signal.show_log_text(f"{traceback.format_exc()}\n Pic: {poster_path}")
-    finally:
-        if pic is not None:
-            pic.close()
 
 
 def cut_thumb_to_poster(
@@ -76,7 +60,7 @@ def cut_thumb_to_poster(
 ):
     start_time = time.time()
     if os.path.exists(poster_path):
-        delete_file(poster_path)
+        delete_file_sync(poster_path)
 
     img = None
     img_new = None
@@ -101,7 +85,7 @@ def cut_thumb_to_poster(
 
         # 不裁剪
         if image_cut == "no":
-            copy_file(thumb_path, poster_path)
+            copy_file_sync(thumb_path, poster_path)
             LogBuffer.log().write(f"\n 🍀 Poster done! (copy thumb)({get_used_time(start_time)}s)")
             json_data["poster_from"] = "copy thumb"
             img.close()
@@ -135,7 +119,7 @@ def cut_thumb_to_poster(
         img_new = cast(Image.Image, img_new)
         img_new_png = img_new.crop((ax, ay, bx, by))
         img_new_png.save(poster_path, quality=95, subsampling=0)
-        if check_pic(poster_path):
+        if config.executor.run(check_pic_async(poster_path)):
             LogBuffer.log().write(f"\n 🍀 Poster done! ({json_data['poster_from']})({get_used_time(start_time)}s)")
             return True
         LogBuffer.log().write(f"\n 🥺 Poster cut failed! ({json_data['poster_from']})({get_used_time(start_time)}s)")
@@ -198,8 +182,13 @@ def cut_pic(pic_path: str):
             img.close()
 
 
+async def fix_pic_async(pic_path: str, new_path: str):
+    await asyncio.to_thread(fix_pic, pic_path, new_path)
+
+
 def fix_pic(pic_path: str, new_path: str):
     pic = None
+    fixed_pic = None
     try:
         pic = Image.open(pic_path)
         (w, h) = pic.size
@@ -228,3 +217,5 @@ def fix_pic(pic_path: str, new_path: str):
     finally:
         if pic is not None:
             pic.close()
+        if fixed_pic is not None:
+            fixed_pic.close()

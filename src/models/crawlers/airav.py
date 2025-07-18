@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-import json
 import re
-import time  # yapf: disable # NOQA: E402
+import time
 
-import urllib3
 from lxml import etree
 
-from models.base.web import curl_html
+from models.config.manager import config
 from models.core.json_data import LogBuffer
-
-urllib3.disable_warnings()  # yapf: disable
 
 
 def getWebNumber(html):
@@ -74,22 +70,22 @@ def getCover(html):
     return result
 
 
-def getOutline(html, language, real_url):
+async def getOutline(html, language, real_url):
     if language == "zh_cn":
         real_url = real_url.replace("cn.airav.wiki", "www.airav.wiki").replace("zh_CN", "zh_TW")
-        try:
-            result, html_content = curl_html(real_url)
-        except Exception:
-            pass
-        html = etree.fromstring(html_content, etree.HTMLParser())
+        html_content, error = await config.async_client.get_text(real_url)
+        if html_content is not None:
+            html = etree.fromstring(html_content, etree.HTMLParser())
+
     result = str(html.xpath('//div[@class="synopsis"]/p/text()')).strip(" ['']")
     return result
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="zh_cn",
+    **kwargs,
 ):
     start_time = time.time()
     website_name = "airav"
@@ -119,9 +115,9 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            result, html_search = curl_html(url_search)
-            if not result:
-                debug_info = f"网络请求错误: {html_search}"
+            html_search, error = await config.async_client.get_text(url_search)
+            if html_search is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
@@ -140,9 +136,9 @@ def main(
         if real_url:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            result, html_content = curl_html(real_url)
-            if not result:
-                debug_info = f"网络请求错误: {html_content}"
+            html_content, error = await config.async_client.get_text(real_url)
+            if html_content is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -157,7 +153,7 @@ def main(
             actor = getActor(html_info)  # 获取actor
             actor_photo = getActorPhoto(actor)
             cover_url = getCover(html_info)  # 获取cover
-            outline = getOutline(html_info, language, real_url)
+            outline = await getOutline(html_info, language, real_url)
             release = getRelease(html_info)
             year = getYear(release)
             tag = getTag(html_info)
@@ -190,7 +186,7 @@ def main(
                     "publisher": publisher,
                     "source": "airav",
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": "",
                     "extrafanart": extrafanart,
                     "trailer": "",
@@ -211,19 +207,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
-    dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
+    dic = {website_name: {language: dic}}
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

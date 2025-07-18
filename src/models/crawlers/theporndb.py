@@ -1,21 +1,16 @@
 #!/usr/bin/env python3
-import json
 import os.path
 import re
-import time  # yapf: disable # NOQA: E402
+import time
 import traceback
 from difflib import SequenceMatcher
 
 import oshash
-import urllib3
 
 from models.base.number import long_name, remove_escape_string
-from models.base.web import get_html
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers import theporndb_movies
-
-urllib3.disable_warnings()  # yapf: disable
 
 
 def similarity(a, b):
@@ -260,12 +255,11 @@ def get_year(release):
         return ""
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="zh_cn",
     file_path="",
-    appoint_number="",
+    **kwargs,
 ):
     if not file_path:
         file_path = number + ".mp4"
@@ -308,13 +302,13 @@ def main(
                     url_hash = f"https://api.theporndb.net/scenes/hash/{hash}"
                     debug_info = f"请求地址: {url_hash} "
                     LogBuffer.info().write(web_info + debug_info)
-                    result, hash_search = get_html(url_hash, headers=headers, json_data=True)
+                    hash_search, error = await config.async_client.get_json(url_hash, headers=headers)
 
-                    if not result:
+                    if hash_search is None:
                         # 判断返回内容是否有问题
-                        debug_info = f"请求错误: {hash_search}"
+                        debug_info = f"请求错误: {error}"
                         LogBuffer.info().write(web_info + debug_info)
-                        if "401 http" in hash_search:
+                        if "HTTP 401" in error:
                             debug_info = f"请检查 API Token 是否正确: {api_token} "
                             LogBuffer.info().write(web_info + debug_info)
                         raise Exception(debug_info)
@@ -349,13 +343,13 @@ def main(
                     url_search = f"https://api.theporndb.net/scenes?parse={search_keyword}&per_page=100"
                     debug_info = f"请求地址: {url_search} "
                     LogBuffer.info().write(web_info + debug_info)
-                    result, res_search = get_html(url_search, headers=headers, json_data=True)
+                    res_search, error = await config.async_client.get_json(url_search, headers=headers)
 
-                    if not result:
+                    if res_search is None:
                         # 判断返回内容是否有问题
                         debug_info = f"请求错误: {url_search}"
                         LogBuffer.info().write(web_info + debug_info)
-                        if "401 http" in res_search:
+                        if "HTTP 401" in error:
                             debug_info = f"请检查 API Token 是否正确: {api_token} "
                             LogBuffer.info().write(web_info + debug_info)
                         raise Exception(debug_info)
@@ -371,12 +365,12 @@ def main(
         if not hash_data:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            result, res_real = get_html(real_url, headers=headers, json_data=True)
-            if not result:
+            res_real, error = await config.async_client.get_json(real_url, headers=headers)
+            if res_real is None:
                 # 判断返回内容是否有问题
-                debug_info = f"请求错误: {res_real} "
+                debug_info = f"请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
-                if "401 http" in res_real:
+                if "HTTP 401" in str(error):
                     debug_info = f"请检查 API Token 是否正确: {api_token} "
                     LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
@@ -431,7 +425,7 @@ def main(
                 "source": "theporndb",
                 "actor_photo": actor_photo,
                 "all_actor_photo": all_actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": poster_url,
                 "extrafanart": [],
                 "trailer": trailer,
@@ -451,24 +445,15 @@ def main(
 
     except Exception:
         # print(traceback.format_exc())
-        return theporndb_movies.main(
+        return await theporndb_movies.main(
             number,
             appoint_url=appoint_url,
-            language="zh_cn",
             file_path=file_path,
-            appoint_number=appoint_number,
         )
 
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

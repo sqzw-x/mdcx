@@ -1,20 +1,12 @@
 #!/usr/bin/env python3
 
-import json
 import re
-import time  # yapf: disable # NOQA: E402
+import time
 
-import urllib3
 from lxml import etree
 
-from models.base.web import get_html
+from models.config.manager import config
 from models.core.json_data import LogBuffer
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
-# import Function.config as cf
 
 
 def get_title(html):
@@ -100,10 +92,10 @@ def get_trailer(html):  # 获取预览片
     return result[0] if result else ""
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="jp",
+    **kwargs,
 ):
     # https://faleno.jp/top/works/fsdss564/
     # https://dahlia-av.jp/works/dldss177/
@@ -132,9 +124,9 @@ def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_info = get_html(real_url)
-            if not result:
-                debug_info = f"请求错误: {html_info} "
+            html_info, error = await config.async_client.get_text(real_url)
+            if html_info is None:
+                debug_info = f"请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 continue
 
@@ -190,7 +182,7 @@ def main(
                 "publisher": publisher,
                 "source": "dahlia",
                 "actor_photo": actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": poster_url,
                 "extrafanart": extrafanart,
                 "trailer": trailer,
@@ -213,19 +205,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
-import json
 import re
-import time  # yapf: disable # NOQA: E402
+import time
 
-import urllib3
 from lxml import etree
 
-from models.base.web import get_html
 from models.config.manager import config
 from models.core.json_data import LogBuffer
-
-urllib3.disable_warnings()  # yapf: disable
 
 
 def get_title(html):
@@ -163,10 +158,11 @@ def get_real_url(html, number):
     return ""
 
 
-def main(
+async def main(
     number,
     appoint_url="",
     language="zh_cn",
+    **kwargs,
 ):
     start_time = time.time()
     website_name = "iqqtv"
@@ -203,9 +199,9 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            result, html_search = get_html(url_search)
-            if not result:
-                debug_info = f"网络请求错误: {html_search}"
+            html_search, error = await config.async_client.get_text(url_search)
+            if html_search is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
@@ -222,9 +218,9 @@ def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
-        result, html_content = get_html(real_url)
-        if not result:
-            debug_info = f"网络请求错误: {html_content}"
+        html_content, error = await config.async_client.get_text(real_url)
+        if html_content is None:
+            debug_info = f"网络请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
         html_info = etree.fromstring(html_content, etree.HTMLParser())
@@ -275,7 +271,7 @@ def main(
                 "source": "iqqtv",
                 "website": real_url,
                 "actor_photo": actor_photo,
-                "cover": cover_url,
+                "thumb": cover_url,
                 "poster": "",
                 "extrafanart": extrafanart,
                 "trailer": "",
@@ -297,19 +293,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {language: dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

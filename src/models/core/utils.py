@@ -4,6 +4,7 @@
     此模块不应依赖 models.core 中除 flags 外的任何其他模块
 """
 
+import asyncio
 import json
 import os
 import re
@@ -13,7 +14,9 @@ import traceback
 import unicodedata
 from typing import Optional
 
-from ..base.file import read_link, split_path
+import aiofiles.os
+
+from ..base.file import read_link_async, split_path
 from ..base.number import deal_actor_more, get_number_first_letter, get_number_letters
 from ..base.path import get_path
 from ..base.utils import convert_path, get_used_time
@@ -115,19 +118,19 @@ def _get_video_metadata_ffmpeg(file_path: str) -> tuple[int, str]:
 _get_video_metadata = _get_video_metadata_opencv if has_opencv else _get_video_metadata_ffmpeg
 
 
-def get_video_size(json_data: JsonData, file_path: str):
+async def get_video_size(json_data: JsonData, file_path: str):
     # 获取本地分辨率 同时获取视频编码格式
     definition = ""
     height = 0
     hd_get = config.hd_get
-    if os.path.islink(file_path):
+    if await aiofiles.os.path.islink(file_path):
         if "symlink_definition" in config.no_escape:
-            file_path = read_link(file_path)
+            file_path = await read_link_async(file_path)
         else:
             hd_get = "path"
     if hd_get == "video":
         try:
-            height, codec_fourcc = _get_video_metadata(file_path)
+            height, codec_fourcc = await asyncio.to_thread(_get_video_metadata, file_path)
         except Exception as e:
             signal.show_log_text(f" 🔴 无法获取视频分辨率! 文件地址: {file_path}  错误信息: {e}")
     elif hd_get == "path":
@@ -405,7 +408,15 @@ def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str,
     )
 
 
-def render_name_template(template: str, file_path: str, json_data: JsonData, show_4k: bool, show_cnword: bool, show_moword: bool, should_escape_result: bool):
+def render_name_template(
+    template: str,
+    file_path: str,
+    json_data: JsonData,
+    show_4k: bool,
+    show_cnword: bool,
+    show_moword: bool,
+    should_escape_result: bool,
+):
     """
     将模板字符串替换成实际值
 

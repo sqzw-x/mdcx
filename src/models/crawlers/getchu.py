@@ -1,22 +1,15 @@
 #!/usr/bin/env python3
 
-import json
 import re
 import time
 import unicodedata
-import urllib
+import urllib.parse
 
-import urllib3
 from lxml import etree
 
-from models.base.web import get_html
+from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers import getchu_dl
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import traceback
 
 
 def get_web_number(html, number):
@@ -109,13 +102,13 @@ def get_extrafanart(html):
     return result
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="jp",
+    **kwargs,
 ):
     if "DLID" in number.upper() or "ITEM" in number.upper() or "GETCHU" in number.upper() or "dl.getchu" in appoint_url:
-        return getchu_dl.main(number, appoint_url, "jp")
+        return await getchu_dl.main(number, appoint_url)
     start_time = time.time()
     website_name = "getchu"
     getchu_url = "http://www.getchu.com"
@@ -151,9 +144,9 @@ def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            result, html_search = get_html(url_search, encoding="euc-jp", timeout=40)
-            if not result:
-                debug_info = f"网络请求错误: {html_search} "
+            html_search, error = await config.async_client.get_text(url_search, encoding="euc-jp")
+            if html_search is None:
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html = etree.fromstring(html_search, etree.HTMLParser())
@@ -171,15 +164,15 @@ def main(
             else:
                 debug_info = "搜索结果: 未匹配到番号！"
                 LogBuffer.info().write(web_info + debug_info)
-                return getchu_dl.main(number, appoint_url, "jp")
+                return await getchu_dl.main(number, appoint_url)
 
         if real_url:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_content = get_html(real_url, encoding="euc-jp", timeout=40)
-            if not result:
-                debug_info = f"网络请求错误: {html_content} "
+            html_content, error = await config.async_client.get_text(real_url, encoding="euc-jp")
+            if html_content is None:
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())
@@ -226,7 +219,7 @@ def main(
                     "publisher": publisher,
                     "source": "getchu",
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": cover_url,
                     "extrafanart": extrafanart,
                     "trailer": "",
@@ -248,19 +241,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

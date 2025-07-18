@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
-import json
 import re
 import time
 
-import urllib3
 from lxml import etree
 
-from models.base.web import check_url, get_html
+from models.base.web import check_url
+from models.config.manager import config
 from models.core.json_data import LogBuffer
-
-urllib3.disable_warnings()  # yapf: disable
-# import traceback
 
 seesaawiki_request_fail_flag = False
 
@@ -74,10 +70,10 @@ def get_extrafanart(html):
     return result
 
 
-def get_wiki_data():
+async def get_wiki_data():
     url = "https://seesaawiki.jp/av_neme/d/%C9%F1%A5%EF%A5%A4%A5%D5"
-    result, html_search = get_html(url, encoding="euc-jp")
-    if not result:
+    html_search, error = await config.async_client.get_text(url, encoding="euc-jp")
+    if html_search is None:
         return False
     try:
         html = etree.fromstring(html_search, etree.HTMLParser())
@@ -109,13 +105,13 @@ def get_wiki_data():
         return False
 
 
-def get_number_data(number):
+async def get_number_data(number):
     global seesaawiki_request_fail_flag
     data = {}
     try:
         mywife_data = data["mywife"]
     except Exception:
-        mywife_data = get_wiki_data()
+        mywife_data = await get_wiki_data()
         if not mywife_data:
             seesaawiki_request_fail_flag = True
             return False
@@ -123,10 +119,10 @@ def get_number_data(number):
     return mywife_data.get(str(number))
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="jp",
+    **kwargs,
 ):
     global seesaawiki_request_fail_flag
     try:  # 捕获主动抛出的异常
@@ -161,14 +157,14 @@ def main(
             debug_info = "请求 seesaawiki.jp 数据... "
             LogBuffer.info().write(web_info + debug_info)
 
-            number_data = get_number_data(key)
+            number_data = await get_number_data(key)
             if number_data:
                 number = number_data["number"]
                 actor = number_data["actor"]
                 poster = number_data["poster"]
                 real_url = number_data["website"]
                 if "mywife.cc" not in real_url:
-                    web_url = check_url(real_url, real_url=True)
+                    web_url = await check_url(real_url, real_url=True)
                     real_url = re.sub(r"\?.*$", "", web_url) if web_url else ""
 
         if not real_url:
@@ -186,9 +182,9 @@ def main(
             debug_info = f"搜索页地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_content = get_html(url_search)
-            if not result:
-                debug_info = f"网络请求错误: {html_content} "
+            html_content, error = await config.async_client.get_text(url_search)
+            if html_content is None:
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())
@@ -198,9 +194,9 @@ def main(
                 debug_info = f"中间页地址: {first_url} "
                 LogBuffer.info().write(web_info + debug_info)
 
-                result, html_content = get_html(first_url)
-                if not result:
-                    debug_info = f"网络请求错误: {html_content} "
+                html_content, error = await config.async_client.get_text(first_url)
+                if html_content is None:
+                    debug_info = f"网络请求错误: {error} "
                     LogBuffer.info().write(web_info + debug_info)
                     raise Exception(debug_info)
                 html_info = etree.fromstring(html_content, etree.HTMLParser())
@@ -221,9 +217,9 @@ def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            result, html_content = get_html(real_url)
-            if not result:
-                debug_info = f"网络请求错误: {html_content} "
+            html_content, error = await config.async_client.get_text(real_url)
+            if html_content is None:
+                debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
             html_info = etree.fromstring(html_content, etree.HTMLParser())
@@ -254,7 +250,7 @@ def main(
                 LogBuffer.info().write(web_info + debug_info)
 
                 key = number.replace("No.", "")
-                number_data = get_number_data(key)
+                number_data = await get_number_data(key)
                 if number_data:
                     actor = number_data["actor"]
                     poster = number_data["poster"]
@@ -279,7 +275,7 @@ def main(
                     "publisher": publisher,
                     "source": "mywife",
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": poster,
                     "extrafanart": extrafanart,
                     "trailer": trailer,
@@ -301,19 +297,12 @@ def main(
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

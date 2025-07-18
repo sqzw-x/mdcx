@@ -3,7 +3,6 @@ import os
 import platform
 import sys
 
-import urllib3  # yapf: disable # NOQA: E402
 from PIL import ImageFile
 from PyQt5.QtCore import QCoreApplication, Qt
 from PyQt5.QtGui import QIcon
@@ -14,7 +13,6 @@ from controllers.main_window.main_window import MyMAinWindow
 
 # import faulthandler
 # faulthandler.enable()
-urllib3.disable_warnings()  # yapf: disable # NOQA: E402
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 if __name__ == "__main__":

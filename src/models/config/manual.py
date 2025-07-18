@@ -41,7 +41,49 @@ class ManualConfig:
         "xcity",
     ]
 
-    # 刮削过程所需预设值
+    # 可配置的字段
+    CONFIG_DATA_FIELDS = [
+        "title",
+        "title_zh",  # 根据语言设置, 分别对应 title 和 originaltitle
+        "outline",
+        "outline_zh",
+        "actor",
+        "thumb",  # 在 nfo 相关配置中为 cover
+        "poster",
+        "extrafanart",
+        "tag",
+        "release",
+        "runtime",
+        "score",
+        "director",
+        "series",
+        "studio",
+        "publisher",
+        "trailer",
+        "wanted",
+    ]
+    # 爬虫返回的字段
+    CRAWLER_DATA_FIELDS = [
+        "title",
+        "originaltitle",
+        "outline",
+        "originalplot",
+        "actor",
+        "thumb",
+        "poster",
+        "extrafanart",
+        "tag",
+        "release",
+        "runtime",
+        "score",
+        "director",
+        "series",
+        "studio",
+        "publisher",
+        "trailer",
+        "wanted",
+        "year",
+    ]
     OUMEI_NAME = {
         "wgp": "WhenGirlsPlay",
         "18og": "18OnlyGirls",

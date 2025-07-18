@@ -3,8 +3,6 @@
 此模块不应依赖任何项目代码
 """
 
-import threading
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -20,9 +18,7 @@ class _Flags:
     total_kills: int = 0
     now_kill: int = 0
     success_save_time: float = 0.0
-    pool: ThreadPoolExecutor = None
     next_start_time: float = 0.0
-    lock: threading.Lock = field(default_factory=threading.Lock)
     count_claw: int = 0  # 批量刮削次数
     can_save_remain: bool = False  # 保存剩余任务
     remain_list: list[str] = field(default_factory=list)
@@ -68,12 +64,10 @@ class _Flags:
     )  # deep 翻译结果（当没有填写api时，使用第三方翻译模块，作用是实现超时自动退出，避免卡死）
     failed_list: list[list[str]] = field(default_factory=list)  # 失败文件和错误原因记录
     failed_file_list: list[str] = field(default_factory=list)  # 失败文件记录
-    stop_flag: bool = False  # 线程停止标识
     single_file_path: str = ""  # 工具单文件刮削的文件路径
     website_name: str = ""
     scrape_start_time: float = 0.0
     success_list: set[str] = field(default_factory=set)
-    threads_list: list[threading.Thread] = field(default_factory=list)  # 开启的线程列表
     stop_other: bool = True  # 非刮削线程停止标识
     local_number_flag: str = ""  # 启动后本地数据库是否扫描过
     actor_numbers_dic: dict[str, list[str]] = field(default_factory=dict)  # 每个演员所有番号的字典
@@ -108,7 +102,6 @@ class _Flags:
         self.json_data_dic = {}
         self.img_path = ""
         self.deepl_result = {}
-        self.stop_flag = False
 
 
 Flags = _Flags()

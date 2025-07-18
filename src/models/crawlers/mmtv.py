@@ -1,21 +1,13 @@
 #!/usr/bin/env python3
-import json
 import re
 import time
 
-import urllib3
 from lxml import etree
 
 from models.base.number import is_uncensored
-from models.base.web import curl_html
 from models.config.manager import config
 from models.core.json_data import LogBuffer
 from models.crawlers.guochan import get_extra_info
-
-urllib3.disable_warnings()  # yapf: disable
-
-
-# import Function.config as cf
 
 
 def get_actor_photo(actor):
@@ -175,11 +167,11 @@ def get_number(html, number):
     return number.replace("FC2-PPV ", "FC2-"), release, runtime, number
 
 
-def main(
+async def main(
     number,
     appoint_url="",
-    language="zh_cn",
     file_path="",
+    **kwargs,
 ):
     start_time = time.time()
     website_name = "7mmtv"
@@ -205,10 +197,10 @@ def main(
             search_url = f"{search_url}?search_keyword={search_keyword}&search_type=searchall&op=search"
             debug_info = f"搜索地址: {search_url} "
             LogBuffer.info().write(web_info + debug_info)
-            result, response = curl_html(search_url)
+            response, error = await config.async_client.get_text(search_url)
 
-            if not result:
-                debug_info = f"网络请求错误: {response}"
+            if response is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -223,9 +215,9 @@ def main(
                 raise Exception(debug_info)
 
         if real_url:
-            result, html_content = curl_html(real_url)
-            if not result:
-                debug_info = f"网络请求错误: {html_content}"
+            html_content, error = await config.async_client.get_text(real_url)
+            if html_content is None:
+                debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
 
@@ -268,7 +260,7 @@ def main(
                     "source": "7mmtv",
                     "website": real_url,
                     "actor_photo": actor_photo,
-                    "cover": cover_url,
+                    "thumb": cover_url,
                     "poster": "",
                     "extrafanart": extrafanart,
                     "trailer": "",
@@ -286,24 +278,16 @@ def main(
                 raise Exception(debug_info)
 
     except Exception as e:
-        # import traceback
         # print(traceback.format_exc())
         LogBuffer.error().write(str(e))
         dic = {
             "title": "",
-            "cover": "",
+            "thumb": "",
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    js = json.dumps(
-        dic,
-        ensure_ascii=False,
-        sort_keys=False,
-        indent=4,
-        separators=(",", ": "),
-    )  # .encode('UTF-8')
     LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
-    return js
+    return dic
 
 
 if __name__ == "__main__":

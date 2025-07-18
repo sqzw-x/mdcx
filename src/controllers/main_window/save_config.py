@@ -277,8 +277,17 @@ def save_config(self):
         (self.Ui.checkBox_youdao, "youdao"),
         (self.Ui.checkBox_google, "google"),
         (self.Ui.checkBox_deepl, "deepl"),
+        (self.Ui.checkBox_llm, "llm"),
     )
     config.deepl_key = self.Ui.lineEdit_deepl_key.text()  # deepl key
+
+    config.llm_url = self.Ui.lineEdit_llm_url.text()
+    config.llm_model = self.Ui.lineEdit_llm_model.text()
+    config.llm_key = self.Ui.lineEdit_llm_key.text()
+    config.llm_prompt = self.Ui.textEdit_llm_prompt.toPlainText()
+    config.llm_max_req_sec = self.Ui.doubleSpinBox_llm_max_req_sec.value()
+    config.llm_max_try = self.Ui.spinBox_llm_max_try.value()
+    config.llm_temperature = self.Ui.doubleSpinBox_llm_temperature.value()
     # endregion
 
     # region common
