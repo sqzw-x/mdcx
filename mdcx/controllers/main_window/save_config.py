@@ -193,6 +193,10 @@ def save_config(self):
     config.nfo_tag_series = self.Ui.lineEdit_nfo_tag_series.text()  # nfo_tag_series 格式
     config.nfo_tag_studio = self.Ui.lineEdit_nfo_tag_studio.text()  # nfo_tag_studio 格式
     config.nfo_tag_publisher = self.Ui.lineEdit_nfo_tag_publisher.text()  # nfo_tag_publisher 格式
+    config.nfo_tag_actor = self.Ui.lineEdit_nfo_tag_actor.text()  # nfo_tag_actor 格式
+    config.nfo_tag_actor_contains = self.Ui.lineEdit_nfo_tag_actor_contains.text().strip(
+        " |｜"
+    )  # nfo_tag_actor_contains 格式
 
     config.whole_fields = get_checkboxes(
         (self.Ui.radioButton_outline_more, "outline"),
@@ -301,7 +305,7 @@ def save_config(self):
         (self.Ui.checkBox_read_has_nfo_update, "has_nfo_update"),
         (self.Ui.checkBox_read_no_nfo_scrape, "no_nfo_scrape"),
         (self.Ui.checkBox_read_download_file_again, "read_download_again"),
-        (self.Ui.checkBox_read_translate_again, "read_translate_again"),
+        (self.Ui.checkBox_read_update_nfo, "read_update_nfo"),
     )
     # update 模式设置
     if self.Ui.radioButton_update_c.isChecked():
@@ -314,7 +318,9 @@ def save_config(self):
         config.update_mode = "c"
     config.update_a_folder = self.Ui.lineEdit_update_a_folder.text()  # 更新模式 - a 目录
     config.update_b_folder = self.Ui.lineEdit_update_b_folder.text()  # 更新模式 - b 目录
+    config.update_c_filetemplate = self.Ui.lineEdit_update_c_filetemplate.text()  # 更新模式 - c 文件命名规则
     config.update_d_folder = self.Ui.lineEdit_update_d_folder.text()  # 更新模式 - d 目录
+    config.update_titletemplate = self.Ui.lineEdit_update_titletemplate.text()  # 更新模式 - emby视频标题
     # 链接模式设置
     if self.Ui.radioButton_soft_on.isChecked():  # 软链接开
         config.soft_link = 1

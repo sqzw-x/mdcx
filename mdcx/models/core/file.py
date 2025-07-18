@@ -256,7 +256,7 @@ class Input_3(Input_11):
     folder_name: str
 
 
-def _get_folder_path(file_path: str, success_folder: str, json_data: Input_3) -> str:
+def _get_folder_path(file_path: str, success_folder: str, json_data: Input_3) -> tuple[str, str]:
     folder_name: str = config.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
     folder_path, file_name = split_path(file_path)  # 当前文件的目录和文件名
 
@@ -265,7 +265,7 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: Input_3) ->
         if config.update_mode == "c":
             folder_name = split_path(folder_path)[1]
             json_data["folder_name"] = folder_name
-            return folder_path
+            return folder_path, folder_name
         elif "bc" in config.update_mode:
             folder_name = config.update_b_folder
             success_folder = split_path(folder_path)[0]
@@ -282,12 +282,12 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: Input_3) ->
         if config.soft_link == 0 and not config.success_file_move:
             folder_path = split_path(file_path)[0]
             json_data["folder_name"] = folder_name
-            return folder_path
+            return folder_path, folder_name
 
     # 当根据刮削模式得到的视频目录名为空时，使用成功输出目录
     if not folder_name:
         json_data["folder_name"] = ""
-        return success_folder
+        return success_folder, folder_name
 
     show_4k = "folder" in config.show_4k
     show_cnword = config.folder_cnword
@@ -342,20 +342,27 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: Input_3) ->
 
     json_data["folder_name"] = folder_new_name
 
-    return folder_new_path.strip().replace(" /", "/")
+    return folder_new_path.strip().replace(" /", "/"), folder_name
 
 
 class Input_4(Input_11):
     cd_part: str
 
 
-def _generate_file_name(file_path: str, json_data: Input_4) -> str:
+def _generate_file_name(file_path: str, json_data: Input_4, folder_name_template: str) -> str:
     file_full_name = split_path(file_path)[1]
     file_name, file_ex = os.path.splitext(file_full_name)
 
     # 如果成功后不重命名，则返回原来名字
     if not config.success_file_rename:
         return file_name
+
+    # 更新模式 或 读取模式
+    if config.main_mode == 3 or config.main_mode == 4:
+        file_name_template = config.update_c_filetemplate
+    # 正常模式 或 整理模式
+    else:
+        file_name_template = config.naming_file
 
     # 获取文件信息
     cd_part = json_data["cd_part"]
@@ -364,9 +371,17 @@ def _generate_file_name(file_path: str, json_data: Input_4) -> str:
     show_cnword = config.file_cnword
     show_moword = "file" in config.show_moword
     should_escape_result = True
-    file_name, naming_file, number, originaltitle, outline, title = render_name_template(
-        config.naming_file, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result
+    file_name, file_name_template, number, originaltitle, outline, title = render_name_template(
+        file_name_template, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result
     )
+
+    # 当“视频文件名”和“视频目录名”相同，且没有设置防屏蔽字符时，视为想要分集命名，
+    # 此时直接修改文件名开头为目录名，避免因为长度限制处理导致文件名开头与目录名不一致的问题。
+    # 注意应该放在_render_name_template处理后，保证folder_name_template和file_name_template就算被处理也相同。
+    if folder_name_template == file_name_template and not config.prevent_char:
+        file_name = json_data["folder_name"]
+        file_name += cd_part
+        return file_name
 
     file_name += cd_part
 
@@ -389,19 +404,19 @@ def _generate_file_name(file_path: str, json_data: Input_4) -> str:
 
         # 如果没有防屏蔽字符，截短标题或者简介，这样不影响其他字段阅读
         if not prevent_char:
-            if "originaltitle" in naming_file:
+            if "originaltitle" in file_name_template:
                 LogBuffer.log().write(
                     f"\n 💡 当前文件名长度：{len(file_name)}，"
                     f"最大允许长度：{file_name_max}，文件命名时将去除原标题后{abs(cut_index)}个字符!"
                 )
                 file_name = file_name.replace(originaltitle, originaltitle[:cut_index])
-            elif "title" in naming_file:
+            elif "title" in file_name_template:
                 LogBuffer.log().write(
                     f"\n 💡 当前文件名长度：{len(file_name)}，"
                     f"最大允许长度：{file_name_max}，文件命名时将去除标题后{abs(cut_index)}个字符!"
                 )
                 file_name = file_name.replace(title, title[:cut_index])
-            elif "outline" in naming_file:
+            elif "outline" in file_name_template:
                 LogBuffer.log().write(
                     f"\n 💡 当前文件名长度：{len(file_name)}，"
                     f"最大允许长度：{file_name_max}，文件命名时将去除简介后{abs(cut_index)}个字符!"
@@ -436,10 +451,10 @@ def get_output_name(
     json_data: Input_5, file_path: str, success_folder: str, file_ex: str
 ) -> tuple[str, str, str, str, str, str, str, str, str, str]:
     # =====================================================================================更新输出文件夹名
-    folder_new_path = _get_folder_path(file_path, success_folder, json_data)
+    folder_new_path, foldername_template = _get_folder_path(file_path, success_folder, json_data)
     folder_new_path = _deal_path_name(folder_new_path)
     # =====================================================================================更新实体文件命名规则
-    naming_rule = _generate_file_name(file_path, json_data)
+    naming_rule = _generate_file_name(file_path, json_data, foldername_template)
     naming_rule = _deal_path_name(naming_rule)
     # =====================================================================================生成文件和nfo新路径
     file_new_name = naming_rule + file_ex.lower()

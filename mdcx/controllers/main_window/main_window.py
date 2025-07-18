@@ -1283,7 +1283,7 @@ class MyMAinWindow(QMainWindow):
             json_data["trailer"] = self.Ui.lineEdit_nfo_trailer.text()
             json_data["website"] = self.Ui.lineEdit_nfo_website.text()
             json_data["country"] = self.Ui.comboBox_nfo.currentText()
-            if config.executor.run(write_nfo(json_data, nfo_path, nfo_folder, file_path, edit_mode=True)):
+            if config.executor.run(write_nfo(json_data, nfo_path, nfo_folder, file_path, update=True)):
                 self.Ui.label_save_tips.setText(f"已保存! {get_current_time()}")
                 signal.add_label_info(json_data)
             else:
