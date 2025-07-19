@@ -1,0 +1,5 @@
+{
+    "xml.format.maxLineWidth": 0,
+    "python.analysis.languageServerMode": "full",
+    "python.analysis.typeCheckingMode": "standard",
+}

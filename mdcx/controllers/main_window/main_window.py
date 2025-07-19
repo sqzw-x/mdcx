@@ -5,6 +5,7 @@ import threading
 import time
 import traceback
 import webbrowser
+from typing import TYPE_CHECKING, cast
 
 from PyQt5.QtCore import QEvent, QPoint, Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QCursor, QHoverEvent, QIcon, QKeySequence
@@ -61,6 +62,9 @@ from mdcx.utils.file import delete_file_sync, open_file_thread
 from mdcx.utils.path import get_path
 from mdcx.views.MDCx import Ui_MDCx
 
+if TYPE_CHECKING:
+    from PyQt5.QtGui import QMouseEvent
+
 
 class MyMAinWindow(QMainWindow):
     # region 信号量
@@ -102,7 +106,7 @@ class MyMAinWindow(QMainWindow):
         self.json_data = {}  # 当前树状图选中文件的json_data
         self.img_path = ""  # 当前树状图选中文件的图片地址
         self.m_drag = False  # 允许鼠标拖动的标识
-        self.m_DragPosition = 0  # 鼠标拖动位置
+        self.m_DragPosition: QPoint  # 鼠标拖动位置
         self.logs_counts = 0  # 日志次数（每1w次清屏）
         self.req_logs_counts = 0  # 日志次数（每1w次清屏）
         self.file_main_open_path = ""  # 主界面打开的文件路径
@@ -133,23 +137,14 @@ class MyMAinWindow(QMainWindow):
 
         # region 其它属性声明
         self.threads_list: list[threading.Thread] = []  # 启动的线程列表
-        self.start_click_time = None
-        self.start_click_pos = None
-        self.menu_start = None
-        self.menu_stop = None
-        self.menu_number = None
-        self.menu_website = None
-        self.menu_del_file = None
-        self.menu_del_folder = None
-        self.menu_folder = None
-        self.menu_nfo = None
-        self.menu_play = None
-        self.menu_hide = None
+        self.start_click_time = 0
+        self.start_click_pos: QPoint
         self.window_marjin = None
         self.now_show_name = None
         self.show_name = None
         self.t_net = None
         self.options = None
+        self.tray_icon = None
         # endregion
 
         # region 初始化 UI
@@ -234,7 +229,7 @@ class MyMAinWindow(QMainWindow):
         self.Ui.page_main.setContextMenuPolicy(Qt.CustomContextMenu)
         self.Ui.page_main.customContextMenuRequested.connect(self._menu)
 
-    def _menu(self, pos=""):
+    def _menu(self, pos=None):
         if not pos:
             pos = self.Ui.pushButton_right_menu.pos() + QPoint(40, 10)
             # pos = QCursor().pos()
@@ -288,47 +283,52 @@ class MyMAinWindow(QMainWindow):
     def change_mainpage(self, t):
         self.pushButton_main_clicked()
 
-    def eventFilter(self, object_, event):
+    def eventFilter(self, a0, a1):
         # print(event.type())
 
-        if event.type() == 3:  # 松开鼠标，检查是否在前台
+        if a1.type() == 3:  # 松开鼠标，检查是否在前台
             self.recover_windowflags()
-        if event.type() == 121:
+        if a1.type() == 121:
             if not self.isVisible():
                 self.show()
-        if object_.objectName() == "label_poster" or object_.objectName() == "label_thumb":
-            if event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
-                self.start_click_time = time.time()
-                self.start_click_pos = event.globalPos()
-            elif event.type() == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton:
-                if not (event.globalPos() - self.start_click_pos) or (time.time() - self.start_click_time < 0.05):
-                    self._pic_main_clicked()
-        if object_ is self.Ui.textBrowser_log_main.viewport() or object_ is self.Ui.textBrowser_log_main_2.viewport():
-            if not self.Ui.textBrowser_log_main_3.isHidden() and event.type() == QEvent.MouseButtonPress:
+        if a0.objectName() == "label_poster" or a0.objectName() == "label_thumb":
+            if a1.type() == QEvent.Type.MouseButtonPress:
+                a1 = cast("QMouseEvent", a1)
+                if a1.button() == Qt.MouseButton.LeftButton:
+                    self.start_click_time = time.time()
+                    self.start_click_pos = a1.globalPos()
+            elif a1.type() == QEvent.Type.MouseButtonRelease:
+                a1 = cast("QMouseEvent", a1)
+                if a1.button() == Qt.MouseButton.LeftButton:
+                    if not bool(a1.globalPos() - self.start_click_pos) or (time.time() - self.start_click_time < 0.05):
+                        self._pic_main_clicked()
+        if a0 is self.Ui.textBrowser_log_main.viewport() or a0 is self.Ui.textBrowser_log_main_2.viewport():
+            if not self.Ui.textBrowser_log_main_3.isHidden() and a1.type() == QEvent.Type.MouseButtonPress:
                 self.Ui.textBrowser_log_main_3.hide()
                 self.Ui.pushButton_scraper_failed_list.hide()
                 self.Ui.pushButton_save_failed_list.hide()
-        return super().eventFilter(object_, event)
+        return super().eventFilter(a0, a1)
 
-    def showEvent(self, event):
+    def showEvent(self, a0):
         self.resize(1030, 700)  # 调整窗口大小
 
     # 当隐藏边框时，最小化后，点击任务栏时，需要监听事件，在恢复窗口时隐藏边框
-    def changeEvent(self, event):
+    def changeEvent(self, a0):
         # self.show_traceback_log(QEvent.WindowStateChange)
         # WindowState （WindowNoState=0 正常窗口; WindowMinimized= 1 最小化;
         # WindowMaximized= 2 最大化; WindowFullScreen= 3 全屏;WindowActive= 8 可编辑。）
         # windows平台无问题，仅mac平台python版有问题
         if not IS_WINDOWS:
-            if self.window_radius and event.type() == QEvent.WindowStateChange and not int(self.windowState()):
-                self.setWindowFlag(Qt.FramelessWindowHint, True)  # 隐藏边框
+            if self.window_radius and a0.type() == QEvent.Type.WindowStateChange and not int(self.windowState()):
+                self.setWindowFlag(Qt.WindowType.FramelessWindowHint, True)  # 隐藏边框
                 self.show()
 
         # activeAppName = AppKit.NSWorkspace.sharedWorkspace().activeApplication()['NSApplicationName'] # 活动窗口的标题
 
-    def closeEvent(self, event):
+    def closeEvent(self, a0):
         self.ready_to_exit()
-        event.ignore()
+        if a0:
+            a0.ignore()
 
     # 显示与隐藏窗口标题栏
     def _windows_auto_adjust(self):
@@ -389,23 +389,23 @@ class MyMAinWindow(QMainWindow):
 
     # region 拖动窗口
     # 按下鼠标
-    def mousePressEvent(self, e):
-        if e.button() == Qt.LeftButton:
+    def mousePressEvent(self, a0):
+        if a0 and a0.button() == Qt.MouseButton.LeftButton:
             self.m_drag = True
-            self.m_DragPosition = e.globalPos() - self.pos()
-            self.setCursor(QCursor(Qt.OpenHandCursor))  # 按下左键改变鼠标指针样式为手掌
+            self.m_DragPosition = a0.globalPos() - self.pos()
+            self.setCursor(QCursor(Qt.CursorShape.OpenHandCursor))  # 按下左键改变鼠标指针样式为手掌
 
     # 松开鼠标
-    def mouseReleaseEvent(self, e):
-        if e.button() == Qt.LeftButton:
+    def mouseReleaseEvent(self, a0):
+        if a0 and a0.button() == Qt.MouseButton.LeftButton:
             self.m_drag = False
-            self.setCursor(QCursor(Qt.ArrowCursor))  # 释放左键改变鼠标指针样式为箭头
+            self.setCursor(QCursor(Qt.CursorShape.ArrowCursor))  # 释放左键改变鼠标指针样式为箭头
 
     # 拖动鼠标
-    def mouseMoveEvent(self, e):
-        if Qt.LeftButton and self.m_drag:
-            self.move(e.globalPos() - self.m_DragPosition)
-            e.accept()
+    def mouseMoveEvent(self, a0):
+        if a0 and self.m_drag:
+            self.move(a0.globalPos() - self.m_DragPosition)
+            a0.accept()
 
     # endregion
 
@@ -458,10 +458,8 @@ class MyMAinWindow(QMainWindow):
                 manager.save_config()
             except Exception:
                 signal.show_traceback_log(traceback.format_exc())
-        try:
+        if self.tray_icon is not None:
             self.tray_icon.hide()
-        except Exception:
-            signal.show_traceback_log(traceback.format_exc())
         signal.show_traceback_log("\n\n\n\n************ 程序正常退出！************\n")
         os._exit(0)
 
@@ -474,7 +472,7 @@ class MyMAinWindow(QMainWindow):
             return
         # mac 平台 python 版本 最小化有问题，此处就是为了兼容它，需要先设置为显示窗口标题栏才能最小化
         if not IS_WINDOWS:
-            self.setWindowFlag(Qt.FramelessWindowHint, False)  # 不隐藏边框
+            self.setWindowFlag(Qt.WindowType.FramelessWindowHint, False)  # 不隐藏边框
 
         # self.setWindowState(Qt.WindowMinimized)
         # self.show_traceback_log(self.isMinimized())
@@ -482,7 +480,7 @@ class MyMAinWindow(QMainWindow):
 
     def pushButton_min_clicked2(self):
         if not IS_WINDOWS:
-            self.setWindowFlag(Qt.FramelessWindowHint, False)  # 不隐藏边框
+            self.setWindowFlag(Qt.WindowType.FramelessWindowHint, False)  # 不隐藏边框
             # self.show()  # 加上后可以显示缩小动画
         self.showMinimized()
 
@@ -1046,8 +1044,8 @@ class MyMAinWindow(QMainWindow):
         主界面点播放
         """
         # 发送hover事件，清除hover状态（因为弹窗后，失去焦点，状态不会变化）
-        self.Ui.pushButton_play.setAttribute(Qt.WA_UnderMouse, False)
-        event = QHoverEvent(QEvent.HoverLeave, QPoint(40, 40), QPoint(0, 0))
+        self.Ui.pushButton_play.setAttribute(Qt.WidgetAttribute.WA_UnderMouse, False)
+        event = QHoverEvent(QEvent.Type.HoverLeave, QPoint(40, 40), QPoint(0, 0))
         QApplication.sendEvent(self.Ui.pushButton_play, event)
         if self._check_main_file_path():
             file_path = convert_path(self.file_main_open_path)
@@ -1063,8 +1061,8 @@ class MyMAinWindow(QMainWindow):
         """
         主界面点打开文件夹
         """
-        self.Ui.pushButton_open_folder.setAttribute(Qt.WA_UnderMouse, False)
-        event = QHoverEvent(QEvent.HoverLeave, QPoint(40, 40), QPoint(0, 0))
+        self.Ui.pushButton_open_folder.setAttribute(Qt.WidgetAttribute.WA_UnderMouse, False)
+        event = QHoverEvent(QEvent.Type.HoverLeave, QPoint(40, 40), QPoint(0, 0))
         QApplication.sendEvent(self.Ui.pushButton_open_folder, event)
         if self._check_main_file_path():
             file_path = convert_path(self.file_main_open_path)
@@ -1080,8 +1078,8 @@ class MyMAinWindow(QMainWindow):
         """
         主界面点打开nfo
         """
-        self.Ui.pushButton_open_nfo.setAttribute(Qt.WA_UnderMouse, False)
-        event = QHoverEvent(QEvent.HoverLeave, QPoint(40, 40), QPoint(0, 0))
+        self.Ui.pushButton_open_nfo.setAttribute(Qt.WidgetAttribute.WA_UnderMouse, False)
+        event = QHoverEvent(QEvent.Type.HoverLeave, QPoint(40, 40), QPoint(0, 0))
         QApplication.sendEvent(self.Ui.pushButton_open_nfo, event)
         if self._check_main_file_path():
             self.Ui.widget_nfo.show()
@@ -1093,7 +1091,7 @@ class MyMAinWindow(QMainWindow):
         """
         # 发送hover事件，清除hover状态（因为弹窗后，失去焦点，状态不会变化）
         self.Ui.pushButton_right_menu.setAttribute(Qt.WA_UnderMouse, False)
-        event = QHoverEvent(QEvent.HoverLeave, QPoint(40, 40), QPoint(0, 0))
+        event = QHoverEvent(QEvent.Type.HoverLeave, QPoint(40, 40), QPoint(0, 0))
         QApplication.sendEvent(self.Ui.pushButton_right_menu, event)
         self._menu()
 
