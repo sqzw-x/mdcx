@@ -9,8 +9,9 @@ import oshash
 
 from mdcx.config.manager import config
 from mdcx.crawlers import theporndb_movies
-from mdcx.models.base.number import long_name, remove_escape_string
+from mdcx.models.base.number import remove_escape_string
 from mdcx.models.log_buffer import LogBuffer
+from mdcx.number import long_name
 
 
 def similarity(a, b):

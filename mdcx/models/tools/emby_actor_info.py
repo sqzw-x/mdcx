@@ -16,7 +16,7 @@ from lxml import etree
 from mdcx.config.extend import get_movie_path_setting
 from mdcx.config.manager import config
 from mdcx.config.resources import resources
-from mdcx.models.core.web import download_file_with_filepath
+from mdcx.models.base.web import download_file_with_filepath
 from mdcx.models.tools.actress_db import ActressDB
 from mdcx.models.tools.emby import EMbyActressInfo
 from mdcx.models.tools.emby_actor_image import (

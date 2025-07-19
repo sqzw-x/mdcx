@@ -10,13 +10,13 @@ import zhconv
 from mdcx.config.manager import config
 from mdcx.config.manual import ManualConfig
 from mdcx.config.resources import resources
-from mdcx.models.core.flags import Flags
-from mdcx.models.core.translate import (
+from mdcx.models.base.translate import (
     deepl_translate_async,
+    google_translate_async,
     llm_translate_async,
     youdao_translate_async,
 )
-from mdcx.models.core.web import google_translate_async
+from mdcx.models.flags import Flags
 from mdcx.models.tools.emby import EMbyActressInfo
 
 

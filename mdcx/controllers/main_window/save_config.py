@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt
 from mdcx.config.extend import get_movie_path_setting
 from mdcx.config.manager import config, manager
 from mdcx.controllers.main_window.bind_utils import get_checkbox, get_checkboxes, get_radio_buttons
-from mdcx.models.core.flags import Flags
+from mdcx.models.flags import Flags
 from mdcx.models.tools.actress_db import ActressDB
 from mdcx.signals import signal
 from mdcx.utils import convert_path

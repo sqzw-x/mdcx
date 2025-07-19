@@ -24,16 +24,10 @@ from mdcx.models.base.file import (
     pic_some_deal,
     save_success_list,
 )
+from mdcx.models.base.image import extrafanart_copy2, extrafanart_extras_copy
 from mdcx.models.core.crawler import crawl
-from mdcx.models.core.file import (
-    creat_folder,
-    deal_old_files,
-    get_file_info,
-    get_output_name,
-    move_movie,
-)
-from mdcx.models.core.flags import Flags
-from mdcx.models.core.image import add_mark, extrafanart_copy2, extrafanart_extras_copy
+from mdcx.models.core.file import creat_folder, deal_old_files, get_file_info, get_output_name, move_movie
+from mdcx.models.core.image import add_mark
 from mdcx.models.core.nfo import get_nfo_data, write_nfo
 from mdcx.models.core.translate import translate_actor, translate_info, translate_title_outline
 from mdcx.models.core.utils import (
@@ -52,6 +46,7 @@ from mdcx.models.core.web import (
     trailer_download,
 )
 from mdcx.models.enums import FileMode
+from mdcx.models.flags import Flags
 from mdcx.models.json_data import JsonData
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.tools.emby_actor_image import update_emby_actor_photo

@@ -9,10 +9,10 @@ import httpx
 
 from mdcx.config.manual import ManualConfig
 from mdcx.consts import MAIN_PATH, MARK_FILE
-from mdcx.models.base.llm import LLMClient
-from mdcx.models.base.web_async import AsyncWebClient
+from mdcx.llm import LLMClient
 from mdcx.signals import signal
 from mdcx.utils import executor, get_random_headers, get_user_agent
+from mdcx.web_async import AsyncWebClient
 
 
 def ini_value_to_bool(value: str) -> bool:

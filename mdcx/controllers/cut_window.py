@@ -8,8 +8,8 @@ from PyQt5.QtGui import QCursor, QPixmap
 from PyQt5.QtWidgets import QDialog, QFileDialog, QPushButton
 
 from mdcx.config.manager import config
+from mdcx.models.base.image import add_mark_thread
 from mdcx.models.core.file import get_file_info
-from mdcx.models.core.image import add_mark_thread
 from mdcx.utils import split_path
 from mdcx.utils.file import delete_file_sync
 from mdcx.views.posterCutTool import Ui_Dialog_cut_poster

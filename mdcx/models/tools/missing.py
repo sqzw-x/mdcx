@@ -15,7 +15,7 @@ from mdcx.config.manager import config, manager
 from mdcx.config.resources import resources
 from mdcx.models.base.file import movie_lists
 from mdcx.models.core.file import get_file_info
-from mdcx.models.core.flags import Flags
+from mdcx.models.flags import Flags
 from mdcx.signals import signal
 from mdcx.utils import get_used_time
 

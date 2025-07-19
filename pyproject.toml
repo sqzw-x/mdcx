@@ -13,7 +13,7 @@ dependencies = [
     "lxml==5.4.0",
     "numpy==1.26.4",
     "openai==1.91.0",
-    "opencv-contrib-python-headless==4.7.0.68",
+    "opencv-contrib-python-headless==4.8.*",
     "oshash==0.1.1",
     "pillow==9.4.0",
     "ping3==4.0.4",

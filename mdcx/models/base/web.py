@@ -4,24 +4,19 @@ import re
 import threading
 from io import BytesIO
 from typing import List, Literal, Optional, Tuple, overload
-from urllib.parse import quote
 
+import aiofiles.os
+from lxml import etree
 from PIL import Image
 from ping3 import ping
 
 from mdcx.config.manager import config
+from mdcx.config.manual import ManualConfig
 from mdcx.models.base.web_sync import get_json_sync
+from mdcx.models.log_buffer import LogBuffer
 from mdcx.signals import signal
 from mdcx.utils import get_user_agent
-
-
-def url_encode(url: str) -> str:
-    new_url = ""
-    for i in url:
-        if i not in [":", "/", "&", "?", "=", "%"]:
-            i = quote(i)
-        new_url += i
-    return new_url
+from mdcx.utils.file import check_pic_async
 
 
 @overload
@@ -387,3 +382,64 @@ async def get_big_pic_by_google(pic_url, poster=False) -> tuple[str, tuple[int, 
         return url, pic_size
     else:
         return "", (0, 0)
+
+
+async def get_actorname(number: str) -> tuple[bool, str]:
+    # 获取真实演员名字
+    url = f"https://av-wiki.net/?s={number}"
+    res, error = await config.async_client.get_text(url)
+    if res is None:
+        return False, f"Error: {error}"
+    html_detail = etree.fromstring(res, etree.HTMLParser(encoding="utf-8"))
+    actor_box = html_detail.xpath('//ul[@class="post-meta clearfix"]')
+    for each in actor_box:
+        actor_name = each.xpath('li[@class="actress-name"]/a/text()')
+        actor_number = each.xpath('li[@class="actress-name"]/following-sibling::li[last()]/text()')
+        if actor_number:
+            if actor_number[0].upper().endswith(number.upper()) or number.upper().endswith(actor_number[0].upper()):
+                return True, ",".join(actor_name)
+    return False, "No Result!"
+
+
+async def get_yesjav_title(movie_number: str) -> str:
+    yesjav_url = f"http://www.yesjav101.com/search.asp?q={movie_number}&"
+    movie_title = ""
+    response, error = await config.async_client.get_text(yesjav_url)
+    if response is not None:
+        parser = etree.HTMLParser(encoding="utf-8")
+        html = etree.HTML(response, parser)
+        movie_title = html.xpath(
+            '//dl[@id="zi"]/p/font/a/b[contains(text(), $number)]/../../a[contains(text(), "中文字幕")]/text()',
+            number=movie_number,
+        )
+        if movie_title:
+            movie_title = movie_title[0]
+            for each in ManualConfig.CHAR_LIST:
+                movie_title = movie_title.replace(each, "")
+            movie_title = movie_title.strip()
+    return movie_title
+
+
+async def download_file_with_filepath(url: str, file_path: str, folder_new_path: str) -> bool:
+    if not url:
+        return False
+
+    if not await aiofiles.os.path.exists(folder_new_path):
+        await aiofiles.os.makedirs(folder_new_path)
+    try:
+        if await config.async_client.download(url, file_path):
+            return True
+    except Exception:
+        pass
+    LogBuffer.log().write(f"\n 🥺 Download failed! {url}")
+    return False
+
+
+async def _mutil_extrafanart_download_thread(task: tuple[str, str, str, str]) -> bool:
+    extrafanart_url, extrafanart_file_path, extrafanart_folder_path, extrafanart_name = task
+    if await download_file_with_filepath(extrafanart_url, extrafanart_file_path, extrafanart_folder_path):
+        if await check_pic_async(extrafanart_file_path):
+            return True
+    else:
+        LogBuffer.log().write(f"\n 💡 {extrafanart_name} download failed! ( {extrafanart_url} )")
+    return False

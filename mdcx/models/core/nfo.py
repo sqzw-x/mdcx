@@ -12,9 +12,9 @@ import lxml.etree as etree
 
 from mdcx.config.manager import config
 from mdcx.config.manual import ManualConfig
-from mdcx.models.base.number import get_number_letters
 from mdcx.models.core.utils import render_name_template
 from mdcx.models.log_buffer import LogBuffer
+from mdcx.number import get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import convert_path, get_used_time, split_path
 from mdcx.utils.file import delete_file_async

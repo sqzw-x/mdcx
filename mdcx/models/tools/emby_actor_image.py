@@ -12,8 +12,8 @@ from lxml import etree
 
 from mdcx.config.manager import config
 from mdcx.config.resources import resources
-from mdcx.models.base.image import cut_pic, fix_pic_async
-from mdcx.models.core.web import download_file_with_filepath
+from mdcx.image import cut_pic, fix_pic_async
+from mdcx.models.base.web import download_file_with_filepath
 from mdcx.signals import signal
 from mdcx.utils import get_used_time
 

@@ -6,8 +6,8 @@ from lxml import etree
 
 from mdcx.config.manager import config
 from mdcx.crawlers.guochan import get_extra_info
-from mdcx.models.base.number import is_uncensored
 from mdcx.models.log_buffer import LogBuffer
+from mdcx.number import is_uncensored
 
 
 def get_actor_photo(actor):

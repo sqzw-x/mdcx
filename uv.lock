@@ -2,12 +2,21 @@ version = 1
 revision = 1
 requires-python = ">=3.9"
 resolution-markers = [
-    "python_full_version >= '3.11' and sys_platform == 'darwin'",
+    "python_full_version >= '3.12' and sys_platform == 'darwin'",
+    "python_full_version == '3.11.*' and sys_platform == 'darwin'",
     "python_full_version == '3.10.*' and sys_platform == 'darwin'",
-    "python_full_version >= '3.10' and platform_machine == 'aarch64' and sys_platform == 'linux'",
-    "python_full_version >= '3.10' and sys_platform == 'window'",
-    "python_full_version >= '3.10' and sys_platform == 'windows'",
-    "(python_full_version >= '3.10' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.10' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'window' and sys_platform != 'windows')",
+    "python_full_version >= '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
+    "python_full_version == '3.11.*' and platform_machine == 'aarch64' and sys_platform == 'linux'",
+    "python_full_version == '3.10.*' and platform_machine == 'aarch64' and sys_platform == 'linux'",
+    "python_full_version >= '3.12' and sys_platform == 'window'",
+    "python_full_version == '3.11.*' and sys_platform == 'window'",
+    "python_full_version == '3.10.*' and sys_platform == 'window'",
+    "python_full_version >= '3.12' and sys_platform == 'windows'",
+    "python_full_version == '3.11.*' and sys_platform == 'windows'",
+    "python_full_version == '3.10.*' and sys_platform == 'windows'",
+    "(python_full_version >= '3.12' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.12' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'window' and sys_platform != 'windows')",
+    "(python_full_version == '3.11.*' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version == '3.11.*' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'window' and sys_platform != 'windows')",
+    "(python_full_version == '3.10.*' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version == '3.10.*' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'window' and sys_platform != 'windows')",
     "python_full_version < '3.10' and platform_machine == 'arm64' and sys_platform == 'darwin'",
     "python_full_version < '3.10' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "python_full_version < '3.10' and platform_machine != 'arm64' and sys_platform == 'darwin'",
@@ -210,7 +219,7 @@ name = "exceptiongroup"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "(python_full_version < '3.13' and sys_platform != 'darwin') or (python_full_version < '3.11' and sys_platform == 'darwin')" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0b/9f/a65090624ecf468cdca03533906e7c69ed7588582240cfe7cc9e770b50eb/exceptiongroup-1.3.0.tar.gz", hash = "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88", size = 29749 }
 wheels = [
@@ -518,7 +527,7 @@ requires-dist = [
     { name = "lxml", specifier = "==5.4.0" },
     { name = "numpy", specifier = "==1.26.4" },
     { name = "openai", specifier = "==1.91.0" },
-    { name = "opencv-contrib-python-headless", specifier = "==4.7.0.68" },
+    { name = "opencv-contrib-python-headless", specifier = "==4.8.*" },
     { name = "oshash", specifier = "==0.1.1" },
     { name = "pillow", specifier = "==9.4.0" },
     { name = "ping3", specifier = "==4.0.4" },
@@ -598,19 +607,19 @@ wheels = [
 
 [[package]]
 name = "opencv-contrib-python-headless"
-version = "4.7.0.68"
+version = "4.8.1.78"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9e/2a/5e74ec98f6d3e8008745b3fdf6e3ea81c04d9a7f0eaafd6ecf1adafb0a0d/opencv-contrib-python-headless-4.7.0.68.tar.gz", hash = "sha256:340d087f4112679bc7017314b281340c27d811406c255d0ce83a3def44e2f3c0", size = 150477923 }
+sdist = { url = "https://files.pythonhosted.org/packages/51/2f/13431249a2950908aa59c0efd1d488f5ef6ce10952dc0bd08a0bbf086409/opencv-contrib-python-headless-4.8.1.78.tar.gz", hash = "sha256:6954205661c90e6f94b8b5158ea5d79165d9cc335170e8bea20ad565a75daa5a", size = 151259545 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0a/ff/5e6fd1af4cfacbef75960636948ff8131670b0f96ec292d3e0c5ed9d83c3/opencv_contrib_python_headless-4.7.0.68-cp37-abi3-macosx_10_13_x86_64.whl", hash = "sha256:a19ed749f9ee76b0c31e29c71802ab2189e047f9d9d8c98f376edf06de3bdeba", size = 61310520 },
-    { url = "https://files.pythonhosted.org/packages/e1/bd/0ddd87c22bc0d87ad4b11f411760095765f77a0d91993dd62032f50d2de8/opencv_contrib_python_headless-4.7.0.68-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:ce5fc8d6c967571ccaedf8883ba24bccdfcaef192f7ccb377adeabf83ace45dc", size = 41112835 },
-    { url = "https://files.pythonhosted.org/packages/1c/f5/546d8ef3b0f724640f297f12747291112283a85bdba802a0782fd7322229/opencv_contrib_python_headless-4.7.0.68-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b176cc7f74853cc17f72427d9f17da09b3a212b74975eb74a9762df795808f22", size = 32418305 },
-    { url = "https://files.pythonhosted.org/packages/a9/00/7abb373203b1079cb0a9e6f29362584c22e9bd739533f00256fbe7197bfe/opencv_contrib_python_headless-4.7.0.68-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7ab852d777c55df6651688cf15cd9f8fc8274449b57383b63c30e0f8d6b88359", size = 55305503 },
-    { url = "https://files.pythonhosted.org/packages/29/67/b98a5b74227a27558f042929487a75183343e260569f1c591e5b8ed5b746/opencv_contrib_python_headless-4.7.0.68-cp37-abi3-win32.whl", hash = "sha256:a57ef362f4506c835dffca69c921521ae4d0b495986b5cd59fe36e5629703062", size = 33955326 },
-    { url = "https://files.pythonhosted.org/packages/1c/2a/9406cfebec1e394165597dba5c46c198d066d8f654985add88d848ff16aa/opencv_contrib_python_headless-4.7.0.68-cp37-abi3-win_amd64.whl", hash = "sha256:106d1f71e9867be2520e455ce99dc9fad864d90cbb442e685b69e03176cce1ed", size = 44801154 },
+    { url = "https://files.pythonhosted.org/packages/f0/2c/cacbd738525dc11eaddc8f9d8c84a98132c835154a1ef67f4c9f2f6a5b05/opencv_contrib_python_headless-4.8.1.78-cp37-abi3-macosx_10_16_x86_64.whl", hash = "sha256:330255c987fded511cbe76a3ea9b4f9d5970c0c03f9db544ad44e1db81e1d75b", size = 64403727 },
+    { url = "https://files.pythonhosted.org/packages/38/69/56cf5c7385f2b3bc54e868db197c685410b35e3df5fd8135fd22427e4821/opencv_contrib_python_headless-4.8.1.78-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:07df781b5d2d5f7d729239fcf4674616601f3f375ae58d9dacb599d513b11108", size = 41438647 },
+    { url = "https://files.pythonhosted.org/packages/ca/e4/58b7fb579407a0d40fa93dc56f891f728fce2df0e885deadb855a101e062/opencv_contrib_python_headless-4.8.1.78-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:750491b9f6ad7e2d1820649cee7db6cf0b927e6d4f994953435a476ac6e902ae", size = 34309595 },
+    { url = "https://files.pythonhosted.org/packages/a2/e4/ff2c6ec908c942e619203fbb41dcc8506bd6c7312de519dba9d78b914c0c/opencv_contrib_python_headless-4.8.1.78-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9a6674d5f8428315c0c4be6f08fbc3a3ece4e703ed76fdb770dde4e2a265f193", size = 55194752 },
+    { url = "https://files.pythonhosted.org/packages/cf/f6/12998361d3c5384729969b7115080690e3a8b4f77a2502c6a9cd1f41527e/opencv_contrib_python_headless-4.8.1.78-cp37-abi3-win32.whl", hash = "sha256:84992dc32476ced6b00628e1bb912eca28a440921ee994e8c674e5ef31eb9f06", size = 33991946 },
+    { url = "https://files.pythonhosted.org/packages/82/25/ffadfb89fa68f51c6f6a9395074338488c018c00af9c73405503cf2ab198/opencv_contrib_python_headless-4.8.1.78-cp37-abi3-win_amd64.whl", hash = "sha256:7a5ff6365de18705466ed67b0ef291a2c38dba98e320da18d2d51cc5fbd0079a", size = 44691565 },
 ]
 
 [[package]]
@@ -881,7 +890,9 @@ name = "pyqt5"
 version = "5.15.6"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "(python_full_version >= '3.10' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.10' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'window' and sys_platform != 'windows')",
+    "(python_full_version >= '3.12' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.12' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'window' and sys_platform != 'windows')",
+    "(python_full_version == '3.11.*' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version == '3.11.*' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'window' and sys_platform != 'windows')",
+    "(python_full_version == '3.10.*' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version == '3.10.*' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'window' and sys_platform != 'windows')",
     "(python_full_version < '3.10' and platform_machine != 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.10' and sys_platform != 'darwin' and sys_platform != 'linux' and sys_platform != 'window' and sys_platform != 'windows')",
 ]
 dependencies = [
@@ -899,7 +910,8 @@ name = "pyqt5"
 version = "5.15.10"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.11' and sys_platform == 'darwin'",
+    "python_full_version >= '3.12' and sys_platform == 'darwin'",
+    "python_full_version == '3.11.*' and sys_platform == 'darwin'",
     "python_full_version == '3.10.*' and sys_platform == 'darwin'",
     "python_full_version < '3.10' and platform_machine == 'arm64' and sys_platform == 'darwin'",
     "python_full_version < '3.10' and platform_machine != 'arm64' and sys_platform == 'darwin'",

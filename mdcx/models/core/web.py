@@ -7,7 +7,6 @@ import os
 import re
 import shutil
 import time
-import traceback
 import urllib.parse
 from asyncio import to_thread
 from typing import Optional, TypedDict
@@ -17,99 +16,22 @@ import aiofiles.os
 from lxml import etree
 
 from mdcx.config.manager import config
-from mdcx.config.manual import ManualConfig
-from mdcx.models.base.web import check_url, get_amazon_data, get_big_pic_by_google, get_imgsize
-from mdcx.models.core.flags import Flags
+from mdcx.models.base.web import (
+    _mutil_extrafanart_download_thread,
+    check_url,
+    download_file_with_filepath,
+    get_amazon_data,
+    get_big_pic_by_google,
+    get_imgsize,
+)
 from mdcx.models.core.image import cut_thumb_to_poster
 from mdcx.models.core.utils import convert_half
+from mdcx.models.flags import Flags
 from mdcx.models.json_data import JsonData
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.signals import signal
 from mdcx.utils import get_used_time, split_path
 from mdcx.utils.file import check_pic_async, copy_file_async, delete_file_async, move_file_async
-
-
-async def get_actorname(number: str) -> tuple[bool, str]:
-    # 获取真实演员名字
-    url = f"https://av-wiki.net/?s={number}"
-    res, error = await config.async_client.get_text(url)
-    if res is None:
-        return False, f"Error: {error}"
-    html_detail = etree.fromstring(res, etree.HTMLParser(encoding="utf-8"))
-    actor_box = html_detail.xpath('//ul[@class="post-meta clearfix"]')
-    for each in actor_box:
-        actor_name = each.xpath('li[@class="actress-name"]/a/text()')
-        actor_number = each.xpath('li[@class="actress-name"]/following-sibling::li[last()]/text()')
-        if actor_number:
-            if actor_number[0].upper().endswith(number.upper()) or number.upper().endswith(actor_number[0].upper()):
-                return True, ",".join(actor_name)
-    return False, "No Result!"
-
-
-async def get_yesjav_title(movie_number: str) -> str:
-    yesjav_url = f"http://www.yesjav101.com/search.asp?q={movie_number}&"
-    movie_title = ""
-    response, error = await config.async_client.get_text(yesjav_url)
-    if response is not None:
-        parser = etree.HTMLParser(encoding="utf-8")
-        html = etree.HTML(response, parser)
-        movie_title = html.xpath(
-            '//dl[@id="zi"]/p/font/a/b[contains(text(), $number)]/../../a[contains(text(), "中文字幕")]/text()',
-            number=movie_number,
-        )
-        if movie_title:
-            movie_title = movie_title[0]
-            for each in ManualConfig.CHAR_LIST:
-                movie_title = movie_title.replace(each, "")
-            movie_title = movie_title.strip()
-    return movie_title
-
-
-async def google_translate_async(title: str, outline: str) -> tuple[str, str, Optional[str]]:
-    (r1, e1), (r2, e2) = await asyncio.gather(_google_translate(title), _google_translate(outline))
-    if r1 is None or r2 is None:
-        return "", "", f"google 翻译失败! {e1} {e2}"
-    return r1, r2, None
-
-
-async def _google_translate(msg: str) -> tuple[Optional[str], str]:
-    if not msg:
-        return "", ""
-    msg_unquote = urllib.parse.unquote(msg)
-    url = f"https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}"
-    response, error = await config.async_client.get_json(url)
-    if response is None:
-        return None, error
-    return "".join([sen[0] for sen in response[0]]), ""
-
-
-async def download_file_with_filepath(
-    url: str,
-    file_path: str,
-    folder_new_path: str,
-) -> bool:
-    if not url:
-        return False
-
-    if not await aiofiles.os.path.exists(folder_new_path):
-        await aiofiles.os.makedirs(folder_new_path)
-    try:
-        if await config.async_client.download(url, file_path):
-            return True
-    except Exception:
-        pass
-    LogBuffer.log().write(f"\n 🥺 Download failed! {url}")
-    return False
-
-
-async def _mutil_extrafanart_download_thread(task: tuple[JsonData, str, str, str, str]) -> bool:
-    json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path, extrafanart_name = task
-    if await download_file_with_filepath(extrafanart_url, extrafanart_file_path, extrafanart_folder_path):
-        if await check_pic_async(extrafanart_file_path):
-            return True
-    else:
-        LogBuffer.log().write(f"\n 💡 {extrafanart_name} download failed! ( {extrafanart_url} )")
-    return False
 
 
 class AmazonInput(TypedDict):
@@ -119,11 +41,7 @@ class AmazonInput(TypedDict):
     amazon_orginaltitle_actor: str
 
 
-async def get_big_pic_by_amazon(
-    json_data: AmazonInput,
-    originaltitle_amazon: str,
-    actor_amazon: list[str],
-) -> str:
+async def get_big_pic_by_amazon(json_data: AmazonInput, originaltitle_amazon: str, actor_amazon: list[str]) -> str:
     if not originaltitle_amazon or not actor_amazon:
         return ""
     hd_pic_url = ""
@@ -1044,9 +962,7 @@ async def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Opt
             extrafanart_count += 1
             extrafanart_name = "fanart" + str(extrafanart_count) + ".jpg"
             extrafanart_file_path = os.path.join(extrafanart_folder_path_temp, extrafanart_name)
-            task_list.append(
-                (json_data, extrafanart_url, extrafanart_file_path, extrafanart_folder_path_temp, extrafanart_name)
-            )
+            task_list.append((extrafanart_url, extrafanart_file_path, extrafanart_folder_path_temp, extrafanart_name))
 
         # 使用异步并发执行下载任务
         tasks = [_mutil_extrafanart_download_thread(task) for task in task_list]
@@ -1076,25 +992,3 @@ async def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Opt
     if await aiofiles.os.path.exists(extrafanart_folder_path):  # 使用旧文件
         LogBuffer.log().write(f"\n 🍀 ExtraFanart done! (old)({get_used_time(start_time)}s)")
         return True
-
-
-def show_netstatus() -> None:
-    signal.show_net_info(time.strftime("%Y-%m-%d %H:%M:%S").center(80, "="))
-    proxy_type = ""
-    retry_count = 0
-    proxy = ""
-    timeout = 0
-    try:
-        proxy_type, proxy, timeout, retry_count = config.type, config.proxy, config.timeout, config.retry
-    except Exception:
-        signal.show_traceback_log(traceback.format_exc())
-        signal.show_net_info(traceback.format_exc())
-    if proxy == "" or proxy_type == "" or proxy_type == "no":
-        signal.show_net_info(
-            f" 当前网络状态：❌ 未启用代理\n   类型： {str(proxy_type)}    地址：{str(proxy)}    超时时间：{str(timeout)}    重试次数：{str(retry_count)}"
-        )
-    else:
-        signal.show_net_info(
-            f" 当前网络状态：✅ 已启用代理\n   类型： {proxy_type}    地址：{proxy}    超时时间：{str(timeout)}    重试次数：{str(retry_count)}"
-        )
-    signal.show_net_info("=" * 80)

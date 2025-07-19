@@ -6,8 +6,8 @@ from lxml import etree
 
 from mdcx.config.manager import config
 from mdcx.crawlers import prestige
-from mdcx.models.base.number import get_number_letters
 from mdcx.models.log_buffer import LogBuffer
+from mdcx.number import get_number_letters
 
 
 def get_title(html):

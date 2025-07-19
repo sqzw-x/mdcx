@@ -13,7 +13,7 @@ from mdcx.config.manager import config, get_new_str, manager
 from mdcx.config.resources import resources
 from mdcx.consts import IS_WINDOWS
 from mdcx.controllers.main_window.bind_utils import set_checkboxes, set_radio_buttons
-from mdcx.models.core.flags import Flags
+from mdcx.models.flags import Flags
 from mdcx.signals import signal
 from mdcx.utils import convert_path
 from mdcx.utils.file import delete_file_sync

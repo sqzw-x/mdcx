@@ -16,12 +16,13 @@ from mdcx.consts import IS_MAC, IS_WINDOWS
 from mdcx.models.base.file import (
     _deal_path_name,
 )
-from mdcx.models.base.number import get_file_number, get_number_letters, is_uncensored, remove_escape_string
-from mdcx.models.core.flags import Flags
+from mdcx.models.base.number import remove_escape_string
 from mdcx.models.core.utils import Input_11, render_name_template
 from mdcx.models.enums import FileMode
+from mdcx.models.flags import Flags
 from mdcx.models.json_data import JsonData, MoveContext, new_json_data
 from mdcx.models.log_buffer import LogBuffer
+from mdcx.number import get_file_number, get_number_letters, is_uncensored
 from mdcx.signals import signal
 from mdcx.utils import convert_path, nfd2c, split_path
 from mdcx.utils.file import copy_file_async, delete_file_async, move_file_async, read_link_async
@@ -567,7 +568,7 @@ async def get_file_info(
 
         # 获取番号
         if not movie_number:
-            movie_number = get_file_number(file_path)
+            movie_number = get_file_number(file_path, config.escape_string_list)
 
         # 259LUXU-1111, 非mgstage、avsex去除前面的数字前缀
         temp_n = re.findall(r"\d{3,}([a-zA-Z]+-\d+)", movie_number)
