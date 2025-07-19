@@ -190,7 +190,7 @@ jobs:
           echo "" >> $GITHUB_OUTPUT
           echo "${{ needs.init-matrix.outputs.commits_since_tag }}" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
-          echo "⚠️ This is a development build and may contain unstable features." >> $GITHUB_OUTPUT
+          echo "⚠️ 此版本直接从 develop 分支构建, 仅供开发测试使用, 可能存在 bug 甚至无法运行. 确保在隔离环境里运行, 并充分评估风险." >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Create Release - macOS
