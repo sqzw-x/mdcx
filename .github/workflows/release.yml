@@ -203,7 +203,7 @@ jobs:
           prerelease: ${{ env.IS_DAILY == 'true' || env.IS_DEV == 'true' }}
           body: |
             ${{ env.IS_DAILY == 'true' && github.event.repository.updated_at || env.IS_DEV == 'true' && steps.get-dev-msg.outputs.DEV_MESSAGE || steps.get-changelog.outputs.CHANGELOG }}
-          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.event.inputs || github.ref }}
+          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.event.inputs.tag || github.ref }}
 
       - name: Create Release - Windows
         uses: svenstaro/upload-release-action@v2
@@ -215,4 +215,4 @@ jobs:
           prerelease: ${{ env.IS_DAILY == 'true' || env.IS_DEV == 'true' }}
           body: |
             ${{ env.IS_DAILY == 'true' && github.event.repository.updated_at || env.IS_DEV == 'true' && steps.get-dev-msg.outputs.DEV_MESSAGE || steps.get-changelog.outputs.CHANGELOG }}
-          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.event.inputs || github.ref }}
+          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.event.inputs.tag || github.ref }}
