@@ -14,11 +14,11 @@ on:
     inputs:
       tag:
         description: "Tag"
-        required: false
+        required: true
 
 env:
   PYTHON_VERSION: "3.9"
-  IS_DAILY: ${{ !startsWith(github.ref, 'refs/tags/120') && github.ref == 'refs/heads/master' }}
+  IS_DAILY: ${{ !startsWith(github.ref, 'refs/tags/120') && github.event.inputs.tag == '' && github.ref == 'refs/heads/master' }}
   IS_DEV: ${{ github.ref == 'refs/heads/dev' }}
 
 jobs:
@@ -203,7 +203,7 @@ jobs:
           prerelease: ${{ env.IS_DAILY == 'true' || env.IS_DEV == 'true' }}
           body: |
             ${{ env.IS_DAILY == 'true' && github.event.repository.updated_at || env.IS_DEV == 'true' && steps.get-dev-msg.outputs.DEV_MESSAGE || steps.get-changelog.outputs.CHANGELOG }}
-          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.ref }}
+          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.event.inputs || github.ref }}
 
       - name: Create Release - Windows
         uses: svenstaro/upload-release-action@v2
@@ -215,4 +215,4 @@ jobs:
           prerelease: ${{ env.IS_DAILY == 'true' || env.IS_DEV == 'true' }}
           body: |
             ${{ env.IS_DAILY == 'true' && github.event.repository.updated_at || env.IS_DEV == 'true' && steps.get-dev-msg.outputs.DEV_MESSAGE || steps.get-changelog.outputs.CHANGELOG }}
-          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.ref }}
+          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.event.inputs || github.ref }}
