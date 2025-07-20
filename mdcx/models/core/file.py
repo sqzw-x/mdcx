@@ -13,9 +13,7 @@ import aiofiles.os
 
 from mdcx.config.manager import config
 from mdcx.consts import IS_MAC, IS_WINDOWS
-from mdcx.models.base.file import (
-    _deal_path_name,
-)
+from mdcx.models.base.file import _deal_path_name
 from mdcx.models.base.number import remove_escape_string
 from mdcx.models.core.utils import Input_11, render_name_template
 from mdcx.models.enums import FileMode

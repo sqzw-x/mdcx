@@ -420,7 +420,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
 
     # 获取文件基础信息
     file_info = await get_file_info(file_path)
-    json_data, movie_number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = file_info
+    json_data, movie_number, folder_old_path, _, _, _, file_show_name, file_show_path = file_info
 
     # 显示刮削信息
     progress_value = Flags.scrape_started / count_all * 100
@@ -606,9 +606,7 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
                 signal.show_log_text(f"{n} 🖥 File path: {each_f}\n 🌐 File url: {each_i[1]}")
 
     # 获取设置的媒体目录、失败目录、成功目录
-    movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = (
-        get_movie_path_setting()
-    )
+    movie_path, _, _, escape_folder_list, _, softlink_path = get_movie_path_setting()
 
     # 获取待刮削文件列表的相关信息
     if not movie_list:
@@ -622,22 +620,22 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
     Flags.remain_list = movie_list
     Flags.can_save_remain = True
 
-    count_all = len(movie_list)
-    Flags.total_count = count_all
+    task_count = len(movie_list)
+    Flags.total_count = task_count
 
     task_list = []
     i = 0
     for each in movie_list:
         i += 1
-        task_list.append((each, i, count_all))
+        task_list.append((each, i, task_count))
 
-    if count_all:
+    if task_count:
         Flags.count_claw += 1
         if config.main_mode == 4:
             signal.show_log_text(f" 🕷 当前为读取模式，并发数（{thread_number}），线程延时（0）秒...")
         else:
-            if count_all < thread_number:
-                thread_number = count_all
+            if task_count < thread_number:
+                thread_number = task_count
             signal.show_log_text(f" 🕷 开启异步并发，并发数（{thread_number}），线程延时（{thread_time}）秒...")
         if "rest_scrape" in config.switch_on and config.main_mode != 4:
             signal.show_log_text(
@@ -664,17 +662,17 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
     await _clean_empty_fodlers(movie_path, file_mode)
     end_time = time.time()
     used_time = str(round((end_time - Flags.start_time), 2))
-    if count_all:
-        average_time = str(round((end_time - Flags.start_time) / count_all, 2))
+    if task_count:
+        average_time = str(round((end_time - Flags.start_time) / task_count, 2))
     else:
         average_time = used_time
     signal.exec_set_processbar.emit(0)
-    signal.set_label_file_path.emit(f"🎉 恭喜！全部刮削完成！共 {count_all} 个文件！用时 {used_time} 秒")
+    signal.set_label_file_path.emit(f"🎉 恭喜！全部刮削完成！共 {task_count} 个文件！用时 {used_time} 秒")
     signal.show_traceback_log(
-        f"🎉 All finished!!! Total {count_all} , Success {Flags.succ_count} , Failed {Flags.fail_count} "
+        f"🎉 All finished!!! Total {task_count} , Success {Flags.succ_count} , Failed {Flags.fail_count} "
     )
     signal.show_log_text(
-        f" 🎉🎉🎉 All finished!!! Total {count_all} , Success {Flags.succ_count} , Failed {Flags.fail_count} "
+        f" 🎉🎉🎉 All finished!!! Total {task_count} , Success {Flags.succ_count} , Failed {Flags.fail_count} "
     )
     signal.show_log_text("================================================================================")
     if Flags.failed_list:
@@ -688,10 +686,10 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
     )
     signal.show_log_text(" 🏁 End time".ljust(15) + ": " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time)))
     signal.show_log_text(" ⏱ Used time".ljust(15) + f": {used_time}S")
-    signal.show_log_text(" 📺 Movies num".ljust(15) + f": {count_all}")
+    signal.show_log_text(" 📺 Movies num".ljust(15) + f": {task_count}")
     signal.show_log_text(" 🍕 Per time".ljust(15) + f": {average_time}S")
     signal.show_log_text("================================================================================")
-    signal.show_scrape_info(f"🎉 刮削完成 {count_all}/{count_all}")
+    signal.show_scrape_info(f"🎉 刮削完成 {task_count}/{task_count}")
 
     # auto run after scrape
     if "actor_photo_auto" in config.emby_on:

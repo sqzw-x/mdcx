@@ -274,7 +274,7 @@ def get_success_list() -> None:
 async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path: str) -> list[str]:
     start_time = time.time()
     total = []
-    file_type = movie_type.split("|")
+    media_type = movie_type.split("|")
     skip_list = ["skip", ".skip", ".ignore"]
     not_skip_success = bool("skip_success_file" not in config.no_escape)
 
@@ -299,7 +299,7 @@ async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path
             else:
                 # 处理文件列表
                 for f in files:
-                    file_name, file_type_current = os.path.splitext(f)
+                    file_name, file_ext = os.path.splitext(f)
 
                     # 跳过隐藏文件、预告片、主题视频
                     if re.search(r"^\..+", file_name):
@@ -311,7 +311,7 @@ async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path
 
                     # 判断清理文件
                     path = os.path.join(root, f)
-                    if need_clean(path, f, file_type_current):
+                    if need_clean(path, f, file_ext):
                         result, error_info = delete_file_sync(path)
                         if result:
                             signal.show_log_text(f" 🗑 Clean: {path} ")
@@ -321,7 +321,7 @@ async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path
 
                     # 添加文件
                     temp_total = []
-                    if file_type_current.lower() in file_type:
+                    if file_ext.lower() in media_type:
                         if os.path.islink(path):
                             real_path = read_link_sync(path)
                             # 清理失效的软链接文件
@@ -399,9 +399,8 @@ async def get_movie_list(file_mode: FileMode, movie_path: str, escape_folder_lis
             elif config.main_mode == 3 or config.main_mode == 4:
                 escape_folder_list = []
             try:
-                movie_list = await movie_lists(
-                    escape_folder_list, config.media_type, movie_path
-                )  # 获取所有需要刮削的影片列表
+                # 获取所有需要刮削的影片列表
+                movie_list = await movie_lists(escape_folder_list, config.media_type, movie_path)
             except Exception:
                 signal.show_traceback_log(traceback.format_exc())
                 signal.show_log_text(traceback.format_exc())
