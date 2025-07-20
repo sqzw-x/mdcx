@@ -266,11 +266,11 @@ async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list
     # 缓存已请求的网站结果
     all_res: dict[tuple[str, str], CrawlerResult] = {}
 
-    reduced: CrawlersResult = new_json_data()  # 验证 JsonData 和 CrawlersResult 一致, 初始化所有字段
+    reduced = cast(CrawlersResult, new_json_data())  # 验证 JsonData 和 CrawlersResult 一致, 初始化所有字段
     reduced.update(**task_input)  # 复制输入数据
 
     # 无优先级设置的字段的默认配置
-    default_website_lang_pairs = [
+    default_website_lang_pairs: list[tuple[str, str]] = [
         (w, "") if w not in MULTI_LANGUAGE_WEBSITES else (w, "any") for w in number_website_list
     ]
 
@@ -447,13 +447,13 @@ async def _call_specific_crawler(task_input: CallCrawlerInput, website: str) -> 
         director_language = "zh_cn"
     web_data = await _call_crawler(task_input, website, title_language, org_language)
     web_data_json = web_data.get(website, {}).get(title_language)
-    res: CrawlersResult = new_json_data()
+    res = cast(CrawlersResult, new_json_data())
     res.update(**task_input)
     if web_data_json is None:
-        web_data_json = new_json_data()
-        web_data_json.update(**task_input)
+        web_data_json = cast(CrawlerResult, new_json_data())
+        web_data_json.update(**task_input)  # type: ignore
         web_data_json = cast(CrawlerResult, web_data_json)
-    res.update(**web_data_json)
+    res.update(**web_data_json)  # type: ignore
     if not res["title"]:
         return res
     if outline_language != title_language:
@@ -575,7 +575,7 @@ async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult:  #
                 res = await _call_crawlers(task_input, website_list)
             else:
                 LogBuffer.error().write(f"未识别到FC2番号：{file_number}")
-                res: CrawlersResult = new_json_data()
+                res = cast(CrawlersResult, new_json_data())
                 res.update(**task_input)
 
         # =======================================================================sexart.15.06.14

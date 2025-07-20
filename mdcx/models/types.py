@@ -274,12 +274,8 @@ class FileInfoResult(TypedDict):
     Output of get_file_info
     """
 
-    # file_path: str
-    # file_show_path: str
-    # file_name: str
-    # file_ex: str
-    # sub_list: list[str]
     number: str
+    letters: str
     cd_part: str
     has_sub: bool
     c_word: str
@@ -289,6 +285,11 @@ class FileInfoResult(TypedDict):
     youma: str
     mosaic: str
     _4K: str
+    file_path: str
+    short_number: str
+    appoint_number: str
+    appoint_url: str
+    website_name: str
 
 
 # image ============================================================
@@ -335,7 +336,6 @@ class ThumbContext(TypedDict):
     poster_big: bool
     trailer: str
     trailer_from: str
-    thumb_size: tuple[int, int]
 
 
 class PosterContext(CutThumbContext):

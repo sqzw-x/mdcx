@@ -6,6 +6,7 @@ import os
 import re
 import shutil
 import traceback
+from typing import cast
 
 import aiofiles
 import aiofiles.os
@@ -488,7 +489,7 @@ def get_output_name(
 async def get_file_info(
     file_path: str, copy_sub: bool = True
 ) -> tuple[FileInfoResult, str, str, str, str, list[str], str, str]:
-    json_data: FileInfoResult = new_json_data()
+    json_data = cast(FileInfoResult, new_json_data())
     movie_number = ""
     has_sub = False
     c_word = ""
