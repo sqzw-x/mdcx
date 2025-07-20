@@ -14,7 +14,7 @@ from lxml import etree
 from mdcx.config.manager import config, manager
 from mdcx.config.resources import resources
 from mdcx.models.base.file import movie_lists
-from mdcx.models.core.file import get_file_info
+from mdcx.models.core.file import get_file_info_v2
 from mdcx.models.flags import Flags
 from mdcx.signals import signal
 from mdcx.utils import get_used_time
@@ -232,7 +232,6 @@ async def check_missing_number(actor_flag):
             json_data = json.loads(await data.read())
         for movie_path in all_movie_list:
             nfo_path = os.path.splitext(movie_path)[0] + ".nfo"
-            json_data_temp = {}
             number = ""
             has_sub = False  # 初始化has_sub变量
             if json_data.get(movie_path):
@@ -251,17 +250,9 @@ async def check_missing_number(actor_flag):
                         else:
                             has_sub = False
                 if not number:
-                    (
-                        json_data_temp,
-                        number,
-                        folder_old_path,
-                        file_name,
-                        file_ex,
-                        sub_list,
-                        file_show_name,
-                        file_show_path,
-                    ) = await get_file_info(movie_path, copy_sub=False)
-                    has_sub = json_data_temp["has_sub"]  # 视频中文字幕标识
+                    file_info = await get_file_info_v2(movie_path, copy_sub=False)
+                    has_sub = file_info.has_sub
+                    number = file_info.number
                 cn_word_icon = "🀄️" if has_sub else ""
                 signal.show_log_text(f"   发现新番号：{number:<10} {cn_word_icon}")
             temp_number = re.findall(r"\d{3,}([a-zA-Z]+-\d+)", number)  # 去除前缀，因为 javdb 不带前缀

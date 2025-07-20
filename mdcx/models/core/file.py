@@ -2,7 +2,6 @@ import os
 import re
 import shutil
 import traceback
-from dataclasses import asdict
 
 import aiofiles
 import aiofiles.os
@@ -19,7 +18,6 @@ from mdcx.models.types import (
     CreateFolderContext,
     DealOldFilesInput,
     FileInfo,
-    FileInfoResult,
     GenerateFileNameInput,
     GetFolderPathInput,
     GetOutPutNameInput,
@@ -479,22 +477,6 @@ def get_output_name(
         poster_final_path,
         thumb_final_path,
         fanart_final_path,
-    )
-
-
-async def get_file_info(
-    file_path: str, copy_sub: bool = True
-) -> tuple[FileInfoResult, str, str, str, str, list[str], str, str]:
-    info = await get_file_info_v2(file_path, copy_sub)
-    return (
-        asdict(info),  # type: ignore
-        info.number,
-        info.folder_path,
-        info.file_name,
-        info.file_ex,
-        info.sub_list,
-        info.file_show_name,
-        info.file_show_path,
     )
 
 

@@ -270,29 +270,6 @@ class CreateFolderContext(TypedDict):
     poster_path: str
 
 
-class FileInfoResult(TypedDict):
-    """
-    Output of get_file_info
-    """
-
-    number: str
-    letters: str
-    cd_part: str
-    has_sub: bool
-    c_word: str
-    destroyed: str
-    leak: str
-    wuma: str
-    youma: str
-    mosaic: str
-    _4K: str
-    file_path: str
-    short_number: str
-    appoint_number: str
-    appoint_url: str
-    website_name: str
-
-
 @dataclass
 class FileInfo:
     """

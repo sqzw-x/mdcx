@@ -3,6 +3,7 @@ import os
 import re
 import time
 import traceback
+from dataclasses import asdict
 from typing import Optional, cast
 
 import aiofiles.os
@@ -26,7 +27,7 @@ from mdcx.models.base.file import (
 )
 from mdcx.models.base.image import extrafanart_copy2, extrafanart_extras_copy
 from mdcx.models.core.crawler import crawl
-from mdcx.models.core.file import creat_folder, deal_old_files, get_file_info, get_output_name, move_movie
+from mdcx.models.core.file import creat_folder, deal_old_files, get_file_info_v2, get_output_name, move_movie
 from mdcx.models.core.image import add_mark
 from mdcx.models.core.nfo import get_nfo_data, write_nfo
 from mdcx.models.core.translate import translate_actor, translate_info, translate_title_outline
@@ -50,13 +51,13 @@ from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.tools.emby_actor_image import update_emby_actor_photo
 from mdcx.models.tools.emby_actor_info import creat_kodi_actors
-from mdcx.models.types import JsonData
+from mdcx.models.types import FileInfo, JsonData
 from mdcx.signals import signal
 from mdcx.utils import convert_path, get_current_time, get_real_time, get_used_time, split_path
 from mdcx.utils.file import copy_file_async, move_file_async, read_link_async
 
 
-async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode) -> tuple[bool, JsonData]:
+async def _scrape_one_file(file_path: str, file_info: FileInfo, file_mode: FileMode) -> tuple[bool, JsonData]:
     # 处理单个文件刮削
     # 初始化所需变量
     start_time = time.time()
@@ -65,8 +66,14 @@ async def _scrape_one_file(file_path: str, file_info: tuple, file_mode: FileMode
     file_path = convert_path(file_path)
 
     # 获取文件信息
-    json_data, movie_number, folder_old_path, file_name, file_ex, sub_list, file_show_name, file_show_path = file_info
-    json_data = cast(JsonData, json_data)
+    json_data = asdict(file_info)  # type: ignore
+    json_data = cast(JsonData, json_data)  # todo
+
+    movie_number = file_info.number
+    folder_old_path = file_info.folder_path
+    file_name = file_info.file_name
+    file_ex = file_info.file_ex
+    sub_list = file_info.sub_list
 
     # 获取设置的媒体目录、失败目录、成功目录
     _, success_folder, *_ = get_movie_path_setting(file_path)
@@ -419,8 +426,12 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     file_mode = Flags.file_mode
 
     # 获取文件基础信息
-    file_info = await get_file_info(file_path)
-    json_data, movie_number, folder_old_path, _, _, _, file_show_name, file_show_path = file_info
+    file_info = await get_file_info_v2(file_path)
+    json_data = asdict(file_info)  # type: ignore
+    movie_number = file_info.number
+    folder_old_path = file_info.folder_path
+    file_show_name = file_info.file_show_name
+    file_show_path = file_info.file_show_path
 
     # 显示刮削信息
     progress_value = Flags.scrape_started / count_all * 100

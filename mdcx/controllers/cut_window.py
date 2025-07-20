@@ -1,5 +1,6 @@
 import os
 import traceback
+from dataclasses import asdict
 from typing import TYPE_CHECKING, cast
 
 from PIL import Image
@@ -9,7 +10,7 @@ from PyQt5.QtWidgets import QDialog, QFileDialog, QPushButton
 
 from mdcx.config.manager import config
 from mdcx.models.base.image import add_mark_thread
-from mdcx.models.core.file import get_file_info
+from mdcx.models.core.file import get_file_info_v2
 from mdcx.utils import split_path
 from mdcx.utils.file import delete_file_sync
 from mdcx.views.posterCutTool import Ui_Dialog_cut_poster
@@ -231,9 +232,9 @@ class CutWindow(QDialog):
                         if ".nfo" in each:
                             temp_path = os.path.join(img_folder, each)
                             break
-                json_data, *_ = config.executor.run(get_file_info(temp_path, copy_sub=False))
+                json_data = asdict(config.executor.run(get_file_info_v2(temp_path, copy_sub=False)))
 
-            self.setWindowTitle(json_data.get("number") + " 封面图片裁剪")  # 设置窗口标题
+            self.setWindowTitle(json_data.get("number", "") + " 封面图片裁剪")  # 设置窗口标题
 
             # 获取水印信息
             has_sub = json_data["has_sub"]
