@@ -228,9 +228,7 @@ async def add_mark_thread(pic_path: str, mark_list: list[str]):
 async def add_del_extrafanart_copy(mode: str):
     signal.show_log_text(f"Start {mode} extrafanart copy! \n")
 
-    movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = (
-        get_movie_path_setting()
-    )
+    movie_path, *_, extrafanart_folder, _ = get_movie_path_setting()
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 Checking all videos, Please wait...")
     movie_type = config.media_type
     movie_list = await movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表

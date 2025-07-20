@@ -22,9 +22,7 @@ async def add_sub_for_all_video():
         signal.show_log_text("字幕文件夹不存在！\n只能检查无字幕视频，无法添加字幕！")
         signal.show_log_text("================================================================================")
 
-    movie_path, success_folder, failed_folder, escape_folder_list, extrafanart_folder, softlink_path = (
-        get_movie_path_setting()
-    )
+    movie_path, *_ = get_movie_path_setting()
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 正在检查所有视频，请稍候...")
     if config.subtitle_add_chs:
         signal.show_log_text(" 如果字幕文件名不以 .chs 结尾，则会自动添加！\n")
