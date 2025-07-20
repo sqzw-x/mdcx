@@ -47,10 +47,10 @@ from mdcx.models.core.web import (
 )
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
-from mdcx.models.json_data import JsonData
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.tools.emby_actor_image import update_emby_actor_photo
 from mdcx.models.tools.emby_actor_info import creat_kodi_actors
+from mdcx.models.types import JsonData
 from mdcx.signals import signal
 from mdcx.utils import convert_path, get_current_time, get_real_time, get_used_time, split_path
 from mdcx.utils.file import copy_file_async, move_file_async, read_link_async

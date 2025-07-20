@@ -6,7 +6,6 @@ import os
 import re
 import shutil
 import traceback
-from typing import TypedDict
 
 import aiofiles
 import aiofiles.os
@@ -15,11 +14,20 @@ from mdcx.config.manager import config
 from mdcx.consts import IS_MAC, IS_WINDOWS
 from mdcx.models.base.file import _deal_path_name
 from mdcx.models.base.number import remove_escape_string
-from mdcx.models.core.utils import Input_11, render_name_template
+from mdcx.models.core.utils import render_name_template
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
-from mdcx.models.json_data import JsonData, MoveContext, new_json_data
 from mdcx.models.log_buffer import LogBuffer
+from mdcx.models.types import (
+    CreateFolderContext,
+    DealOldFilesInput,
+    FileInfoResult,
+    GenerateFileNameInput,
+    GetFolderPathInput,
+    GetOutPutNameInput,
+    MoveMovieContext,
+    new_json_data,
+)
 from mdcx.number import get_file_number, get_number_letters, is_uncensored
 from mdcx.signals import signal
 from mdcx.utils import convert_path, nfd2c, split_path
@@ -28,7 +36,7 @@ from mdcx.utils.path import showFilePath
 
 
 async def creat_folder(
-    json_data: JsonData,
+    json_data: CreateFolderContext,
     folder_new_path: str,
     file_path: str,
     file_new_path: str,
@@ -152,12 +160,7 @@ async def creat_folder(
     return True
 
 
-class CheckFileData(TypedDict):
-    outline: str
-    tag: str
-
-
-async def move_movie(json_data: MoveContext, file_path: str, file_new_path: str) -> bool:
+async def move_movie(json_data: MoveMovieContext, file_path: str, file_new_path: str) -> bool:
     # 明确不需要移动的，直接返回
     if json_data["dont_move_movie"]:
         LogBuffer.log().write(f"\n 🍀 Movie done! \n 🙉 [Movie] {file_path}")
@@ -251,11 +254,7 @@ async def move_movie(json_data: MoveContext, file_path: str, file_new_path: str)
         return False
 
 
-class Input_3(Input_11):
-    folder_name: str
-
-
-def _get_folder_path(file_path: str, success_folder: str, json_data: Input_3) -> tuple[str, str]:
+def _get_folder_path(file_path: str, success_folder: str, json_data: GetFolderPathInput) -> tuple[str, str]:
     folder_name: str = config.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
     folder_path, file_name = split_path(file_path)  # 当前文件的目录和文件名
 
@@ -344,11 +343,7 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: Input_3) ->
     return folder_new_path.strip().replace(" /", "/"), folder_name
 
 
-class Input_4(Input_11):
-    cd_part: str
-
-
-def _generate_file_name(file_path: str, json_data: Input_4, folder_name_template: str) -> str:
+def _generate_file_name(file_path: str, json_data: GenerateFileNameInput, folder_name_template: str) -> str:
     file_full_name = split_path(file_path)[1]
     file_name, file_ex = os.path.splitext(file_full_name)
 
@@ -441,13 +436,8 @@ def _generate_file_name(file_path: str, json_data: Input_4, folder_name_template
     return file_name
 
 
-class Input_5(Input_11):
-    folder_name: str
-    cd_part: str
-
-
 def get_output_name(
-    json_data: Input_5, file_path: str, success_folder: str, file_ex: str
+    json_data: GetOutPutNameInput, file_path: str, success_folder: str, file_ex: str
 ) -> tuple[str, str, str, str, str, str, str, str, str, str]:
     # =====================================================================================更新输出文件夹名
     folder_new_path, foldername_template = _get_folder_path(file_path, success_folder, json_data)
@@ -495,28 +485,10 @@ def get_output_name(
     )
 
 
-class FileInfo(TypedDict):
-    # file_path: str
-    # file_show_path: str
-    # file_name: str
-    # file_ex: str
-    # sub_list: list[str]
-    number: str
-    cd_part: str
-    has_sub: bool
-    c_word: str
-    destroyed: str
-    leak: str
-    wuma: str
-    youma: str
-    mosaic: str
-    _4K: str
-
-
 async def get_file_info(
     file_path: str, copy_sub: bool = True
-) -> tuple[FileInfo, str, str, str, str, list[str], str, str]:
-    json_data: FileInfo = new_json_data()
+) -> tuple[FileInfoResult, str, str, str, str, list[str], str, str]:
+    json_data: FileInfoResult = new_json_data()
     movie_number = ""
     has_sub = False
     c_word = ""
@@ -864,18 +836,8 @@ async def get_file_info(
     return json_data, movie_number, folder_path, file_name, file_ex, sub_list, file_show_name, file_show_path
 
 
-class Input_2(TypedDict):
-    number: str
-    poster_marked: bool
-    thumb_marked: bool
-    fanart_marked: bool
-    poster_path: str
-    thumb_path: str
-    fanart_path: str
-
-
 async def deal_old_files(
-    json_data: Input_2,
+    json_data: DealOldFilesInput,
     folder_old_path: str,
     folder_new_path: str,
     file_path: str,

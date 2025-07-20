@@ -11,7 +11,7 @@ from PIL import Image
 from ping3 import ping
 
 from mdcx.config.manager import config
-from mdcx.config.manual import ManualConfig
+from mdcx.consts import ManualConfig
 from mdcx.models.base.web_sync import get_json_sync
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.signals import signal

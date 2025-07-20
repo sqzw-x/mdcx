@@ -8,19 +8,18 @@ import asyncio
 import os
 import re
 import traceback
-from typing import Optional, TypedDict
 
 import aiofiles.os
 
 from mdcx.config.manager import config
-from mdcx.config.manual import ManualConfig
 from mdcx.config.resources import resources
+from mdcx.consts import ManualConfig
 from mdcx.models.base.number import deal_actor_more
-from mdcx.models.json_data import JsonData
 from mdcx.models.log_buffer import LogBuffer
+from mdcx.models.types import GetVideoSizeContext, JsonData, ShowData, ShowResultInput, TemplateInput
 from mdcx.number import get_number_first_letter, get_number_letters
 from mdcx.signals import signal
-from mdcx.utils import get_used_time, split_path
+from mdcx.utils import get_new_release, get_used_time, split_path
 from mdcx.utils.file import read_link_async
 from mdcx.utils.video import get_video_metadata
 
@@ -49,31 +48,88 @@ def replace_word(json_data: JsonData):
             json_data[field] = json_data[field].replace(each, "").strip(":， ").strip()
 
 
-class ShowData(TypedDict):
-    number: str
-    letters: str
-    has_sub: bool
-    cd_part: str
-    mosaic: str
-    title: str
-    originaltitle: str
-    actor: str
-    all_actor: str
-    outline: str
-    originalplot: str
-    tag: str
-    release: str
-    year: str
-    runtime: str
-    score: str
-    wanted: str
-    series: str
-    director: str
-    studio: str
-    publisher: str
-    trailer: str
-    website: str
-    javdbid: str
+def replace_special_word(json_data: JsonData):
+    # 常见字段替换的字符
+    all_key_word = [
+        "title",
+        "originaltitle",
+        "outline",
+        "originalplot",
+        "series",
+        "director",
+        "studio",
+        "publisher",
+        "tag",
+    ]
+    for key, value in ManualConfig.SPECIAL_WORD.items():
+        for each in all_key_word:
+            json_data[each] = json_data[each].replace(key, value)
+
+
+def deal_some_field(json_data: JsonData) -> JsonData:
+    fields_rule = config.fields_rule
+    actor = json_data["actor"]
+    title = json_data["title"]
+    originaltitle = json_data["originaltitle"]
+    number = json_data["number"]
+
+    # 演员处理
+    if actor:
+        # 去除演员名中的括号
+        new_actor_list = []
+        actor_list = []
+        temp_actor_list = []
+        for each_actor in actor.split(","):
+            if each_actor and each_actor not in actor_list:
+                actor_list.append(each_actor)
+                new_actor = re.findall(r"[^\(\)\（\）]+", each_actor)
+                if new_actor[0] not in new_actor_list:
+                    new_actor_list.append(new_actor[0])
+                temp_actor_list.extend(new_actor)
+        if "del_char" in fields_rule:
+            json_data["actor"] = ",".join(new_actor_list)
+        else:
+            json_data["actor"] = ",".join(actor_list)
+
+        # 去除标题后的演员名
+        if "del_actor" in fields_rule:
+            new_all_actor_name_list = []
+            for each_actor in json_data["actor_amazon"] + temp_actor_list:
+                # 获取演员映射表的所有演员别名进行替换
+                actor_keyword_list: list[str] = resources.get_actor_data(each_actor).get("keyword", [])
+                new_all_actor_name_list.extend(actor_keyword_list)
+            for each_actor in set(new_all_actor_name_list):
+                try:
+                    end_actor = re.compile(rf" {each_actor}$")
+                    title = re.sub(end_actor, "", title)
+                    originaltitle = re.sub(end_actor, "", originaltitle)
+                except Exception:
+                    signal.show_traceback_log(traceback.format_exc())
+        json_data["title"] = title.strip()
+        json_data["originaltitle"] = originaltitle.strip()
+
+    # 去除标题中的番号
+    if number != title and title.startswith(number):
+        title = title.replace(number, "").strip()
+        json_data["title"] = title
+    if number != originaltitle and originaltitle.startswith(number):
+        originaltitle = originaltitle.replace(number, "").strip()
+        json_data["originaltitle"] = originaltitle
+
+    # 去除标题中的/
+    json_data["title"] = json_data["title"].replace("/", "#").strip(" -")
+    json_data["originaltitle"] = json_data["originaltitle"].replace("/", "#").strip(" -")
+
+    # 去除素人番号前缀数字
+    if "del_num" in fields_rule:
+        temp_n = re.findall(r"\d{3,}([a-zA-Z]+-\d+)", number)
+        if temp_n:
+            json_data["number"] = temp_n[0]
+            json_data["letters"] = get_number_letters(json_data["number"])
+
+    if number.endswith("Z"):
+        json_data["number"] = json_data["number"][:-1] + "z"
+    return json_data
 
 
 def show_movie_info(json_data: ShowData):
@@ -92,7 +148,7 @@ def show_movie_info(json_data: ShowData):
         LogBuffer.log().write("\n     " + "%-13s" % key + ": " + str(value))
 
 
-async def get_video_size(json_data: JsonData, file_path: str):
+async def get_video_size(json_data: GetVideoSizeContext, file_path: str):
     # 获取本地分辨率 同时获取视频编码格式
     definition = ""
     height = 0
@@ -102,6 +158,7 @@ async def get_video_size(json_data: JsonData, file_path: str):
             file_path = await read_link_async(file_path)
         else:
             hd_get = "path"
+    codec_fourcc = ""
     if hd_get == "video":
         try:
             height, codec_fourcc = await asyncio.to_thread(get_video_metadata, file_path)
@@ -160,13 +217,13 @@ async def get_video_size(json_data: JsonData, file_path: str):
     [new_tag_list.append(i) for i in tag_list if i]
     if definition and "definition" in config.tag_include:
         new_tag_list.insert(0, definition)
-        if hd_get == "video":
+        if hd_get == "video" and codec_fourcc:
             new_tag_list.insert(0, codec_fourcc.upper())  # 插入编码格式
     json_data["tag"] = "，".join(new_tag_list)
     return json_data
 
 
-def show_data_result(json_data: JsonData, start_time: float):
+def show_data_result(json_data: ShowResultInput, start_time: float):
     if json_data["title"] == "":
         LogBuffer.log().write(
             f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
@@ -188,165 +245,10 @@ def show_data_result(json_data: JsonData, start_time: float):
         return True
 
 
-def deal_url(url: str) -> tuple[Optional[str], str]:
-    if "://" not in url:
-        url = "https://" + url
-    url = url.strip()
-    for key, vlaue in ManualConfig.WEB_DIC.items():
-        if key.lower() in url.lower():
-            return vlaue, url
-
-    # 自定义的网址
-    for web_name in ManualConfig.SUPPORTED_WEBSITES:
-        if hasattr(config, web_name + "_website"):
-            web_url = getattr(config, web_name + "_website")
-            if web_url in url:
-                return web_name, url
-
-    return None, url
-
-
-def replace_special_word(json_data: JsonData):
-    # 常见字段替换的字符
-    all_key_word = [
-        "title",
-        "originaltitle",
-        "outline",
-        "originalplot",
-        "series",
-        "director",
-        "studio",
-        "publisher",
-        "tag",
-    ]
-    for key, value in ManualConfig.SPECIAL_WORD.items():
-        for each in all_key_word:
-            json_data[each] = json_data[each].replace(key, value)
-
-
-def convert_half(string: str) -> str:
-    # 替换敏感词
-    for key, value in ManualConfig.SPECIAL_WORD.items():
-        string = string.replace(key, value)
-    # 替换全角为半角
-    for each in ManualConfig.FULL_HALF_CHAR:
-        string = string.replace(each[0], each[1])
-    # 去除空格等符号
-    return re.sub(r"[\W_]", "", string).upper()
-
-
-def get_new_release(release: str) -> str:
-    release_rule = config.release_rule
-    if not release:
-        release = "0000-00-00"
-    if release_rule == "YYYY-MM-DD":
-        return release
-    year, month, day = re.findall(r"(\d{4})-(\d{2})-(\d{2})", release)[0]
-    return release_rule.replace("YYYY", year).replace("YY", year[-2:]).replace("MM", month).replace("DD", day)
-
-
-def deal_some_field(json_data: JsonData) -> JsonData:
-    fields_rule = config.fields_rule
-    actor = json_data["actor"]
-    title = json_data["title"]
-    originaltitle = json_data["originaltitle"]
-    number = json_data["number"]
-
-    # 演员处理
-    if actor:
-        # 去除演员名中的括号
-        new_actor_list = []
-        actor_list = []
-        temp_actor_list = []
-        for each_actor in actor.split(","):
-            if each_actor and each_actor not in actor_list:
-                actor_list.append(each_actor)
-                new_actor = re.findall(r"[^\(\)\（\）]+", each_actor)
-                if new_actor[0] not in new_actor_list:
-                    new_actor_list.append(new_actor[0])
-                temp_actor_list.extend(new_actor)
-        if "del_char" in fields_rule:
-            json_data["actor"] = ",".join(new_actor_list)
-        else:
-            json_data["actor"] = ",".join(actor_list)
-
-        # 去除标题后的演员名
-        if "del_actor" in fields_rule:
-            new_all_actor_name_list = []
-            for each_actor in json_data["actor_amazon"] + temp_actor_list:
-                actor_keyword_list = resources.get_actor_data(each_actor).get(
-                    "keyword"
-                )  # 获取演员映射表的所有演员别名进行替换
-                new_all_actor_name_list.extend(actor_keyword_list)
-            for each_actor in set(new_all_actor_name_list):
-                try:
-                    end_actor = re.compile(rf" {each_actor}$")
-                    title = re.sub(end_actor, "", title)
-                    originaltitle = re.sub(end_actor, "", originaltitle)
-                except Exception:
-                    signal.show_traceback_log(traceback.format_exc())
-        json_data["title"] = title.strip()
-        json_data["originaltitle"] = originaltitle.strip()
-
-    # 去除标题中的番号
-    if number != title and title.startswith(number):
-        title = title.replace(number, "").strip()
-        json_data["title"] = title
-    if number != originaltitle and originaltitle.startswith(number):
-        originaltitle = originaltitle.replace(number, "").strip()
-        json_data["originaltitle"] = originaltitle
-
-    # 去除标题中的/
-    json_data["title"] = json_data["title"].replace("/", "#").strip(" -")
-    json_data["originaltitle"] = json_data["originaltitle"].replace("/", "#").strip(" -")
-
-    # 去除素人番号前缀数字
-    if "del_num" in fields_rule:
-        temp_n = re.findall(r"\d{3,}([a-zA-Z]+-\d+)", number)
-        if temp_n:
-            json_data["number"] = temp_n[0]
-            json_data["letters"] = get_number_letters(json_data["number"])
-
-    if number.endswith("Z"):
-        json_data["number"] = json_data["number"][:-1] + "z"
-    return json_data
-
-
-class Input_11(TypedDict):
-    """
-    输入数据类型定义
-    用于 render_name_template 函数的输入参数类型提示
-    """
-
-    destroyed: str
-    leak: str
-    wuma: str
-    youma: str
-    c_word: str
-    title: str
-    originaltitle: str
-    studio: str
-    publisher: str
-    year: str
-    outline: str
-    runtime: str
-    director: str
-    actor: str
-    release: str
-    number: str
-    series: str
-    mosaic: str
-    definition: str
-    letters: str
-    wanted: str
-    all_actor: str
-    score: str
-
-
 def render_name_template(
     template: str,
     file_path: str,
-    json_data: Input_11,
+    json_data: TemplateInput,
     show_4k: bool,
     show_cnword: bool,
     show_moword: bool,
@@ -422,7 +324,7 @@ def render_name_template(
         year = "0000"
     if not score:
         score = "0.0"
-    release = get_new_release(release)
+    release = get_new_release(release, config.release_rule)
     # 获取演员
     first_actor = actor.split(",").pop(0)
     all_actor = deal_actor_more(json_data["all_actor"])

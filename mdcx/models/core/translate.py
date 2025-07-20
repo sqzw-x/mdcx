@@ -18,16 +18,16 @@ from mdcx.models.base.translate import (
 )
 from mdcx.models.base.web import get_actorname, get_yesjav_title
 from mdcx.models.flags import Flags
-from mdcx.models.json_data import JsonData
 from mdcx.models.log_buffer import LogBuffer
+from mdcx.models.types import TranslateActorContext, TranslateInfoContext, TransTitleOutlineContext
 from mdcx.number import get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import get_used_time, remove_repeat
 
 
-def translate_info(json_data: JsonData):
+def translate_info(json_data: TranslateInfoContext):
     xml_info = resources.info_mapping_data
-    if len(xml_info) == 0:
+    if xml_info and len(xml_info) == 0:
         return json_data
     tag_translate = config.tag_translate
     series_translate = config.series_translate
@@ -134,7 +134,7 @@ def translate_info(json_data: JsonData):
     if series:  # 为空时会匹配所有
         if series_translate:  # 映射
             info_data = resources.get_info_data(series)
-            series = info_data.get(series_language)
+            series = info_data.get(series_language, "")
         if series and "series" in tag_include:  # 写nfo
             nfo_tag_series = config.nfo_tag_series.replace("series", series)
             if nfo_tag_series:
@@ -144,7 +144,7 @@ def translate_info(json_data: JsonData):
     if studio:
         if studio_translate:
             info_data = resources.get_info_data(studio)
-            studio = info_data.get(studio_language)
+            studio = info_data.get(studio_language, "")
         if studio and "studio" in tag_include:
             nfo_tag_studio = config.nfo_tag_studio.replace("studio", studio)
             if nfo_tag_studio:
@@ -154,7 +154,7 @@ def translate_info(json_data: JsonData):
     if publisher:
         if publisher_translate:
             info_data = resources.get_info_data(publisher)
-            publisher = info_data.get(publisher_language)
+            publisher = info_data.get(publisher_language, "")
         if publisher and "publisher" in tag_include:
             nfo_tag_publisher = config.nfo_tag_publisher.replace("publisher", publisher)
             if nfo_tag_publisher:
@@ -164,7 +164,7 @@ def translate_info(json_data: JsonData):
     if director:
         if director_translate:
             info_data = resources.get_info_data(director)
-            director = info_data.get(director_language)
+            director = info_data.get(director_language, "")
 
     if tag_language == "zh_cn":
         tag = zhconv.convert(tag, "zh-cn")
@@ -182,7 +182,7 @@ def translate_info(json_data: JsonData):
     return json_data
 
 
-async def translate_actor(json_data: JsonData):
+async def translate_actor(json_data: TranslateActorContext):
     # 网络请求真实的演员名字
     actor_realname = config.actor_realname
     mosaic = json_data["mosaic"]
@@ -218,7 +218,7 @@ async def translate_actor(json_data: JsonData):
 
     # 映射表数据加载失败，返回
     xml_actor = resources.actor_mapping_data
-    if len(xml_actor) == 0:
+    if xml_actor and len(xml_actor) == 0:
         return json_data
 
     # 未知演员，返回
@@ -256,7 +256,7 @@ async def translate_actor(json_data: JsonData):
     return json_data
 
 
-async def translate_title_outline(json_data: JsonData, movie_number: str):
+async def translate_title_outline(json_data: TransTitleOutlineContext, movie_number: str):
     title_language = config.title_language
     title_translate = config.title_translate
     outline_language = config.outline_language

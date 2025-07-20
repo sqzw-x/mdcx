@@ -1,7 +1,3 @@
-"""
-基本工具函数, 此模块不应依赖任何项目代码
-"""
-
 import asyncio
 import concurrent
 import concurrent.futures
@@ -19,7 +15,7 @@ from concurrent.futures import Future
 from threading import Thread
 from typing import Any, Coroutine, Set, TypeVar
 
-from mdcx.consts import IS_NFC
+from mdcx.consts import IS_NFC, ManualConfig
 
 T = TypeVar("T")
 
@@ -425,3 +421,23 @@ def split_path(path: str):
         p, f = os.path.split(path.replace("\\", "/"))
         return p.replace("/", "\\"), f
     return os.path.split(path)
+
+
+def get_new_release(release: str, release_rule: str) -> str:
+    if not release:
+        release = "0000-00-00"
+    if release_rule == "YYYY-MM-DD":
+        return release
+    year, month, day = re.findall(r"(\d{4})-(\d{2})-(\d{2})", release)[0]
+    return release_rule.replace("YYYY", year).replace("YY", year[-2:]).replace("MM", month).replace("DD", day)
+
+
+def convert_half(string: str) -> str:
+    # 替换敏感词
+    for key, value in ManualConfig.SPECIAL_WORD.items():
+        string = string.replace(key, value)
+    # 替换全角为半角
+    for each in ManualConfig.FULL_HALF_CHAR:
+        string = string.replace(each[0], each[1])
+    # 去除空格等符号
+    return re.sub(r"[\W_]", "", string).upper()

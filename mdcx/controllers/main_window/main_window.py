@@ -21,11 +21,10 @@ from PyQt5.QtWidgets import (
     QTreeWidgetItem,
 )
 
-from mdcx.config.extend import get_movie_path_setting
+from mdcx.config.extend import deal_url, get_movie_path_setting
 from mdcx.config.manager import config, manager
-from mdcx.config.manual import ManualConfig
 from mdcx.config.resources import resources
-from mdcx.consts import IS_WINDOWS, MARK_FILE
+from mdcx.consts import IS_WINDOWS, MARK_FILE, ManualConfig
 from mdcx.controllers.cut_window import CutWindow
 from mdcx.controllers.main_window.handlers import show_netstatus
 from mdcx.controllers.main_window.init import Init_QSystemTrayIcon, Init_Singal, Init_Ui, init_QTreeWidget
@@ -47,7 +46,6 @@ from mdcx.models.base.web import check_theporndb_api_token, check_version, get_a
 from mdcx.models.base.web_sync import get_text_sync
 from mdcx.models.core.nfo import write_nfo
 from mdcx.models.core.scraper import again_search, get_remain_list, start_new_scrape
-from mdcx.models.core.utils import deal_url
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer

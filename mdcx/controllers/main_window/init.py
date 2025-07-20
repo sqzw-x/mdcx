@@ -6,9 +6,8 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction, QMenu, QSystemTrayIcon, QTreeWidgetItem
 
 from mdcx.config.extend import get_movie_path_setting
-from mdcx.config.manual import ManualConfig
 from mdcx.config.resources import resources
-from mdcx.consts import IS_WINDOWS
+from mdcx.consts import IS_WINDOWS, ManualConfig
 from mdcx.models.flags import Flags
 from mdcx.signals import signal
 

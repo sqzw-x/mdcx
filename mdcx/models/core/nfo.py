@@ -3,7 +3,6 @@ import re
 import time
 import traceback
 from io import StringIO
-from typing import TypedDict
 
 import aiofiles
 import aiofiles.os
@@ -11,57 +10,18 @@ import langid
 import lxml.etree as etree
 
 from mdcx.config.manager import config
-from mdcx.config.manual import ManualConfig
+from mdcx.consts import ManualConfig
 from mdcx.models.core.utils import render_name_template
 from mdcx.models.log_buffer import LogBuffer
+from mdcx.models.types import ReadNfoResult, WriteNfoInput
 from mdcx.number import get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import convert_path, get_used_time, split_path
 from mdcx.utils.file import delete_file_async
 
 
-class NfoData(TypedDict):
-    title: str
-    originaltitle: str
-    originaltitle_amazon: str
-    number: str
-    letters: str
-    actor: str
-    all_actor: str
-    outline: str
-    originalplot: str
-    tag: str
-    release: str
-    year: str
-    runtime: str
-    score: str
-    director: str
-    series: str
-    studio: str
-    publisher: str
-    website: str
-    thumb: str
-    poster: str
-    trailer: str
-    wanted: str
-    poster_path: str
-    thumb_path: str
-    fanart_path: str
-    cd_part: str  # CD分卷信息
-    country: str  # 国家代码
-    outline_from: str  # 剧情简介来源
-    mosaic: str
-    # for render_name_template
-    destroyed: str
-    leak: str
-    wuma: str
-    youma: str
-    c_word: str
-    definition: str
-
-
 async def write_nfo(
-    json_data: NfoData,
+    json_data: WriteNfoInput,
     nfo_new_path: str,
     folder_new_path: str,
     file_path: str,
@@ -399,26 +359,11 @@ async def write_nfo(
         return False
 
 
-class ReadNfoData(NfoData):
-    source: str
-    poster_from: str
-    thumb_from: str
-    extrafanart_from: str
-    trailer_from: str
-    poster_path: str
-    thumb_path: str
-    fanart_path: str
-    outline_from: str
-    tag_only: str
-    thumb_list: list[tuple[str, str]]
-    actor_amazon: list[str]
-
-
-async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfoData]:
+async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfoResult]:
     local_nfo_path = os.path.splitext(file_path)[0] + ".nfo"
     local_nfo_name = split_path(local_nfo_path)[1]
     file_folder = split_path(file_path)[0]
-    json_data: ReadNfoData = {}
+    json_data: ReadNfoResult = {}
     json_data["source"] = "nfo"
     LogBuffer.req().write(local_nfo_path)
     json_data["poster_from"] = "local"

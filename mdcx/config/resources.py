@@ -8,8 +8,7 @@ from lxml import etree
 from PyQt5.QtGui import QFontDatabase
 
 from mdcx.config.manager import manager
-from mdcx.config.manual import ManualConfig
-from mdcx.consts import IS_PYINSTALLER, MAIN_PATH
+from mdcx.consts import IS_PYINSTALLER, MAIN_PATH, ManualConfig
 from mdcx.signals import signal
 from mdcx.utils import singleton
 from mdcx.utils.file import copy_file_sync
@@ -23,7 +22,7 @@ class Resources:
         if IS_PYINSTALLER:
             # 获取 pyinstaller 打包程序运行时解压资源的临时目录
             try:
-                self._resources_base_path = os.path.join(sys._MEIPASS, "resources")
+                self._resources_base_path = os.path.join(sys._MEIPASS, "resources")  # type: ignore
             except Exception:
                 signal.show_traceback_log(self._resources_base_path)
                 signal.show_traceback_log(traceback.format_exc())
@@ -73,7 +72,7 @@ class Resources:
 
         self.actor_mapping_data = None  # 演员映射表数据
         self.info_mapping_data = None  # 信息映射表数据
-        self.sehua_title_data = None  # 色花数据
+        self.sehua_title_data = {}  # 色花数据
 
         self._get_or_generate_local_data()
         self._get_mark_icon()
@@ -92,7 +91,7 @@ class Resources:
 
         # 查询映射表
         xml_actor = self.actor_mapping_data
-        if len(xml_actor):
+        if xml_actor and len(xml_actor):
             actor_name = f",{actor.upper()},"
             for each in ManualConfig.FULL_HALF_CHAR:
                 actor_name = actor_name.replace(each[0], each[1])
@@ -122,7 +121,7 @@ class Resources:
 
         # 查询映射表
         xml_info = self.info_mapping_data
-        if len(xml_info):
+        if xml_info and len(xml_info):
             info_name = f",{info.upper()},"
             for each in ManualConfig.FULL_HALF_CHAR:
                 info_name = info_name.replace(each[0], each[1])
@@ -189,7 +188,7 @@ class Resources:
             )
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
-            self.actor_mapping_data = {}
+            self.actor_mapping_data = None
 
     def _get_mark_icon(self):
         mark_folder = self.userdata_path("watermark")

@@ -1,7 +1,9 @@
 import os
 import re
+from typing import Optional
 
 from mdcx.config.manager import config, manager
+from mdcx.consts import ManualConfig
 from mdcx.utils import convert_path, nfd2c, split_path
 from mdcx.utils.path import get_path
 
@@ -104,3 +106,21 @@ def need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
         except Exception:
             pass
     return False
+
+
+def deal_url(url: str) -> tuple[Optional[str], str]:
+    if "://" not in url:
+        url = "https://" + url
+    url = url.strip()
+    for key, vlaue in ManualConfig.WEB_DIC.items():
+        if key.lower() in url.lower():
+            return vlaue, url
+
+    # 自定义的网址
+    for web_name in ManualConfig.SUPPORTED_WEBSITES:
+        if hasattr(config, web_name + "_website"):
+            web_url = getattr(config, web_name + "_website")
+            if web_url in url:
+                return web_name, url
+
+    return None, url

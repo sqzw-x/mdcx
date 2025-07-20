@@ -7,8 +7,7 @@ from io import StringIO
 
 import httpx
 
-from mdcx.config.manual import ManualConfig
-from mdcx.consts import MAIN_PATH, MARK_FILE
+from mdcx.consts import MAIN_PATH, MARK_FILE, ManualConfig
 from mdcx.llm import LLMClient
 from mdcx.signals import signal
 from mdcx.utils import executor, get_random_headers, get_user_agent

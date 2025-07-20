@@ -8,8 +8,8 @@ import langid
 import zhconv
 
 from mdcx.config.manager import config
-from mdcx.config.manual import ManualConfig
 from mdcx.config.resources import resources
+from mdcx.consts import ManualConfig
 from mdcx.models.base.translate import (
     deepl_translate_async,
     google_translate_async,

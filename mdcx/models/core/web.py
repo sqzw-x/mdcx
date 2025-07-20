@@ -9,7 +9,7 @@ import shutil
 import time
 import urllib.parse
 from asyncio import to_thread
-from typing import Optional, TypedDict
+from typing import Optional
 
 import aiofiles
 import aiofiles.os
@@ -25,23 +25,15 @@ from mdcx.models.base.web import (
     get_imgsize,
 )
 from mdcx.models.core.image import cut_thumb_to_poster
-from mdcx.models.core.utils import convert_half
 from mdcx.models.flags import Flags
-from mdcx.models.json_data import JsonData
 from mdcx.models.log_buffer import LogBuffer
+from mdcx.models.types import AmazonContext, ExtraFanartInput, FanartContext, PosterContext, ThumbContext, TrailerInput
 from mdcx.signals import signal
-from mdcx.utils import get_used_time, split_path
+from mdcx.utils import convert_half, get_used_time, split_path
 from mdcx.utils.file import check_pic_async, copy_file_async, delete_file_async, move_file_async
 
 
-class AmazonInput(TypedDict):
-    number: str
-    poster: str
-    poster_from: str
-    amazon_orginaltitle_actor: str
-
-
-async def get_big_pic_by_amazon(json_data: AmazonInput, originaltitle_amazon: str, actor_amazon: list[str]) -> str:
+async def get_big_pic_by_amazon(json_data: AmazonContext, originaltitle_amazon: str, actor_amazon: list[str]) -> str:
     if not originaltitle_amazon or not actor_amazon:
         return ""
     hd_pic_url = ""
@@ -214,14 +206,8 @@ async def get_big_pic_by_amazon(json_data: AmazonInput, originaltitle_amazon: st
     return hd_pic_url
 
 
-class Input_1(TypedDict):
-    number: str
-    trailer: str
-    trailer_from: str
-
-
 async def trailer_download(
-    json_data: Input_1,
+    json_data: TrailerInput,
     folder_new_path: str,
     folder_old_path: str,
     naming_rule: str,
@@ -273,7 +259,7 @@ async def trailer_download(
 
     # 选择保留文件，当存在文件时，不下载。（done trailer path 未设置时，把当前文件设置为 done trailer path，以便其他分集复制）
     if "trailer" in keep_files and await aiofiles.os.path.exists(trailer_file_path):
-        if not Flags.file_done_dic.get(json_data["number"]).get("trailer"):
+        if not Flags.file_done_dic.get(json_data["number"], {}).get("trailer"):
             Flags.file_done_dic[json_data["number"]].update({"trailer": trailer_file_path})
             # 带文件名时，删除掉新、旧文件夹，用不到了。（其他分集如果没有，可以复制第一个文件的预告片。此时不删，没机会删除了）
             if not trailer_name:
@@ -288,7 +274,7 @@ async def trailer_download(
 
     # 带文件名时，选择下载不保留，或者选择保留但没有预告片，检查是否有其他分集已下载或本地预告片
     # 选择下载不保留，当没有下载成功时，不会删除不保留的文件
-    done_trailer_path = Flags.file_done_dic.get(json_data["number"]).get("trailer")
+    done_trailer_path = Flags.file_done_dic.get(json_data["number"], {}).get("trailer")
     if not trailer_name and done_trailer_path and await aiofiles.os.path.exists(done_trailer_path):
         if await aiofiles.os.path.exists(trailer_file_path):
             await delete_file_async(trailer_file_path)
@@ -323,7 +309,7 @@ async def trailer_download(
                 if trailer_file_path_temp != trailer_file_path:
                     await move_file_async(trailer_file_path_temp, trailer_file_path)
                     await delete_file_async(trailer_file_path_temp)
-                done_trailer_path = Flags.file_done_dic.get(json_data["number"]).get("trailer")
+                done_trailer_path = Flags.file_done_dic.get(json_data["number"], {}).get("trailer")
                 if not done_trailer_path:
                     Flags.file_done_dic[json_data["number"]].update({"trailer": trailer_file_path})
                     if trailer_name == 0:  # 带文件名，已下载成功，删除掉那些不用的文件夹即可
@@ -344,7 +330,7 @@ async def trailer_download(
         LogBuffer.log().write(f"\n 🟠 Trailer download failed! ({trailer_url}) ")
 
     if await aiofiles.os.path.exists(trailer_file_path):  # 使用旧文件
-        done_trailer_path = Flags.file_done_dic.get(json_data["number"]).get("trailer")
+        done_trailer_path = Flags.file_done_dic.get(json_data["number"], {}).get("trailer")
         if not done_trailer_path:
             Flags.file_done_dic[json_data["number"]].update({"trailer": trailer_file_path})
             if trailer_name == 0:  # 带文件名，已下载成功，删除掉那些不用的文件夹即可
@@ -359,27 +345,7 @@ async def trailer_download(
         return True
 
 
-class ThumbDownInput(TypedDict):
-    number: str
-    poster_path: str
-    thumb_path: str
-    fanart_path: str
-    thumb_list: list[tuple[str, str]]
-    thumb_from: str
-    thumb_size: tuple[int, int]
-    cd_part: str
-    thumb_marked: bool
-    letters: str
-    thumb: str
-    poster: str
-    poster_from: str
-    poster_big: bool
-    trailer: str
-    trailer_from: str
-    thumb_size: tuple[int, int]
-
-
-async def _get_big_thumb(json_data: ThumbDownInput) -> ThumbDownInput:
+async def _get_big_thumb(json_data: ThumbContext) -> ThumbContext:
     """
     获取背景大图：
     1，官网图片
@@ -476,27 +442,7 @@ async def _get_big_thumb(json_data: ThumbDownInput) -> ThumbDownInput:
     return json_data
 
 
-class PosterInput(TypedDict):
-    number: str
-    letters: str
-    mosaic: str
-    poster: str
-    poster_from: str
-    originaltitle_amazon: str
-    poster_big: bool
-    image_download: bool
-    poster_path: str
-    thumb_path: str
-    fanart_path: str
-    amazon_orginaltitle_actor: str
-    actor_amazon: list[str]
-    poster_size: tuple[int, int]
-    cd_part: str
-    thumb_marked: bool
-    poster_marked: bool
-
-
-async def _get_big_poster(json_data: PosterInput) -> PosterInput:
+async def _get_big_poster(json_data: PosterContext) -> PosterContext:
     start_time = time.time()
 
     # 未勾选下载高清图poster时，返回
@@ -585,7 +531,7 @@ async def _get_big_poster(json_data: PosterInput) -> PosterInput:
     return json_data
 
 
-async def thumb_download(json_data: ThumbDownInput, folder_new_path: str, thumb_final_path: str) -> bool:
+async def thumb_download(json_data: ThumbContext, folder_new_path: str, thumb_final_path: str) -> bool:
     start_time = time.time()
     poster_path = json_data["poster_path"]
     thumb_path = json_data["thumb_path"]
@@ -607,7 +553,7 @@ async def thumb_download(json_data: ThumbDownInput, folder_new_path: str, thumb_
 
     # 尝试复制其他分集。看分集有没有下载，如果下载完成则可以复制，否则就自行下载
     if json_data["cd_part"]:
-        done_thumb_path = Flags.file_done_dic.get(json_data["number"]).get("thumb")
+        done_thumb_path = Flags.file_done_dic.get(json_data["number"], {}).get("thumb")
         if (
             done_thumb_path
             and await aiofiles.os.path.exists(done_thumb_path)
@@ -702,7 +648,7 @@ async def thumb_download(json_data: ThumbDownInput, folder_new_path: str, thumb_
             return False
 
 
-async def poster_download(json_data: PosterInput, folder_new_path: str, poster_final_path: str) -> bool:
+async def poster_download(json_data: PosterContext, folder_new_path: str, poster_final_path: str) -> bool:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -728,7 +674,7 @@ async def poster_download(json_data: PosterInput, folder_new_path: str, poster_f
 
     # 尝试复制其他分集。看分集有没有下载，如果下载完成则可以复制，否则就自行下载
     if json_data["cd_part"]:
-        done_poster_path = Flags.file_done_dic.get(json_data["number"]).get("poster")
+        done_poster_path = Flags.file_done_dic.get(json_data["number"], {}).get("poster")
         if (
             done_poster_path
             and await aiofiles.os.path.exists(done_poster_path)
@@ -849,7 +795,7 @@ async def poster_download(json_data: PosterInput, folder_new_path: str, poster_f
             return False
 
 
-async def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
+async def fanart_download(json_data: FanartContext, fanart_final_path: str) -> bool:
     """
     复制thumb为fanart
     """
@@ -876,7 +822,7 @@ async def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
 
     # 尝试复制其他分集。看分集有没有下载，如果下载完成则可以复制，否则就自行下载
     if json_data["cd_part"]:
-        done_fanart_path = Flags.file_done_dic.get(json_data["number"]).get("fanart")
+        done_fanart_path = Flags.file_done_dic.get(json_data["number"], {}).get("fanart")
         if (
             done_fanart_path
             and await aiofiles.os.path.exists(done_fanart_path)
@@ -923,7 +869,7 @@ async def fanart_download(json_data: JsonData, fanart_final_path: str) -> bool:
                 return False
 
 
-async def extrafanart_download(json_data: JsonData, folder_new_path: str) -> Optional[bool]:
+async def extrafanart_download(json_data: ExtraFanartInput, folder_new_path: str) -> Optional[bool]:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files

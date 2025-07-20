@@ -1,15 +1,11 @@
-"""
-爬虫控制, 调用 models.crawlers 中各个网站爬虫
-"""
-
 import asyncio
 import re
-from typing import Callable, TypedDict
+from typing import Callable, cast
 
 import langid
 
 from mdcx.config.manager import config
-from mdcx.config.manual import ManualConfig
+from mdcx.consts import ManualConfig
 from mdcx.crawlers import (
     airav,
     airav_cc,
@@ -52,77 +48,15 @@ from mdcx.crawlers import (
 )
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
-from mdcx.models.json_data import JsonData, new_json_data
 from mdcx.models.log_buffer import LogBuffer
+from mdcx.models.types import (
+    CallCrawlerInput,
+    CrawlerResult,
+    CrawlersResult,
+    CrawlTask,
+    new_json_data,
+)
 from mdcx.number import get_number_letters, is_uncensored
-
-
-class CrawlersResult(TypedDict):
-    """
-    爬虫结果类型，包含所有可能的元数据字段. (注释由 AI 生成, 仅供参考)
-    """
-
-    # 基本信息
-    number: str  # 番号
-    short_number: str  # 素人番号的短形式（不带前缀数字）
-    title: str  # 标题
-    originaltitle: str  # 原始标题（日文）
-    originaltitle_amazon: str  # 用于 Amazon 搜索的原始标题
-    outline: str  # 简介
-    originalplot: str  # 原始简介（日文）
-    # 演员信息
-    actor: str  # 演员名称，逗号分隔
-    all_actor: str  # 所有来源的演员名称
-    all_actor_photo: dict  # 演员照片信息
-    actor_amazon: list[str]  # 用于 Amazon 搜索的演员名称
-    amazon_orginaltitle_actor: str  # 用于 Amazon 搜索的原始标题中的演员
-    # 元数据信息
-    tag: str  # 标签，逗号分隔
-    release: str  # 发行日期
-    year: str  # 发行年份
-    runtime: str  # 片长（分钟）
-    score: str  # 评分
-    series: str  # 系列
-    director: str  # 导演
-    studio: str  # 制作商
-    publisher: str  # 发行商
-    # 图片与视频
-    thumb: str  # 缩略图URL
-    thumb_list: list  # 所有来源的缩略图URL列表
-    poster: str  # 海报URL
-    extrafanart: list[str]  # 额外剧照URL列表
-    trailer: str  # 预告片URL
-    image_download: bool  # 是否需要下载图片
-    # 马赛克类型
-    mosaic: str
-    letters: str  # 番号字母部分
-    # 标志信息
-    has_sub: bool  # 是否有字幕
-    c_word: str  # 中文字幕标识
-    leak: str  # 是否是无码流出
-    wuma: str  # 是否是无码
-    youma: str  # 是否是有码
-    cd_part: str  # CD分集信息
-    destroyed: str  # 是否是无码破解
-    version: int  # 版本信息
-    # 文件路径与指定信息
-    file_path: str  # 文件路径
-    appoint_number: str  # 指定番号
-    appoint_url: str  # 指定URL
-    # 其他信息
-    javdbid: str  # JavDB ID
-    fields_info: str  # 字段来源信息
-    naming_media: str  # 媒体命名规则
-    naming_file: str  # 文件命名规则
-    folder_name: str  # 文件夹命名规则
-    # 字段来源信息
-    poster_from: str
-    thumb_from: str
-    extrafanart_from: str
-    trailer_from: str
-    outline_from: str
-    website_name: str  # 使用的网站名称
-
 
 CRAWLER_FUNCS: dict[str, Callable] = {
     "7mmtv": mmtv.main,
@@ -194,12 +128,12 @@ def _deal_some_list(field: str, website: str, same_list: list[str]) -> list[str]
 
 
 async def _call_crawler(
-    task_input: JsonData,
+    task_input: CallCrawlerInput,
     website: str,
     language: str,
     org_language: str,
     timeout: int = 30,
-) -> dict[str, dict[str, dict]]:
+) -> dict[str, dict[str, CrawlerResult]]:  # 实际上是 dict[str, CrawlerResult], 由于 typeddict 的限制不能直接标注
     """
     获取某个网站数据
     """
@@ -234,13 +168,11 @@ async def _call_crawler(
         return await asyncio.wait_for(crawler_func(**kwargs), timeout=timeout)
     except asyncio.TimeoutError:
         # 返回空结果
-        return {website: {language or "jp": {"title": "", "thumb": "", "website": ""}}}
+        # todo 失败时的 CrawlerResult
+        return {website: {language or "jp": new_json_data()}}
 
 
-async def _call_crawlers(
-    task_input: JsonData,
-    number_website_list: list[str],
-) -> CrawlersResult:
+async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list[str]) -> CrawlersResult:
     """
     获取一组网站的数据：按照设置的网站组，请求各字段数据，并返回最终的数据
     采用按需请求策略：仅请求必要的网站，失败时才请求下一优先级网站
@@ -332,10 +264,10 @@ async def _call_crawlers(
             all_field_website_lang_pairs[field].append(pair)
 
     # 缓存已请求的网站结果
-    all_res: dict[tuple[str, str], dict] = {}
+    all_res: dict[tuple[str, str], CrawlerResult] = {}
 
     reduced: CrawlersResult = new_json_data()  # 验证 JsonData 和 CrawlersResult 一致, 初始化所有字段
-    reduced.update(task_input)  # 复制输入数据
+    reduced.update(**task_input)  # 复制输入数据
 
     # 无优先级设置的字段的默认配置
     default_website_lang_pairs = [
@@ -482,7 +414,7 @@ async def _call_crawlers(
     return reduced
 
 
-async def _call_specific_crawler(task_input: JsonData, website: str) -> CrawlersResult:
+async def _call_specific_crawler(task_input: CallCrawlerInput, website: str) -> CrawlersResult:
     file_number = task_input["number"]
     short_number = task_input["short_number"]
 
@@ -514,9 +446,14 @@ async def _call_specific_crawler(task_input: JsonData, website: str) -> Crawlers
         publisher_language = "zh_cn"
         director_language = "zh_cn"
     web_data = await _call_crawler(task_input, website, title_language, org_language)
-    web_data_json = web_data.get(website, {}).get(title_language, {})
-    res = task_input.copy()
-    res.update(web_data_json)
+    web_data_json = web_data.get(website, {}).get(title_language)
+    res: CrawlersResult = new_json_data()
+    res.update(**task_input)
+    if web_data_json is None:
+        web_data_json = new_json_data()
+        web_data_json.update(**task_input)
+        web_data_json = cast(CrawlerResult, web_data_json)
+    res.update(**web_data_json)
     if not res["title"]:
         return res
     if outline_language != title_language:
@@ -577,7 +514,7 @@ async def _call_specific_crawler(task_input: JsonData, website: str) -> Crawlers
     return res
 
 
-async def _crawl(task_input: JsonData, website_name: str) -> CrawlersResult:  # 从JSON返回元数据
+async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult:  # 从JSON返回元数据
     file_number = task_input["number"]
     file_path = task_input["file_path"]
     short_number = task_input["short_number"]
@@ -591,7 +528,6 @@ async def _crawl(task_input: JsonData, website_name: str) -> CrawlersResult:  # 
     cd_part = task_input["cd_part"]
     destroyed = task_input["destroyed"]
     mosaic = task_input["mosaic"]
-    version = task_input["version"]
     # task_input["title"] = ""
     # task_input["fields_info"] = ""
     # task_input["all_actor"] = ""
@@ -639,7 +575,8 @@ async def _crawl(task_input: JsonData, website_name: str) -> CrawlersResult:  # 
                 res = await _call_crawlers(task_input, website_list)
             else:
                 LogBuffer.error().write(f"未识别到FC2番号：{file_number}")
-                res = task_input.copy()
+                res: CrawlersResult = new_json_data()
+                res.update(**task_input)
 
         # =======================================================================sexart.15.06.14
         elif re.search(r"[^.]+\.\d{2}\.\d{2}\.\d{2}", file_number) or (
@@ -727,7 +664,6 @@ async def _crawl(task_input: JsonData, website_name: str) -> CrawlersResult:  # 
     res["youma"] = youma
     res["cd_part"] = cd_part
     res["destroyed"] = destroyed
-    res["version"] = version
     res["file_path"] = file_path
     res["appoint_number"] = appoint_number
     res["appoint_url"] = appoint_url
@@ -735,7 +671,7 @@ async def _crawl(task_input: JsonData, website_name: str) -> CrawlersResult:  # 
     return res
 
 
-def _get_website_name(task_input: JsonData, file_mode: FileMode) -> str:
+def _get_website_name(task_input: CrawlTask, file_mode: FileMode) -> str:
     # 获取刮削网站
     website_name = "all"
     if file_mode == FileMode.Single:  # 刮削单文件（工具页面）
@@ -750,7 +686,7 @@ def _get_website_name(task_input: JsonData, file_mode: FileMode) -> str:
     return website_name
 
 
-async def crawl(task_input: JsonData, file_mode: FileMode) -> CrawlersResult:
+async def crawl(task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult:
     # 从指定网站获取json_data
     website_name = _get_website_name(task_input, file_mode)
     res = await _crawl(task_input, website_name)

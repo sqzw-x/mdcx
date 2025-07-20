@@ -11,14 +11,14 @@ from PIL import Image
 
 from mdcx.config.manager import config
 from mdcx.models.base.image import add_mark_thread
-from mdcx.models.json_data import JsonData
 from mdcx.models.log_buffer import LogBuffer
+from mdcx.models.types import AddMarkInput, CutThumbContext
 from mdcx.signals import signal
 from mdcx.utils import get_used_time
 from mdcx.utils.file import check_pic_async, copy_file_sync, delete_file_sync
 
 
-async def add_mark(json_data: JsonData, poster_marked=False, thumb_marked=False, fanart_marked=False):
+async def add_mark(json_data: AddMarkInput, poster_marked=False, thumb_marked=False, fanart_marked=False):
     download_files = config.download_files
     mark_type = config.mark_type.lower()
     has_sub = json_data["has_sub"]
@@ -68,7 +68,7 @@ async def add_mark(json_data: JsonData, poster_marked=False, thumb_marked=False,
             LogBuffer.log().write(f"\n 🍀 Fanart add watermark: {mark_show_type}!")
 
 
-def cut_thumb_to_poster(json_data: JsonData, thumb_path: str, poster_path: str, image_cut=""):
+def cut_thumb_to_poster(json_data: CutThumbContext, thumb_path: str, poster_path: str, image_cut=""):
     start_time = time.time()
     if os.path.exists(poster_path):
         delete_file_sync(poster_path)
