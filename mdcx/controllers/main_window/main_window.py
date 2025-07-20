@@ -141,7 +141,7 @@ class MyMAinWindow(QMainWindow):
         self.now_show_name = None
         self.show_name = None
         self.t_net = None
-        self.options = None
+        self.options: "QFileDialog.Options | QFileDialog.Option"
         self.tray_icon = None
         # endregion
 
