@@ -1,12 +1,8 @@
-"""
-包括刮削过程所需的文件及路径相关操作, 不一定有实际 IO
-"""
-
 import os
 import re
 import shutil
 import traceback
-from typing import cast
+from dataclasses import asdict
 
 import aiofiles
 import aiofiles.os
@@ -22,12 +18,12 @@ from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import (
     CreateFolderContext,
     DealOldFilesInput,
+    FileInfo,
     FileInfoResult,
     GenerateFileNameInput,
     GetFolderPathInput,
     GetOutPutNameInput,
     MoveMovieContext,
-    new_json_data,
 )
 from mdcx.number import get_file_number, get_number_letters, is_uncensored
 from mdcx.signals import signal
@@ -489,7 +485,21 @@ def get_output_name(
 async def get_file_info(
     file_path: str, copy_sub: bool = True
 ) -> tuple[FileInfoResult, str, str, str, str, list[str], str, str]:
-    json_data = cast(FileInfoResult, new_json_data())
+    info = await get_file_info_v2(file_path, copy_sub)
+    return (
+        asdict(info),  # type: ignore
+        info.number,
+        info.folder_path,
+        info.file_name,
+        info.file_ex,
+        info.sub_list,
+        info.file_show_name,
+        info.file_show_path,
+    )
+
+
+async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
+    optional_data = {}
     movie_number = ""
     has_sub = False
     c_word = ""
@@ -505,12 +515,12 @@ async def get_file_info(
         temp_number, temp_url, temp_website = Flags.new_again_dic[file_path]
         if temp_number:  # 如果指定了番号，则使用指定番号
             movie_number = temp_number
-            json_data["appoint_number"] = temp_number
+            optional_data["appoint_number"] = temp_number
         if temp_url:
-            json_data["appoint_url"] = temp_url
-            json_data["website_name"] = temp_website
+            optional_data["appoint_url"] = temp_url
+            optional_data["website_name"] = temp_website
     elif Flags.file_mode == FileMode.Single:  # 刮削单文件（工具页面）
-        json_data["appoint_url"] = Flags.appoint_url
+        optional_data["appoint_url"] = Flags.appoint_url
 
     # 获取显示路径
     file_path = file_path.replace("\\", "/")
@@ -543,7 +553,7 @@ async def get_file_info(
 
         # 259LUXU-1111, 非mgstage、avsex去除前面的数字前缀
         temp_n = re.findall(r"\d{3,}([a-zA-Z]+-\d+)", movie_number)
-        json_data["short_number"] = temp_n[0] if temp_n else ""
+        optional_data["short_number"] = temp_n[0] if temp_n else ""
 
         # 去掉各种乱七八糟的字符
         file_name_cd = remove_escape_string(file_name, "-").replace(movie_number, "-").replace("--", "-").strip()
@@ -819,22 +829,29 @@ async def get_file_info(
         LogBuffer.log().write("\n" + file_path)
         LogBuffer.log().write("\n" + traceback.format_exc())
 
-    # 车牌前缀
-    letters = get_number_letters(movie_number)
-
-    json_data["number"] = movie_number
-    json_data["letters"] = letters
-    json_data["has_sub"] = has_sub
-    json_data["c_word"] = c_word
-    json_data["cd_part"] = cd_part
-    json_data["destroyed"] = destroyed
-    json_data["leak"] = leak
-    json_data["wuma"] = wuma
-    json_data["youma"] = youma
-    json_data["mosaic"] = mosaic
-    json_data["file_path"] = convert_path(file_path)
-
-    return json_data, movie_number, folder_path, file_name, file_ex, sub_list, file_show_name, file_show_path
+    return FileInfo(
+        number=movie_number,
+        letters=get_number_letters(movie_number),
+        has_sub=has_sub,
+        c_word=c_word,
+        cd_part=cd_part,
+        destroyed=destroyed,
+        leak=leak,
+        wuma=wuma,
+        youma=youma,
+        mosaic=mosaic,
+        file_path=convert_path(file_path),
+        folder_path=folder_path,
+        file_name=file_name,
+        file_ex=file_ex,
+        sub_list=sub_list,
+        file_show_name=file_show_name,
+        file_show_path=file_show_path,
+        short_number=optional_data.get("short_number", ""),
+        appoint_number=optional_data.get("appoint_number", ""),
+        appoint_url=optional_data.get("appoint_url", ""),
+        website_name=optional_data.get("website_name", ""),
+    )
 
 
 async def deal_old_files(

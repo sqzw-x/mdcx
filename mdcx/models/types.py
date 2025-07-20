@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import TypedDict
 
 
@@ -290,6 +291,38 @@ class FileInfoResult(TypedDict):
     appoint_number: str
     appoint_url: str
     website_name: str
+
+
+@dataclass
+class FileInfo:
+    """
+    新版本的文件信息数据类，整合了 get_file_info 函数的所有返回值
+    """
+
+    # FileInfoResult 的所有字段
+    number: str
+    letters: str
+    cd_part: str
+    has_sub: bool
+    c_word: str
+    destroyed: str
+    leak: str
+    wuma: str
+    youma: str
+    mosaic: str
+    file_path: str
+    short_number: str
+    appoint_number: str
+    appoint_url: str
+    website_name: str
+
+    # 原函数其他返回值
+    folder_path: str
+    file_name: str
+    file_ex: str
+    sub_list: list[str]
+    file_show_name: str
+    file_show_path: str
 
 
 # image ============================================================
