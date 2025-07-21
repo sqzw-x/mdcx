@@ -10,9 +10,7 @@ import traceback
 
 from ..base.file import copy_file, delete_file, move_file, read_link, split_path
 from ..base.number import (
-    deal_actor_more,
     get_file_number,
-    get_number_first_letter,
     get_number_letters,
     is_uncensored,
     remove_escape_string,
@@ -26,7 +24,7 @@ from ..entity.enums import FileMode
 from ..signals import signal
 from .flags import Flags
 from .json_data import JsonData, LogBuffer, MoveContext, new_json_data
-from .utils import get_movie_path_setting, get_new_release, nfd2c, render_name_template
+from .utils import get_movie_path_setting, nfd2c, render_name_template
 
 
 def _need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
@@ -583,7 +581,9 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -
     show_cnword = config.folder_cnword
     show_moword = "folder" in config.show_moword
     should_escape_result = True
-    folder_new_name, folder_name, number, originaltitle, outline, title = render_name_template(folder_name, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result)
+    folder_new_name, folder_name, number, originaltitle, outline, title = render_name_template(
+        folder_name, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result
+    )
 
     # 去除各种乱七八糟字符后，文件夹名为空时，使用number显示
     folder_name_temp = re.sub(r'[\\/:*?"<>|\r\n]+', "", folder_new_name)
@@ -655,7 +655,9 @@ def _generate_file_name(file_path: str, json_data: JsonData, folder_name_templat
     show_cnword = config.file_cnword
     show_moword = "file" in config.show_moword
     should_escape_result = True
-    file_name, file_name_template, number, originaltitle, outline, title = render_name_template(file_name_template, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result)
+    file_name, file_name_template, number, originaltitle, outline, title = render_name_template(
+        file_name_template, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result
+    )
 
     # 当“视频文件名”和“视频目录名”相同，且没有设置防屏蔽字符时，视为想要分集命名，
     # 此时直接修改文件名开头为目录名，避免因为长度限制处理导致文件名开头与目录名不一致的问题。
