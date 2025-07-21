@@ -8,8 +8,7 @@ import aiofiles.os
 
 from mdcx.config.manager import config
 from mdcx.consts import IS_MAC, IS_WINDOWS
-from mdcx.models.base.file import _deal_path_name
-from mdcx.models.base.number import remove_escape_string
+from mdcx.models.base.file import _deal_path_name, get_cd_part
 from mdcx.models.core.utils import render_name_template
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
@@ -537,84 +536,8 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
         temp_n = re.findall(r"\d{3,}([a-zA-Z]+-\d+)", movie_number)
         optional_data["short_number"] = temp_n[0] if temp_n else ""
 
-        # 去掉各种乱七八糟的字符
-        file_name_cd = remove_escape_string(file_name, "-").replace(movie_number, "-").replace("--", "-").strip()
-
-        # 替换分隔符为-
         cd_char = config.cd_char
-        if "underline" in cd_char:
-            file_name_cd = file_name_cd.replace("_", "-")
-        if "space" in cd_char:
-            file_name_cd = file_name_cd.replace(" ", "-")
-        if "point" in cd_char:
-            file_name_cd = file_name_cd.replace(".", "-")
-        file_name_cd = file_name_cd.lower() + "."  # .作为结尾
-
-        # 获取分集(排除‘番号-C’和‘番号C’作为字幕标识的情况)
-        # if '-C' in config.cnword_char:
-        #     file_name_cd = file_name_cd.replace('-c.', '.')
-        # else:
-        #     file_name_cd = file_name_cd.replace('-c.', '-cd3.')
-        # if 'C.' in config.cnword_char and file_name_cd.endswith('c.'):
-        #     file_name_cd = file_name_cd[:-2] + '.'
-
-        temp_cd = re.compile(r"(vol|case|no|cwp|cwpbd|act)[-\.]?\d+")
-        temp_cd_filename = re.sub(temp_cd, "", file_name_cd)
-        cd_path_1 = re.findall(r"[-_ .]{1}(cd|part|hd)([0-9]{1,2})", temp_cd_filename)
-        cd_path_2 = re.findall(r"-([0-9]{1,2})\.?$", temp_cd_filename)
-        cd_path_3 = re.findall(r"(-|\d{2,}|\.)([a-o]{1})\.?$", temp_cd_filename)
-        cd_path_4 = re.findall(r"-([0-9]{1})[^a-z0-9]", temp_cd_filename)
-        if cd_path_1 and int(cd_path_1[0][1]) > 0:
-            cd_part = cd_path_1[0][1]
-        elif cd_path_2:
-            if len(cd_path_2[0]) == 1 or "digital" in cd_char:
-                cd_part = str(int(cd_path_2[0]))
-        elif cd_path_3 and "letter" in cd_char:
-            letter_list = [
-                "",
-                "a",
-                "b",
-                "c",
-                "d",
-                "e",
-                "f",
-                "g",
-                "h",
-                "i",
-                "j",
-                "k",
-                "l",
-                "m",
-                "n",
-                "o",
-                "p",
-                "q",
-                "r",
-                "s",
-                "t",
-                "u",
-                "v",
-                "w",
-                "x",
-                "y",
-                "z",
-            ]
-            if cd_path_3[0][1] != "c" or "endc" in cd_char:
-                cd_part = str(letter_list.index(cd_path_3[0][1]))
-        elif cd_path_4 and "middle_number" in cd_char:
-            cd_part = str(int(cd_path_4[0]))
-
-        # 判断分集命名规则
-        if cd_part:
-            cd_name = config.cd_name
-            if int(cd_part) == 0:
-                cd_part = ""
-            elif cd_name == 0:
-                cd_part = "-cd" + str(cd_part)
-            elif cd_name == 1:
-                cd_part = "-CD" + str(cd_part)
-            else:
-                cd_part = "-" + str(cd_part)
+        cd_part = await get_cd_part(file_name, movie_number, cd_char)
 
         # 判断是否是马赛克破坏版
         umr_style = str(config.umr_style)
