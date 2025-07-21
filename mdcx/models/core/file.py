@@ -110,7 +110,8 @@ async def creat_folder(
                     # 当都指向同一个文件时(此处路径不能用小写，因为Linux大小写敏感)
                     if (await aiofiles.os.stat(file_path)).st_ino == (await aiofiles.os.stat(file_new_path)).st_ino:
                         # 硬链接开时，不需要处理
-                        if config.soft_link == 2:
+                        # 除非 scrape_success_folder_and_skip_link 为 True，此时视为关闭软硬链接
+                        if config.soft_link == 2 and not config.scrape_success_folder_and_skip_link:
                             json_data["dont_move_movie"] = True
                         # 非硬链接模式，删除目标文件
                         else:
@@ -167,8 +168,9 @@ async def move_movie(json_data: MoveMovieContext, file_path: str, file_new_path:
         json_data["file_path"] = file_new_path
         return True
 
+    # scrape_success_folder_and_skip_link 为 True 时，不应额外创建软硬链接，当前文件不论是否软硬链接，视为普通文件直接移动
     # 软链接模式开时，先删除目标文件，再创建软链接(需考虑自身是软链接的情况)
-    if config.soft_link == 1:
+    if config.soft_link == 1 and not config.scrape_success_folder_and_skip_link:
         temp_path = file_path
         # 自身是软链接时，获取真实路径
         if await aiofiles.os.path.islink(file_path):
@@ -196,7 +198,7 @@ async def move_movie(json_data: MoveMovieContext, file_path: str, file_new_path:
             return False
 
     # 硬链接模式开时，创建硬链接
-    elif config.soft_link == 2:
+    elif config.soft_link == 2 and not config.scrape_success_folder_and_skip_link:
         try:
             await delete_file_async(file_new_path)
             await aiofiles.os.link(file_path, file_new_path)
@@ -881,7 +883,8 @@ async def deal_old_files(
     trailer_exists = True
 
     # 软硬链接模式，不处理旧的图片
-    if config.soft_link != 0:
+    # 除非 scrape_success_folder_and_skip_link 为 True，此时视为关闭软硬链接
+    if config.soft_link != 0 and not config.scrape_success_folder_and_skip_link:
         return pic_final_catched, single_folder_catched
 
     """

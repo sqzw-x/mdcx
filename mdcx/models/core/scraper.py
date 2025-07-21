@@ -232,7 +232,8 @@ async def _scrape_one_file(file_path: str, file_info: FileInfo, file_mode: FileM
     ) = get_output_name(json_data, file_path, success_folder, file_ex)
 
     # 判断输出文件的路径是否重复
-    if config.soft_link == 0:
+    # should_scrape_success_folder 为 True 时，视为不创建软硬链接，也要进行判断
+    if config.soft_link == 0 or config.scrape_success_folder_and_skip_link:
         done_file_new_path_list = Flags.file_new_path_dic.get(file_new_path)
         if not done_file_new_path_list:  # 如果字典中不存在同名的情况，存入列表，继续刮削
             Flags.file_new_path_dic[file_new_path] = [file_path]
@@ -621,7 +622,10 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
 
     # 获取待刮削文件列表的相关信息
     if not movie_list:
-        if config.scrape_softlink_path:
+        if config.scrape_success_folder_and_skip_link:
+            # scrape_success_folder_and_skip_link 为 True 时用输出路径作为待刮削路径。
+            movie_path = success_folder
+        elif config.scrape_softlink_path:
             await newtdisk_creat_symlink("copy_netdisk_nfo" in config.switch_on, movie_path, softlink_path)
             movie_path = softlink_path
         signal.show_log_text("\n ⏰ Start time: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
@@ -829,7 +833,8 @@ async def move_sub(
             return
 
     # 软硬链接开时，复制字幕（EMBY 显示字幕）
-    elif config.soft_link > 0:
+    # 除非 scrape_success_folder_and_skip_link 为 True，此时视为关闭软硬链接
+    elif config.soft_link > 0 and not config.scrape_success_folder_and_skip_link:
         copy_flag = True
 
     # 成功移动关、成功重命名关时，返回

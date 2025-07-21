@@ -1201,7 +1201,10 @@ def load_config(self):
         self.activateWindow()
         try:
             # 主界面右上角显示提示信息
-            self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")
+            if config.scrape_success_folder_and_skip_link:
+                self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[1]}")
+            else:
+                self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")
         except Exception:
             signal.show_traceback_log(traceback.format_exc())
     else:  # ini不存在，重新创建

@@ -31,7 +31,8 @@ from mdcx.models.base.number import remove_escape_string
 
 async def move_other_file(number: str, folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str):
     # 软硬链接模式不移动
-    if config.soft_link != 0:
+    # 除非 scrape_success_folder_and_skip_link 为 True，此时视为关闭软硬链接
+    if config.soft_link != 0 and not config.scrape_success_folder_and_skip_link:
         return
 
     # 目录相同不移动
@@ -142,8 +143,8 @@ def _deal_path_name(path: str) -> str:
 
 async def save_success_list(old_path: str = "", new_path: str = "") -> None:
     if old_path and config.record_success_file:
-        # 软硬链接时，保存原路径；否则保存新路径
-        if config.soft_link != 0:
+        # 软硬链接时 (除非 scrape_success_folder_and_skip_link 为 True，此时视为关闭软硬链接），保存原路径；否则保存新路径
+        if config.soft_link != 0 and not config.scrape_success_folder_and_skip_link:
             Flags.success_list.add(convert_path(old_path))
         else:
             Flags.success_list.add(convert_path(new_path))
@@ -398,7 +399,10 @@ async def get_movie_list(file_mode: FileMode, movie_path: str, escape_folder_lis
         else:
             signal.show_log_text(" 🖥 Movie path: " + movie_path)
             signal.show_log_text(" 🔎 Searching all videos, Please wait...")
-            signal.set_label_file_path.emit(f"正在遍历待刮削视频目录中的所有视频，请等待...\n {movie_path}")
+            if config.scrape_success_folder_and_skip_link:
+                signal.set_label_file_path.emit(f"正在遍历成功输出目录中的所有视频，请等待...\n {movie_path}")
+            else:
+                signal.set_label_file_path.emit(f"正在遍历待刮削视频目录中的所有视频，请等待...\n {movie_path}")
             if "folder" in config.no_escape:
                 escape_folder_list = []
             elif config.main_mode == 3 or config.main_mode == 4:
