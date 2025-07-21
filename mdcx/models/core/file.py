@@ -16,12 +16,12 @@ from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import (
     CreateFolderContext,
-    DealOldFilesInput,
+    DealOldFilesContext,
     FileInfo,
-    GenerateFileNameInput,
-    GetFolderPathInput,
-    GetOutPutNameInput,
+    GetFolderPathContext,
+    GetOutPutNameContext,
     MoveMovieContext,
+    TemplateInput,
 )
 from mdcx.number import get_file_number, get_number_letters, is_uncensored
 from mdcx.signals import signal
@@ -249,7 +249,7 @@ async def move_movie(json_data: MoveMovieContext, file_path: str, file_new_path:
         return False
 
 
-def _get_folder_path(file_path: str, success_folder: str, json_data: GetFolderPathInput) -> tuple[str, str]:
+def _get_folder_path(file_path: str, success_folder: str, json_data: GetFolderPathContext) -> tuple[str, str]:
     folder_name: str = config.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
     folder_path, file_name = split_path(file_path)  # 当前文件的目录和文件名
 
@@ -338,7 +338,9 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: GetFolderPa
     return folder_new_path.strip().replace(" /", "/"), folder_name
 
 
-def _generate_file_name(file_path: str, json_data: GenerateFileNameInput, folder_name_template: str) -> str:
+def _generate_file_name(
+    file_path: str, cd_part, folder_name, json_data: TemplateInput, folder_name_template: str
+) -> str:
     file_full_name = split_path(file_path)[1]
     file_name, file_ex = os.path.splitext(file_full_name)
 
@@ -354,8 +356,6 @@ def _generate_file_name(file_path: str, json_data: GenerateFileNameInput, folder
         file_name_template = config.naming_file
 
     # 获取文件信息
-    cd_part = json_data["cd_part"]
-
     show_4k = "file" in config.show_4k
     show_cnword = config.file_cnword
     show_moword = "file" in config.show_moword
@@ -368,7 +368,7 @@ def _generate_file_name(file_path: str, json_data: GenerateFileNameInput, folder
     # 此时直接修改文件名开头为目录名，避免因为长度限制处理导致文件名开头与目录名不一致的问题。
     # 注意应该放在_render_name_template处理后，保证folder_name_template和file_name_template就算被处理也相同。
     if folder_name_template == file_name_template and not config.prevent_char:
-        file_name = json_data["folder_name"]
+        file_name = folder_name
         file_name += cd_part
         return file_name
 
@@ -432,13 +432,15 @@ def _generate_file_name(file_path: str, json_data: GenerateFileNameInput, folder
 
 
 def get_output_name(
-    json_data: GetOutPutNameInput, file_path: str, success_folder: str, file_ex: str
+    json_data: GetOutPutNameContext, file_path: str, success_folder: str, file_ex: str
 ) -> tuple[str, str, str, str, str, str, str, str, str, str]:
     # =====================================================================================更新输出文件夹名
     folder_new_path, foldername_template = _get_folder_path(file_path, success_folder, json_data)
     folder_new_path = _deal_path_name(folder_new_path)
     # =====================================================================================更新实体文件命名规则
-    naming_rule = _generate_file_name(file_path, json_data, foldername_template)
+    naming_rule = _generate_file_name(
+        file_path, json_data["cd_part"], json_data["folder_name"], json_data, foldername_template
+    )
     naming_rule = _deal_path_name(naming_rule)
     # =====================================================================================生成文件和nfo新路径
     file_new_name = naming_rule + file_ex.lower()
@@ -837,7 +839,7 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
 
 
 async def deal_old_files(
-    json_data: DealOldFilesInput,
+    json_data: DealOldFilesContext,
     folder_old_path: str,
     folder_new_path: str,
     file_path: str,

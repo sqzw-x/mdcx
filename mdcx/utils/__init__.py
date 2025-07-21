@@ -4,7 +4,6 @@ import concurrent.futures
 import ctypes
 import inspect
 import os
-import platform
 import random
 import re
 import threading
@@ -15,7 +14,7 @@ from concurrent.futures import Future
 from threading import Thread
 from typing import Any, Coroutine, Set, TypeVar
 
-from mdcx.consts import IS_NFC, ManualConfig
+from mdcx.consts import IS_NFC, IS_WINDOWS, ManualConfig
 
 T = TypeVar("T")
 
@@ -387,8 +386,7 @@ def get_random_headers() -> dict:
 
 
 def convert_path(path: str) -> str:
-    is_windows = platform.system() == "Windows"
-    if is_windows:
+    if IS_WINDOWS:
         path = path.replace("/", "\\")
     else:
         path = path.replace("\\", "/")

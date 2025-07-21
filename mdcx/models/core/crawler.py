@@ -137,12 +137,12 @@ async def _call_crawler(
     """
     获取某个网站数据
     """
-    appoint_number = task_input["appoint_number"]
-    appoint_url = task_input["appoint_url"]
-    file_path = task_input["file_path"]
-    number = task_input["number"]
-    mosaic = task_input["mosaic"]
-    short_number = task_input["short_number"]
+    appoint_number = task_input.appoint_number
+    appoint_url = task_input.appoint_url
+    file_path = task_input.file_path
+    number = task_input.number
+    mosaic = task_input.mosaic
+    short_number = task_input.short_number
 
     # 259LUXU-1111， mgstage 和 avsex 之外使用 LUXU-1111（素人番号时，short_number有值，不带前缀数字；反之，short_number为空)
     if short_number and website != "mgstage" and website != "avsex":
@@ -177,8 +177,8 @@ async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list
     获取一组网站的数据：按照设置的网站组，请求各字段数据，并返回最终的数据
     采用按需请求策略：仅请求必要的网站，失败时才请求下一优先级网站
     """
-    number = task_input["number"]
-    short_number = task_input["short_number"]
+    number = task_input.number
+    short_number = task_input.short_number
     scrape_like = config.scrape_like
     none_fields = config.none_fields  # 不单独刮削的字段
 
@@ -415,8 +415,8 @@ async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list
 
 
 async def _call_specific_crawler(task_input: CallCrawlerInput, website: str) -> CrawlersResult:
-    file_number = task_input["number"]
-    short_number = task_input["short_number"]
+    file_number = task_input.number
+    short_number = task_input.short_number
 
     title_language = config.title_language
     org_language = title_language
@@ -515,23 +515,17 @@ async def _call_specific_crawler(task_input: CallCrawlerInput, website: str) -> 
 
 
 async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult:  # 从JSON返回元数据
-    file_number = task_input["number"]
-    file_path = task_input["file_path"]
-    short_number = task_input["short_number"]
-    appoint_number = task_input["appoint_number"]
-    appoint_url = task_input["appoint_url"]
-    has_sub = task_input["has_sub"]
-    c_word = task_input["c_word"]
-    leak = task_input["leak"]
-    wuma = task_input["wuma"]
-    youma = task_input["youma"]
-    cd_part = task_input["cd_part"]
-    destroyed = task_input["destroyed"]
-    mosaic = task_input["mosaic"]
-    # task_input["title"] = ""
-    # task_input["fields_info"] = ""
-    # task_input["all_actor"] = ""
-    # task_input["all_actor_photo"] = {}
+    appoint_number = task_input.appoint_number
+    cd_part = task_input.cd_part
+    destroyed = task_input.destroyed
+    file_number = task_input.number
+    file_path = task_input.file_path
+    leak = task_input.leak
+    mosaic = task_input.mosaic
+    short_number = task_input.short_number
+    wuma = task_input.wuma
+    youma = task_input.youma
+
     # ================================================网站规则添加开始================================================
 
     if website_name == "all":  # 从全部网站刮削
@@ -542,7 +536,7 @@ async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult:  #
             or (re.search(r"([^A-Z]|^)MD[A-Z-]*\d{4,}", file_number) and "MDVR" not in file_number)
             or re.search(r"MKY-[A-Z]+-\d{3,}", file_number)
         ):
-            task_input["mosaic"] = "国产"
+            task_input.mosaic = "国产"
             website_list = config.website_guochan.split(",")
             res = await _call_crawlers(task_input, website_list)
 
@@ -657,16 +651,6 @@ async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult:  #
     # 返回处理后的json_data
     res["number"] = number
     res["letters"] = letters
-    res["has_sub"] = has_sub
-    res["c_word"] = c_word
-    res["leak"] = leak
-    res["wuma"] = wuma
-    res["youma"] = youma
-    res["cd_part"] = cd_part
-    res["destroyed"] = destroyed
-    res["file_path"] = file_path
-    res["appoint_number"] = appoint_number
-    res["appoint_url"] = appoint_url
 
     return res
 
@@ -677,7 +661,7 @@ def _get_website_name(task_input: CrawlTask, file_mode: FileMode) -> str:
     if file_mode == FileMode.Single:  # 刮削单文件（工具页面）
         website_name = Flags.website_name
     elif file_mode == FileMode.Again:  # 重新刮削
-        website_temp = task_input["website_name"]
+        website_temp = task_input.website_name
         if website_temp:
             website_name = website_temp
     elif config.scrape_like == "single":
@@ -784,10 +768,10 @@ def _deal_res(res: CrawlersResult) -> CrawlersResult:
             res[each] = res[each].replace(key, value)
 
     # 命名规则
-    naming_media = config.naming_media
-    naming_file = config.naming_file
-    folder_name = config.folder_name
-    res["naming_media"] = naming_media
-    res["naming_file"] = naming_file
-    res["folder_name"] = folder_name
+    # naming_media = config.naming_media
+    # naming_file = config.naming_file
+    # folder_name = config.folder_name
+    # res["naming_media"] = naming_media
+    # res["naming_file"] = naming_file
+    # res["folder_name"] = folder_name
     return res

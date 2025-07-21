@@ -57,13 +57,13 @@ from mdcx.utils import convert_path, get_current_time, get_real_time, get_used_t
 from mdcx.utils.file import copy_file_async, move_file_async, read_link_async
 
 
-async def _scrape_one_file(file_path: str, file_info: FileInfo, file_mode: FileMode) -> tuple[bool, JsonData]:
+async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bool, JsonData]:
     # 处理单个文件刮削
     # 初始化所需变量
     start_time = time.time()
     read_mode = config.read_mode
     file_escape_size = float(config.file_size)
-    file_path = convert_path(file_path)
+    file_path = file_info.file_path
 
     # 获取文件信息
     json_data = asdict(file_info)  # type: ignore
@@ -94,7 +94,7 @@ async def _scrape_one_file(file_path: str, file_info: FileInfo, file_mode: FileM
         if result:  # 有nfo
             movie_number = nfo_data["number"]
             if "has_nfo_update" not in read_mode:  # 不更新并返回
-                show_data_result(json_data, start_time)
+                show_data_result(nfo_data["title"], json_data["fields_info"], start_time)
                 show_movie_info(json_data)
                 LogBuffer.log().write(f"\n 🙉 [Movie] {file_path}")
                 await save_success_list(file_path, file_path)  # 保存成功列表
@@ -149,9 +149,8 @@ async def _scrape_one_file(file_path: str, file_info: FileInfo, file_mode: FileM
             await asyncio.sleep(1)
 
     json_data_old = Flags.json_data_dic.get(movie_number)
-    if (
-        json_data_old and "." not in movie_number and json_data["mosaic"] not in ["国产"]
-    ):  # 已存在该番号数据时直接使用该数据
+    # 已存在该番号数据时直接使用该数据
+    if json_data_old and "." not in movie_number and json_data["mosaic"] not in ["国产"]:
         json_data_new = {}
         json_data_new.update(json_data_old)
         json_data_new["cd_part"] = json_data["cd_part"]
@@ -161,6 +160,7 @@ async def _scrape_one_file(file_path: str, file_info: FileInfo, file_mode: FileM
         json_data_new["leak"] = json_data["leak"]
         json_data_new["wuma"] = json_data["wuma"]
         json_data_new["youma"] = json_data["youma"]
+        json_data_new["file_path"] = json_data["file_path"]
         json_data_new["_4K"] = ""
 
         def deal_tag_data(tag):
@@ -185,7 +185,6 @@ async def _scrape_one_file(file_path: str, file_info: FileInfo, file_mode: FileM
             return tag.replace(",,", ",")
 
         json_data_new["tag"] = deal_tag_data(json_data_old["tag"])
-        json_data_new["file_path"] = json_data["file_path"]
 
         if "破解" in json_data_old["mosaic"] or "流出" in json_data_old["mosaic"]:
             json_data_new["mosaic"] = json_data["mosaic"] if json_data["mosaic"] else "有码"
@@ -193,11 +192,11 @@ async def _scrape_one_file(file_path: str, file_info: FileInfo, file_mode: FileM
             json_data_new["mosaic"] = json_data["mosaic"]
         json_data.update(json_data_new)
     elif not is_nfo_existed:
-        res = await crawl(json_data, file_mode)
+        res = await crawl(file_info.crawl_task(), file_mode)
         json_data.update(**res)
 
     # 显示json_data结果或日志
-    if not show_data_result(json_data, start_time):
+    if not show_data_result(json_data["title"], json_data["fields_info"], start_time):
         return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
 
     # 映射或翻译
@@ -444,7 +443,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
         f" 刮削中：{Flags.scrape_started - Flags.succ_count - Flags.fail_count} 成功：{Flags.succ_count} 失败：{Flags.fail_count}"
     )
     LogBuffer.log().write("\n" + "👆" * 50)
-    LogBuffer.log().write("\n 🙈 [Movie] " + convert_path(file_path))
+    LogBuffer.log().write("\n 🙈 [Movie] " + file_info.file_path)
     LogBuffer.log().write("\n 🚘 [Number] " + movie_number)
 
     # 如果指定了单一网站，进行提示
@@ -454,7 +453,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
 
     # 获取刮削数据
     try:
-        result, json_data = await _scrape_one_file(file_path, file_info, file_mode)
+        result, json_data = await _scrape_one_file(file_info, file_mode)
         if LogBuffer.req().get() != "do_not_update_json_data_dic":
             if config.main_mode == 4:
                 movie_number = json_data["number"]  # 读取模式且存在nfo时，可能会导致movie_number改变，需要更新

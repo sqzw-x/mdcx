@@ -16,7 +16,7 @@ from mdcx.config.resources import resources
 from mdcx.consts import ManualConfig
 from mdcx.models.base.number import deal_actor_more
 from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import GetVideoSizeContext, JsonData, ShowData, ShowResultInput, TemplateInput
+from mdcx.models.types import GetVideoSizeContext, JsonData, ShowData, TemplateInput
 from mdcx.number import get_number_first_letter, get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import get_new_release, get_used_time, split_path
@@ -223,8 +223,8 @@ async def get_video_size(json_data: GetVideoSizeContext, file_path: str):
     return json_data
 
 
-def show_data_result(json_data: ShowResultInput, start_time: float):
-    if json_data["title"] == "":
+def show_data_result(title, fields_info, start_time: float):
+    if title == "":
         LogBuffer.log().write(
             f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
             f"\n{LogBuffer.info().get().strip()}"
@@ -239,8 +239,8 @@ def show_data_result(json_data: ShowResultInput, start_time: float):
         except Exception:
             signal.show_log_text(traceback.format_exc())
         if config.show_from_log:  # 字段来源信息
-            if json_data["fields_info"]:
-                LogBuffer.log().write("\n" + json_data["fields_info"].strip(" ").strip("\n"))
+            if fields_info:
+                LogBuffer.log().write("\n" + fields_info.strip(" ").strip("\n"))
         LogBuffer.log().write(f"\n 🍀 Data done!({get_used_time(start_time)}s)")
         return True
 
