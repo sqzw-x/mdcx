@@ -1,0 +1,28 @@
+[project]
+name = "mdcx"
+version = "2.0.0"
+description = "mdcx"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "aiofiles==24.1.0",
+    "aiolimiter==1.2.1",
+    "beautifulsoup4==4.13.4",
+    "curl-cffi==0.11.4",
+    "langid==1.1.6",
+    "lxml==5.4.0",
+    "numpy==1.26.4",
+    "openai==1.91.0",
+    "opencv-contrib-python-headless==4.8.*",
+    "oshash==0.1.1",
+    "pillow==9.4.0",
+    "ping3==4.0.4",
+    "pyqt5==5.15.10 ; sys_platform == 'darwin'",
+    "pyqt5==5.15.6 ; sys_platform == 'win32'",
+    "zhconv==1.4.3",
+]
+
+[project.optional-dependencies]
+
+[dependency-groups]
+dev = ["pyinstaller>=6.14.2", "pyqt5-stubs>=5.15.6.0", "types-lxml>=2025.3.30"]

@@ -5,7 +5,7 @@ on:
     types: [published]
   push:
     branches:
-      - dev
+      - develop
     tags:
       - 120*
   # schedule:
@@ -18,8 +18,8 @@ on:
 
 env:
   PYTHON_VERSION: "3.9"
-  IS_DAILY: ${{ !startsWith(github.ref, 'refs/tags/120') && github.event.inputs.tag == '' && github.ref == 'refs/heads/master' }}
-  IS_DEV: ${{ github.ref == 'refs/heads/dev' }}
+  IS_DAILY: ${{ !startsWith(github.ref, 'refs/tags/120') && github.ref == 'refs/heads/master' }}
+  IS_DEV: ${{ github.ref == 'refs/heads/develop' }}
 
 jobs:
   init-matrix:
@@ -190,7 +190,7 @@ jobs:
           echo "" >> $GITHUB_OUTPUT
           echo "${{ needs.init-matrix.outputs.commits_since_tag }}" >> $GITHUB_OUTPUT
           echo "" >> $GITHUB_OUTPUT
-          echo "⚠️ This is a development build and may contain unstable features." >> $GITHUB_OUTPUT
+          echo "⚠️ 此版本直接从 develop 分支构建, 仅供开发测试使用, 可能存在 bug 甚至无法运行. 确保在隔离环境里运行, 并充分评估风险." >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
       - name: Create Release - macOS
