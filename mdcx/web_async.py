@@ -384,11 +384,17 @@ class AsyncWebClient:
     ) -> Optional[str]:
         """下载单个分块"""
         async with semaphore:
-            res, error = await self.get_content(url, headers={"Range": f"bytes={start}-{end}"}, use_proxy=use_proxy)
+            res, error = await self.request(
+                "GET",
+                url,
+                headers={"Range": f"bytes={start}-{end}"},
+                use_proxy=use_proxy,
+                stream=True,
+            )
             if res is None:
                 return error
         # 写入文件
         async with aiofiles.open(file_path, "rb+") as fp:
             await fp.seek(start)
-            await fp.write(res)
+            await fp.write(await res.acontent())
         return ""
