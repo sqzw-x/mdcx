@@ -118,28 +118,28 @@ class ManualConfig:
         "xcity",
     ]
 
-    # 可配置的字段
+    # 可配置来源的字段
     CONFIG_DATA_FIELDS = [
-        "title",
-        "title_zh",  # 根据语言设置, 分别对应 title 和 originaltitle
-        "outline",
-        "outline_zh",
         "actor",
-        "thumb",  # 在 nfo 相关配置中为 cover
-        "poster",
+        "director",
         "extrafanart",
-        "tag",
+        "outline_zh",
+        "outline",
+        "poster",
+        "publisher",
         "release",
         "runtime",
         "score",
-        "director",
         "series",
         "studio",
-        "publisher",
+        "tag",
+        "thumb",  # 在 nfo 相关配置中为 cover
+        "title_zh",  # 根据语言设置, 分别对应 title 和 originaltitle
+        "title",
         "trailer",
         "wanted",
     ]
-    # 爬虫返回的字段
+    # 爬虫返回的字段. 此列表的顺序决定了日志顺序
     CRAWLER_DATA_FIELDS = [
         "title",
         "originaltitle",

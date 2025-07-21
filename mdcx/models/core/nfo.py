@@ -113,7 +113,6 @@ async def write_nfo(
     number = json_data_nfo["number"]
     cover = json_data_nfo["thumb"]
     poster = json_data_nfo["poster"]
-    website = json_data_nfo["website"]
     series = json_data_nfo["series"]
     trailer = json_data_nfo["trailer"]
     all_actor = json_data_nfo["all_actor"]
@@ -198,13 +197,11 @@ async def write_nfo(
                 print("  <sorttitle>" + number + "</sorttitle>", file=code)
 
         # 输出国家和分级
-        try:
-            country = json_data["country"]
-        except Exception:
-            if re.findall(r"\.\d{2}\.\d{2}\.\d{2}", number):
-                country = "US"
-            else:
-                country = "JP"
+        country = "JP"
+        if json_data["mosaic"] == "国产" or json_data["mosaic"] == "國產":
+            country = "CN"
+        elif re.findall(r"\.\d{2}\.\d{2}\.\d{2}", number):
+            country = "US"
 
         # 输出家长分级
         if "mpaa," in nfo_include_new:
@@ -337,10 +334,6 @@ async def write_nfo(
         if trailer and "trailer," in nfo_include_new:
             print("  <trailer>" + trailer + "</trailer>", file=code)
 
-        # 输出网页地址
-        if website and "website," in nfo_include_new:
-            print("  <website>" + website + "</website>", file=code)
-
         # javdb id 输出, 没有时使用番号搜索页
         if "国产" not in json_data_nfo["mosaic"] and "國產" not in json_data_nfo["mosaic"]:
             if "javdbid" in json_data_nfo and json_data_nfo["javdbid"]:
@@ -458,7 +451,6 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfo
     cover = "".join(xml_nfo.xpath("//cover/text()")).replace("&amp;", "&")
     poster = "".join(xml_nfo.xpath("//poster/text()")).replace("&amp;", "&")
     trailer = "".join(xml_nfo.xpath("//trailer/text()")).replace("&amp;", "&")
-    website = "".join(xml_nfo.xpath("//website/text()")).replace("&amp;", "&")
     wanted = "".join(xml_nfo.xpath("//votes/text()"))
 
     # 判断马赛克
@@ -540,7 +532,7 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfo
     json_data["series"] = series
     json_data["studio"] = studio
     json_data["publisher"] = publisher
-    json_data["website"] = website
+    # json_data["website"] = website
     json_data["thumb"] = cover
     if cover:
         json_data["thumb_list"].append(("local", cover))

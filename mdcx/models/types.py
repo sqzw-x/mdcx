@@ -186,6 +186,8 @@ class FileInfo:
     wuma: str
     youma: str
 
+    definition: str = ""  # todo 迁移
+
     def crawler_input(self) -> "CallCrawlerInput":
         """
         将 FileInfo 转换为 CallCrawlerInput 类型
@@ -248,18 +250,20 @@ class CrawlTask(CallCrawlerInput):
     youma: str
 
 
-class BaseCrawlerResult(TypedDict):
+@dataclass
+class BaseCrawlerResultDataClass:
     """
     爬虫结果的公共基础类型，包含 CrawlerResult 和 CrawlersResult 的共同字段
     (注释由 AI 生成, 仅供参考)
     """
 
+    number: str  # 番号
+    mosaic: str  # 马赛克类型（有码/无码）
+    image_download: bool  # 是否需要下载图片
+    # 以下字段会从多个来源 reduce 到一个最终结果
     actor: str  # 演员名称，逗号分隔
     director: str  # 导演
     extrafanart: list[str]  # 额外剧照URL列表
-    image_download: bool  # 是否需要下载图片
-    mosaic: str  # 马赛克类型（有码/无码）
-    number: str  # 番号
     originalplot: str  # 原始简介（日文）
     originaltitle: str  # 原始标题（日文）
     outline: str  # 简介
@@ -274,6 +278,82 @@ class BaseCrawlerResult(TypedDict):
     thumb: str  # 缩略图URL
     title: str  # 标题
     trailer: str  # 预告片URL
+    wanted: str
+    year: str  # 发行年份
+
+
+@dataclass
+class CrawlerResultDataclass(BaseCrawlerResultDataClass):
+    """
+    单一网站爬虫返回的结果
+    """
+
+    actor_photo: dict  # 演员照片信息
+    image_cut: str  # 图片裁剪方式
+    source: str  # 数据来源（爬虫名称）
+    website: str  # 网站地址
+
+
+@dataclass
+class CrawlersResultDataClass(BaseCrawlerResultDataClass):
+    """
+    整合所有网站的爬虫结果
+    """
+
+    # 以下用于后续下载资源
+    actor_amazon: list[str]  # 用于 Amazon 搜索的演员名称
+    all_actor_photo: dict  # 演员照片信息
+    all_actor: str  # 所有来源的演员名称
+    amazon_orginaltitle_actor: str  # 用于 Amazon 搜索的原始标题中的演员
+    thumb_list: list  # 所有来源的缩略图URL列表
+    originaltitle_amazon: str  # 用于 Amazon 搜索的原始标题
+    # 用于写入 nfo 的特殊字段
+    javdbid: str  # JavDB ID
+
+    # 用于 log
+    fields_info: str  # 字段来源信息
+
+    # 字段来源
+    extrafanart_from: str
+    outline_from: str
+    poster_from: str
+    thumb_from: str
+    trailer_from: str
+    version: int  # 版本信息, 可能没用
+
+    # in FileInfo
+    # 除 letters 不确定外, 其它字段是只读的, 所以后续流程可以直接从 FileInfo 获取
+    letters: str  # 番号字母部分, 理论上 get_file_info 函数会返回这个字段
+
+
+class BaseCrawlerResult(TypedDict):
+    """
+    爬虫结果的公共基础类型，包含 CrawlerResult 和 CrawlersResult 的共同字段
+    (注释由 AI 生成, 仅供参考)
+    """
+
+    number: str  # 番号
+    mosaic: str  # 马赛克类型（有码/无码）
+    image_download: bool  # 是否需要下载图片
+    # 以下字段会从多个来源 reduce 到一个最终结果
+    actor: str  # 演员名称，逗号分隔
+    director: str  # 导演
+    extrafanart: list[str]  # 额外剧照URL列表
+    originalplot: str  # 原始简介（日文）
+    originaltitle: str  # 原始标题（日文）
+    outline: str  # 简介
+    poster: str  # 海报URL
+    publisher: str  # 发行商
+    release: str  # 发行日期
+    runtime: str  # 片长（分钟）
+    score: str  # 评分
+    series: str  # 系列
+    studio: str  # 制作商
+    tag: str  # 标签，逗号分隔
+    thumb: str  # 缩略图URL
+    title: str  # 标题
+    trailer: str  # 预告片URL
+    wanted: str
     year: str  # 发行年份
 
 
@@ -285,7 +365,6 @@ class CrawlerResult(BaseCrawlerResult):
     actor_photo: dict  # 演员照片信息
     image_cut: str  # 图片裁剪方式
     source: str  # 数据来源（爬虫名称）
-    wanted: str  # 期望信息
     website: str  # 网站地址
 
 
@@ -308,6 +387,7 @@ class CrawlersResult(BaseCrawlerResult):
     # folder_name: str  # 文件夹命名规则
     # naming_file: str  # 文件命名规则
     # naming_media: str  # 媒体命名规则
+
     # 用于 log
     fields_info: str  # 字段来源信息
 
@@ -345,21 +425,23 @@ class TemplateInput(BaseCrawlerResult):
     用于 render_name_template 根据用户模版生成文件名
     """
 
-    all_actor: str
+    # in FileInfo
     c_word: str
-    definition: str
     destroyed: str
     leak: str
     letters: str
-    wanted: str
     wuma: str
     youma: str
+    definition: str
+    # in CrawlersResult
+    all_actor: str
 
 
 class GetVideoSizeContext(TypedDict):
-    definition: str
-    _4K: str
-    tag: str
+    definition: str  # 在此处新建, 考虑移动到 FileInfo
+    _4K: str  # 在此处新建, 等于 -definition, 仅用于显示, 考虑移除
+    # in BaseCrawlerResult
+    tag: str  # 根据用户配置, 可能将分辨率添加到 tag
 
 
 class ShowData(BaseCrawlerResult):
@@ -367,13 +449,20 @@ class ShowData(BaseCrawlerResult):
     ref: ManualConfig.SHOW_KEY
     """
 
-    # actor: str
+    # in CrawlersResult
     all_actor: str
-    cd_part: str
-    # director: str
-    has_sub: bool
     javdbid: str
+
+    # in FileInfo
+    cd_part: str
+    has_sub: bool
     letters: str
+
+    # website: str # remove
+
+    # in BaseCrawlerResult
+    # actor: str
+    # director: str
     # mosaic: str
     # number: str
     # originalplot: str
@@ -388,8 +477,7 @@ class ShowData(BaseCrawlerResult):
     # tag: str
     # title: str
     # trailer: str
-    wanted: str
-    website: str
+    # wanted: str
     # year: str
 
 
@@ -399,22 +487,24 @@ class GetFolderPathContext(TemplateInput):
 
 
 class GetOutPutNameContext(GetFolderPathContext):
-    cd_part: str
+    cd_part: str  # read-only
 
 
 class DealOldFilesContext(TypedDict):
-    number: str
     poster_marked: bool
     thumb_marked: bool
     fanart_marked: bool
     poster_path: str
     thumb_path: str
     fanart_path: str
+    # in BaseCrawlerResult
+    number: str
 
 
 class MoveMovieContext(TypedDict):
     dont_move_movie: bool
     del_file_path: bool
+    # in FileInfo
     file_path: str
     cd_part: str
 
@@ -422,9 +512,10 @@ class MoveMovieContext(TypedDict):
 class CreateFolderContext(TypedDict):
     dont_move_movie: bool
     del_file_path: bool
-    title: str
     thumb_path: str
     poster_path: str
+    # in BaseCrawlerResult
+    title: str
 
 
 @dataclass
@@ -433,29 +524,36 @@ class AssetsInfo: ...
 
 # image ============================================================
 class AddMarkInput(TypedDict):
-    has_sub: bool
-    mosaic: str
     definition: str
     poster_path: str
     thumb_path: str
     fanart_path: str
+    # in FileInfo
+    has_sub: bool
+    # in BaseCrawlerResult
+    mosaic: str
 
 
 class CutThumbContext(TypedDict):
     image_cut: str
+    # in CrawlersResult
     poster_from: str
 
 
 # web ============================================================
 class ExtraFanartInput(TypedDict):
-    extrafanart: list[str]
+    # in CrawlersResult
     extrafanart_from: str
+    # in BaseCrawlerResult
+    extrafanart: list[str]
 
 
 class TrailerInput(TypedDict):
+    # in CrawlersResult
+    trailer_from: str
+    # in BaseCrawlerResult
     number: str
     trailer: str
-    trailer_from: str
 
 
 class ThumbContext(TypedDict):
@@ -463,14 +561,16 @@ class ThumbContext(TypedDict):
     thumb_path: str
     fanart_path: str
     thumb_list: list[tuple[str, str]]
-    thumb_from: str
     thumb_size: tuple[int, int]
-    cd_part: str
     thumb_marked: bool
-    letters: str
-    poster_from: str
     poster_big: bool
+    # in CrawlersResult
+    thumb_from: str
+    poster_from: str
     trailer_from: str
+    letters: str
+    # in FileInfo
+    cd_part: str
     # in BaseCrawlerResult
     number: str
     thumb: str
@@ -479,19 +579,21 @@ class ThumbContext(TypedDict):
 
 
 class PosterContext(CutThumbContext):
-    actor_amazon: list[str]
-    amazon_orginaltitle_actor: str
-    cd_part: str
     fanart_path: str
-    image_download: bool
-    letters: str
-    originaltitle_amazon: str
-    poster_big: bool
     poster_path: str
     poster_size: tuple[int, int]
     thumb_marked: bool
     thumb_path: str
     poster_marked: bool
+    poster_big: bool
+    image_download: bool
+    # in CrawlersResult
+    actor_amazon: list[str]
+    amazon_orginaltitle_actor: str
+    originaltitle_amazon: str
+    letters: str
+    # in FileInfo
+    cd_part: str
     # in BaseCrawlerResult
     mosaic: str
     number: str
@@ -503,11 +605,14 @@ class FanartContext(TypedDict):
     fanart_path: str
     thumb_marked: bool
     fanart_marked: bool
+    # in FileInfo
     cd_part: str
+    # in BaseCrawlerResult
     number: str
 
 
 class AmazonContext(TypedDict):
+    # in CrawlersResult
     poster_from: str
     amazon_orginaltitle_actor: str
     # in BaseCrawlerResult
@@ -517,17 +622,20 @@ class AmazonContext(TypedDict):
 
 # translate =================================================================
 class TransTitleOutlineContext(TypedDict):
+    # in CrawlersResult
     outline_from: str
-    cd_part: str  # read-only
     # in BaseCrawlerResult
     title: str
     outline: str
     mosaic: str
+    # in FileInfo
+    cd_part: str  # read-only
 
 
 class TranslateActorContext(TypedDict):
+    actor_href: str  # 此字段在此创建, 是从映射表读取所得, 仅用于主界面显示
+    # in CrawlersResult
     all_actor: str
-    actor_href: str
     # in BaseCrawlerResult
     mosaic: str
     number: str
@@ -535,6 +643,7 @@ class TranslateActorContext(TypedDict):
 
 
 class TranslateInfoContext(TypedDict):
+    # in FileInfo
     has_sub: bool
     letters: str
     # in BaseCrawlerResult
@@ -550,32 +659,43 @@ class TranslateInfoContext(TypedDict):
 
 # nfo =================================================================
 class WriteNfoInput(BaseCrawlerResult):
+    # in CrawlersResult
     all_actor: str
-    cd_part: str  # CD分卷信息
-    country: str  # 国家代码
-    fanart_path: str
-    letters: str
     originaltitle_amazon: str
     outline_from: str  # 剧情简介来源
+
+    fanart_path: str
     poster_path: str
     thumb_path: str
-    wanted: str
-    website: str
+
+    # 在 v1 中国产网站会返回 CN, 其它网站无结果
+    # 考虑到此时 mosaic==国产, 此字段可推导得出, 因此移除
+    # country: str
+
+    # todo 此字段是某 crawler 实际请求的 url
+    # 在 v1 中, 会取标题的第一个来源的值
+    # 鉴于此值并不是 emby 所需的, 考虑移除
+    # website: str
+
+    # in FileInfo
+    letters: str
+    cd_part: str  # CD分卷信息
     # for render_name_template
-    destroyed: str
-    leak: str
-    wuma: str
-    youma: str
-    c_word: str
-    definition: str
+    # c_word: str
+    # definition: str
+    # destroyed: str
+    # leak: str
+    # wuma: str
+    # youma: str
 
 
 class ReadNfoResult(WriteNfoInput):
     source: str
+    tag_only: str
+    thumb_list: list[tuple[str, str]]
+    # in CrawlersResult
     poster_from: str
     thumb_from: str
     extrafanart_from: str
     trailer_from: str
-    tag_only: str
-    thumb_list: list[tuple[str, str]]
     actor_amazon: list[str]

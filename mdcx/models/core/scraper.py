@@ -211,6 +211,7 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
         replace_word(json_data)
 
     # 更新视频分辨率
+    # todo 仅依赖 file_path, 会写入 definition, tag, _4K. 可提前调用
     await get_video_size(json_data, file_path)
 
     # 显示json_data内容
