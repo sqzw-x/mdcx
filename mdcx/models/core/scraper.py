@@ -89,7 +89,8 @@ async def _scrape_one_file(file_path: str, file_info: FileInfo, file_mode: FileM
     # 读取模式
     file_can_download = True
     if config.main_mode == 4:
-        result, nfo_data = await get_nfo_data(file_path, movie_number)
+        appoint_number = file_info.appoint_number
+        result, nfo_data = await get_nfo_data(file_path, movie_number, appoint_number)
         json_data.update(dict(nfo_data))
         if result:  # 有nfo
             movie_number = nfo_data["number"]
