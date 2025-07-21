@@ -359,7 +359,7 @@ async def write_nfo(
         return False
 
 
-async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfoResult]:
+async def get_nfo_data(file_path: str, movie_number: str, appoint_number: str) -> tuple[bool, ReadNfoResult]:
     local_nfo_path = os.path.splitext(file_path)[0] + ".nfo"
     local_nfo_name = split_path(local_nfo_path)[1]
     file_folder = split_path(file_path)[0]
@@ -397,8 +397,8 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfo
 
     # 获取其他数据
     originaltitle = "".join(xml_nfo.xpath("//originaltitle/text()"))
-    if json_data["appoint_number"]:
-        number = json_data["appoint_number"]
+    if appoint_number:
+        number = appoint_number
     else:
         number = "".join(xml_nfo.xpath("//num/text()"))
         if not number:

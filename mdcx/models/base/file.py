@@ -26,11 +26,13 @@ from mdcx.utils.file import (
     read_link_async,
     read_link_sync,
 )
+from mdcx.models.base.number import remove_escape_string
 
 
 async def move_other_file(number: str, folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str):
     # 软硬链接模式不移动
-    if config.soft_link != 0:
+    # 除非 scrape_success_folder_and_skip_link 为 True，此时视为关闭软硬链接
+    if config.soft_link != 0 and not config.scrape_success_folder_and_skip_link:
         return
 
     # 目录相同不移动
@@ -50,7 +52,8 @@ async def move_other_file(number: str, folder_old_path: str, folder_new_path: st
         if os.path.splitext(old_file)[1].lower() in config.media_type:
             continue
         if number in old_file or file_name in old_file or naming_rule in old_file:
-            if "-cd" not in old_file.lower():  # 避免多分集时，其他分级的内容被移走
+            old_file_name, _ = os.path.splitext(old_file)  # 获取文件名（不含扩展名）、扩展名(含有.)
+            if not await get_cd_part(old_file_name, number, config.cd_char):  # 避免多分集时，其他分集的内容被移走
                 old_file_old_path = os.path.join(folder_old_path, old_file)
                 old_file_new_path = os.path.join(folder_new_path, old_file)
                 if (
@@ -140,8 +143,8 @@ def _deal_path_name(path: str) -> str:
 
 async def save_success_list(old_path: str = "", new_path: str = "") -> None:
     if old_path and config.record_success_file:
-        # 软硬链接时，保存原路径；否则保存新路径
-        if config.soft_link != 0:
+        # 软硬链接时 (除非 scrape_success_folder_and_skip_link 为 True，此时视为关闭软硬链接），保存原路径；否则保存新路径
+        if config.soft_link != 0 and not config.scrape_success_folder_and_skip_link:
             Flags.success_list.add(convert_path(old_path))
         else:
             Flags.success_list.add(convert_path(new_path))
@@ -276,7 +279,10 @@ async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path
     total = []
     media_type = movie_type.split("|")
     skip_list = ["skip", ".skip", ".ignore"]
-    not_skip_success = bool("skip_success_file" not in config.no_escape)
+    not_skip_success = bool(
+        "skip_success_file" not in config.no_escape
+        or ("scrape_success_file" in config.no_escape and config.main_mode in [3, 4])
+    )
 
     signal.show_traceback_log("🔎 遍历待刮削目录....")
 
@@ -393,7 +399,10 @@ async def get_movie_list(file_mode: FileMode, movie_path: str, escape_folder_lis
         else:
             signal.show_log_text(" 🖥 Movie path: " + movie_path)
             signal.show_log_text(" 🔎 Searching all videos, Please wait...")
-            signal.set_label_file_path.emit(f"正在遍历待刮削视频目录中的所有视频，请等待...\n {movie_path}")
+            if config.scrape_success_folder_and_skip_link:
+                signal.set_label_file_path.emit(f"正在遍历成功输出目录中的所有视频，请等待...\n {movie_path}")
+            else:
+                signal.set_label_file_path.emit(f"正在遍历待刮削视频目录中的所有视频，请等待...\n {movie_path}")
             if "folder" in config.no_escape:
                 escape_folder_list = []
             elif config.main_mode == 3 or config.main_mode == 4:
@@ -691,3 +700,86 @@ async def move_trailer_video(folder_old_path: str, folder_new_path: str, file_na
         if await aiofiles.os.path.exists(trailer_old_path) and not await aiofiles.os.path.exists(trailer_new_path):
             await move_file_async(trailer_old_path, trailer_new_path)
             LogBuffer.log().write("\n 🍀 Trailer done!")
+
+
+async def get_cd_part(file_name, movie_number, cd_char):
+    cd_part = ""
+    # 去掉各种乱七八糟的字符
+    file_name_cd = remove_escape_string(file_name, "-").replace(movie_number, "-").replace("--", "-").strip()
+    file_name_cd = re.sub("-(POSTER|THUMB|FANART|TRAILER)", "", file_name_cd)
+
+    # 替换分隔符为-
+    if "underline" in cd_char:
+        file_name_cd = file_name_cd.replace("_", "-")
+    if "space" in cd_char:
+        file_name_cd = file_name_cd.replace(" ", "-")
+    if "point" in cd_char:
+        file_name_cd = file_name_cd.replace(".", "-")
+    file_name_cd = file_name_cd.lower() + "."  # .作为结尾
+
+    # 获取分集(排除‘番号-C’和‘番号C’作为字幕标识的情况)
+    # if '-C' in config.cnword_char:
+    #     file_name_cd = file_name_cd.replace('-c.', '.')
+    # else:
+    #     file_name_cd = file_name_cd.replace('-c.', '-cd3.')
+    # if 'C.' in config.cnword_char and file_name_cd.endswith('c.'):
+    #     file_name_cd = file_name_cd[:-2] + '.'
+
+    temp_cd = re.compile(r"(vol|case|no|cwp|cwpbd|act)[-\.]?\d+")
+    temp_cd_filename = re.sub(temp_cd, "", file_name_cd)
+    cd_path_1 = re.findall(r"[-_ .]{1}(cd|part|hd)([0-9]{1,2})", temp_cd_filename)
+    cd_path_2 = re.findall(r"-([0-9]{1,2})\.?$", temp_cd_filename)
+    cd_path_3 = re.findall(r"(-|\d{2,}|\.)([a-o]{1})\.?$", temp_cd_filename)
+    cd_path_4 = re.findall(r"-([0-9]{1})[^a-z0-9]", temp_cd_filename)
+    if cd_path_1 and int(cd_path_1[0][1]) > 0:
+        cd_part = cd_path_1[0][1]
+    elif cd_path_2:
+        if len(cd_path_2[0]) == 1 or "digital" in cd_char:
+            cd_part = str(int(cd_path_2[0]))
+    elif cd_path_3 and "letter" in cd_char:
+        letter_list = [
+            "",
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h",
+            "i",
+            "j",
+            "k",
+            "l",
+            "m",
+            "n",
+            "o",
+            "p",
+            "q",
+            "r",
+            "s",
+            "t",
+            "u",
+            "v",
+            "w",
+            "x",
+            "y",
+            "z",
+        ]
+        if cd_path_3[0][1] != "c" or "endc" in cd_char:
+            cd_part = str(letter_list.index(cd_path_3[0][1]))
+    elif cd_path_4 and "middle_number" in cd_char:
+        cd_part = str(int(cd_path_4[0]))
+    # 判断分集命名规则
+    if cd_part:
+        cd_name = config.cd_name
+        if int(cd_part) == 0:
+            cd_part = ""
+        elif cd_name == 0:
+            cd_part = "-cd" + str(cd_part)
+        elif cd_name == 1:
+            cd_part = "-CD" + str(cd_part)
+        else:
+            cd_part = "-" + str(cd_part)
+    return cd_part
+

@@ -407,6 +407,10 @@ class ConfigSchema:
         # 是否记录刮削成功列表
         self.record_success_file = "record_success_file" in self.no_escape
 
+        # 是否处于更新/读取模式+创建软硬链接模式，
+        # 此时应把输出目录(软硬链接、nfo所在目录)视为待刮削目录，且输出目录下的链接应视为普通文件，不应额外创建软硬链接，即软硬链接应视为关闭。
+        self.scrape_success_folder_and_skip_link = bool(self.main_mode in [3, 4] and self.soft_link != 0)
+
         # 是否清理文件以及清理列表
         can_clean = True if "i_know" in self.clean_enable and "i_agree" in self.clean_enable else False
         can_clean_auto = True if can_clean and "clean_auto" in self.clean_enable else False

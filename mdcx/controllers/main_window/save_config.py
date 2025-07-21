@@ -43,6 +43,7 @@ def save_config(self):
         (self.Ui.checkBox_no_escape_file, "no_skip_small_file"),
         (self.Ui.checkBox_no_escape_dir, "folder"),
         (self.Ui.checkBox_skip_success_file, "skip_success_file"),
+        (self.Ui.checkBox_skip_success_file_except, "scrape_success_file"),
         (self.Ui.checkBox_record_success_file, "record_success_file"),
         (self.Ui.checkBox_check_symlink, "check_symlink"),
         (self.Ui.checkBox_check_symlink_definition, "symlink_definition"),
@@ -706,6 +707,9 @@ def save_config(self):
     self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)  # type: ignore
     self.activateWindow()
     try:
-        self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")  # 主界面右上角显示提示信息
+        if config.scrape_success_folder_and_skip_link:
+            self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[1]}")
+        else:
+            self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")  # 主界面右上角显示提示信息
     except Exception:
         signal.show_traceback_log(traceback.format_exc())
