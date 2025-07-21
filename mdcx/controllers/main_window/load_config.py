@@ -90,6 +90,7 @@ def load_config(self):
             (self.Ui.checkBox_no_escape_file, "no_skip_small_file"),
             (self.Ui.checkBox_no_escape_dir, "folder"),
             (self.Ui.checkBox_skip_success_file, "skip_success_file"),
+            (self.Ui.checkBox_skip_success_file_except, "scrape_success_file"),
             (self.Ui.checkBox_record_success_file, "record_success_file"),
             (self.Ui.checkBox_check_symlink, "check_symlink"),
             (self.Ui.checkBox_check_symlink_definition, "symlink_definition"),
