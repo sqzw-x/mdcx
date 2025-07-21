@@ -157,6 +157,99 @@ def new_json_data() -> JsonData:
 # ========================================================================
 
 
+class BaseCrawlerResult(TypedDict):
+    """
+    爬虫结果的公共基础类型，包含 CrawlerResult 和 CrawlersResult 的共同字段
+    (注释由 AI 生成, 仅供参考)
+    """
+
+    number: str  # 番号
+    mosaic: str  # 马赛克类型（有码/无码）
+    image_download: bool  # 是否需要下载图片
+    # 以下字段会从多个来源 reduce 到一个最终结果
+    actor: str  # 演员名称，逗号分隔
+    director: str  # 导演
+    extrafanart: list[str]  # 额外剧照URL列表
+    originalplot: str  # 原始简介（日文）
+    originaltitle: str  # 原始标题（日文）
+    outline: str  # 简介
+    poster: str  # 海报URL
+    publisher: str  # 发行商
+    release: str  # 发行日期
+    runtime: str  # 片长（分钟）
+    score: str  # 评分
+    series: str  # 系列
+    studio: str  # 制作商
+    tag: str  # 标签，逗号分隔
+    thumb: str  # 缩略图URL
+    title: str  # 标题
+    trailer: str  # 预告片URL
+    wanted: str
+    year: str  # 发行年份
+
+
+class CrawlerResult(BaseCrawlerResult):
+    """
+    单一网站爬虫返回的结果
+    """
+
+    actor_photo: dict  # 演员照片信息
+    image_cut: str  # 图片裁剪方式
+    source: str  # 数据来源（爬虫名称）
+    website: str  # 网站地址
+
+
+class CrawlersResult(BaseCrawlerResult):
+    """
+    整合所有网站的爬虫结果
+    """
+
+    # 以下用于后续下载资源
+    actor_amazon: list[str]  # 用于 Amazon 搜索的演员名称
+    all_actor_photo: dict  # 演员照片信息
+    all_actor: str  # 所有来源的演员名称
+    amazon_orginaltitle_actor: str  # 用于 Amazon 搜索的原始标题中的演员
+    thumb_list: list  # 所有来源的缩略图URL列表
+    originaltitle_amazon: str  # 用于 Amazon 搜索的原始标题
+    # 用于写入 nfo 的特殊字段
+    javdbid: str  # JavDB ID
+
+    # 以下直接复制 config, 无意义
+    # folder_name: str  # 文件夹命名规则
+    # naming_file: str  # 文件命名规则
+    # naming_media: str  # 媒体命名规则
+
+    # 用于 log
+    fields_info: str  # 字段来源信息
+
+    # 字段来源
+    extrafanart_from: str
+    outline_from: str
+    poster_from: str
+    thumb_from: str
+    trailer_from: str
+    version: int  # 版本信息, 可能没用
+
+    # in FileInfo
+    # 除 letters 不确定外, 其它字段是只读的, 所以后续流程可以直接从 FileInfo 获取
+    letters: str  # 番号字母部分, 理论上 get_file_info 函数会返回这个字段
+
+    # short_number: str  # 素人番号的短形式（不带前缀数字）, 参与刮削决策
+    # # in CallCrawlerInput
+    # c_word: str  # 中文字幕标识
+    # cd_part: str  # CD分集信息
+    # destroyed: str  # 是否是无码破解
+    # has_sub: bool  # 是否有字幕
+    # leak: str  # 是否是无码流出
+    # website_name: str
+    # wuma: str  # 是否是无码
+    # youma: str  # 是否是有码
+    # # in CallCrawlerInput
+    # appoint_number: str  # 指定番号
+    # appoint_url: str  # 指定URL
+    # file_path: str  # 文件路径
+
+
 @dataclass
 class FileInfo:
     """
@@ -281,6 +374,40 @@ class BaseCrawlerResultDataClass:
     wanted: str
     year: str  # 发行年份
 
+    # 用于写入 nfo 的特殊字段
+    javdbid: str  # JavDB ID
+
+    @classmethod
+    def empty(cls) -> "BaseCrawlerResultDataClass":
+        """
+        返回一个空的 BaseCrawlerResultDataClass 实例
+        """
+        return cls(
+            number="",
+            mosaic="",
+            image_download=False,
+            actor="",
+            director="",
+            extrafanart=[],
+            originalplot="",
+            originaltitle="",
+            outline="",
+            poster="",
+            publisher="",
+            release="",
+            runtime="",
+            score="0.0",
+            series="",
+            studio="",
+            tag="",
+            thumb="",
+            title="",
+            trailer="",
+            wanted="",
+            year="",
+            javdbid="",
+        )
+
 
 @dataclass
 class CrawlerResultDataclass(BaseCrawlerResultDataClass):
@@ -292,6 +419,19 @@ class CrawlerResultDataclass(BaseCrawlerResultDataClass):
     image_cut: str  # 图片裁剪方式
     source: str  # 数据来源（爬虫名称）
     website: str  # 网站地址
+
+    @classmethod
+    def empty(cls) -> "CrawlerResultDataclass":
+        """
+        返回一个空的 CrawlerResultDataclass 实例
+        """
+        return cls(
+            **BaseCrawlerResultDataClass.empty().__dict__,
+            actor_photo={},
+            image_cut="",
+            source="",
+            website="",
+        )
 
 
 @dataclass
@@ -305,10 +445,8 @@ class CrawlersResultDataClass(BaseCrawlerResultDataClass):
     all_actor_photo: dict  # 演员照片信息
     all_actor: str  # 所有来源的演员名称
     amazon_orginaltitle_actor: str  # 用于 Amazon 搜索的原始标题中的演员
-    thumb_list: list  # 所有来源的缩略图URL列表
+    thumb_list: list[tuple[str, str]]  # 所有来源的缩略图URL列表
     originaltitle_amazon: str  # 用于 Amazon 搜索的原始标题
-    # 用于写入 nfo 的特殊字段
-    javdbid: str  # JavDB ID
 
     # 用于 log
     fields_info: str  # 字段来源信息
@@ -325,104 +463,36 @@ class CrawlersResultDataClass(BaseCrawlerResultDataClass):
     # 除 letters 不确定外, 其它字段是只读的, 所以后续流程可以直接从 FileInfo 获取
     letters: str  # 番号字母部分, 理论上 get_file_info 函数会返回这个字段
 
-
-class BaseCrawlerResult(TypedDict):
-    """
-    爬虫结果的公共基础类型，包含 CrawlerResult 和 CrawlersResult 的共同字段
-    (注释由 AI 生成, 仅供参考)
-    """
-
-    number: str  # 番号
-    mosaic: str  # 马赛克类型（有码/无码）
-    image_download: bool  # 是否需要下载图片
-    # 以下字段会从多个来源 reduce 到一个最终结果
-    actor: str  # 演员名称，逗号分隔
-    director: str  # 导演
-    extrafanart: list[str]  # 额外剧照URL列表
-    originalplot: str  # 原始简介（日文）
-    originaltitle: str  # 原始标题（日文）
-    outline: str  # 简介
-    poster: str  # 海报URL
-    publisher: str  # 发行商
-    release: str  # 发行日期
-    runtime: str  # 片长（分钟）
-    score: str  # 评分
-    series: str  # 系列
-    studio: str  # 制作商
-    tag: str  # 标签，逗号分隔
-    thumb: str  # 缩略图URL
-    title: str  # 标题
-    trailer: str  # 预告片URL
-    wanted: str
-    year: str  # 发行年份
-
-
-class CrawlerResult(BaseCrawlerResult):
-    """
-    单一网站爬虫返回的结果
-    """
-
-    actor_photo: dict  # 演员照片信息
-    image_cut: str  # 图片裁剪方式
-    source: str  # 数据来源（爬虫名称）
-    website: str  # 网站地址
-
-
-class CrawlersResult(BaseCrawlerResult):
-    """
-    整合所有网站的爬虫结果
-    """
-
-    # 以下用于后续下载资源
-    actor_amazon: list[str]  # 用于 Amazon 搜索的演员名称
-    all_actor_photo: dict  # 演员照片信息
-    all_actor: str  # 所有来源的演员名称
-    amazon_orginaltitle_actor: str  # 用于 Amazon 搜索的原始标题中的演员
-    thumb_list: list  # 所有来源的缩略图URL列表
-    originaltitle_amazon: str  # 用于 Amazon 搜索的原始标题
-    # 用于写入 nfo 的特殊字段
-    javdbid: str  # JavDB ID
-
-    # 以下直接复制 config, 无意义
-    # folder_name: str  # 文件夹命名规则
-    # naming_file: str  # 文件命名规则
-    # naming_media: str  # 媒体命名规则
-
-    # 用于 log
-    fields_info: str  # 字段来源信息
-
-    # 字段来源
-    extrafanart_from: str
-    outline_from: str
-    poster_from: str
-    thumb_from: str
-    trailer_from: str
-    version: int  # 版本信息, 可能没用
-
-    # in FileInfo
-    # 除 letters 不确定外, 其它字段是只读的, 所以后续流程可以直接从 FileInfo 获取
-    letters: str  # 番号字母部分, 理论上 get_file_info 函数会返回这个字段
-
-    # short_number: str  # 素人番号的短形式（不带前缀数字）, 参与刮削决策
-    # # in CallCrawlerInput
-    # c_word: str  # 中文字幕标识
-    # cd_part: str  # CD分集信息
-    # destroyed: str  # 是否是无码破解
-    # has_sub: bool  # 是否有字幕
-    # leak: str  # 是否是无码流出
-    # website_name: str
-    # wuma: str  # 是否是无码
-    # youma: str  # 是否是有码
-    # # in CallCrawlerInput
-    # appoint_number: str  # 指定番号
-    # appoint_url: str  # 指定URL
-    # file_path: str  # 文件路径
+    @classmethod
+    def empty(cls) -> "CrawlersResultDataClass":
+        """
+        返回一个空的 CrawlersResultDataClass 实例
+        """
+        return cls(
+            **BaseCrawlerResultDataClass.empty().__dict__,
+            actor_amazon=[],
+            all_actor_photo={},
+            all_actor="",
+            amazon_orginaltitle_actor="",
+            thumb_list=[],
+            originaltitle_amazon="",
+            fields_info="",
+            extrafanart_from="",
+            outline_from="",
+            poster_from="",
+            thumb_from="",
+            trailer_from="",
+            version=0,
+            letters="",
+        )
 
 
 # utils ============================================================
+# convert to: FileInfo + CrawlersResult
 class TemplateInput(BaseCrawlerResult):
     """
     用于 render_name_template 根据用户模版生成文件名
+
     """
 
     # in FileInfo
@@ -658,15 +728,16 @@ class TranslateInfoContext(TypedDict):
 
 
 # nfo =================================================================
+# convert to: CrawlersResult + FileInfo + *_path
 class WriteNfoInput(BaseCrawlerResult):
+    fanart_path: str
+    poster_path: str
+    thumb_path: str
+
     # in CrawlersResult
     all_actor: str
     originaltitle_amazon: str
     outline_from: str  # 剧情简介来源
-
-    fanart_path: str
-    poster_path: str
-    thumb_path: str
 
     # 在 v1 中国产网站会返回 CN, 其它网站无结果
     # 考虑到此时 mosaic==国产, 此字段可推导得出, 因此移除

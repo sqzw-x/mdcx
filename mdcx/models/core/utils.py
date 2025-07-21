@@ -1,8 +1,4 @@
-"""
-刮削过程的一般工具函数
-依赖:
-    此模块不应依赖 models.core 中除 flags 外的任何其他模块
-"""
+from __future__ import annotations
 
 import asyncio
 import os
@@ -223,26 +219,17 @@ async def get_video_size(json_data: GetVideoSizeContext, file_path: str):
     return json_data
 
 
-def show_data_result(title, fields_info, start_time: float):
-    if title == "":
-        LogBuffer.log().write(
-            f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
-            f"\n{LogBuffer.info().get().strip()}"
-            f"\n 🔴 Data failed!({get_used_time(start_time)}s)"
-        )
-        return False
-    else:
-        if config.show_web_log:  # 字段刮削过程
-            LogBuffer.log().write(f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}")
-        try:
-            LogBuffer.log().write("\n" + LogBuffer.info().get().strip(" ").strip("\n"))
-        except Exception:
-            signal.show_log_text(traceback.format_exc())
-        if config.show_from_log:  # 字段来源信息
-            if fields_info:
-                LogBuffer.log().write("\n" + fields_info.strip(" ").strip("\n"))
-        LogBuffer.log().write(f"\n 🍀 Data done!({get_used_time(start_time)}s)")
-        return True
+def show_result(fields_info, start_time: float):
+    if config.show_web_log:  # 字段刮削过程
+        LogBuffer.log().write(f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}")
+    try:
+        LogBuffer.log().write("\n" + LogBuffer.info().get().strip(" ").strip("\n"))
+    except Exception:
+        signal.show_log_text(traceback.format_exc())
+    if config.show_from_log:  # 字段来源信息
+        if fields_info:
+            LogBuffer.log().write("\n" + fields_info.strip(" ").strip("\n"))
+    LogBuffer.log().write(f"\n 🍀 Data done!({get_used_time(start_time)}s)")
 
 
 def render_name_template(

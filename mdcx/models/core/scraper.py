@@ -36,8 +36,8 @@ from mdcx.models.core.utils import (
     get_video_size,
     replace_special_word,
     replace_word,
-    show_data_result,
     show_movie_info,
+    show_result,
 )
 from mdcx.models.core.web import (
     extrafanart_download,
@@ -94,7 +94,7 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
         if result:  # 有nfo
             movie_number = nfo_data["number"]
             if "has_nfo_update" not in read_mode:  # 不更新并返回
-                show_data_result(nfo_data["title"], json_data["fields_info"], start_time)
+                show_result(json_data["fields_info"], start_time)
                 show_movie_info(json_data)
                 LogBuffer.log().write(f"\n 🙉 [Movie] {file_path}")
                 await save_success_list(file_path, file_path)  # 保存成功列表
@@ -193,11 +193,17 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
         json_data.update(json_data_new)
     elif not is_nfo_existed:
         res = await crawl(file_info.crawl_task(), file_mode)
-        json_data.update(**res)
+        if res is None:
+            LogBuffer.log().write(
+                f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
+                f"\n{LogBuffer.info().get().strip()}"
+                f"\n 🔴 Data failed!({get_used_time(start_time)}s)"
+            )
+            return False, json_data
+        json_data.update(**asdict(res))
 
     # 显示json_data结果或日志
-    if not show_data_result(json_data["title"], json_data["fields_info"], start_time):
-        return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
+    show_result(json_data["fields_info"], start_time)
 
     # 映射或翻译
     # 当不存在已刮削数据，或者读取模式允许更新nfo时才进行映射翻译

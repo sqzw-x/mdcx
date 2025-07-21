@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import re
 from typing import Callable, cast
@@ -51,12 +53,12 @@ from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import (
     CallCrawlerInput,
-    CrawlerResult,
-    CrawlersResult,
+    CrawlerResultDataclass,
+    CrawlersResultDataClass,
     CrawlTask,
-    new_json_data,
 )
 from mdcx.number import get_number_letters, is_uncensored
+from mdcx.utils.dataclass import update
 
 CRAWLER_FUNCS: dict[str, Callable] = {
     "7mmtv": mmtv.main,
@@ -133,9 +135,20 @@ async def _call_crawler(
     language: str,
     org_language: str,
     timeout: int = 30,
-) -> dict[str, dict[str, CrawlerResult]]:  # 实际上是 dict[str, CrawlerResult], 由于 typeddict 的限制不能直接标注
+) -> dict[str, dict[str, CrawlerResultDataclass]]:
     """
-    获取某个网站数据
+    调用指定网站的爬虫函数
+
+    Args:
+        task_input (CallCrawlerInput): 包含爬虫所需的输入数据
+        website (str): 网站名称
+        language (str): 语言参数
+        org_language (str): 原始语言参数
+        timeout (int): 请求超时时间，默认为30秒
+
+    Raises:
+        asyncio.TimeoutError: 如果请求超时
+        Exception: 爬虫函数抛出的异常
     """
     appoint_number = task_input.appoint_number
     appoint_url = task_input.appoint_url
@@ -163,16 +176,19 @@ async def _call_crawler(
         "org_language": org_language,
     }
 
-    try:
-        # 对爬虫函数调用添加超时限制
-        return await asyncio.wait_for(crawler_func(**kwargs), timeout=timeout)
-    except asyncio.TimeoutError:
-        # 返回空结果
-        # todo 失败时的 CrawlerResult
-        return {website: {language or "jp": new_json_data()}}
+    # 对爬虫函数调用添加超时限制, 超时异常由调用者处理
+    r = await asyncio.wait_for(crawler_func(**kwargs), timeout=timeout)
+    # todo 使 crawler 直接返回 dict[str, dict[str, CrawlerResultDataclass]]
+    r = cast(dict[str, dict[str, dict]], r)
+    res: dict[str, dict[str, CrawlerResultDataclass]] = {}
+    for key1 in r:
+        res[key1] = {}
+        for key2 in r[key1]:
+            res[key1][key2] = update(CrawlerResultDataclass.empty(), r[key1][key2])
+    return res
 
 
-async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list[str]) -> CrawlersResult:
+async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list[str]) -> CrawlersResultDataClass:
     """
     获取一组网站的数据：按照设置的网站组，请求各字段数据，并返回最终的数据
     采用按需请求策略：仅请求必要的网站，失败时才请求下一优先级网站
@@ -264,10 +280,8 @@ async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list
             all_field_website_lang_pairs[field].append(pair)
 
     # 缓存已请求的网站结果
-    all_res: dict[tuple[str, str], CrawlerResult] = {}
-
-    reduced = cast(CrawlersResult, new_json_data())  # 验证 JsonData 和 CrawlersResult 一致, 初始化所有字段
-    reduced.update(**task_input)  # 复制输入数据
+    all_res: dict[tuple[str, str], CrawlerResultDataclass] = {}
+    reduced = CrawlersResultDataClass.empty()
 
     # 无优先级设置的字段的默认配置
     default_website_lang_pairs: list[tuple[str, str]] = [
@@ -348,8 +362,8 @@ async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list
                     continue
 
             # 获取网站数据
-            site_data = all_res.get(key, {})
-            if not site_data or not site_data.get("title", "") or not site_data.get(field, ""):
+            site_data = all_res.get(key, None)
+            if not site_data or not site_data.title or not getattr(site_data, field, None):
                 LogBuffer.info().write(f"\n    🔴 {website} (失败)")
                 continue
 
@@ -358,7 +372,7 @@ async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list
                 if field in ["title", "outline", "originaltitle", "originalplot"]:
                     lang = all_field_languages.get(field, "jp")
                     if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:  # why?
-                        if langid.classify(site_data[field])[0] != "ja":
+                        if langid.classify(getattr(site_data, field, ""))[0] != "ja":
                             if lang == "jp":
                                 LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为非日文，跳过！)")
                                 continue
@@ -368,53 +382,56 @@ async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list
 
             # 添加来源信息
             if field in ["poster", "thumb", "extrafanart", "trailer", "outline"]:
-                reduced[field + "_from"] = website
+                setattr(reduced, field + "_from", website)
 
             if field == "poster":
-                reduced["image_download"] = site_data["image_download"]
+                reduced.image_download = site_data.image_download
             elif field == "thumb":
                 # 记录所有 thumb url 以便后续下载
-                reduced["thumb_list"].append((website, site_data["thumb"]))
+                reduced.thumb_list.append((website, site_data.thumb))
             elif field == "actor":
-                if isinstance(site_data["actor"], list):
+                if isinstance(site_data.actor, list):
                     # 处理 actor 为列表的情况
-                    site_data["actor"] = ",".join(site_data["actor"])
-                reduced["all_actor"] = reduced.get("all_actor", site_data["actor"])
-                reduced["all_actor_photo"] = reduced.get("all_actor_photo", site_data.get("actor_photo", ""))
+                    # todo 统一 cralwer 返回类型后移除
+                    site_data.actor = ",".join(site_data.actor)
+                if not reduced.all_actor:
+                    reduced.all_actor = site_data.actor
+                if not reduced.all_actor_photo:
+                    reduced.all_actor_photo = site_data.actor_photo
                 # 记录所有网站的 actor 用于 Amazon 搜图, 因为有的网站 actor 不对
-                reduced["actor_amazon"].extend(site_data["actor"].split(","))
-            elif field == "originaltitle" and site_data.get("actor", ""):
-                reduced["amazon_orginaltitle_actor"] = site_data["actor"].split(",")[0]
+                reduced.actor_amazon.extend(site_data.actor.split(","))
+            elif field == "originaltitle" and site_data.actor:
+                reduced.amazon_orginaltitle_actor = site_data.actor.split(",")[0]
 
             # 保存数据
-            reduced[field] = site_data[field]
-            reduced["fields_info"] += f"\n     {field:<13}: {website}" + f" ({language})" * bool(language)
-            LogBuffer.info().write(f"\n    🟢 {website} (成功)\n     ↳ {reduced[field]}")
+            setattr(reduced, field, getattr(site_data, field))
+            reduced.fields_info += f"\n     {field:<13}: {website}" + f" ({language})" * bool(language)
+            LogBuffer.info().write(f"\n    🟢 {website} (成功)\n     ↳ {getattr(reduced, field)}")
 
             # 找到有效数据，跳出循环继续处理下一个字段
             break
         else:  # 所有来源都无此字段
-            reduced["fields_info"] += f"\n     {field:<13}: {'-----'} ({'not found'})"
+            reduced.fields_info += f"\n     {field:<13}: {'-----'} ({'not found'})"
 
     # 处理 year
-    if reduced.get("year", "") and (r := re.search(r"\d{4}", reduced.get("release", ""))):
-        reduced["year"] = r.group()
+    if reduced.year and (r := re.search(r"\d{4}", reduced.release)):
+        reduced.year = r.group()
 
     # 处理 number：素人影片时使用有数字前缀的number
     if short_number:
-        reduced["number"] = number
+        reduced.number = number
 
     # 处理 javdbid
-    javdb_key = ("javdb", "")
-    reduced["javdbid"] = all_res.get(javdb_key, {}).get("javdbid", "")
+    if r := all_res.get(("javdb", "")):
+        reduced.javdbid = r.javdbid
 
     # todo 由于异步, 此处日志混乱. 需移除 LogBuffer.req(), 改为返回日志信息
-    reduced["fields_info"] = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}{reduced['fields_info']}"
+    reduced.fields_info = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}{reduced.fields_info}"
 
     return reduced
 
 
-async def _call_specific_crawler(task_input: CallCrawlerInput, website: str) -> CrawlersResult:
+async def _call_specific_crawler(task_input: CallCrawlerInput, website: str) -> CrawlersResultDataClass:
     file_number = task_input.number
     short_number = task_input.short_number
 
@@ -447,74 +464,67 @@ async def _call_specific_crawler(task_input: CallCrawlerInput, website: str) -> 
         director_language = "zh_cn"
     web_data = await _call_crawler(task_input, website, title_language, org_language)
     web_data_json = web_data.get(website, {}).get(title_language)
-    res = cast(CrawlersResult, new_json_data())
-    res.update(**task_input)
     if web_data_json is None:
-        web_data_json = cast(CrawlerResult, new_json_data())
-        web_data_json.update(**task_input)  # type: ignore
-        web_data_json = cast(CrawlerResult, web_data_json)
-    res.update(**web_data_json)  # type: ignore
-    if not res["title"]:
+        web_data_json = CrawlerResultDataclass.empty()
+
+    res = update(CrawlersResultDataClass.empty(), web_data_json)
+    if not res.title:
         return res
     if outline_language != title_language:
         web_data_json = web_data[website][outline_language]
-        if web_data_json["outline"]:
-            res["outline"] = web_data_json["outline"]
+        if web_data_json.outline:
+            res.outline = web_data_json.outline
     if actor_language != title_language:
         web_data_json = web_data[website][actor_language]
-        if web_data_json["actor"]:
-            res["actor"] = web_data_json["actor"]
+        if web_data_json.actor:
+            res.actor = web_data_json.actor
     if tag_language != title_language:
         web_data_json = web_data[website][tag_language]
-        if web_data_json["tag"]:
-            res["tag"] = web_data_json["tag"]
+        if web_data_json.tag:
+            res.tag = web_data_json.tag
     if series_language != title_language:
         web_data_json = web_data[website][series_language]
-        if web_data_json["series"]:
-            res["series"] = web_data_json["series"]
+        if web_data_json.series:
+            res.series = web_data_json.series
     if studio_language != title_language:
         web_data_json = web_data[website][studio_language]
-        if web_data_json["studio"]:
-            res["studio"] = web_data_json["studio"]
+        if web_data_json.studio:
+            res.studio = web_data_json.studio
     if publisher_language != title_language:
         web_data_json = web_data[website][publisher_language]
-        if web_data_json["publisher"]:
-            res["publisher"] = web_data_json["publisher"]
+        if web_data_json.publisher:
+            res.publisher = web_data_json.publisher
     if director_language != title_language:
         web_data_json = web_data[website][director_language]
-        if web_data_json["director"]:
-            res["director"] = web_data_json["director"]
-    if res["thumb"]:
-        res["thumb_list"] = [(website, res["thumb"])]
+        if web_data_json.director:
+            res.director = web_data_json.director
+    if res.thumb:
+        res.thumb_list = [(website, res.thumb)]
 
     # 加入来源信息
-    res["outline_from"] = website
-    res["poster_from"] = website
-    res["thumb_from"] = website
-    res["extrafanart_from"] = website
-    res["trailer_from"] = website
+    res.outline_from = website
+    res.poster_from = website
+    res.thumb_from = website
+    res.extrafanart_from = website
+    res.trailer_from = website
     # todo
-    res["fields_info"] = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
+    res.fields_info = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
 
     if short_number:
-        res["number"] = file_number
+        res.number = file_number
 
     temp_actor = (
-        web_data[website]["jp"]["actor"]
-        + ","
-        + web_data[website]["zh_cn"]["actor"]
-        + ","
-        + web_data[website]["zh_tw"]["actor"]
+        web_data[website]["jp"].actor + "," + web_data[website]["zh_cn"].actor + "," + web_data[website]["zh_tw"].actor
     )
-    res["actor_amazon"] = []
-    [res["actor_amazon"].append(i) for i in temp_actor.split(",") if i and i not in res["actor_amazon"]]
-    res["all_actor"] = res["all_actor"] if res.get("all_actor") else web_data_json["actor"]
-    res["all_actor_photo"] = res["all_actor_photo"] if res.get("all_actor_photo") else web_data_json["actor_photo"]
+    res.actor_amazon = []
+    [res.actor_amazon.append(i) for i in temp_actor.split(",") if i and i not in res.actor_amazon]
+    res.all_actor = res.all_actor if res.all_actor else web_data_json.actor
+    res.all_actor_photo = res.all_actor_photo if res.all_actor_photo else web_data_json.actor_photo
 
     return res
 
 
-async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult:  # 从JSON返回元数据
+async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResultDataClass | None:  # 从JSON返回元数据
     appoint_number = task_input.appoint_number
     cd_part = task_input.cd_part
     destroyed = task_input.destroyed
@@ -569,8 +579,7 @@ async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult:  #
                 res = await _call_crawlers(task_input, website_list)
             else:
                 LogBuffer.error().write(f"未识别到FC2番号：{file_number}")
-                res = cast(CrawlersResult, new_json_data())
-                res.update(**task_input)
+                res = None
 
         # =======================================================================sexart.15.06.14
         elif re.search(r"[^.]+\.\d{2}\.\d{2}\.\d{2}", file_number) or (
@@ -605,52 +614,51 @@ async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult:  #
 
     # ================================================网站请求结束================================================
     # ======================================超时或未找到返回
-    if res["title"] == "":
-        return res
+    if res is None:
+        return None
 
-    number = res["number"]
+    number = res.number
     if appoint_number:
         number = appoint_number
 
     # 马赛克
     if leak:
-        res["mosaic"] = "无码流出"
+        res.mosaic = "无码流出"
     elif destroyed:
-        res["mosaic"] = "无码破解"
+        res.mosaic = "无码破解"
     elif wuma:
-        res["mosaic"] = "无码"
+        res.mosaic = "无码"
     elif youma:
-        res["mosaic"] = "有码"
+        res.mosaic = "有码"
     elif mosaic:
-        res["mosaic"] = mosaic
-    if not res.get("mosaic"):
+        res.mosaic = mosaic
+    if not res.mosaic:
         if is_uncensored(number):
-            res["mosaic"] = "无码"
+            res.mosaic = "无码"
         else:
-            res["mosaic"] = "有码"
-    print(number, cd_part, res["mosaic"], LogBuffer.req().get().strip("-> "))
+            res.mosaic = "有码"
+    print(number, cd_part, res.mosaic, LogBuffer.req().get().strip("-> "))
 
     # 车牌字母
     letters = get_number_letters(number)
 
     # 原标题，用于amazon搜索
-    originaltitle = res.get("originaltitle", "")
-    res["originaltitle_amazon"] = originaltitle
-    if res.get("actor_amazon", []):
-        for each in res["actor_amazon"]:  # 去除演员名，避免搜索不到
+    res.originaltitle_amazon = res.originaltitle
+    if res.actor_amazon:
+        for each in res.actor_amazon:  # 去除演员名，避免搜索不到
             try:
                 end_actor = re.compile(rf" {each}$")
-                res["originaltitle_amazon"] = re.sub(end_actor, "", res["originaltitle_amazon"])
+                res.originaltitle_amazon = re.sub(end_actor, "", res.originaltitle_amazon)
             except Exception:
                 pass
 
     # VR 时下载小封面
     if "VR" in number:
-        res["image_download"] = True
+        res.image_download = True
 
     # 返回处理后的json_data
-    res["number"] = number
-    res["letters"] = letters
+    res.number = number
+    res.letters = letters
 
     return res
 
@@ -670,48 +678,35 @@ def _get_website_name(task_input: CrawlTask, file_mode: FileMode) -> str:
     return website_name
 
 
-async def crawl(task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult:
+async def crawl(task_input: CrawlTask, file_mode: FileMode) -> CrawlersResultDataClass | None:
     # 从指定网站获取json_data
     website_name = _get_website_name(task_input, file_mode)
     res = await _crawl(task_input, website_name)
     return _deal_res(res)
 
 
-def _deal_res(res: CrawlersResult) -> CrawlersResult:
+def _deal_res(res: CrawlersResultDataClass | None) -> CrawlersResultDataClass | None:
     # 标题为空返回
-    title = res["title"]
-    if not title:
-        return res
+    if res is None or res.title:
+        return None
 
     # 演员
-    res["actor"] = (
-        str(res["actor"])
-        .strip(" [ ]")
-        .replace("'", "")
-        .replace(", ", ",")
-        .replace("<", "(")
-        .replace(">", ")")
-        .strip(",")
+    res.actor = (
+        str(res.actor).strip(" [ ]").replace("'", "").replace(", ", ",").replace("<", "(").replace(">", ")").strip(",")
     )  # 列表转字符串（避免个别网站刮削返回的是列表）
 
     # 标签
-    tag = (
-        str(res["tag"]).strip(" [ ]").replace("'", "").replace(", ", ",")
-    )  # 列表转字符串（避免个别网站刮削返回的是列表）
+    tag = str(res.tag).strip(" [ ]").replace("'", "").replace(", ", ",")  # 列表转字符串（避免个别网站刮削返回的是列表）
     tag = re.sub(r",\d+[kKpP],", ",", tag)
     tag_rep_word = [",HD高画质", ",HD高畫質", ",高画质", ",高畫質"]
     for each in tag_rep_word:
         if tag.endswith(each):
             tag = tag.replace(each, "")
         tag = tag.replace(each + ",", ",")
-    res["tag"] = tag
-
-    # poster图
-    if not res.get("poster"):
-        res["poster"] = ""
+    res.tag = tag
 
     # 发行日期
-    release = res["release"]
+    release = res.release
     if release:
         release = release.replace("/", "-").strip(". ")
         if len(release) < 10:
@@ -721,15 +716,15 @@ def _deal_res(res: CrawlersResult) -> CrawlersResult:
                 r_month = "0" + r_month if len(r_month) == 1 else r_month
                 r_day = "0" + r_day if len(r_day) == 1 else r_day
                 release = r_year + "-" + r_month + "-" + r_day
-    res["release"] = release
+    res.release = release
 
     # 评分
-    if res.get("score", ""):
-        res["score"] = "%.1f" % float(res.get("score", 0))
+    if res.score:
+        res.score = "%.1f" % float(res.score)
 
     # publisher
-    if not res.get("publisher", ""):
-        res["publisher"] = res["studio"]
+    if not res.publisher:
+        res.publisher = res.studio
 
     # 字符转义，避免显示问题
     key_word = [
@@ -765,13 +760,14 @@ def _deal_res(res: CrawlersResult) -> CrawlersResult:
     }
     for each in key_word:
         for key, value in rep_word.items():
-            res[each] = res[each].replace(key, value)
+            # res[each] = res[each].replace(key, value)
+            setattr(res, each, getattr(res, each).replace(key, value))
 
     # 命名规则
     # naming_media = config.naming_media
     # naming_file = config.naming_file
     # folder_name = config.folder_name
-    # res["naming_media"] = naming_media
-    # res["naming_file"] = naming_file
-    # res["folder_name"] = folder_name
+    # res.naming_media = naming_media
+    # res.naming_file = naming_file
+    # res.folder_name = folder_name
     return res
