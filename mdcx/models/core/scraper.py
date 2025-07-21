@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 import asyncio
 import os
 import re
 import time
 import traceback
-from dataclasses import asdict
-from typing import Optional, cast
+from typing import Optional
 
 import aiofiles.os
 from PyQt5.QtWidgets import QMessageBox
@@ -32,6 +33,7 @@ from mdcx.models.core.image import add_mark
 from mdcx.models.core.nfo import get_nfo_data, write_nfo
 from mdcx.models.core.translate import translate_actor, translate_info, translate_title_outline
 from mdcx.models.core.utils import (
+    add_definition_tag,
     deal_some_field,
     get_video_size,
     replace_special_word,
@@ -51,13 +53,16 @@ from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.tools.emby_actor_image import update_emby_actor_photo
 from mdcx.models.tools.emby_actor_info import creat_kodi_actors
-from mdcx.models.types import FileInfo, JsonData
+from mdcx.models.types import CrawlersResultDataClass, FileInfo, OtherInfo, ScrapeResult, ShowDataDataclass
 from mdcx.signals import signal
 from mdcx.utils import convert_path, get_current_time, get_real_time, get_used_time, split_path
+from mdcx.utils.dataclass import update
 from mdcx.utils.file import copy_file_async, move_file_async, read_link_async
 
 
-async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bool, JsonData]:
+async def _scrape_one_file(
+    file_info: FileInfo, file_mode: FileMode
+) -> tuple[CrawlersResultDataClass | None, OtherInfo | None]:
     # 处理单个文件刮削
     # 初始化所需变量
     start_time = time.time()
@@ -66,8 +71,6 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
     file_path = file_info.file_path
 
     # 获取文件信息
-    json_data = asdict(file_info)  # type: ignore
-    json_data = cast(JsonData, json_data)  # todo
 
     movie_number = file_info.number
     folder_old_path = file_info.folder_path
@@ -81,35 +84,32 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
     # 检查文件大小
     result = await check_file(file_path, file_escape_size)
     if not result:
-        json_data["outline"] = split_path(file_path)[1]
-        json_data["tag"] = file_path
-        return False, json_data
+        # res.outline = split_path(file_path)[1]
+        # res.tag = file_path
+        return None, None
 
     is_nfo_existed = False
+    res = CrawlersResultDataClass.empty()  # todo 保证所有路径上均有 res 值
     # 读取模式
     file_can_download = True
     if config.main_mode == 4:
-        result, nfo_data = await get_nfo_data(file_path, movie_number)
-        json_data.update(dict(nfo_data))
-        if result:  # 有nfo
-            movie_number = nfo_data["number"]
+        nfo_data, info = await get_nfo_data(file_path, movie_number)
+        if nfo_data:  # 有nfo
+            res = nfo_data
+            movie_number = nfo_data.number
             if "has_nfo_update" not in read_mode:  # 不更新并返回
-                show_result(json_data["fields_info"], start_time)
-                show_movie_info(json_data)
+                show_result(res.fields_info, start_time)
+                show_movie_info(file_info, nfo_data)
                 LogBuffer.log().write(f"\n 🙉 [Movie] {file_path}")
                 await save_success_list(file_path, file_path)  # 保存成功列表
-                return True, json_data
+                return nfo_data, info
 
             # 读取模式要不要下载图片等文件
             if "read_download_again" not in read_mode:
                 file_can_download = False
-
-            if "read_update_nfo" in read_mode:
-                # 使用本地nfo再次更新nfo（包括title、tag、翻译等）时，tag使用纯tag的内容
-                json_data["tag"] = nfo_data["tag_only"]
         else:
-            if "no_nfo_scrape" not in read_mode:  # 无nfo，没有勾选「无nfo时，刮削并执行更新模式」
-                return False, json_data
+            if "no_nfo_scrape" not in read_mode:  # 无 nfo 且未勾选 「无nfo时，刮削并执行更新模式」
+                return None, None
 
     # 判断是否write_nfo
     update_nfo = True
@@ -138,30 +138,30 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
 
     # 刮削json_data
     # 获取已刮削的json_data
-    if "." in movie_number or json_data["mosaic"] in ["国产"]:
+    if "." in movie_number or res.mosaic in ["国产"]:
         pass
     elif movie_number not in Flags.json_get_set:
         # 第一次遇到该番号，刮削
         Flags.json_get_set.add(movie_number)
     elif not Flags.json_data_dic.get(movie_number):
         # 已经获取过该番号的json_data（如同一番号的其他集），但已刮削字典中找不到，说明第一次遇到它的线程还没刮削完，等它结束。
+        # todo 修改此处实现, 不要对分集启动多个刮削任务
         while not Flags.json_data_dic.get(movie_number):
             await asyncio.sleep(1)
 
-    json_data_old = Flags.json_data_dic.get(movie_number)
+    pre_data = Flags.json_data_dic.get(movie_number)
     # 已存在该番号数据时直接使用该数据
-    if json_data_old and "." not in movie_number and json_data["mosaic"] not in ["国产"]:
-        json_data_new = {}
-        json_data_new.update(json_data_old)
-        json_data_new["cd_part"] = json_data["cd_part"]
-        json_data_new["has_sub"] = json_data["has_sub"]
-        json_data_new["c_word"] = json_data["c_word"]
-        json_data_new["destroyed"] = json_data["destroyed"]
-        json_data_new["leak"] = json_data["leak"]
-        json_data_new["wuma"] = json_data["wuma"]
-        json_data_new["youma"] = json_data["youma"]
-        json_data_new["file_path"] = json_data["file_path"]
-        json_data_new["_4K"] = ""
+    if pre_data and "." not in movie_number and res.mosaic not in ["国产"]:
+        pre_file_info = pre_data.file_info
+        pre_res = pre_data.data
+        pre_file_info.c_word = file_info.c_word
+        pre_file_info.cd_part = file_info.cd_part
+        pre_file_info.destroyed = file_info.destroyed
+        pre_file_info.file_path = file_info.file_path
+        pre_file_info.has_sub = file_info.has_sub
+        pre_file_info.leak = file_info.leak
+        pre_file_info.wuma = file_info.wuma
+        pre_file_info.youma = file_info.youma
 
         def deal_tag_data(tag):
             for each in [
@@ -184,13 +184,13 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
                 tag = tag.replace(each, "")
             return tag.replace(",,", ",")
 
-        json_data_new["tag"] = deal_tag_data(json_data_old["tag"])
+        pre_res.tag = deal_tag_data(pre_res.tag)
 
-        if "破解" in json_data_old["mosaic"] or "流出" in json_data_old["mosaic"]:
-            json_data_new["mosaic"] = json_data["mosaic"] if json_data["mosaic"] else "有码"
-        elif "破解" in json_data["mosaic"] or "流出" in json_data["mosaic"]:
-            json_data_new["mosaic"] = json_data["mosaic"]
-        json_data.update(json_data_new)
+        if "破解" in pre_res.mosaic or "流出" in pre_res.mosaic:
+            pre_file_info.mosaic = res.mosaic if res.mosaic else "有码"
+        elif "破解" in res.mosaic or "流出" in res.mosaic:
+            pre_file_info.mosaic = res.mosaic
+        res = update(CrawlersResultDataClass.empty(), pre_file_info)
     elif not is_nfo_existed:
         res = await crawl(file_info.crawl_task(), file_mode)
         if res is None:
@@ -199,29 +199,29 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
                 f"\n{LogBuffer.info().get().strip()}"
                 f"\n 🔴 Data failed!({get_used_time(start_time)}s)"
             )
-            return False, json_data
-        json_data.update(**asdict(res))
+            return None, None
 
     # 显示json_data结果或日志
-    show_result(json_data["fields_info"], start_time)
+    show_result(res.fields_info, start_time)
 
     # 映射或翻译
     # 当不存在已刮削数据，或者读取模式允许更新nfo时才进行映射翻译
-    if not json_data_old and update_nfo:
-        deal_some_field(json_data)  # 处理字段
-        replace_special_word(json_data)  # 替换特殊字符
-        await translate_title_outline(json_data, movie_number)  # 翻译json_data（标题/介绍）
-        deal_some_field(json_data)  # 再处理一遍字段，翻译后可能出现要去除的内容
-        await translate_actor(json_data)  # 映射输出演员名/信息
-        translate_info(json_data)  # 映射输出标签等信息
-        replace_word(json_data)
+    if not pre_data and update_nfo:
+        deal_some_field(res)  # 处理字段
+        replace_special_word(res)  # 替换特殊字符
+        await translate_title_outline(res, file_info.cd_part, movie_number)  # 翻译json_data（标题/介绍）
+        deal_some_field(res)  # 再处理一遍字段，翻译后可能出现要去除的内容
+        await translate_actor(res)  # 映射输出演员名/信息
+        translate_info(res, file_info.has_sub)  # 映射输出标签等信息
+        replace_word(res)
 
     # 更新视频分辨率
-    # todo 仅依赖 file_path, 会写入 definition, tag, _4K. 可提前调用
-    await get_video_size(json_data, file_path)
+    definition, codec = await get_video_size(file_path)
+    file_info.definition, file_info.codec = definition, codec
+    add_definition_tag(res, definition, codec)
 
     # 显示json_data内容
-    show_movie_info(json_data)
+    show_movie_info(file_info, res)
 
     # 生成输出文件夹和输出文件的路径
     (
@@ -235,7 +235,7 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
         poster_final_path,
         thumb_final_path,
         fanart_final_path,
-    ) = get_output_name(json_data, file_path, success_folder, file_ex)
+    ) = get_output_name(file_info, res, file_path, success_folder, file_ex)
 
     # 判断输出文件的路径是否重复
     if config.soft_link == 0:
@@ -248,24 +248,26 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
             LogBuffer.error().write(
                 "存在重复文件（指刮削后的文件路径相同！），请检查:\n    🍁 " + "\n    🍁 ".join(done_file_new_path_list)
             )
-            json_data["outline"] = split_path(file_path)[1]
-            json_data["tag"] = file_path
-            return False, json_data
+            res.outline = split_path(file_path)[1]
+            res.tag = file_path
+            return None, None
 
     # 判断输出文件夹和文件是否已存在，如无则创建输出文件夹
+    other = OtherInfo.empty()
     if not await creat_folder(
-        json_data,
+        other,
+        res,
         folder_new_path,
         file_path,
         file_new_path,
         thumb_new_path_with_filename,
         poster_new_path_with_filename,
     ):
-        return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
+        return None, None
 
     # 初始化图片已下载地址的字典
-    if not Flags.file_done_dic.get(json_data["number"]):
-        Flags.file_done_dic[json_data["number"]] = {
+    if not Flags.file_done_dic.get(res.number):
+        Flags.file_done_dic[res.number] = {
             "poster": "",
             "thumb": "",
             "fanart": "",
@@ -280,10 +282,11 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
     # 视频模式（仅根据刮削数据把电影命名为番号并分类到对应目录名称的文件夹下）
     if config.main_mode == 2:
         # 移动文件
-        if await move_movie(json_data, file_path, file_new_path):
+        if await move_movie(other, file_info, file_path, file_new_path):
             if "sort_del" in config.switch_on:
                 await deal_old_files(
-                    json_data,
+                    res.number,
+                    other,
                     folder_old_path,
                     folder_new_path,
                     file_path,
@@ -298,14 +301,15 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
                     fanart_final_path,
                 )  # 清理旧的thumb、poster、fanart、nfo
             await save_success_list(file_path, file_new_path)  # 保存成功列表
-            return True, json_data
+            return res, other
         else:
             # 返回MDCx1_1main, 继续处理下一个文件
-            return False, json_data
+            return None, None
 
     # 清理旧的thumb、poster、fanart、extrafanart、nfo
     pic_final_catched, single_folder_catched = await deal_old_files(
-        json_data,
+        res.number,
+        other,
         folder_old_path,
         folder_new_path,
         file_path,
@@ -321,50 +325,49 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
     )
 
     # 如果 final_pic_path 没处理过，这时才需要下载和加水印
-    if pic_final_catched:
-        if file_can_download:
-            # 下载thumb
-            if not await thumb_download(json_data, folder_new_path, thumb_final_path):
-                return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
+    if pic_final_catched and file_can_download:
+        # 下载thumb
+        if not await thumb_download(res, other, file_info.cd_part, folder_new_path, thumb_final_path):
+            return None, None
 
-            # 下载艺术图
-            await fanart_download(json_data, fanart_final_path)
+        # 下载艺术图
+        await fanart_download(res.number, other, file_info.cd_part, fanart_final_path)
 
-            # 下载poster
-            if not await poster_download(json_data, folder_new_path, poster_final_path):
-                return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
+        # 下载poster
+        if not await poster_download(res, other, file_info.cd_part, folder_new_path, poster_final_path):
+            return None, None
 
-            # 清理冗余图片
-            await pic_some_deal(json_data["number"], thumb_final_path, fanart_final_path)
+        # 清理冗余图片
+        await pic_some_deal(res.number, thumb_final_path, fanart_final_path)
 
-            # 加水印
-            await add_mark(json_data, json_data["poster_marked"], json_data["thumb_marked"], json_data["fanart_marked"])
+        # 加水印
+        await add_mark(other, file_info, res.mosaic)
 
-            # 下载剧照和剧照副本
-            if single_folder_catched:
-                await extrafanart_download(json_data, folder_new_path)
-                await extrafanart_copy2(folder_new_path)
-                await extrafanart_extras_copy(folder_new_path)
+        # 下载剧照和剧照副本
+        if single_folder_catched:
+            await extrafanart_download(res.extrafanart, res.extrafanart_from, folder_new_path)
+            await extrafanart_copy2(folder_new_path)
+            await extrafanart_extras_copy(folder_new_path)
 
-            # 下载trailer、复制主题视频
-            # 因为 trailer也有带文件名，不带文件名两种情况，不能使用pic_final_catched。比如图片不带文件名，trailer带文件名这种场景需要支持每个分集去下载trailer
-            await trailer_download(json_data, folder_new_path, folder_old_path, naming_rule)
-            await copy_trailer_to_theme_videos(folder_new_path, naming_rule)
+        # 下载trailer、复制主题视频
+        # 因为 trailer也有带文件名，不带文件名两种情况，不能使用pic_final_catched。比如图片不带文件名，trailer带文件名这种场景需要支持每个分集去下载trailer
+        await trailer_download(res, folder_new_path, folder_old_path, naming_rule)
+        await copy_trailer_to_theme_videos(folder_new_path, naming_rule)
 
     # 生成nfo文件
-    await write_nfo(json_data, nfo_new_path, folder_new_path, file_path, update_nfo)
+    await write_nfo(file_info, res, nfo_new_path, folder_new_path, file_path, update_nfo)
 
     # 移动字幕、种子、bif、trailer、其他文件
-    if json_data["has_sub"]:
+    if file_info.has_sub:
         await move_sub(folder_old_path, folder_new_path, file_name, sub_list, naming_rule)
     await move_torrent(folder_old_path, folder_new_path, file_name, movie_number, naming_rule)
     await move_bif(folder_old_path, folder_new_path, file_name, naming_rule)
     # self.move_trailer_video(folder_old_path, folder_new_path, file_name, naming_rule)
-    await move_other_file(json_data["number"], folder_old_path, folder_new_path, file_name, naming_rule)
+    await move_other_file(res.number, folder_old_path, folder_new_path, file_name, naming_rule)
 
     # 移动文件
-    if not await move_movie(json_data, file_path, file_new_path):
-        return False, json_data  # 返回MDCx1_1main, 继续处理下一个文件
+    if not await move_movie(other, file_info, file_path, file_new_path):
+        return None, None
     await save_success_list(file_path, file_new_path)  # 保存成功列表
 
     # 创建软链接及复制文件
@@ -373,14 +376,13 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[bo
         await newtdisk_creat_symlink("copy_netdisk_nfo" in config.switch_on, folder_new_path, target_dir)
 
     # json添加封面缩略图路径
-    # json_data['number'] = movie_number
-    json_data["poster_path"] = poster_final_path
-    json_data["thumb_path"] = thumb_final_path
-    json_data["fanart_path"] = fanart_final_path
+    other.poster_path = poster_final_path
+    other.thumb_path = thumb_final_path
+    other.fanart_path = fanart_final_path
     if not await aiofiles.os.path.exists(thumb_final_path) and await aiofiles.os.path.exists(fanart_final_path):
-        json_data["thumb_path"] = fanart_final_path
+        other.thumb_path = fanart_final_path
 
-    return True, json_data
+    return res, other
 
 
 async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
@@ -433,7 +435,6 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
 
     # 获取文件基础信息
     file_info = await get_file_info_v2(file_path)
-    json_data = asdict(file_info)  # type: ignore
     movie_number = file_info.number
     folder_old_path = file_info.folder_path
     file_show_name = file_info.file_show_name
@@ -459,33 +460,35 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
         LogBuffer.log().write(f"\n 😸 [Note] You specified 「 {website_single} 」, some videos may not have results! ")
 
     # 获取刮削数据
+    json_data = None
+    other = None
     try:
-        result, json_data = await _scrape_one_file(file_info, file_mode)
-        if LogBuffer.req().get() != "do_not_update_json_data_dic":
+        json_data, other = await _scrape_one_file(file_info, file_mode)
+        if json_data and other and LogBuffer.req().get() != "do_not_update_json_data_dic":
             if config.main_mode == 4:
-                movie_number = json_data["number"]  # 读取模式且存在nfo时，可能会导致movie_number改变，需要更新
-            Flags.json_data_dic.update({movie_number: json_data})
+                movie_number = json_data.number  # 读取模式且存在nfo时，可能会导致movie_number改变，需要更新
+            Flags.json_data_dic.update({movie_number: ScrapeResult(file_info, json_data, other)})
     except Exception as e:
         _check_stop(file_name_temp)
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
         LogBuffer.error().write("scrape file error: " + str(e))
         LogBuffer.log().write("\n" + traceback.format_exc())
-        result = False
 
     # 显示刮削数据
     try:
-        if result:
+        if json_data and other:
             Flags.succ_count += 1
             succ_show_name = (
                 str(Flags.count_claw)
                 + "-"
                 + str(Flags.succ_count)
                 + "."
-                + file_show_name.replace(movie_number, json_data["number"])
-                + json_data["_4K"]
+                + file_show_name.replace(movie_number, file_info.number)
+                + "-"
+                + file_info.definition
             )
-            signal.show_list_name(succ_show_name, "succ", json_data, movie_number)
+            signal.show_list_name("succ", ShowDataDataclass(file_info, json_data, other, succ_show_name), movie_number)
         else:
             Flags.fail_count += 1
             fail_show_name = (
@@ -493,10 +496,11 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
                 + "-"
                 + str(Flags.fail_count)
                 + "."
-                + file_show_name.replace(movie_number, json_data["number"])
-                + json_data["_4K"]
+                + file_show_name.replace(movie_number, file_info.number)
+                + "-"
+                + file_info.definition
             )
-            signal.show_list_name(fail_show_name, "fail", json_data, movie_number)
+            signal.show_list_name("fail", ShowDataDataclass(file_info, None, None, fail_show_name), movie_number)
             if e := LogBuffer.error().get():
                 LogBuffer.log().write(f"\n 🔴 [Failed] Reason: {e}")
                 if "WinError 5" in e:
@@ -602,7 +606,7 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
 
     signal.show_scrape_info("🔎 正在刮削中...")
 
-    signal.add_label_info({})  # 清空主界面显示信息
+    signal.set_main_info()  # 清空主界面显示信息
     thread_number = config.thread_number  # 线程数量
     thread_time = config.thread_time  # 线程延时
     signal.label_result.emit(f" 刮削中：{0} 成功：{Flags.succ_count} 失败：{Flags.fail_count}")

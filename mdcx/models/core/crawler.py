@@ -687,7 +687,7 @@ async def crawl(task_input: CrawlTask, file_mode: FileMode) -> CrawlersResultDat
 
 def _deal_res(res: CrawlersResultDataClass | None) -> CrawlersResultDataClass | None:
     # 标题为空返回
-    if res is None or res.title:
+    if res is None or not res.title:
         return None
 
     # 演员

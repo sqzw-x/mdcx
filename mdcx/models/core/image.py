@@ -12,18 +12,20 @@ from PIL import Image
 from mdcx.config.manager import config
 from mdcx.models.base.image import add_mark_thread
 from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import AddMarkInput, CutThumbContext
+from mdcx.models.types import CrawlersResultDataClass, FileInfo, OtherInfo
 from mdcx.signals import signal
 from mdcx.utils import get_used_time
 from mdcx.utils.file import check_pic_async, copy_file_sync, delete_file_sync
 
 
-async def add_mark(json_data: AddMarkInput, poster_marked=False, thumb_marked=False, fanart_marked=False):
+async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):
+    poster_marked = json_data.poster_marked
+    thumb_marked = json_data.thumb_marked
+    fanart_marked = json_data.fanart_marked
     download_files = config.download_files
     mark_type = config.mark_type.lower()
-    has_sub = json_data["has_sub"]
-    mosaic = json_data["mosaic"]
-    definition = json_data["definition"]
+    has_sub = file_info.has_sub
+    definition = file_info.definition
     mark_list = []
     if ("K" in definition or "UHD" in definition) and "hd" in mark_type:
         if "8" in definition:
@@ -53,9 +55,9 @@ async def add_mark(json_data: AddMarkInput, poster_marked=False, thumb_marked=Fa
     if mark_list:
         download_files = config.download_files
         mark_show_type = ",".join(mark_list)
-        poster_path = json_data["poster_path"]
-        thumb_path = json_data["thumb_path"]
-        fanart_path = json_data["fanart_path"]
+        poster_path = json_data.poster_path
+        thumb_path = json_data.thumb_path
+        fanart_path = json_data.fanart_path
 
         if config.thumb_mark == 1 and "thumb" in download_files and thumb_path and not thumb_marked:
             await add_mark_thread(thumb_path, mark_list)
@@ -68,7 +70,7 @@ async def add_mark(json_data: AddMarkInput, poster_marked=False, thumb_marked=Fa
             LogBuffer.log().write(f"\n 🍀 Fanart add watermark: {mark_show_type}!")
 
 
-def cut_thumb_to_poster(json_data: CutThumbContext, thumb_path: str, poster_path: str, image_cut=""):
+def cut_thumb_to_poster(json_data: CrawlersResultDataClass, thumb_path: str, poster_path: str, image_cut):
     start_time = time.time()
     if os.path.exists(poster_path):
         delete_file_sync(poster_path)
@@ -92,19 +94,18 @@ def cut_thumb_to_poster(json_data: CutThumbContext, thumb_path: str, poster_path
                 image_cut = "center"
             else:
                 image_cut = "right"
-            json_data["image_cut"] = image_cut
 
         # 不裁剪
         if image_cut == "no":
             copy_file_sync(thumb_path, poster_path)
             LogBuffer.log().write(f"\n 🍀 Poster done! (copy thumb)({get_used_time(start_time)}s)")
-            json_data["poster_from"] = "copy thumb"
+            json_data.poster_from = "copy thumb"
             img.close()
             return True
 
         # 中间裁剪
         elif image_cut == "center":
-            json_data["poster_from"] = "thumb center"
+            json_data.poster_from = "thumb center"
             ax = int((w - h / 1.5) / 2)
             ay = 0
             bx = ax + int(h / 1.5)
@@ -112,7 +113,7 @@ def cut_thumb_to_poster(json_data: CutThumbContext, thumb_path: str, poster_path
 
         # 右边裁剪
         else:
-            json_data["poster_from"] = "thumb right"
+            json_data.poster_from = "thumb right"
             ax, ay, bx, by = w / 1.9, 0, w, h
             if w == 800:
                 if h == 439:
@@ -131,12 +132,12 @@ def cut_thumb_to_poster(json_data: CutThumbContext, thumb_path: str, poster_path
         img_new_png = img_new.crop((ax, ay, bx, by))
         img_new_png.save(poster_path, quality=95, subsampling=0)
         if config.executor.run(check_pic_async(poster_path)):
-            LogBuffer.log().write(f"\n 🍀 Poster done! ({json_data['poster_from']})({get_used_time(start_time)}s)")
+            LogBuffer.log().write(f"\n 🍀 Poster done! ({json_data.poster_from})({get_used_time(start_time)}s)")
             return True
-        LogBuffer.log().write(f"\n 🥺 Poster cut failed! ({json_data['poster_from']})({get_used_time(start_time)}s)")
+        LogBuffer.log().write(f"\n 🥺 Poster cut failed! ({json_data.poster_from})({get_used_time(start_time)}s)")
     except Exception as e:
         LogBuffer.log().write(
-            f"\n 🥺 Poster failed! ({json_data['poster_from']})({get_used_time(start_time)}s)\n    {str(e)}"
+            f"\n 🥺 Poster failed! ({json_data.poster_from})({get_used_time(start_time)}s)\n    {str(e)}"
         )
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(f"{traceback.format_exc()}\n Pic: {thumb_path}")

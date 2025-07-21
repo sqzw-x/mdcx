@@ -91,7 +91,7 @@ class Resources:
 
         # 查询映射表
         xml_actor = self.actor_mapping_data
-        if xml_actor and len(xml_actor):
+        if xml_actor is not None and len(xml_actor):
             actor_name = f",{actor.upper()},"
             for each in ManualConfig.FULL_HALF_CHAR:
                 actor_name = actor_name.replace(each[0], each[1])
@@ -121,7 +121,7 @@ class Resources:
 
         # 查询映射表
         xml_info = self.info_mapping_data
-        if xml_info and len(xml_info):
+        if xml_info is not None and len(xml_info):
             info_name = f",{info.upper()},"
             for each in ManualConfig.FULL_HALF_CHAR:
                 info_name = info_name.replace(each[0], each[1])

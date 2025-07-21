@@ -14,15 +14,7 @@ from mdcx.models.core.utils import render_name_template
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import (
-    CreateFolderContext,
-    DealOldFilesContext,
-    FileInfo,
-    GetFolderPathContext,
-    GetOutPutNameContext,
-    MoveMovieContext,
-    TemplateInput,
-)
+from mdcx.models.types import BaseCrawlerResultDataClass, CrawlersResultDataClass, FileInfo, OtherInfo
 from mdcx.number import get_file_number, get_number_letters, is_uncensored
 from mdcx.signals import signal
 from mdcx.utils import convert_path, nfd2c, split_path
@@ -31,7 +23,8 @@ from mdcx.utils.path import showFilePath
 
 
 async def creat_folder(
-    json_data: CreateFolderContext,
+    other: OtherInfo,
+    json_data: BaseCrawlerResultDataClass,
     folder_new_path: str,
     file_path: str,
     file_new_path: str,
@@ -40,8 +33,8 @@ async def creat_folder(
 ) -> bool:
     """判断是否创建文件夹，目标文件是否有重复文件。file_new_path是最终路径"""
 
-    json_data["dont_move_movie"] = False  # 不需要移动和重命名视频
-    json_data["del_file_path"] = False  # 在 move movie 时需要删除自己，自己是软链接，目标是原始文件
+    other.dont_move_movie = False  # 不需要移动和重命名视频
+    other.del_file_path = False  # 在 move movie 时需要删除自己，自己是软链接，目标是原始文件
     dont_creat_folder = False  # 不需要创建文件夹
 
     # 正常模式、视频模式时，软连接关，成功后不移动文件开时，这时不创建文件夹
@@ -55,7 +48,7 @@ async def creat_folder(
     # 如果不需要创建文件夹，当不重命名时，直接返回
     if dont_creat_folder:
         if not config.success_file_rename:
-            json_data["dont_move_movie"] = True
+            other.dont_move_movie = True
             return True
 
     # 如果不存在目标文件夹，则创建文件夹
@@ -84,7 +77,7 @@ async def creat_folder(
     if await aiofiles.os.path.islink(file_new_path):
         # 路径相同，是自己
         if convert_file_path == convert_file_new_path:
-            json_data["dont_move_movie"] = True
+            other.dont_move_movie = True
         # 路径不同，删掉目标文件即可（不验证是否真实路径了，太麻烦）
         else:
             # 在移动时删除即可。delete_file(file_new_path)
@@ -98,11 +91,11 @@ async def creat_folder(
         if not await aiofiles.os.path.islink(file_path):
             # 如果路径相同，则代表已经在成功文件夹里，不是重复文件（大小写不敏感）
             if convert_file_path == convert_file_new_path:
-                json_data["dont_move_movie"] = True
+                other.dont_move_movie = True
                 if await aiofiles.os.path.exists(thumb_new_path_with_filename):
-                    json_data["thumb_path"] = thumb_new_path_with_filename
+                    other.thumb_path = thumb_new_path_with_filename
                 if await aiofiles.os.path.exists(poster_new_path_with_filename):
-                    json_data["poster_path"] = poster_new_path_with_filename
+                    other.poster_path = poster_new_path_with_filename
                 return True
 
             # 路径不同
@@ -112,7 +105,7 @@ async def creat_folder(
                     if (await aiofiles.os.stat(file_path)).st_ino == (await aiofiles.os.stat(file_new_path)).st_ino:
                         # 硬链接开时，不需要处理
                         if config.soft_link == 2:
-                            json_data["dont_move_movie"] = True
+                            other.dont_move_movie = True
                         # 非硬链接模式，删除目标文件
                         else:
                             # 在移动时删除即可。delete_file(file_new_path)
@@ -122,7 +115,7 @@ async def creat_folder(
                     pass
 
                 # 路径不同，当指向不同文件时
-                json_data["title"] = "Success folder already exists a same name file!"
+                json_data.title = "Success folder already exists a same name file!"
                 LogBuffer.error().write(
                     f"Success folder already exists a same name file! \n ❗️ Current file: {file_path} \n ❗️ Success folder already exists file: {file_new_path} "
                 )
@@ -135,14 +128,14 @@ async def creat_folder(
             if convert_path(real_file_path).lower() == convert_file_new_path:
                 # 非软硬链接时，标记删除待刮削文件自身
                 if config.soft_link == 0:
-                    json_data["del_file_path"] = True
+                    other.del_file_path = True
                 # 软硬链接时，标记不处理
                 else:
-                    json_data["dont_move_movie"] = True
+                    other.dont_move_movie = True
                 return True
             # 路径不同，是两个文件
             else:
-                json_data["title"] = "Success folder already exists a same name file!"
+                json_data.title = "Success folder already exists a same name file!"
                 LogBuffer.error().write(
                     f"Success folder already exists a same name file! \n"
                     f" ❗️ Current file is symlink file: {file_path} \n"
@@ -155,17 +148,17 @@ async def creat_folder(
     return True
 
 
-async def move_movie(json_data: MoveMovieContext, file_path: str, file_new_path: str) -> bool:
+async def move_movie(other: OtherInfo, file_info: FileInfo, file_path: str, file_new_path: str) -> bool:
     # 明确不需要移动的，直接返回
-    if json_data["dont_move_movie"]:
+    if other.dont_move_movie:
         LogBuffer.log().write(f"\n 🍀 Movie done! \n 🙉 [Movie] {file_path}")
         return True
 
     # 明确要删除自己的，删除后返回
-    if json_data["del_file_path"]:
+    if other.del_file_path:
         await delete_file_async(file_path)
         LogBuffer.log().write(f"\n 🍀 Movie done! \n 🙉 [Movie] {file_new_path}")
-        json_data["file_path"] = file_new_path
+        file_info.file_path = file_new_path
         return True
 
     # 软链接模式开时，先删除目标文件，再创建软链接(需考虑自身是软链接的情况)
@@ -178,7 +171,7 @@ async def move_movie(json_data: MoveMovieContext, file_path: str, file_new_path:
         await delete_file_async(file_new_path)
         try:
             await aiofiles.os.symlink(file_path, file_new_path)
-            json_data["file_path"] = file_new_path
+            file_info.file_path = file_new_path
             LogBuffer.log().write(
                 f"\n 🍀 Softlink done! \n    Softlink file: {file_new_path} \n    Source file: {file_path}"
             )
@@ -201,7 +194,7 @@ async def move_movie(json_data: MoveMovieContext, file_path: str, file_new_path:
         try:
             await delete_file_async(file_new_path)
             await aiofiles.os.link(file_path, file_new_path)
-            json_data["file_path"] = file_new_path
+            file_info.file_path = file_new_path
             LogBuffer.log().write(
                 f"\n 🍀 HardLink done! \n    HadrLink file: {file_new_path} \n    Source file: {file_path}"
             )
@@ -233,23 +226,25 @@ async def move_movie(json_data: MoveMovieContext, file_path: str, file_new_path:
             LogBuffer.log().write(
                 f"\n    It's a symlink file! Source file: \n    {await read_link_async(file_new_path)}"  # win 不能用os.path.realpath()，返回的结果不准
             )
-        json_data["file_path"] = file_new_path
+        file_info.file_path = file_new_path
         return True
     else:
         if "are the same file" in error_info.lower():  # 大小写不同，win10 用raidrive 挂载 google drive 改名会出错
-            if json_data["cd_part"]:
+            if file_info.cd_part:
                 temp_folder, temp_file = split_path(file_new_path)
                 if temp_file not in await aiofiles.os.listdir(temp_folder):
                     await move_file_async(file_path, file_new_path + ".MDCx.tmp")
                     await move_file_async(file_new_path + ".MDCx.tmp", file_new_path)
             LogBuffer.log().write(f"\n 🍀 Movie done! \n 🙉 [Movie] {file_new_path}")
-            json_data["file_path"] = file_new_path
+            file_info.file_path = file_new_path
             return True
         LogBuffer.log().write(f"\n 🔴 Failed to move movie file to success folder!\n    {error_info}")
         return False
 
 
-def _get_folder_path(file_path: str, success_folder: str, json_data: GetFolderPathContext) -> tuple[str, str]:
+def _get_folder_path(
+    file_path: str, success_folder: str, file_info: FileInfo, res: CrawlersResultDataClass
+) -> tuple[str, str]:
     folder_name: str = config.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
     folder_path, file_name = split_path(file_path)  # 当前文件的目录和文件名
 
@@ -257,7 +252,6 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: GetFolderPa
     if config.main_mode == 3 or config.main_mode == 4:
         if config.update_mode == "c":
             folder_name = split_path(folder_path)[1]
-            json_data["folder_name"] = folder_name
             return folder_path, folder_name
         elif "bc" in config.update_mode:
             folder_name = config.update_b_folder
@@ -274,20 +268,25 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: GetFolderPa
         # 关闭软连接，并且成功后移动文件关时，使用原来文件夹
         if config.soft_link == 0 and not config.success_file_move:
             folder_path = split_path(file_path)[0]
-            json_data["folder_name"] = folder_name
             return folder_path, folder_name
 
     # 当根据刮削模式得到的视频目录名为空时，使用成功输出目录
     if not folder_name:
-        json_data["folder_name"] = ""
-        return success_folder, folder_name
+        return success_folder, ""
 
     show_4k = "folder" in config.show_4k
     show_cnword = config.folder_cnword
     show_moword = "folder" in config.show_moword
     should_escape_result = True
     folder_new_name, folder_name, number, originaltitle, outline, title = render_name_template(
-        folder_name, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result
+        folder_name,
+        file_path,
+        file_info,
+        res,
+        show_4k,
+        show_cnword,
+        show_moword,
+        should_escape_result,
     )
 
     # 去除各种乱七八糟字符后，文件夹名为空时，使用number显示
@@ -333,14 +332,10 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: GetFolderPa
     folder_new_path = convert_path(folder_new_path)
     folder_new_path = nfd2c(folder_new_path)
 
-    json_data["folder_name"] = folder_new_name
-
-    return folder_new_path.strip().replace(" /", "/"), folder_name
+    return folder_new_path.strip().replace(" /", "/"), folder_new_name
 
 
-def _generate_file_name(
-    file_path: str, cd_part, folder_name, json_data: TemplateInput, folder_name_template: str
-) -> str:
+def _generate_file_name(file_path: str, cd_part, folder_name, file_info: FileInfo, res: CrawlersResultDataClass) -> str:
     file_full_name = split_path(file_path)[1]
     file_name, file_ex = os.path.splitext(file_full_name)
 
@@ -361,13 +356,20 @@ def _generate_file_name(
     show_moword = "file" in config.show_moword
     should_escape_result = True
     file_name, file_name_template, number, originaltitle, outline, title = render_name_template(
-        file_name_template, file_path, json_data, show_4k, show_cnword, show_moword, should_escape_result
+        file_name_template,
+        file_path,
+        file_info,
+        res,
+        show_4k,
+        show_cnword,
+        show_moword,
+        should_escape_result,
     )
 
     # 当“视频文件名”和“视频目录名”相同，且没有设置防屏蔽字符时，视为想要分集命名，
     # 此时直接修改文件名开头为目录名，避免因为长度限制处理导致文件名开头与目录名不一致的问题。
     # 注意应该放在_render_name_template处理后，保证folder_name_template和file_name_template就算被处理也相同。
-    if folder_name_template == file_name_template and not config.prevent_char:
+    if config.folder_name == file_name_template and not config.prevent_char:
         file_name = folder_name
         file_name += cd_part
         return file_name
@@ -432,15 +434,13 @@ def _generate_file_name(
 
 
 def get_output_name(
-    json_data: GetOutPutNameContext, file_path: str, success_folder: str, file_ex: str
+    file_info: FileInfo, json_data: CrawlersResultDataClass, file_path: str, success_folder: str, file_ex: str
 ) -> tuple[str, str, str, str, str, str, str, str, str, str]:
     # =====================================================================================更新输出文件夹名
-    folder_new_path, foldername_template = _get_folder_path(file_path, success_folder, json_data)
+    folder_new_path, folder_name = _get_folder_path(file_path, success_folder, file_info, json_data)
     folder_new_path = _deal_path_name(folder_new_path)
     # =====================================================================================更新实体文件命名规则
-    naming_rule = _generate_file_name(
-        file_path, json_data["cd_part"], json_data["folder_name"], json_data, foldername_template
-    )
+    naming_rule = _generate_file_name(file_path, file_info.cd_part, folder_name, file_info, json_data)
     naming_rule = _deal_path_name(naming_rule)
     # =====================================================================================生成文件和nfo新路径
     file_new_name = naming_rule + file_ex.lower()
@@ -456,7 +456,7 @@ def get_output_name(
     fanart_new_path_with_filename = convert_path(os.path.join(folder_new_path, fanart_new_name))
     # =====================================================================================生成图片最终路径
     # 如果图片命名规则不加文件名并且视频目录不为空
-    if config.pic_simple_name and json_data["folder_name"].replace(" ", ""):
+    if config.pic_simple_name and folder_name:
         poster_final_name = "poster.jpg"
         thumb_final_name = "thumb.jpg"
         fanart_final_name = "fanart.jpg"
@@ -835,11 +835,14 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
         appoint_number=optional_data.get("appoint_number", ""),
         appoint_url=optional_data.get("appoint_url", ""),
         website_name=optional_data.get("website_name", ""),
+        definition="",
+        codec="",
     )
 
 
 async def deal_old_files(
-    json_data: DealOldFilesContext,
+    number: str,
+    info: OtherInfo,
     folder_old_path: str,
     folder_new_path: str,
     file_path: str,
@@ -951,9 +954,9 @@ async def deal_old_files(
     """
 
     # poster_marked True 不加水印，避免二次加水印,；poster_exists 是不是存在本地图片
-    json_data["poster_marked"] = True
-    json_data["thumb_marked"] = True
-    json_data["fanart_marked"] = True
+    info.poster_marked = True
+    info.thumb_marked = True
+    info.fanart_marked = True
     poster_exists = True
     thumb_exists = True
     fanart_exists = True
@@ -974,7 +977,7 @@ async def deal_old_files(
     """
 
     # poster 处理：寻找对应文件放到最终路径上。这样避免刮削失败时，旧的图片被删除
-    done_poster_path = Flags.file_done_dic.get(json_data["number"], {}).get("poster")
+    done_poster_path = Flags.file_done_dic.get(number, {}).get("poster")
     done_poster_path_copy = True
     try:
         # 图片最终路径等于已下载路径时，图片是已下载的，不需要处理
@@ -1002,7 +1005,7 @@ async def deal_old_files(
             poster_exists = False
 
         if poster_exists:
-            Flags.file_done_dic[json_data["number"]].update({"local_poster": poster_final_path})
+            Flags.file_done_dic[number].update({"local_poster": poster_final_path})
             # 清理旧图片
             if poster_old_path_with_filename.lower() != poster_final_path.lower() and await aiofiles.os.path.exists(
                 poster_old_path_with_filename
@@ -1016,14 +1019,14 @@ async def deal_old_files(
                 poster_new_path_with_filename
             ):
                 await delete_file_async(poster_new_path_with_filename)
-        elif Flags.file_done_dic[json_data["number"]]["local_poster"]:
-            await copy_file_async(Flags.file_done_dic[json_data["number"]]["local_poster"], poster_final_path)
+        elif Flags.file_done_dic[number]["local_poster"]:
+            await copy_file_async(Flags.file_done_dic[number]["local_poster"], poster_final_path)
 
     except Exception:
         signal.show_log_text(traceback.format_exc())
 
     # thumb 处理：寻找对应文件放到最终路径上。这样避免刮削失败时，旧的图片被删除
-    done_thumb_path = Flags.file_done_dic.get(json_data["number"], {}).get("thumb")
+    done_thumb_path = Flags.file_done_dic.get(number, {}).get("thumb")
     done_thumb_path_copy = True
     try:
         # 图片最终路径等于已下载路径时，图片是已下载的，不需要处理
@@ -1051,7 +1054,7 @@ async def deal_old_files(
             thumb_exists = False
 
         if thumb_exists:
-            Flags.file_done_dic[json_data["number"]].update({"local_thumb": thumb_final_path})
+            Flags.file_done_dic[number].update({"local_thumb": thumb_final_path})
             # 清理旧图片
             if thumb_old_path_with_filename.lower() != thumb_final_path.lower() and await aiofiles.os.path.exists(
                 thumb_old_path_with_filename
@@ -1065,14 +1068,14 @@ async def deal_old_files(
                 thumb_new_path_with_filename
             ):
                 await delete_file_async(thumb_new_path_with_filename)
-        elif Flags.file_done_dic[json_data["number"]]["local_thumb"]:
-            await copy_file_async(Flags.file_done_dic[json_data["number"]]["local_thumb"], thumb_final_path)
+        elif Flags.file_done_dic[number]["local_thumb"]:
+            await copy_file_async(Flags.file_done_dic[number]["local_thumb"], thumb_final_path)
 
     except Exception:
         signal.show_log_text(traceback.format_exc())
 
     # fanart 处理：寻找对应文件放到最终路径上。这样避免刮削失败时，旧的图片被删除
-    done_fanart_path = Flags.file_done_dic.get(json_data["number"], {}).get("fanart")
+    done_fanart_path = Flags.file_done_dic.get(number, {}).get("fanart")
     done_fanart_path_copy = True
     try:
         # 图片最终路径等于已下载路径时，图片是已下载的，不需要处理
@@ -1100,7 +1103,7 @@ async def deal_old_files(
             fanart_exists = False
 
         if fanart_exists:
-            Flags.file_done_dic[json_data["number"]].update({"local_fanart": fanart_final_path})
+            Flags.file_done_dic[number].update({"local_fanart": fanart_final_path})
             # 清理旧图片
             if fanart_old_path_with_filename.lower() != fanart_final_path.lower() and await aiofiles.os.path.exists(
                 fanart_old_path_with_filename
@@ -1114,16 +1117,16 @@ async def deal_old_files(
                 fanart_new_path_with_filename
             ):
                 await delete_file_async(fanart_new_path_with_filename)
-        elif Flags.file_done_dic[json_data["number"]]["local_fanart"]:
-            await copy_file_async(Flags.file_done_dic[json_data["number"]]["local_fanart"], fanart_final_path)
+        elif Flags.file_done_dic[number]["local_fanart"]:
+            await copy_file_async(Flags.file_done_dic[number]["local_fanart"], fanart_final_path)
 
     except Exception:
         signal.show_log_text(traceback.format_exc())
 
     # 更新图片地址
-    json_data["poster_path"] = poster_final_path if poster_exists and done_poster_path_copy else ""
-    json_data["thumb_path"] = thumb_final_path if thumb_exists and done_thumb_path_copy else ""
-    json_data["fanart_path"] = fanart_final_path if fanart_exists and done_fanart_path_copy else ""
+    info.poster_path = poster_final_path if poster_exists and done_poster_path_copy else ""
+    info.thumb_path = thumb_final_path if thumb_exists and done_thumb_path_copy else ""
+    info.fanart_path = fanart_final_path if fanart_exists and done_fanart_path_copy else ""
 
     # nfo 处理
     try:
@@ -1189,7 +1192,7 @@ async def deal_old_files(
             trailer_exists = False
 
         if trailer_exists:
-            Flags.file_done_dic[json_data["number"]].update({"local_trailer": trailer_new_file_path_with_filename})
+            Flags.file_done_dic[number].update({"local_trailer": trailer_new_file_path_with_filename})
             # 删除旧、新文件夹，用不到了(分集使用local trailer复制即可)
             if await aiofiles.os.path.exists(trailer_old_folder_path):
                 shutil.rmtree(trailer_old_folder_path, ignore_errors=True)
@@ -1204,7 +1207,7 @@ async def deal_old_files(
             ):
                 await delete_file_async(trailer_old_file_path_with_filename)
         else:
-            local_trailer = Flags.file_done_dic.get(json_data["number"], {}).get("local_trailer")
+            local_trailer = Flags.file_done_dic.get(number, {}).get("local_trailer")
             if local_trailer and await aiofiles.os.path.exists(local_trailer):
                 await copy_file_async(local_trailer, trailer_new_file_path_with_filename)
 

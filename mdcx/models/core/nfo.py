@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import os
 import re
 import time
 import traceback
+from dataclasses import asdict
 from io import StringIO
 
 import aiofiles
@@ -13,7 +16,7 @@ from mdcx.config.manager import config
 from mdcx.consts import ManualConfig
 from mdcx.models.core.utils import render_name_template
 from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import ReadNfoResult, WriteNfoInput
+from mdcx.models.types import CrawlersResultDataClass, FileInfo, OtherInfo
 from mdcx.number import get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import convert_path, get_used_time, split_path
@@ -21,7 +24,8 @@ from mdcx.utils.file import delete_file_async
 
 
 async def write_nfo(
-    json_data: WriteNfoInput,
+    file_info: FileInfo,
+    json_data: CrawlersResultDataClass,
     nfo_new_path: str,
     folder_new_path: str,
     file_path: str,
@@ -49,7 +53,7 @@ async def write_nfo(
         nfo_title_template = config.naming_media
 
     # 字符转义，避免emby无法解析
-    json_data_nfo = json_data.copy()
+    json_data_nfo = CrawlersResultDataClass(**asdict(json_data))
     key_word = [
         "title",
         "originaltitle",
@@ -61,7 +65,6 @@ async def write_nfo(
         "studio",
         "publisher",
         "tag",
-        "website",
         "thumb",
         "poster",
         "trailer",
@@ -83,7 +86,8 @@ async def write_nfo(
     }
     for key, value in rep_word.items():
         for each in key_word:
-            json_data_nfo[each] = str(json_data_nfo[each]).replace(key, value)
+            # json_data_nfo[each] = str(json_data_nfo[each]).replace(key, value)
+            setattr(json_data_nfo, each, str(getattr(json_data_nfo, each)).replace(key, value))
 
     show_4k = False
     show_cnword = False
@@ -91,31 +95,38 @@ async def write_nfo(
     # 获取在媒体文件中显示的规则，不需要过滤Windows异常字符
     should_escape_result = False
     nfo_title, *_ = render_name_template(
-        nfo_title_template, file_path, json_data_nfo, show_4k, show_cnword, show_moword, should_escape_result
+        nfo_title_template,
+        file_path,
+        file_info,
+        json_data_nfo,
+        show_4k,
+        show_cnword,
+        show_moword,
+        should_escape_result,
     )
 
     # 获取字段
     # 只有nfo的title用替换后的，其他字段用原始的
     nfo_include_new = config.nfo_include_new
-    cd_part = json_data_nfo["cd_part"]
-    originaltitle = json_data_nfo["originaltitle"]
-    originalplot = json_data_nfo["originalplot"]
-    title = json_data_nfo["title"]
-    studio = json_data_nfo["studio"]
-    publisher = json_data_nfo["publisher"]
-    year = json_data_nfo["year"]
-    outline = json_data_nfo["outline"]
-    runtime = json_data_nfo["runtime"]
-    director = json_data_nfo["director"]
-    actor = json_data_nfo["actor"]
-    release = json_data_nfo["release"]
-    tag = json_data_nfo["tag"]
-    number = json_data_nfo["number"]
-    cover = json_data_nfo["thumb"]
-    poster = json_data_nfo["poster"]
-    series = json_data_nfo["series"]
-    trailer = json_data_nfo["trailer"]
-    all_actor = json_data_nfo["all_actor"]
+    cd_part = file_info.cd_part
+    originaltitle = json_data_nfo.originaltitle
+    originalplot = json_data_nfo.originalplot
+    title = json_data_nfo.title
+    studio = json_data_nfo.studio
+    publisher = json_data_nfo.publisher
+    year = json_data_nfo.year
+    outline = json_data_nfo.outline
+    runtime = json_data_nfo.runtime
+    director = json_data_nfo.director
+    actor = json_data_nfo.actor
+    release = json_data_nfo.release
+    tag = json_data_nfo.tag
+    number = json_data_nfo.number
+    cover = json_data_nfo.thumb
+    poster = json_data_nfo.poster
+    series = json_data_nfo.series
+    trailer = json_data_nfo.trailer
+    all_actor = json_data_nfo.all_actor
 
     tag = re.split(r"[,，]", tag)  # tag str转list
 
@@ -136,7 +147,7 @@ async def write_nfo(
                     outline += f"<br>  <br>{originalplot}"
                 elif "show_jp_zh" in outline_show:
                     outline = f"{originalplot}<br>  <br>{outline}"
-                outline_from = json_data["outline_from"].capitalize().replace("Youdao", "有道")
+                outline_from = json_data.outline_from.capitalize().replace("Youdao", "有道")
                 if "show_from" in outline_show and outline_from:
                     outline += f"<br>  <br>由 {outline_from} 提供翻译"
             if "outline_no_cdata," in nfo_include_new:
@@ -198,7 +209,7 @@ async def write_nfo(
 
         # 输出国家和分级
         country = "JP"
-        if json_data["mosaic"] == "国产" or json_data["mosaic"] == "國產":
+        if json_data.mosaic == "国产" or json_data.mosaic == "國產":
             country = "CN"
         elif re.findall(r"\.\d{2}\.\d{2}\.\d{2}", number):
             country = "US"
@@ -245,8 +256,8 @@ async def write_nfo(
 
         # 输出公众评分、影评人评分
         try:
-            if json_data["score"]:
-                score = float(json_data["score"])
+            if json_data.score:
+                score = float(json_data.score)
                 if "score," in nfo_include_new:
                     print("  <rating>" + str(score) + "</rating>", file=code)
                 if "criticrating," in nfo_include_new:
@@ -256,8 +267,8 @@ async def write_nfo(
 
         # 输出我想看人数
         try:
-            if json_data["wanted"] and "wanted," in nfo_include_new:
-                print("  <votes>" + json_data["wanted"] + "</votes>", file=code)
+            if json_data.wanted and "wanted," in nfo_include_new:
+                print("  <votes>" + json_data.wanted + "</votes>", file=code)
         except Exception:
             pass
 
@@ -335,9 +346,9 @@ async def write_nfo(
             print("  <trailer>" + trailer + "</trailer>", file=code)
 
         # javdb id 输出, 没有时使用番号搜索页
-        if "国产" not in json_data_nfo["mosaic"] and "國產" not in json_data_nfo["mosaic"]:
-            if "javdbid" in json_data_nfo and json_data_nfo["javdbid"]:
-                print("  <javdbid>" + json_data_nfo["javdbid"] + "</javdbid>", file=code)
+        if "国产" not in json_data_nfo.mosaic and "國產" not in json_data_nfo.mosaic:
+            if json_data_nfo.javdbid:
+                print("  <javdbid>" + json_data_nfo.javdbid + "</javdbid>", file=code)
             else:
                 print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
         print("</movie>", file=code)
@@ -352,24 +363,23 @@ async def write_nfo(
         return False
 
 
-async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfoResult]:
+async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResultDataClass | None, OtherInfo | None]:
     local_nfo_path = os.path.splitext(file_path)[0] + ".nfo"
     local_nfo_name = split_path(local_nfo_path)[1]
     file_folder = split_path(file_path)[0]
-    json_data: ReadNfoResult = {}
-    json_data["source"] = "nfo"
+    json_data = CrawlersResultDataClass.empty()
     LogBuffer.req().write(local_nfo_path)
-    json_data["poster_from"] = "local"
-    json_data["thumb_from"] = "local"
-    json_data["extrafanart_from"] = "local"
-    json_data["trailer_from"] = "local"
+    json_data.poster_from = "local"
+    json_data.thumb_from = "local"
+    json_data.extrafanart_from = "local"
+    json_data.trailer_from = "local"
 
     if not await aiofiles.os.path.exists(local_nfo_path):
         LogBuffer.error().write("nfo文件不存在")
         LogBuffer.req().write("do_not_update_json_data_dic")
-        json_data["outline"] = split_path(file_path)[1]
-        json_data["tag"] = file_path
-        return False, json_data
+        json_data.outline = split_path(file_path)[1]
+        json_data.tag = file_path
+        return None, None
 
     async with aiofiles.open(local_nfo_path, encoding="utf-8") as f:
         content = await f.read()
@@ -383,19 +393,16 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfo
     if not title:
         LogBuffer.error().write("nfo文件损坏")
         LogBuffer.req().write("do_not_update_json_data_dic")
-        json_data["outline"] = split_path(file_path)[1]
-        json_data["tag"] = file_path
-        return False, json_data
+        json_data.outline = split_path(file_path)[1]
+        json_data.tag = file_path
+        return None, None
     title = re.sub(r" (CD)?\d{1}$", "", title)
 
     # 获取其他数据
     originaltitle = "".join(xml_nfo.xpath("//originaltitle/text()"))
-    if json_data["appoint_number"]:
-        number = json_data["appoint_number"]
-    else:
-        number = "".join(xml_nfo.xpath("//num/text()"))
-        if not number:
-            number = movie_number
+    number = "".join(xml_nfo.xpath("//num/text()"))
+    if not number:
+        number = movie_number
     letters = get_number_letters(number)
     title = title.replace(number + " ", "").strip()
     originaltitle = originaltitle.replace(number + " ", "").strip()
@@ -415,7 +422,7 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfo
             temp_from = re.findall(r"<br>  <br>由 .+ 提供翻译", outline)
             if temp_from:
                 outline = outline.replace(temp_from[0], "")
-                json_data["outline_from"] = temp_from[0].replace("<br>  <br>由 ", "").replace(" 提供翻译", "")
+                json_data.outline_from = temp_from[0].replace("<br>  <br>由 ", "").replace(" 提供翻译", "")
             outline = outline.replace(originalplot, "").replace("<br>  <br>", "")
     tag = ",".join(xml_nfo.xpath("//tag/text()"))
     release = "".join(xml_nfo.xpath("//release/text()"))
@@ -432,7 +439,7 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfo
                 r_month = "0" + r_month if len(r_month) == 1 else r_month
                 r_day = "0" + r_day if len(r_day) == 1 else r_day
                 release = r_year + "-" + r_month + "-" + r_day
-    json_data["release"] = release
+    json_data.release = release
     year = "".join(xml_nfo.xpath("//year/text()"))
     runtime = "".join(xml_nfo.xpath("//runtime/text()"))
     score = "".join(xml_nfo.xpath("//rating/text()"))
@@ -455,19 +462,19 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfo
 
     # 判断马赛克
     if "国产" in tag or "國產" in tag:
-        json_data["mosaic"] = "国产"
+        json_data.mosaic = "国产"
     elif "破解" in tag:
-        json_data["mosaic"] = "无码破解"
+        json_data.mosaic = "无码破解"
     elif "有码" in tag or "有碼" in tag:
-        json_data["mosaic"] = "有码"
+        json_data.mosaic = "有码"
     elif "流出" in tag:
-        json_data["mosaic"] = "流出"
+        json_data.mosaic = "流出"
     elif "无码" in tag or "無碼" in tag or "無修正" in tag:
-        json_data["mosaic"] = "无码"
+        json_data.mosaic = "无码"
     elif "里番" in tag or "裏番" in tag:
-        json_data["mosaic"] = "里番"
+        json_data.mosaic = "里番"
     elif "动漫" in tag or "動漫" in tag:
-        json_data["mosaic"] = "动漫"
+        json_data.mosaic = "动漫"
 
     # 获取只有标签的标签（因为启用字段翻译后，会再次重复添加字幕、演员、发行、系列等字段）
     replace_keys = set(filter(None, ["：", ":"] + re.split(r"[,，]", actor)))
@@ -478,7 +485,7 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfo
             if each_key in each_tag:
                 only_tag_list.remove(each_tag)
                 break
-    json_data["tag_only"] = ",".join(only_tag_list)
+    tag_only = ",".join(only_tag_list)
 
     # 获取本地图片路径
     poster_path_1 = convert_path(os.path.splitext(file_path)[0] + "-poster.jpg")
@@ -507,41 +514,44 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[bool, ReadNfo
         fanart_path = ""
 
     # 返回数据
-    json_data["title"] = title
+    json_data.title = title
     if config.title_language == "jp" and "read_update_nfo" in config.read_mode and originaltitle:
-        json_data["title"] = originaltitle
-    json_data["originaltitle"] = originaltitle
+        json_data.title = originaltitle
+    json_data.originaltitle = originaltitle
     if originaltitle and langid.classify(originaltitle)[0] == "ja":
-        json_data["originaltitle_amazon"] = originaltitle
+        json_data.originaltitle_amazon = originaltitle
         if actor:
-            json_data["actor_amazon"] = actor.split(",")
-    json_data["number"] = number
-    json_data["letters"] = letters
-    json_data["actor"] = actor
-    json_data["all_actor"] = actor
-    json_data["outline"] = outline
+            json_data.actor_amazon = actor.split(",")
+    json_data.number = number
+    json_data.letters = letters
+    json_data.actor = actor
+    json_data.all_actor = actor
+    json_data.outline = outline
     if config.outline_language == "jp" and "read_update_nfo" in config.read_mode and originalplot:
-        json_data["outline"] = originalplot
-    json_data["originalplot"] = originalplot
-    json_data["tag"] = tag
-    json_data["release"] = release
-    json_data["year"] = year
-    json_data["runtime"] = runtime
-    json_data["score"] = score
-    json_data["director"] = director
-    json_data["series"] = series
-    json_data["studio"] = studio
-    json_data["publisher"] = publisher
-    # json_data["website"] = website
-    json_data["thumb"] = cover
+        json_data.outline = originalplot
+    json_data.originalplot = originalplot
+    json_data.tag = tag
+    if "read_update_nfo" in config.read_mode:
+        json_data.tag = tag_only
+    json_data.release = release
+    json_data.year = year
+    json_data.runtime = runtime
+    json_data.score = score
+    json_data.director = director
+    json_data.series = series
+    json_data.studio = studio
+    json_data.publisher = publisher
+    # json_data.website = website
+    json_data.thumb = cover
     if cover:
-        json_data["thumb_list"].append(("local", cover))
-    json_data["poster"] = poster
-    json_data["trailer"] = trailer
-    json_data["wanted"] = wanted
-    json_data["poster_path"] = poster_path
-    json_data["thumb_path"] = thumb_path
-    json_data["fanart_path"] = fanart_path
+        json_data.thumb_list.append(("local", cover))
+    json_data.poster = poster
+    json_data.trailer = trailer
+    json_data.wanted = wanted
+    info = OtherInfo.empty()
+    info.poster_path = poster_path
+    info.thumb_path = thumb_path
+    info.fanart_path = fanart_path
     LogBuffer.log().write(f"\n 📄 [NFO] {local_nfo_name}")
-    signal.show_traceback_log(f"{number} {json_data['mosaic']}")
-    return True, json_data
+    signal.show_traceback_log(f"{number} {json_data.mosaic}")
+    return json_data, info

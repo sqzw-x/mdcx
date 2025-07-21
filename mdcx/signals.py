@@ -1,18 +1,10 @@
-"""
-信号及日志类, 包括与 controller 通信所需的所有信号量
-功能:
-    向控制台输出日志
-    通过信号量显示可视化日志
-    其他需要操作 UI 的行为
-依赖:
-    此模块不应依赖除 models.base.utils 外的任何项目代码
-"""
-
 import threading
 import time
+from typing import Literal
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
+from mdcx.models.types import ShowDataDataclass
 from mdcx.utils import singleton
 
 
@@ -22,7 +14,7 @@ class Signals(QObject):
     log_text = pyqtSignal(str)
     scrape_info = pyqtSignal(str)
     net_info = pyqtSignal(str)
-    set_main_info = pyqtSignal(object)  # 主界面更新番号信息
+    exec_set_main_info = pyqtSignal(ShowDataDataclass)  # 主界面更新番号信息
     change_buttons_status = pyqtSignal()
     reset_buttons_status = pyqtSignal()
     set_label_file_path = pyqtSignal(str)
@@ -32,7 +24,7 @@ class Signals(QObject):
     exec_set_processbar = pyqtSignal(int)  # 进度条信号量
     exec_exit_app = pyqtSignal()  # 退出信号量
     view_failed_list_settext = pyqtSignal(str)
-    exec_show_list_name = pyqtSignal(str, str, object, str)
+    exec_show_list_name = pyqtSignal(str, ShowDataDataclass, str)
     logs_failed_show = pyqtSignal(str)  # 失败面板添加信息日志信号
 
     # endregion
@@ -71,17 +63,13 @@ class Signals(QObject):
     def show_net_info(self, text):
         self.net_info.emit(text)
 
-    def add_label_info(self, json_data):
-        self.set_main_info.emit(json_data)
+    def set_main_info(self, show_data=None):
+        if show_data is None:
+            show_data = ShowDataDataclass.empty()
+        self.exec_set_main_info.emit(show_data)
 
-    def show_list_name(
-        self,
-        filename,
-        result,
-        json_data,
-        real_number="",
-    ):
-        self.exec_show_list_name.emit(filename, result, json_data, real_number)
+    def show_list_name(self, status: Literal["succ", "fail"], show_data: ShowDataDataclass, real_number=""):
+        self.exec_show_list_name.emit(status, show_data, real_number)
 
 
 signal = Signals()

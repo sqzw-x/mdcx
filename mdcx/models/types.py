@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import TypedDict
 
@@ -194,6 +196,7 @@ class CrawlerResult(BaseCrawlerResult):
     """
 
     actor_photo: dict  # 演员照片信息
+    # todo 在 v1 里此字段似乎并未被使用, 唯一需要的位置是 cut_thumb_to_poster, 而其值是在调用方 poster_download 中推断出来的
     image_cut: str  # 图片裁剪方式
     source: str  # 数据来源（爬虫名称）
     website: str  # 网站地址
@@ -279,7 +282,8 @@ class FileInfo:
     wuma: str
     youma: str
 
-    definition: str = ""  # todo 迁移
+    definition: str
+    codec: str
 
     def crawler_input(self) -> "CallCrawlerInput":
         """
@@ -313,6 +317,37 @@ class FileInfo:
             cd_part=self.cd_part,
             destroyed=self.destroyed,
             website_name=self.website_name,
+        )
+
+    @classmethod
+    def empty(cls) -> "FileInfo":
+        """
+        返回一个空的 FileInfo 实例
+        """
+        return cls(
+            number="",
+            mosaic="",
+            appoint_number="",
+            appoint_url="",
+            c_word="",
+            cd_part="",
+            destroyed="",
+            file_ex="",
+            file_name="",
+            file_path="",
+            file_show_name="",
+            file_show_path="",
+            folder_path="",
+            has_sub=False,
+            leak="",
+            letters="",
+            short_number="",
+            sub_list=[],
+            website_name="",
+            wuma="",
+            youma="",
+            definition="",
+            codec="",
         )
 
 
@@ -487,12 +522,82 @@ class CrawlersResultDataClass(BaseCrawlerResultDataClass):
         )
 
 
+@dataclass
+class ShowDataDataclass:
+    """
+    用于主界面显示的数据类
+    """
+
+    file_info: FileInfo
+    data: CrawlersResultDataClass | None
+    other: OtherInfo | None
+    show_name: str = ""  # 显示名称, 用于主界面显示
+
+    @classmethod
+    def empty(cls) -> "ShowDataDataclass":
+        """
+        返回一个空的 ShowDataDataclass 实例
+        """
+        return cls(
+            file_info=FileInfo.empty(),
+            data=CrawlersResultDataClass.empty(),
+            other=OtherInfo.empty(),
+            show_name="",
+        )
+
+
+@dataclass
+class ScrapeResult:
+    file_info: FileInfo
+    data: CrawlersResultDataClass
+    other: OtherInfo
+
+
+@dataclass
+class OtherInfo:
+    # 由 creat_folder 写入, move_movie 使用
+    del_file_path: bool
+    dont_move_movie: bool
+    # 用于控制 add_mark 是否添加水印, 有多个写入来源
+    fanart_marked: bool
+    poster_marked: bool
+    thumb_marked: bool
+    # 其它图片获取过程所需字段
+    fanart_path: str
+    poster_path: str
+    thumb_path: str
+    poster_big: bool
+    poster_size: tuple[int, int]
+    thumb_size: tuple[int, int]
+
+    @classmethod
+    def empty(cls) -> "OtherInfo":
+        """
+        返回一个空的 OtherInfo 实例
+        """
+        return cls(
+            del_file_path=False,
+            dont_move_movie=False,
+            fanart_marked=True,
+            poster_marked=True,
+            thumb_marked=True,
+            fanart_path="",
+            poster_path="",
+            thumb_path="",
+            poster_big=False,
+            poster_size=(0, 0),
+            thumb_size=(0, 0),
+        )
+
+
 # utils ============================================================
-# convert to: FileInfo + CrawlersResult
+
+
 class TemplateInput(BaseCrawlerResult):
     """
     用于 render_name_template 根据用户模版生成文件名
 
+    covered by: FileInfo + CrawlersResult
     """
 
     # in FileInfo
@@ -552,11 +657,8 @@ class ShowData(BaseCrawlerResult):
 
 
 # file =================================================================
-class GetFolderPathContext(TemplateInput):
-    folder_name: str
-
-
-class GetOutPutNameContext(GetFolderPathContext):
+class GetOutPutNameContext(TemplateInput):
+    # in FileInfo
     cd_part: str  # read-only
 
 
@@ -588,23 +690,23 @@ class CreateFolderContext(TypedDict):
     title: str
 
 
-@dataclass
-class AssetsInfo: ...
-
-
 # image ============================================================
 class AddMarkInput(TypedDict):
-    definition: str
+    fanart_marked: bool
+    poster_marked: bool
+    thumb_marked: bool
     poster_path: str
     thumb_path: str
     fanart_path: str
     # in FileInfo
+    definition: str
     has_sub: bool
     # in BaseCrawlerResult
     mosaic: str
 
 
 class CutThumbContext(TypedDict):
+    # in CrawlerResult
     image_cut: str
     # in CrawlersResult
     poster_from: str
@@ -627,14 +729,14 @@ class TrailerInput(TypedDict):
 
 
 class ThumbContext(TypedDict):
-    poster_path: str
-    thumb_path: str
     fanart_path: str
-    thumb_list: list[tuple[str, str]]
-    thumb_size: tuple[int, int]
-    thumb_marked: bool
     poster_big: bool
+    poster_path: str
+    thumb_marked: bool
+    thumb_path: str
+    thumb_size: tuple[int, int]
     # in CrawlersResult
+    thumb_list: list[tuple[str, str]]
     thumb_from: str
     poster_from: str
     trailer_from: str
@@ -656,7 +758,6 @@ class PosterContext(CutThumbContext):
     thumb_path: str
     poster_marked: bool
     poster_big: bool
-    image_download: bool
     # in CrawlersResult
     actor_amazon: list[str]
     amazon_orginaltitle_actor: str
@@ -665,6 +766,7 @@ class PosterContext(CutThumbContext):
     # in FileInfo
     cd_part: str
     # in BaseCrawlerResult
+    image_download: bool
     mosaic: str
     number: str
     poster: str
@@ -703,7 +805,7 @@ class TransTitleOutlineContext(TypedDict):
 
 
 class TranslateActorContext(TypedDict):
-    actor_href: str  # 此字段在此创建, 是从映射表读取所得, 仅用于主界面显示
+    actor_href: str  # 此字段在此创建, 是从映射表读取所得, 仅用于主界面显示, 考虑移除
     # in CrawlersResult
     all_actor: str
     # in BaseCrawlerResult
@@ -761,10 +863,10 @@ class WriteNfoInput(BaseCrawlerResult):
 
 
 class ReadNfoResult(WriteNfoInput):
-    source: str
-    tag_only: str
-    thumb_list: list[tuple[str, str]]
+    source: str  # 只用于显示, 理论上多来源刮削时此字段无效, 考虑移除
+    tag_only: str  # 仅在此出现
     # in CrawlersResult
+    thumb_list: list[tuple[str, str]]
     poster_from: str
     thumb_from: str
     extrafanart_from: str

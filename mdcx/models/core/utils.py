@@ -12,7 +12,7 @@ from mdcx.config.resources import resources
 from mdcx.consts import ManualConfig
 from mdcx.models.base.number import deal_actor_more
 from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import GetVideoSizeContext, JsonData, ShowData, TemplateInput
+from mdcx.models.types import BaseCrawlerResultDataClass, CrawlersResultDataClass, FileInfo
 from mdcx.number import get_number_first_letter, get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import get_new_release, get_used_time, split_path
@@ -20,11 +20,11 @@ from mdcx.utils.file import read_link_async
 from mdcx.utils.video import get_video_metadata
 
 
-def replace_word(json_data: JsonData):
+def replace_word(json_data: BaseCrawlerResultDataClass):
     # 常见字段替换的字符
     for key, value in ManualConfig.ALL_REP_WORD.items():
         for each in ManualConfig.ALL_KEY_WORD:
-            json_data[each] = json_data[each].replace(key, value)
+            setattr(json_data, each, getattr(json_data, each).replace(key, value))
 
     # 简体时替换的字符
     key_word = []
@@ -35,16 +35,16 @@ def replace_word(json_data: JsonData):
 
     for key, value in ManualConfig.CHINESE_REP_WORD.items():
         for each in key_word:
-            json_data[each] = json_data[each].replace(key, value)
+            setattr(json_data, each, getattr(json_data, each).replace(key, value))
 
     # 替换标题的上下集信息
     fields_word = ["title", "originaltitle"]
     for field in fields_word:
         for each in ManualConfig.TITLE_REP:
-            json_data[field] = json_data[field].replace(each, "").strip(":， ").strip()
+            setattr(json_data, field, getattr(json_data, field).replace(each, "").strip(":， ").strip())
 
 
-def replace_special_word(json_data: JsonData):
+def replace_special_word(json_data: BaseCrawlerResultDataClass):
     # 常见字段替换的字符
     all_key_word = [
         "title",
@@ -59,15 +59,16 @@ def replace_special_word(json_data: JsonData):
     ]
     for key, value in ManualConfig.SPECIAL_WORD.items():
         for each in all_key_word:
-            json_data[each] = json_data[each].replace(key, value)
+            # json_data[each] = json_data[each].replace(key, value)
+            setattr(json_data, each, getattr(json_data, each).replace(key, value))
 
 
-def deal_some_field(json_data: JsonData) -> JsonData:
+def deal_some_field(json_data: CrawlersResultDataClass):
     fields_rule = config.fields_rule
-    actor = json_data["actor"]
-    title = json_data["title"]
-    originaltitle = json_data["originaltitle"]
-    number = json_data["number"]
+    actor = json_data.actor
+    title = json_data.title
+    originaltitle = json_data.originaltitle
+    number = json_data.number
 
     # 演员处理
     if actor:
@@ -83,14 +84,14 @@ def deal_some_field(json_data: JsonData) -> JsonData:
                     new_actor_list.append(new_actor[0])
                 temp_actor_list.extend(new_actor)
         if "del_char" in fields_rule:
-            json_data["actor"] = ",".join(new_actor_list)
+            json_data.actor = ",".join(new_actor_list)
         else:
-            json_data["actor"] = ",".join(actor_list)
+            json_data.actor = ",".join(actor_list)
 
         # 去除标题后的演员名
         if "del_actor" in fields_rule:
             new_all_actor_name_list = []
-            for each_actor in json_data["actor_amazon"] + temp_actor_list:
+            for each_actor in json_data.actor_amazon + temp_actor_list:
                 # 获取演员映射表的所有演员别名进行替换
                 actor_keyword_list: list[str] = resources.get_actor_data(each_actor).get("keyword", [])
                 new_all_actor_name_list.extend(actor_keyword_list)
@@ -101,38 +102,38 @@ def deal_some_field(json_data: JsonData) -> JsonData:
                     originaltitle = re.sub(end_actor, "", originaltitle)
                 except Exception:
                     signal.show_traceback_log(traceback.format_exc())
-        json_data["title"] = title.strip()
-        json_data["originaltitle"] = originaltitle.strip()
+        json_data.title = title.strip()
+        json_data.originaltitle = originaltitle.strip()
 
     # 去除标题中的番号
     if number != title and title.startswith(number):
         title = title.replace(number, "").strip()
-        json_data["title"] = title
+        json_data.title = title
     if number != originaltitle and originaltitle.startswith(number):
         originaltitle = originaltitle.replace(number, "").strip()
-        json_data["originaltitle"] = originaltitle
+        json_data.originaltitle = originaltitle
 
     # 去除标题中的/
-    json_data["title"] = json_data["title"].replace("/", "#").strip(" -")
-    json_data["originaltitle"] = json_data["originaltitle"].replace("/", "#").strip(" -")
+    json_data.title = json_data.title.replace("/", "#").strip(" -")
+    json_data.originaltitle = json_data.originaltitle.replace("/", "#").strip(" -")
 
     # 去除素人番号前缀数字
     if "del_num" in fields_rule:
         temp_n = re.findall(r"\d{3,}([a-zA-Z]+-\d+)", number)
         if temp_n:
-            json_data["number"] = temp_n[0]
-            json_data["letters"] = get_number_letters(json_data["number"])
+            json_data.number = temp_n[0]
+            json_data.letters = get_number_letters(json_data.number)
 
     if number.endswith("Z"):
-        json_data["number"] = json_data["number"][:-1] + "z"
+        json_data.number = json_data.number[:-1] + "z"
     return json_data
 
 
-def show_movie_info(json_data: ShowData):
+def show_movie_info(file_info: FileInfo, result: CrawlersResultDataClass):
     if not config.show_data_log:  # 调试模式打开时显示详细日志
         return
-    for key in ManualConfig.SHOW_KEY:
-        value = json_data.get(key)
+    for key in ManualConfig.SHOW_KEY:  # 大部分来自 CrawlersResultDataClass, 少部分来自 FileInfo
+        value = getattr(result, key, getattr(file_info, key, ""))
         if not value:
             continue
         if key == "outline" or key == "originalplot" and len(value) > 100:
@@ -140,11 +141,20 @@ def show_movie_info(json_data: ShowData):
         elif key == "has_sub":
             value = "中文字幕"
         elif key == "actor" and "actor_all," in config.nfo_include_new:
-            value = json_data["all_actor"]
+            value = result.all_actor
         LogBuffer.log().write("\n     " + "%-13s" % key + ": " + str(value))
 
 
-async def get_video_size(json_data: GetVideoSizeContext, file_path: str):
+async def get_video_size(file_path: str):
+    """
+    获取视频分辨率和编码格式
+
+    Args:
+        file_path (str): 视频文件的完整路径
+
+    Returns:
+        definition,codec (tuple[str, str]): 视频分辨率, 编码格式
+    """
     # 获取本地分辨率 同时获取视频编码格式
     definition = ""
     height = 0
@@ -154,10 +164,11 @@ async def get_video_size(json_data: GetVideoSizeContext, file_path: str):
             file_path = await read_link_async(file_path)
         else:
             hd_get = "path"
-    codec_fourcc = ""
+    codec = ""
     if hd_get == "video":
         try:
-            height, codec_fourcc = await asyncio.to_thread(get_video_metadata, file_path)
+            height, codec = await asyncio.to_thread(get_video_metadata, file_path)
+            codec = codec.upper()
         except Exception as e:
             signal.show_log_text(f" 🔴 无法获取视频分辨率! 文件地址: {file_path}  错误信息: {e}")
     elif hd_get == "path":
@@ -198,14 +209,13 @@ async def get_video_size(json_data: GetVideoSizeContext, file_path: str):
         definition = "360P"
     elif height >= 100:
         definition = "144P"
-    json_data["definition"] = definition
 
-    if definition in ["4K", "8K", "UHD", "UHD8"]:
-        json_data["_4K"] = "-" + definition
+    return definition, codec
 
-    # 去除标签中的分辨率率，使用本地读取的实际分辨率
+
+def add_definition_tag(res: BaseCrawlerResultDataClass, definition, codec):
     remove_key = ["144P", "360P", "480P", "540P", "720P", "960P", "1080P", "1440P", "2160P", "4K", "8K"]
-    tag = json_data["tag"]
+    tag = res.tag
     for each_key in remove_key:
         tag = tag.replace(each_key, "").replace(each_key.lower(), "")
     tag_list = re.split(r"[,，]", tag)
@@ -213,10 +223,9 @@ async def get_video_size(json_data: GetVideoSizeContext, file_path: str):
     [new_tag_list.append(i) for i in tag_list if i]
     if definition and "definition" in config.tag_include:
         new_tag_list.insert(0, definition)
-        if hd_get == "video" and codec_fourcc:
-            new_tag_list.insert(0, codec_fourcc.upper())  # 插入编码格式
-    json_data["tag"] = "，".join(new_tag_list)
-    return json_data
+        if config.hd_get == "video" and codec:
+            new_tag_list.insert(0, codec)  # 插入编码格式
+    res.tag = "，".join(new_tag_list)
 
 
 def show_result(fields_info, start_time: float):
@@ -235,7 +244,8 @@ def show_result(fields_info, start_time: float):
 def render_name_template(
     template: str,
     file_path: str,
-    json_data: TemplateInput,
+    file_info: FileInfo,
+    json_data: CrawlersResultDataClass,
     show_4k: bool,
     show_cnword: bool,
     show_moword: bool,
@@ -252,32 +262,33 @@ def render_name_template(
     filename = os.path.splitext(file_full_name)[0]
 
     # 获取文件信息
-    destroyed = json_data["destroyed"]
-    leak = json_data["leak"]
-    wuma = json_data["wuma"]
-    youma = json_data["youma"]
+    destroyed = file_info.destroyed
+    leak = file_info.leak
+    wuma = file_info.wuma
+    youma = file_info.youma
     m_word = destroyed + leak + wuma + youma
-    c_word = json_data["c_word"]
-    title = json_data["title"]
-    originaltitle = json_data["originaltitle"]
-    studio = json_data["studio"]
-    publisher = json_data["publisher"]
-    year = json_data["year"]
-    outline = json_data["outline"]
-    runtime = json_data["runtime"]
-    director = json_data["director"]
-    actor = json_data["actor"]
-    release = json_data["release"]
-    number = json_data["number"]
-    series = json_data["series"]
-    mosaic = json_data["mosaic"]
-    definition = json_data["definition"]
-    letters = json_data["letters"]
+    c_word = file_info.c_word
+    definition = file_info.definition
+
+    title = json_data.title
+    originaltitle = json_data.originaltitle
+    studio = json_data.studio
+    publisher = json_data.publisher
+    year = json_data.year
+    outline = json_data.outline
+    runtime = json_data.runtime
+    director = json_data.director
+    actor = json_data.actor
+    release = json_data.release
+    number = json_data.number
+    series = json_data.series
+    mosaic = json_data.mosaic
+    letters = json_data.letters
 
     # 是否勾选文件名添加4k标识
     temp_4k = ""
     if show_4k:
-        definition = json_data["definition"]
+        definition = file_info.definition
         if definition == "8K" or definition == "UHD8" or definition == "4K" or definition == "UHD":
             temp_definition = definition.replace("UHD8", "UHD")
             temp_4k = f"-{temp_definition}"
@@ -302,7 +313,7 @@ def render_name_template(
     # 生成number
     first_letter = get_number_first_letter(number)
     # 处理异常情况
-    score = str(json_data["score"])
+    score = str(json_data.score)
     if not series:
         series = "未知系列"
     if not actor:
@@ -314,7 +325,7 @@ def render_name_template(
     release = get_new_release(release, config.release_rule)
     # 获取演员
     first_actor = actor.split(",").pop(0)
-    all_actor = deal_actor_more(json_data["all_actor"])
+    all_actor = deal_actor_more(json_data.all_actor)
     actor = deal_actor_more(actor)
 
     # 替换字段里的文件夹分隔符
@@ -329,30 +340,30 @@ def render_name_template(
         temp_4k = definition.replace("UHD8", "UHD")
     # 替换文件名
     repl_list = [
-        ["4K", temp_4k.strip("-")],
-        ["originaltitle", originaltitle],
-        ["title", title],
-        ["outline", outline],
-        ["number", number],
-        ["first_actor", first_actor],
-        ["all_actor", all_actor],
-        ["actor", actor],
-        ["release", release],
-        ["year", str(year)],
-        ["runtime", str(runtime)],
-        ["director", director],
-        ["series", series],
-        ["studio", studio],
-        ["publisher", publisher],
-        ["mosaic", mosaic],
-        ["definition", definition.replace("UHD8", "UHD")],
-        ["cnword", cnword],
-        ["moword", moword],
-        ["first_letter", first_letter],
-        ["letters", letters],
-        ["filename", filename],
-        ["wanted", str(json_data["wanted"])],
-        ["score", str(score)],
+        ("4K", temp_4k.strip("-")),
+        ("originaltitle", originaltitle),
+        ("title", title),
+        ("outline", outline),
+        ("number", number),
+        ("first_actor", first_actor),
+        ("all_actor", all_actor),
+        ("actor", actor),
+        ("release", release),
+        ("year", str(year)),
+        ("runtime", str(runtime)),
+        ("director", director),
+        ("series", series),
+        ("studio", studio),
+        ("publisher", publisher),
+        ("mosaic", mosaic),
+        ("definition", definition.replace("UHD8", "UHD")),
+        ("cnword", cnword),
+        ("moword", moword),
+        ("first_letter", first_letter),
+        ("letters", letters),
+        ("filename", filename),
+        ("wanted", str(json_data.wanted)),
+        ("score", str(score)),
     ]
 
     # 国产使用title作为number会出现重复，此处去除title，避免重复(需要注意titile繁体情况)

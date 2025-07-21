@@ -162,7 +162,7 @@ async def main(
                     "director": "",
                     "studio": studio,
                     "publisher": studio,
-                    "source": "fc2hub.main",
+                    "source": "fc2hub",
                     "website": str(real_url).strip("[]"),
                     "actor_photo": {actor: ""},
                     "thumb": str(cover_url),

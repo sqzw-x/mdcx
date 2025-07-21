@@ -1,12 +1,8 @@
-"""
-用于刮削过程控制的标志位
-此模块不应依赖任何项目代码
-"""
-
 from dataclasses import dataclass, field
 from typing import Any
 
 from mdcx.models.enums import FileMode
+from mdcx.models.types import ScrapeResult
 
 
 @dataclass
@@ -57,7 +53,7 @@ class _Flags:
     )  # 当前文件夹剧照已下载的标识（如已存在，视为剧照已处理过）
     nfo_deal_set: set[str] = field(default_factory=set)  # 当前文件nfo已处理的标识（如已存在，视为剧照已处理过）
     json_get_set: set[str] = field(default_factory=set)  # 去获取json的番号列表
-    json_data_dic: dict[str, Any] = field(default_factory=dict)  # 获取成功的json
+    json_data_dic: dict[str, ScrapeResult] = field(default_factory=dict)  # 获取成功的json
     img_path: str = ""
     deepl_result: dict[str, Any] = field(
         default_factory=dict

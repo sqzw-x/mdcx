@@ -118,7 +118,7 @@ def Init_Singal(self):
     signal.log_text.connect(self.show_log_text)  # 可视化日志输出
     signal.scrape_info.connect(self.show_scrape_info)  # 可视化日志输出
     signal.net_info.connect(self.show_net_info)  # 可视化日志输出
-    signal.set_main_info.connect(self.add_label_info_Thread)
+    signal.exec_set_main_info.connect(self.set_main_info)
     signal.change_buttons_status.connect(self.change_buttons_status)
     signal.reset_buttons_status.connect(self.reset_buttons_status)
     signal.logs_failed_settext.connect(self.Ui.textBrowser_log_main_3.setText)
@@ -223,9 +223,6 @@ def Init_Singal(self):
     # endregion
 
     # region 鼠标点击
-    self.Ui.label_number.mousePressEvent = self.label_number_clicked
-    self.Ui.label_source.mousePressEvent = self.label_number_clicked
-    self.Ui.label_actor.mousePressEvent = self.label_actor_clicked
     self.Ui.label_show_version.mousePressEvent = self.label_version_clicked
     self.Ui.label_local_number.mousePressEvent = self.label_local_number_clicked
 
@@ -306,7 +303,7 @@ def init_QTreeWidget(self):
         self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")  # 主界面右上角显示提示信息
     except Exception:
         signal.show_traceback_log(traceback.format_exc())
-    signal.add_label_info("")
+    signal.set_main_info()
     Flags.count_claw = 0  # 批量刮削次数
     if self.Ui.pushButton_start_cap.text() != "开始":
         Flags.count_claw = 1  # 批量刮削次数
