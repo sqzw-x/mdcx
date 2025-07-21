@@ -18,6 +18,9 @@ from mdcx.views.posterCutTool import Ui_Dialog_cut_poster
 if TYPE_CHECKING:
     from mdcx.controllers.main_window.main_window import MyMAinWindow
 
+if TYPE_CHECKING:
+    from controllers.main_window.main_window import MyMAinWindow
+
 
 class DraggableButton(QPushButton):
     def __init__(
