@@ -1,0 +1,19 @@
+name: Close Stale Issues
+
+on:
+  schedule:
+    - cron: "0 20 * * *"
+  workflow_dispatch:
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close Stale Issues
+        uses: actions/stale@v9.1.0
+        with:
+          stale-issue-message: "此 issue 长时间未活跃，将自动关闭。如需继续讨论请重新打开。"
+          days-before-stale: 90
+          days-before-close: 7
+          exempt-issue-labels: "pinned,security"
+          exempt-pr-labels: "pinned,security"

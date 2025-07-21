@@ -1,0 +1,218 @@
+name: Build and Release
+
+on:
+  release:
+    types: [published]
+  push:
+    branches:
+      - dev
+    tags:
+      - 120*
+  schedule:
+    - cron: "0 21 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag"
+        required: false
+
+env:
+  PYTHON_VERSION: "3.9"
+  IS_DAILY: ${{ !startsWith(github.ref, 'refs/tags/120') && github.ref == 'refs/heads/master' }}
+  IS_DEV: ${{ github.ref == 'refs/heads/dev' }}
+
+jobs:
+  init-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      count: ${{ steps.get-new-commits.outputs.count }}
+      short_sha: ${{ steps.get-new-commits.outputs.short_sha }}
+      last_commit: ${{ steps.get-dev-info.outputs.LAST_COMMIT }}
+      commits_since_tag: ${{ steps.get-dev-info.outputs.COMMITS_SINCE_TAG }}
+      last_tag: ${{ steps.get-dev-info.outputs.last_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get new commits
+        id: get-new-commits
+        run: |
+          echo "count=$(git log --oneline --since '24 hours ago' | wc -l)" >> $GITHUB_OUTPUT
+          echo "short_sha=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_OUTPUT
+
+      - name: Get dev commit info
+        id: get-dev-info
+        if: ${{ env.IS_DEV == 'true' }}
+        run: ./scripts/get-dev-info.sh >> $GITHUB_OUTPUT
+
+      - name: Delete old daily release
+        if: ${{ env.IS_DAILY == 'true' && steps.get-new-commits.outputs.count > 0  }}
+        run: |
+          # 删除旧的daily_release
+          echo "Deleting old daily release..."
+          gh release delete daily_release --cleanup-tag --yes || echo "No previous daily release found."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete old dev release
+        if: ${{ env.IS_DEV == 'true' }}
+        run: |
+          echo "Deleting old dev release..."
+          gh release delete alpha --cleanup-tag --yes || echo "No previous dev release found."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # https://github.com/actions/runner/issues/1985#issuecomment-1573518052
+      - name: Set matrix
+        id: set-matrix
+        run: |
+          items=()
+
+          # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners
+
+          items+=('{"build": "macos", "os": "macos-latest", "arch": "aarch64"}')
+          items+=('{"build": "macos", "os": "macos-13", "arch": "x86_64"}')
+
+          items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
+
+          # macOS 10.15.7, x86_64, 指定opencv版本
+          if [[ -n "${{ vars.BUILD_FOR_MACOS_LEGACY }}" && -n "${{ vars.MACOS_LEGACY_CV_VERSION }}" ]]; then
+            items+=('{"build": "macos", "os": "macos-13", "arch": "x86_64", "cv": "${{ vars.MACOS_LEGACY_CV_VERSION }}", "tail": "-legacy"}')
+          fi
+
+          # win7, x86_64, python3.8
+          if [[ -n "${{ vars.BUILD_FOR_WINDOWS_LEGACY }}" ]]; then
+            items+=('{"build": "windows", "os": "windows-2019", "arch": "x86_64", "python": "3.8", "tail": "-legacy"}')
+          fi
+
+          # 合并items到json数组
+          matrix="matrix=["
+          for ((i=0; i<${#items[@]}; i++)); do
+            matrix+=" ${items[i]}"
+            if ((i != ${#items[@]}-1)); then
+              matrix+=","
+            fi
+          done
+          matrix+="]"
+
+          # 输出matrix到GITHUB_OUTPUT
+          echo $matrix >> $GITHUB_OUTPUT
+
+  build-app:
+    needs: init-matrix
+    runs-on: ${{ matrix.os }}
+    # 如果commit数量大于0，或者手动触发，则执行
+    if: ${{ needs.init-matrix.outputs.count > 0 || github.event_name == 'workflow_dispatch' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{fromJson(needs.init-matrix.outputs.matrix)}}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Before setup-python
+        if: ${{ matrix.build == 'macos' }}
+        run: |
+          # 如果指定了cv，则修改requirements-mac.txt里的opencv版本
+          cvVersion="${{ matrix.cv }}"
+          if [ -n "$cvVersion" ]; then
+            sed -i '' "s/opencv-contrib-python-headless==.*/opencv-contrib-python-headless==${cvVersion}/" requirements-mac.txt
+          fi
+
+      - name: Set up Python - cache pip
+        if: ${{ matrix.cache != 'none' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python || env.PYTHON_VERSION }}
+          cache: ${{ matrix.cache || 'pip' }}
+
+      - name: Set up Python - no cache
+        if: ${{ matrix.cache == 'none' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python || env.PYTHON_VERSION }}
+
+      - name: Install libraries - macOS
+        if: ${{ matrix.build == 'macos' }}
+        run: |
+          # FIX: No package 'gobject-introspection-1.0' found
+          # https://tutorials.technology/solved_errors/osx-gobject-introspection-1_0-found.html
+          brew install gobject-introspection
+
+      - name: Install dependencies - macOS
+        if: ${{ matrix.build == 'macos' }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-mac.txt
+          pip install pyinstaller==6.14.1
+
+      - name: Install dependencies - Windows
+        if: ${{ matrix.build == 'windows' }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller==6.14.1
+
+      - name: Build macOS app - macOS
+        if: ${{ matrix.build == 'macos' }}
+        run: |
+          version="${{ github.ref_name }}"
+          # 如果是手动触发，则使用输入的tag
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            version="${{ github.event.inputs.tag }}"
+          fi
+          bash scripts/build-macos.sh --create-dmg --version "$version"
+
+      - name: Build Windows app - Windows
+        if: ${{ matrix.build == 'windows' }}
+        run: scripts/build-action
+
+      - name: Get changelog
+        id: get-changelog
+        if: ${{ matrix.build == 'macos' && env.IS_DAILY != 'true' && env.IS_DEV != 'true' }}
+        run: |
+          echo 'CHANGELOG<<EOF' >> $GITHUB_OUTPUT
+          cat changelog.md >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
+      - name: Create dev release message
+        id: get-dev-msg
+        if: ${{ matrix.build == 'macos' && env.IS_DEV == 'true' }}
+        run: |
+          echo 'DEV_MESSAGE<<EOF' >> $GITHUB_OUTPUT
+          echo "🚀 Development Build - ${{ needs.init-matrix.outputs.short_sha }}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "${{ needs.init-matrix.outputs.last_commit }}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "${{ needs.init-matrix.outputs.commits_since_tag }}" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "⚠️ This is a development build and may contain unstable features." >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
+      - name: Create Release - macOS
+        uses: svenstaro/upload-release-action@v2
+        if: ${{ matrix.build == 'macos' }}
+        with:
+          overwrite: true
+          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ needs.init-matrix.outputs.short_sha }}.dmg
+          file: dist/MDCx.dmg
+          prerelease: ${{ env.IS_DAILY == 'true' || env.IS_DEV == 'true' }}
+          body: |
+            ${{ env.IS_DAILY == 'true' && github.event.repository.updated_at || env.IS_DEV == 'true' && steps.get-dev-msg.outputs.DEV_MESSAGE || steps.get-changelog.outputs.CHANGELOG }}
+          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.ref }}
+
+      - name: Create Release - Windows
+        uses: svenstaro/upload-release-action@v2
+        if: ${{ matrix.build == 'windows' }}
+        with:
+          overwrite: true
+          asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ needs.init-matrix.outputs.short_sha }}.exe
+          file: dist/MDCx.exe
+          prerelease: ${{ env.IS_DAILY == 'true' || env.IS_DEV == 'true' }}
+          body: |
+            ${{ env.IS_DAILY == 'true' && github.event.repository.updated_at || env.IS_DEV == 'true' && steps.get-dev-msg.outputs.DEV_MESSAGE || steps.get-changelog.outputs.CHANGELOG }}
+          tag: ${{ env.IS_DAILY == 'true' && 'daily_release' || env.IS_DEV == 'true' && 'alpha' || github.ref }}
