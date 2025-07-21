@@ -555,7 +555,7 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -
         if config.update_mode == "c":
             folder_name = split_path(folder_path)[1]
             json_data["folder_name"] = folder_name
-            return folder_path
+            return folder_path, folder_name
         elif "bc" in config.update_mode:
             folder_name = config.update_b_folder
             success_folder = split_path(folder_path)[0]
@@ -572,7 +572,7 @@ def _get_folder_path(file_path: str, success_folder: str, json_data: JsonData) -
         if config.soft_link == 0 and not config.success_file_move:
             folder_path = split_path(file_path)[0]
             json_data["folder_name"] = folder_name
-            return folder_path
+            return folder_path, folder_name
 
     # 当根据刮削模式得到的视频目录名为空时，使用成功输出目录
     if not folder_name:
