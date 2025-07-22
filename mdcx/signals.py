@@ -72,4 +72,5 @@ class Signals(QObject):
         self.exec_show_list_name.emit(status, show_data, real_number)
 
 
-signal = Signals()
+signal_qt = Signals()
+signal: "Signals" = signal_qt

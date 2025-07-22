@@ -56,7 +56,7 @@ from mdcx.models.tools.emby_actor_info import creat_kodi_actors, show_emby_actor
 from mdcx.models.tools.missing import check_missing_number
 from mdcx.models.tools.subtitle import add_sub_for_all_video
 from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo, ShowData
-from mdcx.signals import signal
+from mdcx.signals import signal_qt
 from mdcx.utils import _async_raise, add_html, convert_path, get_current_time, get_used_time, kill_a_thread, split_path
 from mdcx.utils.file import delete_file_sync, open_file_thread
 from mdcx.utils.path import get_path
@@ -171,7 +171,7 @@ class MyMAinWindow(QMainWindow):
             "无需代理：avsex、hdouban、iqqtv、airav-wiki、love6、lulubar、fc2、fc2club、fc2hub\n\n"
             "▶️ 点击右上角 【开始检测】按钮以测试网络连通性。"
         )  # 检查网络界面显示提示信息
-        signal.add_log("🍯 你可以点击左下角的图标来 显示 / 隐藏 请求信息面板！")
+        signal_qt.add_log("🍯 你可以点击左下角的图标来 显示 / 隐藏 请求信息面板！")
         self.show_version()  # 日志页面显示版本信息
         self.creat_right_menu()  # 加载右键菜单
         self.pushButton_main_clicked()  # 切换到主界面
@@ -457,10 +457,10 @@ class MyMAinWindow(QMainWindow):
             try:
                 manager.save_config()
             except Exception:
-                signal.show_traceback_log(traceback.format_exc())
+                signal_qt.show_traceback_log(traceback.format_exc())
         if self.tray_icon is not None:
             self.tray_icon.hide()
-        signal.show_traceback_log("\n\n\n\n************ 程序正常退出！************\n")
+        signal_qt.show_traceback_log("\n\n\n\n************ 程序正常退出！************\n")
         os._exit(0)
 
     # endregion
@@ -529,7 +529,7 @@ class MyMAinWindow(QMainWindow):
                     "QPushButton:hover#pushButton_about{color: black;background-color: rgba(160,160,165,40);}"
                 )
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
 
     # endregion
 
@@ -539,8 +539,8 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(target=self._show_version_thread)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     def _show_version_thread(self):
         version_info = f"基于 MDC-GUI 修改 当前版本: {self.localversion}"
@@ -549,7 +549,7 @@ class MyMAinWindow(QMainWindow):
         if latest_version:
             if int(self.localversion) < int(latest_version):
                 self.new_version = f"\n🍉 有新版本了！（{latest_version}）"
-                signal.show_scrape_info()
+                signal_qt.show_scrape_info()
                 self.Ui.label_show_version.setCursor(Qt.OpenHandCursor)  # 设置鼠标形状为十字形
                 version_info = f'基于 MDC-GUI 修改 · 当前版本: {self.localversion} （ <font color="red" >最新版本是: {latest_version}，请及时更新！🚀 </font>）'
                 download_link = ' ⬇️ <a href="https://github.com/sqzw-x/mdcx/releases">下载新版本</a>'
@@ -559,10 +559,10 @@ class MyMAinWindow(QMainWindow):
         feedback = ' 💌 问题反馈: <a href="https://github.com/sqzw-x/mdcx/issues/new">GitHub Issues</a>'
 
         # 显示版本信息和反馈入口
-        signal.show_log_text(version_info)
+        signal_qt.show_log_text(version_info)
         if feedback or download_link:
             self.main_logs_show.emit(f"{feedback}{download_link}")
-        signal.show_log_text("================================================================================")
+        signal_qt.show_log_text("================================================================================")
         self.pushButton_check_javdb_cookie_clicked()  # 检测javdb cookie
         self.pushButton_check_javbus_cookie_clicked()  # 检测javbus cookie
         if config.use_database:
@@ -571,8 +571,8 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(target=check_theporndb_api_token)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # endregion
 
@@ -584,7 +584,7 @@ class MyMAinWindow(QMainWindow):
             else:
                 webbrowser.open("https://github.com/sqzw-x/mdcx/releases")
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
 
     # endregion
 
@@ -632,7 +632,7 @@ class MyMAinWindow(QMainWindow):
                 self.Ui.pushButton_setting.setStyleSheet("font-weight: bold; background-color: rgba(160,160,165,100);")
             self._check_mac_config_folder()
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
 
     # 点击左侧【检测网络】按钮，切换到检测网络页面
     def pushButton_show_net_clicked(self):
@@ -681,51 +681,51 @@ class MyMAinWindow(QMainWindow):
             Flags.rest_sleepping = False
             self.Ui.pushButton_start_cap.setText(" ■ 停止中 ")
             self.Ui.pushButton_start_cap2.setText(" ■ 停止中 ")
-            signal.show_scrape_info("⛔️ 刮削停止中...")
+            signal_qt.show_scrape_info("⛔️ 刮削停止中...")
             config.executor.cancel_async()  # 取消异步任务
             t = threading.Thread(target=self._kill_threads)  # 关闭线程池
             t.start()
 
     # 显示停止信息
     def _show_stop_info(self):
-        signal.reset_buttons_status.emit()
+        signal_qt.reset_buttons_status.emit()
         try:
             Flags.rest_time_convert = Flags.rest_time_convert_
             if Flags.stop_other:
-                signal.show_scrape_info("⛔️ 已手动停止！")
-                signal.show_log_text(
+                signal_qt.show_scrape_info("⛔️ 已手动停止！")
+                signal_qt.show_log_text(
                     "⛔️ 已手动停止！\n================================================================================"
                 )
                 self.set_label_file_path.emit("⛔️ 已手动停止！")
                 return
-            signal.exec_set_processbar.emit(0)
+            signal_qt.exec_set_processbar.emit(0)
             end_time = time.time()
             used_time = str(round((end_time - Flags.start_time), 2))
             if Flags.scrape_done:
                 average_time = str(round((end_time - Flags.start_time) / Flags.scrape_done, 2))
             else:
                 average_time = used_time
-            signal.show_scrape_info("⛔️ 刮削已手动停止！")
+            signal_qt.show_scrape_info("⛔️ 刮削已手动停止！")
             self.set_label_file_path.emit(
                 f"⛔️ 刮削已手动停止！\n   已刮削 {Flags.scrape_done} 个视频, 还剩余 {Flags.total_count - Flags.scrape_done} 个! 刮削用时 {used_time} 秒"
             )
-            signal.show_log_text(
+            signal_qt.show_log_text(
                 f"\n ⛔️ 刮削已手动停止！\n 😊 已刮削 {Flags.scrape_done} 个视频, 还剩余 {Flags.total_count - Flags.scrape_done} 个! 刮削用时 {used_time} 秒, 停止用时 {self.stop_used_time} 秒"
             )
-            signal.show_log_text("================================================================================")
-            signal.show_log_text(
+            signal_qt.show_log_text("================================================================================")
+            signal_qt.show_log_text(
                 " ⏰ Start time".ljust(13) + ": " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(Flags.start_time))
             )
-            signal.show_log_text(
+            signal_qt.show_log_text(
                 " 🏁 End time".ljust(13) + ": " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))
             )
-            signal.show_log_text(f"{' ⏱ Used time'.ljust(13)}: {used_time}S")
-            signal.show_log_text(f"{' 🍕 Per time'.ljust(13)}: {average_time}S")
-            signal.show_log_text("================================================================================")
+            signal_qt.show_log_text(f"{' ⏱ Used time'.ljust(13)}: {used_time}S")
+            signal_qt.show_log_text(f"{' 🍕 Per time'.ljust(13)}: {average_time}S")
+            signal_qt.show_log_text("================================================================================")
             Flags.again_dic.clear()
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
         print(threading.enumerate())
 
     def show_stop_info_thread(
@@ -740,28 +740,28 @@ class MyMAinWindow(QMainWindow):
         Flags.now_kill = 0
         start_time = time.time()
         self.set_label_file_path.emit(f"⛔️ 正在停止刮削...\n   正在停止已在运行的任务线程（1/{Flags.total_kills}）...")
-        signal.show_log_text(
+        signal_qt.show_log_text(
             f"\n ⛔️ {get_current_time()} 已停止添加新的刮削任务，正在停止已在运行的任务线程（{Flags.total_kills}）..."
         )
-        signal.show_traceback_log(f"⛔️ 正在停止正在运行的任务线程 ({Flags.total_kills}) ...")
+        signal_qt.show_traceback_log(f"⛔️ 正在停止正在运行的任务线程 ({Flags.total_kills}) ...")
         i = 0
         for each in self.threads_list:
             i += 1
-            signal.show_traceback_log(f"正在停止线程: {i}/{Flags.total_kills} {each.name} ...")
-        signal.show_traceback_log(
+            signal_qt.show_traceback_log(f"正在停止线程: {i}/{Flags.total_kills} {each.name} ...")
+        signal_qt.show_traceback_log(
             "线程正在停止中，请稍后...\n 🍯 停止时间与线程数量及线程正在执行的任务有关，比如正在执行网络请求、文件下载等IO操作时，需要等待其释放资源。。。\n"
         )
-        signal.stop = True
+        signal_qt.stop = True
         for each in self.threads_list:  # 线程池的线程
             kill_a_thread(each)
             while each.is_alive():
                 pass
 
-        signal.stop = False
+        signal_qt.stop = False
         self.stop_used_time = get_used_time(start_time)
-        signal.show_log_text(f" 🕷 {get_current_time()} 已停止线程：{Flags.total_kills}/{Flags.total_kills}")
-        signal.show_traceback_log(f"所有线程已停止！！！({self.stop_used_time}s)\n ⛔️ 刮削已手动停止！\n")
-        signal.show_log_text(f" ⛔️ {get_current_time()} 所有线程已停止！({self.stop_used_time}s)")
+        signal_qt.show_log_text(f" 🕷 {get_current_time()} 已停止线程：{Flags.total_kills}/{Flags.total_kills}")
+        signal_qt.show_traceback_log(f"所有线程已停止！！！({self.stop_used_time}s)\n ⛔️ 刮削已手动停止！\n")
+        signal_qt.show_log_text(f" ⛔️ {get_current_time()} 所有线程已停止！({self.stop_used_time}s)")
         thread_remain_list = []
         [thread_remain_list.append(i.getName()) for i in threading.enumerate()]  # 剩余线程名字列表
         thread_remain = ", ".join(thread_remain_list)
@@ -877,8 +877,8 @@ class MyMAinWindow(QMainWindow):
 
                 config.executor.submit(self._set_pixmap(poster_path, thumb_path, poster_from, cover_from))
         except Exception:
-            if not signal.stop:
-                signal.show_traceback_log(traceback.format_exc())
+            if not signal_qt.stop:
+                signal_qt.show_traceback_log(traceback.format_exc())
 
     async def _set_pixmap(
         self,
@@ -926,12 +926,12 @@ class MyMAinWindow(QMainWindow):
                 if not self.Ui.widget_nfo.isHidden():
                     self._show_nfo_info()
             except Exception:
-                signal.show_traceback_log(item.text(0) + ": No info!")
+                signal_qt.show_traceback_log(item.text(0) + ": No info!")
 
     def _check_main_file_path(self):
         if not self.file_main_open_path:
             QMessageBox.about(self, "没有目标文件", "请刮削后再使用！！")
-            signal.show_scrape_info(f"💡 请刮削后使用！{get_current_time()}")
+            signal_qt.show_scrape_info(f"💡 请刮削后使用！{get_current_time()}")
             return False
         return True
 
@@ -1004,7 +1004,7 @@ class MyMAinWindow(QMainWindow):
             )
             if ok and text:
                 Flags.again_dic[file_path] = (text, "", "")
-                signal.show_scrape_info(f"💡 已添加刮削！{get_current_time()}")
+                signal_qt.show_scrape_info(f"💡 已添加刮削！{get_current_time()}")
                 if self.Ui.pushButton_start_cap.text() == "开始":
                     again_search()
 
@@ -1027,11 +1027,11 @@ class MyMAinWindow(QMainWindow):
                 website, url = deal_url(text)
                 if website:
                     Flags.again_dic[file_path] = ("", url, website)
-                    signal.show_scrape_info(f"💡 已添加刮削！{get_current_time()}")
+                    signal_qt.show_scrape_info(f"💡 已添加刮削！{get_current_time()}")
                     if self.Ui.pushButton_start_cap.text() == "开始":
                         again_search()
                 else:
-                    signal.show_scrape_info(f"💡 不支持的网站！{get_current_time()}")
+                    signal_qt.show_scrape_info(f"💡 不支持的网站！{get_current_time()}")
 
     def main_del_file_click(self):
         """
@@ -1048,7 +1048,7 @@ class MyMAinWindow(QMainWindow):
             if reply != QMessageBox.Yes:
                 return
             delete_file_sync(file_path)
-            signal.show_scrape_info(f"💡 已删除文件！{get_current_time()}")
+            signal_qt.show_scrape_info(f"💡 已删除文件！{get_current_time()}")
 
     def main_del_folder_click(self):
         """
@@ -1122,8 +1122,8 @@ class MyMAinWindow(QMainWindow):
             all_items = [self.Ui.comboBox_nfo.itemText(i) for i in range(self.Ui.comboBox_nfo.count())]
             self.Ui.comboBox_nfo.setCurrentIndex(all_items.index(json_data.country))
         except Exception:
-            if not signal.stop:
-                signal.show_traceback_log(traceback.format_exc())
+            if not signal_qt.stop:
+                signal_qt.show_traceback_log(traceback.format_exc())
 
     def save_nfo_info(self):
         try:
@@ -1162,8 +1162,8 @@ class MyMAinWindow(QMainWindow):
             else:
                 self.Ui.label_save_tips.setText(f"保存失败! {get_current_time()}")
         except Exception:
-            if not signal.stop:
-                signal.show_traceback_log(traceback.format_exc())
+            if not signal_qt.stop:
+                signal_qt.show_traceback_log(traceback.format_exc())
 
     # endregion
 
@@ -1183,7 +1183,7 @@ class MyMAinWindow(QMainWindow):
             after_info = f"\n{scrape_info}\n🛠 {manager.file}\n🐰 MDCx {self.localversion}"
             self.label_show_version.emit(before_info + after_info + self.new_version)
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
 
     # region 获取/保存成功刮削列表
     def pushButton_success_list_save_clicked(self):
@@ -1296,7 +1296,7 @@ class MyMAinWindow(QMainWindow):
 
     # 显示详细日志
     def show_detail_log(self):
-        text = signal.get_log()
+        text = signal_qt.get_log()
         if text:
             self.main_req_logs_show.emit(add_html(text))
             if self.req_logs_counts < 10000:
@@ -1322,8 +1322,8 @@ class MyMAinWindow(QMainWindow):
                 log_name = convert_path(os.path.join(log_folder, log_name))
 
                 Flags.log_txt = open(log_name, "wb", buffering=0)
-                signal.show_log_text("Create log file: " + log_name + "\n")
-                signal.show_log_text(text)
+                signal_qt.show_log_text("Create log file: " + log_name + "\n")
+                signal_qt.show_log_text(text)
                 return
         try:
             self.main_logs_show.emit(add_html(text))
@@ -1336,7 +1336,7 @@ class MyMAinWindow(QMainWindow):
                 # self.show_traceback_log(self.Ui.textBrowser_log_main.document().lineCount())
 
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
             self.Ui.textBrowser_log_main.append(traceback.format_exc())
 
     # endregion
@@ -1352,8 +1352,8 @@ class MyMAinWindow(QMainWindow):
                 t = threading.Thread(target=check_missing_number, args=(False,))
                 t.start()  # 启动线程,即让线程开始执行
             except Exception:
-                signal.show_traceback_log(traceback.format_exc())
-                signal.show_log_text(traceback.format_exc())
+                signal_qt.show_traceback_log(traceback.format_exc())
+                signal_qt.show_log_text(traceback.format_exc())
 
     # 工具页面本地资源库点选择目录
     def pushButton_select_local_library_clicked(self):
@@ -1396,8 +1396,8 @@ class MyMAinWindow(QMainWindow):
         try:
             config.executor.submit(newtdisk_creat_symlink(self.Ui.checkBox_copy_netdisk_nfo.isChecked()))
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # 工具-检查番号
     def pushButton_find_missing_number_clicked(self):
@@ -1417,8 +1417,8 @@ class MyMAinWindow(QMainWindow):
             self.threads_list.append(t)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # 工具-单文件刮削
     def pushButton_select_file_clicked(self):
@@ -1444,15 +1444,15 @@ class MyMAinWindow(QMainWindow):
     def pushButton_start_single_file_clicked(self):  # 点刮削
         Flags.single_file_path = self.Ui.lineEdit_single_file_path.text().strip()
         if not Flags.single_file_path:
-            signal.show_scrape_info("💡 请选择文件！")
+            signal_qt.show_scrape_info("💡 请选择文件！")
             return
 
         if not os.path.isfile(Flags.single_file_path):
-            signal.show_scrape_info("💡 文件不存在！")  # 主界面左下角显示信息
+            signal_qt.show_scrape_info("💡 文件不存在！")  # 主界面左下角显示信息
             return
 
         if not self.Ui.lineEdit_appoint_url.text():
-            signal.show_scrape_info("💡 请填写番号网址！")  # 主界面左下角显示信息
+            signal_qt.show_scrape_info("💡 请填写番号网址！")  # 主界面左下角显示信息
             return
 
         self.pushButton_show_log_clicked()  # 点击刮削按钮后跳转到日志页面
@@ -1462,7 +1462,7 @@ class MyMAinWindow(QMainWindow):
         if website:
             Flags.website_name = website
         else:
-            signal.show_scrape_info(f"💡 不支持的网站！{get_current_time()}")
+            signal_qt.show_scrape_info(f"💡 不支持的网站！{get_current_time()}")
             return
         start_new_scrape(FileMode.Single)
 
@@ -1499,11 +1499,11 @@ class MyMAinWindow(QMainWindow):
                 self.threads_list.append(t)
                 t.start()  # 启动线程,即让线程开始执行
             except Exception:
-                signal.show_traceback_log(traceback.format_exc())
-                signal.show_log_text(traceback.format_exc())
+                signal_qt.show_traceback_log(traceback.format_exc())
+                signal_qt.show_log_text(traceback.format_exc())
 
     def _move_file_thread(self):
-        signal.change_buttons_status.emit()
+        signal_qt.change_buttons_status.emit()
         movie_type = self.Ui.lineEdit_movie_type.text().lower()
         sub_type = self.Ui.lineEdit_sub_type.text().lower().replace("|.txt", "")
         all_type = movie_type.strip("|") + "|" + sub_type.strip("|")
@@ -1523,15 +1523,15 @@ class MyMAinWindow(QMainWindow):
                 escape_folder_new_list.append(es)
         movie_list = config.executor.run(movie_lists(escape_folder_new_list, all_type, movie_path))
         if not movie_list:
-            signal.show_log_text("No movie found!")
-            signal.show_log_text("================================================================================")
-            signal.reset_buttons_status.emit()
+            signal_qt.show_log_text("No movie found!")
+            signal_qt.show_log_text("================================================================================")
+            signal_qt.reset_buttons_status.emit()
             return
         des_path = os.path.join(movie_path, "Movie_moved")
         if not os.path.exists(des_path):
-            signal.show_log_text("Created folder: Movie_moved")
+            signal_qt.show_log_text("Created folder: Movie_moved")
             os.makedirs(des_path)
-        signal.show_log_text("Start move movies...")
+        signal_qt.show_log_text("Start move movies...")
         skip_list = []
         for file_path in movie_list:
             file_name = split_path(file_path)[1]
@@ -1540,20 +1540,20 @@ class MyMAinWindow(QMainWindow):
                 # move_file(file_path, des_path)
                 shutil.move(file_path, des_path)
                 if file_ext in movie_type:
-                    signal.show_log_text("   Move movie: " + file_name + " to Movie_moved Success!")
+                    signal_qt.show_log_text("   Move movie: " + file_name + " to Movie_moved Success!")
                 else:
-                    signal.show_log_text("   Move sub: " + file_name + " to Movie_moved Success!")
+                    signal_qt.show_log_text("   Move sub: " + file_name + " to Movie_moved Success!")
             except Exception as e:
                 skip_list.append([file_name, file_path, str(e)])
         if skip_list:
-            signal.show_log_text(f"\n{len(skip_list)} file(s) did not move!")
+            signal_qt.show_log_text(f"\n{len(skip_list)} file(s) did not move!")
             i = 0
             for info in skip_list:
                 i += 1
-                signal.show_log_text(f"[{i}] {info[0]}\n file path: {info[1]}\n {info[2]}\n")
-        signal.show_log_text("Move movies finished!")
-        signal.show_log_text("================================================================================")
-        signal.reset_buttons_status.emit()
+                signal_qt.show_log_text(f"[{i}] {info[0]}\n file path: {info[1]}\n {info[2]}\n")
+        signal_qt.show_log_text("Move movies finished!")
+        signal_qt.show_log_text("================================================================================")
+        signal_qt.reset_buttons_status.emit()
 
     # endregion
 
@@ -1611,7 +1611,7 @@ class MyMAinWindow(QMainWindow):
             else:
                 self.Ui.lineEdit_config_folder.setText(media_folder_path)
                 self.pushButton_save_config_clicked()
-            signal.show_scrape_info(f"💡 目录已切换！{get_current_time()}")
+            signal_qt.show_scrape_info(f"💡 目录已切换！{get_current_time()}")
 
     # endregion
 
@@ -1714,8 +1714,8 @@ class MyMAinWindow(QMainWindow):
         try:
             config.executor.submit(check_and_clean_files())
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # 设置-字幕 为所有视频中的无字幕视频添加字幕
     def pushButton_add_sub_for_all_video_clicked(self):
@@ -1723,8 +1723,8 @@ class MyMAinWindow(QMainWindow):
         try:
             config.executor.submit(add_sub_for_all_video())
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # region 设置-下载
     # 为所有视频中的创建/删除剧照附加内容
@@ -1733,14 +1733,14 @@ class MyMAinWindow(QMainWindow):
         try:
             config.executor.submit(add_del_extras("add"))
         except Exception:
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     def pushButton_del_all_extras_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
             config.executor.submit(add_del_extras("del"))
         except Exception:
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # 为所有视频中的创建/删除剧照副本
     def pushButton_add_all_extrafanart_copy_clicked(self):
@@ -1749,7 +1749,7 @@ class MyMAinWindow(QMainWindow):
         try:
             config.executor.submit(add_del_extrafanart_copy("add"))
         except Exception:
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     def pushButton_del_all_extrafanart_copy_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
@@ -1757,7 +1757,7 @@ class MyMAinWindow(QMainWindow):
         try:
             config.executor.submit(add_del_extrafanart_copy("del"))
         except Exception:
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # 为所有视频中的创建/删除主题视频
     def pushButton_add_all_theme_videos_clicked(self):
@@ -1765,14 +1765,14 @@ class MyMAinWindow(QMainWindow):
         try:
             config.executor.submit(add_del_theme_videos("add"))
         except Exception:
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     def pushButton_del_all_theme_videos_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
             config.executor.submit(add_del_theme_videos("del"))
         except Exception:
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # endregion
 
@@ -1784,7 +1784,7 @@ class MyMAinWindow(QMainWindow):
         try:
             config.executor.submit(update_emby_actor_info())
         except Exception:
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # 设置-演员 补全演员头像按钮
     def pushButton_add_actor_pic_clicked(self):
@@ -1793,7 +1793,7 @@ class MyMAinWindow(QMainWindow):
         try:
             config.executor.submit(update_emby_actor_photo())
         except Exception:
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # 设置-演员 补全演员头像按钮 kodi
     def pushButton_add_actor_pic_kodi_clicked(self):
@@ -1802,7 +1802,7 @@ class MyMAinWindow(QMainWindow):
         try:
             config.executor.submit(creat_kodi_actors(True))
         except Exception:
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # 设置-演员 清除演员头像按钮 kodi
     def pushButton_del_actor_folder_clicked(self):
@@ -1810,7 +1810,7 @@ class MyMAinWindow(QMainWindow):
         try:
             config.executor.submit(creat_kodi_actors(False))
         except Exception:
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # 设置-演员 查看演员列表按钮
     def pushButton_show_pic_actor_clicked(self):
@@ -1818,7 +1818,7 @@ class MyMAinWindow(QMainWindow):
         try:
             config.executor.submit(show_emby_actor_list(self.Ui.comboBox_pic_actor.currentIndex()))
         except Exception:
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     # endregion
 
@@ -1860,7 +1860,7 @@ class MyMAinWindow(QMainWindow):
     def config_file_change(self, new_config_file):
         if new_config_file != manager.file:
             new_config_path = os.path.join(manager.data_folder, new_config_file)
-            signal.show_log_text(
+            signal_qt.show_log_text(
                 f"\n================================================================================\n切换配置：{new_config_path}"
             )
             with open(MARK_FILE, "w", encoding="UTF-8") as f:
@@ -1871,7 +1871,7 @@ class MyMAinWindow(QMainWindow):
             if temp_dark != self.dark_mode and temp_window_radius == self.window_radius:
                 self.show_flag = True
                 self._windows_auto_adjust()
-            signal.show_scrape_info(f"💡 配置已切换！{get_current_time()}")
+            signal_qt.show_scrape_info(f"💡 配置已切换！{get_current_time()}")
 
     # 重置配置
     def pushButton_init_config_clicked(self):
@@ -1884,7 +1884,7 @@ class MyMAinWindow(QMainWindow):
             self.show_flag = True
             self._windows_auto_adjust()
         self.Ui.pushButton_init_config.setEnabled(True)
-        signal.show_scrape_info(f"💡 配置已重置！{get_current_time()}")
+        signal_qt.show_scrape_info(f"💡 配置已重置！{get_current_time()}")
 
     # 设置-命名-分集-字母
     def checkBox_cd_part_a_clicked(self):
@@ -1923,7 +1923,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_save_config_clicked(self):
         self.save_config()
         # self.load_config()
-        signal.show_scrape_info(f"💡 配置已保存！{get_current_time()}")
+        signal_qt.show_scrape_info(f"💡 配置已保存！{get_current_time()}")
 
     # 设置-另存为
     def pushButton_save_new_config_clicked(self):
@@ -1946,10 +1946,10 @@ class MyMAinWindow(QMainWindow):
         start_time = time.time()
         try:
             # 显示代理信息
-            signal.show_net_info("\n⛑ 开始检测网络....")
+            signal_qt.show_net_info("\n⛑ 开始检测网络....")
             show_netstatus()
             # 检测网络连通性
-            signal.show_net_info(" 开始检测网络连通性...")
+            signal_qt.show_net_info(" 开始检测网络连通性...")
 
             net_info = {
                 "github": ["https://raw.githubusercontent.com", ""],
@@ -2022,7 +2022,7 @@ class MyMAinWindow(QMainWindow):
 
             for website in ManualConfig.SUPPORTED_WEBSITES:
                 if hasattr(config, f"{website}_website"):
-                    signal.show_net_info(f"   ⚠️{website} 使用自定义网址：{getattr(config, f'{website}_website')}")
+                    signal_qt.show_net_info(f"   ⚠️{website} 使用自定义网址：{getattr(config, f'{website}_website')}")
                     net_info[website][0] = getattr(config, f"{website}_website")
 
             net_info["javdb"][0] += "/v/D16Q5?locale=zh"
@@ -2081,24 +2081,26 @@ class MyMAinWindow(QMainWindow):
                                 each[1] = f"✅ 连接正常{ping_host(host_address)}"
                     except Exception as e:
                         each[1] = "测试连接时出现异常！信息:" + str(e)
-                        signal.show_traceback_log(traceback.format_exc())
-                        signal.show_net_info(traceback.format_exc())
-                signal.show_net_info("   " + name.ljust(12) + each[1])
-            signal.show_net_info(f"\n🎉 网络检测已完成！用时 {get_used_time(start_time)} 秒！")
-            signal.show_net_info("================================================================================\n")
+                        signal_qt.show_traceback_log(traceback.format_exc())
+                        signal_qt.show_net_info(traceback.format_exc())
+                signal_qt.show_net_info("   " + name.ljust(12) + each[1])
+            signal_qt.show_net_info(f"\n🎉 网络检测已完成！用时 {get_used_time(start_time)} 秒！")
+            signal_qt.show_net_info(
+                "================================================================================\n"
+            )
         except Exception as e:
-            if signal.stop:
-                signal.show_net_info("\n⛔️ 当前有刮削任务正在停止中，请等待刮削停止后再进行检测！")
-                signal.show_net_info(
+            if signal_qt.stop:
+                signal_qt.show_net_info("\n⛔️ 当前有刮削任务正在停止中，请等待刮削停止后再进行检测！")
+                signal_qt.show_net_info(
                     "================================================================================\n"
                 )
             else:
-                signal.show_net_info("\n⛔️ 网络检测出现异常！")
-                signal.show_net_info(
+                signal_qt.show_net_info("\n⛔️ 网络检测出现异常！")
+                signal_qt.show_net_info(
                     "================================================================================\n"
                 )
-                signal.show_traceback_log(str(e))
-                signal.show_traceback_log(traceback.format_exc())
+                signal_qt.show_traceback_log(str(e))
+                signal_qt.show_traceback_log(traceback.format_exc())
         self.Ui.pushButton_check_net.setEnabled(True)
         self.Ui.pushButton_check_net.setText("开始检测")
         self.Ui.pushButton_check_net.setStyleSheet(
@@ -2116,15 +2118,17 @@ class MyMAinWindow(QMainWindow):
                 self.t_net = threading.Thread(target=self.network_check)
                 self.t_net.start()  # 启动线程,即让线程开始执行
             except Exception:
-                signal.show_traceback_log(traceback.format_exc())
-                signal.show_net_info(traceback.format_exc())
+                signal_qt.show_traceback_log(traceback.format_exc())
+                signal_qt.show_net_info(traceback.format_exc())
         elif self.Ui.pushButton_check_net.text() == "停止检测":
             self.Ui.pushButton_check_net.setText(" 停止检测 ")
             self.Ui.pushButton_check_net.setText(" 停止检测 ")
             t = threading.Thread(target=kill_a_thread, args=(self.t_net,))
             t.start()
-            signal.show_net_info("\n⛔️ 网络检测已手动停止！")
-            signal.show_net_info("================================================================================\n")
+            signal_qt.show_net_info("\n⛔️ 网络检测已手动停止！")
+            signal_qt.show_net_info(
+                "================================================================================\n"
+            )
             self.Ui.pushButton_check_net.setStyleSheet(
                 "QPushButton#pushButton_check_net{color: white;background-color:#4C6EFF;}QPushButton:hover#pushButton_check_net{color: white;background-color: rgba(76,110,255,240)}QPushButton:pressed#pushButton_check_net{color: white;background-color:#4C6EE0}"
             )
@@ -2134,15 +2138,15 @@ class MyMAinWindow(QMainWindow):
                 if self.t_net is not None:
                     _async_raise(self.t_net.ident, SystemExit)
             except Exception as e:
-                signal.show_traceback_log(str(e))
-                signal.show_traceback_log(traceback.format_exc())
+                signal_qt.show_traceback_log(str(e))
+                signal_qt.show_traceback_log(traceback.format_exc())
 
     # 检测网络界面日志显示
     def show_net_info(self, text):
         try:
             self.net_logs_show.emit(add_html(text))
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
             self.Ui.textBrowser_net_main.append(traceback.format_exc())
 
     # 检查javdb cookie
@@ -2157,8 +2161,8 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(target=self._check_javdb_cookie)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
-            signal.show_log_text(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
+            signal_qt.show_log_text(traceback.format_exc())
 
     def _check_javdb_cookie(self):
         tips = "❌ 未填写 Cookie，影响 FC2 刮削！"
@@ -2213,7 +2217,7 @@ class MyMAinWindow(QMainWindow):
                         self.pushButton_save_config_clicked()
         except Exception as e:
             tips = f"❌ 连接失败！请检查网络或代理设置！ {e}"
-            signal.show_traceback_log(tips)
+            signal_qt.show_traceback_log(tips)
         if input_cookie:
             self.Ui.label_javdb_cookie_result.setText(tips)
             # self.Ui.pushButton_check_javdb_cookie.setEnabled(True)
@@ -2226,7 +2230,7 @@ class MyMAinWindow(QMainWindow):
             t = threading.Thread(target=self._check_javbus_cookie)
             t.start()  # 启动线程,即让线程开始执行
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
             self.show_log_text(traceback.format_exc())
 
     def _check_javbus_cookie(self):
@@ -2366,18 +2370,18 @@ class MyMAinWindow(QMainWindow):
             time.sleep(0.1)
             timed_interval = config.timed_interval
             self.atuo_scrape_count += 1
-            signal.show_log_text(
+            signal_qt.show_log_text(
                 f"\n\n 🍔 已启用「循环刮削」！间隔时间：{timed_interval}！即将开始第 {self.atuo_scrape_count} 次循环刮削！"
             )
             if Flags.scrape_start_time:
-                signal.show_log_text(
+                signal_qt.show_log_text(
                     " ⏰ 上次刮削时间: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(Flags.scrape_start_time))
                 )
             start_new_scrape(FileMode.Default)
 
     def auto_start(self):
         if "auto_start" in config.switch_on:
-            signal.show_log_text("\n\n 🍔 已启用「软件启动后自动刮削」！即将开始自动刮削！")
+            signal_qt.show_log_text("\n\n 🍔 已启用「软件启动后自动刮削」！即将开始自动刮削！")
             self.pushButton_start_scrape_clicked()
 
     # endregion

@@ -11,7 +11,7 @@ from mdcx.config.manager import config, manager
 from mdcx.controllers.main_window.bind_utils import get_checkbox, get_checkboxes, get_radio_buttons
 from mdcx.models.flags import Flags
 from mdcx.models.tools.actress_db import ActressDB
-from mdcx.signals import signal
+from mdcx.signals import signal_qt
 from mdcx.utils import convert_path
 
 if TYPE_CHECKING:
@@ -688,7 +688,7 @@ def save_config(self: "MyMAinWindow"):
             scrape_like_text += " · 软连接开"
         elif config.soft_link == 2:
             scrape_like_text += " · 硬连接开"
-        signal.show_log_text(
+        signal_qt.show_log_text(
             f" 🛠 当前配置：{manager.path} 保存完成！\n "
             f"📂 程序目录：{manager.data_folder} \n "
             f"📂 刮削目录：{get_movie_path_setting()[0]} \n "
@@ -697,14 +697,14 @@ def save_config(self: "MyMAinWindow"):
             f"🐰 软件版本：{self.localversion} \n"
         )
     except Exception:
-        signal.show_traceback_log(traceback.format_exc())
+        signal_qt.show_traceback_log(traceback.format_exc())
     try:
         self._windows_auto_adjust()  # 界面自动调整
     except Exception:
-        signal.show_traceback_log(traceback.format_exc())
+        signal_qt.show_traceback_log(traceback.format_exc())
     self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)  # type: ignore
     self.activateWindow()
     try:
         self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")  # 主界面右上角显示提示信息
     except Exception:
-        signal.show_traceback_log(traceback.format_exc())
+        signal_qt.show_traceback_log(traceback.format_exc())

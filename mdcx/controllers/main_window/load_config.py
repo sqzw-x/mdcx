@@ -14,7 +14,7 @@ from mdcx.config.resources import resources
 from mdcx.consts import IS_WINDOWS
 from mdcx.controllers.main_window.bind_utils import set_checkboxes, set_radio_buttons
 from mdcx.models.flags import Flags
-from mdcx.signals import signal
+from mdcx.signals import signal_qt
 from mdcx.utils import convert_path
 from mdcx.utils.file import delete_file_sync
 
@@ -28,7 +28,7 @@ def load_config(self: "MyMAinWindow"):
     """
     errors = manager.read_config()
     if errors:
-        signal.show_log_text(f"⚠️ 读取配置文件出错:\n\t{errors}\n💡 这不会阻止程序运行, 无效配置将使用默认值\n")
+        signal_qt.show_log_text(f"⚠️ 读取配置文件出错:\n\t{errors}\n💡 这不会阻止程序运行, 无效配置将使用默认值\n")
     config.init()
     config_folder = manager.data_folder
     config_file = manager.file
@@ -1150,7 +1150,7 @@ def load_config(self: "MyMAinWindow"):
                     if hasattr(self, "tray_icon"):
                         self.tray_icon.hide()
                 except Exception:
-                    signal.show_traceback_log(traceback.format_exc())
+                    signal_qt.show_traceback_log(traceback.format_exc())
             else:
                 self.Ui.checkBox_hide_menu_icon.setChecked(False)
                 try:
@@ -1179,7 +1179,7 @@ def load_config(self: "MyMAinWindow"):
                 scrape_like_text += " · 软连接开"
             elif config.soft_link == 2:
                 scrape_like_text += " · 硬连接开"
-            signal.show_log_text(
+            signal_qt.show_log_text(
                 f" 🛠 当前配置：{manager.path} 加载完成！\n "
                 f"📂 程序目录：{manager.data_folder} \n "
                 f"📂 刮削目录：{get_movie_path_setting()[0]} \n "
@@ -1188,19 +1188,19 @@ def load_config(self: "MyMAinWindow"):
                 f"🐰 软件版本：{self.localversion} \n"
             )
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
         try:
             # 界面自动调整
             self._windows_auto_adjust()
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)  # type: ignore
         self.activateWindow()
         try:
             # 主界面右上角显示提示信息
             self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")
         except Exception:
-            signal.show_traceback_log(traceback.format_exc())
+            signal_qt.show_traceback_log(traceback.format_exc())
     else:  # ini不存在，重新创建
-        signal.show_log_text(f"Create config file: {config_path} ")
+        signal_qt.show_log_text(f"Create config file: {config_path} ")
         self.pushButton_init_config_clicked()

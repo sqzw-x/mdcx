@@ -10,7 +10,7 @@ from mdcx.config.extend import get_movie_path_setting
 from mdcx.config.resources import resources
 from mdcx.consts import IS_WINDOWS, ManualConfig
 from mdcx.models.flags import Flags
-from mdcx.signals import signal
+from mdcx.signals import signal_qt
 
 if TYPE_CHECKING:
     from mdcx.controllers.main_window.main_window import MyMAinWindow
@@ -119,21 +119,21 @@ def Init_Ui(self: "MyMAinWindow"):
 
 def Init_Singal(self: "MyMAinWindow"):
     # region 外部信号量连接
-    signal.log_text.connect(self.show_log_text)  # 可视化日志输出
-    signal.scrape_info.connect(self.show_scrape_info)  # 可视化日志输出
-    signal.net_info.connect(self.show_net_info)  # 可视化日志输出
-    signal.exec_set_main_info.connect(self.set_main_info)
-    signal.change_buttons_status.connect(self.change_buttons_status)
-    signal.reset_buttons_status.connect(self.reset_buttons_status)
-    signal.logs_failed_settext.connect(self.Ui.textBrowser_log_main_3.setText)
-    signal.label_result.connect(self.Ui.label_result.setText)
-    signal.set_label_file_path.connect(self.Ui.label_file_path.setText)
-    signal.view_success_file_settext.connect(self.Ui.pushButton_view_success_file.setText)
-    signal.exec_set_processbar.connect(self.set_processbar)
-    signal.view_failed_list_settext.connect(self.Ui.pushButton_view_failed_list.setText)
-    signal.exec_show_list_name.connect(self.show_list_name)
-    signal.exec_exit_app.connect(self.exit_app)
-    signal.logs_failed_show.connect(self.Ui.textBrowser_log_main_3.append)
+    signal_qt.log_text.connect(self.show_log_text)  # 可视化日志输出
+    signal_qt.scrape_info.connect(self.show_scrape_info)  # 可视化日志输出
+    signal_qt.net_info.connect(self.show_net_info)  # 可视化日志输出
+    signal_qt.exec_set_main_info.connect(self.set_main_info)
+    signal_qt.change_buttons_status.connect(self.change_buttons_status)
+    signal_qt.reset_buttons_status.connect(self.reset_buttons_status)
+    signal_qt.logs_failed_settext.connect(self.Ui.textBrowser_log_main_3.setText)
+    signal_qt.label_result.connect(self.Ui.label_result.setText)
+    signal_qt.set_label_file_path.connect(self.Ui.label_file_path.setText)
+    signal_qt.view_success_file_settext.connect(self.Ui.pushButton_view_success_file.setText)
+    signal_qt.exec_set_processbar.connect(self.set_processbar)
+    signal_qt.view_failed_list_settext.connect(self.Ui.pushButton_view_failed_list.setText)
+    signal_qt.exec_show_list_name.connect(self.show_list_name)
+    signal_qt.exec_exit_app.connect(self.exit_app)
+    signal_qt.logs_failed_show.connect(self.Ui.textBrowser_log_main_3.append)
     # endregion
 
     # region 控件点击
@@ -306,8 +306,8 @@ def init_QTreeWidget(self: "MyMAinWindow"):
     try:
         self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")  # 主界面右上角显示提示信息
     except Exception:
-        signal.show_traceback_log(traceback.format_exc())
-    signal.set_main_info()
+        signal_qt.show_traceback_log(traceback.format_exc())
+    signal_qt.set_main_info()
     Flags.count_claw = 0  # 批量刮削次数
     if self.Ui.pushButton_start_cap.text() != "开始":
         Flags.count_claw = 1  # 批量刮削次数
