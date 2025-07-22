@@ -229,7 +229,7 @@ log_step "生成 PyInstaller .spec 文件..."
 pyi-makespec \
   --name "$appName" \
   --osx-bundle-identifier com.mdcuniverse.mdcx \
-  -F -w main.py \
+  -w main.py \
   -p "./mdcx" \
   --add-data "resources:resources" \
   --add-data "libs:." \
