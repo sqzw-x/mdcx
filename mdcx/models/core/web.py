@@ -17,8 +17,8 @@ from lxml import etree
 
 from mdcx.config.manager import config
 from mdcx.models.base.web import (
-    _mutil_extrafanart_download_thread,
     check_url,
+    download_extrafanart_task,
     download_file_with_filepath,
     get_amazon_data,
     get_big_pic_by_google,
@@ -917,7 +917,7 @@ async def extrafanart_download(extrafanart: list[str], extrafanart_from: str, fo
             task_list.append((extrafanart_url, extrafanart_file_path, extrafanart_folder_path_temp, extrafanart_name))
 
         # 使用异步并发执行下载任务
-        tasks = [_mutil_extrafanart_download_thread(task) for task in task_list]
+        tasks = [download_extrafanart_task(task) for task in task_list]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         for res in results:

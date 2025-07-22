@@ -435,7 +435,7 @@ async def download_file_with_filepath(url: str, file_path: str, folder_new_path:
     return False
 
 
-async def _mutil_extrafanart_download_thread(task: tuple[str, str, str, str]) -> bool:
+async def download_extrafanart_task(task: tuple[str, str, str, str]) -> bool:
     extrafanart_url, extrafanart_file_path, extrafanart_folder_path, extrafanart_name = task
     if await download_file_with_filepath(extrafanart_url, extrafanart_file_path, extrafanart_folder_path):
         if await check_pic_async(extrafanart_file_path):
