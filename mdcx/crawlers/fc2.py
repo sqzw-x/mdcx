@@ -20,7 +20,7 @@ def getTitle(html):  # 获取标题
 def getCover(html):  # 获取封面
     extrafanart = html.xpath('//ul[@class="items_article_SampleImagesArea"]/li/a/@href')
     if extrafanart:
-        result = extrafanart[0]
+        result = "https:" + extrafanart[0]
     else:
         result = ""
     return result, extrafanart
