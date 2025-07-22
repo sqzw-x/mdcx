@@ -3,7 +3,7 @@ name = "mdcx"
 version = "2.0.0"
 description = "mdcx"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.13"
 dependencies = [
     "aiofiles==24.1.0",
     "aiolimiter==1.2.1",
@@ -15,7 +15,7 @@ dependencies = [
     "openai==1.91.0",
     "opencv-contrib-python-headless==4.8.*",
     "oshash==0.1.1",
-    "pillow==9.4.0",
+    "pillow==11.3.0",
     "ping3==4.0.4",
     "pyqt5==5.15.10 ; sys_platform == 'darwin'",
     "pyqt5==5.15.6 ; sys_platform == 'win32'",
