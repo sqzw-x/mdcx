@@ -2,7 +2,7 @@ import os
 import platform
 import re
 import traceback
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
@@ -19,14 +19,13 @@ from mdcx.utils import convert_path
 from mdcx.utils.file import delete_file_sync
 
 if TYPE_CHECKING:
-    from views.MDCx import Ui_MDCx
+    from mdcx.controllers.main_window.main_window import MyMAinWindow
 
 
-def load_config(self):
+def load_config(self: "MyMAinWindow"):
     """
     读取配置文件并绑定到 UI 组件
     """
-    self.Ui = cast("Ui_MDCx", self.Ui)
     errors = manager.read_config()
     if errors:
         signal.show_log_text(f"⚠️ 读取配置文件出错:\n\t{errors}\n💡 这不会阻止程序运行, 无效配置将使用默认值\n")

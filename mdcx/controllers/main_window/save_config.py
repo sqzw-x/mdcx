@@ -2,7 +2,7 @@ import os
 import platform
 import re
 import traceback
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from PyQt5.QtCore import Qt
 
@@ -15,14 +15,13 @@ from mdcx.signals import signal
 from mdcx.utils import convert_path
 
 if TYPE_CHECKING:
-    from views.MDCx import Ui_MDCx
+    from mdcx.controllers.main_window.main_window import MyMAinWindow
 
 
-def save_config(self):
+def save_config(self: "MyMAinWindow"):
     """
     从 UI 获取配置并保存到 config 对象中, 并更新配置文件
     """
-    self.Ui = cast("Ui_MDCx", self.Ui)
     # region media & escape
     config.media_path = self.Ui.lineEdit_movie_path.text()  # 待刮削目录
     config.softlink_path = self.Ui.lineEdit_movie_softlink_path.text()  # 软链接目录目录

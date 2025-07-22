@@ -1,5 +1,6 @@
 import traceback
 import webbrowser
+from typing import TYPE_CHECKING
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
@@ -11,8 +12,11 @@ from mdcx.consts import IS_WINDOWS, ManualConfig
 from mdcx.models.flags import Flags
 from mdcx.signals import signal
 
+if TYPE_CHECKING:
+    from mdcx.controllers.main_window.main_window import MyMAinWindow
 
-def Init_Ui(self):
+
+def Init_Ui(self: "MyMAinWindow"):
     self.setWindowTitle("MDCx")  # 设置任务栏标题
     self.setWindowIcon(QIcon(resources.icon_ico))  # 设置任务栏图标
     self.setWindowOpacity(1.0)  # 设置窗口透明度
@@ -113,7 +117,7 @@ def Init_Ui(self):
     self.Ui.widget_nfo.hide()
 
 
-def Init_Singal(self):
+def Init_Singal(self: "MyMAinWindow"):
     # region 外部信号量连接
     signal.log_text.connect(self.show_log_text)  # 可视化日志输出
     signal.scrape_info.connect(self.show_scrape_info)  # 可视化日志输出
@@ -228,17 +232,17 @@ def Init_Singal(self):
 
     def n(a): ...  # mousePressEvent 的返回值必须是 None, 用这个包装一下
 
-    self.Ui.label_download_actor_zip.mousePressEvent = lambda e: n(
+    self.Ui.label_download_actor_zip.mousePressEvent = lambda ev: n(
         webbrowser.open("https://github.com/moyy996/AVDC/releases/tag/%E5%A4%B4%E5%83%8F%E5%8C%85-2")
     )
-    self.Ui.label_download_sub_zip.mousePressEvent = lambda e: n(
+    self.Ui.label_download_sub_zip.mousePressEvent = lambda ev: n(
         webbrowser.open("https://www.dropbox.com/sh/vkbxawm6mwmwswr/AADqZiF8aUHmK6qIc7JSlURIa")
     )
-    self.Ui.label_download_mark_zip.mousePressEvent = lambda e: n(
+    self.Ui.label_download_mark_zip.mousePressEvent = lambda ev: n(
         webbrowser.open("https://www.dropbox.com/sh/vkbxawm6mwmwswr/AADqZiF8aUHmK6qIc7JSlURIa")
     )
-    self.Ui.label_get_cookie_url.mousePressEvent = lambda e: n(webbrowser.open("https://tieba.baidu.com/p/5492736764"))
-    self.Ui.label_download_actor_db.mousePressEvent = lambda e: n(
+    self.Ui.label_get_cookie_url.mousePressEvent = lambda ev: n(webbrowser.open("https://tieba.baidu.com/p/5492736764"))
+    self.Ui.label_download_actor_db.mousePressEvent = lambda ev: n(
         webbrowser.open("https://github.com/sqzw-x/mdcx/releases/tag/actor_info_database")
     )
     # endregion
@@ -275,7 +279,7 @@ def Init_Singal(self):
     self.label_show_version.connect(self.Ui.label_show_version.setText)  # endregion
 
 
-def Init_QSystemTrayIcon(self):
+def Init_QSystemTrayIcon(self: "MyMAinWindow"):
     self.tray_icon = QSystemTrayIcon(self)
     self.tray_icon.setIcon(QIcon(resources.icon_ico))
     self.tray_icon.activated.connect(self.tray_icon_click)
@@ -297,7 +301,7 @@ def Init_QSystemTrayIcon(self):
     # icon的值  0没有图标  1是提示  2是警告  3是错误
 
 
-def init_QTreeWidget(self):
+def init_QTreeWidget(self: "MyMAinWindow"):
     # 初始化树状控件
     try:
         self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")  # 主界面右上角显示提示信息

@@ -1,6 +1,6 @@
 import os
 import traceback
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from PIL import Image
 from PyQt5.QtCore import QPoint, QRect, Qt
@@ -61,11 +61,11 @@ class DraggableButton(QPushButton):
 
 
 class CutWindow(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent: "MyMAinWindow"):
         super().__init__(parent)
         self.Ui = Ui_Dialog_cut_poster()  # 实例化 Ui
         self.Ui.setupUi(self)  # 初始化Ui
-        self.main_window = cast("MyMAinWindow", parent)
+        self.main_window = parent
         self.m_drag = True  # 允许拖动
         self.m_DragPosition = None  # 拖动位置
         self.show_w = self.Ui.label_backgroud_pic.width()  # 图片显示区域的宽高

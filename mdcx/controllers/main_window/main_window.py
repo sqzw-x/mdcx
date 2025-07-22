@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import (
     QMenu,
     QMessageBox,
     QShortcut,
+    QSystemTrayIcon,
     QTreeWidgetItem,
 )
 
@@ -141,7 +142,7 @@ class MyMAinWindow(QMainWindow):
         self.show_name = None
         self.t_net = None
         self.options: "QFileDialog.Options | QFileDialog.Option"
-        self.tray_icon = None
+        self.tray_icon: QSystemTrayIcon
         self.item_succ: QTreeWidgetItem
         self.item_fail: QTreeWidgetItem
         # endregion
@@ -555,7 +556,7 @@ class MyMAinWindow(QMainWindow):
             else:
                 version_info = f'基于 MDC-GUI 修改 · 当前版本: {self.localversion} （ <font color="green">你使用的是最新版本！🎉 </font>）'
 
-        feedback = f' 💌 问题反馈: <a href="https://github.com/sqzw-x/mdcx/issues/new">GitHub Issues</a>'
+        feedback = ' 💌 问题反馈: <a href="https://github.com/sqzw-x/mdcx/issues/new">GitHub Issues</a>'
 
         # 显示版本信息和反馈入口
         signal.show_log_text(version_info)
@@ -576,7 +577,7 @@ class MyMAinWindow(QMainWindow):
     # endregion
 
     # region 各种点击跳转浏览器
-    def label_version_clicked(self, test):
+    def label_version_clicked(self, ev):
         try:
             if "🔍" in self.new_version:
                 webbrowser.open("https://github.com/sqzw-x/mdcx/releases/tag/daily_release")
@@ -943,7 +944,7 @@ class MyMAinWindow(QMainWindow):
         event = QHoverEvent(QEvent.Type.HoverLeave, QPoint(40, 40), QPoint(0, 0))
         QApplication.sendEvent(self.Ui.pushButton_play, event)
         if self._check_main_file_path():
-            file_path = convert_path(self.file_main_open_path)
+            # file_path = convert_path(self.file_main_open_path)
             # mac需要改为无焦点状态，不然弹窗失去焦点后，再切换回来会有找不到焦点的问题（windows无此问题）
             # if not self.is_windows:
             #     self.setWindowFlags(self.windowFlags() | Qt.WindowDoesNotAcceptFocus)
@@ -960,7 +961,7 @@ class MyMAinWindow(QMainWindow):
         event = QHoverEvent(QEvent.Type.HoverLeave, QPoint(40, 40), QPoint(0, 0))
         QApplication.sendEvent(self.Ui.pushButton_open_folder, event)
         if self._check_main_file_path():
-            file_path = convert_path(self.file_main_open_path)
+            # file_path = convert_path(self.file_main_open_path)
             # mac需要改为无焦点状态，不然弹窗失去焦点后，再切换回来会有找不到焦点的问题（windows无此问题）
             # if not self.is_windows:
             #     self.setWindowFlags(self.windowFlags() | Qt.WindowDoesNotAcceptFocus)
@@ -1342,7 +1343,7 @@ class MyMAinWindow(QMainWindow):
 
     # region 工具页
     # 工具页面点查看本地番号
-    def label_local_number_clicked(self, test):
+    def label_local_number_clicked(self, ev):
         if self.Ui.pushButton_find_missing_number.isEnabled():
             self.pushButton_show_log_clicked()  # 点击按钮后跳转到日志页面
             if self.Ui.lineEdit_actors_name.text() != config.actors_name:  # 保存配置

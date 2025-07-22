@@ -116,7 +116,7 @@ async def _add_to_pic(pic_path: str, img_pic: Image.Image, mark_size: int, count
             img_subt = img_subt.convert("RGBA")
             scroll_high = int(img_pic.height * mark_size / 40)
             scroll_width = int(scroll_high * img_subt.width / img_subt.height)
-            img_subt = img_subt.resize((scroll_width, scroll_high), Image.LANCZOS)
+            img_subt = img_subt.resize((scroll_width, scroll_high), resample=Image.Resampling.LANCZOS)
         except Exception:
             signal.show_log_text(f"{traceback.format_exc()}\n Open Pic: {mark_pic_path}")
             print(traceback.format_exc())
@@ -203,16 +203,16 @@ async def add_mark_thread(pic_path: str, mark_list: list[str]):
             "bottom_left": 3,
         }
         mark_pos_count = pos.get(mark_pos, 0)  # 获取自定义位置, 取余配合pos达到顺时针添加的效果
-        count_hd = ""
+        count_hd = 0
         for mark_name in mark_list:
             if mark_name == "4K" or mark_name == "8K":  # 4K/8K使用固定位置
-                count_hd = pos.get(mark_pos_hd)
+                count_hd = pos.get(mark_pos_hd, 0)
                 await _add_to_pic(pic_path, img_pic, mark_size, count_hd, mark_name)
             elif mark_fixed == "fixed":  # 固定位置
                 if mark_name == "字幕":
-                    count = pos.get(mark_pos_sub)
+                    count = pos.get(mark_pos_sub, 0)
                 else:
-                    count = pos.get(mark_pos_mosaic)
+                    count = pos.get(mark_pos_mosaic, 0)
                 await _add_to_pic(pic_path, img_pic, mark_size, count, mark_name)
             else:  # 不固定位置
                 if mark_pos_count % 4 == count_hd:

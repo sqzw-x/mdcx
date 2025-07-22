@@ -20,7 +20,7 @@ async def add_del_extras(mode: str):
     movie_path, *_ = get_movie_path_setting()
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 Checking all videos, Please wait...")
     movie_type = config.media_type
-    movie_list = await movie_lists("", movie_type, movie_path)  # 获取所有需要刮削的影片列表
+    movie_list = await movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
 
     extrafanart_folder_path_list = []
     for movie in movie_list:
@@ -68,7 +68,7 @@ async def add_del_theme_videos(mode: str):
     movie_type = config.media_type
     movie_list = await movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
 
-    theme_videos_folder_path_dic = {}
+    theme_videos_folder_path_dic: dict[str, str] = {}
     for movie in movie_list:
         movie_file_folder_path = split_path(movie)[0]
         movie_file_path_no_ext = os.path.splitext(movie)[0]
@@ -87,7 +87,7 @@ async def add_del_theme_videos(mode: str):
         theme_videos_folder_path = os.path.join(movie_file_folder_path, "backdrops")
         theme_videos_file_path = os.path.join(movie_file_folder_path, "backdrops/theme_video.mp4")
         count += 1
-        if mode == "add":
+        if trailer_file_path and mode == "add":
             if not await aiofiles.os.path.exists(theme_videos_file_path):
                 if not await aiofiles.os.path.exists(theme_videos_folder_path):
                     await aiofiles.os.mkdir(theme_videos_folder_path)

@@ -1,4 +1,10 @@
-def set_style(self):
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mdcx.controllers.main_window.main_window import MyMAinWindow
+
+
+def set_style(self: "MyMAinWindow"):
     if self.dark_mode:
         self.set_dark_style()
         return
@@ -306,7 +312,7 @@ def set_style(self):
         """)
 
 
-def set_dark_style(self):
+def set_dark_style(self: "MyMAinWindow"):
     # 控件美化 左侧栏样式 暗黑模式
     self.Ui.widget_setting.setStyleSheet(f"""
         QWidget#widget_setting{{

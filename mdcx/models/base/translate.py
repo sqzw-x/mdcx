@@ -3,6 +3,7 @@ import hashlib
 import random
 import time
 from typing import Literal, Optional, Union, cast
+from urllib.parse import unquote
 
 from mdcx.config.manager import config
 from mdcx.signals import signal
@@ -141,7 +142,7 @@ async def llm_translate_async(title: str, outline: str, target_language: str = "
 async def _google_translate(msg: str) -> tuple[Optional[str], str]:
     if not msg:
         return "", ""
-    msg_unquote = urllib.parse.unquote(msg)
+    msg_unquote = unquote(msg)
     url = f"https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}"
     response, error = await config.async_client.get_json(url)
     if response is None:
