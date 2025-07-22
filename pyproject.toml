@@ -13,12 +13,12 @@ dependencies = [
     "lxml==5.4.0",
     "numpy==1.26.4",
     "openai==1.91.0",
-    "opencv-contrib-python-headless==4.8.*",
+    "opencv-contrib-python-headless==4.8.*",        # 带有 type stubs 的最低版本
     "oshash==0.1.1",
     "pillow==11.3.0",
     "ping3==4.0.4",
-    "pyqt5==5.15.10 ; sys_platform == 'darwin'",
-    "pyqt5==5.15.6 ; sys_platform == 'win32'",
+    "pyqt5==5.15.11",
+    "pyqt5-qt5==5.15.2; sys_platform == 'Windows'", # 更高版本无 Windows wheel
     "zhconv==1.4.3",
 ]
 

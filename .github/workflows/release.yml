@@ -62,13 +62,15 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Set up uv
-              uses: astral-sh/setup-uv@v6
-
             - name: "Set up Python"
               uses: actions/setup-python@v5
               with:
                   python-version-file: "pyproject.toml"
+
+            - name: Set up uv
+              uses: astral-sh/setup-uv@v6
+              with:
+                  activate-environment: true
 
             - name: Set up python env
               run: uv sync --locked --all-extras --dev
