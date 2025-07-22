@@ -433,7 +433,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
 
     # 获取文件基础信息
     file_info = await get_file_info_v2(file_path)
-    movie_number = file_info.number
+    number = file_info.number
     folder_old_path = file_info.folder_path
     file_show_name = file_info.file_show_name
     file_show_path = file_info.file_show_path
@@ -450,7 +450,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     )
     LogBuffer.log().write("\n" + "👆" * 50)
     LogBuffer.log().write("\n 🙈 [Movie] " + file_info.file_path)
-    LogBuffer.log().write("\n 🚘 [Number] " + movie_number)
+    LogBuffer.log().write("\n 🚘 [Number] " + number)
 
     # 如果指定了单一网站，进行提示
     website_single = config.website_single
@@ -464,8 +464,8 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
         json_data, other = await _scrape_one_file(file_info, file_mode)
         if json_data and other and LogBuffer.req().get() != "do_not_update_json_data_dic":
             if config.main_mode == 4:
-                movie_number = json_data.number  # 读取模式且存在nfo时，可能会导致movie_number改变，需要更新
-            Flags.json_data_dic.update({movie_number: ScrapeResult(file_info, json_data, other)})
+                number = json_data.number  # 读取模式且存在nfo时，可能会导致movie_number改变，需要更新
+            Flags.json_data_dic.update({number: ScrapeResult(file_info, json_data, other)})
     except Exception as e:
         _check_stop(file_name_temp)
         signal.show_traceback_log(traceback.format_exc())
@@ -479,18 +479,18 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
         show_data.file_info = file_info
         if json_data and other:
             show_data.data = json_data
-            show_data.other_info = other
+            show_data.other = other
             Flags.succ_count += 1
             show_data.show_name = (
                 str(Flags.count_claw)
                 + "-"
                 + str(Flags.succ_count)
                 + "."
-                + file_show_name.replace(movie_number, file_info.number)
-                + "-"
+                + file_show_name.replace(number, file_info.number)
+                + ("-" if file_info.definition else "")
                 + file_info.definition
             )
-            signal.show_list_name("succ", show_data, movie_number)
+            signal.show_list_name("succ", show_data, number)
         else:
             Flags.fail_count += 1
             show_data.show_name = (
@@ -498,11 +498,11 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
                 + "-"
                 + str(Flags.fail_count)
                 + "."
-                + file_show_name.replace(movie_number, file_info.number)
-                + "-"
+                + file_show_name.replace(number, file_info.number)
+                + ("-" if file_info.definition else "")
                 + file_info.definition
             )
-            signal.show_list_name("fail", show_data, movie_number)
+            signal.show_list_name("fail", show_data, number)
             if e := LogBuffer.error().get():
                 LogBuffer.log().write(f"\n 🔴 [Failed] Reason: {e}")
                 if "WinError 5" in e:

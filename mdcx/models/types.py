@@ -103,7 +103,6 @@ class FileInfo:
         )
 
 
-# crawler =================================================================
 @dataclass
 class CrawlerInput:
     """调用单个 crawler 所需输入"""
@@ -324,14 +323,18 @@ class OtherInfo:
 
 
 @dataclass
-class ShowData:
-    """
-    用于主界面显示的数据类
-    """
-
+class ScrapeResult:
     file_info: FileInfo
     data: CrawlersResult
     other: OtherInfo
+
+
+@dataclass
+class ShowData(ScrapeResult):
+    """
+    用于主界面显示
+    """
+
     show_name: str
 
     @classmethod
@@ -345,10 +348,3 @@ class ShowData:
             other=OtherInfo.empty(),
             show_name="",
         )
-
-
-@dataclass
-class ScrapeResult:
-    file_info: FileInfo
-    data: CrawlersResult
-    other: OtherInfo
