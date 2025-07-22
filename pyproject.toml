@@ -11,9 +11,9 @@ dependencies = [
     "curl-cffi==0.11.4",
     "langid==1.1.6",
     "lxml==5.4.0",
-    "numpy==1.26.4",
     "openai==1.91.0",
-    "opencv-contrib-python-headless==4.8.*",      # 带有 type stubs 的最低版本
+    # 升级 opencv 以使用 numpy 2. numpy 1 在 3.13 无 wheel, 从 source 编译失败且耗时较长
+    "opencv-contrib-python-headless~=4.12",
     "oshash==0.1.1",
     "pillow==11.3.0",
     "ping3==4.0.4",
