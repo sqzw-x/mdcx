@@ -14,7 +14,7 @@ from mdcx.models.core.utils import render_name_template
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import BaseCrawlerResultDataClass, CrawlersResultDataClass, FileInfo, OtherInfo
+from mdcx.models.types import BaseCrawlerResult, CrawlersResult, FileInfo, OtherInfo
 from mdcx.number import get_file_number, get_number_letters, is_uncensored
 from mdcx.signals import signal
 from mdcx.utils import convert_path, nfd2c, split_path
@@ -24,7 +24,7 @@ from mdcx.utils.path import showFilePath
 
 async def creat_folder(
     other: OtherInfo,
-    json_data: BaseCrawlerResultDataClass,
+    json_data: BaseCrawlerResult,
     folder_new_path: str,
     file_path: str,
     file_new_path: str,
@@ -242,9 +242,7 @@ async def move_movie(other: OtherInfo, file_info: FileInfo, file_path: str, file
         return False
 
 
-def _get_folder_path(
-    file_path: str, success_folder: str, file_info: FileInfo, res: CrawlersResultDataClass
-) -> tuple[str, str]:
+def _get_folder_path(file_path: str, success_folder: str, file_info: FileInfo, res: CrawlersResult) -> tuple[str, str]:
     folder_name: str = config.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
     folder_path, file_name = split_path(file_path)  # 当前文件的目录和文件名
 
@@ -335,7 +333,7 @@ def _get_folder_path(
     return folder_new_path.strip().replace(" /", "/"), folder_new_name
 
 
-def _generate_file_name(file_path: str, cd_part, folder_name, file_info: FileInfo, res: CrawlersResultDataClass) -> str:
+def _generate_file_name(file_path: str, cd_part, folder_name, file_info: FileInfo, res: CrawlersResult) -> str:
     file_full_name = split_path(file_path)[1]
     file_name, file_ex = os.path.splitext(file_full_name)
 
@@ -434,7 +432,7 @@ def _generate_file_name(file_path: str, cd_part, folder_name, file_info: FileInf
 
 
 def get_output_name(
-    file_info: FileInfo, json_data: CrawlersResultDataClass, file_path: str, success_folder: str, file_ex: str
+    file_info: FileInfo, json_data: CrawlersResult, file_path: str, success_folder: str, file_ex: str
 ) -> tuple[str, str, str, str, str, str, str, str, str, str]:
     # =====================================================================================更新输出文件夹名
     folder_new_path, folder_name = _get_folder_path(file_path, success_folder, file_info, json_data)

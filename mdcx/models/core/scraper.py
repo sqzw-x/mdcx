@@ -53,16 +53,14 @@ from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.tools.emby_actor_image import update_emby_actor_photo
 from mdcx.models.tools.emby_actor_info import creat_kodi_actors
-from mdcx.models.types import CrawlersResultDataClass, FileInfo, OtherInfo, ScrapeResult, ShowDataDataclass
+from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo, ScrapeResult, ShowData
 from mdcx.signals import signal
 from mdcx.utils import convert_path, get_current_time, get_real_time, get_used_time, split_path
 from mdcx.utils.dataclass import update
 from mdcx.utils.file import copy_file_async, move_file_async, read_link_async
 
 
-async def _scrape_one_file(
-    file_info: FileInfo, file_mode: FileMode
-) -> tuple[CrawlersResultDataClass | None, OtherInfo | None]:
+async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[CrawlersResult | None, OtherInfo | None]:
     # 处理单个文件刮削
     # 初始化所需变量
     start_time = time.time()
@@ -89,7 +87,7 @@ async def _scrape_one_file(
         return None, None
 
     is_nfo_existed = False
-    res = CrawlersResultDataClass.empty()  # todo 保证所有路径上均有 res 值
+    res = CrawlersResult.empty()  # todo 保证所有路径上均有 res 值
     # 读取模式
     file_can_download = True
     if config.main_mode == 4:
@@ -190,7 +188,7 @@ async def _scrape_one_file(
             pre_file_info.mosaic = res.mosaic if res.mosaic else "有码"
         elif "破解" in res.mosaic or "流出" in res.mosaic:
             pre_file_info.mosaic = res.mosaic
-        res = update(CrawlersResultDataClass.empty(), pre_file_info)
+        res = update(CrawlersResult.empty(), pre_file_info)
     elif not is_nfo_existed:
         res = await crawl(file_info.crawl_task(), file_mode)
         if res is None:
@@ -477,9 +475,13 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
 
     # 显示刮削数据
     try:
+        show_data = ShowData.empty()
+        show_data.file_info = file_info
         if json_data and other:
+            show_data.data = json_data
+            show_data.other_info = other
             Flags.succ_count += 1
-            succ_show_name = (
+            show_data.show_name = (
                 str(Flags.count_claw)
                 + "-"
                 + str(Flags.succ_count)
@@ -488,10 +490,10 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
                 + "-"
                 + file_info.definition
             )
-            signal.show_list_name("succ", ShowDataDataclass(file_info, json_data, other, succ_show_name), movie_number)
+            signal.show_list_name("succ", show_data, movie_number)
         else:
             Flags.fail_count += 1
-            fail_show_name = (
+            show_data.show_name = (
                 str(Flags.count_claw)
                 + "-"
                 + str(Flags.fail_count)
@@ -500,7 +502,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
                 + "-"
                 + file_info.definition
             )
-            signal.show_list_name("fail", ShowDataDataclass(file_info, None, None, fail_show_name), movie_number)
+            signal.show_list_name("fail", show_data, movie_number)
             if e := LogBuffer.error().get():
                 LogBuffer.log().write(f"\n 🔴 [Failed] Reason: {e}")
                 if "WinError 5" in e:

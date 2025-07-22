@@ -51,12 +51,7 @@ from mdcx.crawlers import (
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import (
-    CallCrawlerInput,
-    CrawlerResultDataclass,
-    CrawlersResultDataClass,
-    CrawlTask,
-)
+from mdcx.models.types import CrawlerInput, CrawlerResult, CrawlersResult, CrawlTask
 from mdcx.number import get_number_letters, is_uncensored
 from mdcx.utils.dataclass import update
 
@@ -130,12 +125,12 @@ def _deal_some_list(field: str, website: str, same_list: list[str]) -> list[str]
 
 
 async def _call_crawler(
-    task_input: CallCrawlerInput,
+    task_input: CrawlerInput,
     website: str,
     language: str,
     org_language: str,
     timeout: int = 30,
-) -> dict[str, dict[str, CrawlerResultDataclass]]:
+) -> dict[str, dict[str, CrawlerResult]]:
     """
     调用指定网站的爬虫函数
 
@@ -180,15 +175,15 @@ async def _call_crawler(
     r = await asyncio.wait_for(crawler_func(**kwargs), timeout=timeout)
     # todo 使 crawler 直接返回 dict[str, dict[str, CrawlerResultDataclass]]
     r = cast(dict[str, dict[str, dict]], r)
-    res: dict[str, dict[str, CrawlerResultDataclass]] = {}
+    res: dict[str, dict[str, CrawlerResult]] = {}
     for key1 in r:
         res[key1] = {}
         for key2 in r[key1]:
-            res[key1][key2] = update(CrawlerResultDataclass.empty(), r[key1][key2])
+            res[key1][key2] = update(CrawlerResult.empty(), r[key1][key2])
     return res
 
 
-async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list[str]) -> CrawlersResultDataClass:
+async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str]) -> CrawlersResult:
     """
     获取一组网站的数据：按照设置的网站组，请求各字段数据，并返回最终的数据
     采用按需请求策略：仅请求必要的网站，失败时才请求下一优先级网站
@@ -280,8 +275,8 @@ async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list
             all_field_website_lang_pairs[field].append(pair)
 
     # 缓存已请求的网站结果
-    all_res: dict[tuple[str, str], CrawlerResultDataclass] = {}
-    reduced = CrawlersResultDataClass.empty()
+    all_res: dict[tuple[str, str], CrawlerResult] = {}
+    reduced = CrawlersResult.empty()
 
     # 无优先级设置的字段的默认配置
     default_website_lang_pairs: list[tuple[str, str]] = [
@@ -431,7 +426,7 @@ async def _call_crawlers(task_input: CallCrawlerInput, number_website_list: list
     return reduced
 
 
-async def _call_specific_crawler(task_input: CallCrawlerInput, website: str) -> CrawlersResultDataClass:
+async def _call_specific_crawler(task_input: CrawlerInput, website: str) -> CrawlersResult:
     file_number = task_input.number
     short_number = task_input.short_number
 
@@ -465,9 +460,9 @@ async def _call_specific_crawler(task_input: CallCrawlerInput, website: str) -> 
     web_data = await _call_crawler(task_input, website, title_language, org_language)
     web_data_json = web_data.get(website, {}).get(title_language)
     if web_data_json is None:
-        web_data_json = CrawlerResultDataclass.empty()
+        web_data_json = CrawlerResult.empty()
 
-    res = update(CrawlersResultDataClass.empty(), web_data_json)
+    res = update(CrawlersResult.empty(), web_data_json)
     if not res.title:
         return res
     if outline_language != title_language:
@@ -524,7 +519,7 @@ async def _call_specific_crawler(task_input: CallCrawlerInput, website: str) -> 
     return res
 
 
-async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResultDataClass | None:  # 从JSON返回元数据
+async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult | None:  # 从JSON返回元数据
     appoint_number = task_input.appoint_number
     cd_part = task_input.cd_part
     destroyed = task_input.destroyed
@@ -678,14 +673,14 @@ def _get_website_name(task_input: CrawlTask, file_mode: FileMode) -> str:
     return website_name
 
 
-async def crawl(task_input: CrawlTask, file_mode: FileMode) -> CrawlersResultDataClass | None:
+async def crawl(task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult | None:
     # 从指定网站获取json_data
     website_name = _get_website_name(task_input, file_mode)
     res = await _crawl(task_input, website_name)
     return _deal_res(res)
 
 
-def _deal_res(res: CrawlersResultDataClass | None) -> CrawlersResultDataClass | None:
+def _deal_res(res: CrawlersResult | None) -> CrawlersResult | None:
     # 标题为空返回
     if res is None or not res.title:
         return None

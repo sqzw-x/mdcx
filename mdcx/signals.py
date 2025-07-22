@@ -4,7 +4,7 @@ from typing import Literal
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
-from mdcx.models.types import ShowDataDataclass
+from mdcx.models.types import ShowData
 from mdcx.utils import singleton
 
 
@@ -14,7 +14,7 @@ class Signals(QObject):
     log_text = pyqtSignal(str)
     scrape_info = pyqtSignal(str)
     net_info = pyqtSignal(str)
-    exec_set_main_info = pyqtSignal(ShowDataDataclass)  # 主界面更新番号信息
+    exec_set_main_info = pyqtSignal(ShowData)  # 主界面更新番号信息
     change_buttons_status = pyqtSignal()
     reset_buttons_status = pyqtSignal()
     set_label_file_path = pyqtSignal(str)
@@ -24,7 +24,7 @@ class Signals(QObject):
     exec_set_processbar = pyqtSignal(int)  # 进度条信号量
     exec_exit_app = pyqtSignal()  # 退出信号量
     view_failed_list_settext = pyqtSignal(str)
-    exec_show_list_name = pyqtSignal(str, ShowDataDataclass, str)
+    exec_show_list_name = pyqtSignal(str, ShowData, str)
     logs_failed_show = pyqtSignal(str)  # 失败面板添加信息日志信号
 
     # endregion
@@ -65,10 +65,10 @@ class Signals(QObject):
 
     def set_main_info(self, show_data=None):
         if show_data is None:
-            show_data = ShowDataDataclass.empty()
+            show_data = ShowData.empty()
         self.exec_set_main_info.emit(show_data)
 
-    def show_list_name(self, status: Literal["succ", "fail"], show_data: ShowDataDataclass, real_number=""):
+    def show_list_name(self, status: Literal["succ", "fail"], show_data: ShowData, real_number=""):
         self.exec_show_list_name.emit(status, show_data, real_number)
 
 

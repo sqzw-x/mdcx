@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
+from typing import Literal
 
 
 @dataclass
 class FileInfo:
     """
-    新版本的文件信息数据类，整合了 get_file_info 函数的所有返回值
+    读取媒体文件获得的基础信息
     """
 
     number: str
@@ -35,11 +37,11 @@ class FileInfo:
     definition: str
     codec: str
 
-    def crawler_input(self) -> "CallCrawlerInput":
+    def crawler_input(self) -> "CrawlerInput":
         """
         将 FileInfo 转换为 CallCrawlerInput 类型
         """
-        return CallCrawlerInput(
+        return CrawlerInput(
             appoint_number=self.appoint_number,
             appoint_url=self.appoint_url,
             file_path=self.file_path,
@@ -103,7 +105,7 @@ class FileInfo:
 
 # crawler =================================================================
 @dataclass
-class CallCrawlerInput:
+class CrawlerInput:
     """调用单个 crawler 所需输入"""
 
     appoint_number: str
@@ -115,8 +117,8 @@ class CallCrawlerInput:
 
 
 @dataclass
-class CrawlTask(CallCrawlerInput):
-    """刮削一个文件所需的信息."""
+class CrawlTask(CrawlerInput):
+    """刮削一个文件所需的信息"""
 
     c_word: str
     cd_part: str
@@ -129,9 +131,9 @@ class CrawlTask(CallCrawlerInput):
 
 
 @dataclass
-class BaseCrawlerResultDataClass:
+class BaseCrawlerResult:
     """
-    爬虫结果的公共基础类型，包含 CrawlerResult 和 CrawlersResult 的共同字段
+    爬虫结果的公共基础类型, 包含 CrawlerResult 和 CrawlersResult 的共同字段
     (注释由 AI 生成, 仅供参考)
     """
 
@@ -162,8 +164,20 @@ class BaseCrawlerResultDataClass:
     # 用于写入 nfo 的特殊字段
     javdbid: str  # JavDB ID
 
+    @property
+    def country(self) -> Literal["CN", "JP", "US"]:
+        """
+        根据 mosaic 字段返回国家代码
+        """
+        country = "JP"
+        if self.mosaic in ["国产", "國產"]:
+            country = "CN"
+        elif re.findall(r"\.\d{2}\.\d{2}\.\d{2}", self.number):
+            country = "US"
+        return country
+
     @classmethod
-    def empty(cls) -> "BaseCrawlerResultDataClass":
+    def empty(cls) -> "BaseCrawlerResult":
         """
         返回一个空的 BaseCrawlerResultDataClass 实例
         """
@@ -195,7 +209,7 @@ class BaseCrawlerResultDataClass:
 
 
 @dataclass
-class CrawlerResultDataclass(BaseCrawlerResultDataClass):
+class CrawlerResult(BaseCrawlerResult):
     """
     单一网站爬虫返回的结果
     """
@@ -206,12 +220,12 @@ class CrawlerResultDataclass(BaseCrawlerResultDataClass):
     website: str  # 网站地址
 
     @classmethod
-    def empty(cls) -> "CrawlerResultDataclass":
+    def empty(cls) -> "CrawlerResult":
         """
         返回一个空的 CrawlerResultDataclass 实例
         """
         return cls(
-            **BaseCrawlerResultDataClass.empty().__dict__,
+            **BaseCrawlerResult.empty().__dict__,
             actor_photo={},
             image_cut="",
             source="",
@@ -220,7 +234,7 @@ class CrawlerResultDataclass(BaseCrawlerResultDataClass):
 
 
 @dataclass
-class CrawlersResultDataClass(BaseCrawlerResultDataClass):
+class CrawlersResult(BaseCrawlerResult):
     """
     整合所有网站的爬虫结果
     """
@@ -249,12 +263,12 @@ class CrawlersResultDataClass(BaseCrawlerResultDataClass):
     letters: str  # 番号字母部分, 理论上 get_file_info 函数会返回这个字段
 
     @classmethod
-    def empty(cls) -> "CrawlersResultDataClass":
+    def empty(cls) -> "CrawlersResult":
         """
         返回一个空的 CrawlersResultDataClass 实例
         """
         return cls(
-            **BaseCrawlerResultDataClass.empty().__dict__,
+            **BaseCrawlerResult.empty().__dict__,
             actor_amazon=[],
             all_actor_photo={},
             all_actor="",
@@ -270,37 +284,6 @@ class CrawlersResultDataClass(BaseCrawlerResultDataClass):
             version=0,
             letters="",
         )
-
-
-@dataclass
-class ShowDataDataclass:
-    """
-    用于主界面显示的数据类
-    """
-
-    file_info: FileInfo
-    data: CrawlersResultDataClass | None
-    other: OtherInfo | None
-    show_name: str = ""  # 显示名称, 用于主界面显示
-
-    @classmethod
-    def empty(cls) -> "ShowDataDataclass":
-        """
-        返回一个空的 ShowDataDataclass 实例
-        """
-        return cls(
-            file_info=FileInfo.empty(),
-            data=CrawlersResultDataClass.empty(),
-            other=OtherInfo.empty(),
-            show_name="",
-        )
-
-
-@dataclass
-class ScrapeResult:
-    file_info: FileInfo
-    data: CrawlersResultDataClass
-    other: OtherInfo
 
 
 @dataclass
@@ -338,3 +321,34 @@ class OtherInfo:
             poster_size=(0, 0),
             thumb_size=(0, 0),
         )
+
+
+@dataclass
+class ShowData:
+    """
+    用于主界面显示的数据类
+    """
+
+    file_info: FileInfo
+    data: CrawlersResult
+    other: OtherInfo
+    show_name: str
+
+    @classmethod
+    def empty(cls) -> "ShowData":
+        """
+        返回一个空的 ShowDataDataclass 实例
+        """
+        return cls(
+            file_info=FileInfo.empty(),
+            data=CrawlersResult.empty(),
+            other=OtherInfo.empty(),
+            show_name="",
+        )
+
+
+@dataclass
+class ScrapeResult:
+    file_info: FileInfo
+    data: CrawlersResult
+    other: OtherInfo

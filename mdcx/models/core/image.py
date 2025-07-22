@@ -12,7 +12,7 @@ from PIL import Image
 from mdcx.config.manager import config
 from mdcx.models.base.image import add_mark_thread
 from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import CrawlersResultDataClass, FileInfo, OtherInfo
+from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo
 from mdcx.signals import signal
 from mdcx.utils import get_used_time
 from mdcx.utils.file import check_pic_async, copy_file_sync, delete_file_sync
@@ -70,7 +70,7 @@ async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):
             LogBuffer.log().write(f"\n 🍀 Fanart add watermark: {mark_show_type}!")
 
 
-def cut_thumb_to_poster(json_data: CrawlersResultDataClass, thumb_path: str, poster_path: str, image_cut):
+def cut_thumb_to_poster(json_data: CrawlersResult, thumb_path: str, poster_path: str, image_cut):
     start_time = time.time()
     if os.path.exists(poster_path):
         delete_file_sync(poster_path)

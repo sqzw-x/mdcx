@@ -54,7 +54,7 @@ from mdcx.models.tools.emby_actor_image import update_emby_actor_photo
 from mdcx.models.tools.emby_actor_info import creat_kodi_actors, show_emby_actor_list, update_emby_actor_info
 from mdcx.models.tools.missing import check_missing_number
 from mdcx.models.tools.subtitle import add_sub_for_all_video
-from mdcx.models.types import CrawlersResultDataClass, FileInfo, OtherInfo, ShowDataDataclass
+from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo, ShowData
 from mdcx.signals import signal
 from mdcx.utils import _async_raise, add_html, convert_path, get_current_time, get_used_time, kill_a_thread, split_path
 from mdcx.utils.file import delete_file_sync, open_file_thread
@@ -102,14 +102,14 @@ class MyMAinWindow(QMainWindow):
         # region 初始化需要的变量
         self.localversion = ManualConfig.LOCAL_VERSION  # 当前版本号
         self.new_version = "\n🔍 点击检查最新版本"  # 有版本更新时在左下角显示的新版本信息
-        self.show_data: "ShowDataDataclass|None" = None  # 当前树状图选中文件的数据
+        self.show_data: "ShowData | None" = None  # 当前树状图选中文件的数据
         self.img_path = ""  # 当前树状图选中文件的图片地址
         self.m_drag = False  # 允许鼠标拖动的标识
         self.m_DragPosition: QPoint  # 鼠标拖动位置
         self.logs_counts = 0  # 日志次数（每1w次清屏）
         self.req_logs_counts = 0  # 日志次数（每1w次清屏）
         self.file_main_open_path = ""  # 主界面打开的文件路径
-        self.json_array = {}  # 主界面右侧结果树状数据
+        self.json_array: dict[str, ShowData] = {}  # 主界面右侧结果树状数据
 
         self.window_radius = 0  # 窗口四角弧度，为0时表示显示窗口标题栏
         self.window_border = 0  # 窗口描边，为0时表示显示窗口标题栏
@@ -783,44 +783,38 @@ class MyMAinWindow(QMainWindow):
         # self.Ui.treeWidget_number.setCurrentItem(node)
         # self.Ui.treeWidget_number.scrollToItem(node)
 
-    def show_list_name(self, status: Literal["succ", "fail"], show_data: ShowDataDataclass, real_number=""):
+    def show_list_name(self, status: Literal["succ", "fail"], show_data: ShowData, real_number=""):
         # 添加树状节点
         self._addTreeChild(status, show_data.show_name)
 
-        # 解析json_data，以在主界面左侧显示
-        if not show_data.data:
-            json_data = CrawlersResultDataClass.empty()
-            json_data.title = LogBuffer.error().get()
-            json_data.number = real_number
+        if not show_data.data.title:
+            show_data.data.title = LogBuffer.error().get()
+            show_data.data.number = real_number
         self.show_name = show_data.show_name
         self.set_main_info(show_data)
         self.json_array[show_data.show_name] = show_data
 
-    def set_main_info(self, show_data: "ShowDataDataclass | None"):
+    def set_main_info(self, show_data: "ShowData | None"):
         if show_data is not None:
             self.show_data = show_data
             file_info = show_data.file_info
-            json_data = show_data.data
+            data = show_data.data
             other = show_data.other
-            if not json_data:
-                json_data = CrawlersResultDataClass.empty()
-            if not other:
-                other = OtherInfo.empty()
             self.show_name = show_data.show_name
         else:
             file_info = FileInfo.empty()
-            json_data = CrawlersResultDataClass.empty()
+            data = CrawlersResult.empty()
             other = OtherInfo.empty()
-            self.show_name = ""
+            self.show_name = None
         try:
-            number = json_data.number
+            number = data.number
             self.Ui.label_number.setToolTip(number)
             if len(number) > 11:
                 number = number[:10] + "……"
             self.Ui.label_number.setText(number)
-            actor = str(json_data.actor)
-            if json_data.all_actor and "actor_all," in config.nfo_include_new:
-                actor = str(json_data.all_actor)
+            actor = str(data.actor)
+            if data.all_actor and "actor_all," in config.nfo_include_new:
+                actor = str(data.all_actor)
             self.Ui.label_actor.setToolTip(actor)
             if number and not actor:
                 actor = config.actor_no_name
@@ -829,39 +823,39 @@ class MyMAinWindow(QMainWindow):
             self.Ui.label_actor.setText(actor)
             self.file_main_open_path = file_info.file_path  # 文件路径
 
-            title = json_data.title.split("\n")[0].strip(" :")
+            title = data.title.split("\n")[0].strip(" :")
             self.Ui.label_title.setToolTip(title)
             if len(title) > 27:
                 title = title[:25] + "……"
             self.Ui.label_title.setText(title)
-            outline = str(json_data.outline)
+            outline = str(data.outline)
             self.Ui.label_outline.setToolTip(outline)
             if len(outline) > 38:
                 outline = outline[:36] + "……"
             self.Ui.label_outline.setText(outline)
-            tag = str(json_data.tag).strip(" [',']").replace("'", "")
+            tag = str(data.tag).strip(" [',']").replace("'", "")
             self.Ui.label_tag.setToolTip(tag)
             if len(tag) > 76:
                 tag = tag[:75] + "……"
             self.Ui.label_tag.setText(tag)
-            self.Ui.label_release.setText(str(json_data.release))
-            self.Ui.label_release.setToolTip(str(json_data.release))
-            if json_data.runtime:
-                self.Ui.label_runtime.setText(str(json_data.runtime) + " 分钟")
-                self.Ui.label_runtime.setToolTip(str(json_data.runtime) + " 分钟")
+            self.Ui.label_release.setText(str(data.release))
+            self.Ui.label_release.setToolTip(str(data.release))
+            if data.runtime:
+                self.Ui.label_runtime.setText(str(data.runtime) + " 分钟")
+                self.Ui.label_runtime.setToolTip(str(data.runtime) + " 分钟")
             else:
                 self.Ui.label_runtime.setText("")
-            self.Ui.label_director.setText(str(json_data.director))
-            self.Ui.label_director.setToolTip(str(json_data.director))
-            series = str(json_data.series)
+            self.Ui.label_director.setText(str(data.director))
+            self.Ui.label_director.setToolTip(str(data.director))
+            series = str(data.series)
             self.Ui.label_series.setToolTip(series)
             if len(series) > 32:
                 series = series[:31] + "……"
             self.Ui.label_series.setText(series)
-            self.Ui.label_studio.setText(json_data.studio)
-            self.Ui.label_studio.setToolTip(json_data.studio)
-            self.Ui.label_publish.setText(json_data.publisher)
-            self.Ui.label_publish.setToolTip(json_data.publisher)
+            self.Ui.label_studio.setText(data.studio)
+            self.Ui.label_studio.setToolTip(data.studio)
+            self.Ui.label_publish.setText(data.publisher)
+            self.Ui.label_publish.setToolTip(data.publisher)
             self.Ui.label_poster.setToolTip("点击裁剪图片")
             self.Ui.label_thumb.setToolTip("点击裁剪图片")
             if os.path.isfile(other.fanart_path):  # 生成img_path，用来裁剪使用
@@ -877,8 +871,8 @@ class MyMAinWindow(QMainWindow):
                     if os.path.exists(fanart_path):
                         thumb_path = fanart_path
 
-                poster_from = json_data.poster_from
-                cover_from = json_data.thumb_from
+                poster_from = data.poster_from
+                cover_from = data.thumb_from
 
                 config.executor.submit(self._set_pixmap(poster_path, thumb_path, poster_from, cover_from))
         except Exception:
@@ -1095,97 +1089,75 @@ class MyMAinWindow(QMainWindow):
     # region 主界面编辑nfo
     def _show_nfo_info(self):
         try:
-            json_data = self.json_array[self.show_name]
-            self.now_show_name = json_data["show_name"]
-            title = json_data.get("title")
-            originaltitle = json_data.get("originaltitle")
-            studio = json_data.get("studio")
-            publisher = json_data.get("publisher")
-            year = json_data.get("year")
-            outline = json_data.get("outline")
-            runtime = json_data.get("runtime")
-            director = json_data.get("director")
-            actor = json_data.get("actor")
-            release = json_data.get("release")
-            tag = json_data.get("tag")
-            number = json_data.get("number")
-            cover = json_data.get("thumb")
-            poster = json_data.get("poster")
-            website = json_data.get("website")
-            series = json_data.get("series")
-            trailer = json_data.get("trailer")
-            file_path = json_data.get("file_path")
-            number = json_data.get("number")
-            originalplot = json_data.get("originalplot")
-            score = json_data.get("score")
-            wanted = json_data.get("wanted")
-            country = json_data.get("country")
-            self.Ui.label_nfo.setText(file_path)
-            self.Ui.lineEdit_nfo_number.setText(number)
-            if json_data["all_actor"] and "actor_all," in config.nfo_include_new:
-                actor = str(json_data["all_actor"])
+            if not self.show_name:
+                return
+            show_data = self.json_array[self.show_name]
+            json_data = show_data.data
+            file_info = show_data.file_info
+            self.now_show_name = show_data.show_name
+            actor = json_data.actor
+            if json_data.all_actor and "actor_all," in config.nfo_include_new:
+                actor = json_data.all_actor
+            self.Ui.label_nfo.setText(file_info.file_path)
+            self.Ui.lineEdit_nfo_number.setText(json_data.number)
             self.Ui.lineEdit_nfo_actor.setText(actor)
-            self.Ui.lineEdit_nfo_year.setText(year)
-            self.Ui.lineEdit_nfo_title.setText(title)
-            self.Ui.lineEdit_nfo_originaltitle.setText(originaltitle)
-            self.Ui.textEdit_nfo_outline.setPlainText(outline)
-            self.Ui.textEdit_nfo_originalplot.setPlainText(originalplot)
-            self.Ui.textEdit_nfo_tag.setPlainText(tag)
-            self.Ui.lineEdit_nfo_release.setText(release)
-            self.Ui.lineEdit_nfo_runtime.setText(runtime)
-            self.Ui.lineEdit_nfo_score.setText(score)
-            self.Ui.lineEdit_nfo_wanted.setText(wanted)
-            self.Ui.lineEdit_nfo_director.setText(director)
-            self.Ui.lineEdit_nfo_series.setText(series)
-            self.Ui.lineEdit_nfo_studio.setText(studio)
-            self.Ui.lineEdit_nfo_publisher.setText(publisher)
-            self.Ui.lineEdit_nfo_poster.setText(poster)
-            self.Ui.lineEdit_nfo_cover.setText(cover)
-            self.Ui.lineEdit_nfo_trailer.setText(trailer)
-            self.Ui.lineEdit_nfo_website.setText(website)
-            if not country:
-                if "." in number:
-                    country = "US"
-                else:
-                    country = "JP"
-            AllItems = [self.Ui.comboBox_nfo.itemText(i) for i in range(self.Ui.comboBox_nfo.count())]
-            self.Ui.comboBox_nfo.setCurrentIndex(AllItems.index(country))
+            self.Ui.lineEdit_nfo_year.setText(json_data.year)
+            self.Ui.lineEdit_nfo_title.setText(json_data.title)
+            self.Ui.lineEdit_nfo_originaltitle.setText(json_data.originaltitle)
+            self.Ui.textEdit_nfo_outline.setPlainText(json_data.outline)
+            self.Ui.textEdit_nfo_originalplot.setPlainText(json_data.originalplot)
+            self.Ui.textEdit_nfo_tag.setPlainText(json_data.tag)
+            self.Ui.lineEdit_nfo_release.setText(json_data.release)
+            self.Ui.lineEdit_nfo_runtime.setText(json_data.runtime)
+            self.Ui.lineEdit_nfo_score.setText(json_data.score)
+            self.Ui.lineEdit_nfo_wanted.setText(json_data.wanted)
+            self.Ui.lineEdit_nfo_director.setText(json_data.director)
+            self.Ui.lineEdit_nfo_series.setText(json_data.series)
+            self.Ui.lineEdit_nfo_studio.setText(json_data.studio)
+            self.Ui.lineEdit_nfo_publisher.setText(json_data.publisher)
+            self.Ui.lineEdit_nfo_poster.setText(json_data.poster)
+            self.Ui.lineEdit_nfo_cover.setText(json_data.thumb)
+            self.Ui.lineEdit_nfo_trailer.setText(json_data.trailer)
+            all_items = [self.Ui.comboBox_nfo.itemText(i) for i in range(self.Ui.comboBox_nfo.count())]
+            self.Ui.comboBox_nfo.setCurrentIndex(all_items.index(json_data.country))
         except Exception:
             if not signal.stop:
                 signal.show_traceback_log(traceback.format_exc())
 
     def save_nfo_info(self):
         try:
-            file_info, json_data = self.json_array[self.now_show_name]
-            file_path = json_data["file_path"]
+            if self.now_show_name is None:
+                return
+            show_data = self.json_array[self.now_show_name]
+            json_data = show_data.data
+            file_info = show_data.file_info
+            file_path = file_info.file_path
             nfo_path = os.path.splitext(file_path)[0] + ".nfo"
             nfo_folder = split_path(file_path)[0]
-            json_data["number"] = self.Ui.lineEdit_nfo_number.text()
+            json_data.number = self.Ui.lineEdit_nfo_number.text()
             if "actor_all," in config.nfo_include_new:
-                json_data["all_actor"] = self.Ui.lineEdit_nfo_actor.text()
-            json_data["actor"] = self.Ui.lineEdit_nfo_actor.text()
-            json_data["year"] = self.Ui.lineEdit_nfo_year.text()
-            json_data["title"] = self.Ui.lineEdit_nfo_title.text()
-            json_data["originaltitle"] = self.Ui.lineEdit_nfo_originaltitle.text()
-            json_data["outline"] = self.Ui.textEdit_nfo_outline.toPlainText()
-            json_data["originalplot"] = self.Ui.textEdit_nfo_originalplot.toPlainText()
-            json_data["tag"] = self.Ui.textEdit_nfo_tag.toPlainText()
-            json_data["release"] = self.Ui.lineEdit_nfo_release.text()
-            json_data["runtime"] = self.Ui.lineEdit_nfo_runtime.text()
-            json_data["score"] = self.Ui.lineEdit_nfo_score.text()
-            json_data["wanted"] = self.Ui.lineEdit_nfo_wanted.text()
-            json_data["director"] = self.Ui.lineEdit_nfo_director.text()
-            json_data["series"] = self.Ui.lineEdit_nfo_series.text()
-            json_data["studio"] = self.Ui.lineEdit_nfo_studio.text()
-            json_data["publisher"] = self.Ui.lineEdit_nfo_publisher.text()
-            json_data["poster"] = self.Ui.lineEdit_nfo_poster.text()
-            json_data["thumb"] = self.Ui.lineEdit_nfo_cover.text()
-            json_data["trailer"] = self.Ui.lineEdit_nfo_trailer.text()
-            json_data["website"] = self.Ui.lineEdit_nfo_website.text()
-            json_data["country"] = self.Ui.comboBox_nfo.currentText()
+                json_data.all_actor = self.Ui.lineEdit_nfo_actor.text()
+            json_data.actor = self.Ui.lineEdit_nfo_actor.text()
+            json_data.year = self.Ui.lineEdit_nfo_year.text()
+            json_data.title = self.Ui.lineEdit_nfo_title.text()
+            json_data.originaltitle = self.Ui.lineEdit_nfo_originaltitle.text()
+            json_data.outline = self.Ui.textEdit_nfo_outline.toPlainText()
+            json_data.originalplot = self.Ui.textEdit_nfo_originalplot.toPlainText()
+            json_data.tag = self.Ui.textEdit_nfo_tag.toPlainText()
+            json_data.release = self.Ui.lineEdit_nfo_release.text()
+            json_data.runtime = self.Ui.lineEdit_nfo_runtime.text()
+            json_data.score = self.Ui.lineEdit_nfo_score.text()
+            json_data.wanted = self.Ui.lineEdit_nfo_wanted.text()
+            json_data.director = self.Ui.lineEdit_nfo_director.text()
+            json_data.series = self.Ui.lineEdit_nfo_series.text()
+            json_data.studio = self.Ui.lineEdit_nfo_studio.text()
+            json_data.publisher = self.Ui.lineEdit_nfo_publisher.text()
+            json_data.poster = self.Ui.lineEdit_nfo_poster.text()
+            json_data.thumb = self.Ui.lineEdit_nfo_cover.text()
+            json_data.trailer = self.Ui.lineEdit_nfo_trailer.text()
             if config.executor.run(write_nfo(file_info, json_data, nfo_path, nfo_folder, file_path, update=True)):
                 self.Ui.label_save_tips.setText(f"已保存! {get_current_time()}")
-                self.set_main_info(json_data)
+                self.set_main_info(show_data)
             else:
                 self.Ui.label_save_tips.setText(f"保存失败! {get_current_time()}")
         except Exception:
@@ -2158,7 +2130,8 @@ class MyMAinWindow(QMainWindow):
             self.Ui.pushButton_check_net.setText("开始检测")
         else:
             try:
-                _async_raise(self.t_net.ident, SystemExit)
+                if self.t_net is not None:
+                    _async_raise(self.t_net.ident, SystemExit)
             except Exception as e:
                 signal.show_traceback_log(str(e))
                 signal.show_traceback_log(traceback.format_exc())

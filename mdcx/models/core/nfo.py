@@ -16,7 +16,7 @@ from mdcx.config.manager import config
 from mdcx.consts import ManualConfig
 from mdcx.models.core.utils import render_name_template
 from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import CrawlersResultDataClass, FileInfo, OtherInfo
+from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo
 from mdcx.number import get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import convert_path, get_used_time, split_path
@@ -25,7 +25,7 @@ from mdcx.utils.file import delete_file_async
 
 async def write_nfo(
     file_info: FileInfo,
-    json_data: CrawlersResultDataClass,
+    json_data: CrawlersResult,
     nfo_new_path: str,
     folder_new_path: str,
     file_path: str,
@@ -53,7 +53,7 @@ async def write_nfo(
         nfo_title_template = config.naming_media
 
     # 字符转义，避免emby无法解析
-    json_data_nfo = CrawlersResultDataClass(**asdict(json_data))
+    json_data_nfo = CrawlersResult(**asdict(json_data))
     key_word = [
         "title",
         "originaltitle",
@@ -208,11 +208,7 @@ async def write_nfo(
                 print("  <sorttitle>" + number + "</sorttitle>", file=code)
 
         # 输出国家和分级
-        country = "JP"
-        if json_data.mosaic == "国产" or json_data.mosaic == "國產":
-            country = "CN"
-        elif re.findall(r"\.\d{2}\.\d{2}\.\d{2}", number):
-            country = "US"
+        country = json_data.country
 
         # 输出家长分级
         if "mpaa," in nfo_include_new:
@@ -346,7 +342,7 @@ async def write_nfo(
             print("  <trailer>" + trailer + "</trailer>", file=code)
 
         # javdb id 输出, 没有时使用番号搜索页
-        if "国产" not in json_data_nfo.mosaic and "國產" not in json_data_nfo.mosaic:
+        if json_data_nfo.country == "JP":
             if json_data_nfo.javdbid:
                 print("  <javdbid>" + json_data_nfo.javdbid + "</javdbid>", file=code)
             else:
@@ -363,11 +359,11 @@ async def write_nfo(
         return False
 
 
-async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResultDataClass | None, OtherInfo | None]:
+async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResult | None, OtherInfo | None]:
     local_nfo_path = os.path.splitext(file_path)[0] + ".nfo"
     local_nfo_name = split_path(local_nfo_path)[1]
     file_folder = split_path(file_path)[0]
-    json_data = CrawlersResultDataClass.empty()
+    json_data = CrawlersResult.empty()
     LogBuffer.req().write(local_nfo_path)
     json_data.poster_from = "local"
     json_data.thumb_from = "local"

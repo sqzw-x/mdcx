@@ -18,13 +18,13 @@ from mdcx.models.base.translate import (
 from mdcx.models.base.web import get_actorname, get_yesjav_title
 from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import CrawlersResultDataClass
+from mdcx.models.types import CrawlersResult
 from mdcx.number import get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import get_used_time, remove_repeat
 
 
-def translate_info(json_data: CrawlersResultDataClass, has_sub: bool):
+def translate_info(json_data: CrawlersResult, has_sub: bool):
     xml_info = resources.info_mapping_data
     if xml_info is not None and len(xml_info) == 0:
         return json_data
@@ -180,7 +180,7 @@ def translate_info(json_data: CrawlersResultDataClass, has_sub: bool):
     return json_data
 
 
-async def translate_actor(res: CrawlersResultDataClass):
+async def translate_actor(res: CrawlersResult):
     # 网络请求真实的演员名字
     actor_realname = config.actor_realname
     mosaic = res.mosaic
@@ -246,7 +246,7 @@ async def translate_actor(res: CrawlersResultDataClass):
     return res
 
 
-async def translate_title_outline(json_data: CrawlersResultDataClass, cd_part: str, movie_number: str):
+async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie_number: str):
     title_language = config.title_language
     title_translate = config.title_translate
     outline_language = config.outline_language

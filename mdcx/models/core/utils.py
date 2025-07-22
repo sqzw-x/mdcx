@@ -12,7 +12,7 @@ from mdcx.config.resources import resources
 from mdcx.consts import ManualConfig
 from mdcx.models.base.number import deal_actor_more
 from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import BaseCrawlerResultDataClass, CrawlersResultDataClass, FileInfo
+from mdcx.models.types import BaseCrawlerResult, CrawlersResult, FileInfo
 from mdcx.number import get_number_first_letter, get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import get_new_release, get_used_time, split_path
@@ -20,7 +20,7 @@ from mdcx.utils.file import read_link_async
 from mdcx.utils.video import get_video_metadata
 
 
-def replace_word(json_data: BaseCrawlerResultDataClass):
+def replace_word(json_data: BaseCrawlerResult):
     # 常见字段替换的字符
     for key, value in ManualConfig.ALL_REP_WORD.items():
         for each in ManualConfig.ALL_KEY_WORD:
@@ -44,7 +44,7 @@ def replace_word(json_data: BaseCrawlerResultDataClass):
             setattr(json_data, field, getattr(json_data, field).replace(each, "").strip(":， ").strip())
 
 
-def replace_special_word(json_data: BaseCrawlerResultDataClass):
+def replace_special_word(json_data: BaseCrawlerResult):
     # 常见字段替换的字符
     all_key_word = [
         "title",
@@ -63,7 +63,7 @@ def replace_special_word(json_data: BaseCrawlerResultDataClass):
             setattr(json_data, each, getattr(json_data, each).replace(key, value))
 
 
-def deal_some_field(json_data: CrawlersResultDataClass):
+def deal_some_field(json_data: CrawlersResult):
     fields_rule = config.fields_rule
     actor = json_data.actor
     title = json_data.title
@@ -129,7 +129,7 @@ def deal_some_field(json_data: CrawlersResultDataClass):
     return json_data
 
 
-def show_movie_info(file_info: FileInfo, result: CrawlersResultDataClass):
+def show_movie_info(file_info: FileInfo, result: CrawlersResult):
     if not config.show_data_log:  # 调试模式打开时显示详细日志
         return
     for key in ManualConfig.SHOW_KEY:  # 大部分来自 CrawlersResultDataClass, 少部分来自 FileInfo
@@ -213,7 +213,7 @@ async def get_video_size(file_path: str):
     return definition, codec
 
 
-def add_definition_tag(res: BaseCrawlerResultDataClass, definition, codec):
+def add_definition_tag(res: BaseCrawlerResult, definition, codec):
     remove_key = ["144P", "360P", "480P", "540P", "720P", "960P", "1080P", "1440P", "2160P", "4K", "8K"]
     tag = res.tag
     for each_key in remove_key:
@@ -245,7 +245,7 @@ def render_name_template(
     template: str,
     file_path: str,
     file_info: FileInfo,
-    json_data: CrawlersResultDataClass,
+    json_data: CrawlersResult,
     show_4k: bool,
     show_cnword: bool,
     show_moword: bool,

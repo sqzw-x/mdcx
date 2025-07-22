@@ -27,17 +27,13 @@ from mdcx.models.base.web import (
 from mdcx.models.core.image import cut_thumb_to_poster
 from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import CrawlersResultDataClass, OtherInfo
+from mdcx.models.types import CrawlersResult, OtherInfo
 from mdcx.signals import signal
 from mdcx.utils import convert_half, get_used_time, split_path
 from mdcx.utils.file import check_pic_async, copy_file_async, delete_file_async, move_file_async
 
 
-async def get_big_pic_by_amazon(
-    json_data: CrawlersResultDataClass,
-    originaltitle_amazon: str,
-    actor_amazon: list[str],
-) -> str:
+async def get_big_pic_by_amazon(result: CrawlersResult, originaltitle_amazon: str, actor_amazon: list[str]) -> str:
     if not originaltitle_amazon or not actor_amazon:
         return ""
     hd_pic_url = ""
@@ -50,11 +46,12 @@ async def get_big_pic_by_amazon(
             + urllib.parse.quote_plus(urllib.parse.quote_plus(originaltitle_amazon.replace("&", " ") + " [DVD]"))
             + "&ref=nb_sb_noss"
         )
-        result, html_search = await get_amazon_data(url_search)
+        success, html_search = await get_amazon_data(url_search)
 
         # 没有结果，尝试拆词，重新搜索
         if (
-            "キーワードが正しく入力されていても一致する商品がない場合は、別の言葉をお試しください。" in html_search
+            not success
+            or "キーワードが正しく入力されていても一致する商品がない場合は、別の言葉をお試しください。" in html_search
             and len(originaltitle_amazon_list) < 2
         ):
             for each_name in originaltitle_amazon.split(" "):
@@ -145,8 +142,8 @@ async def get_big_pic_by_amazon(
                                             hd_pic_url = url
                                             return hd_pic_url
                                         else:
-                                            json_data.poster = pic_url  # 用于 Google 搜图
-                                            json_data.poster_from = "Amazon"
+                                            result.poster = pic_url  # 用于 Google 搜图
+                                            result.poster_from = "Amazon"
                                     break
                             else:
                                 title_result_list.append([url, "https://www.amazon.co.jp" + detail_url])
@@ -161,8 +158,8 @@ async def get_big_pic_by_amazon(
                             pic_w = new_pic_w
                             hd_pic_url = each
                         else:
-                            json_data.poster = each  # 用于 Google 搜图
-                            json_data.poster_from = "Amazon"
+                            result.poster = each  # 用于 Google 搜图
+                            result.poster_from = "Amazon"
 
                 if hd_pic_url:
                     return hd_pic_url
@@ -177,8 +174,8 @@ async def get_big_pic_by_amazon(
                         url_new = "https://www.amazon.co.jp" + re.findall(r"(/dp/[^/]+)", each[1])[0]
                     except Exception:
                         url_new = each[1]
-                    result, html_detail = await get_amazon_data(url_new)
-                    if result and html_detail:
+                    success, html_detail = await get_amazon_data(url_new)
+                    if success and html_detail:
                         html = etree.fromstring(html_detail, etree.HTMLParser())
                         detail_actor = str(html.xpath('//span[@class="author notFaded"]/a/text()')).replace(" ", "")
                         detail_info_1 = str(
@@ -195,15 +192,15 @@ async def get_big_pic_by_amazon(
                                 if w > 720 or not w:
                                     return each[0]
                                 else:
-                                    json_data.poster = each[0]  # 用于 Google 搜图
-                                    json_data.poster_from = "Amazon"
+                                    result.poster = each[0]  # 用于 Google 搜图
+                                    result.poster_from = "Amazon"
 
             # 有很多结果时（有下一页按钮），加演员名字重新搜索
             if (
                 "s-pagination-item s-pagination-next s-pagination-button s-pagination-separator" in html_search
                 or len(title_result_list) > 5
             ):
-                amazon_orginaltitle_actor = json_data.amazon_orginaltitle_actor
+                amazon_orginaltitle_actor = result.amazon_orginaltitle_actor
                 if amazon_orginaltitle_actor and amazon_orginaltitle_actor not in originaltitle_amazon:
                     originaltitle_amazon_list.append(f"{originaltitle_amazon} {amazon_orginaltitle_actor}")
 
@@ -211,22 +208,22 @@ async def get_big_pic_by_amazon(
 
 
 async def trailer_download(
-    json_data: CrawlersResultDataClass,
-    folder_new_path: str,
-    folder_old_path: str,
+    result: CrawlersResult,
+    folder_new: str,
+    folder_old: str,
     naming_rule: str,
 ) -> Optional[bool]:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
     trailer_name = config.trailer_simple_name
-    trailer_url = json_data.trailer
-    trailer_old_folder_path = os.path.join(folder_old_path, "trailers")
-    trailer_new_folder_path = os.path.join(folder_new_path, "trailers")
+    trailer_url = result.trailer
+    trailer_old_folder_path = os.path.join(folder_old, "trailers")
+    trailer_new_folder_path = os.path.join(folder_new, "trailers")
 
     # 预告片名字不含视频文件名（只让一个视频去下载即可）
     if trailer_name:
-        trailer_folder_path = os.path.join(folder_new_path, "trailers")
+        trailer_folder_path = os.path.join(folder_new, "trailers")
         trailer_file_name = "trailer.mp4"
         trailer_file_path = os.path.join(trailer_folder_path, trailer_file_name)
 
@@ -245,7 +242,7 @@ async def trailer_download(
     else:
         # 预告片带文件名（每个视频都有机会下载，如果已有下载好的，则使用已下载的）
         trailer_file_name = naming_rule + "-trailer.mp4"
-        trailer_folder_path = folder_new_path
+        trailer_folder_path = folder_new
         trailer_file_path = os.path.join(trailer_folder_path, trailer_file_name)
 
         # 不下载不保留时删除返回
@@ -263,8 +260,8 @@ async def trailer_download(
 
     # 选择保留文件，当存在文件时，不下载。（done trailer path 未设置时，把当前文件设置为 done trailer path，以便其他分集复制）
     if "trailer" in keep_files and await aiofiles.os.path.exists(trailer_file_path):
-        if not Flags.file_done_dic.get(json_data.number, {}).get("trailer"):
-            Flags.file_done_dic[json_data.number].update({"trailer": trailer_file_path})
+        if not Flags.file_done_dic.get(result.number, {}).get("trailer"):
+            Flags.file_done_dic[result.number].update({"trailer": trailer_file_path})
             # 带文件名时，删除掉新、旧文件夹，用不到了。（其他分集如果没有，可以复制第一个文件的预告片。此时不删，没机会删除了）
             if not trailer_name:
                 if await aiofiles.os.path.exists(trailer_old_folder_path):
@@ -278,7 +275,7 @@ async def trailer_download(
 
     # 带文件名时，选择下载不保留，或者选择保留但没有预告片，检查是否有其他分集已下载或本地预告片
     # 选择下载不保留，当没有下载成功时，不会删除不保留的文件
-    done_trailer_path = Flags.file_done_dic.get(json_data.number, {}).get("trailer")
+    done_trailer_path = Flags.file_done_dic.get(result.number, {}).get("trailer")
     if not trailer_name and done_trailer_path and await aiofiles.os.path.exists(done_trailer_path):
         if await aiofiles.os.path.exists(trailer_file_path):
             await delete_file_async(trailer_file_path)
@@ -299,7 +296,7 @@ async def trailer_download(
 
         # 开始下载
         download_files = config.download_files
-        signal.show_traceback_log(f"🍔 {json_data.number} download trailer... {trailer_url}")
+        signal.show_traceback_log(f"🍔 {result.number} download trailer... {trailer_url}")
         trailer_file_path_temp = trailer_file_path
         if await aiofiles.os.path.exists(trailer_file_path):
             trailer_file_path_temp = trailer_file_path + ".[DOWNLOAD].mp4"
@@ -307,15 +304,15 @@ async def trailer_download(
             file_size = await aiofiles.os.path.getsize(trailer_file_path_temp)
             if file_size >= content_length or "ignore_size" in download_files:
                 LogBuffer.log().write(
-                    f"\n 🍀 Trailer done! ({json_data.trailer_from} {file_size}/{content_length})({get_used_time(start_time)}s) "
+                    f"\n 🍀 Trailer done! ({result.trailer_from} {file_size}/{content_length})({get_used_time(start_time)}s) "
                 )
-                signal.show_traceback_log(f"✅ {json_data.number} trailer done!")
+                signal.show_traceback_log(f"✅ {result.number} trailer done!")
                 if trailer_file_path_temp != trailer_file_path:
                     await move_file_async(trailer_file_path_temp, trailer_file_path)
                     await delete_file_async(trailer_file_path_temp)
-                done_trailer_path = Flags.file_done_dic.get(json_data.number, {}).get("trailer")
+                done_trailer_path = Flags.file_done_dic.get(result.number, {}).get("trailer")
                 if not done_trailer_path:
-                    Flags.file_done_dic[json_data.number].update({"trailer": trailer_file_path})
+                    Flags.file_done_dic[result.number].update({"trailer": trailer_file_path})
                     if trailer_name == 0:  # 带文件名，已下载成功，删除掉那些不用的文件夹即可
                         if await aiofiles.os.path.exists(trailer_old_folder_path):
                             await to_thread(shutil.rmtree, trailer_old_folder_path, ignore_errors=True)
@@ -326,7 +323,7 @@ async def trailer_download(
                 return True
             else:
                 LogBuffer.log().write(
-                    f"\n 🟠 Trailer size is incorrect! delete it! ({json_data.trailer_from} {file_size}/{content_length}) "
+                    f"\n 🟠 Trailer size is incorrect! delete it! ({result.trailer_from} {file_size}/{content_length}) "
                 )
 
         # 删除下载失败的文件
@@ -334,9 +331,9 @@ async def trailer_download(
         LogBuffer.log().write(f"\n 🟠 Trailer download failed! ({trailer_url}) ")
 
     if await aiofiles.os.path.exists(trailer_file_path):  # 使用旧文件
-        done_trailer_path = Flags.file_done_dic.get(json_data.number, {}).get("trailer")
+        done_trailer_path = Flags.file_done_dic.get(result.number, {}).get("trailer")
         if not done_trailer_path:
-            Flags.file_done_dic[json_data.number].update({"trailer": trailer_file_path})
+            Flags.file_done_dic[result.number].update({"trailer": trailer_file_path})
             if trailer_name == 0:  # 带文件名，已下载成功，删除掉那些不用的文件夹即可
                 if await aiofiles.os.path.exists(trailer_old_folder_path):
                     await to_thread(shutil.rmtree, trailer_old_folder_path, ignore_errors=True)
@@ -349,11 +346,7 @@ async def trailer_download(
         return True
 
 
-async def _get_big_thumb(
-    json_data: CrawlersResultDataClass,
-    other: OtherInfo,
-    cd_part: str,
-):
+async def _get_big_thumb(result: CrawlersResult, other: OtherInfo):
     """
     获取背景大图：
     1，官网图片
@@ -363,23 +356,23 @@ async def _get_big_thumb(
     start_time = time.time()
     if "thumb" not in config.download_hd_pics:
         return
-    number = json_data.number
-    letters = json_data.letters
+    number = result.number
+    letters = result.letters
     number_lower_line = number.lower()
     number_lower_no_line = number_lower_line.replace("-", "")
     thumb_width = 0
 
     # faleno.jp 番号检查，都是大图，返回即可
-    if json_data.thumb_from in ["faleno", "dahlia"]:
-        if json_data.thumb:
-            LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({json_data.thumb_from})({get_used_time(start_time)}s)")
+    if result.thumb_from in ["faleno", "dahlia"]:
+        if result.thumb:
+            LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({result.thumb_from})({get_used_time(start_time)}s)")
         other.poster_big = True
-        return json_data
+        return result
 
     # prestige 图片有的是大图，需要检测图片分辨率
-    elif json_data.thumb_from in ["prestige", "mgstage"]:
-        if json_data.thumb:
-            thumb_width, h = await get_imgsize(json_data.thumb)
+    elif result.thumb_from in ["prestige", "mgstage"]:
+        if result.thumb:
+            thumb_width, h = await get_imgsize(result.thumb)
 
     # 片商官网查询
     elif "official" in config.download_hd_pics:
@@ -392,17 +385,17 @@ async def _get_big_thumb(
                     r'src="((https://cdn.faleno.net/top/wp-content/uploads/[^_]+_)([^?]+))\?output-quality=', response
                 )
                 if temp_url:
-                    json_data.thumb = temp_url[0][0]
-                    json_data.poster = temp_url[0][1] + "2125.jpg"
-                    json_data.thumb_from = "faleno"
-                    json_data.poster_from = "faleno"
+                    result.thumb = temp_url[0][0]
+                    result.poster = temp_url[0][1] + "2125.jpg"
+                    result.thumb_from = "faleno"
+                    result.poster_from = "faleno"
                     other.poster_big = True
                     trailer_temp = re.findall(r'class="btn09"><a class="pop_sample" href="([^"]+)', response)
                     if trailer_temp:
-                        json_data.trailer = trailer_temp[0]
-                        json_data.trailer_from = "faleno"
+                        result.trailer = trailer_temp[0]
+                        result.trailer_from = "faleno"
                     LogBuffer.log().write(f"\n 🖼 HD Thumb found! (faleno)({get_used_time(start_time)}s)")
-                    return json_data
+                    return result
 
         # km-produce.com 番号检查
         number_letter = letters.lower()
@@ -412,10 +405,10 @@ async def _get_big_thumb(
             req_url = f"https://km-produce.com/img/title1/{number_lower_line}.jpg"
             real_url = await check_url(req_url)
             if real_url:
-                json_data.thumb = real_url
-                json_data.thumb_from = "km-produce"
+                result.thumb = real_url
+                result.thumb_from = "km-produce"
                 LogBuffer.log().write(f"\n 🖼 HD Thumb found! (km-produce)({get_used_time(start_time)}s)")
-                return json_data
+                return result
 
         # www.prestige-av.com 番号检查
         elif number_letter in prestige_key:
@@ -427,34 +420,30 @@ async def _get_big_thumb(
                 if number_letter == "docvr":
                     req_url = f"https://www.prestige-av.com/api/media/goods/doc/{number_letter}/{number_num}/pb_{number_lower_line}.jpg"
                 if (await get_imgsize(req_url))[0] >= 800:
-                    json_data.thumb = req_url
-                    json_data.poster = req_url.replace("/pb_", "/pf_")
-                    json_data.thumb_from = "prestige"
-                    json_data.poster_from = "prestige"
+                    result.thumb = req_url
+                    result.poster = req_url.replace("/pb_", "/pf_")
+                    result.thumb_from = "prestige"
+                    result.poster_from = "prestige"
                     other.poster_big = True
                     LogBuffer.log().write(f"\n 🖼 HD Thumb found! (prestige)({get_used_time(start_time)}s)")
-                    return json_data
+                    return result
 
     # 使用google以图搜图
-    pic_url = json_data.thumb
+    pic_url = result.thumb
     if "google" in config.download_hd_pics:
-        if pic_url and json_data.thumb_from != "theporndb":
+        if pic_url and result.thumb_from != "theporndb":
             thumb_url, cover_size = await get_big_pic_by_google(pic_url)
             if thumb_url and cover_size[0] > thumb_width:
                 other.thumb_size = cover_size
                 pic_domain = re.findall(r"://([^/]+)", thumb_url)[0]
-                json_data.thumb_from = f"Google({pic_domain})"
-                json_data.thumb = thumb_url
-                LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({json_data.thumb_from})({get_used_time(start_time)}s)")
+                result.thumb_from = f"Google({pic_domain})"
+                result.thumb = thumb_url
+                LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({result.thumb_from})({get_used_time(start_time)}s)")
 
-    return json_data
+    return result
 
 
-async def _get_big_poster(
-    json_data: CrawlersResultDataClass,
-    other: OtherInfo,
-    cd_part: str,
-):
+async def _get_big_poster(result: CrawlersResult, other: OtherInfo):
     start_time = time.time()
 
     # 未勾选下载高清图poster时，返回
@@ -462,19 +451,19 @@ async def _get_big_poster(
         return
 
     # 如果有大图时，直接下载
-    if other.poster_big and (await get_imgsize(json_data.poster))[1] > 600:
-        json_data.image_download = True
-        LogBuffer.log().write(f"\n 🖼 HD Poster found! ({json_data.poster_from})({get_used_time(start_time)}s)")
+    if other.poster_big and (await get_imgsize(result.poster))[1] > 600:
+        result.image_download = True
+        LogBuffer.log().write(f"\n 🖼 HD Poster found! ({result.poster_from})({get_used_time(start_time)}s)")
         return
 
     # 初始化数据
-    number = json_data.number
-    poster_url = json_data.poster
+    number = result.number
+    poster_url = result.poster
     hd_pic_url = ""
     poster_width = 0
 
     # 通过原标题去 amazon 查询
-    if "amazon" in config.download_hd_pics and json_data.mosaic in [
+    if "amazon" in config.download_hd_pics and result.mosaic in [
         "有码",
         "有碼",
         "流出",
@@ -485,21 +474,21 @@ async def _get_big_poster(
         "动漫",
         "動漫",
     ]:
-        hd_pic_url = await get_big_pic_by_amazon(json_data, json_data.originaltitle_amazon, json_data.actor_amazon)
+        hd_pic_url = await get_big_pic_by_amazon(result, result.originaltitle_amazon, result.actor_amazon)
         if hd_pic_url:
-            json_data.poster = hd_pic_url
-            json_data.poster_from = "Amazon"
-        if json_data.poster_from == "Amazon":
-            json_data.image_download = True
+            result.poster = hd_pic_url
+            result.poster_from = "Amazon"
+        if result.poster_from == "Amazon":
+            result.image_download = True
 
     # 通过番号去 官网 查询获取稍微大一些的封面图，以便去 Google 搜索
     if (
         not hd_pic_url
         and "official" in config.download_hd_pics
         and "official" not in config.website_set
-        and json_data.poster_from != "Amazon"
+        and result.poster_from != "Amazon"
     ):
-        letters = json_data.letters.upper()
+        letters = result.letters.upper()
         official_url = config.official_websites.get(letters)
         if official_url:
             url_search = official_url + "/search/list?keyword=" + number.replace("-", "")
@@ -509,35 +498,35 @@ async def _get_big_poster(
                 if poster_url_list:
                     # 使用官网图作为封面去 google 搜索
                     poster_url = poster_url_list[0]
-                    json_data.poster = poster_url
-                    json_data.poster_from = official_url.split(".")[-2].replace("https://", "")
+                    result.poster = poster_url
+                    result.poster_from = official_url.split(".")[-2].replace("https://", "")
                     # vr作品或者官网图片高度大于500时，下载封面图开
                     if "VR" in number.upper() or (await get_imgsize(poster_url))[1] > 500:
-                        json_data.image_download = True
+                        result.image_download = True
 
     # 使用google以图搜图，放在最后是因为有时有错误，比如 kawd-943
-    poster_url = json_data.poster
-    if not hd_pic_url and poster_url and "google" in config.download_hd_pics and json_data.poster_from != "theporndb":
+    poster_url = result.poster
+    if not hd_pic_url and poster_url and "google" in config.download_hd_pics and result.poster_from != "theporndb":
         hd_pic_url, poster_size = await get_big_pic_by_google(poster_url, poster=True)
         if hd_pic_url:
-            if "prestige" in json_data.poster or json_data.poster_from == "Amazon":
+            if "prestige" in result.poster or result.poster_from == "Amazon":
                 poster_width, _ = await get_imgsize(poster_url)
             if poster_size[0] > poster_width:
-                json_data.poster = hd_pic_url
+                result.poster = hd_pic_url
                 other.poster_size = poster_size
                 pic_domain = re.findall(r"://([^/]+)", hd_pic_url)[0]
-                json_data.poster_from = f"Google({pic_domain})"
+                result.poster_from = f"Google({pic_domain})"
 
     # 如果找到了高清链接，则替换
     if hd_pic_url:
-        json_data.image_download = True
-        LogBuffer.log().write(f"\n 🖼 HD Poster found! ({json_data.poster_from})({get_used_time(start_time)}s)")
+        result.image_download = True
+        LogBuffer.log().write(f"\n 🖼 HD Poster found! ({result.poster_from})({get_used_time(start_time)}s)")
 
-    return json_data
+    return result
 
 
 async def thumb_download(
-    json_data: CrawlersResultDataClass,
+    result: CrawlersResult,
     other: OtherInfo,
     cd_part: str,
     folder_new_path: str,
@@ -564,7 +553,7 @@ async def thumb_download(
 
     # 尝试复制其他分集。看分集有没有下载，如果下载完成则可以复制，否则就自行下载
     if cd_part:
-        done_thumb_path = Flags.file_done_dic.get(json_data.number, {}).get("thumb")
+        done_thumb_path = Flags.file_done_dic.get(result.number, {}).get("thumb")
         if (
             done_thumb_path
             and await aiofiles.os.path.exists(done_thumb_path)
@@ -572,18 +561,18 @@ async def thumb_download(
         ):
             await copy_file_async(done_thumb_path, thumb_final_path)
             LogBuffer.log().write(f"\n 🍀 Thumb done! (copy cd-thumb)({get_used_time(start_time)}s) ")
-            json_data.thumb_from = "copy cd-thumb"
+            result.thumb_from = "copy cd-thumb"
             other.thumb_path = thumb_final_path
             return True
 
     # 获取高清背景图
-    await _get_big_thumb(json_data, other, cd_part)
+    await _get_big_thumb(result, other)
 
     # 下载图片
-    cover_url = json_data.thumb
-    cover_from = json_data.thumb_from
+    cover_url = result.thumb
+    cover_from = result.thumb_from
     if cover_url:
-        cover_list = json_data.thumb_list
+        cover_list = result.thumb_list
         while (cover_from, cover_url) in cover_list:
             cover_list.remove((cover_from, cover_url))
         cover_list.insert(0, (cover_from, cover_url))
@@ -601,7 +590,7 @@ async def thumb_download(
                     f"\n 🟠 检测到 Thumb 图片失效! 跳过！({cover_from})({get_used_time(start_time)}s) " + each[1]
                 )
                 continue
-            json_data.thumb_from = cover_from
+            result.thumb_from = cover_from
             if await download_file_with_filepath(cover_url, thumb_final_path_temp, folder_new_path):
                 cover_size = await check_pic_async(thumb_final_path_temp)
                 if cover_size:
@@ -619,11 +608,9 @@ async def thumb_download(
                             await delete_file_async(thumb_final_path_temp)
                         if cd_part:
                             dic = {"thumb": thumb_final_path}
-                            Flags.file_done_dic[json_data.number].update(dic)
+                            Flags.file_done_dic[result.number].update(dic)
                         other.thumb_marked = False  # 表示还没有走加水印流程
-                        LogBuffer.log().write(
-                            f"\n 🍀 Thumb done! ({json_data.thumb_from})({get_used_time(start_time)}s) "
-                        )
+                        LogBuffer.log().write(f"\n 🍀 Thumb done! ({result.thumb_from})({get_used_time(start_time)}s) ")
                         other.thumb_path = thumb_final_path
                         return True
                     else:
@@ -657,7 +644,7 @@ async def thumb_download(
 
 
 async def poster_download(
-    json_data: CrawlersResultDataClass,
+    result: CrawlersResult,
     other: OtherInfo,
     cd_part: str,
     folder_new_path: str,
@@ -688,22 +675,22 @@ async def poster_download(
 
     # 尝试复制其他分集。看分集有没有下载，如果下载完成则可以复制，否则就自行下载
     if cd_part:
-        done_poster_path = Flags.file_done_dic.get(json_data.number, {}).get("poster")
+        done_poster_path = Flags.file_done_dic.get(result.number, {}).get("poster")
         if (
             done_poster_path
             and await aiofiles.os.path.exists(done_poster_path)
             and split_path(done_poster_path)[0] == split_path(poster_final_path)[0]
         ):
             await copy_file_async(done_poster_path, poster_final_path)
-            json_data.poster_from = "copy cd-poster"
+            result.poster_from = "copy cd-poster"
             other.poster_path = poster_final_path
             LogBuffer.log().write(f"\n 🍀 Poster done! (copy cd-poster)({get_used_time(start_time)}s)")
             return True
 
     # 勾选复制 thumb时：国产，复制thumb；无码，勾选不裁剪时，也复制thumb
     if thumb_path:
-        mosaic = json_data.mosaic
-        number = json_data.number
+        mosaic = result.mosaic
+        number = result.number
         copy_flag = False
         if number.startswith("FC2"):
             image_cut = "center"
@@ -723,21 +710,21 @@ async def poster_download(
         if copy_flag:
             await copy_file_async(thumb_path, poster_final_path)
             other.poster_marked = other.thumb_marked
-            json_data.poster_from = "copy thumb"
+            result.poster_from = "copy thumb"
             other.poster_path = poster_final_path
             LogBuffer.log().write(f"\n 🍀 Poster done! (copy thumb)({get_used_time(start_time)}s)")
             return True
 
     # 获取高清 poster
-    await _get_big_poster(json_data, other, cd_part)
+    await _get_big_poster(result, other)
 
     # 下载图片
-    poster_url = json_data.poster
-    poster_from = json_data.poster_from
+    poster_url = result.poster
+    poster_from = result.poster_from
     poster_final_path_temp = poster_final_path
     if await aiofiles.os.path.exists(poster_final_path):
         poster_final_path_temp = poster_final_path + ".[DOWNLOAD].jpg"
-    if json_data.image_download:
+    if result.image_download:
         start_time = time.time()
         if await download_file_with_filepath(poster_url, poster_final_path_temp, folder_new_path):
             poster_size = await check_pic_async(poster_final_path_temp)
@@ -752,7 +739,7 @@ async def poster_download(
                         await delete_file_async(poster_final_path_temp)
                     if cd_part:
                         dic = {"poster": poster_final_path}
-                        Flags.file_done_dic[json_data.number].update(dic)
+                        Flags.file_done_dic[result.number].update(dic)
                     other.poster_marked = False  # 下载的图，还没加水印
                     other.poster_path = poster_final_path
                     LogBuffer.log().write(f"\n 🍀 Poster done! ({poster_from})({get_used_time(start_time)}s)")
@@ -781,12 +768,12 @@ async def poster_download(
     poster_final_path_temp = poster_final_path + ".[CUT].jpg"
     if fanart_path:
         thumb_path = fanart_path
-    if await asyncio.to_thread(cut_thumb_to_poster, json_data, thumb_path, poster_final_path_temp, image_cut):
+    if await asyncio.to_thread(cut_thumb_to_poster, result, thumb_path, poster_final_path_temp, image_cut):
         # 裁剪成功，替换旧图
         await move_file_async(poster_final_path_temp, poster_final_path)
         if cd_part:
             dic = {"poster": poster_final_path}
-            Flags.file_done_dic[json_data.number].update(dic)
+            Flags.file_done_dic[result.number].update(dic)
         other.poster_path = poster_final_path
         other.poster_marked = False
         return True
