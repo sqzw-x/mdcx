@@ -1,0 +1,119 @@
+name: Build and Release with Python3.13
+
+on:
+    release:
+        types: [published]
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: "Tag"
+                required: true
+
+jobs:
+    init-matrix:
+        runs-on: ubuntu-latest
+        outputs:
+            matrix: ${{ steps.set-matrix.outputs.matrix }}
+        steps:
+            # https://github.com/actions/runner/issues/1985#issuecomment-1573518052
+            - name: Set matrix
+              id: set-matrix
+              run: |
+                  items=()
+
+                  # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners
+
+                  items+=('{"build": "macos", "os": "macos-latest", "arch": "aarch64"}')
+                  items+=('{"build": "macos", "os": "macos-13", "arch": "x86_64"}')
+
+                  items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
+
+                  # macOS 10.15.7, x86_64, 指定opencv版本
+                  if [[ -n "${{ vars.BUILD_FOR_MACOS_LEGACY }}" && -n "${{ vars.MACOS_LEGACY_CV_VERSION }}" ]]; then
+                    items+=('{"build": "macos", "os": "macos-13", "arch": "x86_64", "cv": "${{ vars.MACOS_LEGACY_CV_VERSION }}", "tail": "-legacy"}')
+                  fi
+
+                  # win7, x86_64, python3.8
+                  if [[ -n "${{ vars.BUILD_FOR_WINDOWS_LEGACY }}" ]]; then
+                    items+=('{"build": "windows", "os": "windows-2019", "arch": "x86_64", "python": "3.8", "tail": "-legacy"}')
+                  fi
+
+                  # 合并items到json数组
+                  matrix="matrix=["
+                  for ((i=0; i<${#items[@]}; i++)); do
+                    matrix+=" ${items[i]}"
+                    if ((i != ${#items[@]}-1)); then
+                      matrix+=","
+                    fi
+                  done
+                  matrix+="]"
+
+                  # 输出matrix到GITHUB_OUTPUT
+                  echo $matrix >> $GITHUB_OUTPUT
+
+    build-app:
+        needs: init-matrix
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{fromJson(needs.init-matrix.outputs.matrix)}}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: "Set up Python"
+              uses: actions/setup-python@v5
+              with:
+                  python-version-file: "pyproject.toml"
+
+            - name: Set up uv
+              uses: astral-sh/setup-uv@v6
+              with:
+                  activate-environment: true
+
+            - name: Set up python env
+              run: uv sync --locked --all-extras --dev
+
+            - name: Build macOS app - macOS
+              if: ${{ matrix.build == 'macos' }}
+              run: |
+                  version="${{ github.ref_name }}"
+                  # 如果是手动触发，则使用输入的tag
+                  if [ -n "${{ github.event.inputs.tag }}" ]; then
+                    version="${{ github.event.inputs.tag }}"
+                  fi
+                  bash scripts/build-macos.sh --create-dmg --version "$version" -n "${{ 'MDCx-v2-py3.13' }}"
+
+            - name: Build Windows app - Windows
+              if: ${{ matrix.build == 'windows' }}
+              run: scripts/build-action
+
+            - name: Get changelog
+              id: get-changelog
+              if: ${{ matrix.build == 'macos' }}
+              run: |
+                  echo 'CHANGELOG<<EOF' >> $GITHUB_OUTPUT
+                  cat changelog.md >> $GITHUB_OUTPUT
+                  echo 'EOF' >> $GITHUB_OUTPUT
+
+            - name: Create Release - macOS
+              uses: svenstaro/upload-release-action@v2
+              if: ${{ matrix.build == 'macos' }}
+              with:
+                  overwrite: true
+                  asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ github.sha }}.dmg
+                  file: dist/MDCx-v2-py3.13.dmg
+                  prerelease: true
+                  body: ${{ steps.get-changelog.outputs.CHANGELOG }}
+                  tag: ${{ github.event.inputs.tag || github.ref }}
+
+            - name: Create Release - Windows
+              uses: svenstaro/upload-release-action@v2
+              if: ${{ matrix.build == 'windows' }}
+              with:
+                  overwrite: true
+                  asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ github.sha }}.exe
+                  file: dist/MDCx.exe
+                  prerelease: true
+                  tag: ${{ github.event.inputs.tag || github.ref }}

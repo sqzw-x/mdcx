@@ -229,7 +229,7 @@ log_step "生成 PyInstaller .spec 文件..."
 pyi-makespec \
   --name "$appName" \
   --osx-bundle-identifier com.mdcuniverse.mdcx \
-  -F -w main.py \
+  -w main.py \
   -p "./mdcx" \
   --add-data "resources:resources" \
   --add-data "libs:." \
@@ -430,33 +430,17 @@ if [ "$CREATE_DMG" = true ]; then
   dmg_start_time=$(date +%s)
   
   # https://github.com/create-dmg/create-dmg?tab=readme-ov-file#usage
-  if [ "$LOG_LEVEL" -ge 2 ]; then
-    # 详细模式：显示 create-dmg 输出
-    create-dmg \
-      --volname "$appName" \
-      --volicon "resources/Img/MDCx.icns" \
-      --window-pos 200 120 \
-      --window-size 800 400 \
-      --icon-size 80 \
-      --icon "$appName.app" 300 36 \
-      --hide-extension "$appName.app" \
-      --app-drop-link 500 36 \
-      "dist/$appName.dmg" \
-      "dist/$appName.app"
-  else
-    # 基本模式：隐藏详细输出
-    create-dmg \
-      --volname "$appName" \
-      --volicon "resources/Img/MDCx.icns" \
-      --window-pos 200 120 \
-      --window-size 800 400 \
-      --icon-size 80 \
-      --icon "$appName.app" 300 36 \
-      --hide-extension "$appName.app" \
-      --app-drop-link 500 36 \
-      "dist/$appName.dmg" \
-      "dist/$appName.app" > /tmp/create-dmg.log 2>&1
-  fi
+  create-dmg \
+    --volname "$appName" \
+    --volicon "resources/Img/MDCx.icns" \
+    --window-pos 200 120 \
+    --window-size 800 400 \
+    --icon-size 80 \
+    --icon "$appName.app" 300 36 \
+    --hide-extension "$appName.app" \
+    --app-drop-link 500 36 \
+    "dist/$appName.dmg" \
+    "dist/$appName.app"
 
   dmg_end_time=$(date +%s)
   dmg_duration=$((dmg_end_time - dmg_start_time))
@@ -473,9 +457,6 @@ if [ "$CREATE_DMG" = true ]; then
     fi
   else
     log_error "❌ 创建 DMG 文件失败!"
-    if [ "$LOG_LEVEL" -lt 2 ]; then
-      log_error "DMG 创建日志保存在: /tmp/create-dmg.log"
-    fi
     exit 1
   fi
 else
