@@ -26,7 +26,7 @@ def is_dataclass_instance(obj):
 T = TypeVar("T", bound="DataclassInstance")
 
 
-def update(d1: "T", d2: "DataclassInstance|dict") -> T:
+def update(d1: "T", d2: "DataclassInstance | dict") -> T:
     """
     用一个 dataclass/dict 更新另一个 dataclass, 此函数不会修改原实例
 

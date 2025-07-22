@@ -245,10 +245,11 @@ def _ping_host_thread(host_address: str, result_list: List[Optional[int]], i: in
     result_list[i] = int(response * 1000) if response else 0
 
 
+# todo 可以移除 ping, 仅靠 http request 检测网络连通性
 def ping_host(host_address: str) -> str:
     count = config.retry
     result_list: List[Optional[int]] = [None] * count
-    thread_list: List[threading.Thread] = [None] * count  # type: ignore # todo
+    thread_list: List[threading.Thread] = [None] * count  # type: ignore
     for i in range(count):
         thread_list[i] = threading.Thread(target=_ping_host_thread, args=(host_address, result_list, i))
         thread_list[i].start()

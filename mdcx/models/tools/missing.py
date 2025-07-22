@@ -281,7 +281,7 @@ async def check_missing_number(actor_flag):
         signal.show_log_text(
             f"\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n🔍 需要查询的演员：\n   {', '.join(actor_list)}"
         )
-        for actor_name in actor_list:  # todo concurrent
+        for actor_name in actor_list:
             if not actor_name:
                 continue
             if "http" in actor_name:
