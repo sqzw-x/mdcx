@@ -194,7 +194,7 @@ def remove_repeat(a: str) -> str:
     return a
 
 
-# noinspection PyUnresolvedReferences
+# todo 此方法调用 c api 强制终止线程, 在异步版本中应该不需要
 def _async_raise(tid, exctype):
     """raises the exception, performs cleanup if needed"""
     tid = ctypes.c_long(tid)
@@ -213,6 +213,7 @@ def _async_raise(tid, exctype):
         raise SystemError("PyThreadState_SetAsyncExc failed")
 
 
+# todo 同上, 应该优雅的退出线程
 def kill_a_thread(t: Thread):
     try:
         while t.is_alive():
@@ -414,7 +415,7 @@ def nfd2c(path: str) -> str:
     return new_path
 
 
-def split_path(path: str):
+def split_path(path: str) -> tuple[str, str]:
     if "\\" in path:
         p, f = os.path.split(path.replace("\\", "/"))
         return p.replace("/", "\\"), f

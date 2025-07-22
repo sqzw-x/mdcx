@@ -31,7 +31,7 @@ from mdcx.utils import get_used_time
 from mdcx.utils.file import copy_file_async
 
 
-async def creat_kodi_actors(add: bool):
+async def creat_kodi_actors(add: bool) -> None:
     signal.change_buttons_status.emit()
     signal.show_log_text(f"📂 待刮削目录: {get_movie_path_setting()[0]}")
     if add:
@@ -48,7 +48,7 @@ async def creat_kodi_actors(add: bool):
     signal.show_log_text("================================================================================")
 
 
-async def update_emby_actor_info():
+async def update_emby_actor_info() -> None:
     signal.change_buttons_status.emit()
     start_time = time.time()
     emby_on = config.emby_on
@@ -145,7 +145,7 @@ async def _process_actor_async(actor: dict, emby_on) -> tuple[int, str]:
         return 0, f"🔴 {actor_name} 未知异常:\n    {traceback.format_exc()}"
 
 
-async def show_emby_actor_list(mode):
+async def show_emby_actor_list(mode: int) -> None:
     signal.change_buttons_status.emit()
     start_time = time.time()
 

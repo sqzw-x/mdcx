@@ -225,7 +225,7 @@ async def add_mark_thread(pic_path: str, mark_list: list[str]):
     img_pic.close()
 
 
-async def add_del_extrafanart_copy(mode: str):
+async def add_del_extrafanart_copy(mode: str) -> None:
     signal.show_log_text(f"Start {mode} extrafanart copy! \n")
 
     movie_path, *_, extrafanart_folder, _ = get_movie_path_setting()

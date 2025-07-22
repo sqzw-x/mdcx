@@ -11,7 +11,7 @@ from mdcx.utils import split_path
 from mdcx.utils.file import copy_file_async, move_file_async
 
 
-async def add_del_extras(mode: str):
+async def add_del_extras(mode: str) -> None:
     """
     添加/删除剧照
     """
@@ -60,7 +60,7 @@ async def add_del_extras(mode: str):
     signal.show_log_text("================================================================================")
 
 
-async def add_del_theme_videos(mode: str):
+async def add_del_theme_videos(mode: str) -> None:
     signal.show_log_text(f"Start {mode} theme videos! \n")
 
     movie_path, *_ = get_movie_path_setting()

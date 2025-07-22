@@ -13,7 +13,7 @@ from mdcx.utils import split_path
 from mdcx.utils.file import copy_file_async, move_file_async
 
 
-async def add_sub_for_all_video():
+async def add_sub_for_all_video() -> None:
     signal.change_buttons_status.emit()
     sub_add = True
     signal.show_log_text("开始检查无字幕视频并为其添加字幕！\n")

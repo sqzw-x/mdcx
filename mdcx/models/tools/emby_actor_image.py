@@ -18,7 +18,7 @@ from mdcx.signals import signal
 from mdcx.utils import get_used_time
 
 
-async def update_emby_actor_photo():
+async def update_emby_actor_photo() -> None:
     signal.change_buttons_status.emit()
     server_type = config.server_type
     if "emby" in server_type:

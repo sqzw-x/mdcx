@@ -81,7 +81,7 @@ def check_pic_sync(path_pic: str):
     return False
 
 
-def open_file_thread(file_path: str, is_dir: bool):
+def open_file_thread(file_path: str, is_dir: bool) -> None:
     if IS_WINDOWS:
         if is_dir:
             # os.system(f'explorer /select,"{file_path}"')  pyinstall打包后打开文件时会闪现cmd窗口。
