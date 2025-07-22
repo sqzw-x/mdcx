@@ -16,7 +16,6 @@ from mdcx.models.base.translate import (
     llm_translate_async,
     youdao_translate_async,
 )
-from mdcx.models.flags import Flags
 from mdcx.models.tools.emby import EMbyActressInfo
 
 
@@ -486,7 +485,7 @@ async def _process_translation(actor_info, overview, ja, emby_on):
     if not (ja or tag_trans) or "actor_info_translate" not in emby_on or "actor_info_ja" in emby_on:
         return overview
 
-    translate_by_list = Flags.translate_by_list.copy()
+    translate_by_list = config.translate_by_list.copy()
     random.shuffle(translate_by_list)
 
     if not translate_by_list:

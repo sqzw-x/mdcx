@@ -16,7 +16,6 @@ from mdcx.models.base.translate import (
     youdao_translate_async,
 )
 from mdcx.models.base.web import get_actorname, get_yesjav_title
-from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import CrawlersResult
 from mdcx.number import get_number_letters
@@ -295,10 +294,10 @@ async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie
             trans_outline = json_data.outline
 
     # 翻译
-    if Flags.translate_by_list:
+    if config.translate_by_list:
         if (trans_title and title_translate) or (trans_outline and outline_translate):
             start_time = time.time()
-            translate_by_list = Flags.translate_by_list.copy()
+            translate_by_list = config.translate_by_list.copy()
             if not cd_part:
                 random.shuffle(translate_by_list)
 

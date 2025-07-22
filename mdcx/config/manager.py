@@ -404,6 +404,9 @@ class ConfigSchema:
         temp_list = re.split(r"[,，]", self.google_exclude)
         self.google_keyword = [each for each in temp_list if each.strip()]  # 去空
 
+        # 翻译源
+        self.translate_by_list = self.translate_by.strip(",").split(",")
+
         # 是否记录刮削成功列表
         self.record_success_file = "record_success_file" in self.no_escape
 
@@ -461,9 +464,6 @@ class ConfigSchema:
         # 字段命名规则-后缀字段顺序
         all_str_list = ["moword", "cnword", "definition"]
         read_str_list = re.split(r"[,，]", self.suffix_sort)
-        read_str_list = [
-            i1.replace("mosaic", "moword") for i1 in read_str_list
-        ]  # 更新旧版的mosaic为moword，避免旧配置出错
         new_str_list1 = [i1 for i1 in read_str_list if i1 in all_str_list]  # 去除不在list中的字符
         new_str_list = []
         [new_str_list.append(i1) for i1 in new_str_list1 if i1 not in new_str_list]  # 去重

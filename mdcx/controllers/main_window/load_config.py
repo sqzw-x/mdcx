@@ -514,7 +514,6 @@ def load_config(self: "MyMAinWindow"):
             (self.Ui.checkBox_deepl, "deepl"),
             (self.Ui.checkBox_llm, "llm"),
         )
-        Flags.translate_by_list = translate_by.strip(",").split(",") if translate_by.strip(",") else []
 
         # deepl_key
         self.Ui.lineEdit_deepl_key.setText(config.deepl_key)
