@@ -10,7 +10,7 @@ from io import StringIO
 import aiofiles
 import aiofiles.os
 import langid
-import lxml.etree as etree
+from lxml import etree
 
 from mdcx.config.manager import config
 from mdcx.consts import ManualConfig
