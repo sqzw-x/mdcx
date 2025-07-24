@@ -36,7 +36,7 @@ def get_detail_info(html, number, file_path):
         if t.endswith("女郎") and i + 1 < len(detail_info) and detail_info[i + 1].startswith("："):
             temp_actor = re.findall(r"：\s*(.+)\s*", detail_info[i + 1])
             actor = temp_actor[0].replace("、", ",") if temp_actor else ""
-    number = title if not number else number
+    number = number if number else title
 
     studio = html.xpath('string(//span[@class="meta-category"])').strip()
     cover_url = html.xpath('//div[@class="entry-content u-text-format u-clearfix"]/p/img/@src')
@@ -173,7 +173,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

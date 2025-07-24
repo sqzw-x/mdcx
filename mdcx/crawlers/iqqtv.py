@@ -26,10 +26,7 @@ def get_real_title(title):
 
 def getWebNumber(title, number):
     result = title.split(" ")
-    if len(result) > 1:
-        result = result[-1]
-    else:
-        result = number.upper()
+    result = result[-1] if len(result) > 1 else number.upper()
     return (
         result.replace("_1pondo_", "")
         .replace("1pondo_", "")
@@ -57,10 +54,7 @@ def getActorPhoto(actor):
 
 def getCover(html):
     result = html.xpath('//meta[@property="og:image"]/@content')
-    if result:
-        result = result[0]
-    else:
-        result = ""
+    result = result[0] if result else ""
     return result
 
 
@@ -78,10 +72,7 @@ def getOutline(html):
 
 def getRelease(html):
     result = html.xpath('//div[@class="date"]/text()')
-    if result:
-        result = result[0].replace("/", "-").strip()
-    else:
-        result = ""
+    result = result[0].replace("/", "-").strip() if result else ""
     return result
 
 
@@ -95,27 +86,18 @@ def getYear(release):
 
 def getTag(html):
     tag_list = html.xpath('//div[contains(@class,"tag-info")]//a[contains(@href, "tag")]/text()')
-    if tag_list:
-        result = ",".join(tag_list) if tag_list else ""
-    else:
-        result = ""
+    result = (",".join(tag_list) if tag_list else "") if tag_list else ""
     return result
 
 
 def getMosaic(tag):
-    if "无码" in tag or "無碼" in tag or "無修正" in tag:
-        mosaic = "无码"
-    else:
-        mosaic = "有码"
+    mosaic = "无码" if "无码" in tag or "無碼" in tag or "無修正" in tag else "有码"
     return mosaic
 
 
 def getStudio(html):
     result = html.xpath('//a[contains(@href, "fac")]/div[@itemprop]/text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result
 
 
@@ -170,10 +152,7 @@ async def main(
 
     if not re.match(r"n\d{4}", number):
         number = number.upper()
-    if appoint_url:
-        real_url = appoint_url
-    else:
-        real_url = ""
+    real_url = appoint_url or ""
     iqqtv_url = getattr(config, "iqqtv_website", "https://iqq5.xyz")
     cover_url = ""
     image_cut = "right"
@@ -297,7 +276,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {language: dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

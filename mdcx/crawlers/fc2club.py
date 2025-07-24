@@ -10,19 +10,13 @@ from mdcx.models.log_buffer import LogBuffer
 
 def getTitle(html, number):  # 获取标题
     result = html.xpath("//h3/text()")
-    if result:
-        result = result[0].replace(f"FC2-{number} ", "")
-    else:
-        result = ""
+    result = result[0].replace(f"FC2-{number} ", "") if result else ""
     return result
 
 
 def getNum(html):  # 获取番号
     result = html.xpath("//h1/text()")
-    if result:
-        result = result[0]
-    else:
-        result = ""
+    result = result[0] if result else ""
     return result
 
 
@@ -40,10 +34,7 @@ def getCover(html):  # 获取封面
 
 def getStudio(html):  # 使用卖家作为厂家
     result = html.xpath('//strong[contains(text(), "卖家信息")]/../a/text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result.replace("本资源官网地址", "")
 
 
@@ -61,10 +52,7 @@ def getActor(html, studio):  # 获取演员
     if result:
         result = str(result).strip(" []").replace('"', "").replace("'", "").replace(", ", ",")
     else:
-        if "fc2_seller" in config.fields_rule:
-            result = studio
-        else:
-            result = ""
+        result = studio if "fc2_seller" in config.fields_rule else ""
     return result
 
 
@@ -97,10 +85,7 @@ def getOutline(html):  # 获取简介
 
 def getMosaic(html):  # 获取马赛克
     result = str(html.xpath('//h5/strong[contains(text(), "资源参数")]/../text()'))
-    if "无码" in result:
-        mosaic = "无码"
-    else:
-        mosaic = "有码"
+    mosaic = "无码" if "无码" in result else "有码"
     return mosaic
 
 
@@ -195,7 +180,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

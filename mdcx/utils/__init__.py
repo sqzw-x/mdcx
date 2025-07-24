@@ -1,6 +1,7 @@
 import asyncio
 import concurrent
 import concurrent.futures
+import contextlib
 import ctypes
 import inspect
 import os
@@ -10,9 +11,10 @@ import threading
 import time
 import traceback
 import unicodedata
+from collections.abc import Coroutine
 from concurrent.futures import Future
 from threading import Thread
-from typing import Any, Coroutine, Set, TypeVar
+from typing import Any, TypeVar
 
 from mdcx.consts import IS_NFC, IS_WINDOWS, ManualConfig
 
@@ -24,7 +26,7 @@ class AsyncBackgroundExecutor:
 
     def __init__(self):
         self._loop: asyncio.AbstractEventLoop
-        self._pending_futures: Set[Future] = set()
+        self._pending_futures: set[Future] = set()
         self._lock = threading.Lock()
         self._running = False
         self._start_background_thread()
@@ -118,10 +120,8 @@ class AsyncBackgroundExecutor:
         finally:
             # 清理资源
             if self._loop and not self._loop.is_closed():
-                try:
+                with contextlib.suppress(Exception):
                     self._loop.close()
-                except Exception:
-                    pass
             # 重置loop引用
             self._loop = None  # type: ignore
 
@@ -387,11 +387,7 @@ def get_random_headers() -> dict:
 
 
 def convert_path(path: str) -> str:
-    if IS_WINDOWS:
-        path = path.replace("/", "\\")
-    else:
-        path = path.replace("\\", "/")
-    return path
+    return path.replace("/", "\\") if IS_WINDOWS else path.replace("\\", "/")
 
 
 def singleton(cls):
@@ -408,11 +404,7 @@ def singleton(cls):
 def nfd2c(path: str) -> str:
     # 转换 NFC(mac nfc和nfd都能访问到文件，但是显示的是nfd，这里统一使用nfc，避免各种问题。
     # 日文浊音转换（mac的坑，osx10.12以下使用nfd，以上兼容nfc和nfd，只是显示成了nfd）
-    if IS_NFC:
-        new_path = unicodedata.normalize("NFC", path)  # Mac 会拆成两个字符，即 NFD，windwos是 NFC
-    else:
-        new_path = unicodedata.normalize("NFD", path)  # Mac 会拆成两个字符，即 NFD，windwos是 NFC
-    return new_path
+    return unicodedata.normalize("NFC", path) if IS_NFC else unicodedata.normalize("NFD", path)
 
 
 def split_path(path: str) -> tuple[str, str]:

@@ -1,3 +1,4 @@
+import contextlib
 import json
 import os
 import random
@@ -77,7 +78,7 @@ def get_c_number():
     if not os.path.exists(json_filename):
         with open(json_filename, "w", encoding="utf-8") as f:
             f.write("{}")
-    with open(json_filename, "r", encoding="utf-8") as data:
+    with open(json_filename, encoding="utf-8") as data:
         json_data = {}
         json_data1 = json.load(data)
         for key, value in json_data1.items():
@@ -203,9 +204,7 @@ def get_c_number():
 
 if __name__ == "__main__":
     print(".......")
-    try:
+    with contextlib.suppress(Exception):
         os.remove("_错误信息.txt")
-    except Exception:
-        pass
     get_c_number()
     print("\n\n# ===== 处理完成！ ===== #\n")

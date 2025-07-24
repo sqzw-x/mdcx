@@ -227,7 +227,7 @@ async def main(
         "official": {"zh_cn": dic, "zh_tw": dic, "jp": dic},
         website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic},
     }
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

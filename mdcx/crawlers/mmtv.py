@@ -50,9 +50,11 @@ def get_real_url(html, number):
                 temp_number_head = cap_number.replace("FC2-", "FC2-PPV ")
                 if temp_title.upper().startswith(temp_number_head):
                     return temp_url
-            elif temp_number.upper().startswith(cap_number):
-                return temp_url
-            elif temp_number.upper().endswith(cap_number) and temp_number.upper().replace(cap_number, "").isdigit():
+            elif (
+                temp_number.upper().startswith(cap_number)
+                or temp_number.upper().endswith(cap_number)
+                and temp_number.upper().replace(cap_number, "").isdigit()
+            ):
                 return temp_url
     return url
 
@@ -150,12 +152,7 @@ def get_mosaic(html, number):
     except Exception:
         pass
     if not mosaic:
-        if number.upper().startswith("FC2"):
-            mosaic = "无码"
-        elif is_uncensored(number):
-            mosaic = "无码"
-        else:
-            mosaic = "有码"
+        mosaic = "无码" if number.upper().startswith("FC2") or is_uncensored(number) else "有码"
     return mosaic
 
 
@@ -286,7 +283,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

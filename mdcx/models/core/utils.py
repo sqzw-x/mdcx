@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 import os
 import re
@@ -142,7 +140,7 @@ def show_movie_info(file_info: FileInfo, result: CrawlersResult):
             value = "中文字幕"
         elif key == "actor" and "actor_all," in config.nfo_include_new:
             value = result.all_actor
-        LogBuffer.log().write("\n     " + "%-13s" % key + ": " + str(value))
+        LogBuffer.log().write(f"\n     {key:<13}: {value}")
 
 
 async def get_video_size(file_path: str):
@@ -235,9 +233,8 @@ def show_result(fields_info, start_time: float):
         LogBuffer.log().write("\n" + LogBuffer.info().get().strip(" ").strip("\n"))
     except Exception:
         signal.show_log_text(traceback.format_exc())
-    if config.show_from_log:  # 字段来源信息
-        if fields_info:
-            LogBuffer.log().write("\n" + fields_info.strip(" ").strip("\n"))
+    if config.show_from_log and fields_info:  # 字段来源信息
+        LogBuffer.log().write("\n" + fields_info.strip(" ").strip("\n"))
     LogBuffer.log().write(f"\n 🍀 Data done!({get_used_time(start_time)}s)")
 
 

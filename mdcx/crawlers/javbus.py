@@ -10,10 +10,7 @@ from mdcx.models.log_buffer import LogBuffer
 
 def get_title(html):
     result = html.xpath("//h3/text()")
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result
 
 
@@ -50,13 +47,7 @@ def getActorPhoto(html, url):
 
 def getCover(html, url):  # 获取封面链接
     result = html.xpath('//a[@class="bigImage"]/@href')
-    if result:
-        if "http" not in result[0]:
-            cover_url = url + result[0]
-        else:
-            cover_url = result[0]
-    else:
-        cover_url = ""
+    cover_url = (url + result[0] if "http" not in result[0] else result[0]) if result else ""
     return cover_url
 
 
@@ -71,10 +62,7 @@ def get_poster_url(cover_url):  # 获取小封面链接
 
 def getRelease(html):  # 获取发行日期
     result = html.xpath('//span[@class="header"][contains(text(), "發行日期:")]/../text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result
 
 
@@ -88,10 +76,7 @@ def getYear(release):
 
 def getMosaic(html):
     select_tab = str(html.xpath('//li[@class="active"]/a/text()'))
-    if "有碼" in select_tab:
-        mosaic = "有码"
-    else:
-        mosaic = "无码"
+    mosaic = "有码" if "有碼" in select_tab else "无码"
     return mosaic
 
 
@@ -100,10 +85,7 @@ def getRuntime(html):
     if result:
         result = result[0].strip()
         result = re.findall(r"\d+", result)
-        if result:
-            result = result[0]
-        else:
-            result = ""
+        result = result[0] if result else ""
     else:
         result = ""
     return result
@@ -111,37 +93,25 @@ def getRuntime(html):
 
 def getStudio(html):
     result = html.xpath('//a[contains(@href, "/studio/")]/text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result
 
 
 def getPublisher(html, studio):  # 获取发行商
     result = html.xpath('//a[contains(@href, "/label/")]/text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = studio
+    result = result[0].strip() if result else studio
     return result
 
 
 def getDirector(html):  # 获取导演
     result = html.xpath('//a[contains(@href, "/director/")]/text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result
 
 
 def getSeries(html):
     result = html.xpath('//a[contains(@href, "/series/")]/text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result
 
 
@@ -160,10 +130,7 @@ def getExtraFanart(html, url):  # 获取封面链接
 
 def getTag(html):  # 获取标签
     result = html.xpath('//span[@class="genre"]/label/a[contains(@href, "/genre/")]/text()')
-    if result:
-        result = str(result).strip(" ['']").replace("'", "").replace(", ", ",")
-    else:
-        result = ""
+    result = str(result).strip(" ['']").replace("'", "").replace(", ", ",") if result else ""
     return result
 
 
@@ -318,9 +285,12 @@ async def main(
         mosaic = getMosaic(html_info)
         if mosaic == "无码":
             image_cut = "center"
-            if "_" in number and poster_url:  # 一本道，并且有小图时，下载poster
-                image_download = True
-            elif "HEYZO" in number and len(poster_url.replace(javbus_url + "/imgs/thumbs/", "")) == 7:
+            if (
+                "_" in number
+                and poster_url
+                or "HEYZO" in number
+                and len(poster_url.replace(javbus_url + "/imgs/thumbs/", "")) == 7
+            ):  # 一本道，并且有小图时，下载poster
                 image_download = True
             else:
                 poster_url = ""  # 非一本道的无码/欧美影片，清空小图地址，因为小图都是未裁剪的低分辨率图片
@@ -377,7 +347,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

@@ -49,17 +49,18 @@ async def move_other_file(number: str, folder_old_path: str, folder_new_path: st
     for old_file in files:
         if os.path.splitext(old_file)[1].lower() in config.media_type:
             continue
-        if number in old_file or file_name in old_file or naming_rule in old_file:
-            if "-cd" not in old_file.lower():  # 避免多分集时，其他分级的内容被移走
-                old_file_old_path = os.path.join(folder_old_path, old_file)
-                old_file_new_path = os.path.join(folder_new_path, old_file)
-                if (
-                    old_file_old_path != old_file_new_path
-                    and await aiofiles.os.path.exists(old_file_old_path)
-                    and not await aiofiles.os.path.exists(old_file_new_path)
-                ):
-                    await move_file_async(old_file_old_path, old_file_new_path)
-                    LogBuffer.log().write(f"\n 🍀 Move {old_file} done!")
+        if (
+            number in old_file or file_name in old_file or naming_rule in old_file
+        ) and "-cd" not in old_file.lower():  # 避免多分集时，其他分级的内容被移走
+            old_file_old_path = os.path.join(folder_old_path, old_file)
+            old_file_new_path = os.path.join(folder_new_path, old_file)
+            if (
+                old_file_old_path != old_file_new_path
+                and await aiofiles.os.path.exists(old_file_old_path)
+                and not await aiofiles.os.path.exists(old_file_new_path)
+            ):
+                await move_file_async(old_file_old_path, old_file_new_path)
+                LogBuffer.log().write(f"\n 🍀 Move {old_file} done!")
 
 
 async def copy_trailer_to_theme_videos(folder_new_path: str, naming_rule: str) -> None:
@@ -179,10 +180,7 @@ async def _clean_empty_fodlers(path: str, file_mode: FileMode) -> None:
         return
     signal.set_label_file_path.emit("🗑 正在清理空文件夹，请等待...")
     signal.show_log_text(" ⏳ Cleaning empty folders...")
-    if "folder" in config.no_escape:
-        escape_folder_list = ""
-    else:
-        escape_folder_list = get_movie_path_setting()[3]
+    escape_folder_list = "" if "folder" in config.no_escape else get_movie_path_setting()[3]
     if not await aiofiles.os.path.exists(path):
         signal.show_log_text(f" 🍀 Clean done!({get_used_time(start_time)}s)")
         signal.show_log_text("=" * 80)
@@ -394,9 +392,7 @@ async def get_movie_list(file_mode: FileMode, movie_path: str, escape_folder_lis
             signal.show_log_text(" 🖥 Movie path: " + movie_path)
             signal.show_log_text(" 🔎 Searching all videos, Please wait...")
             signal.set_label_file_path.emit(f"正在遍历待刮削视频目录中的所有视频，请等待...\n {movie_path}")
-            if "folder" in config.no_escape:
-                escape_folder_list = []
-            elif config.main_mode == 3 or config.main_mode == 4:
+            if "folder" in config.no_escape or config.main_mode == 3 or config.main_mode == 4:
                 escape_folder_list = []
             try:
                 # 获取所有需要刮削的影片列表
@@ -629,10 +625,7 @@ async def move_torrent(folder_old_path: str, folder_new_path: str, file_name: st
             return
 
     # 软硬链接开时，不移动
-    elif config.soft_link != 0:
-        return
-
-    elif not config.success_file_move and not config.success_file_rename:
+    elif config.soft_link != 0 or not config.success_file_move and not config.success_file_rename:
         return
     torrent_file1 = os.path.join(folder_old_path, (file_name + ".torrent"))
     torrent_file2 = os.path.join(folder_old_path, (movie_number + ".torrent"))
@@ -646,14 +639,13 @@ async def move_torrent(folder_old_path: str, folder_new_path: str, file_name: st
         await move_file_async(torrent_file1, torrent_file1_new_path)
         LogBuffer.log().write("\n 🍀 Torrent done!")
 
-    if torrent_file2 != torrent_file1:
-        if (
-            await aiofiles.os.path.exists(torrent_file2)
-            and torrent_file2 != torrent_file2_new_path
-            and not await aiofiles.os.path.exists(torrent_file2_new_path)
-        ):
-            await move_file_async(torrent_file2, torrent_file2_new_path)
-            LogBuffer.log().write("\n 🍀 Torrent done!")
+    if torrent_file2 != torrent_file1 and (
+        await aiofiles.os.path.exists(torrent_file2)
+        and torrent_file2 != torrent_file2_new_path
+        and not await aiofiles.os.path.exists(torrent_file2_new_path)
+    ):
+        await move_file_async(torrent_file2, torrent_file2_new_path)
+        LogBuffer.log().write("\n 🍀 Torrent done!")
 
 
 async def move_bif(folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str) -> None:
@@ -676,9 +668,8 @@ async def move_bif(folder_old_path: str, folder_new_path: str, file_name: str, n
 
 
 async def move_trailer_video(folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str) -> None:
-    if config.main_mode < 2:
-        if not config.success_file_move and not config.success_file_rename:
-            return
+    if config.main_mode < 2 and not config.success_file_move and not config.success_file_rename:
+        return
     if config.main_mode > 2:
         update_mode = config.update_mode
         if update_mode == "c" and not config.success_file_rename:

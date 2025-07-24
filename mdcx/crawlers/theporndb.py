@@ -23,10 +23,7 @@ def read_data(data):
     if not title:
         title = ""
     outline = data.get("description")
-    if not outline:
-        outline = ""
-    else:
-        outline = outline.replace("＜p＞", "").replace("＜/p＞", "")
+    outline = "" if not outline else outline.replace("＜p＞", "").replace("＜/p＞", "")
     release = data.get("date")
     if not release:
         release = ""
@@ -453,7 +450,7 @@ async def main(
         )
 
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

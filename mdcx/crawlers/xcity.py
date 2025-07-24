@@ -10,10 +10,7 @@ from mdcx.models.log_buffer import LogBuffer
 
 def getTitle(html):
     result = html.xpath('//span[@id="program_detail_title"]/text()')
-    if result:
-        result = result[0]
-    else:
-        result = ""
+    result = result[0] if result else ""
     return result
 
 
@@ -42,29 +39,20 @@ def getActorPhoto(actor):
 
 def getCover(html):
     result = html.xpath('//div[@class="photo"]/p/a/@href')
-    if result:
-        result = "https:" + result[0]
-    else:
-        result = ""
+    result = "https:" + result[0] if result else ""
     return result
 
 
 def getOutline(html):
     result = html.xpath('//p[@class="lead"]/text()')
-    if result:
-        result = result[0].strip().replace('"', "")
-    else:
-        result = ""
+    result = result[0].strip().replace('"', "") if result else ""
     return result
 
 
 def getRelease(html):
     result = html.xpath('//li/span[@class="koumoku" and (contains(text(), "発売日"))]/../text()')
     result = re.findall(r"[\d]+/[\d]+/[\d]+", str(result))
-    if result:
-        result = result[0].replace("/", "-")
-    else:
-        result = ""
+    result = result[0].replace("/", "-") if result else ""
     return result
 
 
@@ -87,38 +75,26 @@ def getTag(html):
 
 def getStudio(html):
     result = html.xpath('//span[@id="program_detail_maker_name"]/text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result
 
 
 def getPublisher(html):
     result = html.xpath('//span[@id="program_detail_label_name"]/text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result
 
 
 def getRuntime(html):
     result = str(html.xpath('//span[@class="koumoku"][contains(text(), "収録時間")]/../text()'))
     result = re.findall(r"[\d]+", result)
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result
 
 
 def getDirector(html):
     result = html.xpath('//span[@id="program_detail_director"]/text()')
-    if result:
-        result = result[0].replace("\\n", "").replace("\\t", "").strip()
-    else:
-        result = ""
+    result = result[0].replace("\\n", "").replace("\\t", "").strip() if result else ""
     return result
 
 
@@ -140,19 +116,13 @@ def getExtrafanart(html):
 
 def getCoverSmall(html):
     result = html.xpath('//img[@class="packageThumb"]/@src')
-    if result:
-        result = "https:" + result[0]
-    else:
-        result = ""
+    result = "https:" + result[0] if result else ""
     return result.replace("package/medium/", "")
 
 
 def getSeries(html):
     result = html.xpath('//a[contains(@href, "series")]/span/text()')
-    if result:
-        result = result[0]
-    else:
-        result = ""
+    result = result[0] if result else ""
     return result
 
 
@@ -165,7 +135,6 @@ async def main(
     website_name = "xcity"
     LogBuffer.req().write(f"-> {website_name}")
 
-    headers_o = config.headers
     real_url = appoint_url
     cover_url = ""
     poster_url = ""
@@ -278,7 +247,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

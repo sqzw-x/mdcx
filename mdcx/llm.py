@@ -1,6 +1,6 @@
 import asyncio
 import re
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from aiolimiter import AsyncLimiter
 from httpx import AsyncClient, Timeout
@@ -14,7 +14,7 @@ class LLMClient:
         *,
         api_key: str,
         base_url: str,  # https://api.openai.com/v1
-        proxy: Optional[str] = None,
+        proxy: str | None = None,
         timeout: Timeout,
         rate: tuple[float, float],
     ):
@@ -35,7 +35,7 @@ class LLMClient:
         temperature: float = 0.8,
         max_try: int,
         log_fn: Callable[[str], None] = lambda _: None,
-    ) -> Optional[str]:
+    ) -> str | None:
         messages: list[ChatCompletionMessageParam] = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},

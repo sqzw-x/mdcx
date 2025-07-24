@@ -209,10 +209,7 @@ async def add_mark_thread(pic_path: str, mark_list: list[str]):
                 count_hd = pos.get(mark_pos_hd, 0)
                 await _add_to_pic(pic_path, img_pic, mark_size, count_hd, mark_name)
             elif mark_fixed == "fixed":  # 固定位置
-                if mark_name == "字幕":
-                    count = pos.get(mark_pos_sub, 0)
-                else:
-                    count = pos.get(mark_pos_mosaic, 0)
+                count = pos.get(mark_pos_sub, 0) if mark_name == "字幕" else pos.get(mark_pos_mosaic, 0)
                 await _add_to_pic(pic_path, img_pic, mark_size, count, mark_name)
             else:  # 不固定位置
                 if mark_pos_count % 4 == count_hd:

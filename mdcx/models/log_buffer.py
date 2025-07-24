@@ -1,6 +1,5 @@
 import asyncio
 import threading
-from typing import Optional
 
 
 class LogBuffer:
@@ -14,7 +13,7 @@ class LogBuffer:
         return LogBuffer.global_buffer
 
     @staticmethod
-    def _get_task_id() -> Optional[int]:
+    def _get_task_id() -> int | None:
         """获取当前协程的 Task ID，如果在协程环境下运行则返回 Task ID，否则返回线程 ID"""
         try:
             # 尝试获取当前协程

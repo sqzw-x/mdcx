@@ -268,7 +268,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {language: dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

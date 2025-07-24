@@ -197,9 +197,8 @@ def get_real_url(
             if cid_list:
                 temp_list.append(each)
                 cid = cid_list[0][1]
-                if "-" in cid:  # 134cwx001-1
-                    if cid[-2:] in file_path:
-                        number = cid
+                if "-" in cid and cid[-2:] in file_path:  # 134cwx001-1
+                    number = cid
     if not temp_list:  # 通过标题搜索
         # title_list = html.xpath("//p[@class='txt']/a//text()")
         title_list = re.findall(r'title\\":\\"(.*?)\\",', html, re.S)
@@ -685,7 +684,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

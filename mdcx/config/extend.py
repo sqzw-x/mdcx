@@ -1,6 +1,5 @@
 import os
 import re
-from typing import Optional
 
 from mdcx.config.manager import config, manager
 from mdcx.consts import ManualConfig
@@ -108,7 +107,7 @@ def need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
     return False
 
 
-def deal_url(url: str) -> tuple[Optional[str], str]:
+def deal_url(url: str) -> tuple[str | None, str]:
     if "://" not in url:
         url = "https://" + url
     url = url.strip()

@@ -26,7 +26,7 @@ def get_detail_info(html, number, file_path):
     tmp_tag = html.xpath('//header//div[@class="categories-wrap"]/a/text()')
     # 标签转简体
     tag = zhconv.convert(tmp_tag[0], "zh-cn") if tmp_tag else ""
-    cover_url = html.xpath(f'//meta[@property="og:image"]/@content')
+    cover_url = html.xpath('//meta[@property="og:image"]/@content')
     cover_url = cover_url[0] if cover_url else ""
 
     return number, title, actor, cover_url, tag
@@ -150,7 +150,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

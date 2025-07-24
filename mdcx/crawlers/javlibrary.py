@@ -32,10 +32,7 @@ def get_real_url(html, number, domain_2):
 
 def get_title(html):
     result = html.xpath('//div[@id="video_title"]/h3/a/text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result
 
 
@@ -46,10 +43,7 @@ def get_number(html, number):
 
 def get_actor(html):
     result = html.xpath('//div[@id="video_cast"]/table/tr/td[@class="text"]/span/span[@class="star"]/a/text()')
-    if result:
-        result = str(result).strip(" []").replace("'", "").replace(", ", ",")
-    else:
-        result = ""
+    result = str(result).strip(" []").replace("'", "").replace(", ", ",") if result else ""
     return result
 
 
@@ -64,31 +58,19 @@ def get_actor_photo(actor):
 
 def get_cover(html):
     result = html.xpath("//img[@id='video_jacket_img']/@src")
-    if result:
-        if "http" not in result[0]:
-            result = "https:" + result[0]
-        else:
-            result = result[0]
-    else:
-        result = ""
+    result = ("https:" + result[0] if "http" not in result[0] else result[0]) if result else ""
     return result
 
 
 def get_tag(html):
     result = html.xpath('//div[@id="video_genres"]/table/tr/td[@class="text"]/span/a/text()')
-    if result:
-        result = str(result).strip(" []").replace("'", "").replace(", ", ",")
-    else:
-        result = ""
+    result = str(result).strip(" []").replace("'", "").replace(", ", ",") if result else ""
     return result
 
 
 def get_release(html):
     result = html.xpath('//div[@id="video_date"]/table/tr/td[@class="text"]/text()')
-    if result:
-        result = str(result).strip(" []").replace("'", "").replace(", ", ",")
-    else:
-        result = ""
+    result = str(result).strip(" []").replace("'", "").replace(", ", ",") if result else ""
     return result
 
 
@@ -102,46 +84,31 @@ def get_year(release):
 
 def get_studio(html):
     result = html.xpath('//div[@id="video_maker"]/table/tr/td[@class="text"]/span/a/text()')
-    if result:
-        result = result[0]
-    else:
-        result = ""
+    result = result[0] if result else ""
     return result
 
 
 def get_publisher(html):
     result = html.xpath('//div[@id="video_label"]/table/tr/td[@class="text"]/span/a/text()')
-    if result:
-        result = result[0]
-    else:
-        result = ""
+    result = result[0] if result else ""
     return result
 
 
 def get_runtime(html):
     result = html.xpath('//div[@id="video_length"]/table/tr/td/span[@class="text"]/text()')
-    if result:
-        result = result[0]
-    else:
-        result = ""
+    result = result[0] if result else ""
     return result
 
 
 def get_score(html):
     result = html.xpath('//div[@id="video_review"]/table/tr/td/span[@class="score"]/text()')
-    if result:
-        result = result[0].strip("()")
-    else:
-        result = ""
+    result = result[0].strip("()") if result else ""
     return result
 
 
 def get_director(html):
     result = html.xpath('//div[@id="video_director"]/table/tr/td[@class="text"]/span/a/text()')
-    if result:
-        result = result[0]
-    else:
-        result = ""
+    result = result[0] if result else ""
     return result
 
 
@@ -291,7 +258,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {language: dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

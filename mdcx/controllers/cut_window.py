@@ -10,16 +10,13 @@ from PyQt5.QtWidgets import QDialog, QFileDialog, QPushButton
 from mdcx.config.manager import config
 from mdcx.models.base.image import add_mark_thread
 from mdcx.models.core.file import get_file_info_v2
-from mdcx.models.types import FileInfo
 from mdcx.utils import split_path
 from mdcx.utils.file import delete_file_sync
 from mdcx.views.posterCutTool import Ui_Dialog_cut_poster
 
 if TYPE_CHECKING:
     from mdcx.controllers.main_window.main_window import MyMAinWindow
-
-if TYPE_CHECKING:
-    from controllers.main_window.main_window import MyMAinWindow
+    from mdcx.models.types import FileInfo
 
 
 class DraggableButton(QPushButton):
@@ -245,12 +242,11 @@ class CutWindow(QDialog):
             definition = json_data.definition
             # 获取裁剪后的的poster和thumb路径
             poster_path = os.path.join(img_folder, "poster.jpg")
-            if not pic_name:  # 文件名-poster.jpg
-                if "-" in img_name:
-                    poster_path = (
-                        img_path.replace("-fanart", "").replace("-thumb", "").replace("-poster", "").replace(img_ex, "")
-                        + "-poster.jpg"
-                    )
+            if not pic_name and "-" in img_name:  # 文件名-poster.jpg
+                poster_path = (
+                    img_path.replace("-fanart", "").replace("-thumb", "").replace("-poster", "").replace(img_ex, "")
+                    + "-poster.jpg"
+                )
             thumb_path = poster_path.replace("poster.", "thumb.")
             fanart_path = poster_path.replace("poster.", "fanart.")
             self.cut_thumb_path = thumb_path  # 裁剪后的thumb路径
@@ -465,8 +461,7 @@ class CutWindow(QDialog):
     def mouseMoveEvent(self, a0):
         if a0 is None:
             return
-        if Qt.MouseButton.LeftButton and self.m_drag:
-            if self.m_DragPosition is not None:
-                self.move(a0.globalPos() - self.m_DragPosition)
-                a0.accept()
+        if Qt.MouseButton.LeftButton and self.m_drag and self.m_DragPosition is not None:
+            self.move(a0.globalPos() - self.m_DragPosition)
+            a0.accept()
         # self.show_traceback_log('main',e.x(),e.y())

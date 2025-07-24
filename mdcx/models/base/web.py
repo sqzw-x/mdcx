@@ -3,7 +3,7 @@ import asyncio
 import re
 import threading
 from io import BytesIO
-from typing import List, Literal, Optional, Tuple, overload
+from typing import Literal, overload
 
 import aiofiles.os
 from lxml import etree
@@ -20,9 +20,9 @@ from mdcx.utils.file import check_pic_async
 
 
 @overload
-async def check_url(url: str, length: Literal[False] = False, real_url: bool = False) -> Optional[str]: ...
+async def check_url(url: str, length: Literal[False] = False, real_url: bool = False) -> str | None: ...
 @overload
-async def check_url(url: str, length: Literal[True] = True, real_url: bool = False) -> Optional[int]: ...
+async def check_url(url: str, length: Literal[True] = True, real_url: bool = False) -> int | None: ...
 async def check_url(url: str, length: bool = False, real_url: bool = False):
     """
     检测下载链接. 失败时返回 None.
@@ -106,7 +106,7 @@ async def get_avsox_domain() -> str:
     return domain
 
 
-async def get_amazon_data(req_url: str) -> Tuple[bool, str]:
+async def get_amazon_data(req_url: str) -> tuple[bool, str]:
     """
     获取 Amazon 数据
     """
@@ -240,7 +240,7 @@ async def get_dmm_trailer(trailer_url):
     return trailer_url
 
 
-def _ping_host_thread(host_address: str, result_list: List[Optional[int]], i: int) -> None:
+def _ping_host_thread(host_address: str, result_list: list[int | None], i: int) -> None:
     response = ping(host_address, timeout=1)
     result_list[i] = int(response * 1000) if response else 0
 
@@ -248,8 +248,8 @@ def _ping_host_thread(host_address: str, result_list: List[Optional[int]], i: in
 # todo 可以移除 ping, 仅靠 http request 检测网络连通性
 def ping_host(host_address: str) -> str:
     count = config.retry
-    result_list: List[Optional[int]] = [None] * count
-    thread_list: List[threading.Thread] = [None] * count  # type: ignore
+    result_list: list[int | None] = [None] * count
+    thread_list: list[threading.Thread] = [None] * count  # type: ignore
     for i in range(count):
         thread_list[i] = threading.Thread(target=_ping_host_thread, args=(host_address, result_list, i))
         thread_list[i].start()
@@ -263,7 +263,7 @@ def ping_host(host_address: str) -> str:
     )
 
 
-def check_version() -> Optional[int]:
+def check_version() -> int | None:
     if config.update_check:
         url = "https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
         res_json, error = get_json_sync(url)
@@ -297,10 +297,7 @@ def check_theporndb_api_token() -> str:
         if response.status_code == 401 and "Unauthenticated" in str(response.text):
             tips = "❌ API Token 错误！影响欧美刮削！请到「设置」-「网络」中修改。"
         elif response.status_code == 200:
-            if response.json().get("data"):
-                tips = "✅ 连接正常！"
-            else:
-                tips = "❌ 返回数据异常！"
+            tips = "✅ 连接正常！" if response.json().get("data") else "❌ 返回数据异常！"
         else:
             tips = f"❌ 连接失败！请检查网络或代理设置！ {response.status_code} {response.text}"
     signal.show_log_text(tips.replace("❌", " ❌ ThePornDB").replace("✅", " ✅ ThePornDB"))
@@ -396,9 +393,10 @@ async def get_actorname(number: str) -> tuple[bool, str]:
     for each in actor_box:
         actor_name = each.xpath('li[@class="actress-name"]/a/text()')
         actor_number = each.xpath('li[@class="actress-name"]/following-sibling::li[last()]/text()')
-        if actor_number:
-            if actor_number[0].upper().endswith(number.upper()) or number.upper().endswith(actor_number[0].upper()):
-                return True, ",".join(actor_name)
+        if actor_number and (
+            actor_number[0].upper().endswith(number.upper()) or number.upper().endswith(actor_number[0].upper())
+        ):
+            return True, ",".join(actor_name)
     return False, "No Result!"
 
 

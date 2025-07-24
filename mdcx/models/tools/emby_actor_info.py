@@ -207,7 +207,6 @@ async def show_emby_actor_list(mode: int) -> None:
                     logs += actor_list_temp + "\n"
                 if count % 100 == 0 or (succ_pic + fail_pic) == total:
                     signal.show_log_text(logs)
-                    time.sleep(0.01)
                     logs = ""
                 count += 1
             else:

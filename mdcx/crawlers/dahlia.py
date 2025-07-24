@@ -112,10 +112,7 @@ async def main(
     debug_info = ""
     number_lo = number.lower()
     real_url_list = []
-    if real_url:
-        real_url_list = [real_url]
-    else:
-        real_url_list = [f"https://dahlia-av.jp/works/{number_lo.replace('-', '')}/"]
+    real_url_list = [real_url] if real_url else [f"https://dahlia-av.jp/works/{number_lo.replace('-', '')}/"]
 
     LogBuffer.info().write("\n    🌐 dahlia")
     mosaic = "有码"
@@ -144,7 +141,7 @@ async def main(
 
         actor = get_actor(html_detail)  # 获取actor
         actor_photo = get_actor_photo(actor)
-        for each in actor_photo.keys():
+        for each in actor_photo:
             title = title.replace(" " + each, "")
         cover_url = get_cover(html_detail)  # 获取cover
         poster_url = (
@@ -209,7 +206,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

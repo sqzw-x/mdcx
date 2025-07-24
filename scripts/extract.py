@@ -14,15 +14,15 @@ import argparse
 import os
 import re
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, List
 
 
 class LineExtractor:
     """行提取器类"""
 
     def __init__(self):
-        self.filters: List[Callable[[str], bool]] = []
+        self.filters: list[Callable[[str], bool]] = []
 
     def add_pattern_filter(self, pattern: str):
         """添加通配符模式过滤器"""
@@ -117,7 +117,7 @@ class LineExtractor:
         total_lines = 0
 
         try:
-            with open(input_file, "r", encoding=encoding) as infile:
+            with open(input_file, encoding=encoding) as infile:
                 for line_num, line in enumerate(infile, 1):
                     total_lines += 1
                     if self.matches_line(line):

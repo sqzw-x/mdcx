@@ -10,10 +10,7 @@ from mdcx.models.log_buffer import LogBuffer
 
 def getTitle(html):  # 获取标题
     result = html.xpath('//div[@data-section="userInfo"]//h3/span/../text()')
-    if result:
-        result = " ".join(result)
-    else:
-        result = ""
+    result = " ".join(result) if result else ""
     return result
 
 
@@ -29,29 +26,20 @@ def getCover(html):  # 获取封面
 
 def getCoverSmall(html):  # 获取小图
     result = html.xpath('//div[@class="items_article_MainitemThumb"]/span/img/@src')
-    if result:
-        result = "https:" + result[0]
-    else:
-        result = ""
+    result = "https:" + result[0] if result else ""
     return result
 
 
 def getRelease(html):
     result = html.xpath('//div[@class="items_article_Releasedate"]/p/text()')
     result = re.findall(r"\d+/\d+/\d+", str(result))
-    if result:
-        result = result[0].replace("/", "-")
-    else:
-        result = ""
+    result = result[0].replace("/", "-") if result else ""
     return result
 
 
 def getStudio(html):  # 使用卖家作为厂家
     result = html.xpath('//div[@class="items_article_headerInfo"]/ul/li[last()]/a/text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result
 
 
@@ -63,18 +51,12 @@ def getTag(html):  # 获取标签
 
 def getOutline(html):  # 获取简介
     result = html.xpath('//meta[@name="description"]/@content')
-    if result:
-        result = result[0]
-    else:
-        result = ""
+    result = result[0] if result else ""
     return result
 
 
 def getMosaic(tag, title):  # 获取马赛克
-    if "無修正" in tag or "無修正" in title:
-        result = "无码"
-    else:
-        result = "有码"
+    result = "无码" if "無修正" in tag or "無修正" in title else "有码"
     return result
 
 
@@ -132,10 +114,7 @@ async def main(
         studio = getStudio(html_info)  # 使用卖家作为厂商
         mosaic = getMosaic(tag, title)
         tag = tag.replace("無修正,", "").replace("無修正", "").strip(",")
-        if "fc2_seller" in config.fields_rule:
-            actor = studio
-        else:
-            actor = ""
+        actor = studio if "fc2_seller" in config.fields_rule else ""
 
         try:
             dic = {
@@ -182,7 +161,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

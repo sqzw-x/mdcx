@@ -9,7 +9,7 @@ try:
     def get_video_metadata_opencv(file_path: str) -> tuple[int, str]:
         cap = cv2.VideoCapture(file_path)
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        ##使用opencv获取编码器格式
+        # 使用opencv获取编码器格式
         codec = int(cap.get(cv2.CAP_PROP_FOURCC))
         codec_fourcc = (
             chr(codec & 0xFF) + chr((codec >> 8) & 0xFF) + chr((codec >> 16) & 0xFF) + chr((codec >> 24) & 0xFF)

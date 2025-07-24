@@ -325,10 +325,7 @@ async def get_trailer(html):  # 获取预览片
 
 def get_mosaic(title, actor):
     title += actor
-    if "無碼" in title or "無修正" in title or "Uncensored" in title:
-        mosaic = "无码"
-    else:
-        mosaic = ""
+    mosaic = "无码" if "無碼" in title or "無修正" in title or "Uncensored" in title else ""
     return mosaic
 
 
@@ -472,7 +469,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

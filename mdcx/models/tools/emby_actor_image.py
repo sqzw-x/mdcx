@@ -73,15 +73,7 @@ async def _upload_actor_photo(url, pic_path):
         async with aiofiles.open(pic_path, "rb") as f:
             content = await f.read()
             b6_pic = base64.b64encode(content)  # 读取文件内容, 转换为base64编码
-
-        if pic_path.endswith("jpg"):
-            header = {
-                "Content-Type": "image/jpeg",
-            }
-        else:
-            header = {
-                "Content-Type": "image/png",
-            }
+        header = {"Content-Type": "image/jpeg" if pic_path.endswith("jpg") else "image/png"}
         r, err = await config.async_client.post_content(url=url, data=b6_pic, headers=header)
         return r is not None, err
     except Exception as e:
@@ -324,9 +316,8 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
 
         # graphis 判断
         pic_path, backdrop_path, logs = "", "", ""
-        if "actor_photo_net" in emby_on and has_name:
-            if "graphis_backdrop" in emby_on or "graphis_face" in emby_on:
-                pic_path, backdrop_path, logs = await _get_graphis_pic(jp_name)
+        if "actor_photo_net" in emby_on and has_name and ("graphis_backdrop" in emby_on or "graphis_face" in emby_on):
+            pic_path, backdrop_path, logs = await _get_graphis_pic(jp_name)
 
         # 要上传的头像图片未找到时
         if not pic_path:
@@ -412,10 +403,9 @@ def _get_local_actor_photo():
         all_files = os.walk(actor_photo_folder)
         for root, dirs, files in all_files:
             for file in files:
-                if file.endswith("jpg") or file.endswith("png"):
-                    if file not in local_actor_photo_dic:
-                        pic_path = os.path.join(root, file)
-                        local_actor_photo_dic[file] = pic_path
+                if (file.endswith("jpg") or file.endswith("png")) and file not in local_actor_photo_dic:
+                    pic_path = os.path.join(root, file)
+                    local_actor_photo_dic[file] = pic_path
 
         if not local_actor_photo_dic:
             signal.show_log_text("🔴 本地头像库文件夹未发现头像图片！请把图片放到文件夹中！")

@@ -1,11 +1,8 @@
-from __future__ import annotations
-
 import asyncio
 import os
 import re
 import time
 import traceback
-from typing import Optional
 
 import aiofiles.os
 from PyQt5.QtWidgets import QMessageBox
@@ -569,10 +566,9 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
                 if Flags.scrape_starting > count:
                     time_note = f" 🏖 当前还存在 {Flags.scrape_starting - count} 个已经在刮削的任务，等待这些任务结束将进入休息状态...\n"
                     signal.show_log_text(time_note)
-                    while not Flags.rest_sleepping:
-                        await asyncio.sleep(1)
-                elif not Flags.rest_sleepping and count < count_all:
-                    Flags.rest_sleepping = True  # 开始休眠
+                    await Flags.sleep_end.wait()  # 等待休眠结束
+                elif Flags.sleep_end.is_set() and count < count_all:
+                    Flags.sleep_end.clear()  # 开始休眠
                     Flags.rest_next_begin_time = time.time()  # 下一轮倒计时开始时间
                     time_note = f'\n ⏸ 休息 {Flags.rest_time_convert} 秒，将在 <font color="red">{get_real_time(Flags.rest_next_begin_time + Flags.rest_time_convert)}</font> 继续刮削剩余的 {count_all - count} 个任务...\n'
                     signal.show_log_text(time_note)
@@ -584,12 +580,10 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
                             break
                         await asyncio.sleep(1)
                     Flags.rest_now_begin_count = count
-                    Flags.rest_sleepping = False  # 休眠结束，下一轮开始
+                    Flags.sleep_end.set()  # 休眠结束，下一轮开始
                     Flags.next_start_time = time.time() - config.thread_time
                 else:
-                    while Flags.rest_sleepping:
-                        await asyncio.sleep(1)
-
+                    await Flags.sleep_end.wait()
     except Exception as e:
         _check_stop(file_name_temp)
         signal.show_traceback_log(traceback.format_exc())
@@ -599,7 +593,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     LogBuffer.clear_thread()
 
 
-async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
+async def scrape(file_mode: FileMode, movie_list: list[str] | None) -> None:
     Flags.reset()
     if movie_list is None:
         movie_list = []
@@ -647,9 +641,7 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
     Flags.total_count = task_count
 
     task_list = []
-    i = 0
-    for each in movie_list:
-        i += 1
+    for i, each in enumerate(movie_list, 1):
         task_list.append((each, i, task_count))
 
     if task_count:
@@ -685,10 +677,7 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
     await _clean_empty_fodlers(movie_path, file_mode)
     end_time = time.time()
     used_time = str(round((end_time - Flags.start_time), 2))
-    if task_count:
-        average_time = str(round((end_time - Flags.start_time) / task_count, 2))
-    else:
-        average_time = used_time
+    average_time = str(round((end_time - Flags.start_time) / task_count, 2)) if task_count else used_time
     signal.exec_set_processbar.emit(0)
     signal.set_label_file_path.emit(f"🎉 恭喜！全部刮削完成！共 {task_count} 个文件！用时 {used_time} 秒")
     signal.show_traceback_log(
@@ -735,7 +724,7 @@ async def scrape(file_mode: FileMode, movie_list: Optional[list[str]]) -> None:
         signal.exec_exit_app.emit()
 
 
-def start_new_scrape(file_mode: FileMode, movie_list: Optional[list[str]] = None) -> None:
+def start_new_scrape(file_mode: FileMode, movie_list: list[str] | None = None) -> None:
     signal.change_buttons_status.emit()
     signal.exec_set_processbar.emit(0)
     try:
@@ -852,9 +841,8 @@ async def move_sub(
         sub_old_path = os.path.join(folder_old_path, (file_name + sub))
         sub_new_path = os.path.join(folder_new_path, (naming_rule + sub))
         sub_new_path_chs = os.path.join(folder_new_path, (naming_rule + ".chs" + sub))
-        if config.subtitle_add_chs:
-            if ".chs" not in sub:
-                sub_new_path = sub_new_path_chs
+        if config.subtitle_add_chs and ".chs" not in sub:
+            sub_new_path = sub_new_path_chs
         if await aiofiles.os.path.exists(sub_old_path) and not await aiofiles.os.path.exists(sub_new_path):
             if copy_flag:
                 if not await copy_file_async(sub_old_path, sub_new_path):

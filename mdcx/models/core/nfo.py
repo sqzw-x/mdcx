@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import os
 import re
 import time
@@ -293,9 +291,8 @@ async def write_nfo(
             print("  </set>", file=code)
 
         # 输出系列
-        if series:
-            if "series," in nfo_include_new:
-                print("  <series>" + series + "</series>", file=code)
+        if series and "series," in nfo_include_new:
+            print("  <series>" + series + "</series>", file=code)
 
         # 输出片商/制作商
         if studio:

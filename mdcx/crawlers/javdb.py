@@ -16,10 +16,7 @@ sleep = True
 
 def get_number(html, number):
     result = html.xpath('//a[@class="button is-white copy-to-clipboard"]/@data-clipboard-text')
-    if result:
-        result = result[0]
-    else:
-        result = number
+    result = result[0] if result else number
     return result
 
 
@@ -139,20 +136,14 @@ def get_score(html):
     result = str(html.xpath("//span[@class='score-stars']/../text()")).strip(" ['']")
     try:
         score = re.findall(r"(\d{1}\..+)分", result)
-        if score:
-            score = score[0]
-        else:
-            score = ""
+        score = score[0] if score else ""
     except Exception:
         score = ""
     return score
 
 
 def get_mosaic(title):
-    if "無碼" in title or "無修正" in title or "Uncensored" in title:
-        mosaic = "无码"
-    else:
-        mosaic = ""
+    mosaic = "无码" if "無碼" in title or "無修正" in title or "Uncensored" in title else ""
     return mosaic
 
 
@@ -418,7 +409,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

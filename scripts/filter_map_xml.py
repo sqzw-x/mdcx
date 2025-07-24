@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 XML 映射表过滤脚本
 过滤掉无信息的行，即：
@@ -10,7 +9,6 @@ XML 映射表过滤脚本
 import argparse
 import os
 import xml.etree.ElementTree as ET
-from typing import Optional, Tuple
 
 
 def count_keywords(keyword_string: str) -> int:
@@ -58,7 +56,7 @@ def is_redundant_entry(element) -> bool:
     return False
 
 
-def filter_xml_file(input_file: str, output_file: Optional[str] = None, backup: bool = True) -> Tuple[int, int]:
+def filter_xml_file(input_file: str, output_file: str | None = None, backup: bool = True) -> tuple[int, int]:
     """
     过滤XML文件中的无信息条目
 
@@ -77,7 +75,7 @@ def filter_xml_file(input_file: str, output_file: Optional[str] = None, backup: 
     if backup:
         backup_file = input_file + ".backup"
         print(f"创建备份文件: {backup_file}")
-        with open(input_file, "r", encoding="utf-8") as src, open(backup_file, "w", encoding="utf-8") as dst:
+        with open(input_file, encoding="utf-8") as src, open(backup_file, "w", encoding="utf-8") as dst:
             dst.write(src.read())
 
     # 解析XML文件

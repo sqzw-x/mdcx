@@ -178,7 +178,7 @@ async def main(
 
             actor = get_actor(html_detail)  # 获取actor
             actor_photo = get_actor_photo(actor)
-            for each in actor_photo.keys():
+            for each in actor_photo:
                 title = title.replace(" " + each, "")
             cover_url = get_cover(html_detail)  # 获取cover
             if not poster_url:
@@ -250,7 +250,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

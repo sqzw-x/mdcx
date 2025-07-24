@@ -131,9 +131,9 @@ def load_config(self: "MyMAinWindow"):
         # 有码番号刮削网站
         self.Ui.lineEdit_website_youma.setText(get_new_str(config.website_youma))
         # 无码番号刮削网站
-        self.Ui.lineEdit_website_wuma.setText(get_new_str((config.website_wuma)))
+        self.Ui.lineEdit_website_wuma.setText(get_new_str(config.website_wuma))
         # 素人番号刮削网站
-        self.Ui.lineEdit_website_suren.setText(get_new_str((config.website_suren)))
+        self.Ui.lineEdit_website_suren.setText(get_new_str(config.website_suren))
         # FC2番号刮削网站
         self.Ui.lineEdit_website_fc2.setText(get_new_str(config.website_fc2))
         # 欧美番号刮削网站

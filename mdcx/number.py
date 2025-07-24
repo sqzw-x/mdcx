@@ -1,3 +1,4 @@
+import contextlib
 import os
 import re
 import unicodedata
@@ -53,20 +54,13 @@ def is_uncensored(number: str) -> bool:
         "bird",
         "bouga",
     ]
-    for each in key_start_word:
-        if number.upper().startswith(each.upper()):
-            return True
-    else:
-        return False
+    return any(number.upper().startswith(each.upper()) for each in key_start_word)
 
 
 def is_suren(number: str) -> bool:
     if re.search(r"\d{3,}[A-Z]+-\d{2}", number.upper()) or "SIRO" in number.upper():
         return True
-    for key in ManualConfig.SUREN_DIC.keys():
-        if number.upper().startswith(key):
-            return True
-    return False
+    return any(number.upper().startswith(key) for key in ManualConfig.SUREN_DIC)
 
 
 def get_number_letters(number: str) -> str:
@@ -164,10 +158,10 @@ def get_file_number(filepath: str, escape_string_list: list[str]) -> str:
         result = re.findall(r"([A-Z0-9-]{2,})[-_.]2?0?(\d{2}[-.]\d{2}[-.]\d{2})", oumei_filename)
         return (long_name(result[0][0].strip("-")) + "." + result[0][1].replace("-", ".")).capitalize()
 
-    elif r := re.search(r"XXX-AV-\d{4,}", filename):  # 提取xxx-av-11111
-        file_number = r.group()
-
-    elif r := re.search(r"MKY-[A-Z]+-\d{3,}", filename):  # MKY-A-11111
+    elif (
+        (r := re.search(r"XXX-AV-\d{4,}", filename))  # MKY-A-11111
+        or (r := re.search(r"MKY-[A-Z]+-\d{3,}", filename))  # 提取xxx-av-11111
+    ):
         file_number = r.group()
 
     elif "FC2" in filename:
@@ -196,10 +190,10 @@ def get_file_number(filepath: str, escape_string_list: list[str]) -> str:
     elif r := re.search(r"KIN8(TENGOKU)?-?\d{3,}", filename):  # 提取S2MBD-002 或S2MBD-006
         file_number = r.group().replace("TENGOKU", "-").replace("--", "-")
 
-    elif r := re.search(r"S2M[BD]*-\d{3,}", filename):  # 提取S2MBD-002 或S2MBD-006
-        file_number = r.group()
-
-    elif r := re.search(r"MCB3D[BD]*-\d{2,}", filename):  # MCB3DBD-33
+    elif (
+        (r := re.search(r"S2M[BD]*-\d{3,}", filename))  # MCB3DBD-33
+        or (r := re.search(r"MCB3D[BD]*-\d{2,}", filename))  # S2MBD-002
+    ):
         file_number = r.group()
 
     elif r := re.search(r"T28-?\d{3,}", filename):  # 提取T28-223
@@ -221,13 +215,11 @@ def get_file_number(filepath: str, escape_string_list: list[str]) -> str:
                 file_number = value + file_number
                 break
 
-    elif r := re.search(r"[A-Z]+-[A-Z]\d+", filename):  # 提取类似mkbd-s120番号
-        file_number = r.group()
-
-    elif r := re.search(r"\d{2,}[-_]\d{2,}", filename):  # 提取类似 111111-000 111111_000 番号
-        file_number = r.group()
-
-    elif r := re.search(r"\d{3,}-[A-Z]{3,}", filename):  # 提取类似 111111-MMMM 番号
+    elif (
+        (r := re.search(r"[A-Z]+-[A-Z]\d+", filename))  # mkbd-s120
+        or (r := re.search(r"\d{2,}[-_]\d{2,}", filename))  # 111111-000 111111_000
+        or (r := re.search(r"\d{3,}-[A-Z]{3,}", filename))  # 111111-MMMM
+    ):
         file_number = r.group()
 
     elif r := re.search(r"([^A-Z]|^)(N\d{4})(\D|$)", filename):  # 提取n1111
@@ -237,21 +229,18 @@ def get_file_number(filepath: str, escape_string_list: list[str]) -> str:
         a, b = r.groups()
         file_number = a + "-" + b
 
-    elif r := re.findall(r"([A-Z]{3,}).*?(\d{2,})", filename):  # 3个及以上字母，2个及以上数字
-        temp = r[0]
-        file_number = temp[0] + "-" + temp[1]
-
-    elif r := re.findall(r"([A-Z]{2,}).*?(\d{3,})", filename):  # 2个及以上字母，3个及以上数字
+    elif (
+        (r := re.findall(r"([A-Z]{3,}).*?(\d{2,})", filename))  # 3个及以上字母，2个及以上数字
+        or (r := re.findall(r"([A-Z]{2,}).*?(\d{3,})", filename))  # 2个及以上字母，3个及以上数字
+    ):
         temp = r[0]
         file_number = temp[0] + "-" + temp[1]
 
     else:
         temp_name = re.sub(r"[【(（\[].+?[]）)】]", "", file_name).strip("@. ")  # 去除[]
         temp_name = unicodedata.normalize("NFC", temp_name)  # Mac 把会拆成两个字符，即 NFD，而网页请求使用的是 NFC
-        try:
+        with contextlib.suppress(Exception):
             temp_name = temp_name.encode("cp932").decode("shift_jis")  # 转换为常见日文，比如～ 转换成 〜
-        except Exception:
-            pass
         file_number = temp_name
 
     if file_number.startswith("FC-"):

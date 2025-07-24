@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+import contextlib
 import re
 import time
 import unicodedata
-import urllib
+import urllib.parse
 
 from lxml import etree
 
@@ -91,10 +92,8 @@ async def main(
             keyword = unicodedata.normalize(
                 "NFC", number.replace("●", " ")
             )  # Mac 把会拆成两个字符，即 NFD，而网页请求使用的是 NFC
-            try:
-                keyword = keyword.encode("cp932").decode("shift_jis")  # 转换为常见日文，比如～ 转换成 〜
-            except Exception:
-                pass
+            with contextlib.suppress(Exception):  # 转换为常见日文，比如～ 转换成 〜
+                keyword = keyword.encode("cp932").decode("shift_jis")
             keyword2 = urllib.parse.quote_plus(
                 keyword, encoding="EUC-JP"
             )  # quote() 不编码斜线，空格‘ ’编码为‘%20’；quote_plus() 会编码斜线为‘%2F’; 空格‘ ’编码为‘+’
@@ -197,7 +196,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

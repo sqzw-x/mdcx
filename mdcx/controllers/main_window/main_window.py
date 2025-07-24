@@ -103,7 +103,7 @@ class MyMAinWindow(QMainWindow):
         # region 初始化需要的变量
         self.localversion = ManualConfig.LOCAL_VERSION  # 当前版本号
         self.new_version = "\n🔍 点击检查最新版本"  # 有版本更新时在左下角显示的新版本信息
-        self.show_data: "ShowData | None" = None  # 当前树状图选中文件的数据
+        self.show_data: ShowData | None = None  # 当前树状图选中文件的数据
         self.img_path = ""  # 当前树状图选中文件的图片地址
         self.m_drag = False  # 允许鼠标拖动的标识
         self.m_DragPosition: QPoint  # 鼠标拖动位置
@@ -141,7 +141,7 @@ class MyMAinWindow(QMainWindow):
         self.now_show_name = None
         self.show_name = None
         self.t_net = None
-        self.options: "QFileDialog.Options | QFileDialog.Option"
+        self.options: QFileDialog.Options | QFileDialog.Option
         self.tray_icon: QSystemTrayIcon
         self.item_succ: QTreeWidgetItem
         self.item_fail: QTreeWidgetItem
@@ -263,14 +263,13 @@ class MyMAinWindow(QMainWindow):
 
     # region 窗口操作
     def tray_icon_click(self, e):
-        if int(e) == 3:
-            if IS_WINDOWS:
-                if self.isVisible():
-                    self.hide()
-                else:
-                    self.activateWindow()
-                    self.raise_()
-                    self.show()
+        if int(e) == 3 and IS_WINDOWS:
+            if self.isVisible():
+                self.hide()
+            else:
+                self.activateWindow()
+                self.raise_()
+                self.show()
 
     def tray_icon_show(self):
         if int(self.windowState()) == 1:  # 最小化时恢复
@@ -288,9 +287,8 @@ class MyMAinWindow(QMainWindow):
 
         if a1.type() == 3:  # 松开鼠标，检查是否在前台
             self.recover_windowflags()
-        if a1.type() == 121:
-            if not self.isVisible():
-                self.show()
+        if a1.type() == 121 and not self.isVisible():
+            self.show()
         if a0.objectName() == "label_poster" or a0.objectName() == "label_thumb":
             if a1.type() == QEvent.Type.MouseButtonPress:
                 a1 = cast("QMouseEvent", a1)
@@ -318,10 +316,14 @@ class MyMAinWindow(QMainWindow):
         # WindowState （WindowNoState=0 正常窗口; WindowMinimized= 1 最小化;
         # WindowMaximized= 2 最大化; WindowFullScreen= 3 全屏;WindowActive= 8 可编辑。）
         # windows平台无问题，仅mac平台python版有问题
-        if not IS_WINDOWS:
-            if self.window_radius and a0.type() == QEvent.Type.WindowStateChange and not int(self.windowState()):
-                self.setWindowFlag(Qt.WindowType.FramelessWindowHint, True)  # 隐藏边框
-                self.show()
+        if (
+            not IS_WINDOWS
+            and self.window_radius
+            and a0.type() == QEvent.Type.WindowStateChange
+            and not int(self.windowState())
+        ):
+            self.setWindowFlag(Qt.WindowType.FramelessWindowHint, True)  # 隐藏边框
+            self.show()
 
         # activeAppName = AppKit.NSWorkspace.sharedWorkspace().activeApplication()['NSApplicationName'] # 活动窗口的标题
 
@@ -678,7 +680,6 @@ class MyMAinWindow(QMainWindow):
             config.executor.run(save_success_list())
             Flags.rest_time_convert_ = Flags.rest_time_convert
             Flags.rest_time_convert = 0
-            Flags.rest_sleepping = False
             self.Ui.pushButton_start_cap.setText(" ■ 停止中 ")
             self.Ui.pushButton_start_cap2.setText(" ■ 停止中 ")
             signal_qt.show_scrape_info("⛔️ 刮削停止中...")
@@ -859,18 +860,15 @@ class MyMAinWindow(QMainWindow):
             self.Ui.label_publish.setToolTip(data.publisher)
             self.Ui.label_poster.setToolTip("点击裁剪图片")
             self.Ui.label_thumb.setToolTip("点击裁剪图片")
-            if os.path.isfile(other.fanart_path):  # 生成img_path，用来裁剪使用
-                img_path = other.fanart_path
-            else:
-                img_path = other.thumb_path
+            # 生成img_path，用来裁剪使用
+            img_path = other.fanart_path if os.path.isfile(other.fanart_path) else other.thumb_path
             self.img_path = img_path
             if self.Ui.checkBox_cover.isChecked():  # 主界面显示封面和缩略图
                 poster_path = other.poster_path
                 thumb_path = other.thumb_path
                 fanart_path = other.fanart_path
-                if not os.path.exists(thumb_path):
-                    if os.path.exists(fanart_path):
-                        thumb_path = fanart_path
+                if not os.path.exists(thumb_path) and os.path.exists(fanart_path):
+                    thumb_path = fanart_path
 
                 poster_from = data.poster_from
                 cover_from = data.thumb_from
@@ -2284,10 +2282,6 @@ class MyMAinWindow(QMainWindow):
     # 改回接受焦点状态
     def recover_windowflags(self):
         return
-        if not IS_WINDOWS and not self.window().isActiveWindow():  # 不在前台，有点击事件，即切换回前台
-            if (self.windowFlags() | Qt.WindowDoesNotAcceptFocus) == self.windowFlags():
-                self.setWindowFlags(self.windowFlags() & ~Qt.WindowDoesNotAcceptFocus)
-                self.show()
 
     def change_buttons_status(self):
         Flags.stop_other = True

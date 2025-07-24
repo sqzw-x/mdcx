@@ -13,7 +13,7 @@ def update_existing(d1: dict, d2: dict) -> dict:
     other = d2
     if len(d1) > len(d2):
         d1, d2 = d2, d1  # 确保 d1 是较小的字典
-    for key in d1.keys():
+    for key in d1:
         if key in d2:
             res[key] = other[key]
     return res

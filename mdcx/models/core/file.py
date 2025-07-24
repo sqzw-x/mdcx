@@ -665,30 +665,29 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
 
         # 判断是否流出
         leak_style = str(config.leak_style)
-        if not mosaic:
-            if "流出" in file_path or "leaked" in file_path.lower() or (leak_style and leak_style in file_path):
-                leak = leak_style
-                mosaic = "无码流出"
+        if not mosaic and (
+            "流出" in file_path or "leaked" in file_path.lower() or (leak_style and leak_style in file_path)
+        ):
+            leak = leak_style
+            mosaic = "无码流出"
 
         # 判断是否无码
         wuma_style = str(config.wuma_style)
-        if not mosaic:
-            if (
-                "无码" in file_path
-                or "無碼" in file_path
-                or "無修正" in file_path
-                or "uncensored" in file_path.lower()
-                or is_uncensored(movie_number)
-            ):
-                wuma = wuma_style
-                mosaic = "无码"
+        if not mosaic and (
+            "无码" in file_path
+            or "無碼" in file_path
+            or "無修正" in file_path
+            or "uncensored" in file_path.lower()
+            or is_uncensored(movie_number)
+        ):
+            wuma = wuma_style
+            mosaic = "无码"
 
         # 判断是否有码
         youma_style = str(config.youma_style)
-        if not mosaic:
-            if "有码" in file_path or "有碼" in file_path:
-                youma = youma_style
-                mosaic = "有码"
+        if not mosaic and ("有码" in file_path or "有碼" in file_path):
+            youma = youma_style
+            mosaic = "有码"
 
         # 查找本地字幕文件
         cnword_list = config.cnword_char.replace("，", ",").split(",")
@@ -721,21 +720,19 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
                 file_name_temp = re.sub(r"(-|\d{2,}|\.)C\.$", ".", file_name_temp)
 
             for each in cnword_list:
-                if each.upper() in file_name_temp:
-                    if "無字幕" not in file_path and "无字幕" not in file_path:
-                        c_word = cnword_style  # 中文字幕影片后缀
-                        has_sub = True
-                        break
+                if each.upper() in file_name_temp and "無字幕" not in file_path and "无字幕" not in file_path:
+                    c_word = cnword_style  # 中文字幕影片后缀
+                    has_sub = True
+                    break
 
         # 判断nfo中是否有中文字幕、马赛克
         if (not has_sub or not mosaic) and await aiofiles.os.path.exists(nfo_old_path):
             try:
                 async with aiofiles.open(nfo_old_path, encoding="utf-8") as f:
                     nfo_content = await f.read()
-                if not has_sub:
-                    if ">中文字幕</" in nfo_content:
-                        c_word = cnword_style  # 中文字幕影片后缀
-                        has_sub = True
+                if not has_sub and ">中文字幕</" in nfo_content:
+                    c_word = cnword_style  # 中文字幕影片后缀
+                    has_sub = True
                 if not mosaic:
                     if ">无码流出</" in nfo_content or ">無碼流出</" in nfo_content:
                         leak = leak_style

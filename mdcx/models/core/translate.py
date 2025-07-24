@@ -158,10 +158,9 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
                 tag += f",{nfo_tag_publisher}"
 
     # 导演
-    if director:
-        if director_translate:
-            info_data = resources.get_info_data(director)
-            director = info_data.get(director_language, "")
+    if director and director_translate:
+        info_data = resources.get_info_data(director)
+        director = info_data.get(director_language, "")
 
     if tag_language == "zh_cn":
         tag = zhconv.convert(tag, "zh-cn")
@@ -289,49 +288,50 @@ async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie
             trans_title = json_data.title
 
     # 处理outline
-    if json_data.outline and outline_language != "jp":
-        if outline_translate and langid.classify(json_data.outline)[0] == "ja":
-            trans_outline = json_data.outline
+    if (
+        json_data.outline
+        and outline_language != "jp"
+        and outline_translate
+        and langid.classify(json_data.outline)[0] == "ja"
+    ):
+        trans_outline = json_data.outline
 
     # 翻译
-    if config.translate_by_list:
-        if (trans_title and title_translate) or (trans_outline and outline_translate):
-            start_time = time.time()
-            translate_by_list = config.translate_by_list.copy()
-            if not cd_part:
-                random.shuffle(translate_by_list)
+    if config.translate_by_list and ((trans_title and title_translate) or (trans_outline and outline_translate)):
+        start_time = time.time()
+        translate_by_list = config.translate_by_list.copy()
+        if not cd_part:
+            random.shuffle(translate_by_list)
 
-            async def _task(each):
-                if each == "youdao":  # 使用有道翻译
-                    t, o, r = await youdao_translate_async(trans_title, trans_outline)
-                elif each == "google":  # 使用 google 翻译
-                    t, o, r = await google_translate_async(trans_title, trans_outline)
-                elif each == "llm":  # 使用 llm 翻译
-                    t, o, r = await llm_translate_async(trans_title, trans_outline)
-                else:  # 使用deepl翻译
-                    t, o, r = await deepl_translate_async(trans_title, trans_outline, "JA")
-                if r:
-                    LogBuffer.log().write(
-                        f"\n 🔴 Translation failed!({each.capitalize()})({get_used_time(start_time)}s) Error: {r}"
-                    )
-                else:
-                    if t:
-                        json_data.title = t
-                    if o:
-                        json_data.outline = o
-                    LogBuffer.log().write(f"\n 🍀 Translation done!({each.capitalize()})({get_used_time(start_time)}s)")
-                    json_data.outline_from = each
-                    return "break"
-
-            res = await asyncio.gather(*[_task(each) for each in translate_by_list])
-            for r in res:
-                if r == "break":
-                    break
-            else:
-                translate_by = translate_by.strip(",").capitalize()
+        async def _task(each):
+            if each == "youdao":  # 使用有道翻译
+                t, o, r = await youdao_translate_async(trans_title, trans_outline)
+            elif each == "google":  # 使用 google 翻译
+                t, o, r = await google_translate_async(trans_title, trans_outline)
+            elif each == "llm":  # 使用 llm 翻译
+                t, o, r = await llm_translate_async(trans_title, trans_outline)
+            else:  # 使用deepl翻译
+                t, o, r = await deepl_translate_async(trans_title, trans_outline, "JA")
+            if r:
                 LogBuffer.log().write(
-                    f"\n 🔴 Translation failed! {translate_by} 不可用！({get_used_time(start_time)}s)"
+                    f"\n 🔴 Translation failed!({each.capitalize()})({get_used_time(start_time)}s) Error: {r}"
                 )
+            else:
+                if t:
+                    json_data.title = t
+                if o:
+                    json_data.outline = o
+                LogBuffer.log().write(f"\n 🍀 Translation done!({each.capitalize()})({get_used_time(start_time)}s)")
+                json_data.outline_from = each
+                return "break"
+
+        res = await asyncio.gather(*[_task(each) for each in translate_by_list])
+        for r in res:
+            if r == "break":
+                break
+        else:
+            translate_by = translate_by.strip(",").capitalize()
+            LogBuffer.log().write(f"\n 🔴 Translation failed! {translate_by} 不可用！({get_used_time(start_time)}s)")
 
     # 简繁转换
     if title_language == "zh_cn":

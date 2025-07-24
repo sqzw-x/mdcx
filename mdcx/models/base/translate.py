@@ -2,7 +2,7 @@ import asyncio
 import hashlib
 import random
 import time
-from typing import Literal, Optional, Union, cast
+from typing import Literal, cast
 from urllib.parse import unquote
 
 from mdcx.config.manager import config
@@ -52,7 +52,7 @@ async def youdao_translate_async(title: str, outline: str):
     if res is None:
         return title, outline, f"请求失败！可能是被封了，可尝试更换代理！错误：{error}"
     else:
-        res = cast(dict, res)
+        res = cast("dict", res)
         translateResult = res.get("translateResult")
         if not translateResult:
             return title, outline, f"返回数据未找到翻译结果！返回内容：{res}"
@@ -79,7 +79,7 @@ async def youdao_translate_async(title: str, outline: str):
     return title, outline.strip("\n"), ""
 
 
-async def _deepl_translate(text: str, source_lang: Union[Literal["JA"], Literal["EN"]] = "JA") -> Optional[str]:
+async def _deepl_translate(text: str, source_lang: Literal["JA", "EN"] = "JA") -> str | None:
     """调用 DeepL API 翻译文本"""
     if not text:
         return ""
@@ -106,11 +106,7 @@ async def _deepl_translate(text: str, source_lang: Union[Literal["JA"], Literal[
         return None
 
 
-async def deepl_translate_async(
-    title: str,
-    outline: str,
-    ls: Union[Literal["JA"], Literal["EN"]] = "JA",
-):
+async def deepl_translate_async(title: str, outline: str, ls: Literal["JA", "EN"] = "JA"):
     """DeepL 翻译接口"""
     r1, r2 = await asyncio.gather(_deepl_translate(title, ls), _deepl_translate(outline, ls))
     if r1 is None or r2 is None:
@@ -118,7 +114,7 @@ async def deepl_translate_async(
     return r1, r2, None
 
 
-async def _llm_translate(text: str, target_language: str = "简体中文") -> Optional[str]:
+async def _llm_translate(text: str, target_language: str = "简体中文") -> str | None:
     """调用 LLM 翻译文本"""
     if not text:
         return ""
@@ -139,7 +135,7 @@ async def llm_translate_async(title: str, outline: str, target_language: str = "
     return r1, r2, None
 
 
-async def _google_translate(msg: str) -> tuple[Optional[str], str]:
+async def _google_translate(msg: str) -> tuple[str | None, str]:
     if not msg:
         return "", ""
     msg_unquote = unquote(msg)
@@ -150,7 +146,7 @@ async def _google_translate(msg: str) -> tuple[Optional[str], str]:
     return "".join([sen[0] for sen in response[0]]), ""
 
 
-async def google_translate_async(title: str, outline: str) -> tuple[str, str, Optional[str]]:
+async def google_translate_async(title: str, outline: str) -> tuple[str, str, str | None]:
     (r1, e1), (r2, e2) = await asyncio.gather(_google_translate(title), _google_translate(outline))
     if r1 is None or r2 is None:
         return "", "", f"google 翻译失败! {e1} {e2}"

@@ -9,28 +9,19 @@ from mdcx.models.log_buffer import LogBuffer
 
 def getTitle(html):  # 获取标题
     result = html.xpath("//h1/text()")
-    if result:
-        result = result[1]
-    else:
-        result = ""
+    result = result[1] if result else ""
     return result
 
 
 def getNum(html):  # 获取番号
     result = html.xpath("//h1/text()")
-    if result:
-        result = result[0]
-    else:
-        result = ""
+    result = result[0] if result else ""
     return result
 
 
 def getCover(html):  # 获取封面
     result = html.xpath('//a[@data-fancybox="gallery"]/@href')
-    if result:
-        result = result[0]
-    else:
-        result = ""
+    result = result[0] if result else ""
     return result
 
 
@@ -48,10 +39,7 @@ def getStudio(html):  # 使用卖家作为厂家
 
 def getTag(html):  # 获取标签
     result = html.xpath('//p[@class="card-text"]/a[contains(@href, "/tag/")]/text()')
-    if result:
-        result = str(result).strip(" []").replace(", ", ",").replace("'", "").strip()
-    else:
-        result = ""
+    result = str(result).strip(" []").replace(", ", ",").replace("'", "").strip() if result else ""
     return result
 
 
@@ -69,10 +57,7 @@ def getOutline(html):  # 获取简介
 
 
 def getMosaic(tag, title):  # 获取马赛克
-    if "無修正" in tag or "無修正" in title:
-        result = "无码"
-    else:
-        result = "有码"
+    result = "无码" if "無修正" in tag or "無修正" in title else "有码"
     return result
 
 
@@ -140,10 +125,7 @@ async def main(
             studio = getStudio(html_info)  # 获取厂商
             extrafanart = getExtraFanart(html_info)
             mosaic = getMosaic(tag, title)
-            if "fc2_seller" in config.fields_rule:
-                actor = studio
-            else:
-                actor = ""
+            actor = studio if "fc2_seller" in config.fields_rule else ""
 
             try:
                 dic = {
@@ -191,7 +173,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

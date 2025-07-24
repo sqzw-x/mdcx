@@ -1,3 +1,4 @@
+from asyncio import Event
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -28,7 +29,7 @@ class _Flags:
     counting_order: int = 0  # 刮削顺序
     total_count: int = 0  # 总数
     rest_now_begin_count: int = 0  # 本轮刮削开始统计的线程序号（实际-1）
-    rest_sleepping: bool = False  # 是否休眠中
+    sleep_end: Event = field(default_factory=Event)  # 本轮休眠标识
     rest_next_begin_time: float = 0.0  # 下一轮开始时间
     scrape_starting: int = 0  # 已进入过刮削流程的数量
     scrape_started: int = 0  # 已进入过刮削流程并开始的数量
@@ -83,7 +84,7 @@ class _Flags:
         self.counting_order = 0
         self.total_count = 0
         self.rest_now_begin_count = 0
-        self.rest_sleepping = False
+        self.sleep_end.set()  # 初始状态为未休眠
         self.scrape_starting = 0
         self.scrape_started = 0
         self.scrape_done = 0

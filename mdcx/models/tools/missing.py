@@ -87,10 +87,7 @@ async def _get_actor_numbers(actor_url, actor_single_url):
                 download_info = "🧲  🀄️"
             elif video_download_link:
                 download_info = "🧲    "
-            if video_number in number_single_list:
-                single_info = "单体"
-            else:
-                single_info = "\u3000\u3000"
+            single_info = "单体" if video_number in number_single_list else "\u3000\u3000"
             time_list = re.split(r"[./-]", video_date)
             if len(time_list[0]) == 2:
                 video_date = f"{time_list[2]}/{time_list[0]}/{time_list[1]}"
@@ -284,10 +281,7 @@ async def check_missing_number(actor_flag):
         for actor_name in actor_list:
             if not actor_name:
                 continue
-            if "http" in actor_name:
-                actor_url = actor_name
-            else:
-                actor_url = resources.get_actor_data(actor_name).get("href")
+            actor_url = actor_name if "http" in actor_name else resources.get_actor_data(actor_name).get("href")
             if actor_url:
                 signal.show_log_text(
                     f"\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 从 JAVDB 获取 [ {actor_name} ] 的所有番号列表..."

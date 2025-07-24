@@ -48,9 +48,8 @@ async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):
             mark_list.append("流出")
         elif "uncensored" in mark_type:
             mark_list.append("无码")
-    elif mosaic == "无码" or mosaic == "無碼":
-        if "uncensored" in mark_type:
-            mark_list.append("无码")
+    elif (mosaic == "无码" or mosaic == "無碼") and "uncensored" in mark_type:
+        mark_list.append("无码")
 
     if mark_list:
         download_files = config.download_files
@@ -81,7 +80,7 @@ def cut_thumb_to_poster(json_data: CrawlersResult, thumb_path: str, poster_path:
     # 打开图片, 获取图片尺寸
     try:
         img = Image.open(thumb_path)  # 返回一个Image对象
-        img = cast(Image.Image, img)
+        img = cast("Image.Image", img)
 
         w, h = img.size
         prop = h / w
@@ -122,13 +121,12 @@ def cut_thumb_to_poster(json_data: CrawlersResult, thumb_path: str, poster_path:
                     ax, ay, bx, by = 437, 0, w, h
                 else:
                     ax, ay, bx, by = 421, 0, w, h
-            elif w == 840:
-                if h == 472:
-                    ax, ay, bx, by = 473, 0, 788, h
+            elif w == 840 and h == 472:
+                ax, ay, bx, by = 473, 0, 788, h
 
         # 裁剪并保存
         img_new = img.convert("RGB")
-        img_new = cast(Image.Image, img_new)
+        img_new = cast("Image.Image", img_new)
         img_new_png = img_new.crop((ax, ay, bx, by))
         img_new_png.save(poster_path, quality=95, subsampling=0)
         if config.executor.run(check_pic_async(poster_path)):

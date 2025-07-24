@@ -1,7 +1,8 @@
 import asyncio
 import random
+from collections.abc import Callable
 from io import BytesIO
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 import aiofiles
 import httpx
@@ -33,11 +34,11 @@ class AsyncWebClient:
     def __init__(
         self,
         *,
-        proxy: Optional[str] = None,
+        proxy: str | None = None,
         retry: int = 3,
         timeout: float,
-        log_fn: Optional[Callable[[str], None]] = None,
-        limiters: Optional[AsyncWebLimiters] = None,
+        log_fn: Callable[[str], None] | None = None,
+        limiters: AsyncWebLimiters | None = None,
         loop=None,
     ):
         self.retry = retry
@@ -54,7 +55,7 @@ class AsyncWebClient:
         self.log_fn = log_fn if log_fn is not None else lambda _: None
         self.limiters = limiters if limiters is not None else AsyncWebLimiters()
 
-    def _prepare_headers(self, url: Optional[str] = None, headers: Optional[dict[str, str]] = None) -> dict[str, str]:
+    def _prepare_headers(self, url: str | None = None, headers: dict[str, str] | None = None) -> dict[str, str]:
         """预处理请求头"""
         if not headers:
             headers = {}
@@ -79,15 +80,15 @@ class AsyncWebClient:
         method: HttpMethod,
         url: str,
         *,
-        headers: Optional[dict[str, str]] = None,
-        cookies: Optional[dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
+        cookies: dict[str, str] | None = None,
         use_proxy: bool = True,
-        data: Optional[Union[dict[str, str], list[tuple], str, BytesIO, bytes]] = None,
-        json_data: Optional[dict[str, Any]] = None,
-        timeout: Optional[httpx.Timeout] = None,
+        data: dict[str, str] | list[tuple] | str | BytesIO | bytes | None = None,
+        json_data: dict[str, Any] | None = None,
+        timeout: httpx.Timeout | None = None,
         stream: bool = False,
         allow_redirects: bool = True,
-    ) -> tuple[Optional[Response], str]:
+    ) -> tuple[Response | None, str]:
         """
         执行请求的通用方法
 
@@ -160,11 +161,11 @@ class AsyncWebClient:
         self,
         url: str,
         *,
-        headers: Optional[dict[str, str]] = None,
-        cookies: Optional[dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
+        cookies: dict[str, str] | None = None,
         encoding: str = "utf-8",
         use_proxy: bool = True,
-    ) -> tuple[Optional[str], str]:
+    ) -> tuple[str | None, str]:
         """请求文本内容"""
         resp, error = await self.request("GET", url, headers=headers, cookies=cookies, use_proxy=use_proxy)
         if resp is None:
@@ -179,10 +180,10 @@ class AsyncWebClient:
         self,
         url: str,
         *,
-        headers: Optional[dict[str, str]] = None,
-        cookies: Optional[dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
+        cookies: dict[str, str] | None = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[bytes], str]:
+    ) -> tuple[bytes | None, str]:
         """请求二进制内容"""
         resp, error = await self.request("GET", url, headers=headers, cookies=cookies, use_proxy=use_proxy)
         if resp is None:
@@ -194,10 +195,10 @@ class AsyncWebClient:
         self,
         url: str,
         *,
-        headers: Optional[dict[str, str]] = None,
-        cookies: Optional[dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
+        cookies: dict[str, str] | None = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[Any], str]:
+    ) -> tuple[Any | None, str]:
         """请求JSON数据"""
         response, error = await self.request("GET", url, headers=headers, cookies=cookies, use_proxy=use_proxy)
         if response is None:
@@ -211,13 +212,13 @@ class AsyncWebClient:
         self,
         url: str,
         *,
-        data: Optional[Union[dict[str, str], list[tuple], str, BytesIO, bytes]] = None,
-        json_data: Optional[dict[str, Any]] = None,
-        headers: Optional[dict[str, str]] = None,
-        cookies: Optional[dict[str, str]] = None,
+        data: dict[str, str] | list[tuple] | str | BytesIO | bytes | None = None,
+        json_data: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+        cookies: dict[str, str] | None = None,
         encoding: str = "utf-8",
         use_proxy: bool = True,
-    ) -> tuple[Optional[str], str]:
+    ) -> tuple[str | None, str]:
         """POST 请求, 返回响应文本内容"""
         response, error = await self.request(
             "POST", url, data=data, json_data=json_data, headers=headers, cookies=cookies, use_proxy=use_proxy
@@ -234,12 +235,12 @@ class AsyncWebClient:
         self,
         url: str,
         *,
-        data: Optional[Union[dict[str, str], list[tuple], str, BytesIO, bytes]] = None,
-        json_data: Optional[dict[str, Any]] = None,
-        headers: Optional[dict[str, str]] = None,
-        cookies: Optional[dict[str, str]] = None,
+        data: dict[str, str] | list[tuple] | str | BytesIO | bytes | None = None,
+        json_data: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+        cookies: dict[str, str] | None = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[Any], str]:
+    ) -> tuple[Any | None, str]:
         """POST 请求, 返回响应JSON数据"""
         response, error = await self.request(
             "POST", url, data=data, json_data=json_data, headers=headers, cookies=cookies, use_proxy=use_proxy
@@ -256,12 +257,12 @@ class AsyncWebClient:
         self,
         url: str,
         *,
-        data: Optional[Union[dict[str, str], list[tuple], str, BytesIO, bytes]] = None,
-        json_data: Optional[dict[str, Any]] = None,
-        headers: Optional[dict[str, str]] = None,
-        cookies: Optional[dict[str, str]] = None,
+        data: dict[str, str] | list[tuple] | str | BytesIO | bytes | None = None,
+        json_data: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+        cookies: dict[str, str] | None = None,
         use_proxy: bool = True,
-    ) -> tuple[Optional[bytes], str]:
+    ) -> tuple[bytes | None, str]:
         """POST请求, 返回二进制响应"""
         response, error = await self.request(
             "POST", url, data=data, json_data=json_data, headers=headers, cookies=cookies, use_proxy=use_proxy
@@ -271,7 +272,7 @@ class AsyncWebClient:
 
         return response.content, ""
 
-    async def get_filesize(self, url: str, *, use_proxy: bool = True) -> Optional[int]:
+    async def get_filesize(self, url: str, *, use_proxy: bool = True) -> int | None:
         """获取文件大小"""
         response, error = await self.request("HEAD", url, use_proxy=use_proxy)
         if response is None:
@@ -381,7 +382,7 @@ class AsyncWebClient:
         end: int,
         chunk_id: int,
         use_proxy: bool = True,
-    ) -> Optional[str]:
+    ) -> str | None:
         """下载单个分块"""
         async with semaphore:
             res, error = await self.request(

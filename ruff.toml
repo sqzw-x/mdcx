@@ -27,6 +27,7 @@ exclude = [
     "site-packages",
     "venv",
     "*_generated.py",
+    "**/views/*.py",
 ]
 
 # Same as Black.
@@ -35,11 +36,28 @@ indent-width = 4
 
 
 [lint]
-# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
-# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
-# McCabe complexity (`C901`) by default.
-select = ["E4", "E7", "E9", "F"]
-ignore = []
+# https://docs.astral.sh/ruff/rules
+select = [
+    # "SIM", # flake8-simplify 可简化的代码. 默认不启用
+    # "D", # pydocstyle
+    "I",        # isort
+    "UP",       # pyupgrade
+    "E",        # pycodestyle
+    "F",        # Pyflakes
+    "B",        # flake8-bugbear
+    "C4",       # flake8-comprehensions
+    "FAST",
+    "ASYNC230", # Async functions should not open files with blocking methods like open
+    "ASYNC251", # Async functions should not call time.sleep
+]
+
+ignore = [
+    "E501",   # line too long
+    "B005",   # Using .strip() with multi-character strings is misleading
+    "B007",   # Loop control variable not used within the loop body
+    "B904",   # Within an except clause, raise exceptions with raise ... from err or raise ... from None to distinguish them from errors in exception handling
+    "SIM113", # Use `enumerate()` for index variable `n` in `for` loop
+]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]

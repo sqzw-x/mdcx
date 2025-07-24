@@ -1,8 +1,7 @@
-from __future__ import annotations
-
 import asyncio
 import re
-from typing import Callable, cast
+from collections.abc import Callable
+from typing import cast
 
 import langid
 
@@ -174,7 +173,7 @@ async def _call_crawler(
     # 对爬虫函数调用添加超时限制, 超时异常由调用者处理
     r = await asyncio.wait_for(crawler_func(**kwargs), timeout=timeout)
     # todo 使 crawler 直接返回 dict[str, dict[str, CrawlerResultDataclass]]
-    r = cast(dict[str, dict[str, dict]], r)
+    r = cast("dict[str, dict[str, dict]]", r)
     res: dict[str, dict[str, CrawlerResult]] = {}
     for key1 in r:
         res[key1] = {}
@@ -242,7 +241,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
     # 获取使用的网站
     all_fields = [f for f in ManualConfig.CONFIG_DATA_FIELDS if f not in none_fields]  # 去除不专门刮削的字段
     if scrape_like == "speed":  # 快速模式
-        all_field_websites = {field: number_website_list for field in all_fields}
+        all_field_websites = dict.fromkeys(all_fields, number_website_list)
     else:  # 全部模式
         # 各字段网站列表
         all_field_websites = {field: get_field_websites(field) for field in all_fields}
@@ -357,23 +356,22 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
                     continue
 
             # 获取网站数据
-            site_data = all_res.get(key, None)
+            site_data = all_res.get(key)
             if not site_data or not site_data.title or not getattr(site_data, field, None):
                 LogBuffer.info().write(f"\n    🔴 {website} (失败)")
                 continue
 
             # 语言检测逻辑
-            if config.scrape_like != "speed":
-                if field in ["title", "outline", "originaltitle", "originalplot"]:
-                    lang = all_field_languages.get(field, "jp")
-                    if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:  # why?
-                        if langid.classify(getattr(site_data, field, ""))[0] != "ja":
-                            if lang == "jp":
-                                LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为非日文，跳过！)")
-                                continue
-                        elif lang != "jp":
-                            LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为日文，跳过！)")
+            if config.scrape_like != "speed" and field in ["title", "outline", "originaltitle", "originalplot"]:
+                lang = all_field_languages.get(field, "jp")
+                if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:  # why?
+                    if langid.classify(getattr(site_data, field, ""))[0] != "ja":
+                        if lang == "jp":
+                            LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为非日文，跳过！)")
                             continue
+                    elif lang != "jp":
+                        LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为日文，跳过！)")
+                        continue
 
             # 添加来源信息
             if field in ["poster", "thumb", "extrafanart", "trailer", "outline"]:
@@ -715,7 +713,7 @@ def _deal_res(res: CrawlersResult | None) -> CrawlersResult | None:
 
     # 评分
     if res.score:
-        res.score = "%.1f" % float(res.score)
+        res.score = f"{float(res.score):.1f}"
 
     # publisher
     if not res.publisher:

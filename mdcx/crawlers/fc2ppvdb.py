@@ -69,8 +69,6 @@ async def main(
     website_name = "fc2ppvdb"
     LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
-    image_cut = "right"
-    image_download = False
     number = number.upper().replace("FC2PPV", "").replace("FC2-PPV-", "").replace("FC2-", "").replace("-", "").strip()
     dic = {}
     web_info = "\n       "
@@ -79,7 +77,7 @@ async def main(
         if not real_url:
             url_search = f"https://fc2ppvdb.com/articles/{number}"
 
-        debug_info = "番号地址: %s" % real_url
+        debug_info = f"番号地址: {real_url}"
         LogBuffer.info().write(web_info + debug_info)
         # ========================================================================番号详情页
         html_content, error = await config.async_client.get_text(url_search)
@@ -122,7 +120,7 @@ async def main(
                 "tag": tag,
                 "release": release_date,
                 "year": year,
-                "runtime": "",
+                "runtime": video_time,
                 "score": "",
                 "series": "FC2系列",
                 "director": "",
@@ -143,7 +141,7 @@ async def main(
             debug_info = "数据获取成功！"
             LogBuffer.info().write(web_info + debug_info)
         except Exception as e:
-            debug_info = "数据生成出错: %s" % str(e)
+            debug_info = f"数据生成出错: {str(e)}"
             LogBuffer.info().write(web_info + debug_info)
             raise Exception(debug_info)
 
@@ -156,7 +154,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {"zh_cn": dic, "zh_tw": dic, "jp": dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

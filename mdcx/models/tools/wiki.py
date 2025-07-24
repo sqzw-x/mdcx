@@ -1,7 +1,7 @@
+import contextlib
 import random
 import re
 import urllib.parse
-from typing import Optional
 
 import bs4
 import langid
@@ -19,7 +19,7 @@ from mdcx.models.base.translate import (
 from mdcx.models.tools.emby import EMbyActressInfo
 
 
-async def search_wiki(actor_info: EMbyActressInfo) -> tuple[Optional[str], str]:
+async def search_wiki(actor_info: EMbyActressInfo) -> tuple[str | None, str]:
     """
     搜索维基百科演员信息
 
@@ -99,7 +99,7 @@ async def search_wiki(actor_info: EMbyActressInfo) -> tuple[Optional[str], str]:
 async def get_detail(url, url_log, actor_info: EMbyActressInfo) -> tuple[bool, str]:
     """异步版本的_get_wiki_detail函数"""
     try:
-        ja = True if "ja." in url else False
+        ja = "ja." in url
         emby_on = config.emby_on
         res, error = await config.async_client.get_text(url, headers=config.random_headers)
         if res is None:
@@ -140,7 +140,7 @@ async def get_detail(url, url_log, actor_info: EMbyActressInfo) -> tuple[bool, s
         return False, f"获取维基百科详情时发生异常: {str(e)}"
 
 
-def handle_search_res(res, wiki_id, actor_info, description_en) -> tuple[Optional[str], str]:
+def handle_search_res(res, wiki_id, actor_info, description_en) -> tuple[str | None, str]:
     # 更新 descriptions
     description_zh = ""
     description_ja = ""
@@ -307,10 +307,8 @@ async def parse_detail(res, url, url_log, actor_info, ja, emby_on):
         actor_introduce_0 = actor_output.find(id="mf-section-0")
 
         # 人物
-        try:
+        with contextlib.suppress(Exception):
             overview += _extract_section_content(actor_output, actor_introduce_0, "人物", "人物介绍")
-        except Exception:
-            pass
 
         # 简历
         try:

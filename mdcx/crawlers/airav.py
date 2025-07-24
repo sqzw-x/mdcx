@@ -10,10 +10,7 @@ from mdcx.models.log_buffer import LogBuffer
 
 def getWebNumber(html):
     result = html.xpath('//h5[@class=" d-none d-md-block text-primary mb-3"]/text()')
-    if result:
-        result = result[0].strip()
-    else:
-        result = ""
+    result = result[0].strip() if result else ""
     return result
 
 
@@ -211,7 +208,7 @@ async def main(
             "website": "",
         }
     dic = {website_name: {language: dic}}
-    LogBuffer.req().write(f"({round((time.time() - start_time))}s) ")
+    LogBuffer.req().write(f"({round(time.time() - start_time)}s) ")
     return dic
 
 

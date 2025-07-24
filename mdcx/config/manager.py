@@ -89,7 +89,7 @@ class ConfigManager(ManualConfig):
                         errors.append(f"内部错误: {key} 具有未知类型 {expected_type} (位于 {section}), 请联系开发者")
                 except Exception as e:
                     errors.append(f"读取配置错误: {key} (位于 {section}) {value=}  {str(e)}")
-        setattr(self.config, "unknown_fields", unknown_fields)
+        setattr(self.config, "unknown_fields", unknown_fields)  # noqa: B010
         return "\n\t".join(errors)
 
     def init_config(self):
@@ -411,8 +411,8 @@ class ConfigSchema:
         self.record_success_file = "record_success_file" in self.no_escape
 
         # 是否清理文件以及清理列表
-        can_clean = True if "i_know" in self.clean_enable and "i_agree" in self.clean_enable else False
-        can_clean_auto = True if can_clean and "clean_auto" in self.clean_enable else False
+        can_clean = "i_know" in self.clean_enable and "i_agree" in self.clean_enable
+        can_clean_auto = can_clean and "clean_auto" in self.clean_enable
         clean_ext_list = (
             re.split(r"[|｜，,]", self.clean_ext)
             if can_clean and self.clean_ext and "clean_ext" in self.clean_enable
@@ -500,10 +500,7 @@ class ConfigSchema:
         parser.add_section("mdcx")
         for field in fields(self):
             value = getattr(self, field.name)
-            if isinstance(value, bool):
-                value = "true" if value else "false"
-            else:
-                value = str(value)
+            value = ("true" if value else "false") if isinstance(value, bool) else str(value)
             parser.set("mdcx", field.name, value)
         for website in ManualConfig.SUPPORTED_WEBSITES:
             if url := getattr(self, f"{website}_website", ""):

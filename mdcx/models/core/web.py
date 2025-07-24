@@ -9,7 +9,6 @@ import shutil
 import time
 import urllib.parse
 from asyncio import to_thread
-from typing import Optional
 
 import aiofiles
 import aiofiles.os
@@ -55,13 +54,12 @@ async def get_big_pic_by_amazon(result: CrawlersResult, originaltitle_amazon: st
             and len(originaltitle_amazon_list) < 2
         ):
             for each_name in originaltitle_amazon.split(" "):
-                if each_name not in originaltitle_amazon_list:
-                    if (
-                        len(each_name) > 8
-                        or (not each_name.encode("utf-8").isalnum() and len(each_name) > 4)
-                        and each_name not in actor_amazon
-                    ):
-                        originaltitle_amazon_list.append(each_name)
+                if each_name not in originaltitle_amazon_list and (
+                    len(each_name) > 8
+                    or (not each_name.encode("utf-8").isalnum() and len(each_name) > 4)
+                    and each_name not in actor_amazon
+                ):
+                    originaltitle_amazon_list.append(each_name)
             continue
 
         # 有结果时，检查结果
@@ -83,13 +81,12 @@ async def get_big_pic_by_amazon(result: CrawlersResult, originaltitle_amazon: st
                         if short_originaltitle_amazon in originaltitle_amazon_half:
                             originaltitle_amazon_half = short_originaltitle_amazon
                 for each_name in originaltitle_amazon.split(" "):
-                    if each_name not in originaltitle_amazon_list:
-                        if (
-                            len(each_name) > 8
-                            or (not each_name.encode("utf-8").isalnum() and len(each_name) > 4)
-                            and each_name not in actor_amazon
-                        ):
-                            originaltitle_amazon_list.append(each_name)
+                    if each_name not in originaltitle_amazon_list and (
+                        len(each_name) > 8
+                        or (not each_name.encode("utf-8").isalnum() and len(each_name) > 4)
+                        and each_name not in actor_amazon
+                    ):
+                        originaltitle_amazon_list.append(each_name)
 
             # 标题不带演员名匹配
             for each_actor in actor_amazon:
@@ -212,7 +209,7 @@ async def trailer_download(
     folder_new: str,
     folder_old: str,
     naming_rule: str,
-) -> Optional[bool]:
+) -> bool | None:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
@@ -430,15 +427,14 @@ async def _get_big_thumb(result: CrawlersResult, other: OtherInfo):
 
     # 使用google以图搜图
     pic_url = result.thumb
-    if "google" in config.download_hd_pics:
-        if pic_url and result.thumb_from != "theporndb":
-            thumb_url, cover_size = await get_big_pic_by_google(pic_url)
-            if thumb_url and cover_size[0] > thumb_width:
-                other.thumb_size = cover_size
-                pic_domain = re.findall(r"://([^/]+)", thumb_url)[0]
-                result.thumb_from = f"Google({pic_domain})"
-                result.thumb = thumb_url
-                LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({result.thumb_from})({get_used_time(start_time)}s)")
+    if "google" in config.download_hd_pics and pic_url and result.thumb_from != "theporndb":
+        thumb_url, cover_size = await get_big_pic_by_google(pic_url)
+        if thumb_url and cover_size[0] > thumb_width:
+            other.thumb_size = cover_size
+            pic_domain = re.findall(r"://([^/]+)", thumb_url)[0]
+            result.thumb_from = f"Google({pic_domain})"
+            result.thumb = thumb_url
+            LogBuffer.log().write(f"\n 🖼 HD Thumb found! ({result.thumb_from})({get_used_time(start_time)}s)")
 
     return result
 
@@ -544,9 +540,12 @@ async def thumb_download(
 
     # 如果thumb不下载，看fanart、poster要不要下载，都不下载则返回
     if "thumb" not in config.download_files:
-        if "poster" in config.download_files and ("poster" not in config.keep_files or not poster_path):
-            pass
-        elif "fanart" in config.download_files and ("fanart" not in config.keep_files or not fanart_path):
+        if (
+            "poster" in config.download_files
+            and ("poster" not in config.keep_files or not poster_path)
+            or "fanart" in config.download_files
+            and ("fanart" not in config.keep_files or not fanart_path)
+        ):
             pass
         else:
             return True
@@ -875,7 +874,7 @@ async def fanart_download(
                 return False
 
 
-async def extrafanart_download(extrafanart: list[str], extrafanart_from: str, folder_new_path: str) -> Optional[bool]:
+async def extrafanart_download(extrafanart: list[str], extrafanart_from: str, folder_new_path: str) -> bool | None:
     start_time = time.time()
     download_files = config.download_files
     keep_files = config.keep_files
