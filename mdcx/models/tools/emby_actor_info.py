@@ -37,7 +37,7 @@ async def creat_kodi_actors(add: bool) -> None:
     if add:
         signal.show_log_text("💡 将为待刮削目录中的每个视频创建 .actors 文件夹，并补全演员图片到 .actors 文件夹中\n")
         signal.show_log_text("👩🏻 开始补全 Kodi/Plex/Jvedio 演员头像...")
-        gfriends_actor_data = _get_gfriends_actor_data()
+        gfriends_actor_data = await _get_gfriends_actor_data()
     else:
         signal.show_log_text("💡 将清除该目录下的所有 .actors 文件夹...\n")
         gfriends_actor_data = True
