@@ -7,6 +7,8 @@
 ```bash
 git clone https://github.com/sqzw-x/mdcx.git
 cd mdcx
+uv sync
+pre-commit install
 uv run main.py
 ```
 
