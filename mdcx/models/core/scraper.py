@@ -195,6 +195,14 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
                 f"\n 🔴 Data failed!({get_used_time(start_time)}s)"
             )
             return None, None
+        # 处理 FileInfo 和 CrawlersResult 的共同字段, 即 number/mosaic/letters
+        # todo 理想情况, crawl 后应该以 res 为准, 后续不应再访问 file_info 的相关字段
+        # todo 注意, 实际上目前各 crawler 返回的 mosaic 和 number 字段并未被使用
+        # 1. number 在 crawl 中被更新, 当前只可能取 file_info.number/short_number/appoint_number
+        # 2. letters 在 crawl 过程不会变化, 直接取 file_info 的值
+        res.letters = file_info.letters
+        # 3. res.mosaic 在 crawl 中被更新, 实际上完全是由 file_info 的某些字段决定的, 和初始化 file_info.mosaic 的逻辑存在重复
+        file_info.mosaic = res.mosaic
 
     # 显示json_data结果或日志
     show_result(res.fields_info, start_time)

@@ -610,9 +610,10 @@ async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult | N
     if res is None:
         return None
 
-    number = res.number
+    number = file_number  # res.number 实际上并未设置, 此处取 file_number
     if appoint_number:
         number = appoint_number
+    res.number = number  # 此处设置
 
     # 马赛克
     if leak:
@@ -632,9 +633,6 @@ async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult | N
             res.mosaic = "有码"
     print(number, cd_part, res.mosaic, LogBuffer.req().get().strip("-> "))
 
-    # 车牌字母
-    letters = get_number_letters(number)
-
     # 原标题，用于amazon搜索
     res.originaltitle_amazon = res.originaltitle
     if res.actor_amazon:
@@ -648,10 +646,6 @@ async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult | N
     # VR 时下载小封面
     if "VR" in number:
         res.image_download = True
-
-    # 返回处理后的json_data
-    res.number = number
-    res.letters = letters
 
     return res
 
