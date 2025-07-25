@@ -51,7 +51,7 @@ from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import CrawlerInput, CrawlerResult, CrawlersResult, CrawlTask
-from mdcx.number import get_number_letters, is_uncensored
+from mdcx.number import is_uncensored
 from mdcx.utils.dataclass import update
 
 CRAWLER_FUNCS: dict[str, Callable] = {
@@ -379,9 +379,6 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
 
             if field == "poster":
                 reduced.image_download = site_data.image_download
-            elif field == "thumb":
-                # 记录所有 thumb url 以便后续下载
-                reduced.thumb_list.append((website, site_data.thumb))
             elif field == "actor":
                 if isinstance(site_data.actor, list):
                     # 处理 actor 为列表的情况
@@ -391,8 +388,6 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
                     reduced.all_actor = site_data.actor
                 if not reduced.all_actor_photo:
                     reduced.all_actor_photo = site_data.actor_photo
-                # 记录所有网站的 actor 用于 Amazon 搜图, 因为有的网站 actor 不对
-                reduced.actor_amazon.extend(site_data.actor.split(","))
             elif field == "originaltitle" and site_data.actor:
                 reduced.amazon_orginaltitle_actor = site_data.actor.split(",")[0]
 
@@ -405,6 +400,18 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
             break
         else:  # 所有来源都无此字段
             reduced.fields_info += f"\n     {field:<13}: {'-----'} ({'not found'})"
+
+    # 需尽力收集的字段
+    for data in all_res.values():
+        # 记录所有来源的 thumb url 以便后续下载
+        if data.thumb:
+            reduced.thumb_list.append((data.source, data.thumb))
+        # 记录所有来源的 actor 用于 Amazon 搜图
+        if data.actor:
+            reduced.actor_amazon.extend(data.actor.split(","))
+    # 去重
+    reduced.thumb_list = list(dict.fromkeys(reduced.thumb_list))  # 保序
+    reduced.actor_amazon = list(set(reduced.actor_amazon))
 
     # 处理 year
     if reduced.year and (r := re.search(r"\d{4}", reduced.release)):
