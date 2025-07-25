@@ -166,7 +166,6 @@ async def get_video_size(file_path: str):
     if hd_get == "video":
         try:
             height, codec = await asyncio.to_thread(get_video_metadata, file_path)
-            codec = codec.upper()
         except Exception as e:
             signal.show_log_text(f" 🔴 无法获取视频分辨率! 文件地址: {file_path}  错误信息: {e}")
     elif hd_get == "path":
