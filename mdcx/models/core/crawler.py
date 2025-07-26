@@ -3,8 +3,6 @@ import re
 from collections.abc import Callable
 from typing import cast
 
-import langid
-
 from mdcx.config.manager import config
 from mdcx.consts import ManualConfig
 from mdcx.crawlers import (
@@ -53,6 +51,7 @@ from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import CrawlerInput, CrawlerResult, CrawlersResult, CrawlTask
 from mdcx.number import is_uncensored
 from mdcx.utils.dataclass import update
+from mdcx.utils.str import is_japanese
 
 CRAWLER_FUNCS: dict[str, Callable] = {
     "7mmtv": mmtv.main,
@@ -365,7 +364,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
             if config.scrape_like != "speed" and field in ["title", "outline", "originaltitle", "originalplot"]:
                 lang = all_field_languages.get(field, "jp")
                 if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:  # why?
-                    if langid.classify(getattr(site_data, field, ""))[0] != "ja":
+                    if not is_japanese(getattr(site_data, field, "")):
                         if lang == "jp":
                             LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为非日文，跳过！)")
                             continue

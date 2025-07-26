@@ -4,7 +4,6 @@ import re
 import urllib.parse
 
 import bs4
-import langid
 import zhconv
 
 from mdcx.config.manager import config
@@ -17,6 +16,7 @@ from mdcx.models.base.translate import (
     youdao_translate_async,
 )
 from mdcx.models.tools.emby import EMbyActressInfo
+from mdcx.utils.str import is_english
 
 
 async def search_wiki(actor_info: EMbyActressInfo) -> tuple[str | None, str]:
@@ -493,7 +493,7 @@ async def _process_translation(actor_info, overview, ja, emby_on):
     tag_req = actor_info.taglines[0] if tag_trans else ""
 
     # 英文标签单独翻译
-    if tag_req and langid.classify(tag_req)[0] == "en":
+    if tag_req and is_english(tag_req):
         tag_req = await _translate_english_tag(tag_req, translate_by_list, actor_info)
 
     # 翻译内容

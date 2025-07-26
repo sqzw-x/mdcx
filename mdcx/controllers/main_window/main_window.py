@@ -176,7 +176,6 @@ class MyMAinWindow(QMainWindow):
         self.creat_right_menu()  # 加载右键菜单
         self.pushButton_main_clicked()  # 切换到主界面
         self.auto_start()  # 自动开始刮削
-        # self.load_langid() # 后台加载langid，第一次加载需要时间，预加载避免卡住
         # endregion
 
     # region Init

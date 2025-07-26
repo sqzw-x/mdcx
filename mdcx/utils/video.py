@@ -4,25 +4,9 @@ import shutil
 import subprocess
 
 try:
-    import cv2
-except ImportError:
-    cv2 = None
-
-try:
     import av
 except ImportError:
     av = None
-
-
-def get_video_metadata_opencv(file_path: str) -> tuple[int, str]:
-    if cv2 is None:
-        raise ImportError("Should not be called if opencv is not available")
-    cap = cv2.VideoCapture(file_path)
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    # 使用opencv获取编码器格式
-    codec = int(cap.get(cv2.CAP_PROP_FOURCC))
-    codec_fourcc = chr(codec & 0xFF) + chr((codec >> 8) & 0xFF) + chr((codec >> 16) & 0xFF) + chr((codec >> 24) & 0xFF)
-    return height, codec_fourcc.upper()
 
 
 def get_video_metadata_pyav(file_path: str) -> tuple[int, str]:
@@ -67,10 +51,7 @@ def get_video_metadata_ffmpeg(file_path: str) -> tuple[int, str]:
     return height, codec_fourcc
 
 
-if cv2 is not None:
-    print("Using OpenCV for video metadata extraction")
-    get_video_metadata = get_video_metadata_opencv
-elif av is not None:
+if av is not None:
     print("Using PyAV for video metadata extraction")
     get_video_metadata = get_video_metadata_pyav
 else:

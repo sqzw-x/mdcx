@@ -4,7 +4,6 @@ import re
 import time
 import traceback
 
-import langid
 import zhconv
 
 from mdcx.config.manager import config
@@ -21,6 +20,7 @@ from mdcx.models.types import CrawlersResult
 from mdcx.number import get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import get_used_time, remove_repeat
+from mdcx.utils.str import is_japanese
 
 
 def translate_info(json_data: CrawlersResult, has_sub: bool):
@@ -257,14 +257,14 @@ async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie
     title_sehua = config.title_sehua
     title_sehua_zh = config.title_sehua_zh
     title_yesjav = config.title_yesjav
-    json_data_title_language = langid.classify(json_data.title)[0]
+    title_is_jp = is_japanese(json_data.title)
 
     # 处理title
     if title_language != "jp":
         movie_title = ""
 
         # 匹配本地高质量标题(色花标题数据)
-        if title_sehua_zh or (json_data_title_language == "ja" and title_sehua):
+        if title_sehua_zh or (title_is_jp and title_sehua):
             start_time = time.time()
             try:
                 movie_title = resources.sehua_title_data.get(movie_number)
@@ -276,24 +276,19 @@ async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie
                 LogBuffer.log().write(f"\n 🌸 Sehua title done!({get_used_time(start_time)}s)")
 
         # 匹配网络高质量标题（yesjav， 可在线更新）
-        if not movie_title and title_yesjav and json_data_title_language == "ja":
+        if not movie_title and title_yesjav and title_is_jp:
             start_time = time.time()
             movie_title = await get_yesjav_title(movie_number)
-            if movie_title and langid.classify(movie_title)[0] != "ja":
+            if movie_title and not is_japanese(movie_title):
                 json_data.title = movie_title
                 LogBuffer.log().write(f"\n 🆈 Yesjav title done!({get_used_time(start_time)}s)")
 
         # 使用json_data数据
-        if not movie_title and title_translate and json_data_title_language == "ja":
+        if not movie_title and title_translate and title_is_jp:
             trans_title = json_data.title
 
     # 处理outline
-    if (
-        json_data.outline
-        and outline_language != "jp"
-        and outline_translate
-        and langid.classify(json_data.outline)[0] == "ja"
-    ):
+    if json_data.outline and outline_language != "jp" and outline_translate and is_japanese(json_data.outline):
         trans_outline = json_data.outline
 
     # 翻译

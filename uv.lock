@@ -293,15 +293,6 @@ wheels = [
 ]
 
 [[package]]
-name = "langid"
-version = "1.1.6"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/ea/4c/0fb7d900d3b0b9c8703be316fbddffecdab23c64e1b46c7a83561d78bd43/langid-1.1.6.tar.gz", hash = "sha256:044bcae1912dab85c33d8e98f2811b8f4ff1213e5e9a9e9510137b84da2cb293", size = 1925978, upload-time = "2016-04-05T22:34:15.786Z" }
-
-[[package]]
 name = "lxml"
 version = "5.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -360,10 +351,8 @@ dependencies = [
     { name = "av" },
     { name = "beautifulsoup4" },
     { name = "curl-cffi" },
-    { name = "langid" },
     { name = "lxml" },
     { name = "openai" },
-    { name = "opencv-contrib-python-headless" },
     { name = "oshash" },
     { name = "pillow" },
     { name = "ping3" },
@@ -390,10 +379,8 @@ requires-dist = [
     { name = "av", specifier = ">=15.0.0" },
     { name = "beautifulsoup4", specifier = "==4.13.4" },
     { name = "curl-cffi", specifier = "==0.11.4" },
-    { name = "langid", specifier = "==1.1.6" },
     { name = "lxml", specifier = "==5.4.0" },
     { name = "openai", specifier = "==1.91.0" },
-    { name = "opencv-contrib-python-headless", specifier = "~=4.12" },
     { name = "oshash", specifier = "==0.1.1" },
     { name = "pillow", specifier = "==11.3.0" },
     { name = "ping3", specifier = "==4.0.4" },
@@ -432,34 +419,6 @@ wheels = [
 ]
 
 [[package]]
-name = "numpy"
-version = "2.2.6"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/76/21/7d2a95e4bba9dc13d043ee156a356c0a8f0c6309dff6b21b4d71a073b8a8/numpy-2.2.6.tar.gz", hash = "sha256:e29554e2bef54a90aa5cc07da6ce955accb83f21ab5de01a62c8478897b264fd", size = 20276440, upload-time = "2025-05-17T22:38:04.611Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f9/5c/6657823f4f594f72b5471f1db1ab12e26e890bb2e41897522d134d2a3e81/numpy-2.2.6-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:0811bb762109d9708cca4d0b13c4f67146e3c3b7cf8d34018c722adb2d957c84", size = 20867828, upload-time = "2025-05-17T21:37:56.699Z" },
-    { url = "https://files.pythonhosted.org/packages/dc/9e/14520dc3dadf3c803473bd07e9b2bd1b69bc583cb2497b47000fed2fa92f/numpy-2.2.6-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:287cc3162b6f01463ccd86be154f284d0893d2b3ed7292439ea97eafa8170e0b", size = 14143006, upload-time = "2025-05-17T21:38:18.291Z" },
-    { url = "https://files.pythonhosted.org/packages/4f/06/7e96c57d90bebdce9918412087fc22ca9851cceaf5567a45c1f404480e9e/numpy-2.2.6-cp313-cp313-macosx_14_0_arm64.whl", hash = "sha256:f1372f041402e37e5e633e586f62aa53de2eac8d98cbfb822806ce4bbefcb74d", size = 5076765, upload-time = "2025-05-17T21:38:27.319Z" },
-    { url = "https://files.pythonhosted.org/packages/73/ed/63d920c23b4289fdac96ddbdd6132e9427790977d5457cd132f18e76eae0/numpy-2.2.6-cp313-cp313-macosx_14_0_x86_64.whl", hash = "sha256:55a4d33fa519660d69614a9fad433be87e5252f4b03850642f88993f7b2ca566", size = 6617736, upload-time = "2025-05-17T21:38:38.141Z" },
-    { url = "https://files.pythonhosted.org/packages/85/c5/e19c8f99d83fd377ec8c7e0cf627a8049746da54afc24ef0a0cb73d5dfb5/numpy-2.2.6-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f92729c95468a2f4f15e9bb94c432a9229d0d50de67304399627a943201baa2f", size = 14010719, upload-time = "2025-05-17T21:38:58.433Z" },
-    { url = "https://files.pythonhosted.org/packages/19/49/4df9123aafa7b539317bf6d342cb6d227e49f7a35b99c287a6109b13dd93/numpy-2.2.6-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1bc23a79bfabc5d056d106f9befb8d50c31ced2fbc70eedb8155aec74a45798f", size = 16526072, upload-time = "2025-05-17T21:39:22.638Z" },
-    { url = "https://files.pythonhosted.org/packages/b2/6c/04b5f47f4f32f7c2b0e7260442a8cbcf8168b0e1a41ff1495da42f42a14f/numpy-2.2.6-cp313-cp313-musllinux_1_2_aarch64.whl", hash = "sha256:e3143e4451880bed956e706a3220b4e5cf6172ef05fcc397f6f36a550b1dd868", size = 15503213, upload-time = "2025-05-17T21:39:45.865Z" },
-    { url = "https://files.pythonhosted.org/packages/17/0a/5cd92e352c1307640d5b6fec1b2ffb06cd0dabe7d7b8227f97933d378422/numpy-2.2.6-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:b4f13750ce79751586ae2eb824ba7e1e8dba64784086c98cdbbcc6a42112ce0d", size = 18316632, upload-time = "2025-05-17T21:40:13.331Z" },
-    { url = "https://files.pythonhosted.org/packages/f0/3b/5cba2b1d88760ef86596ad0f3d484b1cbff7c115ae2429678465057c5155/numpy-2.2.6-cp313-cp313-win32.whl", hash = "sha256:5beb72339d9d4fa36522fc63802f469b13cdbe4fdab4a288f0c441b74272ebfd", size = 6244532, upload-time = "2025-05-17T21:43:46.099Z" },
-    { url = "https://files.pythonhosted.org/packages/cb/3b/d58c12eafcb298d4e6d0d40216866ab15f59e55d148a5658bb3132311fcf/numpy-2.2.6-cp313-cp313-win_amd64.whl", hash = "sha256:b0544343a702fa80c95ad5d3d608ea3599dd54d4632df855e4c8d24eb6ecfa1c", size = 12610885, upload-time = "2025-05-17T21:44:05.145Z" },
-    { url = "https://files.pythonhosted.org/packages/6b/9e/4bf918b818e516322db999ac25d00c75788ddfd2d2ade4fa66f1f38097e1/numpy-2.2.6-cp313-cp313t-macosx_10_13_x86_64.whl", hash = "sha256:0bca768cd85ae743b2affdc762d617eddf3bcf8724435498a1e80132d04879e6", size = 20963467, upload-time = "2025-05-17T21:40:44Z" },
-    { url = "https://files.pythonhosted.org/packages/61/66/d2de6b291507517ff2e438e13ff7b1e2cdbdb7cb40b3ed475377aece69f9/numpy-2.2.6-cp313-cp313t-macosx_11_0_arm64.whl", hash = "sha256:fc0c5673685c508a142ca65209b4e79ed6740a4ed6b2267dbba90f34b0b3cfda", size = 14225144, upload-time = "2025-05-17T21:41:05.695Z" },
-    { url = "https://files.pythonhosted.org/packages/e4/25/480387655407ead912e28ba3a820bc69af9adf13bcbe40b299d454ec011f/numpy-2.2.6-cp313-cp313t-macosx_14_0_arm64.whl", hash = "sha256:5bd4fc3ac8926b3819797a7c0e2631eb889b4118a9898c84f585a54d475b7e40", size = 5200217, upload-time = "2025-05-17T21:41:15.903Z" },
-    { url = "https://files.pythonhosted.org/packages/aa/4a/6e313b5108f53dcbf3aca0c0f3e9c92f4c10ce57a0a721851f9785872895/numpy-2.2.6-cp313-cp313t-macosx_14_0_x86_64.whl", hash = "sha256:fee4236c876c4e8369388054d02d0e9bb84821feb1a64dd59e137e6511a551f8", size = 6712014, upload-time = "2025-05-17T21:41:27.321Z" },
-    { url = "https://files.pythonhosted.org/packages/b7/30/172c2d5c4be71fdf476e9de553443cf8e25feddbe185e0bd88b096915bcc/numpy-2.2.6-cp313-cp313t-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e1dda9c7e08dc141e0247a5b8f49cf05984955246a327d4c48bda16821947b2f", size = 14077935, upload-time = "2025-05-17T21:41:49.738Z" },
-    { url = "https://files.pythonhosted.org/packages/12/fb/9e743f8d4e4d3c710902cf87af3512082ae3d43b945d5d16563f26ec251d/numpy-2.2.6-cp313-cp313t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f447e6acb680fd307f40d3da4852208af94afdfab89cf850986c3ca00562f4fa", size = 16600122, upload-time = "2025-05-17T21:42:14.046Z" },
-    { url = "https://files.pythonhosted.org/packages/12/75/ee20da0e58d3a66f204f38916757e01e33a9737d0b22373b3eb5a27358f9/numpy-2.2.6-cp313-cp313t-musllinux_1_2_aarch64.whl", hash = "sha256:389d771b1623ec92636b0786bc4ae56abafad4a4c513d36a55dce14bd9ce8571", size = 15586143, upload-time = "2025-05-17T21:42:37.464Z" },
-    { url = "https://files.pythonhosted.org/packages/76/95/bef5b37f29fc5e739947e9ce5179ad402875633308504a52d188302319c8/numpy-2.2.6-cp313-cp313t-musllinux_1_2_x86_64.whl", hash = "sha256:8e9ace4a37db23421249ed236fdcdd457d671e25146786dfc96835cd951aa7c1", size = 18385260, upload-time = "2025-05-17T21:43:05.189Z" },
-    { url = "https://files.pythonhosted.org/packages/09/04/f2f83279d287407cf36a7a8053a5abe7be3622a4363337338f2585e4afda/numpy-2.2.6-cp313-cp313t-win32.whl", hash = "sha256:038613e9fb8c72b0a41f025a7e4c3f0b7a1b5d768ece4796b674c8f3fe13efff", size = 6377225, upload-time = "2025-05-17T21:43:16.254Z" },
-    { url = "https://files.pythonhosted.org/packages/67/0e/35082d13c09c02c011cf21570543d202ad929d961c02a147493cb0c2bdf5/numpy-2.2.6-cp313-cp313t-win_amd64.whl", hash = "sha256:6031dd6dfecc0cf9f668681a37648373bddd6421fff6c66ec1624eed0180ee06", size = 12771374, upload-time = "2025-05-17T21:43:35.479Z" },
-]
-
-[[package]]
 name = "openai"
 version = "1.91.0"
 source = { registry = "https://pypi.org/simple" }
@@ -476,23 +435,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/0f/e2/a22f2973b729eff3f1f429017bdf717930c5de0fbf9e14017bae330e4e7a/openai-1.91.0.tar.gz", hash = "sha256:d6b07730d2f7c6745d0991997c16f85cddfc90ddcde8d569c862c30716b9fc90", size = 472529, upload-time = "2025-06-23T18:27:10.961Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7a/d2/f99bdd6fc737d6b3cf0df895508d621fc9a386b375a1230ee81d46c5436e/openai-1.91.0-py3-none-any.whl", hash = "sha256:207f87aa3bc49365e014fac2f7e291b99929f4fe126c4654143440e0ad446a5f", size = 735837, upload-time = "2025-06-23T18:27:08.913Z" },
-]
-
-[[package]]
-name = "opencv-contrib-python-headless"
-version = "4.12.0.88"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/d2/2d/6ff35fa696afe2c4e3616d9560848b131353f24d9110d51baa93dd947212/opencv-contrib-python-headless-4.12.0.88.tar.gz", hash = "sha256:3d8a7b23a5faba4ad34e13f51668c56be791e57ab02d68d9016200fed3c12c77", size = 150801337, upload-time = "2025-07-07T09:20:37.432Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/33/3a/edf7380db58557cc29bdcff71862b8100c64adf489517ec7250509df4b72/opencv_contrib_python_headless-4.12.0.88-cp37-abi3-macosx_13_0_arm64.whl", hash = "sha256:a17ebb914f309afe72447c33b9187ff02f23f1483faa5c0ffde7aadc88711e2a", size = 46854919, upload-time = "2025-07-07T09:17:29.386Z" },
-    { url = "https://files.pythonhosted.org/packages/ca/0b/abacf0a9d3161cf15ee9783fab7081f1349e825844b03178bfe6fb484e96/opencv_contrib_python_headless-4.12.0.88-cp37-abi3-macosx_13_0_x86_64.whl", hash = "sha256:85b520e527052a85a682f09cdc12e5f156f56d8c277261b4b65b48431abae96f", size = 67163853, upload-time = "2025-07-07T09:17:40.97Z" },
-    { url = "https://files.pythonhosted.org/packages/93/b4/13f1370c2b8e566f9c9f3658982ecd331c666215e7f379e8b1d7ab52a63d/opencv_contrib_python_headless-4.12.0.88-cp37-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:d60a12b915c55a50468c013fcd839e941b49ccc1f37b914b62543382c36bf81d", size = 38548620, upload-time = "2025-07-07T09:17:49.086Z" },
-    { url = "https://files.pythonhosted.org/packages/b3/17/bfe5ccbaa3b15b8af3371137732e69a4563ee1b05a17e6578521c09d2a56/opencv_contrib_python_headless-4.12.0.88-cp37-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:b183e2322468c9d3bd9cac4ba44b272d828ec22842395bcfa51df31765224c0a", size = 60138674, upload-time = "2025-07-07T09:17:59.07Z" },
-    { url = "https://files.pythonhosted.org/packages/9b/2c/328488cba04909ab6f1f00ad98758cb6c4806db4904adf2d12ee988508fd/opencv_contrib_python_headless-4.12.0.88-cp37-abi3-win32.whl", hash = "sha256:902888b4e1b4826c721840d9107e91d32f146a2c3bc8cb728f0088bf44204e4b", size = 36114174, upload-time = "2025-07-07T09:18:06.818Z" },
-    { url = "https://files.pythonhosted.org/packages/44/d0/75057aac72cb7134b430a7c4c715af8a0cc68fe17c69889d64f33a5e311a/opencv_contrib_python_headless-4.12.0.88-cp37-abi3-win_amd64.whl", hash = "sha256:c57e32812fea2a542bb220088fb3ce8a210fe114c9454d1c9e8cd162e1a1fde8", size = 45190148, upload-time = "2025-07-07T09:18:15.15Z" },
 ]
 
 [[package]]

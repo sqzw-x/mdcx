@@ -7,7 +7,6 @@ from io import StringIO
 
 import aiofiles
 import aiofiles.os
-import langid
 from lxml import etree
 
 from mdcx.config.manager import config
@@ -19,6 +18,7 @@ from mdcx.number import get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import convert_path, get_used_time, split_path
 from mdcx.utils.file import delete_file_async
+from mdcx.utils.str import is_japanese
 
 
 async def write_nfo(
@@ -511,7 +511,7 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResul
     if config.title_language == "jp" and "read_update_nfo" in config.read_mode and originaltitle:
         json_data.title = originaltitle
     json_data.originaltitle = originaltitle
-    if originaltitle and langid.classify(originaltitle)[0] == "ja":
+    if is_japanese(originaltitle):
         json_data.originaltitle_amazon = originaltitle
         if actor:
             json_data.actor_amazon = actor.split(",")
