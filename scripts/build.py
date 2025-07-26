@@ -97,7 +97,7 @@ class BuildManager:
         if self.is_mac and self.create_dmg:
             r = self._run_command(["create-dmg", "--version"])
             if not r:
-                logger.warning("create-dmg 未安装, 尝试安装... brew install create-dmg")
+                logger.warning("create-dmg 未安装, 尝试安装: brew install create-dmg ...")
                 self._run_command(["brew", "install", "create-dmg"], error_msg="create-dmg 安装失败")
                 r = self._run_command(["create-dmg", "--version"])
             logger.info(f"\tcreate-dmg 版本: {r}")
@@ -112,12 +112,12 @@ class BuildManager:
         """生成.spec文件"""
         logger.info("生成 .spec 文件...")
         cmd = [
-            sys.executable,
-            "-m",
-            "PyInstaller",
+            "pyi-makespec",
             "--name",
             self.app_name,
+            "--noupx",
             *(["--osx-bundle-identifier", "com.mdcuniverse.mdcx"] * self.is_mac),
+            *(["--onefile"] if not self.is_mac else []),
             "-w",
             "main.py",
             "-p",
@@ -132,9 +132,8 @@ class BuildManager:
             "_cffi_backend",
             "--collect-all",
             "curl_cffi",
-            "-y",
         ]
-        self._run_command(cmd, "✅ 生成.spec文件", "spec文件生成失败")
+        self._run_command(cmd, "✅ 生成 .spec 文件", "spec 文件生成失败")
 
     def _modify_spec(self):
         """修改.spec文件添加版本信息"""
@@ -176,19 +175,26 @@ class BuildManager:
         logger.info("开始构建应用...")
         build_start = time.time()
 
-        cmd = [sys.executable, "-m", "PyInstaller", f"{self.app_name}.spec", "-y"]
+        cmd = ["pyinstaller", f"{self.app_name}.spec", "-y"]
         self._run_command(cmd, "✅ 应用构建成功", "pyinstaller 构建失败")
         build_duration = time.time() - build_start
 
         logger.info(f"✅ 应用构建成功! 耗时: {int(build_duration)}秒")
 
         # 验证构建结果
-        app_path = Path(f"dist/{self.app_name}.app")
+        if self.is_windows:
+            app_path = Path(f"dist/{self.app_name}.exe")
+        elif self.is_mac:
+            app_path = Path(f"dist/{self.app_name}.app")
+        else:
+            app_path = Path(f"dist/{self.app_name}")
         if not app_path.exists():
-            raise BuildError("应用包未生成")
+            raise BuildError("构建未生成")
+        logger.info(f"✅ 构建产物: {app_path}")
         with suppress(Exception):
-            app_size = shutil.disk_usage(app_path).used
-            logger.info(f"应用包大小: {app_size / 1024 / 1024 / 1024:.1f} MB")
+            if app_path.is_file():
+                app_size = app_path.stat().st_size
+                logger.info(f"大小: {app_size / 1024 / 1024:.1f} MB")
 
     def _create_dmg(self):
         """创建DMG文件"""
@@ -226,8 +232,8 @@ class BuildManager:
         dmg_duration = time.time() - dmg_start
 
         if result.returncode != 0:
-            raise BuildError("DMG文件创建失败: " + result.stdout.strip())
-        logger.debug("DMG创建输出: ", result.stdout.strip())
+            raise BuildError("DMG 文件创建失败: " + result.stdout.strip())
+        logger.debug("DMG 创建输出: ", result.stdout.strip())
 
         logger.info(f"✅ DMG 文件创建成功! 耗时: {int(dmg_duration)}秒")
 
@@ -236,7 +242,7 @@ class BuildManager:
         logger.info(f"✅ DMG 文件: {dmg_path}")
         with suppress(Exception):
             dmg_size = dmg_path.stat().st_size
-            logger.info(f"大小: {dmg_size / 1024 / 1024:.1f} MB")
+            logger.info(f"大小: {dmg_size >> 20:.1f} MB")
 
     def _cleanup(self):
         """清理临时文件"""
