@@ -7,13 +7,14 @@ requires-python = ">=3.13"
 dependencies = [
     "aiofiles==24.1.0",
     "aiolimiter==1.2.1",
+    "av>=15.0.0",
     "beautifulsoup4==4.13.4",
     "curl-cffi==0.11.4",
-    "langid==1.1.6",
+    "langid==1.1.6",          # todo remove this
     "lxml==5.4.0",
     "openai==1.91.0",
     # 升级 opencv 以使用 numpy 2. numpy 1 在 3.13 无 wheel, 从 source 编译失败且耗时较长
-    "opencv-contrib-python-headless~=4.12",
+    "opencv-contrib-python-headless~=4.12",       # todo remove this
     "oshash==0.1.1",
     "pillow==11.3.0",
     "ping3==4.0.4",
