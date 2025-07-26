@@ -234,7 +234,7 @@ class BuildManager:
 
         if result.returncode != 0:
             raise BuildError("DMG 文件创建失败: " + result.stdout.strip())
-        logger.debug("DMG 创建输出: ", result.stdout.strip())
+        logger.debug("DMG 创建输出: " + result.stdout.strip())
 
         logger.info(f"✅ DMG 文件创建成功! 耗时: {int(dmg_duration)}秒")
 
