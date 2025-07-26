@@ -12,7 +12,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.logging import RichHandler
 
-console = Console()
+console = Console(color_system="truecolor")
 handler = RichHandler(console=console)
 logger = logging.getLogger("build")
 logger.setLevel(logging.INFO)
@@ -273,9 +273,14 @@ class BuildManager:
         Returns:
             如果命令执行成功, 返回标准输出内容; 否则返回 False
         """
-        logger.debug(f"Execute: {' '.join(f'{arg}' for arg in args)}")
-        result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        logger.debug(result.stdout.strip())
+        logger.debug(f"Execute: {' '.join(args)}")
+        try:
+            result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            logger.debug(result.stdout.strip())
+        except Exception:
+            if error_msg is not None:
+                raise BuildError(f"{error_msg}")
+            return False
         if result.returncode != 0:
             if error_msg is not None:
                 raise BuildError(f"{error_msg}")
@@ -289,7 +294,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--version", "-v", help="指定版本号")
     parser.add_argument("--app-name", "-n", default="MDCx", help="指定应用名称")
-    parser.add_argument("--create-dmg", "-dmg", action="store_true", help="创建 DMG 文件 (仅macOS)")
+    parser.add_argument("--create-dmg", "--dmg", action="store_true", help="创建 DMG 文件 (仅macOS)")
     parser.add_argument("--debug", action="store_true", help="启用调试模式")
     parser.add_argument("--no-color", action="store_true", help="禁用颜色输出")
     args = parser.parse_args()

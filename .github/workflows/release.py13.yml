@@ -83,13 +83,13 @@ jobs:
           if [ -n "${{ github.event.inputs.tag }}" ]; then
             version="${{ github.event.inputs.tag }}"
           fi
-          uv run scripts/build.py --create-dmg --version "$version" -n "${{ 'MDCx-v2-py3.13' }}"
+          uv run scripts/build.py --create-dmg --version "$version" -n "${{ 'MDCx-v2-py3.13' }}" --debug
 
       - name: Build Windows app - Windows
         if: ${{ matrix.build == 'windows' }}
         env:
           PYTHONIOENCODING: utf-8
-        run: uv run scripts/build.py
+        run: uv run scripts/build.py --debug
 
       - name: Get changelog
         id: get-changelog
