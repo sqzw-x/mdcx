@@ -227,16 +227,8 @@ class BuildManager:
             f"dist/{self.app_name}.dmg",
             f"dist/{self.app_name}.app",
         ]
-        logger.debug(f"Execute: {' '.join(cmd)}")
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-
-        dmg_duration = time.time() - dmg_start
-
-        if result.returncode != 0:
-            raise BuildError("DMG 文件创建失败: " + result.stdout.strip())
-        logger.debug("DMG 创建输出: " + result.stdout.strip())
-
-        logger.info(f"✅ DMG 文件创建成功! 耗时: {int(dmg_duration)}秒")
+        self._run_command(cmd, error_msg="DMG 文件创建失败")
+        logger.info(f"✅ DMG 文件创建成功! 耗时: {int(time.time() - dmg_start)}秒")
 
         # 验证DMG文件
         dmg_path = Path(f"dist/{self.app_name}.dmg")
