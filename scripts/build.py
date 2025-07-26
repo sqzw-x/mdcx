@@ -12,8 +12,8 @@ from pathlib import Path
 from rich.console import Console
 from rich.logging import RichHandler
 
-console = Console(color_system="truecolor")
-handler = RichHandler(console=console)
+console = Console(color_system="truecolor", width=200, no_color=False)
+handler = RichHandler(level=logging.DEBUG, console=console)
 logger = logging.getLogger("build")
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
@@ -77,6 +77,7 @@ class BuildManager:
             sys.exit(1)
         except Exception as e:
             logger.error(f"意外错误: {e}")
+            console.print_exception()
             sys.exit(1)
 
     def _check_environment(self):
@@ -176,7 +177,7 @@ class BuildManager:
         build_start = time.time()
 
         cmd = ["pyinstaller", f"{self.app_name}.spec", "-y"]
-        self._run_command(cmd, "✅ 应用构建成功", "pyinstaller 构建失败")
+        self._run_command(cmd, error_msg="pyinstaller 构建失败")
         build_duration = time.time() - build_start
 
         logger.info(f"✅ 应用构建成功! 耗时: {int(build_duration)}秒")
