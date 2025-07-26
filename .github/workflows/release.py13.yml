@@ -83,11 +83,11 @@ jobs:
                   if [ -n "${{ github.event.inputs.tag }}" ]; then
                     version="${{ github.event.inputs.tag }}"
                   fi
-                  bash scripts/build-macos.sh --create-dmg --version "$version" -n "${{ 'MDCx-v2-py3.13' }}"
+                  uv run scripts/build.py --create-dmg --version "$version" -n "${{ 'MDCx-v2-py3.13' }}"
 
             - name: Build Windows app - Windows
               if: ${{ matrix.build == 'windows' }}
-              run: scripts/build-action
+              run: uv run scripts/build.py
 
             - name: Get changelog
               id: get-changelog
