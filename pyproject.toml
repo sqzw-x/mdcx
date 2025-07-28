@@ -18,10 +18,13 @@ dependencies = [
     "ping3==4.0.4",
     "pyqt5==5.15.11",
     "pyqt5-qt5==5.15.2; sys_platform == 'win32'", # 更高版本无 Windows wheel
+    # "pyqt5-pt5==5.15.17; sys_platform != 'win32'",
     "zhconv==1.4.3",
 ]
 
+
 [project.optional-dependencies]
+web = ["fastapi>=0.116.1", "uvicorn[standard]>=0.35.0"]
 
 [dependency-groups]
 dev = [
