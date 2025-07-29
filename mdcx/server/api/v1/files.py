@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
 from ...config import SAFE_DIR
@@ -39,12 +39,14 @@ async def list_files(path: Annotated[str, Query(description="The absolute path o
         else:
             target_path = (Path.cwd() / p).resolve(strict=True)
     except OSError:
-        raise HTTPException(status_code=400, detail="Resolve path failed. Invalid path provided.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Resolve path failed. Invalid path provided."
+        )
 
     # Ensure the path is within the SAFE_DIR
     if not target_path.as_posix().startswith(SAFE_DIR.as_posix()):
         raise HTTPException(
-            status_code=403,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Access to the specified path is forbidden.",
         )
 
@@ -52,7 +54,7 @@ async def list_files(path: Annotated[str, Query(description="The absolute path o
         target_path = target_path.parent
 
     if not target_path.exists():
-        raise HTTPException(status_code=404, detail=f"Path not found: {path}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Path not found: {path}")
 
     try:
         items = []
@@ -77,4 +79,6 @@ async def list_files(path: Annotated[str, Query(description="The absolute path o
         return {"data": items}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An unexpected error occurred: {str(e)}"
+        )

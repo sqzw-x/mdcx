@@ -9,7 +9,8 @@ from typing import Any
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
 
-from mdcx.server.ws.types import ConnectionStatus, Handler, MessageType, Middleware, WebSocketMessage
+from ..config import WS_PROTOCOL
+from .types import ConnectionStatus, Handler, MessageType, Middleware, WebSocketMessage
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +76,7 @@ class WebSocketManager:
 
     async def connect(self, websocket: WebSocket, client_id: str | None = None) -> str:
         """接受新的 WebSocket 连接"""
-        await websocket.accept()
+        await websocket.accept(subprotocol=WS_PROTOCOL)
 
         if client_id is None:
             client_id = str(uuid.uuid4())
@@ -311,6 +312,22 @@ class WebSocketHandler:
         """处理单个客户端连接"""
         actual_client_id = await self.manager.connect(websocket, client_id)
 
+        async def test_log_to_all():
+            while actual_client_id in self.manager._connections:
+                await asyncio.sleep(1)
+                await self.manager.send_to_client(
+                    actual_client_id,
+                    WebSocketMessage(
+                        type=MessageType.CUSTOM,
+                        data={
+                            "message": f"Test log from client {actual_client_id}",
+                            "timestamp": datetime.now().isoformat(),
+                        },
+                        client_id=actual_client_id,
+                    ),
+                )
+
+        asyncio.create_task(test_log_to_all())
         try:
             while True:
                 # 接收消息

@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-API_KEY_NAME = "X-API-KEY"
+API_KEY_HEADER = "X-API-KEY"
 API_KEY = os.getenv("API_KEY")
 assert API_KEY, "API_KEY must be set in the environment variables."
 
@@ -11,3 +11,5 @@ if _SAFE_DIR is None:
     _SAFE_DIR = "~"
 SAFE_DIR = Path(_SAFE_DIR).expanduser().resolve()
 assert SAFE_DIR.is_dir(), "SAFE_DIR must be a valid directory path."
+
+WS_PROTOCOL = "v1.mdcx"

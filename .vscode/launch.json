@@ -5,6 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug server.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/server.py",
+            "console": "integratedTerminal",
+            "env": {
+                "API_KEY": "API_KEY_FOR_TEST"
+            },
+            "justMyCode": false,
+        },
+        {
             "name": "Debug main.py",
             "type": "debugpy",
             "request": "launch",
