@@ -37,23 +37,21 @@ class ConfigManager(ManualConfig):
     @path.setter
     def path(self, path: str):
         self.data_folder, self.file = os.path.split(path)
+        self.write_mark_file(path)  # 更新标记文件路径
         self._path = path
 
     @path.getter
     def path(self) -> str:
         return self._path
 
-    def read_config(self):
-        self._get_config_path()
-        return self._read_file(self.path)
+    def load(self):
+        return self._load_file(self.path)
 
-    def save_config(self):
-        with open(MARK_FILE, "w", encoding="UTF-8") as f:
-            f.write(self.path)
+    def save(self):
         with open(self.path, "w", encoding="UTF-8") as f:
             f.write(self.config.format_ini())
 
-    def _read_file(self, path):
+    def _load_file(self, path) -> list[str]:
         reader = RawConfigParser(interpolation=None)
         reader.read(path, encoding="UTF-8")
         field_types = {f.name: f.type for f in fields(ConfigSchema)}
@@ -90,9 +88,9 @@ class ConfigManager(ManualConfig):
                 except Exception as e:
                     errors.append(f"读取配置错误: {key} (位于 {section}) {value=}  {str(e)}")
         setattr(self.config, "unknown_fields", unknown_fields)  # noqa: B010
-        return "\n\t".join(errors)
+        return errors
 
-    def init_config(self):
+    def reset(self):
         """写入默认配置"""
         with open(self.path, "w", encoding="UTF-8") as f:
             f.write(ConfigSchema().format_ini())
@@ -100,17 +98,30 @@ class ConfigManager(ManualConfig):
     def _get_config_path(self):
         if not os.path.exists(MARK_FILE):  # 标记文件不存在
             self.path = os.path.join(MAIN_PATH, "config.ini")  # 默认配置文件路径
+        else:
+            self._path = self.read_mark_file()
+            self.data_folder, self.file = os.path.split(self._path)
+        if not os.path.exists(self._path):  # 配置文件不存在, 写入默认值
+            self.reset()
+
+    @staticmethod
+    def write_mark_file(path: str):
+        """写入 MARK_FILE"""
+        if not os.path.exists(MARK_FILE):  # 标记文件不存在
             # 确保 MARK_FILE 所在目录存在
             mark_dir = os.path.dirname(MARK_FILE)
             if mark_dir:
                 os.makedirs(mark_dir, exist_ok=True)
-            with open(MARK_FILE, "w", encoding="UTF-8") as f:
-                f.write(self.path)
-        else:
-            with open(MARK_FILE, encoding="UTF-8") as f:
-                self.path = f.read()
-        if not os.path.exists(self.path):  # 配置文件不存在, 写入默认值
-            self.init_config()
+        with open(MARK_FILE, "w", encoding="UTF-8") as f:
+            f.write(path)
+
+    @staticmethod
+    def read_mark_file() -> str:
+        """读取 MARK_FILE"""
+        if not os.path.exists(MARK_FILE):
+            raise FileNotFoundError(f"标记文件 {MARK_FILE} 不存在, 请先运行配置初始化.")
+        with open(MARK_FILE, encoding="UTF-8") as f:
+            return f.read().strip()
 
 
 @dataclass

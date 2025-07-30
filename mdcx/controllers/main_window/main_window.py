@@ -456,7 +456,7 @@ class MyMAinWindow(QMainWindow):
             need_save_config = True
         if need_save_config:
             try:
-                manager.save_config()
+                manager.save()
             except Exception:
                 signal_qt.show_traceback_log(traceback.format_exc())
         if self.tray_icon is not None:
@@ -1873,7 +1873,7 @@ class MyMAinWindow(QMainWindow):
     # 重置配置
     def pushButton_init_config_clicked(self):
         self.Ui.pushButton_init_config.setEnabled(False)
-        manager.init_config()
+        manager.reset()
         temp_dark = self.dark_mode
         temp_window_radius = self.window_radius
         self.load_config()

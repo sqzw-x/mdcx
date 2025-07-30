@@ -26,9 +26,11 @@ def load_config(self: "MyMAinWindow"):
     """
     读取配置文件并绑定到 UI 组件
     """
-    errors = manager.read_config()
+    errors = manager.load()
     if errors:
-        signal_qt.show_log_text(f"⚠️ 读取配置文件出错:\n\t{errors}\n💡 这不会阻止程序运行, 无效配置将使用默认值\n")
+        signal_qt.show_log_text(
+            f"⚠️ 读取配置文件出错:\n\t{'\n\t'.join(errors)}\n💡 这不会阻止程序运行, 无效配置将使用默认值\n"
+        )
     config.init()
     config_folder = manager.data_folder
     config_file = manager.file

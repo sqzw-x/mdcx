@@ -6,6 +6,8 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
+from mdcx.utils.path import is_descendant
+
 from ...config import SAFE_DIR
 
 router = APIRouter(prefix="/files")
@@ -44,11 +46,8 @@ async def list_files(path: Annotated[str, Query(description="The absolute path o
         )
 
     # Ensure the path is within the SAFE_DIR
-    if not target_path.as_posix().startswith(SAFE_DIR.as_posix()):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access to the specified path is forbidden.",
-        )
+    if not is_descendant(target_path, SAFE_DIR):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access to the specified path is forbidden.")
 
     if not target_path.is_dir():
         target_path = target_path.parent

@@ -657,7 +657,7 @@ def save_config(self: "MyMAinWindow"):
         config_folder = manager.data_folder
     manager.path = convert_path(os.path.join(config_folder, manager.file))
     config.version = self.localversion
-    manager.save_config()
+    manager.save()
     config.init()
 
     # 刮削偏好

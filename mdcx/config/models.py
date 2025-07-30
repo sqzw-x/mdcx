@@ -1,10 +1,12 @@
 import re
+from dataclasses import asdict
 from datetime import timedelta
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, DirectoryPath, Field, FilePath, HttpUrl, field_validator, model_validator
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
+from .manager import ConfigSchema
 from .ui_schema import Enum
 
 
@@ -344,7 +346,7 @@ class KeepableFile(str, Enum):
             "剧照",
             "额外剧照",
             "预告片",
-            "Nfo",
+            "nfo",
             "复制额外剧照",
             "主题视频",
         ]
@@ -360,7 +362,7 @@ class HDPicSource(str, Enum):
 
     @classmethod
     def names(cls):
-        return ["海报", "缩略图", "Amazon", "官网", "Google", "仅 Google"]
+        return ["poster", "thumb", "Amazon", "官网", "Google", "仅 Google"]
 
 
 class FieldRule(str, Enum):
@@ -371,7 +373,7 @@ class FieldRule(str, Enum):
 
     @classmethod
     def names(cls):
-        return ["删除演员", "删除字符", "FC2 卖家", "移除番号"]
+        return ["移除标题后的演员名", "移除演员名中的括号", "使用 FC2 卖家作为演员名", "移除番号前缀数字"]
 
 
 class ShowLocation(str, Enum):
@@ -395,17 +397,18 @@ class CDChar(str, Enum):
     @classmethod
     def names(cls):
         return [
-            "字母",
-            "结尾字符",
-            "Digital",
-            "Middle Number",
-            "Underline",
-            "Space",
-            "Point",
+            "除C以外的字母",
+            "C结尾也视为分集而非字幕",
+            "末尾两位数字",
+            "不在结尾的数字",
+            "分集分隔符: 下划线",
+            "分集分隔符: 空格",
+            "分集分隔符: 英文句号",
         ]
 
 
 class EmbyAction(str, Enum):
+    # todo 这些枚举对应 Emby 操作及配置的组合, 需简化
     ACTOR_INFO_ZH_CN = "actor_info_zh_cn"
     ACTOR_INFO_ZH_TW = "actor_info_zh_tw"
     ACTOR_INFO_JA = "actor_info_ja"
@@ -455,10 +458,11 @@ class MarkType(str, Enum):
 
     @classmethod
     def names(cls):
-        return ["字幕", "有码", "Umr", "Leak", "Uncensored", "Hd"]
+        return ["字幕", "有码", "破解", "流出", "无码", "高清"]
 
 
 class Switch(str, Enum):
+    # todo 许多配置项不适用 web 应用
     AUTO_START = "auto_start"
     AUTO_EXIT = "auto_exit"
     REST_SCRAPE = "rest_scrape"
@@ -513,7 +517,7 @@ class SuffixSort(str, Enum):
 
     @classmethod
     def names(cls):
-        return ["魔词", "中文词", "Definition"]
+        return ["马赛克", "中文字幕", "清晰度"]
 
 
 class Website(str, Enum):
@@ -660,11 +664,11 @@ class Config(BaseModel):
     )
     clean_ext: list[str] = Field(
         default_factory=lambda: [".html", ".url"],
-        title="要清理的扩展名",
+        title="清理规则: 扩展名",
     )
     clean_name: list[str] = Field(
         default_factory=lambda: ["uur76.mp4", "uur93.com.mp4"],
-        title="要清理的文件名",
+        title="清理规则: 文件名(完全匹配)",
     )
     clean_contains: list[str] = Field(
         default_factory=lambda: [
@@ -677,16 +681,16 @@ class Config(BaseModel):
             "妹妹直播",
             "精彩直播",
         ],
-        title="文件名中要清理的子字符串",
+        title="清理规则: 文件名包含",
     )
     clean_size: float = Field(0.0, title="清理小于此大小的文件（MB）")
     clean_ignore_ext: list[str] = Field(
         default_factory=list,
-        title="清理时忽略的扩展名",
+        title="清理规则: 排除扩展名",
     )
     clean_ignore_contains: list[str] = Field(
         default_factory=lambda: ["skip", "ignore"],
-        title="清理时忽略的子字符串",
+        title="清理规则: 排除文件名包含",
     )
     clean_enable: list[CleanAction] = Field(
         default_factory=lambda: [
@@ -697,7 +701,7 @@ class Config(BaseModel):
             CleanAction.CLEAN_IGNORE_EXT,
             CleanAction.CLEAN_IGNORE_CONTAINS,
         ],
-        title="启用清理操作",
+        title="启用的清理规则",
     )
     # endregion
 
@@ -706,10 +710,7 @@ class Config(BaseModel):
     thread_time: int = Field(0, title="线程时间")
     javdb_time: int = Field(10, title="Javdb时间")
     main_mode: int = Field(1, title="主模式")
-    read_mode: list[ReadMode] = Field(
-        default_factory=list,
-        title="读取模式",
-    )
+    read_mode: list[ReadMode] = Field(default_factory=list, title="读取模式")
     update_mode: str = Field("c", title="更新模式")
     update_a_folder: str = Field("actor", title="更新A目录")
     update_b_folder: str = Field("number actor", title="更新B目录")
@@ -1109,7 +1110,7 @@ class Config(BaseModel):
         title="翻译服务",
     )
     deepl_key: str = Field("", title="Deepl密钥")
-    llm_url: HttpUrl | None = Field(HttpUrl("https://api.llm.com/v1"), title="Llm网址")
+    llm_url: HttpUrl = Field(HttpUrl("https://api.llm.com/v1"), title="Llm网址")
     llm_model: str = Field("gpt-3.5-turbo", title="Llm模型")
     llm_key: str = Field("", title="Llm密钥")
     llm_prompt: str = Field(
@@ -1271,7 +1272,7 @@ class Config(BaseModel):
 
     # region: Server Settings
     server_type: str = Field("emby", title="服务器类型")
-    emby_url: HttpUrl | None = Field(HttpUrl("http://192.168.5.191:8096"), title="Emby网址")
+    emby_url: HttpUrl = Field(HttpUrl("http://127.0.0.1:8096"), title="Emby网址")
     api_key: str = Field("ee9a2f2419704257b1dd60b975f2d64e", title="API密钥")
     user_id: str = Field("", title="用户ID")
     emby_on: list[EmbyAction] = Field(
@@ -1291,9 +1292,9 @@ class Config(BaseModel):
         title="Emby功能开关",
     )
     use_database: int = Field(0, title="使用数据库")
-    info_database_path: FilePath | None = Field(None, title="信息数据库路径")
-    gfriends_github: HttpUrl | None = Field(HttpUrl("https://github.com/gfriends/gfriends"), title="Gfriends Github")
-    actor_photo_folder: DirectoryPath | None = Field(None, title="演员照片目录")
+    info_database_path: str = Field("", title="信息数据库路径")
+    gfriends_github: HttpUrl = Field(HttpUrl("https://github.com/gfriends/gfriends"), title="Gfriends Github")
+    actor_photo_folder: str = Field("", title="演员照片目录")
     actor_photo_kodi_auto: bool = Field(False, title="演员照片Kodi自动")
     # endregion
 
@@ -1340,10 +1341,10 @@ class Config(BaseModel):
 
     # region: Misc Settings
     update_check: bool = Field(True, title="检查更新")
-    local_library: DirectoryPath | None = Field(None, title="本地库")
+    local_library: str = Field("", title="本地库")
     actors_name: str = Field("", title="演员名称")
-    netdisk_path: DirectoryPath | None = Field(None, title="网盘路径")
-    localdisk_path: DirectoryPath | None = Field(None, title="本地磁盘路径")
+    netdisk_path: str = Field("", title="网盘路径")
+    localdisk_path: str = Field("", title="本地磁盘路径")
     window_title: str = Field("hide", title="窗口标题")
     switch_on: list[Switch] = Field(
         default_factory=lambda: [
@@ -1461,24 +1462,13 @@ class Config(BaseModel):
             return timedelta(hours=h, minutes=m, seconds=s)
         return v
 
-    @model_validator(mode="before")
-    def convert_paths(cls, data: dict[str, Any]) -> dict[str, Any]:
-        path_fields = [
-            "info_database_path",
-            "actor_photo_folder",
-            "local_library",
-            "netdisk_path",
-            "localdisk_path",
-        ]
-        for field in path_fields:
-            if data.get(field) == "":
-                data[field] = None
-            if data.get(field) is not None:
-                data[field] = Path(data[field])
-        return data
+    def to_legacy(self) -> dict[str, str | int | bool]:
+        """
+        将 Pydantic 模型转换为可用于构造 ConfigSchema 的 dict.
 
-    def to_schema_dict(self) -> dict[str, str | int | bool]:
-        """Converts the Pydantic model back to a ConfigSchema-compatible dictionary."""
+        Returns:
+            d: 与 ConfigSchema 兼容的 dict.
+        """
         data = self.model_dump(mode="python")  # Use python types (Enum, Path, etc.)
 
         schema_dict: dict[str, str | int | bool] = {}
@@ -1508,6 +1498,10 @@ class Config(BaseModel):
         return schema_dict
 
     @classmethod
-    def from_schema_dict(cls, schema_data: dict[str, Any]) -> "Config":
-        """Creates a Pydantic model instance from a ConfigSchema dictionary."""
-        return cls.model_validate(schema_data)
+    def from_legacy(cls, config_schema: dict[str, Any] | ConfigSchema) -> "Config":
+        """
+        从 ConfigSchema 创建 Config 实例.
+        """
+        if isinstance(config_schema, ConfigSchema):
+            config_schema = asdict(config_schema)
+        return cls.model_validate(config_schema)
