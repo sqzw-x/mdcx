@@ -24,13 +24,13 @@ jobs:
           # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners
 
           items+=('{"build": "macos", "os": "macos-latest", "arch": "aarch64"}')
-          items+=('{"build": "macos", "os": "macos-13", "arch": "x86_64"}')
+          items+=('{"build": "macos", "os": "macos-latest", "arch": "x86_64"}')
 
           items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
 
           # macOS 10.15.7, x86_64, 指定opencv版本
           if [[ -n "${{ vars.BUILD_FOR_MACOS_LEGACY }}" && -n "${{ vars.MACOS_LEGACY_CV_VERSION }}" ]]; then
-            items+=('{"build": "macos", "os": "macos-13", "arch": "x86_64", "cv": "${{ vars.MACOS_LEGACY_CV_VERSION }}", "tail": "-legacy"}')
+            items+=('{"build": "macos", "os": "macos-latest", "arch": "x86_64", "cv": "${{ vars.MACOS_LEGACY_CV_VERSION }}", "tail": "-legacy"}')
           fi
 
           # win7, x86_64, python3.8
