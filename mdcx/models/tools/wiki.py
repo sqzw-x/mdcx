@@ -16,7 +16,7 @@ from mdcx.models.base.translate import (
     youdao_translate_async,
 )
 from mdcx.models.tools.emby import EMbyActressInfo
-from mdcx.utils.str import is_english
+from mdcx.utils.language import is_english
 
 
 async def search_wiki(actor_info: EMbyActressInfo) -> tuple[str | None, str]:

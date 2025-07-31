@@ -18,7 +18,7 @@ from mdcx.number import get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import convert_path, get_used_time, split_path
 from mdcx.utils.file import delete_file_async
-from mdcx.utils.str import is_japanese
+from mdcx.utils.language import is_japanese
 
 
 async def write_nfo(

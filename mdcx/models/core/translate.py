@@ -19,8 +19,8 @@ from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import CrawlersResult
 from mdcx.number import get_number_letters
 from mdcx.signals import signal
-from mdcx.utils import get_used_time, remove_repeat
-from mdcx.utils.str import is_japanese
+from mdcx.utils import clean_list, get_used_time
+from mdcx.utils.language import is_japanese
 
 
 def translate_info(json_data: CrawlersResult, has_sub: bool):
@@ -78,7 +78,7 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
         tag = ",".join(tag_new)
 
     # tag去重/去空/排序
-    tag = remove_repeat(tag)
+    tag = clean_list(tag)
 
     # 添加演员
     if "actor" in tag_include and json_data.actor:
@@ -168,7 +168,7 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
         tag = zhconv.convert(tag, "zh-hant")
 
     # tag去重/去空/排序
-    tag = remove_repeat(tag)
+    tag = clean_list(tag)
 
     json_data.tag = tag.strip(",")
     json_data.series = series

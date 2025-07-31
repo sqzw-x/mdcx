@@ -485,6 +485,8 @@ class ConfigSchema:
             log_fn=signal.add_log,
         )
 
+        if self.llm_max_req_sec <= 0:
+            self.llm_max_req_sec = 1
         self.llm_client = LLMClient(
             api_key=self.llm_key,
             base_url=self.llm_url,

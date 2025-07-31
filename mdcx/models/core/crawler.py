@@ -51,7 +51,7 @@ from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import CrawlerInput, CrawlerResult, CrawlersResult, CrawlTask
 from mdcx.number import is_uncensored
 from mdcx.utils.dataclass import update
-from mdcx.utils.str import is_japanese
+from mdcx.utils.language import is_japanese
 
 CRAWLER_FUNCS: dict[str, Callable] = {
     "7mmtv": mmtv.main,

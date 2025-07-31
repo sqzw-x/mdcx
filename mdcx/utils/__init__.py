@@ -184,14 +184,11 @@ def add_html(text: str) -> str:
     return f'<span style="white-space: pre-wrap;">{text}</span>'
 
 
-def remove_repeat(a: str) -> str:
-    if a:  # 转列表去空去重
-        list1 = a.split(",")  # 转列表
-        list2 = list(set(list1))  # 去重
-        list3 = [each for each in list2 if each.strip()]  # 去空
-        list3.sort(key=list1.index)  # 排序（保持原顺序）
-        a = ",".join(map(str, list3))  # 转字符串
-    return a
+def clean_list(a: str) -> str:
+    """
+    移除逗号分隔的字符串中的重复项, 同时移除每项首尾的空格.
+    """
+    return ",".join(dict.fromkeys(w.strip() for w in a.split(",") if w.strip()).keys())
 
 
 # todo 此方法调用 c api 强制终止线程, 在异步版本中应该不需要

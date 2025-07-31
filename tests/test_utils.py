@@ -1,6 +1,7 @@
 import pytest
 
-from mdcx.utils import str as str_utils
+from mdcx.utils import clean_list
+from mdcx.utils.language import is_english, is_japanese
 
 
 @pytest.mark.parametrize(
@@ -15,7 +16,7 @@ from mdcx.utils import str as str_utils
     ],
 )
 def test_is_japanese(s, expected):
-    assert str_utils.is_japanese(s) == expected
+    assert is_japanese(s) == expected
 
 
 @pytest.mark.parametrize(
@@ -33,4 +34,19 @@ def test_is_japanese(s, expected):
     ],
 )
 def test_is_english(s, expected):
-    assert str_utils.is_english(s) == expected
+    assert is_english(s) == expected
+
+
+@pytest.mark.parametrize(
+    "s,expected",
+    [
+        ("a,b,a,c", "a,b,c"),
+        ("a,b,c", "a,b,c"),
+        (" a ,b, a,c ", "a,b,c"),
+        ("", ""),
+        ("a,,b", "a,b"),
+        ("A,a,B,b", "A,a,B,b"),
+    ],
+)
+def test_clean_list(s, expected):
+    assert clean_list(s) == expected
