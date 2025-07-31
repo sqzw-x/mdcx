@@ -37,7 +37,7 @@ def get_version_from_config() -> str:
 
 
 class BuildManager:
-    def __init__(self, app_name: str, app_version: str, create_dmg: bool):
+    def __init__(self, app_name: str, app_version: str, create_dmg: bool, debug: bool):
         self.app_name = app_name
         self.app_version = app_version
         self.create_dmg = create_dmg
@@ -46,6 +46,7 @@ class BuildManager:
         self.is_mac = self.os == "Darwin"
         self.is_windows = self.os == "Windows"
         self.is_linux = self.os == "Linux"
+        self.debug = debug
 
     def run(self):
         """运行构建流程"""
@@ -69,7 +70,8 @@ class BuildManager:
             if self.create_dmg and self.is_mac:
                 self._create_dmg()
 
-            self._cleanup()
+            if not self.debug:
+                self._cleanup()
             logger.info(f"构建完成. 耗时: {int(time.time() - start_time)}秒")
         except BuildError as e:
             logger.error(f"构建失败: {e}")
@@ -297,7 +299,9 @@ def main():
     if args.debug:
         logger.setLevel(logging.DEBUG)
 
-    manager = BuildManager(app_name=args.app_name, app_version=args.version, create_dmg=args.create_dmg)
+    manager = BuildManager(
+        app_name=args.app_name, app_version=args.version, create_dmg=args.create_dmg, debug=args.debug
+    )
     manager.run()
 
 
