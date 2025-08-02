@@ -20,8 +20,8 @@ from .config import check_path_access
 router = APIRouter(prefix="/legacy", tags=["Legacy"])
 
 
-@router.post("/scrape", summary="开始刮削")
-async def scrape():
+@router.post("/scrape", summary="开始刮削", operation_id="startScrape")
+async def start_scrape():
     """使用当前配置运行刮削流程, 无需额外参数"""
     try:
         manager.load()
@@ -36,8 +36,8 @@ class ScrapeFileBody(BaseModel):
     url: str
 
 
-@router.post("/scrape_single", summary="单文件刮削")
-async def scrape_single_file(body: ScrapeFileBody):
+@router.post("/scrape/single", summary="单文件刮削", operation_id="scrapeSingleFile")
+async def scrape_single(body: ScrapeFileBody):
     Flags.single_file_path = body.path
     website, url = deal_url(body.url)
     if not website:
@@ -57,8 +57,8 @@ class CreateSoftlinksBody(BaseModel):
     copy_files: bool = Field(default=False, description="是否复制 nfo, 图片, 字幕等文件")
 
 
-@router.post("/symlink", summary="创建软链接")
-async def creat_symlink(body: CreateSoftlinksBody):
+@router.post("/symlink", summary="创建软链接", operation_id="createSymlink")
+async def create_symlink(body: CreateSoftlinksBody):
     check_path_access(body.source_dir, *SAFE_DIRS)
     check_path_access(body.dest_dir, *SAFE_DIRS)
     try:
@@ -68,8 +68,8 @@ async def creat_symlink(body: CreateSoftlinksBody):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/subtitles/check_and_add", summary="检查并添加字幕")
-async def check_and_add_subtitles():
+@router.post("/subtitles", summary="检查并添加字幕", operation_id="addSubtitles")
+async def add_subtitles():
     """检查媒体库字幕情况并自动添加 (依据本地字幕包)"""
     try:
         create_task(add_sub_for_all_video())
@@ -78,8 +78,8 @@ async def check_and_add_subtitles():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/media_server/actors", summary="查看媒体服务器演员名单")
-async def get_media_server_actors():
+@router.get("/actors", summary="查看媒体服务器演员名单", operation_id="getActors")
+async def get_actors():
     """查看 emby/jellyfin 中符合条件的演员名单"""
     try:
         await show_emby_actor_list(0)
@@ -88,8 +88,8 @@ async def get_media_server_actors():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/media_server/actors/complete_info", summary="补全演员信息")
-async def complete_actor_info():
+@router.post("/actors/complete", summary="补全演员信息", operation_id="completeActors")
+async def complete_actors():
     """补全 emby/jellyfin 演员信息/头像"""
     try:
         create_task(update_emby_actor_info())
@@ -99,7 +99,7 @@ async def complete_actor_info():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/cookies/check", summary="Cookie 有效性检查")
+@router.post("/cookies", summary="Cookie 有效性检查", operation_id="checkCookies")
 async def check_cookies():
     # This is a placeholder as the original logic is tied to UI.
     return {"message": "Not Implemented yet, original logic is tied to UI."}
@@ -110,7 +110,7 @@ class SetSiteUrlBody(BaseModel):
     url: str
 
 
-@router.post("/sites/set_url", summary="设置网站自定义网址")
+@router.post("/sites", summary="设置网站自定义网址", operation_id="setSiteUrl")
 async def set_site_url(body: SetSiteUrlBody):
     """指定网站自定义网址设置"""
     try:
