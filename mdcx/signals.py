@@ -1,11 +1,14 @@
 import threading
 import time
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
 from mdcx.models.types import ShowData
 from mdcx.utils import singleton
+
+if TYPE_CHECKING:
+    from mdcx.server.signals import ServerSignals
 
 
 @singleton
@@ -73,4 +76,9 @@ class Signals(QObject):
 
 
 signal_qt = Signals()
-signal: "Signals" = signal_qt
+signal: "Signals | ServerSignals" = signal_qt
+
+
+def set_signal(signal_instance: "Signals | ServerSignals"):
+    global signal
+    signal = signal_instance

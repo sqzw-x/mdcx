@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/server.py",
             "console": "integratedTerminal",
             "env": {
-                "API_KEY": "API_KEY_FOR_TEST"
+                "MDCX_DEV": "1"
             },
             "justMyCode": false,
         },
