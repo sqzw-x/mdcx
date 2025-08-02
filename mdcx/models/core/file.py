@@ -364,14 +364,6 @@ def _generate_file_name(file_path: str, cd_part, folder_name, file_info: FileInf
         should_escape_result,
     )
 
-    # 当“视频文件名”和“视频目录名”相同，且没有设置防屏蔽字符时，视为想要分集命名，
-    # 此时直接修改文件名开头为目录名，避免因为长度限制处理导致文件名开头与目录名不一致的问题。
-    # 注意应该放在_render_name_template处理后，保证folder_name_template和file_name_template就算被处理也相同。
-    if config.folder_name == file_name_template and not config.prevent_char:
-        file_name = folder_name
-        file_name += cd_part
-        return file_name
-
     file_name += cd_part
 
     # 去除各种乱七八糟字符后，文件名为空时，使用number显示
