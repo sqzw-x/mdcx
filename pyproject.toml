@@ -16,6 +16,7 @@ dependencies = [
     "oshash==0.1.1",
     "pillow==11.3.0",
     "ping3==4.0.4",
+    "pydantic-settings>=2.10.1",
     "pyqt5==5.15.11",
     "pyqt5-qt5==5.15.2; sys_platform == 'win32'", # 更高版本无 Windows wheel
     # "pyqt5-pt5==5.15.17; sys_platform != 'win32'",
@@ -28,6 +29,7 @@ web = ["fastapi>=0.116.1", "uvicorn[standard]>=0.35.0"]
 
 [dependency-groups]
 dev = [
+    "fastapi-cli>=0.0.8",
     "pre-commit>=4.2.0",
     "pyinstaller>=6.14.2",
     "pyqt5-stubs>=5.15.6.0",

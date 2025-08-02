@@ -2,18 +2,16 @@ from fastapi import APIRouter, WebSocket
 
 from ...ws.manager import websocket_handler, websocket_manager
 
-router = APIRouter(prefix="/ws")
+router = APIRouter(prefix="/ws", tags=["WebSocket"])
 
 
-@router.websocket("/")
+@router.websocket("/", name="websocket_connection")
 async def websocket_endpoint(websocket: WebSocket):
-    """WebSocket 端点"""
     await websocket_handler.handle_client(websocket)
 
 
-@router.get("/connections")
+@router.get("/connections", operation_id="getWebSocketConnections", summary="获取所有 WebSocket 连接信息")
 async def get_connections():
-    """获取所有连接信息"""
     return {
         "active_connections": websocket_manager.connection_count,
         "connections": websocket_manager.get_all_connections_info(),

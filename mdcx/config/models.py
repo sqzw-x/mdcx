@@ -1,13 +1,15 @@
 import re
 from dataclasses import asdict
 from datetime import timedelta
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 
+from ..server.config import SAFE_DIRS
 from .manager import ConfigSchema
-from .ui_schema import Enum
+from .ui_schema import Enum, ServerPathDirectory, extract_ui_schema_recursive
 
 
 # Helper function to convert comma/pipe separated strings to lists
@@ -588,11 +590,10 @@ class Config(BaseModel):
     """
 
     # region: General Settings
-    # version: int = Field(120240924, title="版本")
-    media_path: str | None = Field(None, title="媒体路径")
-    softlink_path: str = Field("softlink", title="软链接路径")
-    success_output_folder: str = Field("JAV_output", title="成功输出目录")
-    failed_output_folder: str = Field("failed", title="失败输出目录")
+    media_path: str = ServerPathDirectory(".", title="媒体路径", initial_path=SAFE_DIRS[0].as_posix())
+    softlink_path: str = ServerPathDirectory("softlink", title="软链接路径", ref_field="media_path")
+    success_output_folder: str = ServerPathDirectory("JAV_output", title="成功输出目录", ref_field="media_path")
+    failed_output_folder: str = ServerPathDirectory("failed", title="失败输出目录", ref_field="media_path")
     extrafanart_folder: str = Field("extrafanart_copy", title="额外剧照目录")
     media_type: list[str] = Field(
         default_factory=lambda: [
@@ -1323,7 +1324,7 @@ class Config(BaseModel):
     # endregion
 
     # region: Network Settings
-    type: str = Field("no", title="代理类型")  # 'type' is a reserved keyword, consider renaming
+    proxy_type: str = Field("no", title="代理类型")
     proxy: str = Field("127.0.0.1:7890", title="代理地址")
     timeout: int = Field(10, title="超时")
     retry: int = Field(3, title="重试")
@@ -1504,4 +1505,16 @@ class Config(BaseModel):
         """
         if isinstance(config_schema, ConfigSchema):
             config_schema = asdict(config_schema)
+        config_schema["proxy_type"] = config_schema["type"]  # Rename 'type' to 'proxy_type'
+        config_schema.pop("type", None)
         return cls.model_validate(config_schema)
+
+    @classmethod
+    @lru_cache
+    def ui_schema(cls) -> dict[str, Any]:
+        return extract_ui_schema_recursive(cls.json_schema())
+
+    @classmethod
+    @lru_cache
+    def json_schema(cls) -> dict[str, Any]:
+        return cls.model_json_schema()
