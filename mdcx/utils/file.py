@@ -22,7 +22,7 @@ def delete_file_sync(file_path: str):
         error_info = f" Delete File: {file_path}\n Error: {e}\n{traceback.format_exc()}"
         signal.add_log(error_info)
         print(error_info)
-        return False, error_info
+    return False, error_info
 
 
 def move_file_sync(old_path: str, new_path: str):
@@ -35,7 +35,7 @@ def move_file_sync(old_path: str, new_path: str):
         error_info = f" Move File: {old_path}\n To: {new_path} \n Error: {e}\n{traceback.format_exc()}\n"
         signal.add_log(error_info)
         print(error_info)
-        return False, error_info
+    return False, error_info
 
 
 def copy_file_sync(old_path: str, new_path: str):
@@ -106,12 +106,9 @@ def open_file_thread(file_path: str, is_dir: bool) -> None:
 async def delete_file_async(file_path: str):
     """异步删除文件"""
     try:
-        for _ in range(5):
-            if await aiofiles.os.path.islink(file_path):
-                pass
-            elif not await aiofiles.os.path.exists(file_path):
-                break
-            await aiofiles.os.remove(file_path)
+        if not os.path.exists(file_path) and not os.path.islink(file_path):  # 不删除无效的符号链接
+            return True, ""
+        os.remove(file_path)
         return True, ""
     except Exception as e:
         error_info = f" Delete File: {file_path}\n Error: {e}\n{traceback.format_exc()}"
@@ -130,25 +127,22 @@ async def move_file_async(old_path: str, new_path: str):
     except Exception as e:
         error_info = f" Move File: {old_path}\n To: {new_path} \n Error: {e}\n{traceback.format_exc()}\n"
         signal.add_log(error_info)
-
-        return False, error_info
+    return False, error_info
 
 
 async def copy_file_async(old_path: str, new_path: str):
     """异步复制文件"""
-    error_info = ""
-    for _ in range(3):
-        try:
-            if not await aiofiles.os.path.exists(old_path):
-                return False, f"不存在: {old_path}"
-            elif old_path.lower() != new_path.lower():
-                await delete_file_async(new_path)
-            await asyncio.to_thread(shutil.copy, old_path, new_path)
-            return True, ""
-        except Exception as e:
-            error_info = f" Copy File: {old_path}\n To: {new_path} \n Error: {e}\n{traceback.format_exc()}"
-            signal.add_log(error_info)
-            print(error_info)
+    try:
+        if not await aiofiles.os.path.exists(old_path):
+            return False, f"不存在: {old_path}"
+        elif old_path.lower() != new_path.lower():
+            await delete_file_async(new_path)
+        await asyncio.to_thread(shutil.copy, old_path, new_path)
+        return True, ""
+    except Exception as e:
+        error_info = f" Copy File: {old_path}\n To: {new_path} \n Error: {e}\n{traceback.format_exc()}"
+        signal.add_log(error_info)
+        print(error_info)
     return False, error_info
 
 
