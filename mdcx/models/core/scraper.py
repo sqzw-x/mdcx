@@ -90,6 +90,7 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
     if config.main_mode == 4:
         nfo_data, info = await get_nfo_data(file_path, movie_number)
         if nfo_data:  # 有nfo
+            is_nfo_existed = True
             res = nfo_data
             movie_number = nfo_data.number
             if "has_nfo_update" not in read_mode:  # 不更新并返回
