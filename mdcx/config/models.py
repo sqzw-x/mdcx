@@ -523,65 +523,41 @@ class SuffixSort(str, Enum):
 
 
 class Website(str, Enum):
-    AIRAV_CC = "airav_cc"
-    IQQTV = "iqqtv"
-    JAVBUS = "javbus"
-    FREEJAVBT = "freejavbt"
-    JAV321 = "jav321"
-    DMM = "dmm"
-    JAVLIBRARY = "javlibrary"
-    MMTV = "7mmtv"
-    HDOUBAN = "hdouban"
-    JAVDB = "javdb"
-    AVSEX = "avsex"
-    LULUBAR = "lulubar"
     AIRAV = "airav"
-    XCITY = "xcity"
+    AIRAV_CC = "airav_cc"
+    AVSEX = "avsex"
     AVSOX = "avsox"
-    MGSTAGE = "mgstage"
+    CABLEAV = "cableav"
+    CNMDB = "cnmdb"
+    DMM = "dmm"
+    FALENO = "faleno"
+    FANTASTICA = "fantastica"
     FC2 = "fc2"
     FC2CLUB = "fc2club"
     FC2HUB = "fc2hub"
-    THEPORNDB = "theporndb"
+    FC2PPVDB = "fc2ppvdb"
+    FREEJAVBT = "freejavbt"
+    GETCHU = "getchu"
+    GIGA = "giga"
+    HDOUBAN = "hdouban"
+    HSCANGKU = "hscangku"
+    IQQTV = "iqqtv"
+    JAV321 = "jav321"
+    JAVBUS = "javbus"
+    JAVDAY = "javday"
+    JAVDB = "javdb"
+    JAVLIBRARY = "javlibrary"
+    KIN8 = "kin8"
+    LOVE6 = "love6"
+    LULUBAR = "lulubar"
     MADOUQU = "madouqu"
     MDTV = "mdtv"
-    CNMDB = "cnmdb"
-    JAVDAY = "javday"
-    OFFICIAL = "official"
-    GOOGLE = "google"
-    AMAZON = "amazon"
-
-    @classmethod
-    def names(cls):
-        return [
-            "Airav.cc",
-            "Iqqtv",
-            "Javbus",
-            "Freejavbt",
-            "Jav321",
-            "DMM",
-            "Javlibrary",
-            "7mmtv",
-            "Hdouban",
-            "Javdb",
-            "Avsex",
-            "Lulubar",
-            "Airav",
-            "Xcity",
-            "Avsox",
-            "Mgstage",
-            "Fc2",
-            "Fc2club",
-            "Fc2hub",
-            "Theporndb",
-            "Madouqu",
-            "Mdtv",
-            "Cnmdb",
-            "Javday",
-            "官网",
-            "谷歌",
-            "亚马逊",
-        ]
+    MGSTAGE = "mgstage"
+    MMTV = "7mmtv"
+    MYWIFE = "mywife"
+    PRESTIGE = "prestige"
+    THEPORNDB = "theporndb"
+    XCITY = "xcity"
 
 
 class Config(BaseModel):

@@ -27,8 +27,8 @@ def ini_value_to_bool(value: str) -> bool:
 class ConfigManager(ManualConfig):
     def __init__(self):
         self._get_config_path()
-        self._path = ""
-        self.config = ConfigSchema()  # 此初始值作为默认配置
+        self.config = ConfigSchema()
+        self.config.init()
 
     @property
     def path(self) -> str:

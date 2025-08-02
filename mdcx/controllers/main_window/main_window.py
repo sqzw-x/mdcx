@@ -1345,12 +1345,7 @@ class MyMAinWindow(QMainWindow):
             self.pushButton_show_log_clicked()  # 点击按钮后跳转到日志页面
             if self.Ui.lineEdit_actors_name.text() != config.actors_name:  # 保存配置
                 self.pushButton_save_config_clicked()
-            try:
-                t = threading.Thread(target=check_missing_number, args=(False,))
-                t.start()  # 启动线程,即让线程开始执行
-            except Exception:
-                signal_qt.show_traceback_log(traceback.format_exc())
-                signal_qt.show_log_text(traceback.format_exc())
+            config.executor.submit(check_missing_number(False))
 
     # 工具页面本地资源库点选择目录
     def pushButton_select_local_library_clicked(self):
@@ -1409,13 +1404,7 @@ class MyMAinWindow(QMainWindow):
             or self.Ui.lineEdit_local_library_path.text() != config.local_library
         ):
             self.pushButton_save_config_clicked()
-        try:
-            t = threading.Thread(target=check_missing_number, args=(True,))
-            self.threads_list.append(t)
-            t.start()  # 启动线程,即让线程开始执行
-        except Exception:
-            signal_qt.show_traceback_log(traceback.format_exc())
-            signal_qt.show_log_text(traceback.format_exc())
+        config.executor.submit(check_missing_number(True))
 
     # 工具-单文件刮削
     def pushButton_select_file_clicked(self):

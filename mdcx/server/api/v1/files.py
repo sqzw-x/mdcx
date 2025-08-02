@@ -6,10 +6,8 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
-from mdcx.utils.path import is_descendant
-
 from ...config import SAFE_DIRS
-from .exceptions import FORBIDDEN_PATH
+from .utils import check_path_access
 
 router = APIRouter(prefix="/files", tags=["文件管理"])
 
@@ -50,8 +48,7 @@ async def list_files(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="路径解析失败, 可能不存在或无访问权限")
 
     # Ensure the path is within the SAFE_DIRS
-    if all(not is_descendant(target_path, safe_dir) for safe_dir in SAFE_DIRS):
-        raise FORBIDDEN_PATH
+    check_path_access(target_path, *SAFE_DIRS)
 
     # 由于我们保证了 target_path 在 SAFE_DIRS 中, 而后者必然为目录, 因此 target_path 非目录时可以安全的访问 target_path.parent
     if not target_path.is_dir():

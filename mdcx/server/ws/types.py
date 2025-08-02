@@ -1,7 +1,7 @@
 import json
 import uuid
 from collections.abc import Awaitable, Callable, Mapping
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any
@@ -28,6 +28,7 @@ class MessageType(Enum):
     PROGRESS = "progress"
     STATUS = "status"
     CUSTOM = "custom"
+    QT_SINGAL = "qt_signal"  # 兼容桌面应用
 
 
 class ConnectionStatus(Enum):
@@ -45,8 +46,8 @@ class WebSocketMessage[T: JsonSerializable]:
 
     type: MessageType
     data: T | None = None
-    timestamp: datetime | None = None
-    message_id: str | None = None
+    timestamp: datetime = field(default_factory=datetime.now)
+    message_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     client_id: str | None = None
 
     def __post_init__(self):
