@@ -1,22 +1,34 @@
 ## 修复
 
-* fc2 cover/extrafanart URL
-* 获取 gfriends 数据失败
-* regression: CrawlersResult 未正确设置 number 字段
-* regression: 未能正确从所有来源聚合某些字段
-
-## 开发
-
-* 全面迁移到 python3.13
-* 使用 pyproject.toml 和 uv 进行依赖管理
-* 重构项目结构
-* 使用 dataclass 替代 TypedDict
-* 添加更多 type hints
-* 添加 lint 规则及 CI 流程和 pre-commit hook
+* 运行时异常 TypeError: 'module' object is not callable
+* llm_max_req_sec 除零异常
+* 读取模式 has_nfo_update 选项行为不正确
+* 不移动文件时未按模板渲染文件名称
 
 <details>
 <summary>Full Changelog</summary>
 
+44f8bbc fix: 不移动文件时文件名称错误
+0cdf98e fix: 文件操作多余的重试
+fa52e71 fix: 读取模式 has_nfo_update 选项行为不正确 (close #539)
+55a4f5c CI: run on review_requested, ready_for_review
+7838c62 fix: str 名称冲突; llm_max_req_sec 可能为0 (close #538)
+3c02ca6 CI: fix macos-latest not having x86 version
+cff1cb4 CI: 使用 macos-latest x86_64 代替 macos-13 以解决 hdiutil: create failed - Resource busy
+c739ad4 CI: debug 模式不清理构建过程中的临时文件
+04c975f fix: missing socksio (fix #537)
+65d726c dep: remove langid and opencv
+3ae3294 CI: use run_command for subprocess calls
+23a974a CI: fix not all arguments converted
+7bb30ac CI: optmize build log
+93decdd CI: fix windows color output; subprocess exception
+67972b7 CI: fix windows encode error
+a8db095 update uv.lock; remove useless files
+745f799 CI: use build.py in CI
+e791ea0 CI: 完善 build.py; 在 Windows 上验证
+aca7ab8 CI: use python to build
+ef912dc feat: add pyav for video metadata
+cd688fd Ready for 2.0-beta-2
 ab05ac3 fix: 未能正确从所有来源聚合某些字段
 d15bd8b fix: CrawlersResult 未正确设置 number 字段
 d0b7f19 doc: add uv sync and pre-commit install to CONTRIBUTING.md
