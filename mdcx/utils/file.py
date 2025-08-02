@@ -14,12 +14,9 @@ from mdcx.utils import split_path
 
 def delete_file_sync(file_path: str):
     try:
-        for _ in range(5):
-            if os.path.islink(file_path):
-                pass
-            elif not os.path.exists(file_path):
-                break
-            os.remove(file_path)
+        if not os.path.exists(file_path) and not os.path.islink(file_path):  # 不删除无效的符号链接
+            return True, ""
+        os.remove(file_path)
         return True, ""
     except Exception as e:
         error_info = f" Delete File: {file_path}\n Error: {e}\n{traceback.format_exc()}"
@@ -42,19 +39,17 @@ def move_file_sync(old_path: str, new_path: str):
 
 
 def copy_file_sync(old_path: str, new_path: str):
-    error_info = ""
-    for _ in range(3):
-        try:
-            if not os.path.exists(old_path):
-                return False, f"不存在: {old_path}"
-            elif old_path.lower() != new_path.lower():
-                delete_file_sync(new_path)
-            shutil.copy(old_path, new_path)
-            return True, ""
-        except Exception as e:
-            error_info = f" Copy File: {old_path}\n To: {new_path} \n Error: {e}\n{traceback.format_exc()}"
-            signal.add_log(error_info)
-            print(error_info)
+    try:
+        if not os.path.exists(old_path):
+            return False, f"不存在: {old_path}"
+        elif old_path.lower() != new_path.lower():
+            delete_file_sync(new_path)
+        shutil.copy(old_path, new_path)
+        return True, ""
+    except Exception as e:
+        error_info = f" Copy File: {old_path}\n To: {new_path} \n Error: {e}\n{traceback.format_exc()}"
+        signal.add_log(error_info)
+        print(error_info)
     return False, error_info
 
 
@@ -135,7 +130,7 @@ async def move_file_async(old_path: str, new_path: str):
     except Exception as e:
         error_info = f" Move File: {old_path}\n To: {new_path} \n Error: {e}\n{traceback.format_exc()}\n"
         signal.add_log(error_info)
-        print(error_info)
+
         return False, error_info
 
 
