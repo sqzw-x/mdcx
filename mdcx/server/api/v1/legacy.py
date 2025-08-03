@@ -24,7 +24,9 @@ router = APIRouter(prefix="/legacy", tags=["Legacy"])
 async def start_scrape():
     """使用当前配置运行刮削流程, 无需额外参数"""
     try:
-        manager.load()
+        errors = manager.load()
+        if errors:
+            raise HTTPException(status_code=500, detail=f"Configuration errors: {', '.join(errors)}")
         start_new_scrape(FileMode.Default)
         return {"message": "Scraping started."}
     except Exception as e:
@@ -114,7 +116,16 @@ class SetSiteUrlBody(BaseModel):
 async def set_site_url(body: SetSiteUrlBody):
     """指定网站自定义网址设置"""
     try:
-        setattr(config, f"{body.site}_website", body.url)
+        setattr(config, f"{body.site.value}_website", body.url)
         manager.save()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/sites", summary="获取网站自定义网址", operation_id="getSiteUrls")
+async def get_site_urls() -> dict[Website, str]:
+    """获取网站自定义网址设置, 对未设置的网站返回空字符串"""
+    try:
+        return {w: getattr(config, f"{w.value}_website", "") for w in Website}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

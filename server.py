@@ -34,7 +34,9 @@ def create_app() -> FastAPI:
     return app
 
 
+app = create_app()
+
 if __name__ == "__main__":
     from mdcx.server.config import HOST, PORT
 
-    uvicorn.run(create_app(), host=HOST, port=PORT)
+    uvicorn.run(app, host=HOST, port=PORT)
