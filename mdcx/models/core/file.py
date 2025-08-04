@@ -482,7 +482,7 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
     leak = ""
     wuma = ""
     youma = ""
-    mosaic = ""
+    mosaic = "有码"
     sub_list = []
     cnword_style = config.cnword_style
     if Flags.file_mode == FileMode.Again and file_path in Flags.new_again_dic:

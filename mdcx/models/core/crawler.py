@@ -689,7 +689,7 @@ def _deal_res(res: CrawlersResult | None) -> CrawlersResult | None:
     )  # 列表转字符串（避免个别网站刮削返回的是列表）
 
     # 标签
-    tag = str(res.tag).strip(" [ ]").replace("'", "").replace(", ", ",")  # 列表转字符串（避免个别网站刮削返回的是列表）
+    tag = str(res.tag).strip(" [ ]").replace("'", "").replace("，", ",").replace(", ", ",")  # 列表转字符串
     tag = re.sub(r",\d+[kKpP],", ",", tag)
     tag_rep_word = [",HD高画质", ",HD高畫質", ",高画质", ",高畫質"]
     for each in tag_rep_word:

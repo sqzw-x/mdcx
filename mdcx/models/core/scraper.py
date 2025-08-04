@@ -134,7 +134,7 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
 
     # 刮削json_data
     # 获取已刮削的json_data
-    if "." in movie_number or res.mosaic in ["国产"]:
+    if "." in movie_number or file_info.mosaic in ["国产"]:
         pass
     elif movie_number not in Flags.json_get_set:
         # 第一次遇到该番号，刮削
@@ -147,20 +147,16 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
 
     pre_data = Flags.json_data_dic.get(movie_number)
     # 已存在该番号数据时直接使用该数据
-    if pre_data and "." not in movie_number and res.mosaic not in ["国产"]:
-        pre_file_info = pre_data.file_info
+    if pre_data and "." not in movie_number and file_info.mosaic not in ["国产"]:
         pre_res = pre_data.data
-        pre_file_info.c_word = file_info.c_word
-        pre_file_info.cd_part = file_info.cd_part
-        pre_file_info.destroyed = file_info.destroyed
-        pre_file_info.file_path = file_info.file_path
-        pre_file_info.has_sub = file_info.has_sub
-        pre_file_info.leak = file_info.leak
-        pre_file_info.wuma = file_info.wuma
-        pre_file_info.youma = file_info.youma
+        res = update(pre_res, file_info)
 
-        def deal_tag_data(tag):
-            for each in [
+        tags = pre_res.tag.split(",")
+        tags = [
+            tag
+            for tag in tags
+            if tag
+            not in (
                 "中文字幕",
                 "无码流出",
                 "無碼流出",
@@ -176,18 +172,15 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
                 "裏番",
                 "动漫",
                 "動漫",
-            ]:
-                tag = tag.replace(each, "")
-            return tag.replace(",,", ",")
+            )
+        ]
+        tags.append(file_info.mosaic)
+        if file_info.has_sub:
+            tags.append("中文字幕")
+        res.tag = ",".join(tags)
 
-        pre_res.tag = deal_tag_data(pre_res.tag)
-
-        if "破解" in pre_res.mosaic or "流出" in pre_res.mosaic:
-            pre_file_info.mosaic = res.mosaic if res.mosaic else "有码"
-        elif "破解" in res.mosaic or "流出" in res.mosaic:
-            pre_file_info.mosaic = res.mosaic
-        res = update(CrawlersResult.empty(), pre_file_info)
     elif not is_nfo_existed:
+        # ========================= call crawlers =========================
         res = await crawl(file_info.crawl_task(), file_mode)
         if res is None:
             LogBuffer.log().write(

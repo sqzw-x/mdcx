@@ -222,7 +222,7 @@ def add_definition_tag(res: BaseCrawlerResult, definition, codec):
         new_tag_list.insert(0, definition)
         if config.hd_get == "video" and codec:
             new_tag_list.insert(0, codec)  # 插入编码格式
-    res.tag = "，".join(new_tag_list)
+    res.tag = ",".join(new_tag_list)
 
 
 def show_result(fields_info, start_time: float):
