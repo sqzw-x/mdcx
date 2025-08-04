@@ -22,11 +22,13 @@ def getNum(html):  # 获取番号
 def getCover(html):  # 获取封面
     result = html.xpath('//a[@data-fancybox="gallery"]/@href')
     result = result[0] if result else ""
+    result = "https:" + result if result.startswith("//") else result
     return result
 
 
 def getExtraFanart(html):  # 获取剧照
     result = html.xpath('//div[@style="padding: 0"]/a/@href')
+    result = ["https:" + u if u.startswith("//") else u for u in result]
     return result
 
 
