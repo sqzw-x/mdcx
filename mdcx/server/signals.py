@@ -91,19 +91,19 @@ class ServerSignals:
 
     def _emit_change_buttons_status(self):
         """发送按钮状态变更"""
-        self._broadcast_message("change_buttons_status", None)
+        # self._broadcast_message("change_buttons_status", None)
 
     def _emit_reset_buttons_status(self):
         """发送按钮状态重置"""
-        self._broadcast_message("reset_buttons_status", None)
+        # self._broadcast_message("reset_buttons_status", None)
 
     def _emit_set_label_file_path(self, path: str):
         """发送文件路径标签设置"""
-        self._broadcast_message("set_label_file_path", path)
+        # self._broadcast_message("set_label_file_path", path)
 
     def _emit_label_result(self, result: str):
         """发送结果标签"""
-        self._broadcast_message("label_result", result)
+        # self._broadcast_message("label_result", result)
 
     def _emit_logs_failed_settext(self, text: str):
         """发送失败日志"""
@@ -134,7 +134,7 @@ class ServerSignals:
 
     def _emit_exit_app(self):
         """发送应用退出信号（Web应用可能无需处理）"""
-        self._broadcast_message("exit_app", None)
+        # self._broadcast_message("exit_app", None)
 
     def _emit_view_failed_list_settext(self, text: str):
         """发送失败列表文本"""
