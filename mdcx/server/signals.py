@@ -6,7 +6,6 @@ from dataclasses import asdict
 from typing import Any, Literal
 
 from mdcx.models.types import ShowData
-from mdcx.utils import singleton
 
 from .ws.manager import websocket_manager
 from .ws.types import MessageType, WebSocketMessage
@@ -20,7 +19,6 @@ class Signal[*T = *tuple[()]]:
         self.fn(*args)
 
 
-@singleton
 class ServerSignals:
     """
     Server端信号系统，将Qt信号转换为WebSocket消息
