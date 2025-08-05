@@ -34,7 +34,7 @@ def showFilePath(file_path: str) -> str:
 
 def is_descendant(p: str | Path, parent: str | Path) -> bool:
     """
-    检查 p 是否是 parent 或者 parent 的子孙目录.
+    检查 p 是否是 parent 或者 parent 的后代.
 
     Raises:
         OSError: 存在循环的符号链接, 无访问权限等
@@ -44,3 +44,10 @@ def is_descendant(p: str | Path, parent: str | Path) -> bool:
     # parent = /foo/bar, p = /foo/barbar 使得简单的前缀判断失效
     # os.path.commonpath 可以处理这种情况
     return os.path.commonpath([p, parent]) == str(parent)
+
+
+def is_any_descendant(p: str | Path, *parents: str | Path) -> bool:
+    """
+    检查 p 是否是 parents 中某路径的后代.
+    """
+    return any(is_descendant(p, parent) for parent in parents)
