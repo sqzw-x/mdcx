@@ -1,0 +1,52 @@
+{
+  "name": "mdcx-webui",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "rsbuild dev --open",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview",
+    "gen:client": "openapi-ts",
+    "ci": "biome ci",
+    "lint": "biome check --write",
+    "check": "biome check --write",
+    "format": "biome format --write",
+    "dep": "ncu -i --format group"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.2.0",
+    "@mui/material": "^7.2.0",
+    "@rjsf/core": "6.0.0-beta.12",
+    "@rjsf/mui": "6.0.0-beta.12",
+    "@rjsf/utils": "6.0.0-beta.12",
+    "@rjsf/validator-ajv8": "6.0.0-beta.12",
+    "@tanstack/react-query": "^5.84.1",
+    "@tanstack/react-query-devtools": "^5.84.1",
+    "@tanstack/react-router": "^1.130.12",
+    "@tanstack/react-router-devtools": "^1.130.13",
+    "axios": "^1.11.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "usehooks-ts": "^3.1.1",
+    "zustand": "^5.0.7"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.1.3",
+    "@hey-api/openapi-ts": "^0.80.1",
+    "@rsbuild/core": "^1.4.12",
+    "@rsbuild/plugin-react": "^1.3.4",
+    "@tanstack/router-plugin": "^1.130.15",
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "npm-check-updates": "^18.0.2",
+    "typescript": "^5.9.2"
+  }
+}

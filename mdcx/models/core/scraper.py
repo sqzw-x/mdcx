@@ -762,10 +762,7 @@ async def _failed_file_info_show(count: str, path: str, error_info: str) -> None
     if await aiofiles.os.path.islink(path):
         real_path = await read_link_async(path)
         real_folder = os.path.dirname(path)
-        info_str = (
-            f"{count + '.':<3} {path} \n    指向文件: {real_path} \n    "
-            f"所在目录: {real_folder} \n    失败原因: {error_info} \n"
-        )
+        info_str = f"{count + '.':<3} {path} \n    指向文件: {real_path} \n    所在目录: {real_folder} \n    失败原因: {error_info} \n"
     signal.logs_failed_show.emit(info_str)
 
 

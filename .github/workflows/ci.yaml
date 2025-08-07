@@ -4,10 +4,16 @@ on:
   push:
     branches:
       - master
+      - develop
   pull_request:
     branches:
       - master
+      - develop
     types: [review_requested, ready_for_review]
+
+env:
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10"
 
 jobs:
   quality:
@@ -25,3 +31,42 @@ jobs:
 
       - name: Run ruff check
         run: uvx ruff check --output-format=github
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Get pnpm store directory
+        shell: bash
+        working-directory: ui
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        working-directory: ui
+        run: pnpm install --frozen-lockfile
+
+      - name: Run biome
+        working-directory: ui
+        run: pnpm run ci
+
+      - name: Build application
+        working-directory: ui
+        run: pnpm build
+      # todo 添加测试后启用
+      # - name: Run tests
+      #   run: pnpm test:coverage

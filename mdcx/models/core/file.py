@@ -387,20 +387,17 @@ def _generate_file_name(file_path: str, cd_part, folder_name, file_info: FileInf
         if not prevent_char:
             if "originaltitle" in file_name_template:
                 LogBuffer.log().write(
-                    f"\n 💡 当前文件名长度：{len(file_name)}，"
-                    f"最大允许长度：{file_name_max}，文件命名时将去除原标题后{abs(cut_index)}个字符!"
+                    f"\n 💡 当前文件名长度：{len(file_name)}，最大允许长度：{file_name_max}，文件命名时将去除原标题后{abs(cut_index)}个字符!"
                 )
                 file_name = file_name.replace(originaltitle, originaltitle[:cut_index])
             elif "title" in file_name_template:
                 LogBuffer.log().write(
-                    f"\n 💡 当前文件名长度：{len(file_name)}，"
-                    f"最大允许长度：{file_name_max}，文件命名时将去除标题后{abs(cut_index)}个字符!"
+                    f"\n 💡 当前文件名长度：{len(file_name)}，最大允许长度：{file_name_max}，文件命名时将去除标题后{abs(cut_index)}个字符!"
                 )
                 file_name = file_name.replace(title, title[:cut_index])
             elif "outline" in file_name_template:
                 LogBuffer.log().write(
-                    f"\n 💡 当前文件名长度：{len(file_name)}，"
-                    f"最大允许长度：{file_name_max}，文件命名时将去除简介后{abs(cut_index)}个字符!"
+                    f"\n 💡 当前文件名长度：{len(file_name)}，最大允许长度：{file_name_max}，文件命名时将去除简介后{abs(cut_index)}个字符!"
                 )
                 file_name = file_name.replace(outline, outline[:cut_index])
 

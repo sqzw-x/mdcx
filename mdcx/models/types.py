@@ -156,7 +156,7 @@ class BaseCrawlerResult:
     title: str  # 标题
     trailer: str  # 预告片URL
     wanted: str
-    year: str  # 发行年份
+    year: str  # 发行年份 # todo 移除. 总是可以从 release 推断
 
     # 用于写入 nfo 的特殊字段
     javdbid: str  # JavDB ID

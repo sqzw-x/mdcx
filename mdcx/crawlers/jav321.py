@@ -76,8 +76,7 @@ def getRelease(response):
 def getCover(detail_page):
     cover_url = str(
         detail_page.xpath(
-            "/html/body/div[@class='row'][2]/div[@class='col-md-3']/div[@class='col-xs-12 "
-            "col-md-12'][1]/p/a/img[@class='img-responsive']/@src"
+            "/html/body/div[@class='row'][2]/div[@class='col-md-3']/div[@class='col-xs-12 col-md-12'][1]/p/a/img[@class='img-responsive']/@src"
         )
     ).strip(" ['']")
     if cover_url == "":
