@@ -2,7 +2,12 @@
 
 ## 环境准备
 
+### 依赖
+
 * [uv](https://docs.astral.sh/uv/getting-started/installation/)
+* pnpm
+
+### clone
 
 ```bash
 git clone https://github.com/sqzw-x/mdcx.git
@@ -10,6 +15,35 @@ cd mdcx
 uv sync --all-extras --dev
 uv run pre-commit install
 uv pip install -e .
+```
+
+## Run
+
+启动 qt 版本
+
+```bash
+uv run main.py
+```
+
+启动 web server
+
+```bash
+# 构建前端
+cd ui && pnpm i && pnpm build && cd ..
+
+# Windows
+$env:MDCX_DEV=1; uv run server.py
+
+# Linux/macOS
+MDCX_DEV=1 uv run server.py
+```
+
+## Test
+
+Python 侧使用 pytest
+
+```bash
+uv run pytest
 ```
 
 ## 如何添加新配置项
@@ -31,14 +65,25 @@ uv pip install -e .
 mdcx
 ├── mdcx # 源代码目录
 │   ├── config # 配置管理
-│   ├── controllers # UI 控制器
+│   ├── controllers # Qt UI 控制器
 │   │   └── main_window
-│   ├── crawlers # 各网站获取
+│   ├── crawlers # 各网站爬虫
 │   ├── models # 业务逻辑
 │   │   ├── base
 │   │   ├── core
 │   │   └── tools
+│   ├── server # Web server
+│   │   ├── api
+│   │   │   └── v1
+│   │   └── ws
 │   ├── utils
-│   └── views # UI 定义
-└── scripts # 开发/构建脚本
+│   └── views # Qt UI 定义
+├── scripts # 开发/构建脚本
+│   ├── build.sh # 构建 Qt 版本
+│   ├── changelog.sh # 生成变更日志模板
+│   └── pyuic.sh # 从 Qt UI 生成 Python 代码
+├── tests # 测试
+└── ui # WebUI 前端
+    ├── dist # 构建结果
+    └── src
 ```
