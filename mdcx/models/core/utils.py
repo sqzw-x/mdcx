@@ -220,7 +220,7 @@ def add_definition_tag(res: BaseCrawlerResult, definition, codec):
     [new_tag_list.append(i) for i in tag_list if i]
     if definition and "definition" in config.tag_include:
         new_tag_list.insert(0, definition)
-        if config.hd_get == "video" and codec:
+        if config.hd_get == "video" and codec and codec not in new_tag_list:
             new_tag_list.insert(0, codec)  # 插入编码格式
     res.tag = ",".join(new_tag_list)
 

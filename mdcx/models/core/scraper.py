@@ -156,7 +156,8 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
             tag
             for tag in tags
             if tag
-            not in (
+            not in (  # 移除与具体文件相关的 tag; 分辨率相关 tag 在 add_definition_tag 中会移除; codec tag 无法穷举, 移除常见类型
+                # todo 所有文件相关的 tag 推迟到 write_nfo 时从 file_info 生成, json_data_dic 只存储通用的 tag
                 "中文字幕",
                 "无码流出",
                 "無碼流出",
@@ -172,6 +173,11 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
                 "裏番",
                 "动漫",
                 "動漫",
+                "H264",
+                "HEVC",
+                "MPEG4",
+                "VP8",
+                "VP9",
             )
         ]
         tags.append(file_info.mosaic)
