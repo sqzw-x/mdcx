@@ -2,11 +2,12 @@ import os
 import os.path
 import re
 from configparser import ConfigParser, RawConfigParser
-from dataclasses import dataclass, fields
+from dataclasses import asdict, dataclass, fields
 from io import StringIO
 
 import httpx
 
+from mdcx.config.models import Config
 from mdcx.consts import MAIN_PATH, MARK_FILE, ManualConfig
 from mdcx.llm import LLMClient
 from mdcx.signals import signal
@@ -524,6 +525,9 @@ class ConfigSchema:
                 parser.set("unknown_fields", key, value)
         parser.write(buffer)
         return buffer.getvalue()
+
+    def to_pydantic_model(self):
+        return Config.from_legacy(asdict(self))
 
 
 manager = ConfigManager()

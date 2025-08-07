@@ -1,15 +1,14 @@
 import re
 from collections.abc import Callable
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from datetime import timedelta
 from functools import lru_cache
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator
 from pydantic.fields import FieldInfo
 
 from ..server.config import SAFE_DIRS
-from .manager import ConfigSchema
 from .ui_schema import Enum, ServerPathDirectory, extract_ui_schema_recursive
 
 
@@ -1403,12 +1402,10 @@ class Config(BaseModel):
         return schema_dict
 
     @classmethod
-    def from_legacy(cls, data: dict[str, Any] | ConfigSchema) -> "Config":
+    def from_legacy(cls, data: dict[str, Any]) -> "Config":
         """
         从 ConfigSchema 创建 Config 实例.
         """
-        if isinstance(data, ConfigSchema):
-            data = asdict(data)
         # 应用兼容规则
         for rule in COMPAT_RULES:
             if isinstance(rule, Rename):
@@ -1478,9 +1475,20 @@ class Add(CompatRule):
 
 # 描述 Config 相比于 ConfigSchema 的变更并添加相应的兼容规则
 COMPAT_RULES: list[CompatRule] = [
-    Rename("type", "proxy_type", notes=[ConfigSchema.type, Config().proxy_type, "与关键词冲突"]),
-    Rename("outline_show", "outline_format", notes=[ConfigSchema.outline_show, Config().outline_format, "澄清语义"]),
-    Rename("tag_include", "nfo_tag_include", notes=[ConfigSchema.tag_include, Config().nfo_tag_include, "澄清语义"]),
-    Remove("show_4k", notes=[ConfigSchema.show_4k, "功能与命名模板冲突"]),
-    Remove("show_moword", notes=[ConfigSchema.show_moword, "功能与命名模板冲突"]),
+    Rename("type", "proxy_type", notes=["ConfigSchema.type", Config().proxy_type, "与关键词冲突"]),
+    Rename("outline_show", "outline_format", notes=["ConfigSchema.outline_show", Config().outline_format, "澄清语义"]),
+    Rename("tag_include", "nfo_tag_include", notes=["ConfigSchema.tag_include", Config().nfo_tag_include, "澄清语义"]),
+    Remove("show_4k", notes=["ConfigSchema.show_4k", "功能与命名模板冲突"]),
+    Remove("show_moword", notes=["ConfigSchema.show_moword", "功能与命名模板冲突"]),
 ]
+if TYPE_CHECKING:
+    from .manager import ConfigSchema
+
+    # 方便快速查看 ConfigSchema 的字段
+    _ = [
+        ConfigSchema.type,
+        ConfigSchema.outline_show,
+        ConfigSchema.tag_include,
+        ConfigSchema.show_4k,
+        ConfigSchema.show_moword,
+    ]

@@ -73,8 +73,7 @@ class TestConfigConversion:
         config_schema = ConfigSchema()
         updated_config_schema = update(config_schema, legacy_dict)
 
-        # 使用 from_legacy 转回 Config
-        converted_config = Config.from_legacy(updated_config_schema)
+        converted_config = updated_config_schema.to_pydantic_model()
 
         # 验证两个 Config 实例深度相等
         assert converted_config.model_dump_json(indent=2) == original_config.model_dump_json(indent=2), (
@@ -94,8 +93,7 @@ class TestConfigConversion:
             legacy_dict = current_config.to_legacy()
             config_schema = ConfigSchema()
             updated_config_schema = update(config_schema, legacy_dict)
-            current_config = Config.from_legacy(updated_config_schema)
-
+            current_config = updated_config_schema.to_pydantic_model()
             # 每轮都应该与原始配置相等
             assert current_config.model_dump_json(indent=2) == original_config.model_dump_json(indent=2), (
                 f"第 {i + 1} 轮转换后配置不一致"
