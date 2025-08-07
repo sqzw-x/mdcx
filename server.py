@@ -1,4 +1,3 @@
-import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -6,9 +5,9 @@ from fastapi.staticfiles import StaticFiles
 
 def init():
     # 设置为服务器模式
-    from mdcx.server import config
+    from mdcx.server import var
 
-    config.is_server = True
+    var.is_server = True
 
     # 使用 ServerSignals 替代 Qt Signal
     from mdcx.server.signals import signal
@@ -40,8 +39,3 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-
-if __name__ == "__main__":
-    from mdcx.server.config import HOST, PORT
-
-    uvicorn.run(app, host=HOST, port=PORT)

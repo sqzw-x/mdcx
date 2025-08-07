@@ -4,9 +4,7 @@ from pathlib import Path
 from pydantic import Field, ValidationError, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# 仅当实际启动服务器时才设置为 True
-# 此参数和 MDCX_DEV 环境变量的作用相同, 作用是在非服务器启动时无须设置环境变量, 如测试时
-is_server = False
+from .var import is_server
 
 
 class Config(BaseSettings):
