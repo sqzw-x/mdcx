@@ -1,3 +1,6 @@
+[tool.setuptools]
+py-modules = ['mdcx']
+
 [project]
 name = "mdcx"
 version = "2.0.0"
