@@ -4,8 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 
-def init_signal():
-    """使用 ServerSignals 替代 Qt Signal"""
+def init():
+    # 设置为服务器模式
+    from mdcx.server import config
+
+    config.is_server = True
+
+    # 使用 ServerSignals 替代 Qt Signal
     from mdcx.server.signals import signal
     from mdcx.signals import set_signal
 
@@ -13,7 +18,7 @@ def init_signal():
 
 
 def create_app() -> FastAPI:
-    init_signal()
+    init()
 
     from mdcx.server.api.v1 import api
     from mdcx.server.ws.auth import WebSocketProtocolBearerMiddleware

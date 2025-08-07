@@ -4,6 +4,10 @@ from pathlib import Path
 from pydantic import Field, ValidationError, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# 仅当实际启动服务器时才设置为 True
+# 此参数和 MDCX_DEV 环境变量的作用相同, 作用是在非服务器启动时无须设置环境变量, 如测试时
+is_server = False
+
 
 class Config(BaseSettings):
     model_config = SettingsConfigDict(
@@ -34,7 +38,7 @@ class Config(BaseSettings):
     def validate_config(self):
         """验证整体配置"""
         # 开发模式下设置默认值
-        if self.dev:
+        if self.dev or not is_server:
             if self.host not in ("localhost", "127.0.0.1") and not self.host.startswith("192.168"):
                 raise ValueError(
                     f"不允许在开发模式下监听非本地地址 {self.host}:{self.port}"

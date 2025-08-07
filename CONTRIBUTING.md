@@ -7,9 +7,9 @@
 ```bash
 git clone https://github.com/sqzw-x/mdcx.git
 cd mdcx
-uv sync
-pre-commit install
-uv run main.py
+uv sync --all-extras --dev
+uv run pre-commit install
+uv pip install -e .
 ```
 
 ## 如何添加新配置项
