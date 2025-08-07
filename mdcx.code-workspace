@@ -7,4 +7,39 @@
 			"path": "ui"
 		}
 	],
+	"settings": {
+		"xml.format.maxLineWidth": 0,
+		"python.analysis.languageServerMode": "full",
+		"python.analysis.typeCheckingMode": "standard",
+		"[css]": {
+			"editor.codeActionsOnSave": {
+				"source.fixAll.biome": "explicit"
+			},
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+		"[html]": {
+			"editor.defaultFormatter": "vscode.html-language-features"
+		},
+		"[javascript]": {
+			"editor.codeActionsOnSave": {
+				"source.fixAll.biome": "explicit"
+			},
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+		"[json]": {
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+		"[typescript]": {
+			"editor.codeActionsOnSave": {
+				"source.fixAll.biome": "explicit"
+			},
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+		"[typescriptreact]": {
+			"editor.codeActionsOnSave": {
+				"source.fixAll.biome": "explicit"
+			},
+			"editor.defaultFormatter": "biomejs.biome"
+		},
+	}
 }
