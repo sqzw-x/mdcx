@@ -65,6 +65,7 @@ jobs:
         run: pnpm run ci
 
       - name: Build application
+        working-directory: ui
         run: pnpm build
       # todo 添加测试后启用
       # - name: Run tests
