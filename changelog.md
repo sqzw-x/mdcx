@@ -1,13 +1,39 @@
+## 新增
+
+*
+
 ## 修复
 
-* 运行时异常 TypeError: 'module' object is not callable
-* llm_max_req_sec 除零异常
-* 读取模式 has_nfo_update 选项行为不正确
-* 不移动文件时未按模板渲染文件名称
+* fc2hub 图片 URL
+* 多版本视频刮削失败
+* 男演员信息丢失
+* 临时解决 dmm digital 无法爬取, 在搜索结果中降低其优先级
 
 <details>
 <summary>Full Changelog</summary>
 
+cd52f02 合并 digital 和 video 类别
+f8b779e fix: 降低 dmm ditigal 优先级 (#549)
+2828565 feat: crawl cli
+444eefd feat: config get_website_base_url
+0b1ccef CI: add v1 release workflow to master
+aa45e97 add dmm video parser
+c5d98d4 fix: 未能正确 reduce all_actor 字段 (fix #554)
+1baa6b7 new cralwer & parser
+2931b52 chore: update CONTRIBUTING.md
+357a637 fix: is_server 不起作用
+2eb530b chore: 避免不必要的环境变量检查
+c39ac4c chore: 允许使用 pip install -e . 安装
+bd5b67e chore: 避免 config/models.py 对 manager.py 的依赖
+63cf39b chore: add vscode settings for projects and workspace
+2ff35dc feat: server & webui 基础实现 (#540)
+4ce9def remove ui
+2c6795c fix: 分集的 codec tag 重复 (fix #552)
+81b36c3 fix: mosaic 初始值错误 (fix #550)
+5fe4a1d fix: 多版本错误复用了 file_info (close #545)
+a3fadf6 fix: fc2hub image URL (close #546)
+2c43404 fix: 移除异步文件操作中的重试
+3ee749e Ready for 2.0-beta-4
 44f8bbc fix: 不移动文件时文件名称错误
 0cdf98e fix: 文件操作多余的重试
 fa52e71 fix: 读取模式 has_nfo_update 选项行为不正确 (close #539)
@@ -61,14 +87,5 @@ daf3cdd update README and add CONTRIBUTING.md
 3e829a3 CI: use input tag for release action
 d62c32d CI: stop daily release
 7593ea8 feat!: async & LLM translate (#463)
-cbaa181 format
-09bef3c feat: add and update some config; bug fix (#476)
-050cca9 feat: add workflow to close stale issues
-b75fdbf fix: 人名繁简转换可能导致错误 (close #477)
-6678740 fix: yesjav url changed (close #488)
-103af12 fix: cut_pic close image
-6fc157d fix: image may not be closed properly (fix #481)
-f6eea9d chore: update mapping_actor.xml (#480)
-ae2ef17 bug fix and refactor (#475)
 
 </details>
