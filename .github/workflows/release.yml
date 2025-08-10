@@ -122,6 +122,16 @@ jobs:
               if: ${{ matrix.build == 'windows' }}
               run: scripts/build-action
 
+            - name: Build macOS app - macOS
+              if: ${{ matrix.build == 'macos' }}
+              run: |
+                version="${{ github.ref_name }}"
+                # 如果是手动触发，则使用输入的tag
+                if [ -n "${{ github.event.inputs.tag }}" ]; then
+                  version="${{ github.event.inputs.tag }}"
+                fi
+                bash scripts/build-macos.sh --create-dmg --version "$version"
+
             - name: Get changelog
               id: get-changelog
               if: ${{ matrix.build == 'macos' }}
