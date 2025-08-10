@@ -84,13 +84,13 @@ class DmmCrawler(BaseCrawler):
     @classmethod
     def _get_parser(cls, category: Category):
         match category:
-            case "digital" | "dvd" | "prime" | "monthly" | "mono":
+            case "dvd" | "prime" | "monthly" | "mono":
                 return cls.parser
-            case "video":
+            case "digital":
                 return cls.parser1
             case "rental":
                 return cls.rental_parser
-            case _:
+            case "tv" | "other":
                 return cls.parser
 
     @override
@@ -102,7 +102,7 @@ class DmmCrawler(BaseCrawler):
                 ctx.debug(f"未知类别: {category} {url=}")
                 continue
             d.setdefault(category, []).append(url)
-        for category in ("mono", "tv", "video", "digital", "dvd", "prime", "monthly", "other"):  # 优先级
+        for category in ("mono", "rental", "dvd", "prime", "monthly", "tv", "digital", "other"):  # 优先级
             urls = d.get(category, [])
             parser = self._get_parser(category)
             for u in urls:

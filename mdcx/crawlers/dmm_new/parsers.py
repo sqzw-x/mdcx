@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from ..base import Context, CrawlerData, DetailPageParser, FieldRes, XPath, extract_all_texts, extract_text
 
-Category = Literal["tv", "digital", "dvd", "prime", "monthly", "video", "mono", "rental", "other"]
+Category = Literal["tv", "digital", "dvd", "prime", "monthly", "mono", "rental", "other"]
 
 
 def parse_category(url: str) -> Category:
@@ -15,7 +15,7 @@ def parse_category(url: str) -> Category:
     """
     if "tv.dmm.co.jp" in url:
         return "tv"
-    elif "/digital/" in url:
+    elif "/digital/" in url or "video.dmm.co.jp" in url:  # 现在 digital 会重定向到 video.dmm.co.jp
         # digital tag 可能有流媒体相关, 如 独占配信
         return "digital"
     elif "/dvd/" in url:
@@ -25,8 +25,6 @@ def parse_category(url: str) -> Category:
         return "prime"
     elif "/monthly/" in url:
         return "monthly"
-    elif "video.dmm.co.jp" in url:
-        return "video"
     elif "/mono/" in url:
         return "mono"
     elif "/rental/" in url:

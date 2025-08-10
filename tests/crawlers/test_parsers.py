@@ -9,7 +9,7 @@ from tests.crawlers.parser import ParserTestBase
     "name, parser_class",
     [
         ("dmm/mono", dmm_new.Parser),
-        ("dmm/video", dmm_new.Parser1),
+        ("dmm/digital", dmm_new.Parser1),
         ("dmm/rental", dmm_new.RentalParser),
     ],
 )
