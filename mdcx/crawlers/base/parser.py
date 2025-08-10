@@ -3,24 +3,7 @@ from collections.abc import Awaitable, Callable
 
 from parsel import Selector
 
-from mdcx.models.types import CrawlerResult
-
-from .base import Context
-
-
-class XPath(str): ...
-
-
-class CSSSelector(str): ...
-
-
-class _NoField: ...
-
-
-type FieldValue[T = str] = T | None | _NoField
-type FieldRes[T = str] = tuple[XPath | CSSSelector, ...] | FieldValue[T]
-
-type SelectorType = XPath | CSSSelector | str
+from .types import Context, CrawlerData, CSSSelector, FieldRes, FieldValue, SelectorType, XPath, _NoField
 
 
 def _get_selector(html: str | Selector) -> Selector:
@@ -133,6 +116,9 @@ class DetailPageParser[T: Context = Context]:
     async def actor(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
         return self.NO_FIELD
 
+    async def all_actor(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
+        return self.NO_FIELD
+
     async def director(self, ctx: T, html: Selector) -> FieldRes:
         return self.NO_FIELD
 
@@ -199,7 +185,7 @@ class DetailPageParser[T: Context = Context]:
     async def mosaic(self, ctx: T, html: Selector) -> FieldRes:
         return self.NO_FIELD
 
-    async def parse(self, ctx: T, html: Selector) -> CrawlerResult:
+    async def parse(self, ctx: T, html: Selector) -> CrawlerData:
         """
         调用所有字段的解析方法, 并构造 CrawlerResult.
 
@@ -209,9 +195,10 @@ class DetailPageParser[T: Context = Context]:
         Returns:
             包含所有刮削数据的 CrawlerResult 对象.
         """
-        return CrawlerResult(
+        return CrawlerData(
             title=await self.str_field(ctx, self.title, html),
-            actor=",".join(await self.str_list_field(ctx, self.actor, html)),
+            actor=await self.str_list_field(ctx, self.actor, html),
+            all_actor=await self.str_list_field(ctx, self.all_actor, html),
             director=await self.str_field(ctx, self.director, html),
             extrafanart=await self.str_list_field(ctx, self.extrafanart, html),
             originalplot=await self.str_field(ctx, self.originalplot, html),
@@ -224,30 +211,27 @@ class DetailPageParser[T: Context = Context]:
             score=await self.str_field(ctx, self.score, html),
             series=await self.str_field(ctx, self.series, html),
             studio=await self.str_field(ctx, self.studio, html),
-            tag=",".join(await self.str_list_field(ctx, self.tag, html)),
+            tag=await self.str_list_field(ctx, self.tag, html),
             thumb=await self.str_field(ctx, self.thumb, html),
             trailer=await self.str_field(ctx, self.trailer, html),
             wanted=await self.str_field(ctx, self.wanted, html),
             year=await self.str_field(ctx, self.year, html),
-            actor_photo=unwrap_field_value(await self.actor_photo(ctx, html), {}),
+            actor_photo=await self.actor_photo(ctx, html),
             image_cut=await self.str_field(ctx, self.image_cut, html),
-            image_download=unwrap_field_value(await self.image_download(ctx, html), False),
+            image_download=await self.image_download(ctx, html),
             number=await self.str_field(ctx, self.number, html),
             mosaic=await self.str_field(ctx, self.mosaic, html),
-            javdbid="",
+            externalId="",
             source="",
             website="",
         )
 
     @classmethod
-    async def str_field(cls, ctx: T, method: Callable[..., Awaitable[FieldRes[str]]], html: Selector) -> str:
-        field_name = method.__name__
+    async def str_field(cls, ctx: T, method: Callable[..., Awaitable[FieldRes]], html: Selector) -> FieldValue:
         method_res = await method(ctx, html)
 
-        if method_res is None or method_res is cls.NO_FIELD or isinstance(method_res, _NoField):
-            # todo 利用 nofield 信息
-            ctx.debug(f"字段 '{field_name}' 在该网站不存在, 跳过.")
-            return ""
+        if method_res is None or isinstance(method_res, _NoField):
+            return method_res
 
         if isinstance(method_res, tuple | XPath | CSSSelector):
             # 执行选择器
@@ -260,25 +244,15 @@ class DetailPageParser[T: Context = Context]:
     @classmethod
     async def str_list_field(
         cls, ctx: T, method: Callable[..., Awaitable[FieldRes[list[str]]]], html: Selector
-    ) -> list[str]:
-        field_name = method.__name__
+    ) -> FieldValue[list[str]]:
         method_res = await method(ctx, html)
 
-        if method_res is None or method_res is cls.NO_FIELD or isinstance(method_res, _NoField):
-            # todo 利用 nofield 信息
-            ctx.debug(f"字段 '{field_name}' 在该网站不存在, 跳过.")
-            return []
-
-        if isinstance(method_res, tuple | XPath | CSSSelector):
+        if method_res is None or isinstance(method_res, _NoField):
+            return method_res
+        elif isinstance(method_res, tuple | XPath | CSSSelector):
             # 执行选择器
             parsed_value = extract_all_texts(html, *method_res)
         else:
             parsed_value = method_res
 
         return parsed_value
-
-
-def unwrap_field_value[V = str](value: FieldValue[V], default: V) -> V:
-    if value is None or isinstance(value, _NoField):
-        return default
-    return value

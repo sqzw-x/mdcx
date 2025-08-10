@@ -1,16 +1,14 @@
 import json
-from abc import ABC, abstractmethod
-from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any, NotRequired, TypedDict
 
 import pytest
 from aiofiles import open as aio_open
 from parsel import Selector
 
-from mdcx.crawlers.parser import DetailPageParser
-from mdcx.models.types import CrawlerInput, CrawlerResult
+from mdcx.crawlers.base import CrawlerData, DetailPageParser
+from mdcx.models.types import CrawlerInput
 
 
 class TestCase(TypedDict):
@@ -19,20 +17,16 @@ class TestCase(TypedDict):
     run_test: bool
     result_file: str
     description: str
+    ctx: NotRequired[dict]  # used to build ctx
 
 
-class ParserTestBase(ABC):
-    @property
-    @abstractmethod
-    def parser_class(self) -> type[DetailPageParser]:
-        """解析器类"""
-        raise NotImplementedError
+class ParserTestBase:
+    """基础解析器测试类"""
 
-    @property
-    @abstractmethod
-    def parser_name(self) -> str:
-        """解析器名称"""
-        raise NotImplementedError
+    def __init__(self, parser_name: str, parser_class: type[DetailPageParser], overwite: bool):
+        self.parser_name = parser_name
+        self.parser_class = parser_class
+        self.overwite = overwite
 
     @property
     def test_data_dir(self) -> Path:
@@ -62,6 +56,7 @@ class ParserTestBase(ABC):
         """扫描测试数据目录中的所有 HTML 文件"""
         test_data_dir = self.test_data_dir
         if not test_data_dir.exists():
+            test_data_dir.mkdir(parents=True, exist_ok=True)
             return []
         return list(test_data_dir.glob("*.html"))
 
@@ -71,13 +66,14 @@ class ParserTestBase(ABC):
             "url": "",
             "run_test": True,
             "result_file": html_file.with_suffix(".json").name,
-            "description": f"Test data for {html_file.name}",
+            "description": "",
+            "ctx": {},
         }
 
-    async def parse_html_file(self, html_file: Path) -> CrawlerResult:
+    async def parse_html_file(self, html_file: Path, case_data: TestCase):
         """解析 HTML 文件并返回结果"""
         # 运行时导入以避免循环导入
-        from mdcx.crawlers.base import Context
+        from mdcx.crawlers.base.types import Context
 
         async with aio_open(html_file, encoding="utf-8") as f:
             html_content = await f.read()
@@ -92,9 +88,9 @@ class ParserTestBase(ABC):
 
         return await parser.parse(ctx, selector)
 
-    def serialize_result(self, result: CrawlerResult) -> dict[str, Any]:
+    def serialize_result(self, result: CrawlerData) -> dict[str, Any]:
         """将 CrawlerResult 序列化为字典"""
-        return asdict(result)
+        return result.to_json()
 
     def load_expected_result(self, result_file: Path) -> dict[str, Any] | None:
         """加载期望的结果"""
@@ -112,8 +108,16 @@ class ParserTestBase(ABC):
         """比较实际结果和期望结果，返回差异列表"""
         differences = []
 
-        # 检查所有字段
-        all_keys = set(actual.keys()) | set(expected.keys())
+        # 检查 key 不匹配
+        actual_keys = set(actual.keys())
+        expected_keys = set(expected.keys())
+        if actual_keys - expected_keys:
+            differences.append(f"出现在实际结果中, 但不在期望结果中的字段: {actual_keys - expected_keys}")
+        if expected_keys - actual_keys:
+            differences.append(f"出现在期望结果中, 但不在实际结果中的字段: {expected_keys - actual_keys}")
+
+        # 检查共同字段
+        all_keys = actual_keys & expected_keys
 
         for key in all_keys:
             actual_value = actual.get(key)
@@ -130,7 +134,7 @@ class ParserTestBase(ABC):
 
         # 解析 HTML 文件
         try:
-            actual_result = await self.parse_html_file(html_file)
+            actual_result = await self.parse_html_file(html_file, case_data)
             actual_dict = self.serialize_result(actual_result)
         except Exception as e:
             print(f"解析 {html_file.name} 时出错: {e}")
@@ -194,8 +198,3 @@ class ParserTestBase(ABC):
         print(f"\n测试完成: 总计 {total_tests}, 通过 {passed_tests}, 失败 {failed_tests}")
 
         return failed_tests == 0
-
-    @pytest.mark.asyncio
-    async def test_parser(self):
-        result = await self.run_all_tests()
-        assert result, "所有测试应该通过"

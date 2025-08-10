@@ -1,7 +1,6 @@
 import time
 import traceback
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from parsel import Selector
@@ -10,26 +9,10 @@ from mdcx.config.models import Website
 from mdcx.models.types import CrawlerInput, CrawlerResponse, CrawlerResult
 from mdcx.web_async import AsyncWebClient
 
+from .types import Context, CralwerException, CrawlerData
+
 if TYPE_CHECKING:
     from mdcx.config.manager import ConfigSchema
-
-    from .parser import DetailPageParser
-
-
-class CralwerException(Exception): ...
-
-
-@dataclass
-class Context:
-    input: CrawlerInput  # crawler 的原始输入
-    show_logs: list[str] = field(default_factory=list)
-    debug_logs: list[str] = field(default_factory=list)
-
-    def show(self, message: str):
-        self.show_logs.append(message)
-
-    def debug(self, message: str):
-        self.debug_logs.append(message)
 
 
 class GenericBaseCrawler[T: Context = Context](ABC):
@@ -95,12 +78,17 @@ class GenericBaseCrawler[T: Context = Context](ABC):
             ctx.debug(f"搜索页 URL: {search_urls}")
 
             detail_urls = await self._search(ctx, search_urls)
+            if not detail_urls:
+                raise CralwerException("未找到匹配的详情页 URL")
         else:
             detail_urls = [ctx.input.appoint_url]
             ctx.debug(f"使用指定详情页 URL: {ctx.input.appoint_url}")
 
         data = await self._detail(ctx, detail_urls)
+        if not data:
+            raise CralwerException("解析详情页数据失败")
         data.source = self.site().value  # todo use Enum directly
+        data = data.to_result()
         await self.post_process(ctx, data)
 
         return CrawlerResponse(
@@ -109,7 +97,7 @@ class GenericBaseCrawler[T: Context = Context](ABC):
             detail_urls=detail_urls,
         )
 
-    async def _search(self, ctx: T, search_urls: list[str]) -> list[str]:
+    async def _search(self, ctx: T, search_urls: list[str]) -> list[str] | None:
         for search_url in search_urls:
             selector, error = await self._fetch_search(ctx, search_url)
             if selector is None:
@@ -119,23 +107,18 @@ class GenericBaseCrawler[T: Context = Context](ABC):
             if detail_urls:
                 ctx.debug(f"详情页 URL: {detail_urls}")
                 return detail_urls if isinstance(detail_urls, list) else [detail_urls]
-        else:
-            raise CralwerException("获取详情页 URL 失败")
 
-    async def _detail(self, ctx: T, detail_urls: list[str]) -> CrawlerResult:
+    async def _detail(self, ctx: T, detail_urls: list[str]) -> CrawlerData | None:
         for detail_url in detail_urls:
             selector, error = await self._fetch_detail(ctx, detail_url)
             if selector is None:
                 ctx.debug(f"详情页请求失败: {detail_url=} {error=}")
                 continue
-
-            parser = self._get_detail_parser(ctx, detail_url)
-            scraped_data = await parser.parse(ctx, selector)
+            ctx.debug(f"详情页请求成功: {detail_url=}")
+            scraped_data = await self._parse_detail_page(ctx, selector, detail_url)
             if scraped_data:
                 scraped_data.website = detail_url
                 return scraped_data
-        else:
-            raise CralwerException("获取详情页数据失败")
 
     @abstractmethod
     async def _generate_search_url(self, ctx: T) -> list[str] | str | None:
@@ -159,9 +142,16 @@ class GenericBaseCrawler[T: Context = Context](ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _get_detail_parser(self, ctx: T, detail_url: str) -> "DetailPageParser[T]":
+    async def _parse_detail_page(self, ctx: T, html: Selector, detail_url: str) -> CrawlerData | None:
         """
-        获取详情页解析器.
+        解析详情页获取数据.
+
+        Args:
+            html (Selector): 包含详情页 HTML 的 parsel Selector 对象.
+            detail_url (str): 详情页 URL.
+
+        Returns:
+            爬取数据对象, 如果解析失败则返回 None.
         """
         raise NotImplementedError
 
