@@ -1,5 +1,5 @@
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Literal
 
 
@@ -152,7 +152,7 @@ class BaseCrawlerResult:
     series: str  # 系列
     studio: str  # 制作商
     tag: str  # 标签，逗号分隔
-    thumb: str  # 缩略图URL
+    thumb: str  # 缩略图URL # todo 需修改为 list[str] 支持多个候选地址
     title: str  # 标题
     trailer: str  # 预告片URL
     wanted: str
@@ -228,6 +228,21 @@ class CrawlerResult(BaseCrawlerResult):
             source="",
             website="",
         )
+
+
+@dataclass
+class CrawlerResponse:
+    """
+    封装单个爬虫的完整执行信息
+    """
+
+    success: bool
+    data: CrawlerResult | None = None
+    execution_time: float = 0.0
+    error: Exception | None = None
+    search_urls: list[str] | None = None
+    detail_urls: list[str] | None = None
+    logs: list[str] = field(default_factory=list)
 
 
 @dataclass
