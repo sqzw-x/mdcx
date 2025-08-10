@@ -280,6 +280,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
     default_website_lang_pairs: list[tuple[str, str]] = [
         (w, "") if w not in MULTI_LANGUAGE_WEBSITES else (w, "any") for w in number_website_list
     ]
+    all_field_website_lang_pairs["all_actor"] = all_field_website_lang_pairs["actor"]
 
     # 按字段分别处理，每个字段按优先级尝试获取
     for field in ManualConfig.CRAWLER_DATA_FIELDS:  # 与 CONFIG_DATA_FIELDS 不完全一致
@@ -383,10 +384,6 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
                     # 处理 actor 为列表的情况
                     # todo 统一 cralwer 返回类型后移除
                     site_data.actor = ",".join(site_data.actor)
-                if not reduced.all_actor:
-                    reduced.all_actor = site_data.actor
-                if not reduced.all_actor_photo:
-                    reduced.all_actor_photo = site_data.actor_photo
             elif field == "originaltitle" and site_data.actor:
                 reduced.amazon_orginaltitle_actor = site_data.actor.split(",")[0]
 

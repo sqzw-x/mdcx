@@ -139,6 +139,7 @@ class BaseCrawlerResult:
     image_download: bool  # 是否需要下载图片
     # 以下字段会从多个来源 reduce 到一个最终结果
     actor: str  # 演员名称，逗号分隔
+    all_actor: str  # 包含男演员的所有演员名称
     director: str  # 导演
     extrafanart: list[str]  # 额外剧照URL列表
     originalplot: str  # 原始简介（日文）
@@ -183,6 +184,7 @@ class BaseCrawlerResult:
             mosaic="",
             image_download=False,
             actor="",
+            all_actor="",
             director="",
             extrafanart=[],
             originalplot="",
@@ -211,7 +213,7 @@ class CrawlerResult(BaseCrawlerResult):
     单一网站爬虫返回的结果
     """
 
-    actor_photo: dict  # 演员照片信息
+    actor_photo: dict  # 演员照片信息 # todo 此字段疑似无用
     image_cut: str  # 图片裁剪方式
     source: str  # 数据来源（爬虫名称）
     website: str  # 网站地址
@@ -253,8 +255,7 @@ class CrawlersResult(BaseCrawlerResult):
 
     # 以下用于后续下载资源
     actor_amazon: list[str]  # 用于 Amazon 搜索的演员名称
-    all_actor_photo: dict  # 演员照片信息
-    all_actor: str  # 所有来源的演员名称
+    all_actor_photo: dict  # 演员照片信息 # todo 此字段疑似无用
     amazon_orginaltitle_actor: str  # 用于 Amazon 搜索的原始标题中的演员
     thumb_list: list[tuple[str, str]]  # 所有来源的缩略图URL列表
     originaltitle_amazon: str  # 用于 Amazon 搜索的原始标题
@@ -283,7 +284,6 @@ class CrawlersResult(BaseCrawlerResult):
             **BaseCrawlerResult.empty().__dict__,
             actor_amazon=[],
             all_actor_photo={},
-            all_actor="",
             amazon_orginaltitle_actor="",
             thumb_list=[],
             originaltitle_amazon="",

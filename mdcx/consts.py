@@ -136,6 +136,7 @@ class ManualConfig:
         "outline",
         "originalplot",
         "actor",
+        "all_actor",
         "thumb",
         "poster",
         "extrafanart",
