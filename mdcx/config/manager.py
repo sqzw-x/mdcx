@@ -7,7 +7,7 @@ from io import StringIO
 
 import httpx
 
-from mdcx.config.models import Config
+from mdcx.config.models import Config, Website
 from mdcx.consts import MAIN_PATH, MARK_FILE, ManualConfig
 from mdcx.llm import LLMClient
 from mdcx.signals import signal
@@ -508,6 +508,12 @@ class ConfigSchema:
         )
         self.executor = executor  # 方便通过 config 访问 executor
 
+    def get_website_base_url(self, website: str | Website) -> str:
+        """获取指定网站的基础 URL"""
+        if isinstance(website, Website):
+            website = website.value
+        return getattr(self, f"{website}_website", "")
+
     def format_ini(self):
         buffer = StringIO()
         parser = ConfigParser(interpolation=None)
@@ -517,7 +523,7 @@ class ConfigSchema:
             value = ("true" if value else "false") if isinstance(value, bool) else str(value)
             parser.set("mdcx", field.name, value)
         for website in ManualConfig.SUPPORTED_WEBSITES:
-            if url := getattr(self, f"{website}_website", ""):
+            if url := self.get_website_base_url(website):
                 parser.set("mdcx", f"{website}_website", url)
         if x := getattr(self, "unknown_fields", {}):
             parser.add_section("unknown_fields")
