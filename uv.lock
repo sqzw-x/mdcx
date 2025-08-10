@@ -449,6 +449,7 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "rich" },
     { name = "ruff" },
+    { name = "typer" },
     { name = "types-lxml" },
 ]
 
@@ -485,6 +486,7 @@ dev = [
     { name = "pytest-asyncio", specifier = ">=1.1.0" },
     { name = "rich", specifier = ">=14.1.0" },
     { name = "ruff", specifier = ">=0.12.5" },
+    { name = "typer", specifier = ">=0.16.0" },
     { name = "types-lxml", specifier = ">=2025.3.30" },
 ]
 

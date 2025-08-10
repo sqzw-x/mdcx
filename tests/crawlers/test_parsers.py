@@ -10,11 +10,12 @@ from tests.crawlers.parser import ParserTestBase
     [
         ("dmm/mono", dmm_new.Parser),
         ("dmm/video", dmm_new.Parser1),
+        ("dmm/rental", dmm_new.RentalParser),
     ],
 )
-async def test_parsers(name, parser_class, overwite, parser_names):
+async def test_parsers(name, parser_class, overwrite, parser_names):
     if parser_names and name not in parser_names:
         pytest.skip(f"跳过解析器: {name}")
-    t = ParserTestBase(name, parser_class, overwite)
+    t = ParserTestBase(name, parser_class, overwrite)
     result = await t.run_all_tests()
     assert result, "所有测试应该通过"

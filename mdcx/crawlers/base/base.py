@@ -7,12 +7,11 @@ from parsel import Selector
 
 from mdcx.config.models import Website
 from mdcx.models.types import CrawlerInput, CrawlerResponse, CrawlerResult
-from mdcx.web_async import AsyncWebClient
 
 from .types import Context, CralwerException, CrawlerData
 
 if TYPE_CHECKING:
-    from mdcx.config.manager import ConfigSchema
+    from mdcx.web_async import AsyncWebClient
 
 
 class GenericBaseCrawler[T: Context = Context](ABC):
@@ -26,9 +25,9 @@ class GenericBaseCrawler[T: Context = Context](ABC):
     由于爬取逻辑因网站而异, 在最极端情况下可以重写 `_run` 方法以完全自定义爬取流程.
     """
 
-    def __init__(self, config: "ConfigSchema"):
-        self.async_client: AsyncWebClient = config.async_client
-        self.base_url: str = getattr(config, f"{self.site}_website", self.base_url_())
+    def __init__(self, client: "AsyncWebClient", base_url: str = ""):
+        self.async_client = client
+        self.base_url: str = base_url or self.base_url_()
 
     @classmethod
     @abstractmethod
@@ -99,10 +98,12 @@ class GenericBaseCrawler[T: Context = Context](ABC):
 
     async def _search(self, ctx: T, search_urls: list[str]) -> list[str] | None:
         for search_url in search_urls:
-            selector, error = await self._fetch_search(ctx, search_url)
-            if selector is None:
+            html, error = await self._fetch_search(ctx, search_url)
+            if html is None:
                 ctx.debug(f"搜索页请求失败: {search_url=} {error=}")
                 continue
+            ctx.debug(f"搜索页请求成功: {search_url=}")
+            selector = Selector(text=html)
             detail_urls = await self._parse_search_page(ctx, selector, search_url)
             if detail_urls:
                 ctx.debug(f"详情页 URL: {detail_urls}")
@@ -110,11 +111,12 @@ class GenericBaseCrawler[T: Context = Context](ABC):
 
     async def _detail(self, ctx: T, detail_urls: list[str]) -> CrawlerData | None:
         for detail_url in detail_urls:
-            selector, error = await self._fetch_detail(ctx, detail_url)
-            if selector is None:
+            html, error = await self._fetch_detail(ctx, detail_url)
+            if html is None:
                 ctx.debug(f"详情页请求失败: {detail_url=} {error=}")
                 continue
             ctx.debug(f"详情页请求成功: {detail_url=}")
+            selector = Selector(text=html)
             scraped_data = await self._parse_detail_page(ctx, selector, detail_url)
             if scraped_data:
                 scraped_data.website = detail_url
@@ -164,39 +166,18 @@ class GenericBaseCrawler[T: Context = Context](ABC):
         """
         return
 
-    async def _fetch_search(self, ctx: T, url: str) -> tuple[Selector | None, str]:
+    async def _fetch_search(self, ctx: T, url: str) -> tuple[str | None, str]:
         """
-        获取搜索页的 HTML 内容并解析为 parsel Selector 对象. 此方法不应抛出异常.
+        获取搜索页. 此方法不应抛出异常.
 
-        Args:
-            url (str): 搜索页的 URL.
-
-        Returns:
-            解析后的 Selector 对象和错误信息.
         """
-        html_text, error = await self.async_client.get_text(
-            url, headers=self._get_headers(ctx), cookies=self._get_cookies(ctx)
-        )
-        if html_text is None:
-            return None, f"搜索页请求失败: {error}"
-        return Selector(text=html_text), ""
+        return await self.async_client.get_text(url, headers=self._get_headers(ctx), cookies=self._get_cookies(ctx))
 
-    async def _fetch_detail(self, ctx: T, url: str) -> tuple[Selector | None, str]:
+    async def _fetch_detail(self, ctx: T, url: str) -> tuple[str | None, str]:
         """
-        获取详情页的 HTML 内容并解析为 parsel Selector 对象. 此方法不应抛出异常.
-
-        Args:
-            url (str): 详情页的 URL.
-
-        Returns:
-            解析后的 Selector 对象和错误信息.
+        获取详情页. 此方法不应抛出异常.
         """
-        html_text, error = await self.async_client.get_text(
-            url, headers=self._get_headers(ctx), cookies=self._get_cookies(ctx)
-        )
-        if html_text is None:
-            return None, f"详情页请求失败: {error}"
-        return Selector(text=html_text), ""
+        return await self.async_client.get_text(url, headers=self._get_headers(ctx), cookies=self._get_cookies(ctx))
 
     def _get_cookies(self, ctx: T) -> dict[str, str] | None:
         return None
@@ -215,7 +196,6 @@ crawler_registry: dict[Website, type[GenericBaseCrawler]] = {}
 
 def register_crawler(crawler_cls: type[GenericBaseCrawler]):
     crawler_registry[crawler_cls.site()] = crawler_cls
-    return crawler_cls
 
 
 def get_crawler(site: Website) -> type[GenericBaseCrawler] | None:

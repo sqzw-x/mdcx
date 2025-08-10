@@ -8,9 +8,13 @@ from PyQt5.QtCore import QCoreApplication, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
 
+from mdcx.consts import show_constants
 from mdcx.controllers.main_window.main_window import MyMAinWindow
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+show_constants()
+
 
 if os.path.isfile("highdpi_passthrough"):
     # 解决不同电脑不同缩放比例问题，非整数倍缩放，如系统中设置了150%的缩放，QT程序的缩放将是两倍，QT 5.14中增加了非整数倍的支持，需要加入下面的代码才能使用150%的缩放

@@ -6,19 +6,18 @@ from parsel import Selector
 from mdcx.config.models import Website
 
 from ..base import (
+    BaseCrawler,
     Context,
     CralwerException,
     CrawlerData,
-    GenericBaseCrawler,
-    register_crawler,
 )
-from .parsers import Category, Parser, Parser1, parse_category
+from .parsers import Category, Parser, Parser1, RentalParser, parse_category
 
 
-@register_crawler
-class DmmCrawler(GenericBaseCrawler):
+class DmmCrawler(BaseCrawler):
     parser = Parser()
     parser1 = Parser1()
+    rental_parser = RentalParser()
 
     @classmethod
     @override
@@ -75,34 +74,44 @@ class DmmCrawler(GenericBaseCrawler):
         n1 = f"{prefix}{digits:0>5}"
         n2 = f"{prefix}{digits}"
 
-        matched: dict[Category, list[str]] = {}
+        res = []
         for u in url_list:
             if n1 in u or n2 in u:
-                matched.setdefault(parse_category(u), []).append(u)
-
-        matched.get("dvd", []).sort(reverse=True)  # why?
-
-        # 网址排序：digital(数据完整) > dvd(无前缀数字，图片完整) > prime（有发行日期） > premium（无发行日期） > s1（无发行日期）
-        res = []
-        for c in ["tv", "digital", "dvd", "prime", "monthly", "other"]:
-            if c in matched:
-                res.extend(matched[c])
+                res.append(u)
 
         return res
 
+    @classmethod
+    def _get_parser(cls, category: Category):
+        match category:
+            case "digital" | "dvd" | "prime" | "monthly" | "mono":
+                return cls.parser
+            case "video":
+                return cls.parser1
+            case "rental":
+                return cls.rental_parser
+            case _:
+                return cls.parser
+
     @override
     async def _detail(self, ctx: Context, detail_urls: list[str]) -> CrawlerData | None:
-        for detail_url in detail_urls:
-            category = parse_category(detail_url)
-            selector, error = await self._fetch_detail(ctx, detail_url)
-            if selector is None:
-                ctx.debug(f"详情页请求失败: {detail_url=} {error=}")
+        d: dict[Category, list[str]] = {}
+        for url in detail_urls:
+            category = parse_category(url)
+            if category not in d:
+                ctx.debug(f"未知类别: {category} {url=}")
                 continue
-            ctx.debug(f"详情页请求成功: {detail_url=}")
-            if category in ["digital", "dvd", "prime", "monthly"]:
-                return await self.parser.parse(ctx, selector)
-            elif category == "video":
-                return await self.parser1.parse(ctx, selector)
+            d.setdefault(category, []).append(url)
+        for category in ("mono", "tv", "video", "digital", "dvd", "prime", "monthly", "other"):  # 优先级
+            urls = d.get(category, [])
+            parser = self._get_parser(category)
+            for u in urls:
+                html, error = await self._fetch_detail(ctx, u)
+                if html is None:
+                    ctx.debug(f"详情页请求失败: {u=} {error=}")
+                    continue
+                ctx.debug(f"详情页请求成功: {u=}")
+                return await parser.parse(ctx, Selector(html))
 
     @override
     async def post_process(self, ctx, res):

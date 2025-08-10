@@ -27,6 +27,8 @@ dependencies = [
     "zhconv==1.4.3",
 ]
 
+[project.scripts]
+crawl = "mdcx.cli.crawl:app"
 
 [project.optional-dependencies]
 web = ["fastapi>=0.116.1", "uvicorn[standard]>=0.35.0"]
@@ -41,5 +43,6 @@ dev = [
     "pytest-asyncio>=1.1.0",
     "rich>=14.1.0",
     "ruff>=0.12.5",
+    "typer>=0.16.0",
     "types-lxml>=2025.3.30",
 ]

@@ -62,9 +62,6 @@ def show_constants():
         print(f"\t{key}: {value}")
 
 
-show_constants()
-
-
 class ManualConfig:
     # 表示运行时版本, 用于检查更新以及向后兼容配置文件
     LOCAL_VERSION = 120250708

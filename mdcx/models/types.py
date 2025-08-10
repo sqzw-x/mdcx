@@ -112,6 +112,10 @@ class CrawlerInput:
     number: str
     short_number: str
 
+    @classmethod
+    def empty(cls) -> "CrawlerInput":
+        return FileInfo.empty().crawler_input()
+
 
 @dataclass
 class CrawlTask(CrawlerInput):
@@ -125,6 +129,10 @@ class CrawlTask(CrawlerInput):
     website_name: str  # 用于重新刮削时指定网站
     wuma: str
     youma: str
+
+    @classmethod
+    def empty(cls) -> "CrawlTask":
+        return FileInfo.empty().crawl_task()
 
 
 @dataclass

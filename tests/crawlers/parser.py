@@ -23,10 +23,10 @@ class TestCase(TypedDict):
 class ParserTestBase:
     """基础解析器测试类"""
 
-    def __init__(self, parser_name: str, parser_class: type[DetailPageParser], overwite: bool):
+    def __init__(self, parser_name: str, parser_class: type[DetailPageParser], overwrite: bool):
         self.parser_name = parser_name
         self.parser_class = parser_class
-        self.overwite = overwite
+        self.overwrite = overwrite
 
     @property
     def test_data_dir(self) -> Path:
@@ -143,11 +143,11 @@ class ParserTestBase:
         # 加载期望结果
         expected_dict = self.load_expected_result(result_file)
 
-        # 如果没有期望结果，保存当前结果并视为通过
-        if not expected_dict:
+        # 如果没有期望结果或覆盖, 则保存实际结果
+        if not expected_dict or self.overwrite:
             self.save_result(result_file, actual_dict)
             print(f"保存新结果: {html_file.name} -> {result_file.name}")
-            return True
+            pytest.skip("保存新结果, 跳过比较")
 
         # 比较结果
         differences = self.compare_results(actual_dict, expected_dict)

@@ -4,16 +4,9 @@ from typing import Literal, override
 from parsel import Selector
 from pydantic import BaseModel
 
-from ..base import (
-    Context,
-    CrawlerData,
-    DetailPageParser,
-    XPath,
-    extract_all_texts,
-    extract_text,
-)
+from ..base import Context, CrawlerData, DetailPageParser, FieldRes, XPath, extract_all_texts, extract_text
 
-Category = Literal["tv", "digital", "dvd", "prime", "monthly", "other", "video"]
+Category = Literal["tv", "digital", "dvd", "prime", "monthly", "video", "mono", "rental", "other"]
 
 
 def parse_category(url: str) -> Category:
@@ -34,6 +27,10 @@ def parse_category(url: str) -> Category:
         return "monthly"
     elif "video.dmm.co.jp" in url:
         return "video"
+    elif "/mono/" in url:
+        return "mono"
+    elif "/rental/" in url:
+        return "rental"
     else:
         # todo 其他类别
         return "other"
@@ -41,7 +38,7 @@ def parse_category(url: str) -> Category:
 
 class Parser(DetailPageParser):
     """
-    适用类别: monthly, digital, dvd # todo 测试具体适用哪些类别
+    适用类别: rental, monthly, digital, dvd # todo 测试具体适用哪些类别
     """
 
     @override
@@ -119,7 +116,7 @@ class Parser(DetailPageParser):
         # return url.replace("ps.jpg", "pl.jpg")
 
     @override
-    async def extrafanart(self, ctx, html) -> list[str]:
+    async def extrafanart(self, ctx, html) -> FieldRes[list[str]]:
         extrafanart = extract_all_texts(
             html, "//div[@id='sample-image-block']/a/@href", "//a[@name='sample-image']/img/@data-lazy"
         )
@@ -147,6 +144,12 @@ class Parser(DetailPageParser):
         if extract_text(html, '//li[@class="on"]/a/text()') == "アニメ":
             return "里番"
         return "有码"
+
+
+class RentalParser(Parser):
+    @override
+    async def extrafanart(self, ctx, html):
+        return (XPath("//a[@name='sample-image']/img/@src"),)
 
 
 class AggregateRating(BaseModel):
@@ -197,8 +200,10 @@ class Parser1(DetailPageParser):
                 d.title = json_data.name
             if json_data.description:
                 d.outline = json_data.description
-            if json_data.image:  # todo 此处的图片包含了封面, 半封面, 预览
-                d.thumb = json_data.image[0]
+            if images := json_data.image:
+                d.thumb = images[0]
+                if len(images) > 3:
+                    d.extrafanart = images[3:]
             if json_data.brand and json_data.brand.name:
                 d.studio = json_data.brand.name
             if video := json_data.subjectOf:
