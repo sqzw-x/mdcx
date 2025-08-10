@@ -239,7 +239,8 @@ def get_real_url(
             other_list.append(i)
     dvd_list.sort(reverse=True)
     # 丢弃 tv_list, 因为获取其信息调用的后续 api 无法访问
-    new_url_list = digital_list + dvd_list + prime_list + monthly_list + other_list
+    # 20250810 digital 重定向到 video.dmm.co.jp 且难以获取
+    new_url_list = dvd_list + prime_list + monthly_list + digital_list + other_list
     real_url = new_url_list[0] if new_url_list else ""
     return real_url, number
 
