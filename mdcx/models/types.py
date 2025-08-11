@@ -146,9 +146,12 @@ class BaseCrawlerResult:
     mosaic: str  # 马赛克类型（有码/无码）
     image_download: bool  # 是否需要下载图片
     # 以下字段会从多个来源 reduce 到一个最终结果
-    actor: str  # 演员名称，逗号分隔
-    all_actor: str  # 包含男演员的所有演员名称
-    director: str  # 导演
+    actors: list[str]
+    # actor: str  # 演员名称，逗号分隔
+    all_actors: list[str]
+    # all_actor: str  # 包含男演员的所有演员名称
+    directors: list[str]
+    # director: str  # 导演
     extrafanart: list[str]  # 额外剧照URL列表
     originalplot: str  # 原始简介（日文）
     originaltitle: str  # 原始标题（日文）
@@ -160,7 +163,8 @@ class BaseCrawlerResult:
     score: str  # 评分
     series: str  # 系列
     studio: str  # 制作商
-    tag: str  # 标签，逗号分隔
+    tags: list[str]
+    # tag: str  # 标签，逗号分隔
     thumb: str  # 缩略图URL # todo 需修改为 list[str] 支持多个候选地址
     title: str  # 标题
     trailer: str  # 预告片URL
@@ -182,6 +186,62 @@ class BaseCrawlerResult:
             country = "US"
         return country
 
+    @property
+    def tag(self) -> str:
+        """
+        向后兼容. 返回标签字段, 如果 tags 不为空则使用 tags, 否则使用 tag
+        """
+        return ",".join(self.tags)
+
+    @tag.setter
+    def tag(self, value: str):
+        """
+        向后兼容. 设置标签字段, 将逗号分隔的字符串转换为列表
+        """
+        self.tags = value.split(",") if value else []
+
+    @property
+    def actor(self) -> str:
+        """
+        向后兼容. 返回演员字段, 如果 actors 不为空则使用 actors, 否则使用 actor
+        """
+        return ",".join(self.actors)
+
+    @actor.setter
+    def actor(self, value: str):
+        """
+        向后兼容. 设置演员字段, 将逗号分隔的字符串转换为列表
+        """
+        self.actors = value.split(",") if value else []
+
+    @property
+    def all_actor(self) -> str:
+        """
+        向后兼容. 返回所有演员字段, 如果 all_actors 不为空则使用 all_actors, 否则使用 all_actor
+        """
+        return ",".join(self.all_actors)
+
+    @all_actor.setter
+    def all_actor(self, value: str):
+        """
+        向后兼容. 设置所有演员字段, 将逗号分隔的字符串转换为列表
+        """
+        self.all_actors = value.split(",") if value else []
+
+    @property
+    def director(self) -> str:
+        """
+        向后兼容. 返回导演字段, 如果 directors 不为空则使用 directors, 否则使用 director
+        """
+        return ",".join(self.directors)
+
+    @director.setter
+    def director(self, value: str):
+        """
+        向后兼容. 设置导演字段, 将逗号分隔的字符串转换为列表
+        """
+        self.directors = value.split(",") if value else []
+
     @classmethod
     def empty(cls) -> "BaseCrawlerResult":
         """
@@ -191,9 +251,9 @@ class BaseCrawlerResult:
             number="",
             mosaic="",
             image_download=False,
-            actor="",
-            all_actor="",
-            director="",
+            actors=[],
+            all_actors=[],
+            directors=[],
             extrafanart=[],
             originalplot="",
             originaltitle="",
@@ -205,7 +265,7 @@ class BaseCrawlerResult:
             score="0.0",
             series="",
             studio="",
-            tag="",
+            tags=[],
             thumb="",
             title="",
             trailer="",
@@ -221,7 +281,6 @@ class CrawlerResult(BaseCrawlerResult):
     单一网站爬虫返回的结果
     """
 
-    actor_photo: dict  # 演员照片信息 # todo 此字段疑似无用
     image_cut: str  # 图片裁剪方式
     source: str  # 数据来源（爬虫名称）
     website: str  # 网站地址
@@ -233,7 +292,6 @@ class CrawlerResult(BaseCrawlerResult):
         """
         return cls(
             **BaseCrawlerResult.empty().__dict__,
-            actor_photo={},
             image_cut="",
             source="",
             website="",
@@ -263,7 +321,6 @@ class CrawlersResult(BaseCrawlerResult):
 
     # 以下用于后续下载资源
     actor_amazon: list[str]  # 用于 Amazon 搜索的演员名称
-    all_actor_photo: dict  # 演员照片信息 # todo 此字段疑似无用
     amazon_orginaltitle_actor: str  # 用于 Amazon 搜索的原始标题中的演员
     thumb_list: list[tuple[str, str]]  # 所有来源的缩略图URL列表
     originaltitle_amazon: str  # 用于 Amazon 搜索的原始标题
@@ -291,7 +348,6 @@ class CrawlersResult(BaseCrawlerResult):
         return cls(
             **BaseCrawlerResult.empty().__dict__,
             actor_amazon=[],
-            all_actor_photo={},
             amazon_orginaltitle_actor="",
             thumb_list=[],
             originaltitle_amazon="",

@@ -83,14 +83,14 @@ class Parser(DetailPageParser):
         )
 
     @override
-    async def director(self, ctx, html):
+    async def directors(self, ctx, html):
         return (
             XPath("//td[contains(text(),'監督')]/following-sibling::td/a/text()"),
             XPath("//th[contains(text(),'監督')]/following-sibling::td/a/text()"),
         )
 
     @override
-    async def actor(self, ctx, html) -> list[str]:
+    async def actors(self, ctx, html) -> list[str]:
         return extract_all_texts(
             html,
             "//span[@id='performer']/a/text()",
@@ -99,7 +99,7 @@ class Parser(DetailPageParser):
         )
 
     @override
-    async def tag(self, ctx, html) -> list[str]:
+    async def tags(self, ctx, html) -> list[str]:
         return extract_all_texts(
             html,
             "//td[contains(text(),'ジャンル')]/following-sibling::td/a/text()",
@@ -206,13 +206,13 @@ class Parser1(DetailPageParser):
                 d.studio = json_data.brand.name
             if video := json_data.subjectOf:
                 if video.genre:
-                    d.tag = video.genre
+                    d.tags = video.genre
                 if video.contentUrl:
                     d.trailer = video.contentUrl
                 if video.uploadDate:
                     d.release = re.sub(r"(\d{4})-(\d{2})-(\d{2})", r"\1-\2-\3", video.uploadDate)
                 if video.actor:
-                    d.actor = [a.name for a in video.actor if a.name]
+                    d.actors = [a.name for a in video.actor if a.name]
             if json_data.aggregateRating:
                 rating = json_data.aggregateRating.ratingValue
                 if rating is not None:
@@ -285,8 +285,8 @@ class Parser1(DetailPageParser):
         )
 
     @override
-    async def director(self, ctx, html) -> str | None:
-        return extract_text(
+    async def directors(self, ctx, html):
+        return extract_all_texts(
             html,
             "//th[contains(text(),'監督')]/following-sibling::td/span/a/text()",
             "//td[contains(text(),'監督')]/following-sibling::td/a/text()",
@@ -294,7 +294,7 @@ class Parser1(DetailPageParser):
         )
 
     @override
-    async def actor(self, ctx, html) -> list[str]:
+    async def actors(self, ctx, html) -> list[str]:
         return extract_all_texts(
             html,
             "//th[contains(text(),'出演者')]/following-sibling::td/span/div/a/text()",
@@ -304,7 +304,7 @@ class Parser1(DetailPageParser):
         )
 
     @override
-    async def tag(self, ctx, html) -> list[str]:
+    async def tags(self, ctx, html) -> list[str]:
         return extract_all_texts(
             html,
             "//th[contains(text(),'ジャンル')]/following-sibling::td/span/div/a/text()",

@@ -13,6 +13,8 @@ class CSSSelector(str): ...
 class _NoField: ...
 
 
+NO_FIELD = _NoField()
+
 type FieldValue[T = str] = T | None | _NoField
 type FieldRes[T = str] = tuple[XPath | CSSSelector, ...] | FieldValue[T]
 
@@ -21,34 +23,34 @@ type SelectorType = XPath | CSSSelector | str
 
 @dataclass
 class CrawlerData:
-    title: FieldValue
-    actor: FieldValue[list[str]]
-    all_actor: FieldValue[list[str]]
-    director: FieldValue
-    extrafanart: FieldValue[list[str]]
-    originalplot: FieldValue
-    originaltitle: FieldValue
-    outline: FieldValue
-    poster: FieldValue
-    publisher: FieldValue
-    release: FieldValue
-    runtime: FieldValue
-    score: FieldValue
-    series: FieldValue
-    studio: FieldValue
-    tag: FieldValue[list[str]]
-    thumb: FieldValue
-    trailer: FieldValue
-    wanted: FieldValue
-    year: FieldValue
-    actor_photo: FieldValue[dict]
-    image_cut: FieldValue
-    image_download: FieldValue[bool]
-    number: FieldValue
-    mosaic: FieldValue
-    externalId: FieldValue
-    source: FieldValue
-    website: FieldValue
+    title: FieldValue = NO_FIELD
+    actors: FieldValue[list[str]] = NO_FIELD
+    all_actors: FieldValue[list[str]] = NO_FIELD
+    directors: FieldValue[list[str]] = NO_FIELD
+    extrafanart: FieldValue[list[str]] = NO_FIELD
+    originalplot: FieldValue = NO_FIELD
+    originaltitle: FieldValue = NO_FIELD
+    outline: FieldValue = NO_FIELD
+    poster: FieldValue = NO_FIELD
+    publisher: FieldValue = NO_FIELD
+    release: FieldValue = NO_FIELD
+    runtime: FieldValue = NO_FIELD
+    score: FieldValue = NO_FIELD
+    series: FieldValue = NO_FIELD
+    studio: FieldValue = NO_FIELD
+    tags: FieldValue[list[str]] = NO_FIELD
+    thumb: FieldValue = NO_FIELD
+    trailer: FieldValue = NO_FIELD
+    wanted: FieldValue = NO_FIELD
+    year: FieldValue = NO_FIELD
+    actor_photo: FieldValue[dict] = NO_FIELD
+    image_cut: FieldValue = NO_FIELD
+    image_download: FieldValue[bool] = NO_FIELD
+    number: FieldValue = NO_FIELD
+    mosaic: FieldValue = NO_FIELD
+    externalId: FieldValue = NO_FIELD
+    source: FieldValue = NO_FIELD
+    website: FieldValue = NO_FIELD
 
     def to_json(self) -> dict[str, Any]:
         """将 CrawlerData 转换为 JSON 兼容的字典, 忽略值为 _NoField 的字段."""
@@ -65,42 +67,9 @@ class CrawlerData:
             if isinstance(value, _NoField) or value is None:
                 result[key] = getattr(default, key)
             else:
-                result[key] = value
+                if key in ("actor", "all_actor", "extrafanart", "tag"):
+                    result[key] = ",".join(value) if isinstance(value, list) else value
         return CrawlerResult(**result)
-
-    @classmethod
-    def empty(cls) -> "CrawlerData":
-        """创建一个空的 CrawlerData 实例, 所有字段都为 _NoField."""
-        return cls(
-            title=_NoField(),
-            actor=_NoField(),
-            all_actor=_NoField(),
-            director=_NoField(),
-            extrafanart=_NoField(),
-            originalplot=_NoField(),
-            originaltitle=_NoField(),
-            outline=_NoField(),
-            poster=_NoField(),
-            publisher=_NoField(),
-            release=_NoField(),
-            runtime=_NoField(),
-            score=_NoField(),
-            series=_NoField(),
-            studio=_NoField(),
-            tag=_NoField(),
-            thumb=_NoField(),
-            trailer=_NoField(),
-            wanted=_NoField(),
-            year=_NoField(),
-            actor_photo=_NoField(),
-            image_cut=_NoField(),
-            image_download=_NoField(),
-            number=_NoField(),
-            mosaic=_NoField(),
-            externalId=_NoField(),
-            source=_NoField(),
-            website=_NoField(),
-        )
 
 
 class CralwerException(Exception): ...
@@ -113,7 +82,9 @@ class Context:
     debug_logs: list[str] = field(default_factory=list)
 
     def show(self, message: str):
+        """添加向用户展示的消息."""
         self.show_logs.append(message)
 
     def debug(self, message: str):
+        """添加调试消息."""
         self.debug_logs.append(message)

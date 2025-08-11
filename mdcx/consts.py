@@ -126,22 +126,29 @@ class ManualConfig:
         "trailer",
         "wanted",
     ]
-    # 爬虫返回的字段. 此列表的顺序决定了日志顺序
+    # 向后兼容, 将 CONFIG_DATA_FIELDS 映射到 CRAWLER_DATA_FIELDS
+    RENAME_MAP = {
+        "actor": "actors",
+        "director": "directors",
+        "tag": "tags",
+    }
+    # 爬虫返回的字段. 此列表的顺序决定了日志顺序.
+    # 此列表的字段必须为 CrawlerResult 的属性 # todo 通过测试确保
     CRAWLER_DATA_FIELDS = [
         "title",
         "originaltitle",
         "outline",
         "originalplot",
-        "actor",
-        "all_actor",
+        "actors",
+        "all_actors",
         "thumb",
         "poster",
         "extrafanart",
-        "tag",
+        "tags",
         "release",
         "runtime",
         "score",
-        "director",
+        "directors",
         "series",
         "studio",
         "publisher",

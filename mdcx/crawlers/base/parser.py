@@ -113,13 +113,13 @@ class DetailPageParser[T: Context = Context]:
     async def title(self, ctx: T, html: Selector) -> FieldRes:
         return self.NO_FIELD
 
-    async def actor(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
+    async def actors(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
         return self.NO_FIELD
 
-    async def all_actor(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
+    async def all_actors(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
         return self.NO_FIELD
 
-    async def director(self, ctx: T, html: Selector) -> FieldRes:
+    async def directors(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
         return self.NO_FIELD
 
     async def extrafanart(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
@@ -155,7 +155,7 @@ class DetailPageParser[T: Context = Context]:
     async def studio(self, ctx: T, html: Selector) -> FieldRes:
         return self.NO_FIELD
 
-    async def tag(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
+    async def tags(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
         return self.NO_FIELD
 
     async def thumb(self, ctx: T, html: Selector) -> FieldRes:
@@ -197,9 +197,9 @@ class DetailPageParser[T: Context = Context]:
         """
         return CrawlerData(
             title=await self.str_field(ctx, self.title, html),
-            actor=await self.str_list_field(ctx, self.actor, html),
-            all_actor=await self.str_list_field(ctx, self.all_actor, html),
-            director=await self.str_field(ctx, self.director, html),
+            actors=await self.str_list_field(ctx, self.actors, html),
+            all_actors=await self.str_list_field(ctx, self.all_actors, html),
+            directors=await self.str_list_field(ctx, self.directors, html),
             extrafanart=await self.str_list_field(ctx, self.extrafanart, html),
             originalplot=await self.str_field(ctx, self.originalplot, html),
             originaltitle=await self.str_field(ctx, self.originaltitle, html),
@@ -211,7 +211,7 @@ class DetailPageParser[T: Context = Context]:
             score=await self.str_field(ctx, self.score, html),
             series=await self.str_field(ctx, self.series, html),
             studio=await self.str_field(ctx, self.studio, html),
-            tag=await self.str_list_field(ctx, self.tag, html),
+            tags=await self.str_list_field(ctx, self.tags, html),
             thumb=await self.str_field(ctx, self.thumb, html),
             trailer=await self.str_field(ctx, self.trailer, html),
             wanted=await self.str_field(ctx, self.wanted, html),

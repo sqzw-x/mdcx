@@ -123,7 +123,6 @@ class DmmCrawler(BaseCrawler):
             res.publisher = res.studio
         if len(res.release) >= 4:
             res.year = res.release[:4]
-        res.actor_photo = dict.fromkeys(res.actor.split(","), "")
 
     @override
     async def _parse_detail_page(self, ctx, html: Selector, detail_url: str) -> CrawlerData | None:
