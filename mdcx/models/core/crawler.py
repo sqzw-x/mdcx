@@ -421,6 +421,11 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
     if r := all_res.get(("javdb", "")):
         reduced.javdbid = r.javdbid
 
+    # 处理 all_actor
+    if not reduced.all_actor:
+        # 如果没有 all_actor 字段，则从 actor 中获取
+        reduced.all_actor = reduced.actor
+
     # todo 由于异步, 此处日志混乱. 需移除 LogBuffer.req(), 改为返回日志信息
     reduced.fields_info = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}{reduced.fields_info}"
 
