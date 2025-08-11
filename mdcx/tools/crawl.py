@@ -8,8 +8,8 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from mdcx.config.manager import config
 from mdcx.config.models import Website
-from mdcx.consts import ManualConfig
 from mdcx.crawlers.base import get_crawler
+from mdcx.manual import ManualConfig
 from mdcx.models.types import CrawlerInput
 from mdcx.web_async import AsyncWebClient
 

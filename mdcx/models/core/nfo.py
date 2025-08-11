@@ -10,7 +10,7 @@ import aiofiles.os
 from lxml import etree
 
 from mdcx.config.manager import config
-from mdcx.consts import ManualConfig
+from mdcx.manual import ManualConfig
 from mdcx.models.core.utils import render_name_template
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo

@@ -8,8 +8,9 @@ from io import StringIO
 import httpx
 
 from mdcx.config.models import Config, Website
-from mdcx.consts import MAIN_PATH, MARK_FILE, ManualConfig
+from mdcx.consts import LOCAL_VERSION, MAIN_PATH, MARK_FILE
 from mdcx.llm import LLMClient
+from mdcx.manual import ManualConfig
 from mdcx.signals import signal
 from mdcx.utils import executor, get_random_headers, get_user_agent
 from mdcx.web_async import AsyncWebClient
@@ -363,7 +364,7 @@ class ConfigSchema:
 
     def _update(self):
         """处理版本变更"""
-        if self.version == ManualConfig.LOCAL_VERSION:
+        if self.version == LOCAL_VERSION:
             return
         # 1. 处理移除的配置项, 其将储存在 unknown_fields 中
         unknown_fields: dict[str, str] = getattr(self, "unknown_fields", {})

@@ -7,7 +7,7 @@ import aiofiles.os
 
 from mdcx.config.manager import config
 from mdcx.config.resources import resources
-from mdcx.consts import ManualConfig
+from mdcx.manual import ManualConfig
 from mdcx.models.base.number import deal_actor_more
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import BaseCrawlerResult, CrawlersResult, FileInfo

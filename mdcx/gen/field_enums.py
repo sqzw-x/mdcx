@@ -1,0 +1,32 @@
+from enum import StrEnum
+
+
+class CrawlerResultFields(StrEnum):
+    NUMBER = "number"
+    MOSAIC = "mosaic"
+    IMAGE_DOWNLOAD = "image_download"
+    ACTORS = "actors"
+    ALL_ACTORS = "all_actors"
+    DIRECTORS = "directors"
+    EXTRAFANART = "extrafanart"
+    ORIGINALPLOT = "originalplot"
+    ORIGINALTITLE = "originaltitle"
+    OUTLINE = "outline"
+    POSTER = "poster"
+    PUBLISHER = "publisher"
+    RELEASE = "release"
+    RUNTIME = "runtime"
+    SCORE = "score"
+    SERIES = "series"
+    STUDIO = "studio"
+    TAGS = "tags"
+    THUMB = "thumb"
+    TITLE = "title"
+    TRAILER = "trailer"
+    WANTED = "wanted"
+    YEAR = "year"
+    JAVDBID = "javdbid"
+    IMAGE_CUT = "image_cut"
+    SOURCE = "source"
+    WEBSITE = "website"
+

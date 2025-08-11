@@ -2,7 +2,7 @@ import os
 import re
 
 from mdcx.config.manager import config, manager
-from mdcx.consts import ManualConfig
+from mdcx.manual import ManualConfig
 from mdcx.utils import convert_path, nfd2c, split_path
 from mdcx.utils.path import get_path
 

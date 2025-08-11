@@ -4,7 +4,6 @@ from collections.abc import Callable
 from typing import cast
 
 from mdcx.config.manager import config
-from mdcx.consts import ManualConfig
 from mdcx.crawlers import (
     airav,
     airav_cc,
@@ -45,6 +44,8 @@ from mdcx.crawlers import (
     theporndb,
     xcity,
 )
+from mdcx.gen.field_enums import CrawlerResultFields
+from mdcx.manual import ManualConfig
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
@@ -292,15 +293,15 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
     all_field_website_lang_pairs["all_actors"] = all_field_website_lang_pairs["actors"]
 
     # 按字段分别处理，每个字段按优先级尝试获取
-    for field in ManualConfig.CRAWLER_DATA_FIELDS:  # 与 CONFIG_DATA_FIELDS 不完全一致
+    for field in ManualConfig.REDUCED_FIELDS:  # 与 CONFIG_DATA_FIELDS 不完全一致
         # 获取该字段的优先级列表
         sources = all_field_website_lang_pairs.get(field, default_website_lang_pairs)
 
         # 如果title_language不是jp，则允许从title_zh来源获取title
-        if field == "title" and config.title_language != "jp":
+        if field == CrawlerResultFields.TITLE and config.title_language != "jp":
             sources = sources + all_field_website_lang_pairs.get("title_zh", [])
         # 如果outline_language不是jp，则允许从outline_zh来源获取outline
-        elif field == "outline" and config.outline_language != "jp":
+        elif field == CrawlerResultFields.OUTLINE and config.outline_language != "jp":
             sources = sources + all_field_website_lang_pairs.get("outline_zh", [])
 
         LogBuffer.info().write(
@@ -371,7 +372,12 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
                 continue
 
             # 语言检测逻辑
-            if config.scrape_like != "speed" and field in ["title", "outline", "originaltitle", "originalplot"]:
+            if config.scrape_like != "speed" and field in [
+                CrawlerResultFields.TITLE,
+                CrawlerResultFields.OUTLINE,
+                CrawlerResultFields.ORIGINALTITLE,
+                CrawlerResultFields.ORIGINALPLOT,
+            ]:
                 lang = all_field_languages.get(field, "jp")
                 if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:  # why?
                     if not is_japanese(getattr(site_data, field, "")):
@@ -383,12 +389,18 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
                         continue
 
             # 添加来源信息
-            if field in ["poster", "thumb", "extrafanart", "trailer", "outline"]:
+            if field in [
+                CrawlerResultFields.POSTER,
+                CrawlerResultFields.THUMB,
+                CrawlerResultFields.EXTRAFANART,
+                CrawlerResultFields.TRAILER,
+                CrawlerResultFields.OUTLINE,
+            ]:
                 setattr(reduced, field + "_from", website)
 
-            if field == "poster":
+            if field == CrawlerResultFields.POSTER:
                 reduced.image_download = site_data.image_download
-            elif field == "originaltitle" and site_data.actor:
+            elif field == CrawlerResultFields.ORIGINALTITLE and site_data.actor:
                 reduced.amazon_orginaltitle_actor = site_data.actor.split(",")[0]
 
             # 保存数据

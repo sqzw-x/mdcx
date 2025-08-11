@@ -8,7 +8,8 @@ from lxml import etree
 from PyQt5.QtGui import QFontDatabase
 
 from mdcx.config.manager import manager
-from mdcx.consts import IS_PYINSTALLER, MAIN_PATH, ManualConfig
+from mdcx.consts import IS_PYINSTALLER, MAIN_PATH
+from mdcx.manual import ManualConfig
 from mdcx.signals import signal
 from mdcx.utils import singleton
 from mdcx.utils.file import copy_file_sync
