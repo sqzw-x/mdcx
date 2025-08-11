@@ -28,7 +28,7 @@ dependencies = [
 ]
 
 [project.scripts]
-crawl = "mdcx.cli.crawl:app"
+crawl = "mdcx.tools.crawl:app"
 
 [project.optional-dependencies]
 web = ["fastapi>=0.116.1", "uvicorn[standard]>=0.35.0"]

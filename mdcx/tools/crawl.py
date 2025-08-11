@@ -13,7 +13,7 @@ from mdcx.manual import ManualConfig
 from mdcx.models.types import CrawlerInput
 from mdcx.web_async import AsyncWebClient
 
-app = typer.Typer(help="获取网站详情页")
+app = typer.Typer(help="获取网站详情页", context_settings={"help_option_names": ["-h", "--help"]})
 console = Console()
 
 
@@ -25,6 +25,87 @@ def get_available_sites() -> list[str]:
 
 
 @app.command()
+def g(
+    url: Annotated[str, typer.Option(help="待获取的URL", prompt="请输入待获取的URL")],
+    output: Annotated[str | None, typer.Option("--output", "-o", help="输出文件路径")] = None,
+    proxy: Annotated[str | None, typer.Option("--proxy", "-p", help="代理地址 (例如: http://127.0.0.1:7890)")] = None,
+    timeout: Annotated[int, typer.Option("--timeout", "-t", help="超时时间（秒）")] = 5,
+    retry: Annotated[int, typer.Option("--retry", "-r", help="重试次数")] = 0,
+):
+    """获取任意URL并保存到文件"""
+    asyncio.run(_get_async(url, output, proxy, timeout, retry))
+
+
+async def _get_async(
+    url: str,
+    output: str | None,
+    proxy: str | None,
+    timeout: int,
+    retry: int,
+):
+    """异步获取URL内容"""
+    client_proxy = proxy or config.httpx_proxy
+    client_timeout = timeout or config.timeout
+    client_retry = retry or config.retry
+
+    console.print(f"[cyan]Get: {url}[/cyan]")
+    if client_proxy:
+        console.print(f"[cyan]代理: {client_proxy}[/cyan]")
+
+    # 创建异步客户端
+    async_client = AsyncWebClient(
+        proxy=client_proxy,
+        retry=client_retry,
+        timeout=client_timeout,
+        log_fn=lambda msg: console.print(f"[dim][AsyncWebClient] {msg}[/dim]"),
+    )
+
+    try:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            task = progress.add_task("正在获取URL内容...", total=None)
+
+            # 获取内容
+            content, error = await async_client.get_text(url)
+
+            progress.remove_task(task)
+
+        if content is None:
+            console.print(f"[red]错误: 获取URL失败 - {error}[/red]")
+            raise typer.Exit(1)
+
+        # 确定输出路径
+        if output:
+            output_path = Path(output)
+        else:
+            # 自动生成文件名
+            from urllib.parse import urlparse
+
+            parsed_url = urlparse(url)
+            domain = parsed_url.netloc or "unknown"
+            path_part = parsed_url.path.strip("/").replace("/", "_") or "index"
+            filename = f"{domain}_{path_part}.html"
+            output_path = Path(filename)
+
+        # 创建输出目录
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # 保存内容
+        output_path.write_text(content, encoding="utf-8")
+
+        console.print("[green]✅ 获取成功![/green]")
+        console.print(f"[green]文件已保存到: {output_path}[/green]")
+        console.print(f"[dim]文件大小: {len(content)} 字符[/dim]")
+
+    except Exception as e:
+        console.print(f"[red]错误: {str(e)}[/red]")
+        raise typer.Exit(1)
+
+
+@app.command()
 def fetch(
     url: Annotated[str, typer.Argument(help="要抓取的详情页URL")],
     site: Annotated[str | None, typer.Option("--site", "-s", help="指定网站类型")] = None,
@@ -32,8 +113,8 @@ def fetch(
     number: Annotated[str | None, typer.Option("--number", "-n", help="番号（用于生成文件名）")] = None,
     base_dir: Annotated[str, typer.Option("--base-dir", "-d", help="基础输出目录")] = "tests/crawlers/data",
     proxy: Annotated[str | None, typer.Option("--proxy", "-p", help="代理地址 (例如: http://127.0.0.1:7890)")] = None,
-    timeout: Annotated[int, typer.Option("--timeout", "-t", help="请求超时时间（秒）")] = 10,
-    retry: Annotated[int, typer.Option("--retry", "-r", help="重试次数")] = 3,
+    timeout: Annotated[int, typer.Option("--timeout", "-t", help="请求超时时间（秒）")] = 5,
+    retry: Annotated[int, typer.Option("--retry", "-r", help="重试次数")] = 1,
 ):
     """抓取指定URL的详情页内容"""
 
@@ -219,7 +300,7 @@ def show_config():
     # config 对象没有 path 属性，从 manager 获取
     from mdcx.config.manager import manager
 
-    console.print(f"配置文件路径: {getattr(manager, 'path', '未知')}")
+    console.print(f"配置文件路径: {manager.path}")
 
 
 if __name__ == "__main__":
