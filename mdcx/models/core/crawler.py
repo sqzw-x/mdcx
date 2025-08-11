@@ -177,6 +177,9 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
         if old in all_field_languages:
             all_field_languages[new] = all_field_languages[old]
             del all_field_languages[old]
+        if old in all_field_website_lang_pairs:
+            all_field_website_lang_pairs[new] = all_field_website_lang_pairs[old]
+            del all_field_website_lang_pairs[old]
 
     all_field_website_lang_pairs["all_actors"] = all_field_website_lang_pairs["actors"]
 

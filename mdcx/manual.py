@@ -583,7 +583,6 @@ class ManualConfig:
         CrawlerResultFields.OUTLINE,
         CrawlerResultFields.ORIGINALPLOT,
         CrawlerResultFields.SERIES,
-        CrawlerResultFields.DIRECTORS,
         CrawlerResultFields.STUDIO,
         CrawlerResultFields.PUBLISHER,
     ]
