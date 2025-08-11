@@ -42,21 +42,13 @@ def _deal_some_list(field: str, website: Website, same_list: list[Website]) -> l
     return same_list
 
 
-async def _call_crawler(
-    task_input: CrawlerInput,
-    website: Website,
-    # language: str,
-    # org_language: str,
-    timeout: int = 30,
-) -> CrawlerResponse:
+async def _call_crawler(task_input: CrawlerInput, website: Website, timeout: int = 30) -> CrawlerResponse:
     """
     调用指定网站的爬虫函数
 
     Args:
         task_input (CallCrawlerInput): 包含爬虫所需的输入数据
         website (str): 网站名称
-        language (str): 语言参数
-        org_language (str): 原始语言参数
         timeout (int): 请求超时时间，默认为30秒
 
     Raises:
