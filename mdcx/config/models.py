@@ -559,6 +559,10 @@ class Website(str, Enum):
     THEPORNDB = "theporndb"
     XCITY = "xcity"
 
+    DAHLIA = "dahlia"
+    GETCHU_DMM = "getchu_dmm"
+    OFFICIAL = "official"
+
 
 class TranslateConfig(BaseModel):
     translate_by: list[Translator] = Field(

@@ -46,6 +46,8 @@ class FileInfo:
             number=self.number,
             mosaic=self.mosaic,
             short_number=self.short_number,
+            language="",
+            org_language="",
         )
 
     def crawl_task(self) -> "CrawlTask":
@@ -67,6 +69,8 @@ class FileInfo:
             cd_part=self.cd_part,
             destroyed=self.destroyed,
             website_name=self.website_name,
+            language="",
+            org_language="",
         )
 
     @classmethod
@@ -111,6 +115,10 @@ class CrawlerInput:
     mosaic: str
     number: str
     short_number: str
+
+    # todo 移除, 仅用于向后兼容
+    language: str
+    org_language: str
 
     @classmethod
     def empty(cls) -> "CrawlerInput":
@@ -299,18 +307,22 @@ class CrawlerResult(BaseCrawlerResult):
 
 
 @dataclass
-class CrawlerResponse:
-    """
-    封装单个爬虫的完整执行信息
-    """
-
-    success: bool
-    data: CrawlerResult | None = None
+class CrawlerDebugInfo:
     execution_time: float = 0.0
     error: Exception | None = None
     search_urls: list[str] | None = None
     detail_urls: list[str] | None = None
     logs: list[str] = field(default_factory=list)
+
+
+@dataclass
+class CrawlerResponse:
+    """
+    封装单个爬虫的完整执行信息
+    """
+
+    debug_info: CrawlerDebugInfo
+    data: CrawlerResult | None = None
 
 
 @dataclass

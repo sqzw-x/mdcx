@@ -46,24 +46,25 @@ class GenericBaseCrawler[T: Context = Context](ABC):
         raise NotImplementedError
 
     async def run(self, input: CrawlerInput) -> CrawlerResponse:
+        """
+        执行爬虫任务.
+
+        此方法负责初始化 `Context`, 处理异常, 记录调试信息等. 具体执行流程应在 `_run` 方法中实现.
+        """
         start_time = time.time()
         ctx = self.new_context(input)
         ctx.debug(f"{input=}")
         ctx.show(f"-> {self.site}")
 
         try:
-            res = await self._run(ctx)
-            res.execution_time = time.time() - start_time
-            return res
+            data = await self._run(ctx)
+            ctx.debug_info.execution_time = time.time() - start_time
+            return CrawlerResponse(data=data, debug_info=ctx.debug_info)
         except Exception as e:
             ctx.show(str(e))
             ctx.debug(traceback.format_exc())
-            return CrawlerResponse(
-                success=False,
-                logs=ctx.show_logs,
-                execution_time=time.time() - start_time,
-                error=e,
-            )
+            ctx.debug_info.error = e
+            return CrawlerResponse(debug_info=ctx.debug_info)
         finally:
             ctx.show(f"({round(time.time() - start_time, 2)}s)")
 
@@ -75,6 +76,7 @@ class GenericBaseCrawler[T: Context = Context](ABC):
             if isinstance(search_urls, str):
                 search_urls = [search_urls]
             ctx.debug(f"搜索页 URL: {search_urls}")
+            ctx.debug_info.search_urls = search_urls
 
             detail_urls = await self._search(ctx, search_urls)
             if not detail_urls:
@@ -83,18 +85,14 @@ class GenericBaseCrawler[T: Context = Context](ABC):
             detail_urls = [ctx.input.appoint_url]
             ctx.debug(f"使用指定详情页 URL: {ctx.input.appoint_url}")
 
+        ctx.debug_info.detail_urls = detail_urls
         data = await self._detail(ctx, detail_urls)
         if not data:
             raise CralwerException("解析详情页数据失败")
         data.source = self.site().value  # todo use Enum directly
         data = data.to_result()
         await self.post_process(ctx, data)
-
-        return CrawlerResponse(
-            success=True,
-            data=data,
-            detail_urls=detail_urls,
-        )
+        return data
 
     async def _search(self, ctx: T, search_urls: list[str]) -> list[str] | None:
         for search_url in search_urls:

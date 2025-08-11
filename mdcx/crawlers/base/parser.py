@@ -3,7 +3,7 @@ from collections.abc import Awaitable, Callable
 
 from parsel import Selector
 
-from .types import Context, CrawlerData, CSSSelector, FieldRes, FieldValue, SelectorType, XPath, _NoField
+from .types import NOT_SUPPORT, Context, CrawlerData, CSSSelector, FieldRes, FieldValue, NotSupport, SelectorType, XPath
 
 
 def _get_selector(html: str | Selector) -> Selector:
@@ -102,88 +102,88 @@ class DetailPageParser[T: Context = Context]:
     1. T 类型的具体值: 直接用于构造 CrawlerResult.
     2. BaseSelector 子类实例 (XPath 或 CSSSelector): 表示一组选择器, 依次用于提取文本.
     3. None 或 T 类型的空值: 表示该字段在此页面上无法获取.
-    4. self.NO_FIELD: 默认实现. 表示某字段在该网站上不存在.
+    4. self.NOT_SUPPORT: 默认实现. 表示某字段在该网站上不存在.
 
     对于返回类型为 FieldValue[T] 的方法, T 较为复杂, 因此不支持情况 2 返回选择器.
     """
 
-    NO_FIELD = _NoField()
+    NOT_SUPPORT = NOT_SUPPORT
     """表示某字段在该网站上不存在. 它和空值的区别在于, 该值不被视为获取失败."""
 
     async def title(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def actors(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def all_actors(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def directors(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def extrafanart(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def originalplot(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def originaltitle(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def outline(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def poster(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def publisher(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def release(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def runtime(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def score(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def series(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def studio(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def tags(self, ctx: T, html: Selector) -> FieldRes[list[str]]:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def thumb(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def trailer(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def wanted(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def year(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def actor_photo(self, ctx: T, html: Selector) -> FieldValue[dict]:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def image_cut(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def image_download(self, ctx: T, html: Selector) -> FieldValue[bool]:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def number(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def mosaic(self, ctx: T, html: Selector) -> FieldRes:
-        return self.NO_FIELD
+        return self.NOT_SUPPORT
 
     async def parse(self, ctx: T, html: Selector) -> CrawlerData:
         """
@@ -230,7 +230,7 @@ class DetailPageParser[T: Context = Context]:
     async def str_field(cls, ctx: T, method: Callable[..., Awaitable[FieldRes]], html: Selector) -> FieldValue:
         method_res = await method(ctx, html)
 
-        if method_res is None or isinstance(method_res, _NoField):
+        if method_res is None or isinstance(method_res, NotSupport):
             return method_res
 
         if isinstance(method_res, tuple | XPath | CSSSelector):
@@ -247,7 +247,7 @@ class DetailPageParser[T: Context = Context]:
     ) -> FieldValue[list[str]]:
         method_res = await method(ctx, html)
 
-        if method_res is None or isinstance(method_res, _NoField):
+        if method_res is None or isinstance(method_res, NotSupport):
             return method_res
         elif isinstance(method_res, tuple | XPath | CSSSelector):
             # 执行选择器

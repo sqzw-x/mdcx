@@ -7,7 +7,8 @@ import pytest
 from aiofiles import open as aio_open
 from parsel import Selector
 
-from mdcx.crawlers.base import CrawlerData, DetailPageParser
+from mdcx.config.manager import asdict
+from mdcx.crawlers.base import CrawlerData, DetailPageParser, NotSupport
 from mdcx.models.types import CrawlerInput
 
 
@@ -83,14 +84,29 @@ class ParserTestBase:
 
         # 创建一个简单的上下文用于测试
         ctx = Context(
-            input=CrawlerInput(appoint_number="", appoint_url="", file_path="", mosaic="", number="", short_number="")
+            input=CrawlerInput(
+                appoint_number="",
+                appoint_url="",
+                file_path="",
+                mosaic="",
+                number="",
+                short_number="",
+                language="",
+                org_language="",
+            )
         )
 
         return await parser.parse(ctx, selector)
 
-    def serialize_result(self, result: CrawlerData) -> dict[str, Any]:
+    def serialize_result(self, data: CrawlerData) -> dict[str, Any]:
         """将 CrawlerResult 序列化为字典"""
-        return result.to_json()
+        result: dict[str, Any] = {"not_support": []}  # 标记解析器不支持的字段
+        for key, value in asdict(data).items():
+            if not isinstance(value, NotSupport):
+                result[key] = value
+            else:
+                result["not_support"].append(key)
+        return result
 
     def load_expected_result(self, result_file: Path) -> dict[str, Any] | None:
         """加载期望的结果"""
