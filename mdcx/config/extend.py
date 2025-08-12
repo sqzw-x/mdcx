@@ -111,9 +111,9 @@ def deal_url(url: str) -> tuple[str | None, str]:
     if "://" not in url:
         url = "https://" + url
     url = url.strip()
-    for key, vlaue in ManualConfig.WEB_DIC.items():
+    for key, site in ManualConfig.WEB_DIC.items():
         if key.lower() in url.lower():
-            return vlaue, url
+            return site.value, url
 
     # 自定义的网址
     for web_name in ManualConfig.SUPPORTED_WEBSITES:
