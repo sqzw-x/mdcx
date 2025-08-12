@@ -21,6 +21,10 @@ type FieldRes[T = str] = tuple[XPath | CSSSelector, ...] | FieldValue[T]
 type SelectorType = XPath | CSSSelector | str
 
 
+def is_valid[T](v: FieldValue[T]) -> bool:
+    return bool(v) and not isinstance(v, NotSupport)
+
+
 @dataclass
 class CrawlerData:
     title: FieldValue = NOT_SUPPORT

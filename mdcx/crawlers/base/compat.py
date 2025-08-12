@@ -3,7 +3,8 @@ import traceback
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 
-from mdcx.config.models import Website
+from mdcx.config.models import Language, Website
+from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import CrawlerInput, CrawlerResponse, CrawlerResult
 from mdcx.utils.dataclass import update
 
@@ -45,20 +46,35 @@ class LegacyCrawler:
             return CrawlerResponse(debug_info=ctx.debug_info)
 
     async def _run(self, ctx: Context) -> CrawlerResult:
+        if ctx.input.language == Language.UNDEFINED:
+            language = ""
+        else:
+            language = ctx.input.language.value
+        if ctx.input.org_language == Language.UNDEFINED:
+            org_language = ""
+        else:
+            org_language = ctx.input.org_language.value
+
         r = await self.fn(
             **{
                 "number": ctx.input.number,
                 "appoint_url": ctx.input.appoint_url,
-                "language": ctx.input.language,
+                "language": language,
                 "file_path": ctx.input.file_path,
                 "appoint_number": ctx.input.appoint_number,
                 "mosaic": ctx.input.mosaic,
                 "short_number": ctx.input.short_number,
-                "org_language": ctx.input.org_language,
+                "org_language": org_language,
             }
         )
-        if not r:
-            raise CralwerException(f"v1 crawler failed: {self.site}")
+
+        if info := LogBuffer.info().buffer:
+            ctx.debug("v1 crawler info log:")
+            ctx.debug_info.logs.extend(info)
+        if error := LogBuffer.error().buffer:
+            ctx.debug("v1 crawler error log:")
+            ctx.debug_info.logs.extend(error)
+
         res = list(r.values())[0]
         # 只有 iqqtv_new 和 javlibrary_new 会返回多种语言的数据, 其他所有来源只可能
         # 1. 返回单一语言的数据, 即 {site: {language: data}}
@@ -66,5 +82,7 @@ class LegacyCrawler:
         # 因此此处只取第一个 data, 对大多数网站都无影响.
         # 唯一受影响的是当需要 iqqtv_new 或 javlibrary_new 的多个语言的数据时, 需要多次请求
         res = list(res.values())[0]
+        if not res or "title" not in res or not res["title"]:
+            raise CralwerException(f"v1 crawler failed: {self.site}")
 
         return update(CrawlerResult.empty(), res)

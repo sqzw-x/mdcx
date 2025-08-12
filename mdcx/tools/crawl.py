@@ -1,152 +1,156 @@
 import asyncio
+import json
+import sys
+from dataclasses import asdict
 from pathlib import Path
 from typing import Annotated
 
 import typer
+from rich import print, print_json
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from mdcx.config.manager import config
-from mdcx.config.models import Website
+from mdcx.config.manager import config, manager
+from mdcx.config.models import Language, Website
+from mdcx.crawlers import get_crawler_compat
 from mdcx.crawlers.base import get_crawler
 from mdcx.manual import ManualConfig
 from mdcx.models.types import CrawlerInput
 from mdcx.web_async import AsyncWebClient
 
-app = typer.Typer(help="获取网站详情页", context_settings={"help_option_names": ["-h", "--help"]})
+app = typer.Typer(help="爬虫调试工具", context_settings={"help_option_names": ["-h", "--help"]})
 console = Console()
 
 
-def get_available_sites() -> list[str]:
-    """获取所有可用的网站列表"""
-    from mdcx.crawlers.base.base import crawler_registry
-
-    return [site.value for site in crawler_registry.keys()]
+proxy_help = "代理地址 (例如: http://127.0.0.1:7890). 如未指定将加载 config 设置"
 
 
-@app.command()
-def g(
-    url: Annotated[str, typer.Option(help="待获取的URL", prompt="请输入待获取的URL")],
-    output: Annotated[str | None, typer.Option("--output", "-o", help="输出文件路径")] = None,
-    proxy: Annotated[str | None, typer.Option("--proxy", "-p", help="代理地址 (例如: http://127.0.0.1:7890)")] = None,
-    timeout: Annotated[int, typer.Option("--timeout", "-t", help="超时时间（秒）")] = 5,
+@app.callback(invoke_without_command=True)
+def main(
+    ctx: typer.Context,
+    site: Annotated[Website | None, typer.Option("--site", "-s", help="指定网站")] = None,
+    # CrawlerInput
+    number: Annotated[str, typer.Option("--number", "-n", rich_help_panel="CrawlerInput")] = "",
+    appoint_url: Annotated[str, typer.Option("--appoint-url", "-u", rich_help_panel="CrawlerInput")] = "",
+    file_path: Annotated[str, typer.Option("--file-path", "-f", rich_help_panel="CrawlerInput")] = "",
+    short_number: Annotated[str, typer.Option("--short-number", rich_help_panel="CrawlerInput")] = "",
+    mosaic: Annotated[str, typer.Option("--mosaic", "-m", rich_help_panel="CrawlerInput")] = "",
+    appoint_number: Annotated[str, typer.Option("--appoint-number", rich_help_panel="CrawlerInput")] = "",
+    language: Annotated[str, typer.Option("--language", "-l", rich_help_panel="CrawlerInput")] = "",
+    org_language: Annotated[str, typer.Option("--org-language", rich_help_panel="CrawlerInput")] = "",
+    # 输出选项
+    output: Annotated[str | None, typer.Option("--output", "-o", help="保存文件路径")] = None,
+    # 网络选项
+    proxy: Annotated[str | None, typer.Option("--proxy", "-p", help=proxy_help)] = None,
+    timeout: Annotated[int, typer.Option("--timeout", "-t", help="请求超时时间（秒）")] = 5,
     retry: Annotated[int, typer.Option("--retry", "-r", help="重试次数")] = 0,
 ):
-    """获取任意URL并保存到文件"""
-    asyncio.run(_get_async(url, output, proxy, timeout, retry))
+    """调用指定网站获取数据并保存到文件."""
 
+    # 如果有子命令被调用，不执行根命令逻辑
+    if ctx.invoked_subcommand is not None:
+        return
 
-async def _get_async(
-    url: str,
-    output: str | None,
-    proxy: str | None,
-    timeout: int,
-    retry: int,
-):
-    """异步获取URL内容"""
-    client_proxy = proxy or config.httpx_proxy
-    client_timeout = timeout or config.timeout
-    client_retry = retry or config.retry
+    # 检查是否提供了网站参数
+    if site is None:
+        console.print("[red]错误: 必须指定网站类型，请使用 --site 参数[/red]")
+        console.print("可用网站列表:")
+        for i, available_site in enumerate(Website, 1):
+            console.print(f"  {i:2d}. {available_site}")
+        raise typer.Exit(1)
 
-    console.print(f"[cyan]Get: {url}[/cyan]")
-    if client_proxy:
-        console.print(f"[cyan]代理: {client_proxy}[/cyan]")
-
-    # 创建异步客户端
-    async_client = AsyncWebClient(
-        proxy=client_proxy,
-        retry=client_retry,
-        timeout=client_timeout,
-        log_fn=lambda msg: console.print(f"[dim][AsyncWebClient] {msg}[/dim]"),
+    crawler_input = CrawlerInput(
+        number=number,
+        appoint_url=appoint_url,
+        file_path=file_path,
+        short_number=short_number,
+        mosaic=mosaic,
+        appoint_number=appoint_number,
+        language=Language(language or "undefined"),
+        org_language=Language(org_language or "undefined"),
     )
 
-    try:
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
-        ) as progress:
-            task = progress.add_task("正在获取URL内容...", total=None)
+    if not any((number, appoint_url)):
+        console.print("[red]错误: number 和 appoint_url 至少需要提供一个[/red]")
+        raise typer.Exit(1)
 
-            # 获取内容
-            content, error = await async_client.get_text(url)
+    _crawl(
+        site=site,
+        input=crawler_input,
+        output=output,
+        proxy=proxy,
+        timeout=timeout,
+        retry=retry,
+    )
 
-            progress.remove_task(task)
 
-        if content is None:
-            console.print(f"[red]错误: 获取URL失败 - {error}[/red]")
-            raise typer.Exit(1)
+def _crawl(
+    site: Website,
+    input: CrawlerInput,
+    output: str | None = None,
+    proxy: str | None = None,
+    timeout: int = 5,
+    retry: int = 0,
+):
+    crawler_class = get_crawler_compat(site)
+    if not crawler_class:
+        print(f"[red]错误: 未找到 {site.value} Crawler[/red]")
+        raise typer.Exit(1)
 
-        # 确定输出路径
+    # v1 crawler 内部直接使用 config.async_client, 必须复用同一个 evantloop 以避免 Future attached to a different loop 错误
+    client = AsyncWebClient(
+        loop=config.executor._loop,
+        proxy=proxy or config.httpx_proxy,
+        retry=retry,
+        timeout=timeout,
+        log_fn=lambda msg: print(f"[dim][AsyncWebClient] {msg}[/dim]"),
+    )
+    crawler = crawler_class(client=client, base_url=config.get_website_base_url(site))
+    res = config.executor.run(crawler.run(input))
+
+    print("\n".join(res.debug_info.logs))
+    if res.data:
+        print("[green]成功[/green]")
+        j = json.dumps(asdict(res.data), ensure_ascii=False, indent=2)
+        print_json(j)
         if output:
             output_path = Path(output)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(j, encoding="utf-8")
+            print(f"[green]结果已保存到: {output_path}[/green]")
+    else:
+        print("[red]失败[/red]")
+        if res.debug_info.error:
+            print(f"[red]错误信息: {res.debug_info.error}[/red]")
         else:
-            # 自动生成文件名
-            from urllib.parse import urlparse
+            sys.exit(1)
 
-            parsed_url = urlparse(url)
-            domain = parsed_url.netloc or "unknown"
-            path_part = parsed_url.path.strip("/").replace("/", "_") or "index"
-            filename = f"{domain}_{path_part}.html"
-            output_path = Path(filename)
 
-        # 创建输出目录
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        # 保存内容
-        output_path.write_text(content, encoding="utf-8")
-
-        console.print("[green]✅ 获取成功![/green]")
-        console.print(f"[green]文件已保存到: {output_path}[/green]")
-        console.print(f"[dim]文件大小: {len(content)} 字符[/dim]")
-
-    except Exception as e:
-        console.print(f"[red]错误: {str(e)}[/red]")
-        raise typer.Exit(1)
+site_help = "指定网站类型. 若未指定, 将尝试从 URL 自动检测. 若有相应 GenericBaseCrawler 实现, 将调用其 _fetch_detail 方法, 否则将直接使用 AsyncWebClient.get_text"
 
 
 @app.command()
 def fetch(
-    url: Annotated[str, typer.Argument(help="要抓取的详情页URL")],
-    site: Annotated[str | None, typer.Option("--site", "-s", help="指定网站类型")] = None,
-    output: Annotated[str | None, typer.Option("--output", "-o", help="输出文件路径")] = None,
-    number: Annotated[str | None, typer.Option("--number", "-n", help="番号（用于生成文件名）")] = None,
+    url: Annotated[str, typer.Argument(help="要获取的详情页URL")],
+    site: Annotated[Website | None, typer.Option("--site", "-s", help=site_help)] = None,
+    output: Annotated[str | None, typer.Option("--output", "-o", help="保存文件路径")] = None,
+    number: Annotated[str | None, typer.Option("--number", "-n")] = None,
     base_dir: Annotated[str, typer.Option("--base-dir", "-d", help="基础输出目录")] = "tests/crawlers/data",
-    proxy: Annotated[str | None, typer.Option("--proxy", "-p", help="代理地址 (例如: http://127.0.0.1:7890)")] = None,
+    proxy: Annotated[str | None, typer.Option("--proxy", "-p", help=proxy_help)] = None,
     timeout: Annotated[int, typer.Option("--timeout", "-t", help="请求超时时间（秒）")] = 5,
     retry: Annotated[int, typer.Option("--retry", "-r", help="重试次数")] = 1,
 ):
-    """抓取指定URL的详情页内容"""
+    """复用指定网站的 GenericBaseCrawler 详情页请求方法获取 URL 并保存到文件."""
 
-    # 验证URL
-    if not url:
-        console.print("[red]错误: 必须提供URL[/red]")
-        raise typer.Exit(1)
-
-    # 自动检测网站类型
     if not site:
         site = _detect_site_from_url(url)
         if site:
             console.print(f"[green]自动检测到网站类型: {site}[/green]")
-        else:
-            console.print("[yellow]无法自动检测网站类型，请手动指定[/yellow]")
-            available_sites = get_available_sites()
-            console.print("可用的网站:", ", ".join(available_sites))
-            raise typer.Exit(1)
 
-    # 验证网站类型
-    try:
-        website_enum = Website(site)
-    except ValueError:
-        console.print(f"[red]错误: 不支持的网站类型 '{site}'[/red]")
-        console.print("支持的网站:", ", ".join(get_available_sites()))
-        raise typer.Exit(1)
-
-    # 运行异步抓取
     asyncio.run(
         _fetch_async(
             url=url,
-            website=website_enum,
+            website=site,
             output_path=output,
             number=number,
             base_dir=base_dir,
@@ -157,7 +161,18 @@ def fetch(
     )
 
 
-def _detect_site_from_url(url: str) -> str | None:
+@app.command()
+def show_config():
+    """显示当前配置信息"""
+    console.print("[bold blue]当前配置信息:[/bold blue]")
+    console.print()
+    console.print(f"代理: {config.httpx_proxy or '未设置'}")
+    console.print(f"超时时间: {config.timeout} 秒")
+    console.print(f"重试次数: {config.retry}")
+    console.print(f"配置文件路径: {manager.path}")
+
+
+def _detect_site_from_url(url: str) -> Website | None:
     """从URL自动检测网站类型"""
     url_lower = url.lower()
 
@@ -169,7 +184,7 @@ def _detect_site_from_url(url: str) -> str | None:
 
 async def _fetch_async(
     url: str,
-    website: Website,
+    website: Website | None,
     output_path: str | None,
     number: str | None,
     base_dir: str,
@@ -177,15 +192,16 @@ async def _fetch_async(
     timeout: int,
     retry: int,
 ):
-    """异步抓取详情页内容"""
+    """异步获取详情页内容"""
 
     # 配置网络客户端
     client_proxy = proxy or config.httpx_proxy
     client_timeout = timeout or config.timeout
     client_retry = retry or config.retry
 
-    console.print(f"[cyan]正在抓取: {url}[/cyan]")
-    console.print(f"[cyan]网站类型: {website.value}[/cyan]")
+    console.print(f"[cyan]正在获取: {url}[/cyan]")
+    if website:
+        console.print(f"[cyan]网站类型: {website.value}[/cyan]")
     if client_proxy:
         console.print(f"[cyan]代理: {client_proxy}[/cyan]")
 
@@ -203,27 +219,23 @@ async def _fetch_async(
             TextColumn("[progress.description]{task.description}"),
             console=console,
         ) as progress:
-            task = progress.add_task("正在抓取详情页...", total=None)
+            task = progress.add_task("正在获取详情页...", total=None)
+            if website:
+                crawler_class = get_crawler(website)
+                if crawler_class is None:
+                    console.print(f"[red]错误: 未找到 {website.value} Crawler[/red]")
+                    exit(1)
 
-            # 获取爬虫类
-            crawler_class = get_crawler(website)
-            if crawler_class is None:
-                console.print(f"[red]错误: 未找到 {website.value} 的爬虫[/red]")
-                exit(1)
-
-            # 创建爬虫实例
-            crawler = crawler_class(client=async_client, base_url=config.get_website_base_url(website))
-
-            # 创建输入
-            crawler_input = CrawlerInput.empty()
-            crawler_input.appoint_url = url
-
-            # 创建上下文
-            ctx = crawler.new_context(crawler_input)
-
-            # 抓取详情页
-            progress.update(task, description="正在请求详情页...")
-            html, error = await crawler._fetch_detail(ctx, url)
+                crawler = crawler_class(client=async_client, base_url=config.get_website_base_url(website))
+                crawler_input = CrawlerInput.empty()
+                crawler_input.appoint_url = url
+                ctx = crawler.new_context(crawler_input)
+                progress.update(task, description="正在请求详情页...")
+                html, error = await crawler._fetch_detail(ctx, url)
+            else:
+                # 如果没有指定网站类型，直接使用客户端获取
+                progress.update(task, description="正在请求详情页...")
+                html, error = await async_client.get_text(url)
 
             if html is None:
                 console.print(f"[red]错误: 获取详情页失败 - {error}[/red]")
@@ -232,7 +244,7 @@ async def _fetch_async(
             progress.update(task, description="请求成功，正在保存...")
 
             # 确定输出路径
-            output_file = _determine_output_path(output_path, url, website.value, number, base_dir)
+            output_file = _determine_output_path(output_path, url, website, number, base_dir)
 
             # 创建输出目录
             output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -242,7 +254,7 @@ async def _fetch_async(
 
             progress.remove_task(task)
 
-        console.print("[green]✅ 抓取成功![/green]")
+        console.print("[green]✅ 获取成功![/green]")
         console.print(f"[green]文件已保存到: {output_file}[/green]")
         console.print(f"[dim]文件大小: {len(html)} 字符[/dim]")
 
@@ -251,7 +263,9 @@ async def _fetch_async(
         raise typer.Exit(1)
 
 
-def _determine_output_path(output_path: str | None, url: str, site: str, number: str | None, base_dir: str) -> Path:
+def _determine_output_path(
+    output_path: str | None, url: str, site: Website | None, number: str | None, base_dir: str
+) -> Path:
     """确定输出文件路径"""
     if output_path:
         return Path(output_path)
@@ -273,34 +287,9 @@ def _determine_output_path(output_path: str | None, url: str, site: str, number:
         else:
             filename = "detail.html"
 
-    return base_path / site / filename
-
-
-@app.command()
-def list():
-    """列出所有支持的网站"""
-    sites = get_available_sites()
-    console.print("[bold blue]支持的网站列表:[/bold blue]")
-    console.print()
-
-    for i, site in enumerate(sites, 1):
-        console.print(f"  {i:2d}. {site}")
-
-    console.print(f"\n[dim]共 {len(sites)} 个网站[/dim]")
-
-
-@app.command()
-def show_config():
-    """显示当前配置信息"""
-    console.print("[bold blue]当前配置信息:[/bold blue]")
-    console.print()
-    console.print(f"代理: {config.httpx_proxy or '未设置'}")
-    console.print(f"超时时间: {config.timeout} 秒")
-    console.print(f"重试次数: {config.retry}")
-    # config 对象没有 path 属性，从 manager 获取
-    from mdcx.config.manager import manager
-
-    console.print(f"配置文件路径: {manager.path}")
+    if site:
+        return base_path / site.value / filename
+    return base_path / filename
 
 
 if __name__ == "__main__":

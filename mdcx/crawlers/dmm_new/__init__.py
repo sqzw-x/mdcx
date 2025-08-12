@@ -4,14 +4,12 @@ from typing import override
 from parsel import Selector
 
 from mdcx.config.models import Website
+from mdcx.utils.dataclass import update_valid
+from mdcx.utils.gather_group import GatherGroup
 
-from ..base import (
-    BaseCrawler,
-    Context,
-    CralwerException,
-    CrawlerData,
-)
+from ..base import BaseCrawler, Context, CralwerException, CrawlerData, DetailPageParser, is_valid
 from .parsers import Category, Parser, Parser1, RentalParser, parse_category
+from .tv import DmmTvResponse, FanzaResp, dmm_tv_com_payload, fanza_tv_payload
 
 
 class DmmCrawler(BaseCrawler):
@@ -61,11 +59,13 @@ class DmmCrawler(BaseCrawler):
         if "404 Not Found" in html.css("span.d-txten::text").get(""):
             raise CralwerException("404! 页面地址错误！")
 
-        url_list = html.css(".tmb>a[href]").getall()
+        # \"detailUrl\":\"https://www.dmm.co.jp/digital/videoa/-/detail/=/cid=ssni00103/?i3_ord=1\u0026i3_ref=search"
+        url_list = set(html.re(r'detailUrl\\":\\"(.*?)\\"'))
         if not url_list:
+            ctx.debug(f"没有找到搜索结果: {ctx.input.number} {search_url=}")
             return None
 
-        number_parts = re.search(r"(\d[a-z])+?-?(\d+)", ctx.input.number.lower())
+        number_parts = re.search(r"(\d*[a-z]+)?-?(\d+)", ctx.input.number.lower())
         if not number_parts:
             ctx.show(f"无法从番号 {ctx.input.number} 提取前缀和数字")
             return None
@@ -76,6 +76,10 @@ class DmmCrawler(BaseCrawler):
 
         res = []
         for u in url_list:
+            cid = re.search(r"cid=([a-z0-9]+)", u)
+            if not cid:
+                ctx.debug(f"无法从搜索结果 URL 提取 cid: {u}")
+                continue
             if n1 in u or n2 in u:
                 res.append(u)
 
@@ -84,34 +88,148 @@ class DmmCrawler(BaseCrawler):
     @classmethod
     def _get_parser(cls, category: Category):
         match category:
-            case "dvd" | "prime" | "monthly" | "mono":
+            case Category.PRIME | Category.MONTHLY | Category.MONO:
                 return cls.parser
-            case "digital":
+            case Category.DIGITAL:
                 return cls.parser1
-            case "rental":
+            case Category.RENTAL:
                 return cls.rental_parser
-            case "tv" | "other":
-                return cls.parser
 
     @override
     async def _detail(self, ctx: Context, detail_urls: list[str]) -> CrawlerData | None:
-        d: dict[Category, list[str]] = {}
+        d = dict.fromkeys(Category, [])
         for url in detail_urls:
             category = parse_category(url)
-            if category not in d:
-                ctx.debug(f"未知类别: {category} {url=}")
-                continue
-            d.setdefault(category, []).append(url)
-        for category in ("mono", "rental", "dvd", "prime", "monthly", "tv", "digital", "other"):  # 优先级
-            urls = d.get(category, [])
-            parser = self._get_parser(category)
-            for u in urls:
-                html, error = await self._fetch_detail(ctx, u)
-                if html is None:
-                    ctx.debug(f"详情页请求失败: {u=} {error=}")
+            d[category].append(url)
+
+        async with GatherGroup[CrawlerData]() as group:
+            for url in d[Category.FANZA_TV]:
+                group.add(self.fetch_fanza_tv(ctx, url))
+            for url in d[Category.DMM_TV]:
+                group.add(self.fetch_dmm_tv(ctx, url))
+
+            for category in (
+                Category.MONO,
+                Category.RENTAL,
+                Category.PRIME,
+                Category.MONTHLY,
+                Category.DIGITAL,
+            ):  # 优先级
+                parser = self._get_parser(category)
+                if parser is None:
                     continue
-                ctx.debug(f"详情页请求成功: {u=}")
-                return await parser.parse(ctx, Selector(html))
+                for u in d[category]:
+                    group.add(self.fetch_and_parse(ctx, u, parser))
+
+        res = None
+        for r in group.results:
+            if isinstance(r, Exception):  # 预计只会返回空值, 不会抛出异常
+                ctx.debug(f"预料之外的异常: {r}")
+                continue
+            if res is None:
+                res = r
+            else:
+                res = update_valid(res, r, is_valid)
+
+        return res
+
+    async def fetch_fanza_tv(self, ctx: Context, detail_url: str) -> CrawlerData:
+        cid = re.search(r"content=([^&/]+)", detail_url)
+        if not cid:
+            ctx.debug(f"无法从 DMM TV URL 提取 cid: {detail_url}")
+            return CrawlerData()
+        cid = cid.group(1)
+
+        response, error = await self.async_client.post_json(
+            "https://api.tv.dmm.co.jp/graphql", json_data=fanza_tv_payload(cid)
+        )
+        if response is None:
+            ctx.debug(f"Fanza TV API 请求失败: {cid=} {error=}")
+            return CrawlerData()
+        try:
+            resp = FanzaResp.model_validate(response)
+            data = resp.data.fanzaTvPlus.content
+        except Exception as e:
+            ctx.debug(f"Fanza TV API 响应解析失败: {e}")
+            return CrawlerData()
+
+        extrafanart = []
+        for sample_pic in data.samplePictures:
+            if sample_pic.imageLarge:
+                extrafanart.append(sample_pic.imageLarge)
+
+        # https://cc3001.dmm.co.jp/hlsvideo/freepv/s/ssi/ssis00497/playlist.m3u8
+        trailer_url = data.sampleMovie.url.replace("hlsvideo", "litevideo")
+        cid_match = re.search(r"/([^/]+)/playlist.m3u8", trailer_url)
+        if cid_match:
+            cid = cid_match.group(1)
+            trailer = trailer_url.replace("playlist.m3u8", cid + "_sm_w.mp4")
+        else:
+            trailer = ""
+
+        return CrawlerData(
+            title=data.title,
+            outline=data.description,
+            release=data.startDeliveryAt,  # 2025-05-17T20:00:00Z
+            tags=[genre.name for genre in data.genres],
+            runtime=str(int(data.playInfo.duration / 60)),
+            actors=[a.name for a in data.actresses],
+            poster=data.packageImage,
+            thumb=data.packageLargeImage,
+            score=str(data.reviewSummary.averagePoint),
+            series=data.series.name,
+            directors=[d.name for d in data.directors],
+            studio=data.maker.name,
+            publisher=data.label.name,
+            extrafanart=extrafanart,
+            trailer=trailer,
+        )
+
+    async def fetch_dmm_tv(self, ctx: Context, detail_url: str) -> CrawlerData:
+        season_id = re.search(r"seasonId=(\d+)", detail_url)
+        if not season_id:
+            ctx.debug(f"无法从 DMM TV URL 提取 seasonId: {detail_url}")
+            return CrawlerData()
+        season_id = season_id.group(1)
+        response, error = await self.async_client.post_json(
+            "https://api.tv.dmm.com/graphql", json_data=dmm_tv_com_payload(season_id)
+        )
+        if response is None:
+            ctx.debug(f"DMM TV API 请求失败: {season_id=} {error=}")
+            return CrawlerData()
+        try:
+            resp = DmmTvResponse.model_validate(response)
+            data = resp.data.video
+        except Exception as e:
+            ctx.debug(f"DMM TV API 响应解析失败: {e}")
+            return CrawlerData()
+
+        studio = ""
+        if r := [item.staffName for item in data.staffs if item.roleName in ["制作プロダクション", "制作", "制作著作"]]:
+            studio = r[0]
+
+        return CrawlerData(
+            title=data.titleName,
+            outline=data.description,
+            actors=[item.actorName for item in data.casts],
+            poster=data.packageImage,
+            thumb=data.keyVisualImage,
+            tags=[item.name for item in data.genres],
+            release=data.startPublicAt,  # 2025-05-17T20:00:00Z
+            year=str(data.productionYear),
+            score=str(data.reviewSummary.averagePoint),
+            directors=[item.staffName for item in data.staffs if item.roleName == "監督"],
+            studio=studio,
+            publisher=studio,
+        )
+
+    async def fetch_and_parse(self, ctx: Context, detail_url: str, parser: DetailPageParser) -> CrawlerData:
+        html, error = await self._fetch_detail(ctx, detail_url)
+        if html is None:
+            ctx.debug(f"详情页请求失败: {error=}")
+            return CrawlerData()
+        ctx.debug(f"详情页请求成功: {detail_url=}")
+        return await parser.parse(ctx, Selector(html))
 
     @override
     async def post_process(self, ctx, res):
@@ -123,6 +241,7 @@ class DmmCrawler(BaseCrawler):
             res.publisher = res.studio
         if len(res.release) >= 4:
             res.year = res.release[:4]
+        return res
 
     @override
     async def _parse_detail_page(self, ctx, html: Selector, detail_url: str) -> CrawlerData | None:

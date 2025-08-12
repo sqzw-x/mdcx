@@ -91,14 +91,13 @@ class GenericBaseCrawler[T: Context = Context](ABC):
             raise CralwerException("解析详情页数据失败")
         data.source = self.site().value  # todo use Enum directly
         data = data.to_result()
-        await self.post_process(ctx, data)
-        return data
+        return await self.post_process(ctx, data)
 
     async def _search(self, ctx: T, search_urls: list[str]) -> list[str] | None:
         for search_url in search_urls:
             html, error = await self._fetch_search(ctx, search_url)
             if html is None:
-                ctx.debug(f"搜索页请求失败: {search_url=} {error=}")
+                ctx.debug(f"搜索页请求失败: {error=}")
                 continue
             ctx.debug(f"搜索页请求成功: {search_url=}")
             selector = Selector(text=html)
@@ -111,7 +110,7 @@ class GenericBaseCrawler[T: Context = Context](ABC):
         for detail_url in detail_urls:
             html, error = await self._fetch_detail(ctx, detail_url)
             if html is None:
-                ctx.debug(f"详情页请求失败: {detail_url=} {error=}")
+                ctx.debug(f"详情页请求失败: {error=}")
                 continue
             ctx.debug(f"详情页请求成功: {detail_url=}")
             selector = Selector(text=html)
@@ -123,14 +122,14 @@ class GenericBaseCrawler[T: Context = Context](ABC):
     @abstractmethod
     async def _generate_search_url(self, ctx: T) -> list[str] | str | None:
         """
-        生成搜索 URL.
+        生成搜索 URL. 如果重写 `_run` 则无须实现此方法.
         """
         raise NotImplementedError
 
     @abstractmethod
     async def _parse_search_page(self, ctx: T, html: Selector, search_url: str) -> list[str] | str | None:
         """
-        解析搜索结果页, 获取详情页 URL.
+        解析搜索结果页, 获取详情页 URL. 如果重写 `_search` 则无须实现此方法.
 
         Args:
             html (Selector): 包含搜索结果页 HTML 的 parsel Selector 对象.
@@ -144,7 +143,7 @@ class GenericBaseCrawler[T: Context = Context](ABC):
     @abstractmethod
     async def _parse_detail_page(self, ctx: T, html: Selector, detail_url: str) -> CrawlerData | None:
         """
-        解析详情页获取数据.
+        解析详情页获取数据. 如果重写 `_detail` 则无须实现此方法.
 
         Args:
             html (Selector): 包含详情页 HTML 的 parsel Selector 对象.
@@ -155,14 +154,14 @@ class GenericBaseCrawler[T: Context = Context](ABC):
         """
         raise NotImplementedError
 
-    async def post_process(self, ctx: T, res: CrawlerResult):
+    async def post_process(self, ctx: T, res: CrawlerResult) -> CrawlerResult:
         """
         爬取并解析完成后对结果进行后处理.
 
         Args:
             res (CrawlerResult): 爬取结果对象.
         """
-        return
+        return res
 
     async def _fetch_search(self, ctx: T, url: str) -> tuple[str | None, str]:
         """

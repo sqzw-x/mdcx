@@ -28,7 +28,10 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "env": {
+                "DEBUG": "1"
+            }
         }
     ]
 }

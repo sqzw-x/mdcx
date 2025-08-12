@@ -9,7 +9,7 @@ from parsel import Selector
 
 from mdcx.config.manager import asdict
 from mdcx.crawlers.base import CrawlerData, DetailPageParser, NotSupport
-from mdcx.models.types import CrawlerInput
+from mdcx.models.types import CrawlerInput, Language
 
 
 class TestCase(TypedDict):
@@ -91,8 +91,8 @@ class ParserTestBase:
                 mosaic="",
                 number="",
                 short_number="",
-                language="",
-                org_language="",
+                language=Language.UNDEFINED,
+                org_language=Language.UNDEFINED,
             )
         )
 

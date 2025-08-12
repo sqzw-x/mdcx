@@ -2,6 +2,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Literal
 
+from mdcx.config.models import Language
+
 
 @dataclass
 class FileInfo:
@@ -46,8 +48,8 @@ class FileInfo:
             number=self.number,
             mosaic=self.mosaic,
             short_number=self.short_number,
-            language="",
-            org_language="",
+            language=Language.UNDEFINED,
+            org_language=Language.UNDEFINED,
         )
 
     def crawl_task(self) -> "CrawlTask":
@@ -69,8 +71,8 @@ class FileInfo:
             cd_part=self.cd_part,
             destroyed=self.destroyed,
             website_name=self.website_name,
-            language="",
-            org_language="",
+            language=Language.UNDEFINED,
+            org_language=Language.UNDEFINED,
         )
 
     @classmethod
@@ -117,8 +119,8 @@ class CrawlerInput:
     short_number: str
 
     # 向后兼容
-    language: str
-    org_language: str
+    language: Language
+    org_language: Language
 
     @classmethod
     def empty(cls) -> "CrawlerInput":

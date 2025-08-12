@@ -46,3 +46,6 @@ dev = [
     "typer>=0.16.0",
     "types-lxml>=2025.3.30",
 ]
+
+[tool.uv]
+package = true

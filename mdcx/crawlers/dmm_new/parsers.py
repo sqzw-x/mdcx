@@ -1,12 +1,22 @@
 import re
-from typing import Literal, override
+from enum import StrEnum
+from typing import override
 
 from parsel import Selector
 from pydantic import BaseModel
 
 from ..base import Context, CrawlerData, DetailPageParser, FieldRes, XPath, extract_all_texts, extract_text
 
-Category = Literal["tv", "digital", "dvd", "prime", "monthly", "mono", "rental", "other"]
+
+class Category(StrEnum):
+    FANZA_TV = "fanza_tv"
+    DMM_TV = "dmm_tv"
+    DIGITAL = "digital"  # 動画
+    PRIME = "prime"
+    MONTHLY = "monthly"  # 月額動画
+    MONO = "mono"  # 通販
+    RENTAL = "rental"
+    OTHER = "other"
 
 
 def parse_category(url: str) -> Category:
@@ -14,24 +24,23 @@ def parse_category(url: str) -> Category:
     根据 DMM URL 判断其子类.
     """
     if "tv.dmm.co.jp" in url:
-        return "tv"
+        return Category.FANZA_TV
+    elif "tv.dmm.com" in url:
+        return Category.DMM_TV
     elif "/digital/" in url or "video.dmm.co.jp" in url:  # 现在 digital 会重定向到 video.dmm.co.jp
         # digital tag 可能有流媒体相关, 如 独占配信
-        return "digital"
-    elif "/dvd/" in url:
-        # dvd 可能有多个结果, 蓝光是单独结果, 封面不同, tag 包含 Blu-ray 字样
-        return "dvd"
+        return Category.DIGITAL
     elif "/prime/" in url:
-        return "prime"
+        return Category.PRIME
     elif "/monthly/" in url:
-        return "monthly"
+        return Category.MONTHLY
     elif "/mono/" in url:
-        return "mono"
+        return Category.MONO
     elif "/rental/" in url:
-        return "rental"
+        return Category.RENTAL
     else:
         # todo 其他类别
-        return "other"
+        return Category.OTHER
 
 
 class Parser(DetailPageParser):
