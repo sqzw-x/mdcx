@@ -1,36 +1,30 @@
 import re
-from collections.abc import Awaitable, Callable
 
 from parsel import Selector
 
-from .types import NOT_SUPPORT, Context, CrawlerData, CSSSelector, FieldRes, FieldValue, NotSupport, SelectorType, XPath
+from .types import NOT_SUPPORT, Context, CrawlerData, CSSSelector, FieldRes, FieldValue, SelectorType
 
 
-def _get_selector(html: str | Selector) -> Selector:
-    if isinstance(html, Selector):
-        return html
-    return Selector(text=html, type="html")
-
-
-def extract_text(html: str | Selector, *selector: SelectorType) -> str:
+def extract_text(html: Selector, *selector: SelectorType) -> str:
     """
     从 HTML 中提取单个文本节点, 将依次尝试每个选择器直到找到匹配项.
 
     Args:
-        html (str | Selector): HTML 内容或 parsel.Selector 对象.
-        selector (tuple[SelectorType, ...]): 一组 XPath 或 CSS 选择器, 字符串视为 XPath 选择器.
+        html (Selector): parsel.Selector 对象, 表示一个 HTML document.
+        selector (tuple[SelectorType, ...]): 一组 XPath, CSS 选择器或正则表达式, 字符串视为 XPath 选择器.
 
     Returns:
         提取并清理后的文本, 未找到则返回空字符串.
     """
-    sel = _get_selector(html)
     try:
         for s in selector:
-            if isinstance(s, CSSSelector):
-                f = sel.css
+            if isinstance(s, re.Pattern):
+                result = html.re(s)
+                result = result[0] if result else ""
+            elif isinstance(s, CSSSelector):
+                result = html.css(s).get()
             else:
-                f = sel.xpath
-            result = f(s).get()
+                result = html.xpath(s).get()
             if result:
                 return clean_string(result)
         return ""
@@ -38,25 +32,25 @@ def extract_text(html: str | Selector, *selector: SelectorType) -> str:
         return ""
 
 
-def extract_all_texts(html: str | Selector, *selector: SelectorType) -> list[str]:
+def extract_all_texts(html: Selector, *selector: SelectorType) -> list[str]:
     """
-    提取所有匹配的文本节点, 将依次尝试每个选择器直到找到匹配项.
+    从 HTML 中提取所有匹配的文本节点, 将依次尝试每个选择器直到找到匹配项.
 
     Args:
-        html (str | Selector): HTML 内容或 parsel.Selector 对象.
-        selector (tuple[SelectorType, ...]): 一组 XPath 或 CSS 选择器, 字符串视为 XPath 选择器.
+        html (Selector): parsel.Selector 对象, 表示一个 HTML document.
+        selector (tuple[SelectorType, ...]): 一组 XPath, CSS 选择器或正则表达式, 字符串视为 XPath 选择器.
 
     Returns:
         list[str]: 所有匹配文本的列表, 每个文本都经过清理.
     """
-    sel = _get_selector(html)
     try:
         for s in selector:
-            if isinstance(s, CSSSelector):
-                f = sel.css
+            if isinstance(s, re.Pattern):
+                results = html.re(s)
+            elif isinstance(s, CSSSelector):
+                results = html.css(s).getall()
             else:
-                f = sel.xpath
-            results = f(s).getall()
+                results = html.xpath(s).getall()
             if results:
                 return [clean_string(r) for r in results if clean_string(r)]
         return []
@@ -98,13 +92,12 @@ class DetailPageParser[T: Context = Context]:
     """
     详情页解析器的基类. 子类应重写所需字段的对应方法.
 
-    对于返回类型为 FieldRes[T] 的方法, 可返回以下几种类型的值:
+    可返回以下几种类型的值:
     1. T 类型的具体值: 直接用于构造 CrawlerResult.
-    2. BaseSelector 子类实例 (XPath 或 CSSSelector): 表示一组选择器, 依次用于提取文本.
-    3. None 或 T 类型的空值: 表示该字段在此页面上无法获取.
-    4. self.NOT_SUPPORT: 默认实现. 表示某字段在该网站上不存在.
+    2. None 或 T 类型的空值: 表示该字段在此页面上无法获取.
+    3. self.NOT_SUPPORT: 默认实现. 表示某字段在该网站上不存在.
 
-    对于返回类型为 FieldValue[T] 的方法, T 较为复杂, 因此不支持情况 2 返回选择器.
+    2 和 3 在最终结果中都会转为空值. 唯一区别在于, None 或空值被视为获取失败, 而 NOT_SUPPORT 则不会.
     """
 
     NOT_SUPPORT = NOT_SUPPORT
@@ -196,63 +189,32 @@ class DetailPageParser[T: Context = Context]:
             包含所有刮削数据的 CrawlerResult 对象.
         """
         return CrawlerData(
-            title=await self.str_field(ctx, self.title, html),
-            actors=await self.str_list_field(ctx, self.actors, html),
-            all_actors=await self.str_list_field(ctx, self.all_actors, html),
-            directors=await self.str_list_field(ctx, self.directors, html),
-            extrafanart=await self.str_list_field(ctx, self.extrafanart, html),
-            originalplot=await self.str_field(ctx, self.originalplot, html),
-            originaltitle=await self.str_field(ctx, self.originaltitle, html),
-            outline=await self.str_field(ctx, self.outline, html),
-            poster=await self.str_field(ctx, self.poster, html),
-            publisher=await self.str_field(ctx, self.publisher, html),
-            release=await self.str_field(ctx, self.release, html),
-            runtime=await self.str_field(ctx, self.runtime, html),
-            score=await self.str_field(ctx, self.score, html),
-            series=await self.str_field(ctx, self.series, html),
-            studio=await self.str_field(ctx, self.studio, html),
-            tags=await self.str_list_field(ctx, self.tags, html),
-            thumb=await self.str_field(ctx, self.thumb, html),
-            trailer=await self.str_field(ctx, self.trailer, html),
-            wanted=await self.str_field(ctx, self.wanted, html),
-            year=await self.str_field(ctx, self.year, html),
+            title=await self.title(ctx, html),
+            actors=await self.actors(ctx, html),
+            all_actors=await self.all_actors(ctx, html),
+            directors=await self.directors(ctx, html),
+            extrafanart=await self.extrafanart(ctx, html),
+            originalplot=await self.originalplot(ctx, html),
+            originaltitle=await self.originaltitle(ctx, html),
+            outline=await self.outline(ctx, html),
+            poster=await self.poster(ctx, html),
+            publisher=await self.publisher(ctx, html),
+            release=await self.release(ctx, html),
+            runtime=await self.runtime(ctx, html),
+            score=await self.score(ctx, html),
+            series=await self.series(ctx, html),
+            studio=await self.studio(ctx, html),
+            tags=await self.tags(ctx, html),
+            thumb=await self.thumb(ctx, html),
+            trailer=await self.trailer(ctx, html),
+            wanted=await self.wanted(ctx, html),
+            year=await self.year(ctx, html),
             actor_photo=await self.actor_photo(ctx, html),
-            image_cut=await self.str_field(ctx, self.image_cut, html),
+            image_cut=await self.image_cut(ctx, html),
             image_download=await self.image_download(ctx, html),
-            number=await self.str_field(ctx, self.number, html),
-            mosaic=await self.str_field(ctx, self.mosaic, html),
+            number=await self.number(ctx, html),
+            mosaic=await self.mosaic(ctx, html),
             externalId="",
             source="",
             website="",
         )
-
-    @classmethod
-    async def str_field(cls, ctx: T, method: Callable[..., Awaitable[FieldRes]], html: Selector) -> FieldValue:
-        method_res = await method(ctx, html)
-
-        if method_res is None or isinstance(method_res, NotSupport):
-            return method_res
-
-        if isinstance(method_res, tuple | XPath | CSSSelector):
-            # 执行选择器
-            parsed_value = extract_text(html, *method_res)
-        else:
-            parsed_value = method_res
-
-        return parsed_value
-
-    @classmethod
-    async def str_list_field(
-        cls, ctx: T, method: Callable[..., Awaitable[FieldRes[list[str]]]], html: Selector
-    ) -> FieldValue[list[str]]:
-        method_res = await method(ctx, html)
-
-        if method_res is None or isinstance(method_res, NotSupport):
-            return method_res
-        elif isinstance(method_res, tuple | XPath | CSSSelector):
-            # 执行选择器
-            parsed_value = extract_all_texts(html, *method_res)
-        else:
-            parsed_value = method_res
-
-        return parsed_value

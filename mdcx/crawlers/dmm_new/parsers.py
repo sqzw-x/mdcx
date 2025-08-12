@@ -86,16 +86,18 @@ class Parser(DetailPageParser):
 
     @override
     async def series(self, ctx, html):
-        return (
-            XPath("//td[contains(text(),'シリーズ')]/following-sibling::td/a/text()"),
-            XPath("//th[contains(text(),'シリーズ')]/following-sibling::td/a/text()"),
+        return extract_text(
+            html,
+            "//td[contains(text(),'シリーズ')]/following-sibling::td/a/text()",
+            "//th[contains(text(),'シリーズ')]/following-sibling::td/a/text()",
         )
 
     @override
     async def directors(self, ctx, html):
-        return (
-            XPath("//td[contains(text(),'監督')]/following-sibling::td/a/text()"),
-            XPath("//th[contains(text(),'監督')]/following-sibling::td/a/text()"),
+        return extract_all_texts(
+            html,
+            "//td[contains(text(),'監督')]/following-sibling::td/a/text()",
+            "//th[contains(text(),'監督')]/following-sibling::td/a/text()",
         )
 
     @override
@@ -156,7 +158,7 @@ class Parser(DetailPageParser):
 class RentalParser(Parser):
     @override
     async def extrafanart(self, ctx, html):
-        return (XPath("//a[@name='sample-image']/img/@src"),)
+        return extract_all_texts(html, "//a[@name='sample-image']/img/@src")
 
 
 class AggregateRating(BaseModel):

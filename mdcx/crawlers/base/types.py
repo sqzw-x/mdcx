@@ -1,4 +1,5 @@
 from dataclasses import asdict, dataclass, field
+from re import Pattern
 from typing import Any
 
 from mdcx.models.types import CrawlerDebugInfo, CrawlerInput, CrawlerResult
@@ -16,9 +17,9 @@ class NotSupport: ...
 NOT_SUPPORT = NotSupport()
 
 type FieldValue[T = str] = T | None | NotSupport
-type FieldRes[T = str] = tuple[XPath | CSSSelector, ...] | FieldValue[T]
+type FieldRes[T = str] = FieldValue[T]
 
-type SelectorType = XPath | CSSSelector | str
+type SelectorType = XPath | CSSSelector | Pattern | str
 
 
 def is_valid[T](v: FieldValue[T]) -> bool:
