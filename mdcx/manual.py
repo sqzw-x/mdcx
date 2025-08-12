@@ -45,22 +45,22 @@ class ManualConfig:
     CONFIG_DATA_FIELDS = [
         "actor",
         "director",
-        "extrafanart",
+        CrawlerResultFields.EXTRAFANART,
         "outline_zh",
-        "outline",
-        "poster",
-        "publisher",
-        "release",
-        "runtime",
-        "score",
-        "series",
-        "studio",
+        CrawlerResultFields.OUTLINE,
+        CrawlerResultFields.POSTER,
+        CrawlerResultFields.PUBLISHER,
+        CrawlerResultFields.RELEASE,
+        CrawlerResultFields.RUNTIME,
+        CrawlerResultFields.SCORE,
+        CrawlerResultFields.SERIES,
+        CrawlerResultFields.STUDIO,
         "tag",
-        "thumb",  # 在 nfo 相关配置中为 cover
+        CrawlerResultFields.THUMB,  # 在 nfo 相关配置中为 cover
         "title_zh",  # 根据语言设置, 分别对应 title 和 originaltitle
-        "title",
-        "trailer",
-        "wanted",
+        CrawlerResultFields.TITLE,
+        CrawlerResultFields.TRAILER,
+        CrawlerResultFields.WANTED,
     ]
     # 向后兼容, 将 CONFIG_DATA_FIELDS 映射到 CRAWLER_DATA_FIELDS
     RENAME_MAP = {

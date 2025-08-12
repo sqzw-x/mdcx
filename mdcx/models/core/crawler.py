@@ -2,7 +2,7 @@ import asyncio
 import re
 
 from mdcx.config.manager import config
-from mdcx.config.models import Website, WebsiteSet
+from mdcx.config.models import Language, Website, WebsiteSet
 from mdcx.crawlers import get_crawler_compat
 from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.manual import ManualConfig
@@ -141,36 +141,36 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
             del all_field_websites["title_zh"]
 
     # 各字段语言, 未指定则默认为 "any"
-    all_field_languages = {field: getattr(config, f"{field}_language", "any") for field in all_fields}
-    all_field_languages["title_zh"] = config.title_language
-    all_field_languages["outline_zh"] = config.outline_language
+    all_field_languages: dict[str, Language] = {
+        field: getattr(config.pydantic, f"{field}_language", Language.UNDEFINED) for field in all_fields
+    }
+    all_field_languages["title_zh"] = config.pydantic.title_language
+    all_field_languages["outline_zh"] = config.pydantic.outline_language
 
     # 处理配置项中没有的字段
     # originaltitle 的网站优先级同 title, 语言为 jp
     all_field_websites["originaltitle"] = all_field_websites.get("title", number_website_list)
-    all_field_languages["originaltitle"] = "jp"
+    all_field_languages["originaltitle"] = Language.JP
     all_field_websites["originalplot"] = all_field_websites.get("outline", number_website_list)
-    all_field_languages["originalplot"] = "jp"
+    all_field_languages["originalplot"] = Language.JP
 
     # 各字段的取值优先级 (网站, 语言) 对
-    all_field_website_lang_pairs: dict[str, list[tuple[Website, str]]] = {}
+    all_field_website_lang_pairs: dict[str, list[tuple[Website, Language]]] = {}
     for field, websites in all_field_websites.items():
         language = all_field_languages[field]
         all_field_website_lang_pairs[field] = []
         for website in websites:
             pair = (website, language)
             if website not in MULTI_LANGUAGE_WEBSITES:
-                pair = (website, "")  # 单语言网站, 语言参数无意义
+                pair = (website, Language.UNDEFINED)  # 单语言网站, 语言参数无意义
             all_field_website_lang_pairs[field].append(pair)
 
     # 缓存已请求的网站结果
-    all_res: dict[tuple[Website, str], CrawlerResult] = {}
+    all_res: dict[tuple[Website, Language], CrawlerResult] = {}
     reduced = CrawlersResult.empty()
 
     # 无优先级设置的字段的默认配置
-    default_website_lang_pairs: list[tuple[Website, str]] = [
-        (w, "") if w not in MULTI_LANGUAGE_WEBSITES else (w, "any") for w in number_website_list
-    ]
+    default_website_lang_pairs: list[tuple[Website, Language]] = [(w, Language.UNDEFINED) for w in number_website_list]
 
     # 处理 CrawlerResult 字段重命名
     for old, new in ManualConfig.RENAME_MAP.items():
@@ -189,10 +189,10 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
         sources = all_field_website_lang_pairs.get(field, default_website_lang_pairs)
 
         # 如果title_language不是jp，则允许从title_zh来源获取title
-        if field == CrawlerResultFields.TITLE and config.title_language != "jp":
+        if field == CrawlerResultFields.TITLE and config.pydantic.title_language != Language.JP:
             sources = sources + all_field_website_lang_pairs.get("title_zh", [])
         # 如果outline_language不是jp，则允许从outline_zh来源获取outline
-        elif field == CrawlerResultFields.OUTLINE and config.outline_language != "jp":
+        elif field == CrawlerResultFields.OUTLINE and config.pydantic.outline_language != Language.JP:
             sources = sources + all_field_website_lang_pairs.get("outline_zh", [])
 
         LogBuffer.info().write(
@@ -207,62 +207,32 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
 
             # 如果网站不支持多语言，标准化key
             if website not in MULTI_LANGUAGE_WEBSITES:
-                key = (website, "")
+                key = (website, Language.UNDEFINED)
 
             # 如果已有该网站数据，直接使用
             if key in all_res:
                 site_data = all_res[key]
             else:
-                # 处理多语言网站的特殊情况
-                if website in MULTI_LANGUAGE_WEBSITES:
-                    # 对于多语言网站，检查是否需要请求jp语言
-                    if language == "any" and all((website, lang) not in all_res for lang in ["jp", "zh_cn", "zh_tw"]):
-                        # 添加一个jp语言的请求
-                        language = "jp"
-                        key = (website, language)
-
-                    # 对于iqqtv，如果请求中文时已经有jp数据，可以跳过jp请求
-                    if (
-                        website == "iqqtv"
-                        and language == "jp"
-                        and any((website, lang) in all_res for lang in ["zh_cn", "zh_tw"])
-                    ):
-                        continue
-
-                    # 跳过any语言的请求，因为会通过具体语言请求
-                    if language == "any":
-                        continue
-
                 # 如果网站数据尚未请求，则进行请求
                 try:
                     task_input.language = language
                     task_input.org_language = config.title_language
                     web_data = await _call_crawler(task_input, website)
                     if web_data.data is None:
-                        if web_data.debug_info.error:
-                            raise web_data.debug_info.error
+                        if e := web_data.debug_info.error:
+                            raise e
                         raise ValueError(f"爬虫 {website} 返回了空数据")
-
+                    site_data = web_data.data
                     # 处理并保存结果
-                    if website not in MULTI_LANGUAGE_WEBSITES:
-                        # 单语言网站, 只取第一个语言的数据
-                        all_res[(website, "")] = web_data.data
-                    else:
-                        # 多语言网站，保存所有语言的数据
-                        all_res[(website, language)] = web_data.data
-                        # 同时为any语言添加一份数据
-                        if (website, "any") not in all_res:
-                            all_res[(website, "any")] = web_data.data
-
-                    # 更新key以便后续使用
-                    if website not in MULTI_LANGUAGE_WEBSITES:
-                        key = (website, "")
+                    all_res[key] = web_data.data
+                    # 多语言网站, 如果 undefined 尚不存在, 也使用当前语言数据
+                    if website in MULTI_LANGUAGE_WEBSITES and (website, Language.UNDEFINED) not in all_res:
+                        all_res[(website, Language.UNDEFINED)] = web_data.data
                 except Exception as e:
                     LogBuffer.info().write(f"\n    🔴 {website} (异常: {str(e)})")
                     continue
 
             # 获取网站数据
-            site_data = all_res.get(key)
             if not site_data or not site_data.title or not getattr(site_data, field, None):
                 LogBuffer.info().write(f"\n    🔴 {website} (失败)")
                 continue
@@ -274,13 +244,13 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
                 CrawlerResultFields.ORIGINALTITLE,
                 CrawlerResultFields.ORIGINALPLOT,
             ]:
-                lang = all_field_languages.get(field, "jp")
+                lang = all_field_languages.get(field, Language.JP)
                 if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:  # why?
                     if not is_japanese(getattr(site_data, field, "")):
-                        if lang == "jp":
+                        if lang == Language.JP:
                             LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为非日文，跳过！)")
                             continue
-                    elif lang != "jp":
+                    elif lang != Language.JP:
                         LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为日文，跳过！)")
                         continue
 
@@ -330,7 +300,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
         reduced.number = number
 
     # 处理 javdbid
-    if r := all_res.get((Website.JAVDB, "")):
+    if r := all_res.get((Website.JAVDB, Language.UNDEFINED)):
         reduced.javdbid = r.javdbid
 
     # 处理 all_actor

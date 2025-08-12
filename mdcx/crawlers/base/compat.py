@@ -60,6 +60,11 @@ class LegacyCrawler:
         if not r:
             raise CralwerException(f"v1 crawler failed: {self.site}")
         res = list(r.values())[0]
+        # 只有 iqqtv_new 和 javlibrary_new 会返回多种语言的数据, 其他所有来源只可能
+        # 1. 返回单一语言的数据, 即 {site: {language: data}}
+        # 2. 返回多语言 dict, 但实际上内部数据相同, 即 {site: {zh_cn: data, zh_tw: data, jp: data}}
+        # 因此此处只取第一个 data, 对大多数网站都无影响.
+        # 唯一受影响的是当需要 iqqtv_new 或 javlibrary_new 的多个语言的数据时, 需要多次请求
         res = list(res.values())[0]
 
         return update(CrawlerResult.empty(), res)

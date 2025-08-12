@@ -564,6 +564,15 @@ class Website(str, Enum):
     OFFICIAL = "official"
 
 
+class Language(str, Enum):
+    UNDEFINED = "undefined"
+    UNKNOWN = "unknown"
+    ZH_CN = "zh_cn"
+    ZH_TW = "zh_tw"
+    JP = "jp"
+    EN = "en"
+
+
 class TranslateConfig(BaseModel):
     translate_by: list[Translator] = Field(
         default_factory=lambda: [Translator.YOUDAO, Translator.GOOGLE, Translator.DEEPL, Translator.LLM],
@@ -1099,26 +1108,26 @@ class Config(BaseModel):
         default_factory=lambda: [Website.JAVLIBRARY, Website.JAVDB],
         title="想看网站源",
     )
-    title_language: str = Field(default="zh_cn", title="标题语言")
+    title_language: Language = Field(default=Language.ZH_CN, title="标题语言")
     title_sehua: bool = Field(default=True, title="使用色花标题")
     title_yesjav: bool = Field(default=False, title="使用 Yesjav 标题")
     title_translate: bool = Field(default=True, title="翻译标题")
     title_sehua_zh: bool = Field(default=True, title="使用色花中文标题")
-    outline_language: str = Field(default="zh_cn", title="简介语言")
+    outline_language: Language = Field(default=Language.ZH_CN, title="简介语言")
     outline_translate: bool = Field(default=True, title="翻译简介")
     outline_format: list[OutlineShow] = Field(default_factory=list, title="简介格式")
-    actor_language: str = Field(default="zh_cn", title="演员语言")
+    actor_language: Language = Field(default=Language.ZH_CN, title="演员语言")
     actor_realname: bool = Field(default=True, title="演员真名")
     actor_translate: bool = Field(default=True, title="翻译演员")
-    tag_language: str = Field(default="zh_cn", title="标签语言")
+    tag_language: Language = Field(default=Language.ZH_CN, title="标签语言")
     tag_translate: bool = Field(default=True, title="翻译标签")
-    director_language: str = Field(default="zh_cn", title="导演语言")
+    director_language: Language = Field(default=Language.ZH_CN, title="导演语言")
     director_translate: bool = Field(default=True, title="翻译导演")
-    series_language: str = Field(default="zh_cn", title="系列语言")
+    series_language: Language = Field(default=Language.ZH_CN, title="系列语言")
     series_translate: bool = Field(default=True, title="翻译系列")
-    studio_language: str = Field(default="zh_cn", title="工作室语言")
+    studio_language: Language = Field(default=Language.ZH_CN, title="工作室语言")
     studio_translate: bool = Field(default=True, title="翻译工作室")
-    publisher_language: str = Field(default="zh_cn", title="发行商语言")
+    publisher_language: Language = Field(default=Language.ZH_CN, title="发行商语言")
     publisher_translate: bool = Field(default=True, title="翻译发行商")
 
     # region: Translation Settings

@@ -116,7 +116,7 @@ class CrawlerInput:
     number: str
     short_number: str
 
-    # todo 移除, 仅用于向后兼容
+    # 向后兼容
     language: str
     org_language: str
 
@@ -340,7 +340,7 @@ class CrawlersResult(BaseCrawlerResult):
     # 用于 log
     fields_info: str  # 字段来源信息
 
-    # 字段来源
+    # 字段来源 # todo 用一个与 BaseCrawlerResult 字段一一对应的字典表示
     extrafanart_from: str
     outline_from: str
     poster_from: str
