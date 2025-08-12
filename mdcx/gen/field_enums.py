@@ -29,4 +29,3 @@ class CrawlerResultFields(StrEnum):
     IMAGE_CUT = "image_cut"
     SOURCE = "source"
     WEBSITE = "website"
-
