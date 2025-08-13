@@ -76,11 +76,10 @@ class DmmCrawler(BaseCrawler):
 
         res = []
         for u in url_list:
-            cid = re.search(r"cid=([a-z0-9]+)", u)
-            if not cid:
-                ctx.debug(f"无法从搜索结果 URL 提取 cid: {u}")
-                continue
-            if n1 in u or n2 in u:
+            # https://tv.dmm.co.jp/list/?content=mide00726&i3_ref=search&i3_ord=1
+            # https://www.dmm.co.jp/digital/videoa/-/detail/=/cid=mide00726/?i3_ref=search&i3_ord=2
+            # https://www.dmm.com/mono/dvd/-/detail/=/cid=n_709mmrak089sp/?i3_ref=search&i3_ord=1
+            if re.search(rf"[^a-z]{n1}[^0-9]", u) or re.search(rf"[^a-z]{n2}[^0-9]", u):
                 res.append(u)
 
         return res

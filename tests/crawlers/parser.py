@@ -8,7 +8,7 @@ from aiofiles import open as aio_open
 from parsel import Selector
 
 from mdcx.config.manager import asdict
-from mdcx.crawlers.base import CrawlerData, DetailPageParser, NotSupport
+from mdcx.crawlers.base import Context, CrawlerData, DetailPageParser, NotSupport
 from mdcx.models.types import CrawlerInput, Language
 
 
@@ -73,16 +73,13 @@ class ParserTestBase:
 
     async def parse_html_file(self, html_file: Path, case_data: TestCase):
         """解析 HTML 文件并返回结果"""
-        # 运行时导入以避免循环导入
-        from mdcx.crawlers.base.types import Context
-
         async with aio_open(html_file, encoding="utf-8") as f:
             html_content = await f.read()
 
         selector = Selector(text=html_content)
         parser = self.parser_class()
 
-        # 创建一个简单的上下文用于测试
+        # 创建一个简单的上下文用于测试 # todo 从 case_data 创建
         ctx = Context(
             input=CrawlerInput(
                 appoint_number="",
@@ -163,7 +160,7 @@ class ParserTestBase:
         if not expected_dict or self.overwrite:
             self.save_result(result_file, actual_dict)
             print(f"保存新结果: {html_file.name} -> {result_file.name}")
-            pytest.skip("保存新结果, 跳过比较")
+            return True
 
         # 比较结果
         differences = self.compare_results(actual_dict, expected_dict)

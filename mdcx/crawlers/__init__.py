@@ -27,7 +27,6 @@ from . import (
     jav321,
     javbus,
     javday,
-    javdb,
     javlibrary_new,
     kin8,
     love6,
@@ -45,6 +44,7 @@ from . import (
 from .base import get_crawler, register_crawler
 from .base.compat import get_v1_crawler, register_v1_crawler
 from .dmm_new import DmmCrawler
+from .javdb_new import JavdbCrawler
 
 CRAWLER_FUNCS: list[tuple[Website, Callable]] = [
     (Website.MMTV, mmtv.main),
@@ -72,7 +72,6 @@ CRAWLER_FUNCS: list[tuple[Website, Callable]] = [
     (Website.JAV321, jav321.main),
     (Website.JAVBUS, javbus.main),
     (Website.JAVDAY, javday.main),
-    (Website.JAVDB, javdb.main),
     (Website.JAVLIBRARY, javlibrary_new.main),  # lang
     (Website.KIN8, kin8.main),
     (Website.LOVE6, love6.main),
@@ -89,6 +88,7 @@ CRAWLER_FUNCS: list[tuple[Website, Callable]] = [
 
 
 register_crawler(DmmCrawler)
+register_crawler(JavdbCrawler)
 for site, func in CRAWLER_FUNCS:
     register_v1_crawler(site, func)
 

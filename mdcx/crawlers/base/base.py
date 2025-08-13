@@ -1,7 +1,7 @@
 import time
 import traceback
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Never
 
 from parsel import Selector
 
@@ -188,12 +188,21 @@ class BaseCrawler(GenericBaseCrawler[Context]):
         return Context(input=input)
 
 
-crawler_registry: dict[Website, type[GenericBaseCrawler]] = {}
+crawler_registry: dict[Website, type[GenericBaseCrawler[Never]]] = {}
 
 
-def register_crawler(crawler_cls: type[GenericBaseCrawler]):
+def register_crawler(crawler_cls: type[GenericBaseCrawler[Any]]):
     crawler_registry[crawler_cls.site()] = crawler_cls
 
 
-def get_crawler(site: Website) -> type[GenericBaseCrawler] | None:
+def get_crawler(site: Website) -> type[GenericBaseCrawler[Never]] | None:
+    """
+    获取指定网站的爬虫类.
+
+    注意: 出于类型安全的目的, 将返回类型标注为 `GenericBaseCrawler[Never]`.
+    由于允许子类继承 `Context` 作为泛型, 因此实际上没有类型可以准确标注此方法的返回值.
+
+    在应用内部, 只有 `run` 被视为公开 API 调用, `Context` 实际上是内部实现细节, 因此这种标注不会导致问题.
+    在测试等情况下, 如果需要调用具有 `ctx` 参数的方法, 必须使用返回类的 `new_context` 类方法创建具体使用的泛型类并传入.
+    """
     return crawler_registry.get(site)

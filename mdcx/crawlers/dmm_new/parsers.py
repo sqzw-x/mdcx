@@ -5,7 +5,7 @@ from typing import override
 from parsel import Selector
 from pydantic import BaseModel
 
-from ..base import Context, CrawlerData, DetailPageParser, FieldRes, XPath, extract_all_texts, extract_text
+from ..base import Context, CrawlerData, DetailPageParser, FieldRes, extract_all_texts, extract_text
 
 
 class Category(StrEnum):
@@ -77,8 +77,8 @@ class Parser(DetailPageParser):
             return match.group()
 
     @override
-    async def studio(self, ctx, html) -> XPath:
-        return XPath("//td[contains(text(),'メーカー')]/following-sibling::td/a/text()")
+    async def studio(self, ctx, html) -> str | None:
+        return extract_text(html, "//td[contains(text(),'メーカー')]/following-sibling::td/a/text()")
 
     @override
     async def publisher(self, ctx, html) -> str | None:
