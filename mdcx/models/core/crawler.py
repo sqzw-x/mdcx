@@ -349,7 +349,6 @@ async def _call_specific_crawler(task_input: CrawlerInput, website: Website) -> 
 
 async def _crawl(task_input: CrawlTask, website: Website | None) -> CrawlersResult:  # 从JSON返回元数据
     appoint_number = task_input.appoint_number
-    cd_part = task_input.cd_part
     destroyed = task_input.destroyed
     file_number = task_input.number
     file_path = task_input.file_path
