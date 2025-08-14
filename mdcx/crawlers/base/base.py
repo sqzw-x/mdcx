@@ -59,12 +59,12 @@ class GenericBaseCrawler[T: Context = Context](ABC):
         try:
             data = await self._run(ctx)
             ctx.debug_info.execution_time = time.time() - start_time
-            return CrawlerResponse(data=data, debug_info=ctx.debug_info)
+            return CrawlerResponse(data=data, debug_info=ctx.debug_info, show_msgs=ctx.show_msgs)
         except Exception as e:
             ctx.show(str(e))
             ctx.debug(traceback.format_exc())
             ctx.debug_info.error = e
-            return CrawlerResponse(debug_info=ctx.debug_info)
+            return CrawlerResponse(debug_info=ctx.debug_info, show_msgs=ctx.show_msgs)
         finally:
             ctx.show(f"({round(time.time() - start_time, 2)}s)")
 
@@ -130,6 +130,8 @@ class GenericBaseCrawler[T: Context = Context](ABC):
     async def _parse_search_page(self, ctx: T, html: Selector, search_url: str) -> list[str] | str | None:
         """
         解析搜索结果页, 获取详情页 URL. 如果重写 `_search` 则无须实现此方法.
+
+        此方法应返回完整 URL, 当解析页面获取到相对 URL 时需进行处理.
 
         Args:
             html (Selector): 包含搜索结果页 HTML 的 parsel Selector 对象.

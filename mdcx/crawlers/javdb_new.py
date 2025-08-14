@@ -2,6 +2,7 @@
 
 import re
 from typing import override
+from urllib.parse import urljoin
 
 from parsel import Selector
 
@@ -194,14 +195,14 @@ class JavdbCrawler(BaseCrawler):
         number = ctx.input.number
         for href, title, meta in info_list:
             if number.upper() in title.upper():
-                return [href]
+                return [urljoin(self.base_url, href)]
 
         # 模糊匹配
         clean_number = number.upper().replace(".", "").replace("-", "").replace(" ", "")
         for href, title, meta in info_list:
             clean_content = (title + meta).upper().replace("-", "").replace(".", "").replace(" ", "")
             if clean_number in clean_content:
-                return [href]
+                return [urljoin(self.base_url, href)]
 
         return None
 
@@ -215,7 +216,7 @@ class JavdbCrawler(BaseCrawler):
             res.originaltitle = res.title
         res.poster = res.thumb.replace("/covers/", "/thumbs/")
         # 提取 javdbid
-        if res.url and (r := re.search(r"/v/([a-zA-Z0-9])+", res.url)):
+        if res.url and (r := re.search(r"/v/([a-zA-Z0-9]+)", res.url)):
             javdbid = r.group(1)
             res.javdbid = javdbid
             res.externalId = javdbid

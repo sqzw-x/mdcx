@@ -132,7 +132,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
         return field_list
 
     # 获取使用的网站
-    all_fields = [f for f in ManualConfig.CONFIG_DATA_FIELDS if f not in none_fields]  # 去除不专门刮削的字段
+    all_fields = [str(f) for f in ManualConfig.CONFIG_DATA_FIELDS if f not in none_fields]  # 去除不专门刮削的字段
     if scrape_like == "speed":  # 快速模式
         all_field_websites = dict.fromkeys(all_fields, number_website_list)
     else:  # 全部模式
@@ -143,7 +143,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
         if config.title_language == "jp" and "title_zh" in all_field_websites:
             del all_field_websites["title_zh"]
 
-    # 各字段语言, 未指定则默认为 "any"
+    # 各字段语言
     all_field_languages: dict[str, Language] = {
         field: getattr(config.pydantic, f"{field}_language", Language.UNDEFINED) for field in all_fields
     }
@@ -168,13 +168,6 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
                 pair = (website, Language.UNDEFINED)  # 单语言网站, 语言参数无意义
             all_field_website_lang_pairs[field].append(pair)
 
-    # 缓存已请求的网站结果
-    all_res: dict[tuple[Website, Language], CrawlerResult] = {}
-    reduced = CrawlersResult.empty()
-
-    # 无优先级设置的字段的默认配置
-    default_website_lang_pairs: list[tuple[Website, Language]] = [(w, Language.UNDEFINED) for w in number_website_list]
-
     # 处理 CrawlerResult 字段重命名
     for old, new in ManualConfig.RENAME_MAP.items():
         if old in all_field_languages:
@@ -183,13 +176,21 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
         if old in all_field_website_lang_pairs:
             all_field_website_lang_pairs[new] = all_field_website_lang_pairs[old]
             del all_field_website_lang_pairs[old]
-
+    # 处理 all_actors 字段
     all_field_website_lang_pairs["all_actors"] = all_field_website_lang_pairs["actors"]
+
+    # 已请求的网站结果
+    all_res: dict[tuple[Website, Language], CrawlerResult] = {}
+    failed: set[tuple[Website, Language]] = set()  # 记录失败的网站
+    reduced = CrawlersResult.empty()
+
+    # 无优先级设置的字段的默认配置
+    default_website_lang_pairs: list[tuple[Website, Language]] = [(w, Language.UNDEFINED) for w in number_website_list]
 
     # 按字段分别处理，每个字段按优先级尝试获取
     for field in ManualConfig.REDUCED_FIELDS:  # 与 CONFIG_DATA_FIELDS 不完全一致
         # 获取该字段的优先级列表
-        sources = all_field_website_lang_pairs.get(field, default_website_lang_pairs)
+        sources = all_field_website_lang_pairs.get(field.value, default_website_lang_pairs)
 
         # 如果title_language不是jp，则允许从title_zh来源获取title
         if field == CrawlerResultFields.TITLE and config.pydantic.title_language != Language.JP:
@@ -215,9 +216,16 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
             # 如果已有该网站数据，直接使用
             if key in all_res:
                 site_data = all_res[key]
+            elif key in failed:
+                # 不再请求已失败的网站
+                LogBuffer.info().write(f"\n    🔴 {website} (已失败，跳过)")
+                continue
             else:
                 # 如果网站数据尚未请求，则进行请求
                 try:
+                    # 多语言网站, 指定一个默认语言
+                    if website in MULTI_LANGUAGE_WEBSITES and language == Language.UNDEFINED:
+                        language = config.pydantic.title_language
                     task_input.language = language
                     task_input.org_language = config.pydantic.title_language
                     web_data = await _call_crawler(task_input, website)
@@ -233,10 +241,11 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
                         all_res[(website, Language.UNDEFINED)] = web_data.data
                 except Exception as e:
                     LogBuffer.info().write(f"\n    🔴 {website} (异常: {str(e)})")
+                    failed.add(key)
                     continue
 
             # 获取网站数据
-            if not site_data or not site_data.title or not getattr(site_data, field, None):
+            if not site_data or not site_data.title or not getattr(site_data, field.value, None):
                 LogBuffer.info().write(f"\n    🔴 {website} (失败)")
                 continue
 
@@ -247,9 +256,9 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
                 CrawlerResultFields.ORIGINALTITLE,
                 CrawlerResultFields.ORIGINALPLOT,
             ]:
-                lang = all_field_languages.get(field, Language.JP)
+                lang = all_field_languages.get(field.value, Language.JP)
                 if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:  # why?
-                    if not is_japanese(getattr(site_data, field, "")):
+                    if not is_japanese(getattr(site_data, field.value, "")):
                         if lang == Language.JP:
                             LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为非日文，跳过！)")
                             continue
@@ -265,7 +274,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
                 CrawlerResultFields.TRAILER,
                 CrawlerResultFields.OUTLINE,
             ]:
-                setattr(reduced, field + "_from", website)
+                setattr(reduced, field.value + "_from", website)
 
             if field == CrawlerResultFields.POSTER:
                 reduced.image_download = site_data.image_download
@@ -273,9 +282,9 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
                 reduced.amazon_orginaltitle_actor = site_data.actor.split(",")[0]
 
             # 保存数据
-            setattr(reduced, field, getattr(site_data, field))
+            setattr(reduced, field.value, getattr(site_data, field.value))
             reduced.fields_info += f"\n     {field:<13}: {website}" + f" ({language})" * bool(language)
-            LogBuffer.info().write(f"\n    🟢 {website} (成功)\n     ↳ {getattr(reduced, field)}")
+            LogBuffer.info().write(f"\n    🟢 {website} (成功)\n     ↳ {getattr(reduced, field.value)}")
 
             # 找到有效数据，跳出循环继续处理下一个字段
             break

@@ -326,6 +326,7 @@ class CrawlerResponse:
     """
 
     debug_info: CrawlerDebugInfo
+    show_msgs: list[str] = field(default_factory=list)
     data: CrawlerResult | None = None
 
 
@@ -350,7 +351,6 @@ class CrawlersResult(BaseCrawlerResult):
     poster_from: str
     thumb_from: str
     trailer_from: str
-    version: int  # 版本信息, 可能没用
 
     # in FileInfo
     # 除 letters 不确定外, 其它字段是只读的, 所以后续流程可以直接从 FileInfo 获取
@@ -373,7 +373,6 @@ class CrawlersResult(BaseCrawlerResult):
             poster_from="",
             thumb_from="",
             trailer_from="",
-            version=0,
             letters="",
         )
 
