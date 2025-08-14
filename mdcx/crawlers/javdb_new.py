@@ -7,7 +7,6 @@ from parsel import Selector
 
 from mdcx.config.manager import config
 from mdcx.config.models import Website
-from mdcx.models.base.web import get_dmm_trailer
 from mdcx.models.types import CrawlerResult
 
 from .base import (
@@ -102,10 +101,7 @@ class Parser(DetailPageParser):
         return extract_all_texts(html, "//div[@class='tile-images preview-images']/a[@class='tile-item']/@href")
 
     async def trailer(self, ctx, html: Selector) -> str:
-        trailer_url_list = extract_all_texts(html, "//video[@id='preview-video']/source/@src")
-        if trailer_url_list:
-            return await get_dmm_trailer(trailer_url_list[0])
-        return ""
+        return extract_text(html, "//video[@id='preview-video']/source/@src")
 
     async def directors(self, ctx, html: Selector) -> list[str]:
         return extract_all_texts(
@@ -121,10 +117,6 @@ class Parser(DetailPageParser):
             return score_match.group(1) if score_match else ""
         except Exception:
             return ""
-
-    async def mosaic(self, ctx, html: Selector) -> str:
-        title = await self.title(ctx, html)
-        return "无码" if any(keyword in title for keyword in ["無碼", "無修正", "Uncensored"]) else ""
 
     async def wanted(self, ctx, html: Selector) -> str:
         html_text = html.get()
@@ -221,13 +213,12 @@ class JavdbCrawler(BaseCrawler):
     async def post_process(self, ctx, res: CrawlerResult) -> CrawlerResult:
         if not res.originaltitle:
             res.originaltitle = res.title
-
         res.poster = res.thumb.replace("/covers/", "/thumbs/")
-
         # 提取 javdbid
         if res.url and (r := re.search(r"/v/([a-zA-Z0-9])+", res.url)):
             javdbid = r.group(1)
             res.javdbid = javdbid
             res.externalId = javdbid
+        res.mosaic = "无码" if any(keyword in res.title for keyword in ["無碼", "無修正", "Uncensored"]) else "有码"
 
         return res

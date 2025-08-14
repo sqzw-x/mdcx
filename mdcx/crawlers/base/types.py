@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass, field
 from re import Pattern
 
@@ -20,6 +21,18 @@ type FieldValue[T = str] = T | None | NotSupport
 type FieldRes[T = str] = FieldValue[T]
 
 type SelectorType = XPath | CSSSelector | Pattern | str
+
+
+def c(selector: str) -> CSSSelector:
+    return CSSSelector(selector)
+
+
+def x(selector: str) -> XPath:
+    return XPath(selector)
+
+
+def r(pattern: str) -> Pattern:
+    return re.compile(pattern)
 
 
 def is_valid[T](v: FieldValue[T]) -> bool:

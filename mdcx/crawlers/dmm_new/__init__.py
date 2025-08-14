@@ -9,14 +9,14 @@ from mdcx.utils.dataclass import update_valid
 from mdcx.utils.gather_group import GatherGroup
 
 from ..base import BaseCrawler, Context, CralwerException, CrawlerData, DetailPageParser, is_valid
-from .parsers import Category, Parser, Parser1, RentalParser, parse_category
+from .parsers import Category, DigitalParser, MonoParser, RentalParser, parse_category
 from .tv import DmmTvResponse, FanzaResp, dmm_tv_com_payload, fanza_tv_payload
 
 
 class DmmCrawler(BaseCrawler):
-    parser = Parser()
-    parser1 = Parser1()
-    rental_parser = RentalParser()
+    mono = MonoParser()
+    digital = DigitalParser()
+    rental = RentalParser()
 
     @classmethod
     @override
@@ -89,11 +89,11 @@ class DmmCrawler(BaseCrawler):
     def _get_parser(cls, category: Category):
         match category:
             case Category.PRIME | Category.MONTHLY | Category.MONO:
-                return cls.parser
+                return cls.mono
             case Category.DIGITAL:
-                return cls.parser1
+                return cls.digital
             case Category.RENTAL:
-                return cls.rental_parser
+                return cls.rental
 
     @override
     async def _detail(self, ctx: Context, detail_urls: list[str]) -> CrawlerData | None:

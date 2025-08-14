@@ -5,7 +5,7 @@ from typing import override
 from parsel import Selector
 from pydantic import BaseModel
 
-from ..base import Context, CrawlerData, DetailPageParser, FieldRes, extract_all_texts, extract_text
+from ..base import Context, CrawlerData, DetailPageParser, FieldRes, c, extract_all_texts, extract_text
 
 
 class Category(StrEnum):
@@ -43,7 +43,7 @@ def parse_category(url: str) -> Category:
         return Category.OTHER
 
 
-class Parser(DetailPageParser):
+class MonoParser(DetailPageParser):
     """
     适用类别: rental, monthly, digital, dvd # todo 测试具体适用哪些类别
     """
@@ -54,7 +54,7 @@ class Parser(DetailPageParser):
         return title
 
     @override
-    async def release(self, ctx, html) -> str | None:
+    async def release(self, ctx, html):
         release = extract_text(
             html,
             "//td[contains(text(),'発売日')]/following-sibling::td/text()",
@@ -133,11 +133,7 @@ class Parser(DetailPageParser):
 
     @override
     async def outline(self, ctx, html) -> str:
-        outline = extract_text(
-            html,
-            "normalize-space(string(//div[@class='wp-smplex']/preceding-sibling::div[contains(@class, 'mg-b20')][1]))",
-        )
-        return outline.replace("「コンビニ受取」対象商品です。詳しくはこちらをご覧ください。", "")
+        return extract_text(html, c(".wrapper-detailContents~div>p::text"))
 
     @override
     async def score(self, ctx, html) -> str:
@@ -155,10 +151,16 @@ class Parser(DetailPageParser):
         return "有码"
 
 
-class RentalParser(Parser):
-    @override
+class RentalParser(MonoParser):
+    async def outline(self, ctx, html) -> str:
+        return extract_text(html, c(".clear p::text"))
+
     async def extrafanart(self, ctx, html):
         return extract_all_texts(html, "//a[@name='sample-image']/img/@src")
+
+    async def release(self, ctx, html):
+        # rental 只有 貸出開始日 不能作为 release
+        return self.NOT_SUPPORT
 
 
 class AggregateRating(BaseModel):
@@ -194,7 +196,7 @@ class DmmJsonSchema(BaseModel):
     aggregateRating: AggregateRating | None = None
 
 
-class Parser1(DetailPageParser):
+class DigitalParser(DetailPageParser):
     """
     适用于 video.dmm.co.jp 的详情页解析器
     """

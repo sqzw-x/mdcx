@@ -8,8 +8,8 @@ from tests.crawlers.parser import ParserTestBase
 @pytest.mark.parametrize(
     "name, parser_class",
     [
-        ("dmm/mono", dmm_new.Parser),
-        ("dmm/digital", dmm_new.Parser1),
+        ("dmm/mono", dmm_new.MonoParser),
+        ("dmm/digital", dmm_new.DigitalParser),
         ("dmm/rental", dmm_new.RentalParser),
         ("javdb", javdb_new.Parser),
     ],
