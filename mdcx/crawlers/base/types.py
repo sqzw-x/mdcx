@@ -80,11 +80,6 @@ class CralwerException(Exception): ...
 class Context:
     input: CrawlerInput  # crawler 的原始输入
     debug_info: "CrawlerDebugInfo" = field(default_factory=CrawlerDebugInfo)
-    show_msgs: list[str] = field(default_factory=list)
-
-    def show(self, message: str):
-        """添加向用户展示的消息."""
-        self.show_msgs.append(message)
 
     def debug(self, message: str):
         """添加调试消息."""

@@ -94,7 +94,7 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
             res = nfo_data
             movie_number = nfo_data.number
             if "has_nfo_update" not in read_mode:  # 不更新并返回
-                show_result(res.fields_info, start_time)
+                show_result(res, start_time)
                 show_movie_info(file_info, nfo_data)
                 LogBuffer.log().write(f"\n 🙉 [Movie] {file_path}")
                 await save_success_list(file_path, file_path)  # 保存成功列表
@@ -188,13 +188,6 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
     elif not is_nfo_existed:
         # ========================= call crawlers =========================
         res = await crawl(file_info.crawl_task(), file_mode)
-        if res is None:
-            LogBuffer.log().write(
-                f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
-                f"\n{LogBuffer.info().get().strip()}"
-                f"\n 🔴 Data failed!({get_used_time(start_time)}s)"
-            )
-            return None, None
         # 处理 FileInfo 和 CrawlersResult 的共同字段, 即 number/mosaic/letters
         # todo 理想情况, crawl 后应该以 res 为准, 后续不应再访问 file_info 的相关字段
         # todo 注意, 实际上目前各 crawler 返回的 mosaic 和 number 字段并未被使用
@@ -205,7 +198,7 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
         file_info.mosaic = res.mosaic
 
     # 显示json_data结果或日志
-    show_result(res.fields_info, start_time)
+    show_result(res, start_time)
 
     # 映射或翻译
     # 当不存在已刮削数据，或者读取模式允许更新nfo时才进行映射翻译
@@ -454,8 +447,8 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
         f" 刮削中：{Flags.scrape_started - Flags.succ_count - Flags.fail_count} 成功：{Flags.succ_count} 失败：{Flags.fail_count}"
     )
     LogBuffer.log().write("\n" + "👆" * 50)
-    LogBuffer.log().write("\n 🙈 [Movie] " + file_info.file_path)
-    LogBuffer.log().write("\n 🚘 [Number] " + number)
+    LogBuffer.log().write("\n 🙈 [file] " + file_info.file_path)
+    LogBuffer.log().write("\n 🚘 [number] " + number)
 
     # 如果指定了单一网站，进行提示
     website_single = config.website_single
@@ -467,7 +460,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     other = None
     try:
         json_data, other = await _scrape_one_file(file_info, file_mode)
-        if json_data and other and LogBuffer.req().get() != "do_not_update_json_data_dic":
+        if json_data and other:
             if config.main_mode == 4:
                 number = json_data.number  # 读取模式且存在nfo时，可能会导致movie_number改变，需要更新
             Flags.json_data_dic.update({number: ScrapeResult(file_info, json_data, other)})

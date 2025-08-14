@@ -54,19 +54,16 @@ class GenericBaseCrawler[T: Context = Context](ABC):
         start_time = time.time()
         ctx = self.new_context(input)
         ctx.debug(f"{input=}")
-        ctx.show(f"-> {self.site}")
 
         try:
             data = await self._run(ctx)
-            ctx.debug_info.execution_time = time.time() - start_time
-            return CrawlerResponse(data=data, debug_info=ctx.debug_info, show_msgs=ctx.show_msgs)
+            return CrawlerResponse(data=data, debug_info=ctx.debug_info)
         except Exception as e:
-            ctx.show(str(e))
             ctx.debug(traceback.format_exc())
             ctx.debug_info.error = e
-            return CrawlerResponse(debug_info=ctx.debug_info, show_msgs=ctx.show_msgs)
+            return CrawlerResponse(debug_info=ctx.debug_info)
         finally:
-            ctx.show(f"({round(time.time() - start_time, 2)}s)")
+            ctx.debug_info.execution_time = time.time() - start_time
 
     async def _run(self, ctx: T):
         if not ctx.input.appoint_url:

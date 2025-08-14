@@ -10,6 +10,7 @@ import aiofiles.os
 from lxml import etree
 
 from mdcx.config.manager import config
+from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.manual import ManualConfig
 from mdcx.models.core.utils import render_name_template
 from mdcx.models.log_buffer import LogBuffer
@@ -361,15 +362,10 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResul
     local_nfo_name = split_path(local_nfo_path)[1]
     file_folder = split_path(file_path)[0]
     json_data = CrawlersResult.empty()
-    LogBuffer.req().write(local_nfo_path)
-    json_data.poster_from = "local"
-    json_data.thumb_from = "local"
-    json_data.extrafanart_from = "local"
-    json_data.trailer_from = "local"
+    json_data.field_sources = dict.fromkeys(CrawlerResultFields, "local")
 
     if not await aiofiles.os.path.exists(local_nfo_path):
         LogBuffer.error().write("nfo文件不存在")
-        LogBuffer.req().write("do_not_update_json_data_dic")
         json_data.outline = split_path(file_path)[1]
         json_data.tag = file_path
         return None, None
@@ -385,7 +381,6 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResul
     # 获取不到标题，表示xml错误，重新刮削
     if not title:
         LogBuffer.error().write("nfo文件损坏")
-        LogBuffer.req().write("do_not_update_json_data_dic")
         json_data.outline = split_path(file_path)[1]
         json_data.tag = file_path
         return None, None

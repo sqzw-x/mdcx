@@ -68,18 +68,12 @@ class LegacyCrawler:
             }
         )
 
-        if req := LogBuffer.req().get():
-            ctx.debug("v1 crawler req log:")
-            ctx.debug_info.logs.extend(req)
-            ctx.show_msgs.extend(req)
         if info := LogBuffer.info().buffer:
             ctx.debug("v1 crawler info log:")
             ctx.debug_info.logs.extend(info)
-            ctx.show_msgs.extend(info)
         if error := LogBuffer.error().buffer:
             ctx.debug("v1 crawler error log:")
             ctx.debug_info.logs.extend(error)
-            ctx.show_msgs.extend(error)
 
         res = list(r.values())[0]
         # 只有 iqqtv_new 和 javlibrary_new 会返回多种语言的数据, 其他所有来源只可能

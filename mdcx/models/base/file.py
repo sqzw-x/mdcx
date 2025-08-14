@@ -605,7 +605,6 @@ async def check_file(file_path: str, file_escape_size: float) -> bool:
 
     if not await aiofiles.os.path.exists(file_path):
         LogBuffer.error().write("文件不存在")
-        LogBuffer.req().write("do_not_update_json_data_dic")
         return False
     if "no_skip_small_file" not in config.no_escape:
         file_size = await aiofiles.os.path.getsize(file_path) / float(1024 * 1024)
@@ -613,7 +612,6 @@ async def check_file(file_path: str, file_escape_size: float) -> bool:
             LogBuffer.error().write(
                 f"文件小于 {file_escape_size} MB 被过滤!（实际大小 {round(file_size, 2)} MB）已跳过刮削！"
             )
-            LogBuffer.req().write("do_not_update_json_data_dic")
             return False
     return True
 

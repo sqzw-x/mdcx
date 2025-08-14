@@ -9,11 +9,9 @@ from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.manual import ManualConfig
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
-from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import CrawlerInput, CrawlerResponse, CrawlerResult, CrawlersResult, CrawlTask
 from mdcx.number import is_uncensored
 from mdcx.utils.dataclass import update
-from mdcx.utils.language import is_japanese
 
 MULTI_LANGUAGE_WEBSITES = [  # 支持多语言, language 参数有意义
     Website.AIRAV_CC,
@@ -71,6 +69,12 @@ async def _call_crawler(task_input: CrawlerInput, website: Website, timeout: flo
         timeout = None
     r = await asyncio.wait_for(c.run(task_input), timeout=timeout)
     return r
+
+
+def sprint_source(website: Website, language: Language) -> str:
+    if language == Language.UNDEFINED:
+        return f"{website.value}"
+    return f"{website.value} ({language.value})"
 
 
 async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Website]) -> CrawlersResult:
@@ -183,6 +187,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
     all_res: dict[tuple[Website, Language], CrawlerResult] = {}
     failed: set[tuple[Website, Language]] = set()  # 记录失败的网站
     reduced = CrawlersResult.empty()
+    req_info: list[str] = []  # 请求信息列表
 
     # 无优先级设置的字段的默认配置
     default_website_lang_pairs: list[tuple[Website, Language]] = [(w, Language.UNDEFINED) for w in number_website_list]
@@ -199,9 +204,9 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
         elif field == CrawlerResultFields.OUTLINE and config.pydantic.outline_language != Language.JP:
             sources = sources + all_field_website_lang_pairs.get("outline_zh", [])
 
-        LogBuffer.info().write(
-            f"\n\n    🙋🏻‍ {field} \n    ====================================\n"
-            f"    🌐 来源优先级：{' -> '.join(i[0] + f'({i[1]})' * bool(i[1]) for i in sources)}"
+        reduced.field_log += (
+            f"\n\n    📌 {field} \n    ====================================\n"
+            f"    🌐 优先级设置: {' -> '.join(sprint_source(*i) for i in sources)}"
         )
 
         # 按优先级依次尝试获取字段值
@@ -218,7 +223,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
                 site_data = all_res[key]
             elif key in failed:
                 # 不再请求已失败的网站
-                LogBuffer.info().write(f"\n    🔴 {website} (已失败，跳过)")
+                reduced.field_log += f"\n    🔴 {website:<15} (已失败, 跳过)"
                 continue
             else:
                 # 如果网站数据尚未请求，则进行请求
@@ -229,10 +234,11 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
                     task_input.language = language
                     task_input.org_language = config.pydantic.title_language
                     web_data = await _call_crawler(task_input, website)
+                    req_info.append(f"{sprint_source(website, language)} ({web_data.debug_info.execution_time:.2f}s)")
                     if web_data.data is None:
                         if e := web_data.debug_info.error:
                             raise e
-                        raise ValueError(f"爬虫 {website} 返回了空数据")
+                        raise ValueError(f"{website} 返回了空数据")
                     site_data = web_data.data
                     # 处理并保存结果
                     all_res[key] = web_data.data
@@ -240,41 +246,17 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
                     if website in MULTI_LANGUAGE_WEBSITES and (website, Language.UNDEFINED) not in all_res:
                         all_res[(website, Language.UNDEFINED)] = web_data.data
                 except Exception as e:
-                    LogBuffer.info().write(f"\n    🔴 {website} (异常: {str(e)})")
+                    reduced.field_log += f"\n    🔴 {website:<15} (失败: {str(e)})"
                     failed.add(key)
                     continue
 
-            # 获取网站数据
-            if not site_data or not site_data.title or not getattr(site_data, field.value, None):
-                LogBuffer.info().write(f"\n    🔴 {website} (失败)")
+            # 检查字段数据
+            if not getattr(site_data, field.value, None):
+                reduced.field_log += f"\n    🔴 {website:<15} (未找到)"
                 continue
 
-            # 语言检测逻辑
-            if config.scrape_like != "speed" and field in [
-                CrawlerResultFields.TITLE,
-                CrawlerResultFields.OUTLINE,
-                CrawlerResultFields.ORIGINALTITLE,
-                CrawlerResultFields.ORIGINALPLOT,
-            ]:
-                lang = all_field_languages.get(field.value, Language.JP)
-                if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:  # why?
-                    if not is_japanese(getattr(site_data, field.value, "")):
-                        if lang == Language.JP:
-                            LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为非日文，跳过！)")
-                            continue
-                    elif lang != Language.JP:
-                        LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为日文，跳过！)")
-                        continue
-
             # 添加来源信息
-            if field in [
-                CrawlerResultFields.POSTER,
-                CrawlerResultFields.THUMB,
-                CrawlerResultFields.EXTRAFANART,
-                CrawlerResultFields.TRAILER,
-                CrawlerResultFields.OUTLINE,
-            ]:
-                setattr(reduced, field.value + "_from", website)
+            reduced.field_sources[field] = website.value
 
             if field == CrawlerResultFields.POSTER:
                 reduced.image_download = site_data.image_download
@@ -283,13 +265,11 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
 
             # 保存数据
             setattr(reduced, field.value, getattr(site_data, field.value))
-            reduced.fields_info += f"\n     {field:<13}: {website}" + f" ({language})" * bool(language)
-            LogBuffer.info().write(f"\n    🟢 {website} (成功)\n     ↳ {getattr(reduced, field.value)}")
-
+            reduced.field_log += f"\n    🟢 {website}\n     ↳{getattr(reduced, field.value)}"
             # 找到有效数据，跳出循环继续处理下一个字段
             break
         else:  # 所有来源都无此字段
-            reduced.fields_info += f"\n     {field:<13}: {'-----'} ({'not found'})"
+            reduced.field_log += "\n    🔴 所有来源均无数据"
 
     # 需尽力收集的字段
     for data in all_res.values():
@@ -320,8 +300,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
         # 如果没有 all_actor 字段，则从 actor 中获取
         reduced.all_actor = reduced.actor
 
-    # todo 由于异步, 此处日志混乱. 需移除 LogBuffer.req(), 改为返回日志信息
-    reduced.fields_info = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}{reduced.fields_info}"
+    reduced.site_log = f"\n 🌐 [website] {'-> '.join(req_info)}"
 
     return reduced
 
@@ -353,13 +332,11 @@ async def _call_specific_crawler(task_input: CrawlerInput, website: Website) -> 
         res.thumb_list = [(website, res.thumb)]
 
     # 加入来源信息
-    res.outline_from = website
-    res.poster_from = website
-    res.thumb_from = website
-    res.extrafanart_from = website
-    res.trailer_from = website
-    # todo
-    res.fields_info = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
+    res.field_sources = dict.fromkeys(CrawlerResultFields, website.value)
+
+    res.site_log = (
+        f"\n 🌐 [website] {sprint_source(website, title_language)} ({web_data.debug_info.execution_time:.2f}s)"
+    )
 
     if short_number:
         res.number = file_number
@@ -370,7 +347,7 @@ async def _call_specific_crawler(task_input: CrawlerInput, website: Website) -> 
     return res
 
 
-async def _crawl(task_input: CrawlTask, website: Website | None) -> CrawlersResult | None:  # 从JSON返回元数据
+async def _crawl(task_input: CrawlTask, website: Website | None) -> CrawlersResult:  # 从JSON返回元数据
     appoint_number = task_input.appoint_number
     cd_part = task_input.cd_part
     destroyed = task_input.destroyed
@@ -422,8 +399,7 @@ async def _crawl(task_input: CrawlTask, website: Website | None) -> CrawlersResu
                 file_number_1.group()
                 res = await _call_crawlers(task_input, config.pydantic.website_fc2)
             else:
-                LogBuffer.error().write(f"未识别到FC2番号：{file_number}")
-                res = None
+                raise Exception(f"未识别的 FC2 番号: {file_number}")
 
         # =======================================================================sexart.15.06.14
         elif re.search(r"[^.]+\.\d{2}\.\d{2}\.\d{2}", file_number) or (
@@ -454,8 +430,6 @@ async def _crawl(task_input: CrawlTask, website: Website | None) -> CrawlersResu
 
     # ================================================网站请求结束================================================
     # ======================================超时或未找到返回
-    if res is None:
-        return None
 
     number = file_number  # res.number 实际上并未设置, 此处取 file_number
     if appoint_number:
@@ -478,7 +452,6 @@ async def _crawl(task_input: CrawlTask, website: Website | None) -> CrawlersResu
             res.mosaic = "无码"
         else:
             res.mosaic = "有码"
-    print(number, cd_part, res.mosaic, LogBuffer.req().get().strip("-> "))
 
     # 原标题，用于amazon搜索
     res.originaltitle_amazon = res.originaltitle
@@ -512,7 +485,7 @@ def _get_website_name(task_input: CrawlTask, file_mode: FileMode) -> str:
     return website_name
 
 
-async def crawl(task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult | None:
+async def crawl(task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult:
     # 从指定网站获取json_data
     website_name = _get_website_name(task_input, file_mode)
     if website_name == "all":
@@ -523,11 +496,7 @@ async def crawl(task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult | 
     return _deal_res(res)
 
 
-def _deal_res(res: CrawlersResult | None) -> CrawlersResult | None:
-    # 标题为空返回
-    if res is None or not res.title:
-        return None
-
+def _deal_res(res: CrawlersResult) -> CrawlersResult:
     # 演员
     res.actor = (
         str(res.actor).strip(" [ ]").replace("'", "").replace(", ", ",").replace("<", "(").replace(">", ")").strip(",")

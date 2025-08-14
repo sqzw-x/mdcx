@@ -68,7 +68,7 @@ class DmmCrawler(BaseCrawler):
 
         number_parts = re.search(r"(\d*[a-z]+)?-?(\d+)", ctx.input.number.lower())
         if not number_parts:
-            ctx.show(f"无法从番号 {ctx.input.number} 提取前缀和数字")
+            ctx.debug(f"无法从番号 {ctx.input.number} 提取前缀和数字")
             return None
         prefix = number_parts.group(1)
         digits = number_parts.group(2)

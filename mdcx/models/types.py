@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 from mdcx.config.models import Language
+from mdcx.gen.field_enums import CrawlerResultFields
 
 
 @dataclass
@@ -326,7 +327,6 @@ class CrawlerResponse:
     """
 
     debug_info: CrawlerDebugInfo
-    show_msgs: list[str] = field(default_factory=list)
     data: CrawlerResult | None = None
 
 
@@ -343,14 +343,11 @@ class CrawlersResult(BaseCrawlerResult):
     originaltitle_amazon: str  # 用于 Amazon 搜索的原始标题
 
     # 用于 log
-    fields_info: str  # 字段来源信息
+    site_log: str
+    field_log: str  # 字段来源信息
 
-    # 字段来源 # todo 用一个与 BaseCrawlerResult 字段一一对应的字典表示
-    extrafanart_from: str
-    outline_from: str
-    poster_from: str
-    thumb_from: str
-    trailer_from: str
+    # 字段来源
+    field_sources: dict[CrawlerResultFields, str]
 
     # in FileInfo
     # 除 letters 不确定外, 其它字段是只读的, 所以后续流程可以直接从 FileInfo 获取
@@ -367,14 +364,52 @@ class CrawlersResult(BaseCrawlerResult):
             amazon_orginaltitle_actor="",
             thumb_list=[],
             originaltitle_amazon="",
-            fields_info="",
-            extrafanart_from="",
-            outline_from="",
-            poster_from="",
-            thumb_from="",
-            trailer_from="",
+            site_log="",
+            field_log="",
+            field_sources=dict.fromkeys(CrawlerResultFields, ""),
             letters="",
         )
+
+    # 以下为向后兼容
+    @property
+    def extrafanart_from(self) -> str:
+        return self.field_sources[CrawlerResultFields.EXTRAFANART]
+
+    @extrafanart_from.setter
+    def extrafanart_from(self, value: str):
+        self.field_sources[CrawlerResultFields.EXTRAFANART] = value
+
+    @property
+    def outline_from(self) -> str:
+        return self.field_sources[CrawlerResultFields.OUTLINE]
+
+    @outline_from.setter
+    def outline_from(self, value: str):
+        self.field_sources[CrawlerResultFields.OUTLINE] = value
+
+    @property
+    def poster_from(self) -> str:
+        return self.field_sources[CrawlerResultFields.POSTER]
+
+    @poster_from.setter
+    def poster_from(self, value: str):
+        self.field_sources[CrawlerResultFields.POSTER] = value
+
+    @property
+    def thumb_from(self) -> str:
+        return self.field_sources[CrawlerResultFields.THUMB]
+
+    @thumb_from.setter
+    def thumb_from(self, value: str):
+        self.field_sources[CrawlerResultFields.THUMB] = value
+
+    @property
+    def trailer_from(self) -> str:
+        return self.field_sources[CrawlerResultFields.TRAILER]
+
+    @trailer_from.setter
+    def trailer_from(self, value: str):
+        self.field_sources[CrawlerResultFields.TRAILER] = value
 
 
 @dataclass
