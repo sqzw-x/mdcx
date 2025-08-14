@@ -1,8 +1,8 @@
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from re import Pattern
-from typing import Any
 
 from mdcx.models.types import CrawlerDebugInfo, CrawlerInput, CrawlerResult
+from mdcx.utils.dataclass import update_valid
 
 
 class XPath(str): ...
@@ -48,25 +48,16 @@ class CrawlerData:
     trailer: FieldValue = NOT_SUPPORT
     wanted: FieldValue = NOT_SUPPORT
     year: FieldValue = NOT_SUPPORT
-    actor_photo: FieldValue[dict] = NOT_SUPPORT
     image_cut: FieldValue = NOT_SUPPORT
     image_download: FieldValue[bool] = NOT_SUPPORT
     number: FieldValue = NOT_SUPPORT
     mosaic: FieldValue = NOT_SUPPORT
     externalId: FieldValue = NOT_SUPPORT
     source: FieldValue = NOT_SUPPORT
-    website: FieldValue = NOT_SUPPORT
+    url: FieldValue = NOT_SUPPORT
 
     def to_result(self) -> "CrawlerResult":
-        default = CrawlerResult.empty()
-        result: dict[str, Any] = {}
-        for key, value in asdict(self).items():
-            if isinstance(value, NotSupport) or value is None:
-                result[key] = getattr(default, key)
-            else:
-                if key in ("actor", "all_actor", "extrafanart", "tag"):
-                    result[key] = ",".join(value) if isinstance(value, list) else value
-        return CrawlerResult(**result)
+        return update_valid(CrawlerResult.empty(), self, is_valid)
 
 
 class CralwerException(Exception): ...

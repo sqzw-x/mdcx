@@ -182,7 +182,8 @@ class BaseCrawlerResult:
     year: str  # 发行年份 # todo 移除. 总是可以从 release 推断
 
     # 用于写入 nfo 的特殊字段
-    javdbid: str  # JavDB ID
+    javdbid: str  # JavDB ID # todo 移除, 统一使用 externalId
+    externalId: str
 
     @property
     def country(self) -> Literal["CN", "JP", "US"]:
@@ -282,6 +283,7 @@ class BaseCrawlerResult:
             wanted="",
             year="",
             javdbid="",
+            externalId="",
         )
 
 
@@ -293,7 +295,7 @@ class CrawlerResult(BaseCrawlerResult):
 
     image_cut: str  # 图片裁剪方式
     source: str  # 数据来源（爬虫名称）
-    website: str  # 网站地址
+    url: str  # 网站地址
 
     @classmethod
     def empty(cls) -> "CrawlerResult":
@@ -304,7 +306,7 @@ class CrawlerResult(BaseCrawlerResult):
             **BaseCrawlerResult.empty().__dict__,
             image_cut="",
             source="",
-            website="",
+            url="",
         )
 
 

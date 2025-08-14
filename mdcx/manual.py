@@ -689,7 +689,7 @@ class ManualConfig:
         CrawlerResultFields.STUDIO,
         CrawlerResultFields.PUBLISHER,
         CrawlerResultFields.TRAILER,
-        CrawlerResultFields.WEBSITE,
+        CrawlerResultFields.URL,
         CrawlerResultFields.JAVDBID,
     ]
     FULL_HALF_CHAR = [

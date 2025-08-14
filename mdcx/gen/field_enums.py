@@ -26,6 +26,7 @@ class CrawlerResultFields(StrEnum):
     WANTED = "wanted"
     YEAR = "year"
     JAVDBID = "javdbid"
+    EXTERNALID = "externalId"
     IMAGE_CUT = "image_cut"
     SOURCE = "source"
-    WEBSITE = "website"
+    URL = "url"

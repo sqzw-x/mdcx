@@ -1,4 +1,5 @@
 import re
+from collections import defaultdict
 from typing import override
 
 from parsel import Selector
@@ -80,7 +81,7 @@ class DmmCrawler(BaseCrawler):
             # https://www.dmm.co.jp/digital/videoa/-/detail/=/cid=mide00726/?i3_ref=search&i3_ord=2
             # https://www.dmm.com/mono/dvd/-/detail/=/cid=n_709mmrak089sp/?i3_ref=search&i3_ord=1
             if re.search(rf"[^a-z]{n1}[^0-9]", u) or re.search(rf"[^a-z]{n2}[^0-9]", u):
-                res.append(u)
+                res.append(u.encode("utf-8").decode("unicode_escape"))
 
         return res
 
@@ -96,7 +97,7 @@ class DmmCrawler(BaseCrawler):
 
     @override
     async def _detail(self, ctx: Context, detail_urls: list[str]) -> CrawlerData | None:
-        d = dict.fromkeys(Category, [])
+        d = defaultdict(list)
         for url in detail_urls:
             category = parse_category(url)
             d[category].append(url)
@@ -112,7 +113,7 @@ class DmmCrawler(BaseCrawler):
                 Category.RENTAL,
                 Category.PRIME,
                 Category.MONTHLY,
-                Category.DIGITAL,
+                # Category.DIGITAL,
             ):  # 优先级
                 parser = self._get_parser(category)
                 if parser is None:
@@ -121,7 +122,7 @@ class DmmCrawler(BaseCrawler):
                     group.add(self.fetch_and_parse(ctx, u, parser))
 
         res = None
-        for r in group.results:
+        for r in group.results[::-1]:
             if isinstance(r, Exception):  # 预计只会返回空值, 不会抛出异常
                 ctx.debug(f"预料之外的异常: {r}")
                 continue
@@ -182,6 +183,7 @@ class DmmCrawler(BaseCrawler):
             publisher=data.label.name,
             extrafanart=extrafanart,
             trailer=trailer,
+            url=detail_url,
         )
 
     async def fetch_dmm_tv(self, ctx: Context, detail_url: str) -> CrawlerData:
@@ -220,6 +222,7 @@ class DmmCrawler(BaseCrawler):
             directors=[item.staffName for item in data.staffs if item.roleName == "監督"],
             studio=studio,
             publisher=studio,
+            url=detail_url,
         )
 
     async def fetch_and_parse(self, ctx: Context, detail_url: str, parser: DetailPageParser) -> CrawlerData:
@@ -228,10 +231,12 @@ class DmmCrawler(BaseCrawler):
             ctx.debug(f"详情页请求失败: {error=}")
             return CrawlerData()
         ctx.debug(f"详情页请求成功: {detail_url=}")
-        return await parser.parse(ctx, Selector(html))
+        return await parser.parse(ctx, Selector(html), url=detail_url)
 
     @override
     async def post_process(self, ctx, res):
+        if not res.number:
+            res.number = ctx.input.number
         res.image_download = "VR" in res.title
         res.originaltitle = res.title
         res.originalplot = res.outline
@@ -240,6 +245,7 @@ class DmmCrawler(BaseCrawler):
             res.publisher = res.studio
         if len(res.release) >= 4:
             res.year = res.release[:4]
+        res.externalId = res.url  # 由于 dmm 子类众多, 直接使用 url
         return res
 
     @override

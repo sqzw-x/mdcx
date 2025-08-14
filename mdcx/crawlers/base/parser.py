@@ -1,4 +1,5 @@
 import re
+from typing import TypedDict, Unpack
 
 from parsel import Selector
 
@@ -163,9 +164,6 @@ class DetailPageParser[T: Context = Context]:
     async def year(self, ctx: T, html: Selector) -> FieldRes:
         return self.NOT_SUPPORT
 
-    async def actor_photo(self, ctx: T, html: Selector) -> FieldValue[dict]:
-        return self.NOT_SUPPORT
-
     async def image_cut(self, ctx: T, html: Selector) -> FieldRes:
         return self.NOT_SUPPORT
 
@@ -178,7 +176,12 @@ class DetailPageParser[T: Context = Context]:
     async def mosaic(self, ctx: T, html: Selector) -> FieldRes:
         return self.NOT_SUPPORT
 
-    async def parse(self, ctx: T, html: Selector) -> CrawlerData:
+    class OtherFields(TypedDict, total=False):
+        externalId: str
+        source: str
+        url: str
+
+    async def parse(self, ctx: T, html: Selector, **kwargs: Unpack[OtherFields]) -> CrawlerData:
         """
         调用所有字段的解析方法, 并构造 CrawlerResult.
 
@@ -209,12 +212,11 @@ class DetailPageParser[T: Context = Context]:
             trailer=await self.trailer(ctx, html),
             wanted=await self.wanted(ctx, html),
             year=await self.year(ctx, html),
-            actor_photo=await self.actor_photo(ctx, html),
             image_cut=await self.image_cut(ctx, html),
             image_download=await self.image_download(ctx, html),
             number=await self.number(ctx, html),
             mosaic=await self.mosaic(ctx, html),
-            externalId="",
-            source="",
-            website="",
+            externalId=kwargs.get("externalId", ""),
+            source=kwargs.get("source", ""),
+            url=kwargs.get("url", ""),
         )

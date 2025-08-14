@@ -5,6 +5,7 @@ from typing import override
 
 from parsel import Selector
 
+from mdcx.config.manager import config
 from mdcx.config.models import Website
 from mdcx.models.base.web import get_dmm_trailer
 from mdcx.models.types import CrawlerResult
@@ -25,25 +26,10 @@ class Parser(DetailPageParser):
         return result or ctx.input.number
 
     async def title(self, ctx, html: Selector) -> str:
-        title = extract_text(html, 'string(//h2[@class="title is-4"]/strong[@class="current-title"])')
-        originaltitle = extract_text(html, 'string(//h2[@class="title is-4"]/span[@class="origin-title"])')
-
-        # 根据语言偏好选择标题
-        if originaltitle and ctx.input.org_language == "jp":
-            title = originaltitle
-        elif not originaltitle:
-            originaltitle = title
-
-        return self._clean_title(title, ctx.input.number)
+        return extract_text(html, 'string(//h2[@class="title is-4"]/strong[@class="current-title"])')
 
     async def originaltitle(self, ctx, html: Selector) -> str:
-        title = extract_text(html, 'string(//h2[@class="title is-4"]/strong[@class="current-title"])')
-        originaltitle = extract_text(html, 'string(//h2[@class="title is-4"]/span[@class="origin-title"])')
-
-        if not originaltitle:
-            originaltitle = title
-
-        return self._clean_title(originaltitle, ctx.input.number)
+        return extract_text(html, 'string(//h2[@class="title is-4"]/span[@class="origin-title"])')
 
     async def actors(self, ctx, html: Selector) -> list[str]:
         # parsel css 不支持 :has() 中的多个选择器, 这是一个已知问题: https://github.com/scrapy/cssselect/issues/138
@@ -57,30 +43,40 @@ class Parser(DetailPageParser):
         return (html.css("span:has(strong.female)") or html.css("span:has(strong.male)")).xpath("a/text()").getall()
 
     async def studio(self, ctx, html: Selector) -> str:
-        result1 = extract_text(html, '//strong[contains(text(),"片商:")]/../span/a/text()')
-        result2 = extract_text(html, '//strong[contains(text(),"Maker:")]/../span/a/text()')
-        return self._clean_field_result(result1, result2)
+        return extract_text(
+            html,
+            '//strong[contains(text(),"片商:")]/../span/a/text()',
+            '//strong[contains(text(),"Maker:")]/../span/a/text()',
+        )
 
     async def publisher(self, ctx, html: Selector) -> str:
-        result1 = extract_text(html, '//strong[contains(text(),"發行:")]/../span/a/text()')
-        result2 = extract_text(html, '//strong[contains(text(),"Publisher:")]/../span/a/text()')
-        return self._clean_field_result(result1, result2)
+        return extract_text(
+            html,
+            '//strong[contains(text(),"發行:")]/../span/a/text()',
+            '//strong[contains(text(),"Publisher:")]/../span/a/text()',
+        )
 
     async def runtime(self, ctx, html: Selector) -> str:
-        result1 = extract_text(html, '//strong[contains(text(),"時長")]/../span/text()')
-        result2 = extract_text(html, '//strong[contains(text(),"Duration:")]/../span/text()')
-        runtime = self._clean_field_result(result1, result2)
-        return runtime.replace(" 分鍾", "").replace(" minute(s)", "")
+        result = extract_text(
+            html,
+            '//strong[contains(text(),"時長")]/../span/text()',
+            '//strong[contains(text(),"Duration:")]/../span/text()',
+        )
+        return result.replace(" 分鍾", "").replace(" minute(s)", "")
 
     async def series(self, ctx, html: Selector) -> str:
-        result1 = extract_text(html, '//strong[contains(text(),"系列:")]/../span/a/text()')
-        result2 = extract_text(html, '//strong[contains(text(),"Series:")]/../span/a/text()')
-        return self._clean_field_result(result1, result2)
+        return extract_text(
+            html,
+            '//strong[contains(text(),"系列:")]/../span/a/text()',
+            '//strong[contains(text(),"Series:")]/../span/a/text()',
+        )
 
     async def release(self, ctx, html: Selector) -> str:
-        result1 = extract_text(html, '//strong[contains(text(),"日期:")]/../span/text()')
-        result2 = extract_text(html, '//strong[contains(text(),"Released Date:")]/../span/text()')
-        return self._clean_field_result(result1, result2)
+        return extract_text(
+            html,
+            '//strong[contains(text(),"日期:")]/../span/text()',
+            '//strong[contains(text(),"Released Date:")]/../span/text()',
+        )
 
     async def year(self, ctx, html: Selector) -> str:
         release_date = await self.release(ctx, html)
@@ -91,25 +87,16 @@ class Parser(DetailPageParser):
             return release_date
 
     async def tags(self, ctx, html: Selector) -> list[str]:
-        result1 = extract_all_texts(html, '//strong[contains(text(),"類別:")]/../span/a/text()')
-        result2 = extract_all_texts(html, '//strong[contains(text(),"Tags:")]/../span/a/text()')
-
-        # 合并并清理标签
-        all_tags = result1 + result2
-        cleaned_tags = []
-        for tag in all_tags:
-            cleaned_tag = tag.replace("\\xa0", "").replace("'", "").replace(" ", "").strip()
-            if cleaned_tag and cleaned_tag not in cleaned_tags:
-                cleaned_tags.append(cleaned_tag)
-
-        return cleaned_tags
+        tags = extract_all_texts(
+            html,
+            '//strong[contains(text(),"類別:")]/../span/a/text()',
+            '//strong[contains(text(),"Tags:")]/../span/a/text()',
+        )
+        tags = [tag.replace("\\xa0", "").replace("'", "").replace(" ", "").strip() for tag in tags if tag.strip()]
+        return list(dict.fromkeys(tags))
 
     async def thumb(self, ctx, html: Selector) -> str:
         return extract_text(html, "//img[@class='video-cover']/@src")
-
-    async def poster(self, ctx, html: Selector) -> str:
-        cover_url = await self.thumb(ctx, html)
-        return cover_url.replace("/covers/", "/thumbs/") if cover_url else ""
 
     async def extrafanart(self, ctx, html: Selector) -> list[str]:
         return extract_all_texts(html, "//div[@class='tile-images preview-images']/a[@class='tile-item']/@href")
@@ -121,10 +108,11 @@ class Parser(DetailPageParser):
         return ""
 
     async def directors(self, ctx, html: Selector) -> list[str]:
-        result1 = extract_text(html, '//strong[contains(text(),"導演:")]/../span/a/text()')
-        result2 = extract_text(html, '//strong[contains(text(),"Director:")]/../span/a/text()')
-        director = self._clean_field_result(result1, result2)
-        return [director] if director else []
+        return extract_all_texts(
+            html,
+            '//strong[contains(text(),"導演:")]/../span/a/text()',
+            '//strong[contains(text(),"Director:")]/../span/a/text()',
+        )
 
     async def score(self, ctx, html: Selector) -> str:
         result = extract_text(html, "//span[@class='score-stars']/../text()")
@@ -143,42 +131,11 @@ class Parser(DetailPageParser):
         result = re.search(r"(\d+)(人想看| want to watch it)", html_text)
         return result.group(1) if result else ""
 
-    async def actor_photo(self, ctx, html: Selector) -> dict:
-        actors = await self.actors(ctx, html)
-        return dict.fromkeys(actors, "")
-
     async def image_cut(self, ctx, html: Selector) -> str:
         return "right"
 
     async def image_download(self, ctx, html: Selector) -> bool:
         return False
-
-    def _clean_title(self, title: str, number: str) -> str:
-        if not title:
-            return ""
-
-        # 移除常见的无用字符和番号
-        title = (
-            title.replace("中文字幕", "")
-            .replace("無碼", "")
-            .replace("\\n", "")
-            .replace("_", "-")
-            .replace(number.upper(), "")
-            .replace(number, "")
-            .replace("--", "-")
-            .strip()
-        )
-
-        # 移除标题中的分集标识
-        title_replacements = ["第一集", "第二集", " - 上", " - 下", " 上集", " 下集", " -上", " -下"]
-        for replacement in title_replacements:
-            title = title.replace(replacement, "").strip()
-
-        return title
-
-    def _clean_field_result(self, result1: str, result2: str) -> str:
-        combined = (result1 + result2).strip("+").replace("', '", "").replace('"', "")
-        return combined
 
 
 class JavdbCrawler(BaseCrawler):
@@ -196,8 +153,8 @@ class JavdbCrawler(BaseCrawler):
 
     @override
     def _get_headers(self, ctx) -> dict[str, str] | None:
-        # todo get and parse from config
-        return
+        if config.javdb:
+            return {"cookie": config.javdb}
 
     @override
     async def _generate_search_url(self, ctx) -> list[str]:
@@ -217,17 +174,13 @@ class JavdbCrawler(BaseCrawler):
 
     @override
     async def _parse_search_page(self, ctx, html: Selector, search_url: str) -> list[str] | None:
-        # 检查各种错误情况
-        html_text = html.get()
-
+        html_text = html._text or ""
         if "The owner of this website has banned your access based on your browser's behaving" in html_text:
             raise CralwerException(f"由于请求过多，javdb网站暂时禁止了你当前IP的访问！！点击 {search_url} 查看详情！")
-
         if "Due to copyright restrictions" in html_text:
             raise CralwerException(
                 f"由于版权限制，javdb网站禁止了日本IP的访问！！请更换日本以外代理！点击 {search_url} 查看详情！"
             )
-
         if "ray-id" in html_text:
             raise CralwerException("搜索结果: 被 Cloudflare 5 秒盾拦截！请尝试更换cookie！")
 
@@ -262,21 +215,19 @@ class JavdbCrawler(BaseCrawler):
 
     @override
     async def _parse_detail_page(self, ctx, html: Selector, detail_url: str) -> CrawlerData | None:
-        return await self.parser.parse(ctx, html)
+        return await self.parser.parse(ctx, html, url=detail_url)
 
     @override
     async def post_process(self, ctx, res: CrawlerResult) -> CrawlerResult:
-        # 设置网站 URL
-        website_url = (
-            res.website.replace(self.base_url, "https://javdb.com")
-            if self.base_url != "https://javdb.com"
-            else res.website
-        )
-        res.website = website_url.replace("?locale=zh", "")
+        if not res.originaltitle:
+            res.originaltitle = res.title
+
+        res.poster = res.thumb.replace("/covers/", "/thumbs/")
 
         # 提取 javdbid
-        if res.website and res.website.startswith("/v/"):
-            javdbid = res.website.replace("/v/", "")
+        if res.url and (r := re.search(r"/v/([a-zA-Z0-9])+", res.url)):
+            javdbid = r.group(1)
             res.javdbid = javdbid
+            res.externalId = javdbid
 
         return res

@@ -200,8 +200,8 @@ class Parser1(DetailPageParser):
     """
 
     @override
-    async def parse(self, ctx: Context, html: Selector) -> CrawlerData:
-        d = await super().parse(ctx, html)
+    async def parse(self, ctx: Context, html: Selector, **kwargs) -> CrawlerData:
+        d = await super().parse(ctx, html, **kwargs)
         json_data = extract_text(html, '//script[@type="application/ld+json"]/text()')
         try:
             json_data = DmmJsonSchema.model_validate_json(json_data)

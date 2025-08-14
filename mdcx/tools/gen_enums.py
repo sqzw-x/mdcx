@@ -93,9 +93,13 @@ def gen(dataclass_types: list[type["DataclassInstance"]], output_file: str | Pat
     return full_code
 
 
-if __name__ == "__main__":
+def main():
     from mdcx.models.types import CrawlerResult
 
     output_file = "mdcx/gen/field_enums.py"
-    code = gen([CrawlerResult], output_file)
+    gen([CrawlerResult], output_file)
     print(f"已生成代码到文件: {output_file}")
+
+
+if __name__ == "__main__":
+    main()

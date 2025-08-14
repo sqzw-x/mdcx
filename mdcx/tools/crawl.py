@@ -43,7 +43,7 @@ def main(
     # 网络选项
     proxy: Annotated[str | None, typer.Option("--proxy", "-p", help=proxy_help)] = None,
     timeout: Annotated[int, typer.Option("--timeout", "-t", help="请求超时时间（秒）")] = 5,
-    retry: Annotated[int, typer.Option("--retry", "-r", help="重试次数")] = 0,
+    retry: Annotated[int, typer.Option("--retry", "-r", help="重试次数")] = 1,
 ):
     """调用指定网站获取数据并保存到文件."""
 
@@ -84,14 +84,7 @@ def main(
     )
 
 
-def _crawl(
-    site: Website,
-    input: CrawlerInput,
-    output: str | None = None,
-    proxy: str | None = None,
-    timeout: int = 5,
-    retry: int = 0,
-):
+def _crawl(site: Website, input: CrawlerInput, output: str | None, proxy: str | None, timeout: int, retry: int):
     crawler_class = get_crawler_compat(site)
     if not crawler_class:
         print(f"[red]错误: 未找到 {site.value} Crawler[/red]")

@@ -80,7 +80,7 @@ class GenericBaseCrawler[T: Context = Context](ABC):
 
             detail_urls = await self._search(ctx, search_urls)
             if not detail_urls:
-                raise CralwerException("未找到匹配的详情页 URL")
+                raise CralwerException("搜索失败")
         else:
             detail_urls = [ctx.input.appoint_url]
             ctx.debug(f"使用指定详情页 URL: {ctx.input.appoint_url}")
@@ -88,7 +88,7 @@ class GenericBaseCrawler[T: Context = Context](ABC):
         ctx.debug_info.detail_urls = detail_urls
         data = await self._detail(ctx, detail_urls)
         if not data:
-            raise CralwerException("解析详情页数据失败")
+            raise CralwerException("获取详情页数据失败")
         data.source = self.site().value  # todo use Enum directly
         data = data.to_result()
         return await self.post_process(ctx, data)
@@ -116,7 +116,7 @@ class GenericBaseCrawler[T: Context = Context](ABC):
             selector = Selector(text=html)
             scraped_data = await self._parse_detail_page(ctx, selector, detail_url)
             if scraped_data:
-                scraped_data.website = detail_url
+                scraped_data.url = detail_url
                 return scraped_data
 
     @abstractmethod
