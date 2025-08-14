@@ -120,9 +120,7 @@ class MonoParser(DetailPageParser):
     @override
     async def thumb(self, ctx, html) -> str | None:
         url = extract_text(html, '//meta[@property="og:image"]/@content')
-        aws_url = url.replace("pics.dmm.co.jp", "awsimgsrc.dmm.co.jp/pics_dig")
-        return aws_url.replace("ps.jpg", "pl.jpg")
-        # return url.replace("ps.jpg", "pl.jpg")
+        return url.replace("ps.jpg", "pl.jpg")
 
     @override
     async def extrafanart(self, ctx, html) -> FieldRes[list[str]]:

@@ -5,6 +5,7 @@ from typing import override
 from parsel import Selector
 
 from mdcx.config.models import Website
+from mdcx.models.base.web import check_url
 from mdcx.utils.dataclass import update_valid
 from mdcx.utils.gather_group import GatherGroup
 
@@ -66,7 +67,7 @@ class DmmCrawler(BaseCrawler):
             ctx.debug(f"没有找到搜索结果: {ctx.input.number} {search_url=}")
             return None
 
-        number_parts = re.search(r"(\d*[a-z]+)?-?(\d+)", ctx.input.number.lower())
+        number_parts: re.Match[str] | None = re.search(r"(\d*[a-z]+)?-?(\d+)", ctx.input.number.lower())
         if not number_parts:
             ctx.debug(f"无法从番号 {ctx.input.number} 提取前缀和数字")
             return None
@@ -118,7 +119,7 @@ class DmmCrawler(BaseCrawler):
                 parser = self._get_parser(category)
                 if parser is None:
                     continue
-                for u in d[category]:
+                for u in sorted(d[category]):
                     group.add(self.fetch_and_parse(ctx, u, parser))
 
         res = None
@@ -240,6 +241,12 @@ class DmmCrawler(BaseCrawler):
         res.image_download = "VR" in res.title
         res.originaltitle = res.title
         res.originalplot = res.outline
+        # check aws image
+        if res.thumb and "pics.dmm.co.jp" in res.thumb:
+            aws_url = res.thumb.replace("pics.dmm.co.jp", "awsimgsrc.dmm.co.jp/pics_dig").replace("/adult/", "/")
+            if await check_url(aws_url):
+                ctx.debug(f"use aws image: {aws_url}")
+                res.thumb = aws_url
         res.poster = res.thumb.replace("pl.jpg", "ps.jpg")
         if not res.publisher:
             res.publisher = res.studio

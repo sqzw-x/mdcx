@@ -101,9 +101,12 @@ def _crawl(site: Website, input: CrawlerInput, output: str | None, proxy: str | 
     crawler = crawler_class(client=client, base_url=config.get_website_base_url(site))
     res = config.executor.run(crawler.run(input))
 
-    print("\n".join(res.debug_info.logs))
+    print("\n[bold blue]Debug Info:[/bold blue]")
+    print("\n\t".join(res.debug_info.logs))
+    print(f"耗时: {res.debug_info.execution_time:.2f} 秒")
+    print()
     if res.data:
-        print("[green]成功[/green]")
+        print("[green]成功. 结果:[/green]\n")
         j = json.dumps(asdict(res.data), ensure_ascii=False, indent=2)
         print_json(j)
         if output:
@@ -112,9 +115,9 @@ def _crawl(site: Website, input: CrawlerInput, output: str | None, proxy: str | 
             output_path.write_text(j, encoding="utf-8")
             print(f"[green]结果已保存到: {output_path}[/green]")
     else:
-        print("[red]失败[/red]")
+        print("[red]失败[/red]\n")
         if res.debug_info.error:
-            print(f"[red]错误信息: {res.debug_info.error}[/red]")
+            print(f"[red]{res.debug_info.error}[/red]")
         else:
             sys.exit(1)
 
