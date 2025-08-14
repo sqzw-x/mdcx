@@ -172,14 +172,10 @@ async def get_imgsize(url) -> tuple[int, int]:
 
 async def get_dmm_trailer(trailer_url):
     """
-    异步版本的 get_dmm_trailer 函数
-    如果预览片地址为 dmm ，尝试获取 dmm 预览片最高分辨率
-
-    Args:
-        trailer_url (str): 预览片地址
+    尝试获取 dmm 最高分辨率预告片.
 
     Returns:
-        str: 最高分辨率的预览片地址
+        str: 有效的最高分辨率预告片 URL.
     """
     # 如果不是DMM域名或已经是最高分辨率，则直接返回
     if ".dmm.co" not in trailer_url or "_mhb_w.mp4" in trailer_url:
@@ -203,40 +199,18 @@ async def get_dmm_trailer(trailer_url):
     https://cc3001.dmm.co.jp/litevideo/freepv/s/ssi/ssis00090/ssis00090_mhb_w.mp4
     """
 
-    # 解析URL获取基础部分和当前分辨率标识
-    pattern = r"(.+)(_[sd]mb?_w.mp4)"
-    match = re.findall(pattern, trailer_url)
+    match = re.search(r"(.+)(_[sd]mb?_w.mp4)", trailer_url)
     if not match:
         return trailer_url
+    base_url, resolution_tag = match.groups()
+    suffixes = ("_sm_w.mp4", "_dm_w.mp4", "_dmb_w.mp4", "_mhb_w.mp4")
 
-    # 解析URL基础部分和分辨率标识
-    base_url, resolution_tag = match[0]
+    for i, suffix in enumerate(suffixes):
+        if suffix in resolution_tag:
+            for suf in suffixes[i + 1 :: -1]:
+                if await check_url(base_url + suf):
+                    return base_url + suf
 
-    # 构建各种分辨率的URL
-    resolutions = {
-        "_mhb_w.mp4": base_url + "_mhb_w.mp4",  # 最高分辨率
-        "_dmb_w.mp4": base_url + "_dmb_w.mp4",  # 次高分辨率
-        "_dm_w.mp4": base_url + "_dm_w.mp4",  # 中等分辨率
-    }
-
-    # 根据当前分辨率选择检查策略
-    check_list = []
-    if resolution_tag == "_dmb_w.mp4":
-        # 已经是次高分辨率，只需检查最高分辨率
-        check_list = ["_mhb_w.mp4"]
-    elif resolution_tag == "_dm_w.mp4":
-        # 中等分辨率，按优先级检查最高和次高分辨率
-        check_list = ["_mhb_w.mp4", "_dmb_w.mp4"]
-    elif resolution_tag == "_sm_w.mp4":
-        # 最低分辨率，按优先级检查所有更高分辨率
-        check_list = ["_mhb_w.mp4", "_dmb_w.mp4", "_dm_w.mp4"]
-
-    # 按优先级检查更高分辨率
-    for res_key in check_list:
-        if await check_url(resolutions[res_key]):
-            return resolutions[res_key]
-
-    # 如果所有检查都失败，则返回原始URL
     return trailer_url
 
 

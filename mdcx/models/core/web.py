@@ -21,6 +21,7 @@ from mdcx.models.base.web import (
     download_file_with_filepath,
     get_amazon_data,
     get_big_pic_by_google,
+    get_dmm_trailer,
     get_imgsize,
 )
 from mdcx.models.core.image import cut_thumb_to_poster
@@ -214,6 +215,7 @@ async def trailer_download(
     download_files = config.download_files
     keep_files = config.keep_files
     trailer_name = config.trailer_simple_name
+    result.trailer = await get_dmm_trailer(result.trailer)  # todo 或许找一个更合适的地方进行统一后处理
     trailer_url = result.trailer
     trailer_old_folder_path = os.path.join(folder_old, "trailers")
     trailer_new_folder_path = os.path.join(folder_new, "trailers")
