@@ -1,5 +1,6 @@
 import asyncio
 import threading
+from warnings import deprecated
 
 
 class LogBuffer:
@@ -56,6 +57,7 @@ class LogBuffer:
         return LogBuffer._get_buffer("log")
 
     @staticmethod
+    @deprecated("仅用于向后兼容")
     def info() -> "LogBuffer":
         return LogBuffer._get_buffer("info")
 
@@ -64,6 +66,7 @@ class LogBuffer:
         return LogBuffer._get_buffer("error")
 
     @staticmethod
+    @deprecated("内容不会被任何位置使用")
     def req() -> "LogBuffer":
         return LogBuffer._get_buffer("req")
 

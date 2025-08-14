@@ -25,7 +25,7 @@ from PyQt5.QtWidgets import (
 from mdcx.config.extend import deal_url, get_movie_path_setting
 from mdcx.config.manager import config, manager
 from mdcx.config.resources import resources
-from mdcx.consts import IS_WINDOWS, MARK_FILE, ManualConfig
+from mdcx.consts import IS_WINDOWS, LOCAL_VERSION, MARK_FILE
 from mdcx.controllers.cut_window import CutWindow
 from mdcx.controllers.main_window.handlers import show_netstatus
 from mdcx.controllers.main_window.init import Init_QSystemTrayIcon, Init_Singal, Init_Ui, init_QTreeWidget
@@ -33,6 +33,7 @@ from mdcx.controllers.main_window.load_config import load_config
 from mdcx.controllers.main_window.save_config import save_config
 from mdcx.controllers.main_window.style import set_dark_style, set_style
 from mdcx.image import get_pixmap
+from mdcx.manual import ManualConfig
 from mdcx.models.base.file import (
     check_and_clean_files,
     get_success_list,
@@ -101,7 +102,7 @@ class MyMAinWindow(QMainWindow):
         super().__init__(parent)
 
         # region 初始化需要的变量
-        self.localversion = ManualConfig.LOCAL_VERSION  # 当前版本号
+        self.localversion = LOCAL_VERSION  # 当前版本号
         self.new_version = "\n🔍 点击检查最新版本"  # 有版本更新时在左下角显示的新版本信息
         self.show_data: ShowData | None = None  # 当前树状图选中文件的数据
         self.img_path = ""  # 当前树状图选中文件的图片地址

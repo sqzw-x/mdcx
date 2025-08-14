@@ -1,7 +1,9 @@
-from dataclasses import asdict, dataclass, field
-from typing import Any
+import re
+from dataclasses import dataclass, field
+from re import Pattern
 
-from mdcx.models.types import CrawlerInput, CrawlerResult
+from mdcx.models.types import CrawlerDebugInfo, CrawlerInput, CrawlerResult
+from mdcx.utils.dataclass import update_valid
 
 
 class XPath(str): ...
@@ -10,97 +12,65 @@ class XPath(str): ...
 class CSSSelector(str): ...
 
 
-class _NoField: ...
+class NotSupport: ...
 
 
-type FieldValue[T = str] = T | None | _NoField
-type FieldRes[T = str] = tuple[XPath | CSSSelector, ...] | FieldValue[T]
+NOT_SUPPORT = NotSupport()
 
-type SelectorType = XPath | CSSSelector | str
+type FieldValue[T = str] = T | None | NotSupport
+type FieldRes[T = str] = FieldValue[T]
+
+type SelectorType = XPath | CSSSelector | Pattern | str
+
+
+def c(selector: str) -> CSSSelector:
+    return CSSSelector(selector)
+
+
+def x(selector: str) -> XPath:
+    return XPath(selector)
+
+
+def r(pattern: str) -> Pattern:
+    return re.compile(pattern)
+
+
+def is_valid[T](v: FieldValue[T]) -> bool:
+    return bool(v) and not isinstance(v, NotSupport)
 
 
 @dataclass
 class CrawlerData:
-    title: FieldValue
-    actor: FieldValue[list[str]]
-    all_actor: FieldValue[list[str]]
-    director: FieldValue
-    extrafanart: FieldValue[list[str]]
-    originalplot: FieldValue
-    originaltitle: FieldValue
-    outline: FieldValue
-    poster: FieldValue
-    publisher: FieldValue
-    release: FieldValue
-    runtime: FieldValue
-    score: FieldValue
-    series: FieldValue
-    studio: FieldValue
-    tag: FieldValue[list[str]]
-    thumb: FieldValue
-    trailer: FieldValue
-    wanted: FieldValue
-    year: FieldValue
-    actor_photo: FieldValue[dict]
-    image_cut: FieldValue
-    image_download: FieldValue[bool]
-    number: FieldValue
-    mosaic: FieldValue
-    externalId: FieldValue
-    source: FieldValue
-    website: FieldValue
-
-    def to_json(self) -> dict[str, Any]:
-        """将 CrawlerData 转换为 JSON 兼容的字典, 忽略值为 _NoField 的字段."""
-        result: dict[str, Any] = {}
-        for key, value in asdict(self).items():
-            if not isinstance(value, _NoField):
-                result[key] = value
-        return result
+    title: FieldValue = NOT_SUPPORT
+    actors: FieldValue[list[str]] = NOT_SUPPORT
+    all_actors: FieldValue[list[str]] = NOT_SUPPORT
+    directors: FieldValue[list[str]] = NOT_SUPPORT
+    extrafanart: FieldValue[list[str]] = NOT_SUPPORT
+    originalplot: FieldValue = NOT_SUPPORT
+    originaltitle: FieldValue = NOT_SUPPORT
+    outline: FieldValue = NOT_SUPPORT
+    poster: FieldValue = NOT_SUPPORT
+    publisher: FieldValue = NOT_SUPPORT
+    release: FieldValue = NOT_SUPPORT
+    runtime: FieldValue = NOT_SUPPORT
+    score: FieldValue = NOT_SUPPORT
+    series: FieldValue = NOT_SUPPORT
+    studio: FieldValue = NOT_SUPPORT
+    tags: FieldValue[list[str]] = NOT_SUPPORT
+    thumb: FieldValue = NOT_SUPPORT
+    trailer: FieldValue = NOT_SUPPORT
+    wanted: FieldValue = NOT_SUPPORT
+    year: FieldValue = NOT_SUPPORT
+    image_cut: FieldValue = NOT_SUPPORT
+    image_download: FieldValue[bool] = NOT_SUPPORT
+    number: FieldValue = NOT_SUPPORT
+    mosaic: FieldValue = NOT_SUPPORT
+    externalId: FieldValue = NOT_SUPPORT
+    source: FieldValue = NOT_SUPPORT
+    url: FieldValue = NOT_SUPPORT
 
     def to_result(self) -> "CrawlerResult":
-        default = CrawlerResult.empty()
-        result: dict[str, Any] = {}
-        for key, value in asdict(self).items():
-            if isinstance(value, _NoField) or value is None:
-                result[key] = getattr(default, key)
-            else:
-                result[key] = value
-        return CrawlerResult(**result)
-
-    @classmethod
-    def empty(cls) -> "CrawlerData":
-        """创建一个空的 CrawlerData 实例, 所有字段都为 _NoField."""
-        return cls(
-            title=_NoField(),
-            actor=_NoField(),
-            all_actor=_NoField(),
-            director=_NoField(),
-            extrafanart=_NoField(),
-            originalplot=_NoField(),
-            originaltitle=_NoField(),
-            outline=_NoField(),
-            poster=_NoField(),
-            publisher=_NoField(),
-            release=_NoField(),
-            runtime=_NoField(),
-            score=_NoField(),
-            series=_NoField(),
-            studio=_NoField(),
-            tag=_NoField(),
-            thumb=_NoField(),
-            trailer=_NoField(),
-            wanted=_NoField(),
-            year=_NoField(),
-            actor_photo=_NoField(),
-            image_cut=_NoField(),
-            image_download=_NoField(),
-            number=_NoField(),
-            mosaic=_NoField(),
-            externalId=_NoField(),
-            source=_NoField(),
-            website=_NoField(),
-        )
+        return update_valid(CrawlerResult.empty(), self, is_valid)
 
 
 class CralwerException(Exception): ...
@@ -109,11 +79,8 @@ class CralwerException(Exception): ...
 @dataclass
 class Context:
     input: CrawlerInput  # crawler 的原始输入
-    show_logs: list[str] = field(default_factory=list)
-    debug_logs: list[str] = field(default_factory=list)
-
-    def show(self, message: str):
-        self.show_logs.append(message)
+    debug_info: "CrawlerDebugInfo" = field(default_factory=CrawlerDebugInfo)
 
     def debug(self, message: str):
-        self.debug_logs.append(message)
+        """添加调试消息."""
+        self.debug_info.logs.append(message)

@@ -3,7 +3,7 @@ import os
 import re
 import unicodedata
 
-from mdcx.consts import ManualConfig
+from mdcx.manual import ManualConfig
 
 
 def is_uncensored(number: str) -> bool:

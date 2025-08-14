@@ -32,7 +32,7 @@ def list_to_str(v: list[Any] | None, separator: str = ",") -> str:
     return separator + separator.join(map(str, v)) + separator
 
 
-class NoEscape(str, Enum):
+class NoEscape(Enum):
     NO_SKIP_SMALL_FILE = "no_skip_small_file"
     FOLDER = "folder"
     SKIP_SUCCESS_FILE = "skip_success_file"
@@ -52,7 +52,7 @@ class NoEscape(str, Enum):
         ]
 
 
-class CleanAction(str, Enum):
+class CleanAction(Enum):
     CLEAN_EXT = "clean_ext"
     CLEAN_NAME = "clean_name"
     CLEAN_CONTAINS = "clean_contains"
@@ -78,7 +78,7 @@ class CleanAction(str, Enum):
         ]
 
 
-class WebsiteSet(str, Enum):
+class WebsiteSet(Enum):
     OFFICIAL = "official"
 
     @classmethod
@@ -86,7 +86,7 @@ class WebsiteSet(str, Enum):
         return ["官网"]
 
 
-class OutlineShow(str, Enum):
+class OutlineShow(Enum):
     SHOW_FROM = "show_from"
     SHOW_ZH_JP = "show_zh_jp"
     SHOW_JP_ZH = "show_jp_zh"
@@ -96,7 +96,7 @@ class OutlineShow(str, Enum):
         return ["显示来源", "显示中日", "显示日中"]
 
 
-class TagInclude(str, Enum):
+class TagInclude(Enum):
     ACTOR = "actor"
     LETTERS = "letters"
     SERIES = "series"
@@ -120,7 +120,7 @@ class TagInclude(str, Enum):
         ]
 
 
-class WholeField(str, Enum):
+class WholeField(Enum):
     OUTLINE = "outline"
     ACTOR = "actor"
     THUMB = "thumb"
@@ -156,7 +156,7 @@ class WholeField(str, Enum):
         ]
 
 
-class NoneField(str, Enum):
+class NoneField(Enum):
     OUTLINE = "outline"
     ACTOR = "actor"
     THUMB = "thumb"
@@ -194,7 +194,7 @@ class NoneField(str, Enum):
         ]
 
 
-class NfoInclude(str, Enum):
+class NfoInclude(Enum):
     SORTTITLE = "sorttitle"
     ORIGINALTITLE = "originaltitle"
     TITLE_CD = "title_cd"
@@ -270,7 +270,7 @@ class NfoInclude(str, Enum):
         ]
 
 
-class Translator(str, Enum):
+class Translator(Enum):
     YOUDAO = "youdao"
     GOOGLE = "google"
     DEEPL = "deepl"
@@ -281,7 +281,7 @@ class Translator(str, Enum):
         return ["有道", "谷歌", "Deepl", "LLM"]
 
 
-class ReadMode(str, Enum):
+class ReadMode(Enum):
     HAS_NFO_UPDATE = "has_nfo_update"
     NO_NFO_SCRAPE = "no_nfo_scrape"
     READ_DOWNLOAD_AGAIN = "read_download_again"
@@ -292,7 +292,7 @@ class ReadMode(str, Enum):
         return ["有NFO时更新", "无NFO时刮削", "重新下载", "更新NFO"]
 
 
-class DownloadableFile(str, Enum):
+class DownloadableFile(Enum):
     POSTER = "poster"
     THUMB = "thumb"
     FANART = "fanart"
@@ -330,7 +330,7 @@ class DownloadableFile(str, Enum):
         ]
 
 
-class KeepableFile(str, Enum):
+class KeepableFile(Enum):
     POSTER = "poster"
     THUMB = "thumb"
     FANART = "fanart"
@@ -354,7 +354,7 @@ class KeepableFile(str, Enum):
         ]
 
 
-class HDPicSource(str, Enum):
+class HDPicSource(Enum):
     POSTER = "poster"
     THUMB = "thumb"
     AMAZON = "amazon"
@@ -367,7 +367,7 @@ class HDPicSource(str, Enum):
         return ["poster", "thumb", "Amazon", "官网", "Google", "仅 Google"]
 
 
-class FieldRule(str, Enum):
+class FieldRule(Enum):
     DEL_ACTOR = "del_actor"
     DEL_CHAR = "del_char"
     FC2_SELLER = "fc2_seller"
@@ -378,7 +378,7 @@ class FieldRule(str, Enum):
         return ["移除标题后的演员名", "移除演员名中的括号", "使用 FC2 卖家作为演员名", "移除番号前缀数字"]
 
 
-class ShowLocation(str, Enum):
+class ShowLocation(Enum):
     FOLDER = "folder"
     FILE = "file"
 
@@ -387,7 +387,7 @@ class ShowLocation(str, Enum):
         return ["目录", "文件"]
 
 
-class CDChar(str, Enum):
+class CDChar(Enum):
     LETTER = "letter"
     ENDC = "endc"
     DIGITAL = "digital"
@@ -409,7 +409,7 @@ class CDChar(str, Enum):
         ]
 
 
-class EmbyAction(str, Enum):
+class EmbyAction(Enum):
     # todo 这些枚举对应 Emby 操作及配置的组合, 需简化
     ACTOR_INFO_ZH_CN = "actor_info_zh_cn"
     ACTOR_INFO_ZH_TW = "actor_info_zh_tw"
@@ -450,7 +450,7 @@ class EmbyAction(str, Enum):
         ]
 
 
-class MarkType(str, Enum):
+class MarkType(Enum):
     SUB = "sub"
     YOUMA = "youma"
     UMR = "umr"
@@ -463,7 +463,7 @@ class MarkType(str, Enum):
         return ["字幕", "有码", "破解", "流出", "无码", "高清"]
 
 
-class Switch(str, Enum):
+class Switch(Enum):
     # todo 许多配置项不适用 web 应用
     AUTO_START = "auto_start"
     AUTO_EXIT = "auto_exit"
@@ -512,7 +512,7 @@ class Switch(str, Enum):
         ]
 
 
-class SuffixSort(str, Enum):
+class SuffixSort(Enum):
     MOWORD = "moword"
     CNWORD = "cnword"
     DEFINITION = "definition"
@@ -522,7 +522,7 @@ class SuffixSort(str, Enum):
         return ["马赛克", "中文字幕", "清晰度"]
 
 
-class Website(str, Enum):
+class Website(Enum):
     AIRAV = "airav"
     AIRAV_CC = "airav_cc"
     AVSEX = "avsex"
@@ -558,6 +558,19 @@ class Website(str, Enum):
     PRESTIGE = "prestige"
     THEPORNDB = "theporndb"
     XCITY = "xcity"
+
+    DAHLIA = "dahlia"
+    GETCHU_DMM = "getchu_dmm"
+    OFFICIAL = "official"
+
+
+class Language(Enum):
+    UNDEFINED = "undefined"
+    UNKNOWN = "unknown"
+    ZH_CN = "zh_cn"
+    ZH_TW = "zh_tw"
+    JP = "jp"
+    EN = "en"
 
 
 class TranslateConfig(BaseModel):
@@ -1095,26 +1108,26 @@ class Config(BaseModel):
         default_factory=lambda: [Website.JAVLIBRARY, Website.JAVDB],
         title="想看网站源",
     )
-    title_language: str = Field(default="zh_cn", title="标题语言")
+    title_language: Language = Field(default=Language.ZH_CN, title="标题语言")
     title_sehua: bool = Field(default=True, title="使用色花标题")
     title_yesjav: bool = Field(default=False, title="使用 Yesjav 标题")
     title_translate: bool = Field(default=True, title="翻译标题")
     title_sehua_zh: bool = Field(default=True, title="使用色花中文标题")
-    outline_language: str = Field(default="zh_cn", title="简介语言")
+    outline_language: Language = Field(default=Language.ZH_CN, title="简介语言")
     outline_translate: bool = Field(default=True, title="翻译简介")
     outline_format: list[OutlineShow] = Field(default_factory=list, title="简介格式")
-    actor_language: str = Field(default="zh_cn", title="演员语言")
+    actor_language: Language = Field(default=Language.ZH_CN, title="演员语言")
     actor_realname: bool = Field(default=True, title="演员真名")
     actor_translate: bool = Field(default=True, title="翻译演员")
-    tag_language: str = Field(default="zh_cn", title="标签语言")
+    tag_language: Language = Field(default=Language.ZH_CN, title="标签语言")
     tag_translate: bool = Field(default=True, title="翻译标签")
-    director_language: str = Field(default="zh_cn", title="导演语言")
+    director_language: Language = Field(default=Language.ZH_CN, title="导演语言")
     director_translate: bool = Field(default=True, title="翻译导演")
-    series_language: str = Field(default="zh_cn", title="系列语言")
+    series_language: Language = Field(default=Language.ZH_CN, title="系列语言")
     series_translate: bool = Field(default=True, title="翻译系列")
-    studio_language: str = Field(default="zh_cn", title="工作室语言")
+    studio_language: Language = Field(default=Language.ZH_CN, title="工作室语言")
     studio_translate: bool = Field(default=True, title="翻译工作室")
-    publisher_language: str = Field(default="zh_cn", title="发行商语言")
+    publisher_language: Language = Field(default=Language.ZH_CN, title="发行商语言")
     publisher_translate: bool = Field(default=True, title="翻译发行商")
 
     # region: Translation Settings

@@ -9,8 +9,9 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
+            "args": "${command:pickArgs}",
             "console": "integratedTerminal",
-            "args": "${command:pickArgs}"
+            "justMyCode": false,
         },
         {
             "name": "Debug server.py",
@@ -18,17 +19,45 @@
             "request": "launch",
             "program": "${workspaceFolder}/server.py",
             "console": "integratedTerminal",
+            "justMyCode": false,
             "env": {
                 "MDCX_DEV": "1"
             },
-            "justMyCode": false,
         },
         {
             "name": "Debug main.py",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/main.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "DEBUG": "1"
+            }
+        },
+        {
+            "name": "Debug pytest",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/.venv/bin/pytest",
+            "args": "${command:pickArgs}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "DEBUG": "1"
+            }
+        },
+        {
+            "name": "Debug crawler",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/.venv/bin/crawl",
+            "args": "${command:pickArgs}",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "env": {
+                "DEBUG": "1"
+            }
         }
     ]
 }

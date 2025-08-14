@@ -1,104 +1,23 @@
 import asyncio
+import os
 import re
-from collections.abc import Callable
-from typing import cast
 
 from mdcx.config.manager import config
-from mdcx.consts import ManualConfig
-from mdcx.crawlers import (
-    airav,
-    airav_cc,
-    avsex,
-    avsox,
-    cableav,
-    cnmdb,
-    dahlia,
-    dmm,
-    faleno,
-    fantastica,
-    fc2,
-    fc2club,
-    fc2hub,
-    fc2ppvdb,
-    freejavbt,
-    getchu,
-    getchu_dmm,
-    giga,
-    hdouban,
-    hscangku,
-    iqqtv_new,
-    jav321,
-    javbus,
-    javday,
-    javdb,
-    javlibrary_new,
-    kin8,
-    love6,
-    lulubar,
-    madouqu,
-    mdtv,
-    mgstage,
-    mmtv,
-    mywife,
-    official,
-    prestige,
-    theporndb,
-    xcity,
-)
+from mdcx.config.models import Language, Website, WebsiteSet
+from mdcx.crawlers import get_crawler_compat
+from mdcx.gen.field_enums import CrawlerResultFields
+from mdcx.manual import ManualConfig
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import CrawlerInput, CrawlerResult, CrawlersResult, CrawlTask
+from mdcx.models.types import CrawlerInput, CrawlerResponse, CrawlerResult, CrawlersResult, CrawlTask
 from mdcx.number import is_uncensored
 from mdcx.utils.dataclass import update
-from mdcx.utils.language import is_japanese
-
-CRAWLER_FUNCS: dict[str, Callable] = {
-    "7mmtv": mmtv.main,
-    "airav_cc": airav_cc.main,  # lang
-    "airav": airav.main,  # lang
-    "avsex": avsex.main,
-    "avsox": avsox.main,
-    "cableav": cableav.main,
-    "cnmdb": cnmdb.main,
-    "dahlia": dahlia.main,
-    "dmm": dmm.main,
-    "faleno": faleno.main,
-    "fantastica": fantastica.main,
-    "fc2": fc2.main,
-    "fc2club": fc2club.main,
-    "fc2hub": fc2hub.main,
-    "fc2ppvdb": fc2ppvdb.main,
-    "freejavbt": freejavbt.main,
-    "getchu_dmm": getchu_dmm.main,
-    "getchu": getchu.main,
-    "giga": giga.main,
-    "hdouban": hdouban.main,
-    "hscangku": hscangku.main,
-    "iqqtv": iqqtv_new.main,  # lang
-    "jav321": jav321.main,
-    "javbus": javbus.main,
-    "javday": javday.main,
-    "javdb": javdb.main,
-    "javlibrary": javlibrary_new.main,  # lang
-    "kin8": kin8.main,
-    "love6": love6.main,
-    "lulubar": lulubar.main,
-    "madouqu": madouqu.main,
-    "mdtv": mdtv.main,
-    "mgstage": mgstage.main,
-    "mywife": mywife.main,
-    "official": official.main,
-    "prestige": prestige.main,
-    "theporndb": theporndb.main,
-    "xcity": xcity.main,
-}
 
 MULTI_LANGUAGE_WEBSITES = [  # 支持多语言, language 参数有意义
-    "airav_cc",
-    "airav",
-    "iqqtv",
-    "javlibrary",
+    Website.AIRAV_CC,
+    Website.AIRAV,
+    Website.IQQTV,
+    Website.JAVLIBRARY,
 ]
 
 
@@ -111,7 +30,7 @@ def clean_list(raw: list[str]) -> list[str]:
     return cleaned
 
 
-def _deal_some_list(field: str, website: str, same_list: list[str]) -> list[str]:
+def _deal_some_list(field: str, website: Website, same_list: list[Website]) -> list[Website]:
     if website not in same_list:
         same_list.append(website)
     if field in ["title", "outline", "thumb", "poster", "trailer", "extrafanart"]:
@@ -122,66 +41,43 @@ def _deal_some_list(field: str, website: str, same_list: list[str]) -> list[str]
     return same_list
 
 
-async def _call_crawler(
-    task_input: CrawlerInput,
-    website: str,
-    language: str,
-    org_language: str,
-    timeout: int = 30,
-) -> dict[str, dict[str, CrawlerResult]]:
+async def _call_crawler(task_input: CrawlerInput, website: Website, timeout: float | None = 30) -> CrawlerResponse:
     """
     调用指定网站的爬虫函数
 
     Args:
         task_input (CallCrawlerInput): 包含爬虫所需的输入数据
         website (str): 网站名称
-        language (str): 语言参数
-        org_language (str): 原始语言参数
-        timeout (int): 请求超时时间，默认为30秒
+        timeout (float | None): 请求超时时间，默认为30秒
 
     Raises:
         asyncio.TimeoutError: 如果请求超时
         Exception: 爬虫函数抛出的异常
     """
-    appoint_number = task_input.appoint_number
-    appoint_url = task_input.appoint_url
-    file_path = task_input.file_path
-    number = task_input.number
-    mosaic = task_input.mosaic
     short_number = task_input.short_number
 
     # 259LUXU-1111， mgstage 和 avsex 之外使用 LUXU-1111（素人番号时，short_number有值，不带前缀数字；反之，short_number为空)
     if short_number and website != "mgstage" and website != "avsex":
-        number = short_number
+        task_input.number = short_number
 
     # 获取爬虫函数
-    crawler_func = CRAWLER_FUNCS.get(website, javdb.main)
-
-    # 准备参数
-    kwargs = {
-        "number": number,
-        "appoint_url": appoint_url,
-        "language": language,
-        "file_path": file_path,
-        "appoint_number": appoint_number,
-        "mosaic": mosaic,
-        "short_number": short_number,
-        "org_language": org_language,
-    }
+    crawler = get_crawler_compat(website)
+    c = crawler(config.async_client, config.get_website_base_url(website))
 
     # 对爬虫函数调用添加超时限制, 超时异常由调用者处理
-    r = await asyncio.wait_for(crawler_func(**kwargs), timeout=timeout)
-    # todo 使 crawler 直接返回 dict[str, dict[str, CrawlerResultDataclass]]
-    r = cast("dict[str, dict[str, dict]]", r)
-    res: dict[str, dict[str, CrawlerResult]] = {}
-    for key1 in r:
-        res[key1] = {}
-        for key2 in r[key1]:
-            res[key1][key2] = update(CrawlerResult.empty(), r[key1][key2])
-    return res
+    if os.getenv("DEBUG"):
+        timeout = None
+    r = await asyncio.wait_for(c.run(task_input), timeout=timeout)
+    return r
 
 
-async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str]) -> CrawlersResult:
+def sprint_source(website: Website, language: Language) -> str:
+    if language == Language.UNDEFINED:
+        return f"{website.value}"
+    return f"{website.value} ({language.value})"
+
+
+async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Website]) -> CrawlersResult:
     """
     获取一组网站的数据：按照设置的网站组，请求各字段数据，并返回最终的数据
     采用按需请求策略：仅请求必要的网站，失败时才请求下一优先级网站
@@ -191,7 +87,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
     scrape_like = config.scrape_like
     none_fields = config.none_fields  # 不单独刮削的字段
 
-    def get_field_websites(field: str) -> list[str]:
+    def get_field_websites(field: str) -> list[Website]:
         """
         获取指定字段的来源优先级列表
 
@@ -199,13 +95,15 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
         """
         # 指定字段网站列表
         field_no_zh = field.replace("_zh", "")  # 去除 _zh 后缀的字段名
-        field_list = clean_list(getattr(config, f"{field}_website", "").split(","))
+        field_list: list[Website] = getattr(config.pydantic, f"{field}_website", [])
+        # todo 移除运行时检查
+        assert all(isinstance(i, Website) for i in field_list), f"{field}_website must be a list of Website"
         # 与指定类型网站列表取交集
         field_list = [i for i in field_list if i in number_website_list]
-        if "official" in config.website_set:  # 优先使用官方网站
-            field_list.insert(0, "official")
+        if WebsiteSet.OFFICIAL in config.pydantic.website_set:  # 优先使用官方网站
+            field_list.insert(0, Website.OFFICIAL)
         # 指定字段排除网站列表
-        field_ex_list = clean_list(getattr(config, f"{field_no_zh}_website_exclude", "").split(","))
+        field_ex_list: list[Website] = getattr(config.pydantic, f"{field_no_zh}_website_exclude", [])
         # 所有设定的本字段来源失败时, 是否继续使用类型网站补全
         include_others = field == "title" or field in config.whole_fields
         if include_others and field != "trailer":  # 取剩余未相交网站， trailer 不取未相交网站
@@ -216,15 +114,15 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
         # mgstage 素人番号检查
         if short_number:
             not_frist_field_list = ["title", "actor"]  # 这些字段以外，素人把 mgstage 放在第一位
-            if field not in not_frist_field_list and "mgstage" in field_list:
-                field_list.remove("mgstage")
-                field_list.insert(0, "mgstage")
+            if field not in not_frist_field_list and Website.MGSTAGE in field_list:
+                field_list.remove(Website.MGSTAGE)
+                field_list.insert(0, Website.MGSTAGE)
         # faleno.jp 番号检查 dldss177 dhla009
         elif re.findall(r"F[A-Z]{2}SS", number):
-            field_list = _deal_some_list(field, "faleno", field_list)
+            field_list = _deal_some_list(field, Website.FALENO, field_list)
         # dahlia-av.jp 番号检查
         elif number.startswith("DLDSS") or number.startswith("DHLA"):
-            field_list = _deal_some_list(field, "dahlia", field_list)
+            field_list = _deal_some_list(field, Website.DAHLIA, field_list)
         # fantastica 番号检查 FAVI、FAAP、FAPL、FAKG、FAHO、FAVA、FAKY、FAMI、FAIT、FAKA、FAMO、FASO、FAIH、FASH、FAKS、FAAN
         elif (
             re.search(r"FA[A-Z]{2}-?\d+", number.upper())
@@ -234,11 +132,11 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
             or number.upper().startswith("FAKWM")
             or number.upper().startswith("PDS")
         ):
-            field_list = _deal_some_list(field, "fantastica", field_list)
+            field_list = _deal_some_list(field, Website.FANTASTICA, field_list)
         return field_list
 
     # 获取使用的网站
-    all_fields = [f for f in ManualConfig.CONFIG_DATA_FIELDS if f not in none_fields]  # 去除不专门刮削的字段
+    all_fields = [str(f) for f in ManualConfig.CONFIG_DATA_FIELDS if f not in none_fields]  # 去除不专门刮削的字段
     if scrape_like == "speed":  # 快速模式
         all_field_websites = dict.fromkeys(all_fields, number_website_list)
     else:  # 全部模式
@@ -249,54 +147,66 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
         if config.title_language == "jp" and "title_zh" in all_field_websites:
             del all_field_websites["title_zh"]
 
-    # 各字段语言, 未指定则默认为 "any"
-    all_field_languages = {field: getattr(config, f"{field}_language", "any") for field in all_fields}
-    all_field_languages["title_zh"] = config.title_language
-    all_field_languages["outline_zh"] = config.outline_language
+    # 各字段语言
+    all_field_languages: dict[str, Language] = {
+        field: getattr(config.pydantic, f"{field}_language", Language.UNDEFINED) for field in all_fields
+    }
+    all_field_languages["title_zh"] = config.pydantic.title_language
+    all_field_languages["outline_zh"] = config.pydantic.outline_language
 
     # 处理配置项中没有的字段
     # originaltitle 的网站优先级同 title, 语言为 jp
     all_field_websites["originaltitle"] = all_field_websites.get("title", number_website_list)
-    all_field_languages["originaltitle"] = "jp"
+    all_field_languages["originaltitle"] = Language.JP
     all_field_websites["originalplot"] = all_field_websites.get("outline", number_website_list)
-    all_field_languages["originalplot"] = "jp"
+    all_field_languages["originalplot"] = Language.JP
 
     # 各字段的取值优先级 (网站, 语言) 对
-    all_field_website_lang_pairs: dict[str, list[tuple[str, str]]] = {}
+    all_field_website_lang_pairs: dict[str, list[tuple[Website, Language]]] = {}
     for field, websites in all_field_websites.items():
         language = all_field_languages[field]
         all_field_website_lang_pairs[field] = []
         for website in websites:
             pair = (website, language)
             if website not in MULTI_LANGUAGE_WEBSITES:
-                pair = (website, "")  # 单语言网站, 语言参数无意义
+                pair = (website, Language.UNDEFINED)  # 单语言网站, 语言参数无意义
             all_field_website_lang_pairs[field].append(pair)
 
-    # 缓存已请求的网站结果
-    all_res: dict[tuple[str, str], CrawlerResult] = {}
+    # 处理 CrawlerResult 字段重命名
+    for old, new in ManualConfig.RENAME_MAP.items():
+        if old in all_field_languages:
+            all_field_languages[new] = all_field_languages[old]
+            del all_field_languages[old]
+        if old in all_field_website_lang_pairs:
+            all_field_website_lang_pairs[new] = all_field_website_lang_pairs[old]
+            del all_field_website_lang_pairs[old]
+    # 处理 all_actors 字段
+    all_field_website_lang_pairs["all_actors"] = all_field_website_lang_pairs["actors"]
+
+    # 已请求的网站结果
+    all_res: dict[tuple[Website, Language], CrawlerResult] = {}
+    failed: set[tuple[Website, Language]] = set()  # 记录失败的网站
     reduced = CrawlersResult.empty()
+    req_info: list[str] = []  # 请求信息列表
 
     # 无优先级设置的字段的默认配置
-    default_website_lang_pairs: list[tuple[str, str]] = [
-        (w, "") if w not in MULTI_LANGUAGE_WEBSITES else (w, "any") for w in number_website_list
-    ]
-    all_field_website_lang_pairs["all_actor"] = all_field_website_lang_pairs["actor"]
+    default_website_lang_pairs: list[tuple[Website, Language]] = [(w, Language.UNDEFINED) for w in number_website_list]
 
     # 按字段分别处理，每个字段按优先级尝试获取
-    for field in ManualConfig.CRAWLER_DATA_FIELDS:  # 与 CONFIG_DATA_FIELDS 不完全一致
+    for field in ManualConfig.REDUCED_FIELDS:  # 与 CONFIG_DATA_FIELDS 不完全一致
         # 获取该字段的优先级列表
-        sources = all_field_website_lang_pairs.get(field, default_website_lang_pairs)
+        sources = all_field_website_lang_pairs.get(field.value, default_website_lang_pairs)
 
         # 如果title_language不是jp，则允许从title_zh来源获取title
-        if field == "title" and config.title_language != "jp":
+        if field == CrawlerResultFields.TITLE and config.pydantic.title_language != Language.JP:
             sources = sources + all_field_website_lang_pairs.get("title_zh", [])
         # 如果outline_language不是jp，则允许从outline_zh来源获取outline
-        elif field == "outline" and config.outline_language != "jp":
+        elif field == CrawlerResultFields.OUTLINE and config.pydantic.outline_language != Language.JP:
             sources = sources + all_field_website_lang_pairs.get("outline_zh", [])
 
-        LogBuffer.info().write(
-            f"\n\n    🙋🏻‍ {field} \n    ====================================\n"
-            f"    🌐 来源优先级：{' -> '.join(i[0] + f'({i[1]})' * bool(i[1]) for i in sources)}"
+        reduced.field_log += (
+            f"\n\n    📌 {field} \n    ====================================\n"
+            f"    🌐 优先级设置: {' -> '.join(sprint_source(*i) for i in sources)}"
         )
 
         # 按优先级依次尝试获取字段值
@@ -306,96 +216,60 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
 
             # 如果网站不支持多语言，标准化key
             if website not in MULTI_LANGUAGE_WEBSITES:
-                key = (website, "")
+                key = (website, Language.UNDEFINED)
 
             # 如果已有该网站数据，直接使用
             if key in all_res:
                 site_data = all_res[key]
+            elif key in failed:
+                # 不再请求已失败的网站
+                reduced.field_log += f"\n    🔴 {website:<15} (已失败, 跳过)"
+                continue
             else:
-                # 处理多语言网站的特殊情况
-                if website in MULTI_LANGUAGE_WEBSITES:
-                    # 对于多语言网站，检查是否需要请求jp语言
-                    if language == "any" and all((website, lang) not in all_res for lang in ["jp", "zh_cn", "zh_tw"]):
-                        # 添加一个jp语言的请求
-                        language = "jp"
-                        key = (website, language)
-
-                    # 对于iqqtv，如果请求中文时已经有jp数据，可以跳过jp请求
-                    if (
-                        website == "iqqtv"
-                        and language == "jp"
-                        and any((website, lang) in all_res for lang in ["zh_cn", "zh_tw"])
-                    ):
-                        continue
-
-                    # 跳过any语言的请求，因为会通过具体语言请求
-                    if language == "any":
-                        continue
-
                 # 如果网站数据尚未请求，则进行请求
                 try:
-                    web_data = await _call_crawler(task_input, website, language, config.title_language)
-
+                    # 多语言网站, 指定一个默认语言
+                    if website in MULTI_LANGUAGE_WEBSITES and language == Language.UNDEFINED:
+                        language = config.pydantic.title_language
+                    task_input.language = language
+                    task_input.org_language = config.pydantic.title_language
+                    web_data = await _call_crawler(task_input, website)
+                    req_info.append(f"{sprint_source(website, language)} ({web_data.debug_info.execution_time:.2f}s)")
+                    if web_data.data is None:
+                        if e := web_data.debug_info.error:
+                            raise e
+                        raise ValueError(f"{website} 返回了空数据")
+                    site_data = web_data.data
                     # 处理并保存结果
-                    if website not in MULTI_LANGUAGE_WEBSITES:
-                        # 单语言网站, 只取第一个语言的数据
-                        all_res[(website, "")] = next(iter(web_data[website].values()))
-                    else:
-                        # 多语言网站，保存所有语言的数据
-                        for lang, data in web_data[website].items():
-                            all_res[(website, lang)] = data
-                            # 同时为any语言添加一份数据
-                            if (website, "any") not in all_res:
-                                all_res[(website, "any")] = data
-
-                    # 更新key以便后续使用
-                    if website not in MULTI_LANGUAGE_WEBSITES:
-                        key = (website, "")
+                    all_res[key] = web_data.data
+                    # 多语言网站, 如果 undefined 尚不存在, 也使用当前语言数据
+                    if website in MULTI_LANGUAGE_WEBSITES and (website, Language.UNDEFINED) not in all_res:
+                        all_res[(website, Language.UNDEFINED)] = web_data.data
                 except Exception as e:
-                    LogBuffer.info().write(f"\n    🔴 {website} (异常: {str(e)})")
+                    reduced.field_log += f"\n    🔴 {website:<15} (失败: {str(e)})"
+                    failed.add(key)
                     continue
 
-            # 获取网站数据
-            site_data = all_res.get(key)
-            if not site_data or not site_data.title or not getattr(site_data, field, None):
-                LogBuffer.info().write(f"\n    🔴 {website} (失败)")
+            # 检查字段数据
+            if not getattr(site_data, field.value, None):
+                reduced.field_log += f"\n    🔴 {website:<15} (未找到)"
                 continue
 
-            # 语言检测逻辑
-            if config.scrape_like != "speed" and field in ["title", "outline", "originaltitle", "originalplot"]:
-                lang = all_field_languages.get(field, "jp")
-                if website in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "lulubar"]:  # why?
-                    if not is_japanese(getattr(site_data, field, "")):
-                        if lang == "jp":
-                            LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为非日文，跳过！)")
-                            continue
-                    elif lang != "jp":
-                        LogBuffer.info().write(f"\n    🔴 {website} (失败，检测为日文，跳过！)")
-                        continue
-
             # 添加来源信息
-            if field in ["poster", "thumb", "extrafanart", "trailer", "outline"]:
-                setattr(reduced, field + "_from", website)
+            reduced.field_sources[field] = website.value
 
-            if field == "poster":
+            if field == CrawlerResultFields.POSTER:
                 reduced.image_download = site_data.image_download
-            elif field == "actor":
-                if isinstance(site_data.actor, list):
-                    # 处理 actor 为列表的情况
-                    # todo 统一 cralwer 返回类型后移除
-                    site_data.actor = ",".join(site_data.actor)
-            elif field == "originaltitle" and site_data.actor:
+            elif field == CrawlerResultFields.ORIGINALTITLE and site_data.actor:
                 reduced.amazon_orginaltitle_actor = site_data.actor.split(",")[0]
 
             # 保存数据
-            setattr(reduced, field, getattr(site_data, field))
-            reduced.fields_info += f"\n     {field:<13}: {website}" + f" ({language})" * bool(language)
-            LogBuffer.info().write(f"\n    🟢 {website} (成功)\n     ↳ {getattr(reduced, field)}")
-
+            setattr(reduced, field.value, getattr(site_data, field.value))
+            reduced.field_log += f"\n    🟢 {website}\n     ↳{getattr(reduced, field.value)}"
             # 找到有效数据，跳出循环继续处理下一个字段
             break
         else:  # 所有来源都无此字段
-            reduced.fields_info += f"\n     {field:<13}: {'-----'} ({'not found'})"
+            reduced.field_log += "\n    🔴 所有来源均无数据"
 
     # 需尽力收集的字段
     for data in all_res.values():
@@ -418,7 +292,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
         reduced.number = number
 
     # 处理 javdbid
-    if r := all_res.get(("javdb", "")):
+    if r := all_res.get((Website.JAVDB, Language.UNDEFINED)):
         reduced.javdbid = r.javdbid
 
     # 处理 all_actor
@@ -426,108 +300,55 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[str
         # 如果没有 all_actor 字段，则从 actor 中获取
         reduced.all_actor = reduced.actor
 
-    # todo 由于异步, 此处日志混乱. 需移除 LogBuffer.req(), 改为返回日志信息
-    reduced.fields_info = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}{reduced.fields_info}"
+    reduced.site_log = f"\n 🌐 [website] {'-> '.join(req_info)}"
 
     return reduced
 
 
-async def _call_specific_crawler(task_input: CrawlerInput, website: str) -> CrawlersResult:
+async def _call_specific_crawler(task_input: CrawlerInput, website: Website) -> CrawlersResult:
     file_number = task_input.number
     short_number = task_input.short_number
 
-    title_language = config.title_language
+    title_language = config.pydantic.title_language
     org_language = title_language
-    outline_language = config.outline_language
-    actor_language = config.actor_language
-    tag_language = config.tag_language
-    series_language = config.series_language
-    studio_language = config.studio_language
-    publisher_language = config.publisher_language
-    director_language = config.director_language
+
     if website not in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "mdtv", "madouqu", "lulubar"]:
-        title_language = "jp"
-        outline_language = "jp"
-        actor_language = "jp"
-        tag_language = "jp"
-        series_language = "jp"
-        studio_language = "jp"
-        publisher_language = "jp"
-        director_language = "jp"
+        title_language = Language.JP
+
     elif website == "mdtv":
-        title_language = "zh_cn"
-        outline_language = "zh_cn"
-        actor_language = "zh_cn"
-        tag_language = "zh_cn"
-        series_language = "zh_cn"
-        studio_language = "zh_cn"
-        publisher_language = "zh_cn"
-        director_language = "zh_cn"
-    web_data = await _call_crawler(task_input, website, title_language, org_language)
-    web_data_json = web_data.get(website, {}).get(title_language)
+        title_language = Language.ZH_CN
+
+    task_input.language = title_language
+    task_input.org_language = org_language
+    web_data = await _call_crawler(task_input, website)
+    web_data_json = web_data.data
     if web_data_json is None:
-        web_data_json = CrawlerResult.empty()
+        return CrawlersResult.empty()
 
     res = update(CrawlersResult.empty(), web_data_json)
     if not res.title:
         return res
-    if outline_language != title_language:
-        web_data_json = web_data[website][outline_language]
-        if web_data_json.outline:
-            res.outline = web_data_json.outline
-    if actor_language != title_language:
-        web_data_json = web_data[website][actor_language]
-        if web_data_json.actor:
-            res.actor = web_data_json.actor
-    if tag_language != title_language:
-        web_data_json = web_data[website][tag_language]
-        if web_data_json.tag:
-            res.tag = web_data_json.tag
-    if series_language != title_language:
-        web_data_json = web_data[website][series_language]
-        if web_data_json.series:
-            res.series = web_data_json.series
-    if studio_language != title_language:
-        web_data_json = web_data[website][studio_language]
-        if web_data_json.studio:
-            res.studio = web_data_json.studio
-    if publisher_language != title_language:
-        web_data_json = web_data[website][publisher_language]
-        if web_data_json.publisher:
-            res.publisher = web_data_json.publisher
-    if director_language != title_language:
-        web_data_json = web_data[website][director_language]
-        if web_data_json.director:
-            res.director = web_data_json.director
     if res.thumb:
         res.thumb_list = [(website, res.thumb)]
 
     # 加入来源信息
-    res.outline_from = website
-    res.poster_from = website
-    res.thumb_from = website
-    res.extrafanart_from = website
-    res.trailer_from = website
-    # todo
-    res.fields_info = f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}"
+    res.field_sources = dict.fromkeys(CrawlerResultFields, website.value)
+
+    res.site_log = (
+        f"\n 🌐 [website] {sprint_source(website, title_language)} ({web_data.debug_info.execution_time:.2f}s)"
+    )
 
     if short_number:
         res.number = file_number
 
-    temp_actor = (
-        web_data[website]["jp"].actor + "," + web_data[website]["zh_cn"].actor + "," + web_data[website]["zh_tw"].actor
-    )
-    res.actor_amazon = []
-    [res.actor_amazon.append(i) for i in temp_actor.split(",") if i and i not in res.actor_amazon]
-    res.all_actor = res.all_actor if res.all_actor else web_data_json.actor
-    res.all_actor_photo = res.all_actor_photo if res.all_actor_photo else web_data_json.actor_photo
+    res.actor_amazon = web_data_json.actors
+    res.all_actors = res.all_actors or web_data_json.actors
 
     return res
 
 
-async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult | None:  # 从JSON返回元数据
+async def _crawl(task_input: CrawlTask, website: Website | None) -> CrawlersResult:  # 从JSON返回元数据
     appoint_number = task_input.appoint_number
-    cd_part = task_input.cd_part
     destroyed = task_input.destroyed
     file_number = task_input.number
     file_path = task_input.file_path
@@ -539,7 +360,7 @@ async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult | N
 
     # ================================================网站规则添加开始================================================
 
-    if website_name == "all":  # 从全部网站刮削
+    if website is None:  # 从全部网站刮削
         # =======================================================================先判断是不是国产，避免浪费时间
         if (
             mosaic == "国产"
@@ -548,75 +369,66 @@ async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult | N
             or re.search(r"MKY-[A-Z]+-\d{3,}", file_number)
         ):
             task_input.mosaic = "国产"
-            website_list = config.website_guochan.split(",")
-            res = await _call_crawlers(task_input, website_list)
+            res = await _call_crawlers(task_input, config.pydantic.website_guochan)
 
         # =======================================================================kin8
         elif file_number.startswith("KIN8"):
-            website_name = "kin8"
-            res = await _call_specific_crawler(task_input, website_name)
+            website = Website.KIN8
+            res = await _call_specific_crawler(task_input, website)
 
         # =======================================================================同人
         elif file_number.startswith("DLID"):
-            website_name = "getchu"
-            res = await _call_specific_crawler(task_input, website_name)
+            website = Website.GETCHU
+            res = await _call_specific_crawler(task_input, website)
 
         # =======================================================================里番
         elif "getchu" in file_path.lower() or "里番" in file_path or "裏番" in file_path:
-            website_name = "getchu_dmm"
-            res = await _call_specific_crawler(task_input, website_name)
+            website = Website.GETCHU_DMM
+            res = await _call_specific_crawler(task_input, website)
 
         # =======================================================================Mywife No.1111
         elif "mywife" in file_path.lower():
-            website_name = "mywife"
-            res = await _call_specific_crawler(task_input, website_name)
+            website = Website.MYWIFE
+            res = await _call_specific_crawler(task_input, website)
 
         # =======================================================================FC2-111111
         elif "FC2" in file_number.upper():
             file_number_1 = re.search(r"\d{5,}", file_number)
             if file_number_1:
                 file_number_1.group()
-                website_list = config.website_fc2.split(",")
-                res = await _call_crawlers(task_input, website_list)
+                res = await _call_crawlers(task_input, config.pydantic.website_fc2)
             else:
-                LogBuffer.error().write(f"未识别到FC2番号：{file_number}")
-                res = None
+                raise Exception(f"未识别的 FC2 番号: {file_number}")
 
         # =======================================================================sexart.15.06.14
         elif re.search(r"[^.]+\.\d{2}\.\d{2}\.\d{2}", file_number) or (
             "欧美" in file_path and "东欧美" not in file_path
         ):
-            website_list = config.website_oumei.split(",")
-            res = await _call_crawlers(task_input, website_list)
+            res = await _call_crawlers(task_input, config.pydantic.website_oumei)
 
         # =======================================================================无码抓取:111111-111,n1111,HEYZO-1111,SMD-115
         elif mosaic == "无码" or mosaic == "無碼":
-            website_list = config.website_wuma.split(",")
-            res = await _call_crawlers(task_input, website_list)
+            res = await _call_crawlers(task_input, config.pydantic.website_wuma)
 
         # =======================================================================259LUXU-1111
         elif short_number or "SIRO" in file_number.upper():
-            website_list = config.website_suren.split(",")
-            res = await _call_crawlers(task_input, website_list)
+            res = await _call_crawlers(task_input, config.pydantic.website_suren)
 
         # =======================================================================ssni00321
         elif re.match(r"\D{2,}00\d{3,}", file_number) and "-" not in file_number and "_" not in file_number:
-            website_list = ["dmm"]
-            res = await _call_crawlers(task_input, website_list)
+            res = await _call_crawlers(task_input, [Website.DMM])
 
         # =======================================================================剩下的（含匹配不了）的按有码来刮削
         else:
-            website_list = config.website_youma.split(",")
-            if "official" in config.website_set:  # 优先使用官方网站
-                website_list.insert(0, "official")
+            website_list = config.pydantic.website_youma
+            if WebsiteSet.OFFICIAL in config.pydantic.website_set:  # 优先使用官方网站
+                website_list.insert(0, Website.OFFICIAL)
             res = await _call_crawlers(task_input, website_list)
     else:
-        res = await _call_specific_crawler(task_input, website_name)
+        res = await _call_specific_crawler(task_input, website)
 
     # ================================================网站请求结束================================================
     # ======================================超时或未找到返回
-    if res is None:
-        return None
 
     number = file_number  # res.number 实际上并未设置, 此处取 file_number
     if appoint_number:
@@ -639,7 +451,6 @@ async def _crawl(task_input: CrawlTask, website_name: str) -> CrawlersResult | N
             res.mosaic = "无码"
         else:
             res.mosaic = "有码"
-    print(number, cd_part, res.mosaic, LogBuffer.req().get().strip("-> "))
 
     # 原标题，用于amazon搜索
     res.originaltitle_amazon = res.originaltitle
@@ -673,18 +484,18 @@ def _get_website_name(task_input: CrawlTask, file_mode: FileMode) -> str:
     return website_name
 
 
-async def crawl(task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult | None:
+async def crawl(task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult:
     # 从指定网站获取json_data
     website_name = _get_website_name(task_input, file_mode)
-    res = await _crawl(task_input, website_name)
+    if website_name == "all":
+        website = None
+    else:
+        website = Website(website_name)
+    res = await _crawl(task_input, website)
     return _deal_res(res)
 
 
-def _deal_res(res: CrawlersResult | None) -> CrawlersResult | None:
-    # 标题为空返回
-    if res is None or not res.title:
-        return None
-
+def _deal_res(res: CrawlersResult) -> CrawlersResult:
     # 演员
     res.actor = (
         str(res.actor).strip(" [ ]").replace("'", "").replace(", ", ",").replace("<", "(").replace(">", ")").strip(",")

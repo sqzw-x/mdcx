@@ -1,4 +1,4 @@
-from enum import Enum as PyEnum
+from enum import StrEnum as PyStrEnum
 from functools import partial, update_wrapper
 from typing import Any, Literal, overload
 
@@ -63,7 +63,7 @@ def extract_ui_schema_recursive(json_schema: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-class Enum(PyEnum):
+class Enum(PyStrEnum):
     @classmethod
     def names(cls):
         """

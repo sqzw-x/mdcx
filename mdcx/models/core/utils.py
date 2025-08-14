@@ -7,7 +7,7 @@ import aiofiles.os
 
 from mdcx.config.manager import config
 from mdcx.config.resources import resources
-from mdcx.consts import ManualConfig
+from mdcx.manual import ManualConfig
 from mdcx.models.base.number import deal_actor_more
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import BaseCrawlerResult, CrawlersResult, FileInfo
@@ -225,15 +225,10 @@ def add_definition_tag(res: BaseCrawlerResult, definition, codec):
     res.tag = ",".join(new_tag_list)
 
 
-def show_result(fields_info, start_time: float):
-    if config.show_web_log:  # 字段刮削过程
-        LogBuffer.log().write(f"\n 🌐 [website] {LogBuffer.req().get().strip('-> ')}")
-    try:
-        LogBuffer.log().write("\n" + LogBuffer.info().get().strip(" ").strip("\n"))
-    except Exception:
-        signal.show_log_text(traceback.format_exc())
-    if config.show_from_log and fields_info:  # 字段来源信息
-        LogBuffer.log().write("\n" + fields_info.strip(" ").strip("\n"))
+def show_result(res: CrawlersResult, start_time: float):
+    LogBuffer.log().write(res.site_log)
+    if config.show_from_log and res.field_log:  # 字段来源信息
+        LogBuffer.log().write("\n\n 📒 字段来源\n\n" + res.field_log.strip(" ").strip("\n"))
     LogBuffer.log().write(f"\n 🍀 Data done!({get_used_time(start_time)}s)")
 
 

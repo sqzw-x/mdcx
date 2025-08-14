@@ -16,7 +16,8 @@ from concurrent.futures import Future
 from threading import Thread
 from typing import Any, TypeVar
 
-from mdcx.consts import IS_NFC, IS_WINDOWS, ManualConfig
+from mdcx.consts import IS_NFC, IS_WINDOWS
+from mdcx.manual import ManualConfig
 
 T = TypeVar("T")
 

@@ -1,12 +1,22 @@
 import re
-from typing import Literal, override
+from enum import StrEnum
+from typing import override
 
 from parsel import Selector
 from pydantic import BaseModel
 
-from ..base import Context, CrawlerData, DetailPageParser, FieldRes, XPath, extract_all_texts, extract_text
+from ..base import Context, CrawlerData, DetailPageParser, FieldRes, c, extract_all_texts, extract_text
 
-Category = Literal["tv", "digital", "dvd", "prime", "monthly", "mono", "rental", "other"]
+
+class Category(StrEnum):
+    FANZA_TV = "fanza_tv"
+    DMM_TV = "dmm_tv"
+    DIGITAL = "digital"  # 動画
+    PRIME = "prime"
+    MONTHLY = "monthly"  # 月額動画
+    MONO = "mono"  # 通販
+    RENTAL = "rental"
+    OTHER = "other"
 
 
 def parse_category(url: str) -> Category:
@@ -14,27 +24,26 @@ def parse_category(url: str) -> Category:
     根据 DMM URL 判断其子类.
     """
     if "tv.dmm.co.jp" in url:
-        return "tv"
+        return Category.FANZA_TV
+    elif "tv.dmm.com" in url:
+        return Category.DMM_TV
     elif "/digital/" in url or "video.dmm.co.jp" in url:  # 现在 digital 会重定向到 video.dmm.co.jp
         # digital tag 可能有流媒体相关, 如 独占配信
-        return "digital"
-    elif "/dvd/" in url:
-        # dvd 可能有多个结果, 蓝光是单独结果, 封面不同, tag 包含 Blu-ray 字样
-        return "dvd"
+        return Category.DIGITAL
     elif "/prime/" in url:
-        return "prime"
+        return Category.PRIME
     elif "/monthly/" in url:
-        return "monthly"
+        return Category.MONTHLY
     elif "/mono/" in url:
-        return "mono"
+        return Category.MONO
     elif "/rental/" in url:
-        return "rental"
+        return Category.RENTAL
     else:
         # todo 其他类别
-        return "other"
+        return Category.OTHER
 
 
-class Parser(DetailPageParser):
+class MonoParser(DetailPageParser):
     """
     适用类别: rental, monthly, digital, dvd # todo 测试具体适用哪些类别
     """
@@ -45,7 +54,7 @@ class Parser(DetailPageParser):
         return title
 
     @override
-    async def release(self, ctx, html) -> str | None:
+    async def release(self, ctx, html):
         release = extract_text(
             html,
             "//td[contains(text(),'発売日')]/following-sibling::td/text()",
@@ -68,8 +77,8 @@ class Parser(DetailPageParser):
             return match.group()
 
     @override
-    async def studio(self, ctx, html) -> XPath:
-        return XPath("//td[contains(text(),'メーカー')]/following-sibling::td/a/text()")
+    async def studio(self, ctx, html) -> str | None:
+        return extract_text(html, "//td[contains(text(),'メーカー')]/following-sibling::td/a/text()")
 
     @override
     async def publisher(self, ctx, html) -> str | None:
@@ -77,20 +86,22 @@ class Parser(DetailPageParser):
 
     @override
     async def series(self, ctx, html):
-        return (
-            XPath("//td[contains(text(),'シリーズ')]/following-sibling::td/a/text()"),
-            XPath("//th[contains(text(),'シリーズ')]/following-sibling::td/a/text()"),
+        return extract_text(
+            html,
+            "//td[contains(text(),'シリーズ')]/following-sibling::td/a/text()",
+            "//th[contains(text(),'シリーズ')]/following-sibling::td/a/text()",
         )
 
     @override
-    async def director(self, ctx, html):
-        return (
-            XPath("//td[contains(text(),'監督')]/following-sibling::td/a/text()"),
-            XPath("//th[contains(text(),'監督')]/following-sibling::td/a/text()"),
+    async def directors(self, ctx, html):
+        return extract_all_texts(
+            html,
+            "//td[contains(text(),'監督')]/following-sibling::td/a/text()",
+            "//th[contains(text(),'監督')]/following-sibling::td/a/text()",
         )
 
     @override
-    async def actor(self, ctx, html) -> list[str]:
+    async def actors(self, ctx, html) -> list[str]:
         return extract_all_texts(
             html,
             "//span[@id='performer']/a/text()",
@@ -99,7 +110,7 @@ class Parser(DetailPageParser):
         )
 
     @override
-    async def tag(self, ctx, html) -> list[str]:
+    async def tags(self, ctx, html) -> list[str]:
         return extract_all_texts(
             html,
             "//td[contains(text(),'ジャンル')]/following-sibling::td/a/text()",
@@ -122,11 +133,7 @@ class Parser(DetailPageParser):
 
     @override
     async def outline(self, ctx, html) -> str:
-        outline = extract_text(
-            html,
-            "normalize-space(string(//div[@class='wp-smplex']/preceding-sibling::div[contains(@class, 'mg-b20')][1]))",
-        )
-        return outline.replace("「コンビニ受取」対象商品です。詳しくはこちらをご覧ください。", "")
+        return extract_text(html, c(".wrapper-detailContents~div>p::text"))
 
     @override
     async def score(self, ctx, html) -> str:
@@ -144,10 +151,16 @@ class Parser(DetailPageParser):
         return "有码"
 
 
-class RentalParser(Parser):
-    @override
+class RentalParser(MonoParser):
+    async def outline(self, ctx, html) -> str:
+        return extract_text(html, c(".clear p::text"))
+
     async def extrafanart(self, ctx, html):
-        return (XPath("//a[@name='sample-image']/img/@src"),)
+        return extract_all_texts(html, "//a[@name='sample-image']/img/@src")
+
+    async def release(self, ctx, html):
+        # rental 只有 貸出開始日 不能作为 release
+        return self.NOT_SUPPORT
 
 
 class AggregateRating(BaseModel):
@@ -183,14 +196,14 @@ class DmmJsonSchema(BaseModel):
     aggregateRating: AggregateRating | None = None
 
 
-class Parser1(DetailPageParser):
+class DigitalParser(DetailPageParser):
     """
     适用于 video.dmm.co.jp 的详情页解析器
     """
 
     @override
-    async def parse(self, ctx: Context, html: Selector) -> CrawlerData:
-        d = await super().parse(ctx, html)
+    async def parse(self, ctx: Context, html: Selector, **kwargs) -> CrawlerData:
+        d = await super().parse(ctx, html, **kwargs)
         json_data = extract_text(html, '//script[@type="application/ld+json"]/text()')
         try:
             json_data = DmmJsonSchema.model_validate_json(json_data)
@@ -206,13 +219,13 @@ class Parser1(DetailPageParser):
                 d.studio = json_data.brand.name
             if video := json_data.subjectOf:
                 if video.genre:
-                    d.tag = video.genre
+                    d.tags = video.genre
                 if video.contentUrl:
                     d.trailer = video.contentUrl
                 if video.uploadDate:
                     d.release = re.sub(r"(\d{4})-(\d{2})-(\d{2})", r"\1-\2-\3", video.uploadDate)
                 if video.actor:
-                    d.actor = [a.name for a in video.actor if a.name]
+                    d.actors = [a.name for a in video.actor if a.name]
             if json_data.aggregateRating:
                 rating = json_data.aggregateRating.ratingValue
                 if rating is not None:
@@ -285,8 +298,8 @@ class Parser1(DetailPageParser):
         )
 
     @override
-    async def director(self, ctx, html) -> str | None:
-        return extract_text(
+    async def directors(self, ctx, html):
+        return extract_all_texts(
             html,
             "//th[contains(text(),'監督')]/following-sibling::td/span/a/text()",
             "//td[contains(text(),'監督')]/following-sibling::td/a/text()",
@@ -294,7 +307,7 @@ class Parser1(DetailPageParser):
         )
 
     @override
-    async def actor(self, ctx, html) -> list[str]:
+    async def actors(self, ctx, html) -> list[str]:
         return extract_all_texts(
             html,
             "//th[contains(text(),'出演者')]/following-sibling::td/span/div/a/text()",
@@ -304,7 +317,7 @@ class Parser1(DetailPageParser):
         )
 
     @override
-    async def tag(self, ctx, html) -> list[str]:
+    async def tags(self, ctx, html) -> list[str]:
         return extract_all_texts(
             html,
             "//th[contains(text(),'ジャンル')]/following-sibling::td/span/div/a/text()",
