@@ -221,5 +221,6 @@ class JavdbCrawler(BaseCrawler):
             res.javdbid = javdbid
             res.externalId = javdbid
         res.mosaic = "无码" if any(keyword in res.title for keyword in ["無碼", "無修正", "Uncensored"]) else "有码"
-
+        if res.trailer.startswith("//"):
+            res.trailer = "https:" + res.trailer
         return res
