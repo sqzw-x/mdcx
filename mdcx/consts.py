@@ -2,7 +2,7 @@ import platform
 import sys
 from os.path import abspath, dirname, expanduser, join, realpath
 
-LOCAL_VERSION = 120250708
+LOCAL_VERSION = 220250814
 
 os_name = platform.system()
 mac_ver = platform.mac_ver()[0]
