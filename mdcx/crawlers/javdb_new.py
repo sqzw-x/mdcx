@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 
 from parsel import Selector
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.config.models import Website
 from mdcx.models.types import CrawlerResult
 
@@ -146,8 +146,8 @@ class JavdbCrawler(BaseCrawler):
 
     @override
     def _get_headers(self, ctx) -> dict[str, str] | None:
-        if config.javdb:
-            return {"cookie": config.javdb}
+        if manager.config_v1.javdb:
+            return {"cookie": manager.config_v1.javdb}
 
     @override
     async def _generate_search_url(self, ctx) -> list[str]:

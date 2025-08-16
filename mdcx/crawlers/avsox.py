@@ -4,7 +4,7 @@ import time
 
 from lxml import etree
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.models.base.web import get_avsox_domain
 from mdcx.models.log_buffer import LogBuffer
 
@@ -116,7 +116,7 @@ async def main(
             url_search = f"{avsox_url}/cn/search/{number}"
             debug_info = f"搜索地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
-            response, error = await config.async_client.get_text(url_search)
+            response, error = await manager.config_v1.async_client.get_text(url_search)
             if response is None:
                 debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
@@ -133,7 +133,7 @@ async def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
-        htmlcode, error = await config.async_client.get_text(real_url)
+        htmlcode, error = await manager.config_v1.async_client.get_text(real_url)
         if htmlcode is None:
             debug_info = f"网络请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)

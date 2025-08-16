@@ -4,7 +4,7 @@ import shutil
 import aiofiles.os
 
 from mdcx.config.extend import get_movie_path_setting
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.models.base.file import movie_lists
 from mdcx.signals import signal
 from mdcx.utils import split_path
@@ -19,7 +19,7 @@ async def add_del_extras(mode: str) -> None:
 
     movie_path, *_ = get_movie_path_setting()
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 Checking all videos, Please wait...")
-    movie_type = config.media_type
+    movie_type = manager.config_v1.media_type
     movie_list = await movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
 
     extrafanart_folder_path_list = []
@@ -65,7 +65,7 @@ async def add_del_theme_videos(mode: str) -> None:
 
     movie_path, *_ = get_movie_path_setting()
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 Checking all videos, Please wait...")
-    movie_type = config.media_type
+    movie_type = manager.config_v1.media_type
     movie_list = await movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
 
     theme_videos_folder_path_dic: dict[str, str] = {}
