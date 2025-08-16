@@ -1,4 +1,5 @@
 import json
+from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any, NotRequired, TypedDict
@@ -7,7 +8,6 @@ import pytest
 from aiofiles import open as aio_open
 from parsel import Selector
 
-from mdcx.config.manager import asdict
 from mdcx.crawlers.base import Context, CrawlerData, DetailPageParser, NotSupport
 from mdcx.models.types import CrawlerInput, Language
 

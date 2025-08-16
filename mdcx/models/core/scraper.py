@@ -8,7 +8,7 @@ import aiofiles.os
 from PyQt5.QtWidgets import QMessageBox
 
 from mdcx.config.extend import get_movie_path_setting
-from mdcx.config.manager import config, manager
+from mdcx.config.manager import manager
 from mdcx.config.resources import resources
 from mdcx.models.base.file import (
     _clean_empty_fodlers,
@@ -61,8 +61,8 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
     # 处理单个文件刮削
     # 初始化所需变量
     start_time = time.time()
-    read_mode = config.read_mode
-    file_escape_size = float(config.file_size)
+    read_mode = manager.config_v1.read_mode
+    file_escape_size = float(manager.config_v1.file_size)
     file_path = file_info.file_path
 
     # 获取文件信息
@@ -87,7 +87,7 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
     res = CrawlersResult.empty()  # todo 保证所有路径上均有 res 值
     # 读取模式
     file_can_download = True
-    if config.main_mode == 4:
+    if manager.config_v1.main_mode == 4:
         nfo_data, info = await get_nfo_data(file_path, movie_number)
         if nfo_data:  # 有nfo
             is_nfo_existed = True
@@ -110,21 +110,21 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
     # 判断是否write_nfo
     update_nfo = True
     # 不写nfo的情况：
-    if config.main_mode == 2 and "sort_del" in config.switch_on:
+    if manager.config_v1.main_mode == 2 and "sort_del" in manager.config_v1.switch_on:
         # 2模式勾选“删除本地已下载的nfo文件”（暂无效，会直接return）
         update_nfo = False
-    elif config.main_mode in [1, 2, 3] or (
-        config.main_mode == 4 and not is_nfo_existed and "no_nfo_scrape" in read_mode
+    elif manager.config_v1.main_mode in [1, 2, 3] or (
+        manager.config_v1.main_mode == 4 and not is_nfo_existed and "no_nfo_scrape" in read_mode
     ):
         # 1、2、3模式，或4模式启用了“本地之前刮削失败和没有nfo的文件重新刮削”（变量命名有点问题，存在"no_nfo_scrape"意思其实是要刮削）
         # 且
-        if "nfo" not in config.download_files:
+        if "nfo" not in manager.config_v1.download_files:
             # [下载]处不勾选下载nfo时
             update_nfo = False
-        if "nfo" in config.keep_files and is_nfo_existed:
+        if "nfo" in manager.config_v1.keep_files and is_nfo_existed:
             # [下载]处勾选保留nfo且nfo存在时
             update_nfo = False
-    elif config.main_mode == 4:
+    elif manager.config_v1.main_mode == 4:
         # 4（读取）模式默认不写nfo
         update_nfo = False
         # 除非
@@ -234,7 +234,7 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
     ) = get_output_name(file_info, res, file_path, success_folder, file_ex)
 
     # 判断输出文件的路径是否重复
-    if config.soft_link == 0:
+    if manager.config_v1.soft_link == 0:
         done_file_new_path_list = Flags.file_new_path_dic.get(file_new_path)
         if not done_file_new_path_list:  # 如果字典中不存在同名的情况，存入列表，继续刮削
             Flags.file_new_path_dic[file_new_path] = [file_path]
@@ -276,10 +276,10 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
 
     # 视频模式（原来叫整理模式）
     # 视频模式（仅根据刮削数据把电影命名为番号并分类到对应目录名称的文件夹下）
-    if config.main_mode == 2:
+    if manager.config_v1.main_mode == 2:
         # 移动文件
         if await move_movie(other, file_info, file_path, file_new_path):
-            if "sort_del" in config.switch_on:
+            if "sort_del" in manager.config_v1.switch_on:
                 await deal_old_files(
                     res.number,
                     other,
@@ -367,9 +367,9 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
     await save_success_list(file_path, file_new_path)  # 保存成功列表
 
     # 创建软链接及复制文件
-    if config.auto_link:
-        target_dir = os.path.join(config.localdisk_path, os.path.relpath(folder_new_path, success_folder))
-        await newtdisk_creat_symlink("copy_netdisk_nfo" in config.switch_on, folder_new_path, target_dir)
+    if manager.config_v1.auto_link:
+        target_dir = os.path.join(manager.config_v1.localdisk_path, os.path.relpath(folder_new_path, success_folder))
+        await newtdisk_creat_symlink("copy_netdisk_nfo" in manager.config_v1.switch_on, folder_new_path, target_dir)
 
     # json添加封面缩略图路径
     other.poster_path = poster_final_path
@@ -394,9 +394,9 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
 
     # 处理间歇任务
     while (
-        config.main_mode != 4
-        and "rest_scrape" in config.switch_on
-        and count - Flags.rest_now_begin_count > config.rest_count
+        manager.config_v1.main_mode != 4
+        and "rest_scrape" in manager.config_v1.switch_on
+        and count - Flags.rest_now_begin_count > manager.config_v1.rest_count
     ):
         _check_stop(file_name_temp)
         await asyncio.sleep(1)
@@ -404,8 +404,8 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     # 非第一个加延时
     Flags.scrape_starting += 1
     count = Flags.scrape_starting
-    thread_time = config.thread_time
-    if count == 1 or thread_time == 0 or config.main_mode == 4:
+    thread_time = manager.config_v1.thread_time
+    if count == 1 or thread_time == 0 or manager.config_v1.main_mode == 4:
         Flags.next_start_time = time.time()
         signal.show_log_text(f" 🕷 {get_current_time()} 开始刮削：{Flags.scrape_starting}/{count_all} {file_name_temp}")
         thread_time = 0
@@ -451,8 +451,8 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     LogBuffer.log().write("\n 🚘 [number] " + number)
 
     # 如果指定了单一网站，进行提示
-    website_single = config.website_single
-    if config.scrape_like == "single" and file_mode != FileMode.Single and config.main_mode != 4:
+    website_single = manager.config_v1.website_single
+    if manager.config_v1.scrape_like == "single" and file_mode != FileMode.Single and manager.config_v1.main_mode != 4:
         LogBuffer.log().write(f"\n 😸 [Note] You specified 「 {website_single} 」, some videos may not have results! ")
 
     # 获取刮削数据
@@ -461,7 +461,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
     try:
         json_data, other = await _scrape_one_file(file_info, file_mode)
         if json_data and other:
-            if config.main_mode == 4:
+            if manager.config_v1.main_mode == 4:
                 number = json_data.number  # 读取模式且存在nfo时，可能会导致movie_number改变，需要更新
             Flags.json_data_dic.update({number: ScrapeResult(file_info, json_data, other)})
     except Exception as e:
@@ -560,10 +560,10 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
 
     # 处理间歇刮削
     try:
-        if config.main_mode != 4 and "rest_scrape" in config.switch_on:
-            time_note = f" 🏖 已累计刮削 {count}/{count_all}，已连续刮削 {count - Flags.rest_now_begin_count}/{config.rest_count}..."
+        if manager.config_v1.main_mode != 4 and "rest_scrape" in manager.config_v1.switch_on:
+            time_note = f" 🏖 已累计刮削 {count}/{count_all}，已连续刮削 {count - Flags.rest_now_begin_count}/{manager.config_v1.rest_count}..."
             signal.show_log_text(time_note)
-            if count - Flags.rest_now_begin_count >= config.rest_count:
+            if count - Flags.rest_now_begin_count >= manager.config_v1.rest_count:
                 if Flags.scrape_starting > count:
                     time_note = f" 🏖 当前还存在 {Flags.scrape_starting - count} 个已经在刮削的任务，等待这些任务结束将进入休息状态...\n"
                     signal.show_log_text(time_note)
@@ -574,7 +574,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
                     time_note = f'\n ⏸ 休息 {Flags.rest_time_convert} 秒，将在 <font color="red">{get_real_time(Flags.rest_next_begin_time + Flags.rest_time_convert)}</font> 继续刮削剩余的 {count_all - count} 个任务...\n'
                     signal.show_log_text(time_note)
                     while (
-                        "rest_scrape" in config.switch_on
+                        "rest_scrape" in manager.config_v1.switch_on
                         and time.time() - Flags.rest_next_begin_time < Flags.rest_time_convert
                     ):
                         if Flags.scrape_starting > count:  # 如果突然调大了文件数量，这时跳出休眠
@@ -582,7 +582,7 @@ async def _scrape_exec_thread(task: tuple[str, int, int]) -> None:
                         await asyncio.sleep(1)
                     Flags.rest_now_begin_count = count
                     Flags.sleep_end.set()  # 休眠结束，下一轮开始
-                    Flags.next_start_time = time.time() - config.thread_time
+                    Flags.next_start_time = time.time() - manager.config_v1.thread_time
                 else:
                     await Flags.sleep_end.wait()
     except Exception as e:
@@ -604,8 +604,8 @@ async def scrape(file_mode: FileMode, movie_list: list[str] | None) -> None:
     signal.show_scrape_info("🔎 正在刮削中...")
 
     signal.set_main_info()  # 清空主界面显示信息
-    thread_number = config.thread_number  # 线程数量
-    thread_time = config.thread_time  # 线程延时
+    thread_number = manager.config_v1.thread_number  # 线程数量
+    thread_time = manager.config_v1.thread_time  # 线程延时
     signal.label_result.emit(f" 刮削中：{0} 成功：{Flags.succ_count} 失败：{Flags.fail_count}")
     signal.logs_failed_settext.emit("\n\n\n")
 
@@ -628,8 +628,8 @@ async def scrape(file_mode: FileMode, movie_list: list[str] | None) -> None:
 
     # 获取待刮削文件列表的相关信息
     if not movie_list:
-        if config.scrape_softlink_path:
-            await newtdisk_creat_symlink("copy_netdisk_nfo" in config.switch_on, movie_path, softlink_path)
+        if manager.config_v1.scrape_softlink_path:
+            await newtdisk_creat_symlink("copy_netdisk_nfo" in manager.config_v1.switch_on, movie_path, softlink_path)
             movie_path = softlink_path
         signal.show_log_text("\n ⏰ Start time: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         movie_list = await get_movie_list(file_mode, movie_path, escape_folder_list)
@@ -647,15 +647,15 @@ async def scrape(file_mode: FileMode, movie_list: list[str] | None) -> None:
 
     if task_count:
         Flags.count_claw += 1
-        if config.main_mode == 4:
+        if manager.config_v1.main_mode == 4:
             signal.show_log_text(f" 🕷 当前为读取模式，并发数（{thread_number}），线程延时（0）秒...")
         else:
             if task_count < thread_number:
                 thread_number = task_count
             signal.show_log_text(f" 🕷 开启异步并发，并发数（{thread_number}），线程延时（{thread_time}）秒...")
-        if "rest_scrape" in config.switch_on and config.main_mode != 4:
+        if "rest_scrape" in manager.config_v1.switch_on and manager.config_v1.main_mode != 4:
             signal.show_log_text(
-                f'<font color="brown"> 🍯 间歇刮削 已启用，连续刮削 {config.rest_count} 个文件后，将自动休息 {Flags.rest_time_convert} 秒...</font>'
+                f'<font color="brown"> 🍯 间歇刮削 已启用，连续刮削 {manager.config_v1.rest_count} 个文件后，将自动休息 {Flags.rest_time_convert} 秒...</font>'
             )
 
         Flags.next_start_time = time.time()
@@ -705,9 +705,9 @@ async def scrape(file_mode: FileMode, movie_list: list[str] | None) -> None:
     signal.show_scrape_info(f"🎉 刮削完成 {task_count}/{task_count}")
 
     # auto run after scrape
-    if "actor_photo_auto" in config.emby_on:
+    if "actor_photo_auto" in manager.config_v1.emby_on:
         await update_emby_actor_photo()
-    if config.actor_photo_kodi_auto:
+    if manager.config_v1.actor_photo_kodi_auto:
         await creat_kodi_actors(True)
 
     signal.reset_buttons_status.emit()
@@ -716,7 +716,7 @@ async def scrape(file_mode: FileMode, movie_list: list[str] | None) -> None:
         new_movie_list = list(Flags.new_again_dic.keys())
         Flags.again_dic.clear()
         start_new_scrape(FileMode.Again, new_movie_list)
-    if "auto_exit" in config.switch_on:
+    if "auto_exit" in manager.config_v1.switch_on:
         signal.show_log_text("\n\n 🍔 已启用「刮削后自动退出软件」！")
         count = 5
         for i in range(count):
@@ -730,7 +730,7 @@ def start_new_scrape(file_mode: FileMode, movie_list: list[str] | None = None) -
     signal.exec_set_processbar.emit(0)
     try:
         Flags.start_time = time.time()
-        config.executor.submit(scrape(file_mode, movie_list))
+        manager.config_v1.executor.submit(scrape(file_mode, movie_list))
     except Exception:
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())
@@ -766,7 +766,7 @@ def get_remain_list() -> bool:
         with open(remain_list_path, encoding="utf-8", errors="ignore") as f:
             temp = f.read()
             Flags.remain_list = temp.split("\n") if temp.strip() else []
-            if "remain_task" in config.switch_on and len(Flags.remain_list):
+            if "remain_task" in manager.config_v1.switch_on and len(Flags.remain_list):
                 box = QMessageBox(QMessageBox.Information, "继续刮削", "上次刮削未完成，是否继续刮削剩余任务？")
                 box.setStandardButtons(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
                 box.button(QMessageBox.Yes).setText("继续刮削剩余任务")
@@ -778,7 +778,7 @@ def get_remain_list() -> bool:
                     return True  # 不刮削
 
                 if reply == QMessageBox.Yes:
-                    movie_path = config.media_path
+                    movie_path = manager.config_v1.media_path
                     if movie_path == "":
                         movie_path = manager.data_folder
                     if not re.findall(r"[/\\]$", movie_path):
@@ -823,23 +823,23 @@ async def move_sub(
     copy_flag = False
 
     # 更新模式 或 读取模式
-    if config.main_mode > 2:
-        if config.update_mode == "c" and not config.success_file_rename:
+    if manager.config_v1.main_mode > 2:
+        if manager.config_v1.update_mode == "c" and not manager.config_v1.success_file_rename:
             return
 
     # 软硬链接开时，复制字幕（EMBY 显示字幕）
-    elif config.soft_link > 0:
+    elif manager.config_v1.soft_link > 0:
         copy_flag = True
 
     # 成功移动关、成功重命名关时，返回
-    elif not config.success_file_move and not config.success_file_rename:
+    elif not manager.config_v1.success_file_move and not manager.config_v1.success_file_rename:
         return
 
     for sub in sub_list:
         sub_old_path = os.path.join(folder_old_path, (file_name + sub))
         sub_new_path = os.path.join(folder_new_path, (naming_rule + sub))
         sub_new_path_chs = os.path.join(folder_new_path, (naming_rule + ".chs" + sub))
-        if config.subtitle_add_chs and ".chs" not in sub:
+        if manager.config_v1.subtitle_add_chs and ".chs" not in sub:
             sub_new_path = sub_new_path_chs
         if await aiofiles.os.path.exists(sub_old_path) and not await aiofiles.os.path.exists(sub_new_path):
             if copy_flag:

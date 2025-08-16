@@ -14,7 +14,7 @@ import aiofiles
 import aiofiles.os
 from lxml import etree
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.models.base.web import (
     check_url,
     download_extrafanart_task,
@@ -212,9 +212,9 @@ async def trailer_download(
     naming_rule: str,
 ) -> bool | None:
     start_time = time.time()
-    download_files = config.download_files
-    keep_files = config.keep_files
-    trailer_name = config.trailer_simple_name
+    download_files = manager.config_v1.download_files
+    keep_files = manager.config_v1.keep_files
+    trailer_name = manager.config_v1.trailer_simple_name
     result.trailer = await get_dmm_trailer(result.trailer)  # todo 或许找一个更合适的地方进行统一后处理
     trailer_url = result.trailer
     trailer_old_folder_path = os.path.join(folder_old, "trailers")
@@ -294,7 +294,7 @@ async def trailer_download(
             await aiofiles.os.makedirs(trailer_folder_path)
 
         # 开始下载
-        download_files = config.download_files
+        download_files = manager.config_v1.download_files
         signal.show_traceback_log(f"🍔 {result.number} download trailer... {trailer_url}")
         trailer_file_path_temp = trailer_file_path
         if await aiofiles.os.path.exists(trailer_file_path):
@@ -353,7 +353,7 @@ async def _get_big_thumb(result: CrawlersResult, other: OtherInfo):
     3，Google 搜图
     """
     start_time = time.time()
-    if "thumb" not in config.download_hd_pics:
+    if "thumb" not in manager.config_v1.download_hd_pics:
         return
     number = result.number
     letters = result.letters
@@ -374,11 +374,11 @@ async def _get_big_thumb(result: CrawlersResult, other: OtherInfo):
             thumb_width, h = await get_imgsize(result.thumb)
 
     # 片商官网查询
-    elif "official" in config.download_hd_pics:
+    elif "official" in manager.config_v1.download_hd_pics:
         # faleno.jp 番号检查
         if re.findall(r"F[A-Z]{2}SS", number):
             req_url = f"https://faleno.jp/top/works/{number_lower_no_line}/"
-            response, error = await config.async_client.get_text(req_url)
+            response, error = await manager.config_v1.async_client.get_text(req_url)
             if response is not None:
                 temp_url = re.findall(
                     r'src="((https://cdn.faleno.net/top/wp-content/uploads/[^_]+_)([^?]+))\?output-quality=', response
@@ -429,7 +429,7 @@ async def _get_big_thumb(result: CrawlersResult, other: OtherInfo):
 
     # 使用google以图搜图
     pic_url = result.thumb
-    if "google" in config.download_hd_pics and pic_url and result.thumb_from != "theporndb":
+    if "google" in manager.config_v1.download_hd_pics and pic_url and result.thumb_from != "theporndb":
         thumb_url, cover_size = await get_big_pic_by_google(pic_url)
         if thumb_url and cover_size[0] > thumb_width:
             other.thumb_size = cover_size
@@ -445,7 +445,7 @@ async def _get_big_poster(result: CrawlersResult, other: OtherInfo):
     start_time = time.time()
 
     # 未勾选下载高清图poster时，返回
-    if "poster" not in config.download_hd_pics:
+    if "poster" not in manager.config_v1.download_hd_pics:
         return
 
     # 如果有大图时，直接下载
@@ -461,7 +461,7 @@ async def _get_big_poster(result: CrawlersResult, other: OtherInfo):
     poster_width = 0
 
     # 通过原标题去 amazon 查询
-    if "amazon" in config.download_hd_pics and result.mosaic in [
+    if "amazon" in manager.config_v1.download_hd_pics and result.mosaic in [
         "有码",
         "有碼",
         "流出",
@@ -482,15 +482,15 @@ async def _get_big_poster(result: CrawlersResult, other: OtherInfo):
     # 通过番号去 官网 查询获取稍微大一些的封面图，以便去 Google 搜索
     if (
         not hd_pic_url
-        and "official" in config.download_hd_pics
-        and "official" not in config.website_set
+        and "official" in manager.config_v1.download_hd_pics
+        and "official" not in manager.config_v1.website_set
         and result.poster_from != "Amazon"
     ):
         letters = result.letters.upper()
-        official_url = config.official_websites.get(letters)
+        official_url = manager.config_v1.official_websites.get(letters)
         if official_url:
             url_search = official_url + "/search/list?keyword=" + number.replace("-", "")
-            html_search, error = await config.async_client.get_text(url_search)
+            html_search, error = await manager.config_v1.async_client.get_text(url_search)
             if html_search is not None:
                 poster_url_list = re.findall(r'img class="c-main-bg lazyload" data-src="([^"]+)"', html_search)
                 if poster_url_list:
@@ -504,7 +504,12 @@ async def _get_big_poster(result: CrawlersResult, other: OtherInfo):
 
     # 使用google以图搜图，放在最后是因为有时有错误，比如 kawd-943
     poster_url = result.poster
-    if not hd_pic_url and poster_url and "google" in config.download_hd_pics and result.poster_from != "theporndb":
+    if (
+        not hd_pic_url
+        and poster_url
+        and "google" in manager.config_v1.download_hd_pics
+        and result.poster_from != "theporndb"
+    ):
         hd_pic_url, poster_size = await get_big_pic_by_google(poster_url, poster=True)
         if hd_pic_url:
             if "prestige" in result.poster or result.poster_from == "Amazon":
@@ -536,17 +541,17 @@ async def thumb_download(
     fanart_path = other.fanart_path
 
     # 本地存在 thumb.jpg，且勾选保留旧文件时，不下载
-    if thumb_path and "thumb" in config.keep_files:
+    if thumb_path and "thumb" in manager.config_v1.keep_files:
         LogBuffer.log().write(f"\n 🍀 Thumb done! (old)({get_used_time(start_time)}s) ")
         return True
 
     # 如果thumb不下载，看fanart、poster要不要下载，都不下载则返回
-    if "thumb" not in config.download_files:
+    if "thumb" not in manager.config_v1.download_files:
         if (
-            "poster" in config.download_files
-            and ("poster" not in config.keep_files or not poster_path)
-            or "fanart" in config.download_files
-            and ("fanart" not in config.keep_files or not fanart_path)
+            "poster" in manager.config_v1.download_files
+            and ("poster" not in manager.config_v1.keep_files or not poster_path)
+            or "fanart" in manager.config_v1.download_files
+            and ("fanart" not in manager.config_v1.keep_files or not fanart_path)
         ):
             pass
         else:
@@ -630,7 +635,7 @@ async def thumb_download(
         LogBuffer.log().write(f"\n 🍀 Thumb done! (old)({get_used_time(start_time)}s) ")
         return True
     else:
-        if "ignore_pic_fail" in config.download_files:
+        if "ignore_pic_fail" in manager.config_v1.download_files:
             LogBuffer.log().write("\n 🟠 Thumb download failed! (你已勾选「图片下载失败时，不视为失败！」) ")
             LogBuffer.log().write(f"\n 🍀 Thumb done! (none)({get_used_time(start_time)}s)")
             return True
@@ -652,8 +657,8 @@ async def poster_download(
     poster_final_path: str,
 ) -> bool:
     start_time = time.time()
-    download_files = config.download_files
-    keep_files = config.keep_files
+    download_files = manager.config_v1.download_files
+    keep_files = manager.config_v1.keep_files
     poster_path = other.poster_path
     thumb_path = other.thumb_path
     fanart_path = other.fanart_path
@@ -809,8 +814,8 @@ async def fanart_download(
     start_time = time.time()
     thumb_path = other.thumb_path
     fanart_path = other.fanart_path
-    download_files = config.download_files
-    keep_files = config.keep_files
+    download_files = manager.config_v1.download_files
+    keep_files = manager.config_v1.keep_files
 
     # 不保留不下载时删除返回
     if ",fanart" not in keep_files and ",fanart" not in download_files:
@@ -878,8 +883,8 @@ async def fanart_download(
 
 async def extrafanart_download(extrafanart: list[str], extrafanart_from: str, folder_new_path: str) -> bool | None:
     start_time = time.time()
-    download_files = config.download_files
-    keep_files = config.keep_files
+    download_files = manager.config_v1.download_files
+    keep_files = manager.config_v1.keep_files
     extrafanart_list = extrafanart
     extrafanart_folder_path = os.path.join(folder_new_path, "extrafanart")
 

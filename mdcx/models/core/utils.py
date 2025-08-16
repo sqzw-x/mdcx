@@ -5,7 +5,7 @@ import traceback
 
 import aiofiles.os
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.config.resources import resources
 from mdcx.manual import ManualConfig
 from mdcx.models.base.number import deal_actor_more
@@ -26,9 +26,9 @@ def replace_word(json_data: BaseCrawlerResult):
 
     # 简体时替换的字符
     key_word = []
-    if config.title_language == "zh_cn":
+    if manager.config_v1.title_language == "zh_cn":
         key_word.append("title")
-    if config.outline_language == "zh_cn":
+    if manager.config_v1.outline_language == "zh_cn":
         key_word.append("outline")
 
     for key, value in ManualConfig.CHINESE_REP_WORD.items():
@@ -62,7 +62,7 @@ def replace_special_word(json_data: BaseCrawlerResult):
 
 
 def deal_some_field(json_data: CrawlersResult):
-    fields_rule = config.fields_rule
+    fields_rule = manager.config_v1.fields_rule
     title = json_data.title
     originaltitle = json_data.originaltitle
     number = json_data.number
@@ -137,7 +137,7 @@ def deal_some_field(json_data: CrawlersResult):
 
 
 def show_movie_info(file_info: FileInfo, result: CrawlersResult):
-    if not config.show_data_log:  # 调试模式打开时显示详细日志
+    if not manager.config_v1.show_data_log:  # 调试模式打开时显示详细日志
         return
     for key in ManualConfig.SHOW_KEY:  # 大部分来自 CrawlersResultDataClass, 少部分来自 FileInfo
         value = getattr(result, key, getattr(file_info, key, ""))
@@ -147,7 +147,7 @@ def show_movie_info(file_info: FileInfo, result: CrawlersResult):
             value = str(value)[:98] + "……（略）"
         elif key == "has_sub":
             value = "中文字幕"
-        elif key == "actor" and "actor_all," in config.nfo_include_new:
+        elif key == "actor" and "actor_all," in manager.config_v1.nfo_include_new:
             value = result.all_actor
         LogBuffer.log().write(f"\n     {key:<13}: {value}")
 
@@ -165,9 +165,9 @@ async def get_video_size(file_path: str):
     # 获取本地分辨率 同时获取视频编码格式
     definition = ""
     height = 0
-    hd_get = config.hd_get
+    hd_get = manager.config_v1.hd_get
     if await aiofiles.os.path.islink(file_path):
-        if "symlink_definition" in config.no_escape:
+        if "symlink_definition" in manager.config_v1.no_escape:
             file_path = await read_link_async(file_path)
         else:
             hd_get = "path"
@@ -192,7 +192,7 @@ async def get_video_size(file_path: str):
         elif "720P" in file_path_temp or "HD" in file_path_temp:
             height = 720
 
-    hd_name = config.hd_name
+    hd_name = manager.config_v1.hd_name
     if not height:
         pass
     elif height >= 4000:
@@ -227,16 +227,16 @@ def add_definition_tag(res: BaseCrawlerResult, definition, codec):
     tag_list = re.split(r"[,，]", tag)
     new_tag_list = []
     [new_tag_list.append(i) for i in tag_list if i]
-    if definition and "definition" in config.tag_include:
+    if definition and "definition" in manager.config_v1.tag_include:
         new_tag_list.insert(0, definition)
-        if config.hd_get == "video" and codec and codec not in new_tag_list:
+        if manager.config_v1.hd_get == "video" and codec and codec not in new_tag_list:
             new_tag_list.insert(0, codec)  # 插入编码格式
     res.tag = ",".join(new_tag_list)
 
 
 def show_result(res: CrawlersResult, start_time: float):
     LogBuffer.log().write(res.site_log)
-    if config.show_from_log and res.field_log:  # 字段来源信息
+    if manager.config_v1.show_from_log and res.field_log:  # 字段来源信息
         LogBuffer.log().write("\n\n 📒 字段来源\n\n" + res.field_log.strip(" ").strip("\n"))
     LogBuffer.log().write(f"\n 🍀 Data done!({get_used_time(start_time)}s)")
 
@@ -301,7 +301,7 @@ def render_name_template(
     if not show_moword:
         m_word = ""
     # 判断后缀字段顺序
-    suffix_sort_list = config.suffix_sort.split(",")
+    suffix_sort_list = manager.config_v1.suffix_sort.split(",")
     for each in suffix_sort_list:
         # "mosaic" 已在ConfigSchema.init()中替换为 "moword"
         if each == "moword":
@@ -317,12 +317,12 @@ def render_name_template(
     if not series:
         series = "未知系列"
     if not actor:
-        actor = config.actor_no_name
+        actor = manager.config_v1.actor_no_name
     if not year:
         year = "0000"
     if not score:
         score = "0.0"
-    release = get_new_release(release, config.release_rule)
+    release = get_new_release(release, manager.config_v1.release_rule)
     # 获取演员
     first_actor = actor.split(",").pop(0)
     all_actor = deal_actor_more(json_data.all_actor)

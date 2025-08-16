@@ -7,7 +7,7 @@ import time
 
 from lxml import etree
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.models.base.web import get_dmm_trailer
 from mdcx.models.log_buffer import LogBuffer
 
@@ -196,9 +196,9 @@ async def main(
     website_name = "javdb"
     LogBuffer.req().write(f"-> {website_name}")
 
-    javdb_time = config.javdb_time
-    header = {"cookie": config.javdb}
-    javdb_url = getattr(config, "javdb_website", "https://javdb.com")
+    javdb_time = manager.config_v1.javdb_time
+    header = {"cookie": manager.config_v1.javdb}
+    javdb_url = getattr(manager.config_v1, "javdb_website", "https://javdb.com")
     if appoint_url and "?locale" not in appoint_url:
         appoint_url += "?locale=zh"
     real_url = appoint_url
@@ -226,7 +226,7 @@ async def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # 先使用scraper方法请求，失败时再使用get请求
-            html_search, error = await config.async_client.get_text(url_search, headers=header)
+            html_search, error = await manager.config_v1.async_client.get_text(url_search, headers=header)
             if html_search is None:
                 # 判断返回内容是否有问题
                 if "HTTP 403" in error:
@@ -270,7 +270,7 @@ async def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            html_info, error = await config.async_client.get_text(real_url, headers=header)
+            html_info, error = await manager.config_v1.async_client.get_text(real_url, headers=header)
             if html_info is None:
                 debug_info = f"请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
@@ -294,7 +294,7 @@ async def main(
             if "/password_resets" in html_info:
                 debug_info = f"此內容需要登入才能查看或操作！点击 {real_url} 查看详情！"
                 LogBuffer.info().write(web_info + debug_info)
-                if config.javdb:
+                if manager.config_v1.javdb:
                     debug_info = "Cookie 已失效，请到设置中更新 javdb Cookie！"
                     LogBuffer.info().write(web_info + debug_info)
                 else:

@@ -1,7 +1,7 @@
 import time
 import traceback
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.signals import signal_qt
 
 
@@ -12,7 +12,12 @@ def show_netstatus() -> None:
     proxy = ""
     timeout = 0
     try:
-        proxy_type, proxy, timeout, retry_count = config.type, config.proxy, config.timeout, config.retry
+        proxy_type, proxy, timeout, retry_count = (
+            manager.config_v1.type,
+            manager.config_v1.proxy,
+            manager.config_v1.timeout,
+            manager.config_v1.retry,
+        )
     except Exception:
         signal_qt.show_traceback_log(traceback.format_exc())
         signal_qt.show_net_info(traceback.format_exc())

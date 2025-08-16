@@ -4,7 +4,7 @@ import time
 
 from lxml import etree
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
 from mdcx.models.log_buffer import LogBuffer
 
@@ -200,7 +200,7 @@ async def main(
     LogBuffer.info().write(" \n    🌐 javday")
     debug_info = ""
 
-    javday_url = getattr(config, "javday_website", "https://javday.tv")
+    javday_url = getattr(manager.config_v1, "javday_website", "https://javday.tv")
     real_url = appoint_url
     real_html_content = ""
     try:
@@ -214,7 +214,7 @@ async def main(
                 testNumberUrl = javday_url + f"/videos/{number}/"
                 debug_info = f'搜索地址: {testNumberUrl} {{"wd": {number}}}'
                 LogBuffer.info().write(web_info + debug_info)
-                html_content, error = await config.async_client.get_text(testNumberUrl)
+                html_content, error = await manager.config_v1.async_client.get_text(testNumberUrl)
                 if html_content is None:
                     debug_info = f"网络请求错误: {error}"
                     LogBuffer.info().write(web_info + debug_info)
