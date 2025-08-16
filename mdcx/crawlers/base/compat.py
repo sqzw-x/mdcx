@@ -85,4 +85,16 @@ class LegacyCrawler:
         if not res or "title" not in res or not res["title"]:
             raise CralwerException(f"v1 crawler failed: {self.site}")
 
+        # 处理字段重命名
+        if r := res.get("actor"):
+            res["actors"] = r.split(",")
+        if r := res.get("all_actor"):
+            res["all_actors"] = r.split(",")
+        if r := res.get("director"):
+            res["directors"] = r.split(",")
+        if r := res.get("tag"):
+            res["tags"] = r.split(",")
+        if r := res.get("website"):
+            res["url"] = r
+
         return update(CrawlerResult.empty(), res)
