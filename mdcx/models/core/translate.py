@@ -6,7 +6,7 @@ import traceback
 
 import zhconv
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.config.resources import resources
 from mdcx.models.base.translate import (
     deepl_translate_async,
@@ -27,19 +27,19 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
     xml_info = resources.info_mapping_data
     if xml_info is not None and len(xml_info) == 0:
         return json_data
-    tag_translate = config.tag_translate
-    series_translate = config.series_translate
-    studio_translate = config.studio_translate
-    publisher_translate = config.publisher_translate
-    director_translate = config.director_translate
-    tag_language = config.tag_language
-    series_language = config.series_language
-    studio_language = config.studio_language
-    publisher_language = config.publisher_language
-    director_language = config.director_language
-    fields_rule = config.fields_rule
+    tag_translate = manager.config_v1.tag_translate
+    series_translate = manager.config_v1.series_translate
+    studio_translate = manager.config_v1.studio_translate
+    publisher_translate = manager.config_v1.publisher_translate
+    director_translate = manager.config_v1.director_translate
+    tag_language = manager.config_v1.tag_language
+    series_language = manager.config_v1.series_language
+    studio_language = manager.config_v1.studio_language
+    publisher_language = manager.config_v1.publisher_language
+    director_language = manager.config_v1.director_language
+    fields_rule = manager.config_v1.fields_rule
 
-    tag_include = config.tag_include
+    tag_include = manager.config_v1.tag_include
     tag = json_data.tag
     remove_key = [
         "HD高画质",
@@ -87,13 +87,13 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
 
         for each_actor in actor_list:
             should_add = True
-            if len(config.nfo_tag_actor_contains_list) > 0:
+            if len(manager.config_v1.nfo_tag_actor_contains_list) > 0:
                 # 按白名单筛选演员名
-                should_add = each_actor in config.nfo_tag_actor_contains_list
+                should_add = each_actor in manager.config_v1.nfo_tag_actor_contains_list
 
             if should_add:
                 # 按要求修改演员命名格式
-                nfo_tag_actor = config.nfo_tag_actor.replace("actor", each_actor)
+                nfo_tag_actor = manager.config_v1.nfo_tag_actor.replace("actor", each_actor)
                 if nfo_tag_actor:
                     tag = nfo_tag_actor + "," + tag
 
@@ -133,7 +133,7 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
             info_data = resources.get_info_data(series)
             series = info_data.get(series_language, "")
         if series and "series" in tag_include:  # 写nfo
-            nfo_tag_series = config.nfo_tag_series.replace("series", series)
+            nfo_tag_series = manager.config_v1.nfo_tag_series.replace("series", series)
             if nfo_tag_series:
                 tag += f",{nfo_tag_series}"
 
@@ -143,7 +143,7 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
             info_data = resources.get_info_data(studio)
             studio = info_data.get(studio_language, "")
         if studio and "studio" in tag_include:
-            nfo_tag_studio = config.nfo_tag_studio.replace("studio", studio)
+            nfo_tag_studio = manager.config_v1.nfo_tag_studio.replace("studio", studio)
             if nfo_tag_studio:
                 tag += f",{nfo_tag_studio}"
 
@@ -153,7 +153,7 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
             info_data = resources.get_info_data(publisher)
             publisher = info_data.get(publisher_language, "")
         if publisher and "publisher" in tag_include:
-            nfo_tag_publisher = config.nfo_tag_publisher.replace("publisher", publisher)
+            nfo_tag_publisher = manager.config_v1.nfo_tag_publisher.replace("publisher", publisher)
             if nfo_tag_publisher:
                 tag += f",{nfo_tag_publisher}"
 
@@ -180,7 +180,7 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
 
 async def translate_actor(res: CrawlersResult):
     # 网络请求真实的演员名字
-    actor_realname = config.actor_realname
+    actor_realname = manager.config_v1.actor_realname
     mosaic = res.mosaic
     number = res.number
 
@@ -208,7 +208,7 @@ async def translate_actor(res: CrawlersResult):
                 LogBuffer.log().write(f"\n 🔴 Av-wiki failed! {temp_actor} ({get_used_time(start_time)}s)")
 
     # 如果不映射，返回
-    if not config.actor_translate:
+    if not manager.config_v1.actor_translate:
         return res
 
     # 映射表数据加载失败，返回
@@ -218,16 +218,16 @@ async def translate_actor(res: CrawlersResult):
 
     # 未知演员，返回
     actor = res.actor
-    if "actor_all," in config.nfo_include_new:
+    if "actor_all," in manager.config_v1.nfo_include_new:
         actor = res.all_actor
-    if actor == config.actor_no_name:
+    if actor == manager.config_v1.actor_no_name:
         return res
 
     # 查询映射表
     actor_list = actor.split(",")
     actor_new_list = []
     actor_href_list = []
-    actor_language = config.actor_language
+    actor_language = manager.config_v1.actor_language
     for each_actor in actor_list:
         if each_actor:
             actor_data = resources.get_actor_data(each_actor)
@@ -237,25 +237,25 @@ async def translate_actor(res: CrawlersResult):
                 if actor_data.get("href"):
                     actor_href_list.append(actor_data.get("href"))
     res.actor = ",".join(actor_new_list)
-    if "actor_all," in config.nfo_include_new:
+    if "actor_all," in manager.config_v1.nfo_include_new:
         res.all_actor = ",".join(actor_new_list)
 
     return res
 
 
 async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie_number: str):
-    title_language = config.title_language
-    title_translate = config.title_translate
-    outline_language = config.outline_language
-    outline_translate = config.outline_translate
-    translate_by = config.translate_by
+    title_language = manager.config_v1.title_language
+    title_translate = manager.config_v1.title_translate
+    outline_language = manager.config_v1.outline_language
+    outline_translate = manager.config_v1.outline_translate
+    translate_by = manager.config_v1.translate_by
     if title_language == "jp" and outline_language == "jp":
         return
     trans_title = ""
     trans_outline = ""
-    title_sehua = config.title_sehua
-    title_sehua_zh = config.title_sehua_zh
-    title_yesjav = config.title_yesjav
+    title_sehua = manager.config_v1.title_sehua
+    title_sehua_zh = manager.config_v1.title_sehua_zh
+    title_yesjav = manager.config_v1.title_yesjav
     title_is_jp = is_japanese(json_data.title)
 
     # 处理title
@@ -291,9 +291,11 @@ async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie
         trans_outline = json_data.outline
 
     # 翻译
-    if config.translate_by_list and ((trans_title and title_translate) or (trans_outline and outline_translate)):
+    if manager.config_v1.translate_by_list and (
+        (trans_title and title_translate) or (trans_outline and outline_translate)
+    ):
         start_time = time.time()
-        translate_by_list = config.translate_by_list.copy()
+        translate_by_list = manager.config_v1.translate_by_list.copy()
         if not cd_part:
             random.shuffle(translate_by_list)
 

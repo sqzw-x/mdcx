@@ -2,6 +2,7 @@ import os
 import os.path
 import re
 from pathlib import Path
+from warnings import deprecated
 
 from mdcx.consts import MAIN_PATH, MARK_FILE
 from mdcx.manual import ManualConfig
@@ -14,8 +15,8 @@ class ConfigManager:
     def __init__(self):
         self._get_config_path()
         self.config = Config()
-        self.config_v1 = ConfigSchema(**self.config.to_legacy())
-        self.config_v1.init()
+        self._config_v1 = ConfigSchema(**self.config.to_legacy())
+        self._config_v1.init()
 
     @property
     def path(self) -> str:
@@ -28,28 +29,37 @@ class ConfigManager:
         self.write_mark_file(p)  # 更新标记文件路径
         self._path = p
 
+    @property
+    @deprecated("v1 config is deprecated, use config instead")
+    def config_v1(self) -> ConfigSchema:
+        return self._config_v1
+
     def load(self) -> list[str]:
         if self.file.endswith(".ini"):  # handle v1 config
             return self.handle_v1()
         try:
             self.config = Config.model_validate_json(self._path.read_text(encoding="UTF-8"))
-            self.config_v1 = ConfigSchema(**self.config.to_legacy())
+            self._config_v1 = ConfigSchema(**self.config.to_legacy())
             return []
         except Exception as e:
             return str(e).splitlines()
 
     def handle_v1(self):
+        v2path = self.path.removesuffix(".ini") + ".v2.json"
+        v1path = self.path
+        if os.path.exists(v2path):
+            self.path = v2path
+            return [f"{v1path} 是旧版配置文件, 对应的新版配置文件已存在, 改为加载新版配置: {v2path}"] + self.load()
+
         d, errors = load_v1(self.path)
+        self.path = v2path
         errors = [
-            f"{self.path} 是旧版配置文件, 将自动转换为新版配置并保存到 {self.path.removesuffix('.ini') + '.v1.json'}",
-            "旧版配置文件不会被删除. 当保存配置时, 仅会写入新版配置文件, 后续请选择新版配置文件",
+            f"{self.path} 是旧版配置文件, 将自动转换为新版配置并保存到 {v2path}",
+            "旧版配置文件不会被删除. 当保存配置时, 仅会写入新版配置文件, 后续会自动使用新版配置文件",
         ] + errors
-        self.config_v1 = ConfigSchema(**d)
-        self.config_v1.init()
-        self.config = self.config_v1.to_pydantic_model()
-        self.path = self.path.removesuffix(".ini") + ".v2.json"
-        if os.path.exists(self.path):
-            raise RuntimeError(f"新版配置文件 {self.path} 已存在, 请直接加载此文件.")
+        self._config_v1 = ConfigSchema(**d)
+        self._config_v1.init()
+        self.config = self._config_v1.to_pydantic_model()
         self.save()
         return errors
 
@@ -96,7 +106,6 @@ class ConfigManager:
 
 
 manager = ConfigManager()
-config = manager.config_v1
 
 
 def get_new_str(a: str, wanted=False):

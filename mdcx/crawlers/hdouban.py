@@ -5,7 +5,7 @@ import time
 
 import zhconv
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.models.log_buffer import LogBuffer
 
 
@@ -208,7 +208,7 @@ async def main(
     score = ""
     series = ""
     trailer = ""
-    hdouban_url = getattr(config, "hdouban_website", "https://ormtgu.com")
+    hdouban_url = getattr(manager.config_v1, "hdouban_website", "https://ormtgu.com")
 
     # real_url = 'https://byym21.com/moviedetail/153858'
     # real_url = 'https://byym21.com/moviedetail/2202'
@@ -234,7 +234,7 @@ async def main(
                 LogBuffer.info().write(web_info + debug_info)
 
                 # ========================================================================搜索番号
-                html_search, error = await config.async_client.get_json(url_search)
+                html_search, error = await manager.config_v1.async_client.get_json(url_search)
                 if html_search is None:
                     debug_info = f"网络请求错误: {error} "
                     LogBuffer.info().write(web_info + debug_info)
@@ -277,7 +277,7 @@ async def main(
 
             detail_url = "https://api.6dccbca.com/api/movie/detail"
             data = {"id": str(detail_id[0])}
-            response, error = await config.async_client.post_json(detail_url, data=data)
+            response, error = await manager.config_v1.async_client.post_json(detail_url, data=data)
             if response is None:
                 debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)

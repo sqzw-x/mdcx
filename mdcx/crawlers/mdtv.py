@@ -4,7 +4,7 @@ import time
 
 from lxml import etree
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
 from mdcx.models.log_buffer import LogBuffer
 
@@ -217,7 +217,7 @@ async def main(
     LogBuffer.info().write(" \n    🌐 mdtv")
     debug_info = ""
 
-    mdtv_url = getattr(config, "mdtv_website", "https://www.mdpjzip.xyz")
+    mdtv_url = getattr(manager.config_v1, "mdtv_website", "https://www.mdpjzip.xyz")
     real_url = appoint_url
     search_url = f"{mdtv_url}/index.php/vodsearch/-------------.html"
 
@@ -231,7 +231,7 @@ async def main(
             for number in number_list_new:
                 debug_info = f'搜索地址: {search_url} {{"wd": {number}}}'
                 LogBuffer.info().write(web_info + debug_info)
-                response, error = await config.async_client.post_text(search_url, data={"wd": number})
+                response, error = await manager.config_v1.async_client.post_text(search_url, data={"wd": number})
                 if response is None:
                     debug_info = f"网络请求错误: {error}"
                     LogBuffer.info().write(web_info + debug_info)
@@ -255,7 +255,7 @@ async def main(
                 raise Exception(debug_info)
 
         if real_url:
-            html_content, error = await config.async_client.get_text(real_url)
+            html_content, error = await manager.config_v1.async_client.get_text(real_url)
             if html_content is None:
                 debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)

@@ -9,7 +9,7 @@ from typing import cast
 
 from PIL import Image
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.models.base.image import add_mark_thread
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo
@@ -22,8 +22,8 @@ async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):
     poster_marked = json_data.poster_marked
     thumb_marked = json_data.thumb_marked
     fanart_marked = json_data.fanart_marked
-    download_files = config.download_files
-    mark_type = config.mark_type.lower()
+    download_files = manager.config_v1.download_files
+    mark_type = manager.config_v1.mark_type.lower()
     has_sub = file_info.has_sub
     definition = file_info.definition
     mark_list = []
@@ -52,19 +52,19 @@ async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):
         mark_list.append("无码")
 
     if mark_list:
-        download_files = config.download_files
+        download_files = manager.config_v1.download_files
         mark_show_type = ",".join(mark_list)
         poster_path = json_data.poster_path
         thumb_path = json_data.thumb_path
         fanart_path = json_data.fanart_path
 
-        if config.thumb_mark == 1 and "thumb" in download_files and thumb_path and not thumb_marked:
+        if manager.config_v1.thumb_mark == 1 and "thumb" in download_files and thumb_path and not thumb_marked:
             await add_mark_thread(thumb_path, mark_list)
             LogBuffer.log().write(f"\n 🍀 Thumb add watermark: {mark_show_type}!")
-        if config.poster_mark == 1 and "poster" in download_files and poster_path and not poster_marked:
+        if manager.config_v1.poster_mark == 1 and "poster" in download_files and poster_path and not poster_marked:
             await add_mark_thread(poster_path, mark_list)
             LogBuffer.log().write(f"\n 🍀 Poster add watermark: {mark_show_type}!")
-        if config.fanart_mark == 1 and ",fanart" in download_files and fanart_path and not fanart_marked:
+        if manager.config_v1.fanart_mark == 1 and ",fanart" in download_files and fanart_path and not fanart_marked:
             await add_mark_thread(fanart_path, mark_list)
             LogBuffer.log().write(f"\n 🍀 Fanart add watermark: {mark_show_type}!")
 
@@ -129,7 +129,7 @@ def cut_thumb_to_poster(json_data: CrawlersResult, thumb_path: str, poster_path:
         img_new = cast("Image.Image", img_new)
         img_new_png = img_new.crop((ax, ay, bx, by))
         img_new_png.save(poster_path, quality=95, subsampling=0)
-        if config.executor.run(check_pic_async(poster_path)):
+        if manager.config_v1.executor.run(check_pic_async(poster_path)):
             LogBuffer.log().write(f"\n 🍀 Poster done! ({json_data.poster_from})({get_used_time(start_time)}s)")
             return True
         LogBuffer.log().write(f"\n 🥺 Poster cut failed! ({json_data.poster_from})({get_used_time(start_time)}s)")

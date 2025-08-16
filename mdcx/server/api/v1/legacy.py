@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from mdcx.config.extend import deal_url
-from mdcx.config.manager import config, manager
+from mdcx.config.manager import manager
 from mdcx.config.models import Website
 from mdcx.models.base.file import newtdisk_creat_symlink
 from mdcx.models.core.scraper import start_new_scrape
@@ -116,7 +116,7 @@ class SetSiteUrlBody(BaseModel):
 async def set_site_url(body: SetSiteUrlBody):
     """指定网站自定义网址设置"""
     try:
-        setattr(config, f"{body.site.value}_website", body.url)
+        setattr(manager.config_v1, f"{body.site.value}_website", body.url)
         manager.save()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -126,6 +126,6 @@ async def set_site_url(body: SetSiteUrlBody):
 async def get_site_urls() -> dict[Website, str]:
     """获取网站自定义网址设置, 对未设置的网站返回空字符串"""
     try:
-        return {w: getattr(config, f"{w.value}_website", "") for w in Website}
+        return {w: getattr(manager.config_v1, f"{w.value}_website", "") for w in Website}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
