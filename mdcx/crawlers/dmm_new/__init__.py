@@ -6,15 +6,21 @@ from parsel import Selector
 
 from mdcx.config.models import Website
 from mdcx.models.base.web import check_url
+from mdcx.models.types import CrawlerInput
 from mdcx.utils.dataclass import update_valid
 from mdcx.utils.gather_group import GatherGroup
 
-from ..base import BaseCrawler, Context, CralwerException, CrawlerData, DetailPageParser, is_valid
+from ..base import Context, CralwerException, CrawlerData, DetailPageParser, GenericBaseCrawler, is_valid
 from .parsers import Category, DigitalParser, MonoParser, RentalParser, parse_category
 from .tv import DmmTvResponse, FanzaResp, dmm_tv_com_payload, fanza_tv_payload
 
 
-class DmmCrawler(BaseCrawler):
+class DMMContext(Context):
+    number_00: str | None = None
+    number_no_00: str | None = None
+
+
+class DmmCrawler(GenericBaseCrawler[DMMContext]):
     mono = MonoParser()
     digital = DigitalParser()
     rental = RentalParser()
@@ -29,6 +35,10 @@ class DmmCrawler(BaseCrawler):
     def base_url_(cls) -> str:
         # DMM 不支持自定义 URL
         return ""
+
+    @override
+    def new_context(self, input: CrawlerInput) -> DMMContext:
+        return DMMContext(input=input)
 
     @override
     def _get_cookies(self, ctx) -> dict[str, str] | None:
@@ -49,6 +59,8 @@ class DmmCrawler(BaseCrawler):
         number_00 = number.replace("-", "00")
         # 搜索结果少
         number_no_00 = number.replace("-", "")
+        ctx.number_00 = number_00
+        ctx.number_no_00 = number_no_00
 
         return [
             f"https://www.dmm.co.jp/search/=/searchstr={number_00}/sort=ranking/",
@@ -97,7 +109,7 @@ class DmmCrawler(BaseCrawler):
                 return cls.rental
 
     @override
-    async def _detail(self, ctx: Context, detail_urls: list[str]) -> CrawlerData | None:
+    async def _detail(self, ctx: DMMContext, detail_urls: list[str]) -> CrawlerData | None:
         d = defaultdict(list)
         for url in detail_urls:
             category = parse_category(url)
@@ -226,7 +238,7 @@ class DmmCrawler(BaseCrawler):
             url=detail_url,
         )
 
-    async def fetch_and_parse(self, ctx: Context, detail_url: str, parser: DetailPageParser) -> CrawlerData:
+    async def fetch_and_parse(self, ctx: DMMContext, detail_url: str, parser: DetailPageParser) -> CrawlerData:
         html, error = await self._fetch_detail(ctx, detail_url)
         if html is None:
             ctx.debug(f"详情页请求失败: {error=}")
@@ -243,10 +255,16 @@ class DmmCrawler(BaseCrawler):
         res.originalplot = res.outline
         # check aws image
         if res.thumb and "pics.dmm.co.jp" in res.thumb:
-            aws_url = res.thumb.replace("pics.dmm.co.jp", "awsimgsrc.dmm.co.jp/pics_dig").replace("/adult/", "/")
-            if await check_url(aws_url):
-                ctx.debug(f"use aws image: {aws_url}")
-                res.thumb = aws_url
+            aws_urls = [
+                res.thumb.replace("pics.dmm.co.jp", "awsimgsrc.dmm.co.jp/pics_dig").replace("/adult/", "/"),
+                f"https://awsimgsrc.dmm.co.jp/pics_dig/digital/video/{ctx.number_00}/{ctx.number_00}pl.jpg",
+                f"https://awsimgsrc.dmm.co.jp/pics_dig/digital/video/{ctx.number_no_00}/{ctx.number_no_00}pl.jpg",
+            ]
+            for aws_url in aws_urls:
+                if await check_url(aws_url):
+                    ctx.debug(f"use aws image: {aws_url}")
+                    res.thumb = aws_url
+                    break
         res.poster = res.thumb.replace("pl.jpg", "ps.jpg")
         if not res.publisher:
             res.publisher = res.studio
