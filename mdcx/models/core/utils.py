@@ -63,28 +63,37 @@ def replace_special_word(json_data: BaseCrawlerResult):
 
 def deal_some_field(json_data: CrawlersResult):
     fields_rule = config.fields_rule
-    actor = json_data.actor
     title = json_data.title
     originaltitle = json_data.originaltitle
     number = json_data.number
 
     # 演员处理
-    if actor:
+    if json_data.actors:
         # 去除演员名中的括号
-        new_actor_list = []
-        actor_list = []
         temp_actor_list = []
-        for each_actor in actor.split(","):
-            if each_actor and each_actor not in actor_list:
-                actor_list.append(each_actor)
-                new_actor = re.findall(r"[^\(\)\（\）]+", each_actor)
-                if new_actor[0] not in new_actor_list:
-                    new_actor_list.append(new_actor[0])
-                temp_actor_list.extend(new_actor)
-        if "del_char" in fields_rule:
-            json_data.actor = ",".join(new_actor_list)
-        else:
-            json_data.actor = ",".join(actor_list)
+        actors = json_data.actors.copy()
+        json_data.actors = []
+        for raw_name in actors:
+            if not raw_name:
+                continue
+            cleaned = re.findall(r"[^\(\)\（\）]+", raw_name)
+            temp_actor_list.extend(cleaned)
+            if "del_char" in fields_rule:
+                json_data.actors.append(cleaned[0])
+            else:
+                json_data.actors.append(raw_name)
+
+        # 去除 all_actors 中的括号
+        all_actors = json_data.all_actors.copy()
+        json_data.all_actors = []
+        for raw_name in all_actors:
+            if not raw_name:
+                continue
+            cleaned = re.findall(r"[^\(\)\（\）]+", raw_name)
+            if "del_char" in fields_rule:
+                json_data.all_actors.append(cleaned[0])
+            else:
+                json_data.all_actors.append(raw_name)
 
         # 去除标题后的演员名
         if "del_actor" in fields_rule:

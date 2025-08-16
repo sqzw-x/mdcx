@@ -193,14 +193,13 @@ async def translate_actor(res: CrawlersResult):
             result, temp_actor = await get_actorname(res.number)
             if result:
                 actor: str = res.actor
-                all_actor: str = res.all_actor
-                actor_list: list = all_actor.split(",")
+                actor_list = res.all_actors
                 res.actor = temp_actor
                 # 从actor_list中循环查找元素是否包含字符串temp_actor，有则替换
                 for item in actor_list:
                     if item.find(actor) != -1:
                         actor_list[actor_list.index(item)] = temp_actor
-                res.all_actor = ",".join(actor_list)
+                res.all_actors = actor_list
 
                 LogBuffer.log().write(
                     f"\n 👩🏻 Av-wiki done! Actor's real Japanese name is '{temp_actor}' ({get_used_time(start_time)}s)"

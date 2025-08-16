@@ -1,6 +1,7 @@
 import asyncio
 import os
 import re
+from itertools import chain
 
 from mdcx.config.manager import config
 from mdcx.config.models import Language, Website, WebsiteSet
@@ -278,7 +279,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
             reduced.thumb_list.append((data.source, data.thumb))
         # 记录所有来源的 actor 用于 Amazon 搜图
         if data.actor:
-            reduced.actor_amazon.extend(data.actor.split(","))
+            reduced.actor_amazon.extend(data.actors)
     # 去重
     reduced.thumb_list = list(dict.fromkeys(reduced.thumb_list))  # 保序
     reduced.actor_amazon = list(set(reduced.actor_amazon))
@@ -295,10 +296,9 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
     if r := all_res.get((Website.JAVDB, Language.UNDEFINED)):
         reduced.javdbid = r.javdbid
 
-    # 处理 all_actor
-    if not reduced.all_actor:
-        # 如果没有 all_actor 字段，则从 actor 中获取
-        reduced.all_actor = reduced.actor
+    # 使用 actors 字段补全 all_actors, 理想情况下前者应该是后者的子集
+    # 对 actors 的所有后处理都需要同样地应用到 all_actors
+    reduced.all_actors = list(dict.fromkeys(chain(reduced.all_actors, reduced.actors)))
 
     reduced.site_log = f"\n 🌐 [website] {'-> '.join(req_info)}"
 
@@ -342,7 +342,7 @@ async def _call_specific_crawler(task_input: CrawlerInput, website: Website) -> 
         res.number = file_number
 
     res.actor_amazon = web_data_json.actors
-    res.all_actors = res.all_actors or web_data_json.actors
+    res.all_actors = list(dict.fromkeys(chain(res.all_actors, web_data_json.actors)))
 
     return res
 
@@ -496,14 +496,8 @@ async def crawl(task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult:
 
 
 def _deal_res(res: CrawlersResult) -> CrawlersResult:
-    # 演员
-    res.actor = (
-        str(res.actor).strip(" [ ]").replace("'", "").replace(", ", ",").replace("<", "(").replace(">", ")").strip(",")
-    )  # 列表转字符串（避免个别网站刮削返回的是列表）
-
     # 标签
-    tag = str(res.tag).strip(" [ ]").replace("'", "").replace("，", ",").replace(", ", ",")  # 列表转字符串
-    tag = re.sub(r",\d+[kKpP],", ",", tag)
+    tag = re.sub(r",\d+[kKpP],", ",", res.tag)
     tag_rep_word = [",HD高画质", ",HD高畫質", ",高画质", ",高畫質"]
     for each in tag_rep_word:
         if tag.endswith(each):
