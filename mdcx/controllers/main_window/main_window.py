@@ -460,7 +460,7 @@ class MyMAinWindow(QMainWindow):
                 manager.save()
             except Exception:
                 signal_qt.show_traceback_log(traceback.format_exc())
-        if self.tray_icon is not None:
+        if hasattr(self, "tray_icon"):
             self.tray_icon.hide()
         signal_qt.show_traceback_log("\n\n\n\n************ 程序正常退出！************\n")
         os._exit(0)
@@ -1585,9 +1585,8 @@ class MyMAinWindow(QMainWindow):
     def pushButton_select_config_folder_clicked(self):
         media_folder_path = convert_path(self._get_select_folder_path())
         if media_folder_path and media_folder_path != manager.data_folder:
-            config_path = os.path.join(media_folder_path, "config.ini")
-            with open(MARK_FILE, "w", encoding="UTF-8") as f:
-                f.write(config_path)
+            config_path = os.path.join(media_folder_path, "config.json")
+            manager.path = media_folder_path
             if os.path.isfile(config_path):
                 temp_dark = self.dark_mode
                 temp_window_radius = self.window_radius
