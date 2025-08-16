@@ -87,14 +87,21 @@ class LegacyCrawler:
 
         # 处理字段重命名
         if r := res.get("actor"):
-            res["actors"] = r.split(",")
+            res["actors"] = to_list(r)
         if r := res.get("all_actor"):
-            res["all_actors"] = r.split(",")
+            res["all_actors"] = to_list(r)
         if r := res.get("director"):
-            res["directors"] = r.split(",")
+            res["directors"] = to_list(r)
         if r := res.get("tag"):
-            res["tags"] = r.split(",")
+            res["tags"] = to_list(r)
         if r := res.get("website"):
             res["url"] = r
 
         return update(CrawlerResult.empty(), res)
+
+
+def to_list(v: str | list[str]) -> list[str]:
+    if isinstance(v, str):
+        v = v.strip()
+        return v.split(",") if v else []
+    return v
