@@ -452,8 +452,6 @@ class ConfigSchema:
         )
         self.executor = executor  # 方便通过 config 访问 executor
 
-        self.pydantic = self.to_pydantic_model()
-
     def get_website_base_url(self, website: str | Website) -> str:
         """获取指定网站的基础 URL"""
         if isinstance(website, Website):

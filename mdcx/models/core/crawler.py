@@ -96,15 +96,15 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
         """
         # 指定字段网站列表
         field_no_zh = field.replace("_zh", "")  # 去除 _zh 后缀的字段名
-        field_list: list[Website] = getattr(manager.config_v1.pydantic, f"{field}_website", [])
+        field_list: list[Website] = getattr(manager.config, f"{field}_website", [])
         # todo 移除运行时检查
         assert all(isinstance(i, Website) for i in field_list), f"{field}_website must be a list of Website"
         # 与指定类型网站列表取交集
         field_list = [i for i in field_list if i in number_website_list]
-        if WebsiteSet.OFFICIAL in manager.config_v1.pydantic.website_set:  # 优先使用官方网站
+        if WebsiteSet.OFFICIAL in manager.config.website_set:  # 优先使用官方网站
             field_list.insert(0, Website.OFFICIAL)
         # 指定字段排除网站列表
-        field_ex_list: list[Website] = getattr(manager.config_v1.pydantic, f"{field_no_zh}_website_exclude", [])
+        field_ex_list: list[Website] = getattr(manager.config, f"{field_no_zh}_website_exclude", [])
         # 所有设定的本字段来源失败时, 是否继续使用类型网站补全
         include_others = field == "title" or field in manager.config_v1.whole_fields
         if include_others and field != "trailer":  # 取剩余未相交网站， trailer 不取未相交网站
@@ -150,10 +150,10 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
 
     # 各字段语言
     all_field_languages: dict[str, Language] = {
-        field: getattr(manager.config_v1.pydantic, f"{field}_language", Language.UNDEFINED) for field in all_fields
+        field: getattr(manager.config, f"{field}_language", Language.UNDEFINED) for field in all_fields
     }
-    all_field_languages["title_zh"] = manager.config_v1.pydantic.title_language
-    all_field_languages["outline_zh"] = manager.config_v1.pydantic.outline_language
+    all_field_languages["title_zh"] = manager.config.title_language
+    all_field_languages["outline_zh"] = manager.config.outline_language
 
     # 处理配置项中没有的字段
     # originaltitle 的网站优先级同 title, 语言为 jp
@@ -199,10 +199,10 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
         sources = all_field_website_lang_pairs.get(field.value, default_website_lang_pairs)
 
         # 如果title_language不是jp，则允许从title_zh来源获取title
-        if field == CrawlerResultFields.TITLE and manager.config_v1.pydantic.title_language != Language.JP:
+        if field == CrawlerResultFields.TITLE and manager.config.title_language != Language.JP:
             sources = sources + all_field_website_lang_pairs.get("title_zh", [])
         # 如果outline_language不是jp，则允许从outline_zh来源获取outline
-        elif field == CrawlerResultFields.OUTLINE and manager.config_v1.pydantic.outline_language != Language.JP:
+        elif field == CrawlerResultFields.OUTLINE and manager.config.outline_language != Language.JP:
             sources = sources + all_field_website_lang_pairs.get("outline_zh", [])
 
         reduced.field_log += (
@@ -231,9 +231,9 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
                 try:
                     # 多语言网站, 指定一个默认语言
                     if website in MULTI_LANGUAGE_WEBSITES and language == Language.UNDEFINED:
-                        language = manager.config_v1.pydantic.title_language
+                        language = manager.config.title_language
                     task_input.language = language
-                    task_input.org_language = manager.config_v1.pydantic.title_language
+                    task_input.org_language = manager.config.title_language
                     web_data = await _call_crawler(task_input, website)
                     req_info.append(f"{sprint_source(website, language)} ({web_data.debug_info.execution_time:.2f}s)")
                     if web_data.data is None:
@@ -309,7 +309,7 @@ async def _call_specific_crawler(task_input: CrawlerInput, website: Website) -> 
     file_number = task_input.number
     short_number = task_input.short_number
 
-    title_language = manager.config_v1.pydantic.title_language
+    title_language = manager.config.title_language
     org_language = title_language
 
     if website not in ["airav_cc", "iqqtv", "airav", "avsex", "javlibrary", "mdtv", "madouqu", "lulubar"]:
@@ -369,7 +369,7 @@ async def _crawl(task_input: CrawlTask, website: Website | None) -> CrawlersResu
             or re.search(r"MKY-[A-Z]+-\d{3,}", file_number)
         ):
             task_input.mosaic = "国产"
-            res = await _call_crawlers(task_input, manager.config_v1.pydantic.website_guochan)
+            res = await _call_crawlers(task_input, manager.config.website_guochan)
 
         # =======================================================================kin8
         elif file_number.startswith("KIN8"):
@@ -396,7 +396,7 @@ async def _crawl(task_input: CrawlTask, website: Website | None) -> CrawlersResu
             file_number_1 = re.search(r"\d{5,}", file_number)
             if file_number_1:
                 file_number_1.group()
-                res = await _call_crawlers(task_input, manager.config_v1.pydantic.website_fc2)
+                res = await _call_crawlers(task_input, manager.config.website_fc2)
             else:
                 raise Exception(f"未识别的 FC2 番号: {file_number}")
 
@@ -404,15 +404,15 @@ async def _crawl(task_input: CrawlTask, website: Website | None) -> CrawlersResu
         elif re.search(r"[^.]+\.\d{2}\.\d{2}\.\d{2}", file_number) or (
             "欧美" in file_path and "东欧美" not in file_path
         ):
-            res = await _call_crawlers(task_input, manager.config_v1.pydantic.website_oumei)
+            res = await _call_crawlers(task_input, manager.config.website_oumei)
 
         # =======================================================================无码抓取:111111-111,n1111,HEYZO-1111,SMD-115
         elif mosaic == "无码" or mosaic == "無碼":
-            res = await _call_crawlers(task_input, manager.config_v1.pydantic.website_wuma)
+            res = await _call_crawlers(task_input, manager.config.website_wuma)
 
         # =======================================================================259LUXU-1111
         elif short_number or "SIRO" in file_number.upper():
-            res = await _call_crawlers(task_input, manager.config_v1.pydantic.website_suren)
+            res = await _call_crawlers(task_input, manager.config.website_suren)
 
         # =======================================================================ssni00321
         elif re.match(r"\D{2,}00\d{3,}", file_number) and "-" not in file_number and "_" not in file_number:
@@ -420,8 +420,8 @@ async def _crawl(task_input: CrawlTask, website: Website | None) -> CrawlersResu
 
         # =======================================================================剩下的（含匹配不了）的按有码来刮削
         else:
-            website_list = manager.config_v1.pydantic.website_youma
-            if WebsiteSet.OFFICIAL in manager.config_v1.pydantic.website_set:  # 优先使用官方网站
+            website_list = manager.config.website_youma
+            if WebsiteSet.OFFICIAL in manager.config.website_set:  # 优先使用官方网站
                 website_list.insert(0, Website.OFFICIAL)
             res = await _call_crawlers(task_input, website_list)
     else:
