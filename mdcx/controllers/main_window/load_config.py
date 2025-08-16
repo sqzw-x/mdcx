@@ -43,15 +43,14 @@ def load_config(self: "MyMAinWindow"):
 
     if os.path.exists(config_path):
         # ======================================================================================获取配置文件夹中的配置文件列表
-        all_files = os.listdir(config_folder)
-        all_config_files = [i for i in all_files if ".ini" in i]
+        all_config_files = manager.list_configs()
         all_config_files.sort()
         self.Ui.comboBox_change_config.clear()
         self.Ui.comboBox_change_config.addItems(all_config_files)
         if config_file in all_config_files:
             self.Ui.comboBox_change_config.setCurrentIndex(all_config_files.index(config_file))
         else:
-            self.Ui.comboBox_change_config.setCurrentIndex(all_config_files.index("config.ini"))
+            self.Ui.comboBox_change_config.setCurrentIndex(all_config_files.index("config.json"))
 
         read_version = config.version
         # region media

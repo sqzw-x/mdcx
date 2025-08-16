@@ -5,8 +5,9 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
-from mdcx.config.manager import ConfigSchema, config, manager
+from mdcx.config.manager import config, manager
 from mdcx.config.models import Config
+from mdcx.config.v1 import ConfigSchema
 from mdcx.utils.dataclass import update_existing
 
 from .utils import check_path_access
