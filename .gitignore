@@ -166,9 +166,17 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
+# user data
 config.ini
+config.json
+config.v2.json
+test.ini
+test.json
+test.v2.json
 MDCx.config
 userdata/
 Log/
-test
+
+# dev files
 dev/
+*.ipynb
