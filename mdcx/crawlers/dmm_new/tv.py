@@ -24,56 +24,56 @@ class Item(BaseModel):
 
 class SampleMovie(BaseModel):
     url: str = ""
-    thumbnail: str = ""
+    # thumbnail: str = ""
 
 
 class SamplePicture(BaseModel):
-    image: str = ""
+    # image: str = ""
     imageLarge: str = ""
 
 
 class ReviewSummary(BaseModel):
     averagePoint: float = 0.0
-    reviewerCount: int = 0
-    reviewCommentCount: int = 0
+    # reviewerCount: int = 0
+    # reviewCommentCount: int = 0
 
 
 class PlayInfoPart(BaseModel):
-    contentId: str = ""
-    number: int = 1
-    resumePoint: int = 0
+    # contentId: str = ""
+    # number: int = 1
+    # resumePoint: int = 0
     duration: int = 0
 
 
 class PlayInfo(BaseModel):
     duration: int = 0
-    resumePartNumber: int = 1
-    highestQualityName: str = ""
-    parts: list[PlayInfoPart] = []
+    # resumePartNumber: int = 1
+    # highestQualityName: str = ""
+    # parts: list[PlayInfoPart] = []
 
 
 class FanzaSvodContent(BaseModel):
-    id: str = ""
-    contentType: str = ""
-    productId: str = ""
-    shopName: str = ""
-    shopOption: str | None = None
-    shopType: str = ""
+    # id: str = ""
+    # contentType: str = ""
+    # productId: str = ""
+    # shopName: str = ""
+    # shopOption: str | None = None
+    # shopType: str = ""
     title: str = ""
     description: str = ""
     packageImage: str = ""
     packageLargeImage: str = ""
-    noIndex: bool = False
-    ppvShopName: str = ""
-    isFanzaTvPlusOnly: bool = False
+    # noIndex: bool = False
+    # ppvShopName: str = ""
+    # isFanzaTvPlusOnly: bool = False
     startDeliveryAt: str = ""
-    endDeliveryAt: str = ""
-    isBeingDelivered: bool = False
-    deliveryStatus: str = ""
+    # endDeliveryAt: str = ""
+    # isBeingDelivered: bool = False
+    # deliveryStatus: str = ""
     sampleMovie: SampleMovie = SampleMovie()
     samplePictures: list[SamplePicture] = []
     actresses: list[Item] = []
-    histrions: list[dict] = []
+    # histrions: list[dict] = []
     directors: list[Item] = []
     series: Item = Item()
     maker: Item = Item()
@@ -115,7 +115,7 @@ class VideoRating(BaseModel):
 
 
 class Cast(BaseModel):
-    castName: str = ""
+    # castName: str = ""
     actorName: str = ""
 
 
@@ -125,31 +125,31 @@ class Staff(BaseModel):
 
 
 class VideoSeason(BaseModel):
-    id: str = ""
-    seasonType: str = ""
-    seasonName: str = ""
+    # id: str = ""
+    # seasonType: str = ""
+    # seasonName: str = ""
     titleName: str = ""
-    highlight: str | None = None
+    # highlight: str | None = None
     description: str = ""
-    notices: str | None = None
+    # notices: str | None = None
     packageImage: str = ""
     productionYear: int = 0
-    isNewArrival: bool = False
-    customTag: str = ""
-    url: str = ""
+    # isNewArrival: bool = False
+    # customTag: str = ""
+    # url: str = ""
     startPublicAt: str = ""
-    campaign: str | None = None
-    rating: VideoRating = Field(default_factory=VideoRating)
+    # campaign: str | None = None
+    # rating: VideoRating = Field(default_factory=VideoRating)
     casts: list[Cast] = []
     staffs: list[Staff] = []
-    categories: list[Item] = []
+    # categories: list[Item] = []
     genres: list[Item] = []
-    metaDescription: str = ""
+    # metaDescription: str = ""
     keyVisualImage: str = ""
-    keyVisualWithoutLogoImage: str = ""
+    # keyVisualWithoutLogoImage: str = ""
     reviewSummary: ReviewSummary = Field(default_factory=ReviewSummary)
-    priceSummary: str | None = None
-    svodEndDeliveryAt: str | None = None
+    # priceSummary: str | None = None
+    # svodEndDeliveryAt: str | None = None
 
 
 class VideoData(BaseModel):
