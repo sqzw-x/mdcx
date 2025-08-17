@@ -54,7 +54,7 @@ class ConfigManager:
         d, errors = load_v1(self.path)
         self.path = v2path
         errors = [
-            f"{self.path} 是旧版配置文件, 将自动转换为新版配置并保存到 {v2path}",
+            f"{v1path} 是旧版配置文件, 将自动转换为新版配置并保存到 {v2path}",
             "旧版配置文件不会被删除. 当保存配置时, 仅会写入新版配置文件, 后续会自动使用新版配置文件",
         ] + errors
         self._config_v1 = ConfigSchema(**d)

@@ -25,7 +25,7 @@ from PyQt5.QtWidgets import (
 from mdcx.config.extend import deal_url, get_movie_path_setting
 from mdcx.config.manager import manager
 from mdcx.config.resources import resources
-from mdcx.consts import IS_WINDOWS, LOCAL_VERSION, MARK_FILE
+from mdcx.consts import IS_WINDOWS, LOCAL_VERSION
 from mdcx.controllers.cut_window import CutWindow
 from mdcx.controllers.main_window.handlers import show_netstatus
 from mdcx.controllers.main_window.init import Init_QSystemTrayIcon, Init_Singal, Init_Ui, init_QTreeWidget
@@ -1853,8 +1853,7 @@ class MyMAinWindow(QMainWindow):
             signal_qt.show_log_text(
                 f"\n================================================================================\n切换配置：{new_config_path}"
             )
-            with open(MARK_FILE, "w", encoding="UTF-8") as f:
-                f.write(new_config_path)
+            manager.path = new_config_path
             temp_dark = self.dark_mode
             temp_window_radius = self.window_radius
             self.load_config()
