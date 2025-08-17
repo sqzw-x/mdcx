@@ -661,6 +661,7 @@ def save_config(self: "MyMAinWindow"):
         config_folder = manager.data_folder
     manager.path = convert_path(os.path.join(config_folder, manager.file))
     manager.config_v1.version = self.localversion
+    manager.config = manager.config_v1.to_pydantic_model()
     manager.save()
     manager.config_v1.init()
 
