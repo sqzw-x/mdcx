@@ -14,7 +14,7 @@ v1_cralwers = {}
 
 
 def register_v1_crawler(site: Website, fn: Callable):
-    v1_cralwers[site] = LegacyCrawler(fn=fn, site=site)
+    v1_cralwers[site] = LegacyCrawler(fn=fn, site_=site)
 
 
 def get_v1_crawler(site: Website) -> "LegacyCrawler":
@@ -26,7 +26,11 @@ def get_v1_crawler(site: Website) -> "LegacyCrawler":
 @dataclass
 class LegacyCrawler:
     fn: Callable[..., Awaitable[dict[str, dict[str, dict]]]]
-    site: Website
+    site_: Website
+
+    def site(self) -> Website:
+        """与 `GenericBaseCrawler.site` 兼容的方法."""
+        return self.site_
 
     def __call__(self, client, base_url):
         return self
@@ -83,7 +87,7 @@ class LegacyCrawler:
         # 唯一受影响的是当需要 iqqtv_new 或 javlibrary_new 的多个语言的数据时, 需要多次请求
         res = list(res.values())[0]
         if not res or "title" not in res or not res["title"]:
-            raise CralwerException(f"v1 crawler failed: {self.site}")
+            raise CralwerException(f"v1 crawler failed: {self.site_}")
 
         # 处理字段重命名
         if r := res.get("actor"):

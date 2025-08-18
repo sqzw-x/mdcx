@@ -1,6 +1,5 @@
 import asyncio
 import json
-import sys
 from dataclasses import asdict
 from pathlib import Path
 from typing import Annotated
@@ -28,7 +27,7 @@ proxy_help = "代理地址 (例如: http://127.0.0.1:7890). 如未指定将加�
 @app.callback(invoke_without_command=True)
 def main(
     ctx: typer.Context,
-    site: Annotated[Website | None, typer.Option("--site", "-s", help="指定网站")] = None,
+    sites: Annotated[list[Website] | None, typer.Option("--site", "-s", help="指定网站")] = None,
     # CrawlerInput
     number: Annotated[str, typer.Option("--number", "-n", rich_help_panel="CrawlerInput")] = "",
     appoint_url: Annotated[str, typer.Option("--appoint-url", "-u", rich_help_panel="CrawlerInput")] = "",
@@ -39,7 +38,7 @@ def main(
     language: Annotated[str, typer.Option("--language", "-l", rich_help_panel="CrawlerInput")] = "",
     org_language: Annotated[str, typer.Option("--org-language", rich_help_panel="CrawlerInput")] = "",
     # 输出选项
-    output: Annotated[str | None, typer.Option("--output", "-o", help="保存文件路径")] = None,
+    output: Annotated[str | None, typer.Option("--output", "-o", help="文件保存路径, 可使用 {site} 变量")] = None,
     # 网络选项
     proxy: Annotated[str | None, typer.Option("--proxy", "-p", help=proxy_help)] = None,
     timeout: Annotated[int, typer.Option("--timeout", "-t", help="请求超时时间（秒）")] = 5,
@@ -52,7 +51,7 @@ def main(
         return
 
     # 检查是否提供了网站参数
-    if site is None:
+    if sites is None:
         console.print("[red]错误: 必须指定网站类型，请使用 --site 参数[/red]")
         console.print("可用网站列表:")
         for i, available_site in enumerate(Website, 1):
@@ -75,7 +74,7 @@ def main(
         raise typer.Exit(1)
 
     _crawl(
-        site=site,
+        sites=sites,
         input=crawler_input,
         output=output,
         proxy=proxy,
@@ -84,11 +83,8 @@ def main(
     )
 
 
-def _crawl(site: Website, input: CrawlerInput, output: str | None, proxy: str | None, timeout: int, retry: int):
-    crawler_class = get_crawler_compat(site)
-    if not crawler_class:
-        print(f"[red]错误: 未找到 {site.value} Crawler[/red]")
-        raise typer.Exit(1)
+def _crawl(sites: list[Website], input: CrawlerInput, output: str | None, proxy: str | None, timeout: int, retry: int):
+    classes = [get_crawler_compat(site) for site in sites]
 
     # v1 crawler 内部直接使用 config.async_client, 必须复用同一个 evantloop 以避免 Future attached to a different loop 错误
     client = AsyncWebClient(
@@ -98,28 +94,33 @@ def _crawl(site: Website, input: CrawlerInput, output: str | None, proxy: str | 
         timeout=timeout,
         log_fn=lambda msg: print(f"[dim][AsyncWebClient] {msg}[/dim]"),
     )
-    crawler = crawler_class(client=client, base_url=config.get_website_base_url(site))
-    res = config.executor.run(crawler.run(input))
+    crawlers = [c(client=client, base_url=config.get_website_base_url(c.site())) for c in classes]
+    futures = [config.executor.submit(crawler.run(input)) for crawler in crawlers]
+    config.executor.wait_all()
 
-    print("\n[bold blue]Debug Info:[/bold blue]")
-    print("\n\t".join(res.debug_info.logs))
-    print(f"耗时: {res.debug_info.execution_time:.2f} 秒")
-    print()
-    if res.data:
-        print("[green]成功. 结果:[/green]\n")
-        j = json.dumps(asdict(res.data), ensure_ascii=False, indent=2)
-        print_json(j)
-        if output:
-            output_path = Path(output)
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            output_path.write_text(j, encoding="utf-8")
-            print(f"[green]结果已保存到: {output_path}[/green]")
-    else:
-        print("[red]失败[/red]\n")
-        if res.debug_info.error:
-            print(f"[red]{res.debug_info.error}[/red]")
+    for i, f in enumerate(futures):
+        print(f"\n[blue]====== Res from site: [bold]{sites[i]}[/bold] ======[/blue]")
+        if f.exception():
+            print(f"[red]错误: {f.exception()}[/red]")
+            continue
+
+        res = f.result()
+        print("[bold blue]Debug Info:[/bold blue]")
+        print("\t" + "\n\t".join("\n".join(res.debug_info.logs).splitlines()))
+        print(f"\n[bold]耗时: {res.debug_info.execution_time:.2f} 秒[/bold]\n")
+        if res.data:
+            print("[green]成功. 结果:[/green]\n")
+            j = json.dumps(asdict(res.data), ensure_ascii=False, indent=2)
+            print_json(j)
+            if output:
+                output_path = Path(output.replace("{site}", sites[i].value))
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                output_path.write_text(j, encoding="utf-8")
+                print(f"[green]结果已保存到: {output_path}[/green]")
         else:
-            sys.exit(1)
+            print("[red]失败[/red]\n")
+            if res.debug_info.error:
+                print(f"[red]{res.debug_info.error}[/red]")
 
 
 site_help = "指定网站类型. 若未指定, 将尝试从 URL 自动检测. 若有相应 GenericBaseCrawler 实现, 将调用其 _fetch_detail 方法, 否则将直接使用 AsyncWebClient.get_text"
