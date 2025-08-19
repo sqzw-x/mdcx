@@ -1377,8 +1377,16 @@ class Config(BaseModel):
         def handle_fields(data: dict) -> dict[str, Any]:
             res = {}
             for key, value in data.items():
-                # | 分隔的字符串列表
-                if key in ["media_type", "sub_type", "clean_ext", "clean_name", "clean_contains"]:
+                # | 分隔的字符串列表. 如果在 Config 中重命名了这些字段需要修改此处
+                if key in (
+                    "media_type",
+                    "sub_type",
+                    "clean_ext",
+                    "clean_name",
+                    "clean_contains",
+                    "clean_ignore_ext",
+                    "clean_ignore_contains",
+                ):
                     res[key] = list_to_str(value, "|")
                 # 逗号分隔的字符串列表
                 elif isinstance(value, list):
@@ -1441,7 +1449,15 @@ class Config(BaseModel):
             for name, info in model_fields.items():
                 assert info.annotation is not None, f"Field {name} has no annotation"
                 if "list" in str(info.annotation):
-                    if name in ["media_type", "sub_type", "clean_ext", "clean_name", "clean_contains"]:
+                    if name in (
+                        "media_type",
+                        "sub_type",
+                        "clean_ext",
+                        "clean_name",
+                        "clean_contains",
+                        "clean_ignore_ext",
+                        "clean_ignore_contains",
+                    ):
                         data[name] = str_to_list(data[name], "|")
                     else:
                         data[name] = str_to_list(data[name], ",")
