@@ -1441,7 +1441,7 @@ class Config(BaseModel):
             for name, info in model_fields.items():
                 assert info.annotation is not None, f"Field {name} has no annotation"
                 if "list" in str(info.annotation):
-                    if "|" in data[name]:
+                    if name in ["media_type", "sub_type", "clean_ext", "clean_name", "clean_contains"]:
                         data[name] = str_to_list(data[name], "|")
                     else:
                         data[name] = str_to_list(data[name], ",")
