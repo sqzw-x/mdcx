@@ -4,7 +4,7 @@ import time
 
 from lxml import etree
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.models.log_buffer import LogBuffer
 
 
@@ -116,7 +116,7 @@ async def get_trailer(html):
     play_url = html.xpath("//a[@class='review-btn']/@href")
     if play_url:
         play_url = play_url[0].replace("/mypage/review.php", "/sampleplayer/sampleRespons.php")
-        htmlcode, error = await config.async_client.get_json(play_url, cookies={"adc": "1"})
+        htmlcode, error = await manager.config_v1.async_client.get_json(play_url, cookies={"adc": "1"})
         if htmlcode is not None:
             url_str = htmlcode.get("url")
             if url_str:
@@ -173,7 +173,7 @@ async def main(
         for real_url in real_url_list:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            htmlcode, error = await config.async_client.get_text(real_url, cookies={"adc": "1"})
+            htmlcode, error = await manager.config_v1.async_client.get_text(real_url, cookies={"adc": "1"})
             if htmlcode is None:
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)

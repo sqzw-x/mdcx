@@ -7,7 +7,7 @@ import re
 import sqlite3
 import traceback
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.models.tools.emby import EMbyActressInfo
 from mdcx.signals import signal
 
@@ -19,7 +19,7 @@ class ActressDB:
     def init_db(cls):
         try:
             #  https://ricardoanderegg.com/posts/python-sqlite-thread-safety/
-            cls.DB = sqlite3.connect(config.info_database_path, check_same_thread=False)
+            cls.DB = sqlite3.connect(manager.config_v1.info_database_path, check_same_thread=False)
             info_count = cls.DB.execute("select count(*) from Info").fetchone()  # 必须实际执行查询才能判断是否连接成功
             signal.show_log_text(f" ✅ 数据库连接成功, 共有 {info_count[0]} 条女优信息")
         except Exception:

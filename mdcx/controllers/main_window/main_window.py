@@ -23,9 +23,9 @@ from PyQt5.QtWidgets import (
 )
 
 from mdcx.config.extend import deal_url, get_movie_path_setting
-from mdcx.config.manager import config, manager
+from mdcx.config.manager import manager
 from mdcx.config.resources import resources
-from mdcx.consts import IS_WINDOWS, LOCAL_VERSION, MARK_FILE
+from mdcx.consts import IS_WINDOWS, LOCAL_VERSION
 from mdcx.controllers.cut_window import CutWindow
 from mdcx.controllers.main_window.handlers import show_netstatus
 from mdcx.controllers.main_window.init import Init_QSystemTrayIcon, Init_Singal, Init_Ui, init_QTreeWidget
@@ -334,7 +334,7 @@ class MyMAinWindow(QMainWindow):
 
     # 显示与隐藏窗口标题栏
     def _windows_auto_adjust(self):
-        if config.window_title == "hide":  # 隐藏标题栏
+        if manager.config_v1.window_title == "hide":  # 隐藏标题栏
             if self.window_radius == 0:
                 self.show_flag = True
             self.window_radius = 5
@@ -414,13 +414,13 @@ class MyMAinWindow(QMainWindow):
     # region 关闭
     # 关闭按钮点击事件响应函数
     def pushButton_close_clicked(self):
-        if "hide_close" in config.switch_on:
+        if "hide_close" in manager.config_v1.switch_on:
             self.hide()
         else:
             self.ready_to_exit()
 
     def ready_to_exit(self):
-        if "show_dialog_exit" in config.switch_on:
+        if "show_dialog_exit" in manager.config_v1.switch_on:
             if not self.isVisible():
                 self.show()
             if int(self.windowState()) == 1:
@@ -442,25 +442,25 @@ class MyMAinWindow(QMainWindow):
 
     # 关闭窗口
     def exit_app(self):
-        show_poster = config.show_poster
-        switch_on = config.switch_on
+        show_poster = manager.config_v1.show_poster
+        switch_on = manager.config_v1.switch_on
         need_save_config = False
 
         if bool(self.Ui.checkBox_cover.isChecked()) != bool(show_poster):
-            config.show_poster = self.Ui.checkBox_cover.isChecked()
+            manager.config_v1.show_poster = self.Ui.checkBox_cover.isChecked()
             need_save_config = True
         if self.Ui.textBrowser_log_main_2.isHidden() == bool("show_logs" in switch_on):
             if self.Ui.textBrowser_log_main_2.isHidden():
-                config.switch_on = switch_on.replace("show_logs,", "")
+                manager.config_v1.switch_on = switch_on.replace("show_logs,", "")
             else:
-                config.switch_on = switch_on + "show_logs,"
+                manager.config_v1.switch_on = switch_on + "show_logs,"
             need_save_config = True
         if need_save_config:
             try:
                 manager.save()
             except Exception:
                 signal_qt.show_traceback_log(traceback.format_exc())
-        if self.tray_icon is not None:
+        if hasattr(self, "tray_icon"):
             self.tray_icon.hide()
         signal_qt.show_traceback_log("\n\n\n\n************ 程序正常退出！************\n")
         os._exit(0)
@@ -469,7 +469,7 @@ class MyMAinWindow(QMainWindow):
 
     # 最小化窗口
     def pushButton_min_clicked(self):
-        if "hide_mini" in config.switch_on:
+        if "hide_mini" in manager.config_v1.switch_on:
             self.hide()
             return
         # mac 平台 python 版本 最小化有问题，此处就是为了兼容它，需要先设置为显示窗口标题栏才能最小化
@@ -567,7 +567,7 @@ class MyMAinWindow(QMainWindow):
         signal_qt.show_log_text("================================================================================")
         self.pushButton_check_javdb_cookie_clicked()  # 检测javdb cookie
         self.pushButton_check_javbus_cookie_clicked()  # 检测javbus cookie
-        if config.use_database:
+        if manager.config_v1.use_database:
             ActressDB.init_db()
         try:
             t = threading.Thread(target=check_theporndb_api_token)
@@ -667,7 +667,7 @@ class MyMAinWindow(QMainWindow):
 
     # 停止确认弹窗
     def pushButton_stop_scrape_clicked(self):
-        if "show_dialog_stop_scrape" in config.switch_on:
+        if "show_dialog_stop_scrape" in manager.config_v1.switch_on:
             box = QMessageBox(QMessageBox.Warning, "停止刮削", "确定要停止刮削吗？")
             box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
             box.button(QMessageBox.Yes).setText("停止刮削")
@@ -677,13 +677,13 @@ class MyMAinWindow(QMainWindow):
             if reply != QMessageBox.Yes:
                 return
         if self.Ui.pushButton_start_cap.text() == "■ 停止":
-            config.executor.run(save_success_list())
+            manager.config_v1.executor.run(save_success_list())
             Flags.rest_time_convert_ = Flags.rest_time_convert
             Flags.rest_time_convert = 0
             self.Ui.pushButton_start_cap.setText(" ■ 停止中 ")
             self.Ui.pushButton_start_cap2.setText(" ■ 停止中 ")
             signal_qt.show_scrape_info("⛔️ 刮削停止中...")
-            config.executor.cancel_async()  # 取消异步任务
+            manager.config_v1.executor.cancel_async()  # 取消异步任务
             t = threading.Thread(target=self._kill_threads)  # 关闭线程池
             t.start()
 
@@ -815,11 +815,11 @@ class MyMAinWindow(QMainWindow):
                 number = number[:10] + "……"
             self.Ui.label_number.setText(number)
             actor = str(data.actor)
-            if data.all_actor and "actor_all," in config.nfo_include_new:
+            if data.all_actor and "actor_all," in manager.config_v1.nfo_include_new:
                 actor = str(data.all_actor)
             self.Ui.label_actor.setToolTip(actor)
             if number and not actor:
-                actor = config.actor_no_name
+                actor = manager.config_v1.actor_no_name
             if len(actor) > 10:
                 actor = actor[:9] + "……"
             self.Ui.label_actor.setText(actor)
@@ -873,7 +873,7 @@ class MyMAinWindow(QMainWindow):
                 poster_from = data.poster_from
                 cover_from = data.thumb_from
 
-                config.executor.submit(self._set_pixmap(poster_path, thumb_path, poster_from, cover_from))
+                manager.config_v1.executor.submit(self._set_pixmap(poster_path, thumb_path, poster_from, cover_from))
         except Exception:
             if not signal_qt.stop:
                 signal_qt.show_traceback_log(traceback.format_exc())
@@ -1095,7 +1095,7 @@ class MyMAinWindow(QMainWindow):
             file_info = show_data.file_info
             self.now_show_name = show_data.show_name
             actor = json_data.actor
-            if json_data.all_actor and "actor_all," in config.nfo_include_new:
+            if json_data.all_actor and "actor_all," in manager.config_v1.nfo_include_new:
                 actor = json_data.all_actor
             self.Ui.label_nfo.setText(file_info.file_path)
             self.Ui.lineEdit_nfo_number.setText(json_data.number)
@@ -1134,7 +1134,7 @@ class MyMAinWindow(QMainWindow):
             nfo_path = os.path.splitext(file_path)[0] + ".nfo"
             nfo_folder = split_path(file_path)[0]
             json_data.number = self.Ui.lineEdit_nfo_number.text()
-            if "actor_all," in config.nfo_include_new:
+            if "actor_all," in manager.config_v1.nfo_include_new:
                 json_data.all_actor = self.Ui.lineEdit_nfo_actor.text()
             json_data.actor = self.Ui.lineEdit_nfo_actor.text()
             json_data.year = self.Ui.lineEdit_nfo_year.text()
@@ -1154,7 +1154,9 @@ class MyMAinWindow(QMainWindow):
             json_data.poster = self.Ui.lineEdit_nfo_poster.text()
             json_data.thumb = self.Ui.lineEdit_nfo_cover.text()
             json_data.trailer = self.Ui.lineEdit_nfo_trailer.text()
-            if config.executor.run(write_nfo(file_info, json_data, nfo_path, nfo_folder, file_path, update=True)):
+            if manager.config_v1.executor.run(
+                write_nfo(file_info, json_data, nfo_path, nfo_folder, file_path, update=True)
+            ):
                 self.Ui.label_save_tips.setText(f"已保存! {get_current_time()}")
                 self.set_main_info(show_data)
             else:
@@ -1172,11 +1174,11 @@ class MyMAinWindow(QMainWindow):
                 scrape_info = f"💡 单文件刮削\n💠 {Flags.main_mode_text} · {self.Ui.comboBox_website_all.currentText()}"
             else:
                 scrape_info = f"💠 {Flags.main_mode_text} · {Flags.scrape_like_text}"
-                if config.scrape_like == "single":
-                    scrape_info = f"💡 {config.website_single} 刮削\n" + scrape_info
-            if config.soft_link == 1:
+                if manager.config_v1.scrape_like == "single":
+                    scrape_info = f"💡 {manager.config_v1.website_single} 刮削\n" + scrape_info
+            if manager.config_v1.soft_link == 1:
                 scrape_info = "🍯 软链接 · 开\n" + scrape_info
-            elif config.soft_link == 2:
+            elif manager.config_v1.soft_link == 2:
                 scrape_info = "🍯 硬链接 · 开\n" + scrape_info
             after_info = f"\n{scrape_info}\n🛠 {manager.file}\n🐰 MDCx {self.localversion}"
             self.label_show_version.emit(before_info + after_info + self.new_version)
@@ -1206,7 +1208,7 @@ class MyMAinWindow(QMainWindow):
         reply = box.exec()
         if reply == QMessageBox.Yes:
             Flags.success_list.clear()
-            config.executor.run(save_success_list())
+            manager.config_v1.executor.run(save_success_list())
             self.Ui.widget_show_success.hide()
 
     def pushButton_view_success_file_clicked(self):
@@ -1309,7 +1311,7 @@ class MyMAinWindow(QMainWindow):
         if not text:
             return
         text = str(text)
-        if config.save_log:  # 保存日志
+        if manager.config_v1.save_log:  # 保存日志
             try:
                 Flags.log_txt.write((text + "\n").encode("utf-8"))
             except Exception:
@@ -1344,9 +1346,9 @@ class MyMAinWindow(QMainWindow):
     def label_local_number_clicked(self, ev):
         if self.Ui.pushButton_find_missing_number.isEnabled():
             self.pushButton_show_log_clicked()  # 点击按钮后跳转到日志页面
-            if self.Ui.lineEdit_actors_name.text() != config.actors_name:  # 保存配置
+            if self.Ui.lineEdit_actors_name.text() != manager.config_v1.actors_name:  # 保存配置
                 self.pushButton_save_config_clicked()
-            config.executor.submit(check_missing_number(False))
+            manager.config_v1.executor.submit(check_missing_number(False))
 
     # 工具页面本地资源库点选择目录
     def pushButton_select_local_library_clicked(self):
@@ -1383,11 +1385,13 @@ class MyMAinWindow(QMainWindow):
         """
         self.pushButton_show_log_clicked()  # 点击按钮后跳转到日志页面
 
-        if bool("copy_netdisk_nfo" in config.switch_on) != bool(self.Ui.checkBox_copy_netdisk_nfo.isChecked()):
+        if bool("copy_netdisk_nfo" in manager.config_v1.switch_on) != bool(
+            self.Ui.checkBox_copy_netdisk_nfo.isChecked()
+        ):
             self.pushButton_save_config_clicked()
 
         try:
-            config.executor.submit(newtdisk_creat_symlink(self.Ui.checkBox_copy_netdisk_nfo.isChecked()))
+            manager.config_v1.executor.submit(newtdisk_creat_symlink(self.Ui.checkBox_copy_netdisk_nfo.isChecked()))
         except Exception:
             signal_qt.show_traceback_log(traceback.format_exc())
             signal_qt.show_log_text(traceback.format_exc())
@@ -1401,11 +1405,11 @@ class MyMAinWindow(QMainWindow):
 
         # 如果本地资源库或演员与配置内容不同，则自动保存
         if (
-            self.Ui.lineEdit_actors_name.text() != config.actors_name
-            or self.Ui.lineEdit_local_library_path.text() != config.local_library
+            self.Ui.lineEdit_actors_name.text() != manager.config_v1.actors_name
+            or self.Ui.lineEdit_local_library_path.text() != manager.config_v1.local_library
         ):
             self.pushButton_save_config_clicked()
-        config.executor.submit(check_missing_number(True))
+        manager.config_v1.executor.submit(check_missing_number(True))
 
     # 工具-单文件刮削
     def pushButton_select_file_clicked(self):
@@ -1494,7 +1498,7 @@ class MyMAinWindow(QMainWindow):
         movie_type = self.Ui.lineEdit_movie_type.text().lower()
         sub_type = self.Ui.lineEdit_sub_type.text().lower().replace("|.txt", "")
         all_type = movie_type.strip("|") + "|" + sub_type.strip("|")
-        movie_path = config.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
+        movie_path = manager.config_v1.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
         if movie_path == "":  # 未设置为空时，使用主程序目录
             movie_path = manager.data_folder
         escape_dir = self.Ui.lineEdit_escape_dir_move.text().replace("\\", "/")
@@ -1508,7 +1512,7 @@ class MyMAinWindow(QMainWindow):
                 if es[-1] != "/":  # 路径尾部添加“/”，方便后面move_list查找时匹配路径
                     es += "/"
                 escape_folder_new_list.append(es)
-        movie_list = config.executor.run(movie_lists(escape_folder_new_list, all_type, movie_path))
+        movie_list = manager.config_v1.executor.run(movie_lists(escape_folder_new_list, all_type, movie_path))
         if not movie_list:
             signal_qt.show_log_text("No movie found!")
             signal_qt.show_log_text("================================================================================")
@@ -1585,9 +1589,8 @@ class MyMAinWindow(QMainWindow):
     def pushButton_select_config_folder_clicked(self):
         media_folder_path = convert_path(self._get_select_folder_path())
         if media_folder_path and media_folder_path != manager.data_folder:
-            config_path = os.path.join(media_folder_path, "config.ini")
-            with open(MARK_FILE, "w", encoding="UTF-8") as f:
-                f.write(config_path)
+            config_path = os.path.join(media_folder_path, "config.json")
+            manager.path = media_folder_path
             if os.path.isfile(config_path):
                 temp_dark = self.dark_mode
                 temp_window_radius = self.window_radius
@@ -1695,11 +1698,11 @@ class MyMAinWindow(QMainWindow):
 
     # 设置-刮削目录 点击检查待刮削目录并清理文件
     def pushButton_check_and_clean_files_clicked(self):
-        if not config.can_clean:
+        if not manager.config_v1.can_clean:
             self.pushButton_save_config_clicked()
         self.pushButton_show_log_clicked()
         try:
-            config.executor.submit(check_and_clean_files())
+            manager.config_v1.executor.submit(check_and_clean_files())
         except Exception:
             signal_qt.show_traceback_log(traceback.format_exc())
             signal_qt.show_log_text(traceback.format_exc())
@@ -1708,7 +1711,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_add_sub_for_all_video_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            config.executor.submit(add_sub_for_all_video())
+            manager.config_v1.executor.submit(add_sub_for_all_video())
         except Exception:
             signal_qt.show_traceback_log(traceback.format_exc())
             signal_qt.show_log_text(traceback.format_exc())
@@ -1718,14 +1721,14 @@ class MyMAinWindow(QMainWindow):
     def pushButton_add_all_extras_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            config.executor.submit(add_del_extras("add"))
+            manager.config_v1.executor.submit(add_del_extras("add"))
         except Exception:
             signal_qt.show_log_text(traceback.format_exc())
 
     def pushButton_del_all_extras_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            config.executor.submit(add_del_extras("del"))
+            manager.config_v1.executor.submit(add_del_extras("del"))
         except Exception:
             signal_qt.show_log_text(traceback.format_exc())
 
@@ -1734,7 +1737,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         self.pushButton_save_config_clicked()
         try:
-            config.executor.submit(add_del_extrafanart_copy("add"))
+            manager.config_v1.executor.submit(add_del_extrafanart_copy("add"))
         except Exception:
             signal_qt.show_log_text(traceback.format_exc())
 
@@ -1742,7 +1745,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         self.pushButton_save_config_clicked()
         try:
-            config.executor.submit(add_del_extrafanart_copy("del"))
+            manager.config_v1.executor.submit(add_del_extrafanart_copy("del"))
         except Exception:
             signal_qt.show_log_text(traceback.format_exc())
 
@@ -1750,14 +1753,14 @@ class MyMAinWindow(QMainWindow):
     def pushButton_add_all_theme_videos_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            config.executor.submit(add_del_theme_videos("add"))
+            manager.config_v1.executor.submit(add_del_theme_videos("add"))
         except Exception:
             signal_qt.show_log_text(traceback.format_exc())
 
     def pushButton_del_all_theme_videos_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            config.executor.submit(add_del_theme_videos("del"))
+            manager.config_v1.executor.submit(add_del_theme_videos("del"))
         except Exception:
             signal_qt.show_log_text(traceback.format_exc())
 
@@ -1769,7 +1772,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_save_config_clicked()
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            config.executor.submit(update_emby_actor_info())
+            manager.config_v1.executor.submit(update_emby_actor_info())
         except Exception:
             signal_qt.show_log_text(traceback.format_exc())
 
@@ -1778,7 +1781,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_save_config_clicked()
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            config.executor.submit(update_emby_actor_photo())
+            manager.config_v1.executor.submit(update_emby_actor_photo())
         except Exception:
             signal_qt.show_log_text(traceback.format_exc())
 
@@ -1787,7 +1790,7 @@ class MyMAinWindow(QMainWindow):
         self.pushButton_save_config_clicked()
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            config.executor.submit(creat_kodi_actors(True))
+            manager.config_v1.executor.submit(creat_kodi_actors(True))
         except Exception:
             signal_qt.show_log_text(traceback.format_exc())
 
@@ -1795,7 +1798,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_del_actor_folder_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            config.executor.submit(creat_kodi_actors(False))
+            manager.config_v1.executor.submit(creat_kodi_actors(False))
         except Exception:
             signal_qt.show_log_text(traceback.format_exc())
 
@@ -1803,7 +1806,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_show_pic_actor_clicked(self):
         self.pushButton_show_log_clicked()  # 点按钮后跳转到日志页面
         try:
-            config.executor.submit(show_emby_actor_list(self.Ui.comboBox_pic_actor.currentIndex()))
+            manager.config_v1.executor.submit(show_emby_actor_list(self.Ui.comboBox_pic_actor.currentIndex()))
         except Exception:
             signal_qt.show_log_text(traceback.format_exc())
 
@@ -1841,7 +1844,7 @@ class MyMAinWindow(QMainWindow):
 
     # 设置-网络-网址设置-下拉框切换
     def switch_custom_website_change(self, new_website_name):
-        self.Ui.lineEdit_custom_website.setText(getattr(config, f"{new_website_name}_website", ""))
+        self.Ui.lineEdit_custom_website.setText(getattr(manager.config_v1, f"{new_website_name}_website", ""))
 
     # 切换配置
     def config_file_change(self, new_config_file):
@@ -1850,8 +1853,7 @@ class MyMAinWindow(QMainWindow):
             signal_qt.show_log_text(
                 f"\n================================================================================\n切换配置：{new_config_path}"
             )
-            with open(MARK_FILE, "w", encoding="UTF-8") as f:
-                f.write(new_config_path)
+            manager.path = new_config_path
             temp_dark = self.dark_mode
             temp_window_radius = self.window_radius
             self.load_config()
@@ -1952,7 +1954,7 @@ class MyMAinWindow(QMainWindow):
                 "mgstage": ["https://www.mgstage.com", ""],
                 "getchu": ["http://www.getchu.com", ""],
                 "theporndb": ["https://api.theporndb.net", ""],
-                "avsox": [config.executor.run(get_avsox_domain()), ""],
+                "avsox": [manager.config_v1.executor.run(get_avsox_domain()), ""],
                 "xcity": ["https://xcity.jp", ""],
                 "7mmtv": ["https://7mmtv.sx", ""],
                 "mdtv": ["https://www.mdpjzip.xyz", ""],
@@ -2008,9 +2010,11 @@ class MyMAinWindow(QMainWindow):
             }
 
             for website in ManualConfig.SUPPORTED_WEBSITES:
-                if hasattr(config, f"{website}_website"):
-                    signal_qt.show_net_info(f"   ⚠️{website} 使用自定义网址：{getattr(config, f'{website}_website')}")
-                    net_info[website][0] = getattr(config, f"{website}_website")
+                if hasattr(manager.config_v1, f"{website}_website"):
+                    signal_qt.show_net_info(
+                        f"   ⚠️{website} 使用自定义网址：{getattr(manager.config_v1, f'{website}_website')}"
+                    )
+                    net_info[website][0] = getattr(manager.config_v1, f"{website}_website")
 
             net_info["javdb"][0] += "/v/D16Q5?locale=zh"
             net_info["seesaawiki"][0] += "/av_neme/d/%C9%F1%A5%EF%A5%A4%A5%D5"
@@ -2031,7 +2035,7 @@ class MyMAinWindow(QMainWindow):
                     each[1] = res_theporndb.replace("✅ 连接正常", f"✅ 连接正常{ping_host(host_address)}")
                 elif name == "javlibrary":
                     use_proxy = True
-                    if hasattr(config, "javlibrary_website"):
+                    if hasattr(manager.config_v1, "javlibrary_website"):
                         use_proxy = False
                     html_info, error = get_text_sync(each[0], use_proxy=use_proxy)
                     if html_info is None:
@@ -2160,8 +2164,8 @@ class MyMAinWindow(QMainWindow):
         # self.Ui.pushButton_check_javdb_cookie.setEnabled(False)
         tips = "✅ 连接正常！"
         header = {"cookie": input_cookie}
-        cookies = config.javdb
-        javdb_url = getattr(config, "javdb_website", "https://javdb.com") + "/v/D16Q5?locale=zh"
+        cookies = manager.config_v1.javdb
+        javdb_url = getattr(manager.config_v1, "javdb_website", "https://javdb.com") + "/v/D16Q5?locale=zh"
         try:
             response, error = get_text_sync(javdb_url, headers=header)
             if response is None:
@@ -2227,13 +2231,13 @@ class MyMAinWindow(QMainWindow):
         tips = "✅ 连接正常！"
         input_cookie = self.Ui.plainTextEdit_cookie_javbus.toPlainText()
         new_cookie = {"cookie": input_cookie}
-        cookies = config.javbus
-        headers_o = config.headers
+        cookies = manager.config_v1.javbus
+        headers_o = manager.config_v1.headers
         headers = {
             "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6",
         }
         headers.update(headers_o)
-        javbus_url = getattr(config, "javbus_website", "https://javbus.com") + "/FSDSS-660"
+        javbus_url = getattr(manager.config_v1, "javbus_website", "https://javbus.com") + "/FSDSS-660"
 
         try:
             response, error = get_text_sync(javbus_url, headers=headers, cookies=new_cookie)
@@ -2349,9 +2353,9 @@ class MyMAinWindow(QMainWindow):
 
     # region 自动刮削
     def auto_scrape(self):
-        if "timed_scrape" in config.switch_on and self.Ui.pushButton_start_cap.text() == "开始":
+        if "timed_scrape" in manager.config_v1.switch_on and self.Ui.pushButton_start_cap.text() == "开始":
             time.sleep(0.1)
-            timed_interval = config.timed_interval
+            timed_interval = manager.config_v1.timed_interval
             self.atuo_scrape_count += 1
             signal_qt.show_log_text(
                 f"\n\n 🍔 已启用「循环刮削」！间隔时间：{timed_interval}！即将开始第 {self.atuo_scrape_count} 次循环刮削！"
@@ -2363,7 +2367,7 @@ class MyMAinWindow(QMainWindow):
             start_new_scrape(FileMode.Default)
 
     def auto_start(self):
-        if "auto_start" in config.switch_on:
+        if "auto_start" in manager.config_v1.switch_on:
             signal_qt.show_log_text("\n\n 🍔 已启用「软件启动后自动刮削」！即将开始自动刮削！")
             self.pushButton_start_scrape_clicked()
 

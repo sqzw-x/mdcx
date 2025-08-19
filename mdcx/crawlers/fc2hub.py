@@ -3,7 +3,7 @@ import time
 
 from lxml import etree
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.models.log_buffer import LogBuffer
 
 
@@ -72,7 +72,7 @@ async def main(
     website_name = "fc2hub"
     LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
-    root_url = getattr(config, "fc2hub_website", "https://javten.com")
+    root_url = getattr(manager.config_v1, "fc2hub_website", "https://javten.com")
 
     number = number.upper().replace("FC2PPV", "").replace("FC2-PPV-", "").replace("FC2-", "").replace("-", "").strip()
     dic = {}
@@ -87,7 +87,7 @@ async def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            html_search, error = await config.async_client.get_text(url_search)
+            html_search, error = await manager.config_v1.async_client.get_text(url_search)
             if html_search is None:
                 debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
@@ -109,7 +109,7 @@ async def main(
         if real_url:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            html_content, error = await config.async_client.get_text(real_url)
+            html_content, error = await manager.config_v1.async_client.get_text(real_url)
             if html_content is None:
                 debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
@@ -127,7 +127,7 @@ async def main(
             studio = getStudio(html_info)  # 获取厂商
             extrafanart = getExtraFanart(html_info)
             mosaic = getMosaic(tag, title)
-            actor = studio if "fc2_seller" in config.fields_rule else ""
+            actor = studio if "fc2_seller" in manager.config_v1.fields_rule else ""
 
             try:
                 dic = {

@@ -5,7 +5,7 @@ from datetime import timedelta
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
 from pydantic.fields import FieldInfo
 
 from ..server.config import SAFE_DIRS
@@ -597,7 +597,7 @@ class Config(BaseModel):
     """
 
     # region: General Settings
-    media_path: str = ServerPathDirectory(".", title="媒体路径", initial_path=SAFE_DIRS[0].as_posix())
+    media_path: str = ServerPathDirectory("./media", title="媒体路径", initial_path=SAFE_DIRS[0].as_posix())
     softlink_path: str = ServerPathDirectory("softlink", title="软链接路径", ref_field="media_path")
     success_output_folder: str = ServerPathDirectory("JAV_output", title="成功输出目录", ref_field="media_path")
     failed_output_folder: str = ServerPathDirectory("failed", title="失败输出目录", ref_field="media_path")
@@ -1323,7 +1323,6 @@ class Config(BaseModel):
     window_title: str = Field(default="hide", title="窗口标题")
     switch_on: list[Switch] = Field(
         default_factory=lambda: [
-            Switch.AUTO_START,
             Switch.AUTO_EXIT,
             Switch.REST_SCRAPE,
             Switch.TIMED_SCRAPE,
@@ -1350,6 +1349,13 @@ class Config(BaseModel):
     statement: int = Field(default=3, title="声明")
     # endregion
 
+    @model_validator(mode="before")
+    def _update(cls, d: dict[str, Any]) -> dict[str, Any]:
+        """
+        处理版本变更.
+        """
+        return d
+
     @field_validator("timed_interval", "rest_time", mode="before")
     def convert_time_str_to_timedelta(cls, v):
         if isinstance(v, timedelta):
@@ -1359,7 +1365,7 @@ class Config(BaseModel):
             return timedelta(hours=h, minutes=m, seconds=s)
         return v
 
-    def to_legacy(self) -> dict[str, str | int | bool | float]:
+    def to_legacy(self) -> dict[str, Any]:
         """
         将 Pydantic 模型转换为可用于构造 ConfigSchema 的 dict.
 
@@ -1495,7 +1501,7 @@ COMPAT_RULES: list[CompatRule] = [
     Remove("show_moword", notes=["ConfigSchema.show_moword", "功能与命名模板冲突"]),
 ]
 if TYPE_CHECKING:
-    from .manager import ConfigSchema
+    from .v1 import ConfigSchema
 
     # 方便快速查看 ConfigSchema 的字段
     _ = [

@@ -5,7 +5,7 @@ from datetime import datetime
 
 from lxml import etree
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.crawlers.guochan import get_extra_info, get_number_list
 from mdcx.models.log_buffer import LogBuffer
 
@@ -86,7 +86,7 @@ async def main(
     LogBuffer.info().write(" \n    🌐 madouqu")
     debug_info = ""
     real_url = appoint_url
-    madouqu_url = getattr(config, "madouqu_website", False)
+    madouqu_url = getattr(manager.config_v1, "madouqu_website", False)
 
     try:
         if not real_url:
@@ -98,7 +98,7 @@ async def main(
                 # real_url = 'https://madouqu.com/?s=XSJ-138.%E5%85%BB%E5%AD%90%E7%9A%84%E7%A7%98%E5%AF%86%E6%95%99%E5%AD%A6EP6'
                 debug_info = f"请求地址: {real_url} "
                 LogBuffer.info().write(web_info + debug_info)
-                response, error = await config.async_client.get_text(real_url)
+                response, error = await manager.config_v1.async_client.get_text(real_url)
 
                 if response is None:
                     debug_info = f"网络请求错误: {error}"
@@ -115,7 +115,7 @@ async def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
-        response, error = await config.async_client.get_text(real_url)
+        response, error = await manager.config_v1.async_client.get_text(real_url)
 
         if response is None:
             debug_info = f"没有找到数据 {error} "

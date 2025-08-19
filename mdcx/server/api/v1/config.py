@@ -5,8 +5,9 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
-from mdcx.config.manager import ConfigSchema, config, manager
+from mdcx.config.manager import manager
 from mdcx.config.models import Config
+from mdcx.config.v1 import ConfigSchema
 from mdcx.utils.dataclass import update_existing
 
 from .utils import check_path_access
@@ -17,17 +18,17 @@ router = APIRouter(prefix="/config", tags=["配置管理"])
 @router.get("/", response_model=Config, operation_id="getCurrentConfig", summary="获取当前配置")
 async def get_config():
     manager.load()
-    return Config.from_legacy(asdict(config))
+    return Config.from_legacy(asdict(manager.config_v1))
 
 
 @router.put("/", operation_id="updateConfig", summary="更新配置")
 async def update_config(new_config: Config):
     # config 被用作全局变量, 必须就地更新
     # 由于 ConfigSchema 没有嵌套字段, 因此可以直接更新 __dict__
-    update_existing(config.__dict__, new_config.to_legacy())
-    config.init()
+    update_existing(manager.config_v1.__dict__, new_config.to_legacy())
+    manager.config_v1.init()
     manager.save()
-    return Config.from_legacy(asdict(config))
+    return Config.from_legacy(asdict(manager.config_v1))
 
 
 @router.delete("/", operation_id="deleteConfig", summary="删除配置文件")
@@ -44,7 +45,7 @@ async def reset_config():
     """将当前配置重置为默认值"""
     manager.reset()
     manager.load()
-    return Config.from_legacy(asdict(config))
+    return Config.from_legacy(asdict(manager.config_v1))
 
 
 @router.post("/create", operation_id="createConfig", summary="创建配置文件")
@@ -76,7 +77,7 @@ async def switch_config(
     new_path = str(new_path.resolve())
     manager.path = new_path
     errors = manager.load()
-    return ConfigSwitchResponse(config=Config.from_legacy(asdict(config)), errors=errors)
+    return ConfigSwitchResponse(config=Config.from_legacy(asdict(manager.config_v1)), errors=errors)
 
 
 @router.get("/schema", response_model=dict, operation_id="getConfigSchema", summary="获取配置架构")

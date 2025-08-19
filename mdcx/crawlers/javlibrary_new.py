@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.crawlers import javlibrary
 
 
@@ -12,12 +12,12 @@ async def main(
     **kwargs,
 ):
     all_language = (
-        config.title_language
-        + config.outline_language
-        + config.actor_language
-        + config.tag_language
-        + config.series_language
-        + config.studio_language
+        manager.config_v1.title_language
+        + manager.config_v1.outline_language
+        + manager.config_v1.actor_language
+        + manager.config_v1.tag_language
+        + manager.config_v1.series_language
+        + manager.config_v1.studio_language
     )
     appoint_url = appoint_url.replace("/cn/", "/ja/").replace("/tw/", "/ja/")
     json_data = await javlibrary.main(number, appoint_url, "jp")

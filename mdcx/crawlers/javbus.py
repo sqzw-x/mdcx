@@ -4,7 +4,7 @@ import time
 
 from lxml import etree
 
-from mdcx.config.manager import config
+from mdcx.config.manager import manager
 from mdcx.models.log_buffer import LogBuffer
 
 
@@ -152,7 +152,7 @@ async def get_real_url(
     debug_info = f"搜索地址: {url_search} "
     LogBuffer.info().write(debug_info)
     # ========================================================================搜索番号
-    html_search, error = await config.async_client.get_text(url_search, headers=headers)
+    html_search, error = await manager.config_v1.async_client.get_text(url_search, headers=headers)
     # 判断是否需要登录
     if html_search is None:
         debug_info = f"网络请求错误: {error} "
@@ -190,9 +190,9 @@ async def main(
     website_name = "javbus"
     LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
-    javbus_url = getattr(config, "javbus_website", "https://www.javbus.com")
-    headers = config.headers
-    cookie = config.javbus
+    javbus_url = getattr(manager.config_v1, "javbus_website", "https://www.javbus.com")
+    headers = manager.config_v1.headers
+    cookie = manager.config_v1.javbus
     headers_o = {
         "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6",
         "cookie": cookie,
@@ -225,7 +225,7 @@ async def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(debug_info)
-        htmlcode, error = await config.async_client.get_text(real_url, headers=headers)
+        htmlcode, error = await manager.config_v1.async_client.get_text(real_url, headers=headers)
 
         # 判断是否需要登录
         if htmlcode is None:
@@ -260,7 +260,7 @@ async def main(
             else:
                 real_url = await get_real_url(number, "censored", javbus_url, json_log, headers, cookie)
 
-            htmlcode, error = await config.async_client.get_text(real_url, headers=headers)
+            htmlcode, error = await manager.config_v1.async_client.get_text(real_url, headers=headers)
             if htmlcode is None:
                 debug_info = "未匹配到番号！"
                 LogBuffer.info().write(debug_info)
