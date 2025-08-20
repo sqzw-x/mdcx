@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Never
 
 from parsel import Selector
+from patchright.async_api import Browser
 
 from mdcx.config.models import Website
 from mdcx.models.types import CrawlerInput, CrawlerResponse, CrawlerResult
@@ -25,9 +26,10 @@ class GenericBaseCrawler[T: Context = Context](ABC):
     由于爬取逻辑因网站而异, 在最极端情况下可以重写 `_run` 方法以完全自定义爬取流程.
     """
 
-    def __init__(self, client: "AsyncWebClient", base_url: str = ""):
+    def __init__(self, client: "AsyncWebClient", base_url: str = "", browser: Browser | None = None):
         self.async_client = client
         self.base_url: str = base_url or self.base_url_()
+        self.browser = browser
 
     @classmethod
     @abstractmethod
