@@ -3,7 +3,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import timedelta
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
 from pydantic.fields import FieldInfo
@@ -562,6 +562,9 @@ class Website(Enum):
     DAHLIA = "dahlia"
     GETCHU_DMM = "getchu_dmm"
     OFFICIAL = "official"
+
+
+WebsiteSupportBrowser = Literal[Website.DMM]
 
 
 class Language(Enum):
@@ -1305,6 +1308,12 @@ class Config(BaseModel):
     theporndb_api_token: str = Field(default="", title="Theporndb API令牌")
     javdb: str = Field(default="", title="Javdb")
     javbus: str = Field(default="", title="Javbus")
+    headless_browser_sites: list[WebsiteSupportBrowser] = Field(
+        default_factory=lambda: [
+            Website.DMM,
+        ],
+        title="使用无头浏览器进行请求的网站",
+    )
     # endregion
 
     # region: Log Settings
@@ -1424,7 +1433,7 @@ class Config(BaseModel):
             elif isinstance(rule, Remove):
                 schema_dict.pop(rule.name, None)
             elif isinstance(rule, Add):
-                pass
+                schema_dict.pop(rule.name, None)
 
         return schema_dict
 
@@ -1448,6 +1457,13 @@ class Config(BaseModel):
         def handle_dict(model_fields: dict[str, FieldInfo], data: dict[str, Any]) -> dict[str, Any]:
             for name, info in model_fields.items():
                 assert info.annotation is not None, f"Field {name} has no annotation"
+                # 处理嵌套
+                if issubclass(info.annotation, BaseModel):
+                    sub_dict = handle_dict(info.annotation.model_fields, data)
+                    data[name] = sub_dict
+                    continue
+                if name not in data:
+                    continue
                 if "list" in str(info.annotation):
                     if name in (
                         "media_type",
@@ -1464,10 +1480,6 @@ class Config(BaseModel):
                 if info.annotation is type(timedelta) and re.match(r"^\d{2}:\d{2}:\d{2}$", data[name]):
                     h, m, s = map(int, data[name].split(":"))
                     data[name] = timedelta(hours=h, minutes=m, seconds=s)
-                # 处理嵌套
-                if issubclass(info.annotation, BaseModel):
-                    sub_dict = handle_dict(info.annotation.model_fields, data)
-                    data[name] = sub_dict
             return data
 
         data = handle_dict(cls.model_fields, data)
@@ -1515,6 +1527,7 @@ COMPAT_RULES: list[CompatRule] = [
     Rename("tag_include", "nfo_tag_include", notes=["ConfigSchema.tag_include", Config().nfo_tag_include, "澄清语义"]),
     Remove("show_4k", notes=["ConfigSchema.show_4k", "功能与命名模板冲突"]),
     Remove("show_moword", notes=["ConfigSchema.show_moword", "功能与命名模板冲突"]),
+    Add("headless_browser_sites", notes=[Config().headless_browser_sites]),
 ]
 if TYPE_CHECKING:
     from .v1 import ConfigSchema

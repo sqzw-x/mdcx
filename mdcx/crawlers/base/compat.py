@@ -32,7 +32,7 @@ class LegacyCrawler:
         """与 `GenericBaseCrawler.site` 兼容的方法."""
         return self.site_
 
-    def __call__(self, client, base_url):
+    def __call__(self, client, base_url, *args, **kwargs) -> "LegacyCrawler":
         return self
 
     async def run(self, input: CrawlerInput) -> CrawlerResponse:

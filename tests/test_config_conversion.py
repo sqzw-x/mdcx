@@ -19,7 +19,14 @@ from tests.random_generator import generate_random_pydantic_instance
 
 def generate_random_config() -> Config:
     """生成具有随机字段值的 Config 实例"""
-    r = generate_random_pydantic_instance(Config, no_default=True, allow_default=["website_set"])
+    r = generate_random_pydantic_instance(
+        Config,
+        no_default=True,
+        allow_default=[
+            "website_set",
+            "headless_browser_sites",
+        ],
+    )
     d = r.model_dump(mode="json")
 
     errors = []

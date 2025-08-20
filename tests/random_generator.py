@@ -2,7 +2,7 @@ import random
 import string
 from datetime import timedelta
 from enum import Enum
-from typing import Any, Union, get_args, get_origin
+from typing import Any, Literal, Union, get_args, get_origin
 
 from pydantic import BaseModel, HttpUrl
 from pydantic.fields import FieldInfo
@@ -110,7 +110,10 @@ def generate_random_value_for_type(field_type: type, field_info: FieldInfo | Non
             else:
                 # 生成随机数量的列表项
                 size = random.randint(1, 5)
-                return [generate_random_value_for_type(item_type) for _ in range(size)]
+                v = [generate_random_value_for_type(item_type) for _ in range(size)]
+                if len(set(v)) != len(v):  # 存在重复值
+                    print(f"生成的列表存在重复值: {v}")
+                return list(dict.fromkeys(v))  # 去重
         else:
             return []
 
@@ -160,6 +163,12 @@ def generate_random_value_for_type(field_type: type, field_info: FieldInfo | Non
     elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
         return generate_random_pydantic_instance(field_type)
 
+    # Literal 类型
+    elif origin is Literal:
+        if args:
+            return random.choice(args)
+        else:
+            raise ValueError("Literal type must have args")
     else:
         raise ValueError(f"Unsupported field type: {field_type}")
 
