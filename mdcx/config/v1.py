@@ -366,44 +366,6 @@ class ConfigSchema:
         # 是否记录刮削成功列表
         self.record_success_file = "record_success_file" in self.no_escape
 
-        # 是否清理文件以及清理列表
-        can_clean = "i_know" in self.clean_enable and "i_agree" in self.clean_enable
-        can_clean_auto = can_clean and "clean_auto" in self.clean_enable
-        clean_ext_list = (
-            re.split(r"[|｜，,]", self.clean_ext)
-            if can_clean and self.clean_ext and "clean_ext" in self.clean_enable
-            else []
-        )
-        clean_name_list = (
-            re.split(r"[|｜，,]", self.clean_name)
-            if can_clean and self.clean_name and "clean_name" in self.clean_enable
-            else []
-        )
-        clean_contains_list = (
-            re.split(r"[|｜，,]", self.clean_contains)
-            if can_clean and self.clean_contains and "clean_contains" in self.clean_enable
-            else []
-        )
-        clean_size_list = self.clean_size if can_clean and "clean_size" in self.clean_enable else None
-        clean_ignore_ext_list = (
-            re.split(r"[|｜，,]", self.clean_ignore_ext)
-            if can_clean and self.clean_ignore_ext and "clean_ignore_ext" in self.clean_enable
-            else []
-        )
-        clean_ignore_contains_list = (
-            re.split(r"[|｜，,]", self.clean_ignore_contains)
-            if can_clean and self.clean_ignore_contains and "clean_ignore_contains" in self.clean_enable
-            else []
-        )
-        self.can_clean = can_clean
-        self.can_clean_auto = can_clean_auto
-        self.clean_ext_list = clean_ext_list
-        self.clean_name_list = clean_name_list
-        self.clean_contains_list = clean_contains_list
-        self.clean_size_list = clean_size_list
-        self.clean_ignore_ext_list = clean_ignore_ext_list
-        self.clean_ignore_contains_list = clean_ignore_contains_list
-
         # 获取排除字符列表
         temp_list = re.split("[,，]", self.string) + ManualConfig.REPL_LIST
         self.escape_string_list = []

@@ -4,19 +4,21 @@ import re
 import shutil
 import time
 import traceback
+from pathlib import Path
 
 import aiofiles
 import aiofiles.os
 
 from mdcx.config.extend import get_movie_path_setting, need_clean
 from mdcx.config.manager import manager
+from mdcx.config.models import CleanAction
 from mdcx.config.resources import resources
 from mdcx.consts import IS_WINDOWS
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.signals import signal
-from mdcx.utils import convert_path, get_current_time, get_used_time, nfd2c, split_path
+from mdcx.utils import convert_path, get_current_time, get_used_time, split_path
 from mdcx.utils.file import (
     copy_file_async,
     copy_file_sync,
@@ -24,7 +26,6 @@ from mdcx.utils.file import (
     delete_file_sync,
     move_file_async,
     read_link_async,
-    read_link_sync,
 )
 
 
@@ -231,17 +232,17 @@ async def check_and_clean_files() -> None:
     succ = 0
     fail = 0
     # 只有主界面点击会运行此函数, 因此此 walk 无需后台执行
-    for root, dirs, files in os.walk(movie_path, topdown=True):
+    for root, dirs, files in Path(movie_path).walk(top_down=True):
         for f in files:
             # 判断清理文件
-            path = os.path.join(root, f)
+            path = root / f
             file_type_current = os.path.splitext(f)[1]
             if need_clean(path, f, file_type_current):
                 total += 1
                 result, error_info = delete_file_sync(path)
                 if result:
                     succ += 1
-                    signal.show_log_text(f" 🗑 Clean: {path} ")
+                    signal.show_log_text(f" 🗑 Clean: {str(path)} ")
                 else:
                     fail += 1
                     signal.show_log_text(f" 🗑 Clean error: {error_info} ")
@@ -282,10 +283,8 @@ async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path
         i = 100
         skip = 0
         skip_repeat_softlink = 0
-        for root, dirs, files in os.walk(movie_path):
-            # 文件夹是否在排除目录
-            root = os.path.join(root, "").replace("\\", "/")
-            if "behind the scenes" in root or root in escape_folder_list:
+        for root, dirs, files in Path(movie_path).walk():
+            if "behind the scenes" in root.as_posix() or root.as_posix() in escape_folder_list:
                 dirs[:] = []  # 忽略当前文件夹子目录
                 continue
 
@@ -308,8 +307,8 @@ async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path
                         continue
 
                     # 判断清理文件
-                    path = os.path.join(root, f)
-                    if need_clean(path, f, file_ext):
+                    path = root / f
+                    if CleanAction.AUTO_CLEAN in manager.config.clean_enable and need_clean(path, f, file_ext):
                         result, error_info = delete_file_sync(path)
                         if result:
                             signal.show_log_text(f" 🗑 Clean: {path} ")
@@ -321,7 +320,7 @@ async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path
                     temp_total = []
                     if file_ext.lower() in media_type:
                         if os.path.islink(path):
-                            real_path = read_link_sync(path)
+                            real_path = path.readlink()
                             # 清理失效的软链接文件
                             if "check_symlink" in manager.config_v1.no_escape and not os.path.exists(real_path):
                                 result, error_info = delete_file_sync(path)
@@ -342,12 +341,8 @@ async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path
                             continue
                         else:
                             temp_total.append(path)
-                        # mac 转换成 NFC，因为mac平台nfc和nfd指向同一个文件，windows平台指向不同文件
-                        if not IS_WINDOWS:
-                            path = nfd2c(path)
-                        new_path = convert_path(path)
-                        if not_skip_success or new_path not in Flags.success_list:
-                            total.append(new_path)
+                        if not_skip_success or str(path) not in Flags.success_list:
+                            total.append(str(path))
                         else:
                             skip += 1
 

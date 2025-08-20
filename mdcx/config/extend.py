@@ -1,7 +1,8 @@
-import os
 import re
+from pathlib import Path
 
 from mdcx.config.manager import manager
+from mdcx.config.models import CleanAction
 from mdcx.manual import ManualConfig
 from mdcx.utils import convert_path, nfd2c, split_path
 from mdcx.utils.path import get_path
@@ -74,41 +75,39 @@ def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str,
     )
 
 
-def need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
+def need_clean(file_path: Path, file_name: str, file_ext: str) -> bool:
     # 判断文件是否需清理
-    if not manager.config_v1.can_clean:
+    if not manager.config.can_clean:
         return False
 
     # 不清理的扩展名
-    if file_ext in manager.config_v1.clean_ignore_ext_list:
+    if CleanAction.CLEAN_IGNORE_EXT in manager.config.clean_enable and file_ext in manager.config.clean_ignore_ext:
         return False
 
     # 不清理的文件名包含
-    for each in manager.config_v1.clean_ignore_contains_list:
-        if each in file_name:
-            return False
+    if CleanAction.CLEAN_IGNORE_CONTAINS in manager.config.clean_enable:
+        for each in manager.config.clean_ignore_contains:
+            if each in file_name:
+                return False
 
     # 清理的扩展名
-    if file_ext in manager.config_v1.clean_ext_list:
+    if CleanAction.CLEAN_EXT in manager.config.clean_enable and file_ext in manager.config.clean_ext:
         return True
 
     # 清理的文件名等于
-    if file_name in manager.config_v1.clean_name_list:
+    if CleanAction.CLEAN_NAME in manager.config.clean_enable and file_name in manager.config.clean_name:
         return True
 
     # 清理的文件名包含
-    for each in manager.config_v1.clean_contains_list:
-        if each in file_name:
-            return True
+    if CleanAction.CLEAN_CONTAINS in manager.config.clean_enable:
+        for each in manager.config.clean_contains:
+            if each in file_name:
+                return True
 
     # 清理的文件大小<=(KB)
-    if os.path.islink(file_path):
-        file_path = os.readlink(file_path)
-    if manager.config_v1.clean_size_list is not None:
+    if CleanAction.CLEAN_SIZE in manager.config.clean_enable:
         try:  # 路径太长时，此处会报错 FileNotFoundError: [WinError 3] 系统找不到指定的路径。
-            stat_result = os.stat(file_path)
-            if stat_result.st_size <= manager.config_v1.clean_size_list * 1024:
-                return True
+            return file_path.stat().st_size <= manager.config.clean_size * 1024
         except Exception:
             pass
     return False

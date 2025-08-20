@@ -1698,7 +1698,7 @@ class MyMAinWindow(QMainWindow):
 
     # 设置-刮削目录 点击检查待刮削目录并清理文件
     def pushButton_check_and_clean_files_clicked(self):
-        if not manager.config_v1.can_clean:
+        if not manager.config.can_clean:
             self.pushButton_save_config_clicked()
         self.pushButton_show_log_clicked()
         try:

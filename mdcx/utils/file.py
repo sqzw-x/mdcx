@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import traceback
+from pathlib import Path
 
 import aiofiles.os
 from PIL import Image
@@ -12,7 +13,7 @@ from mdcx.signals import signal
 from mdcx.utils import split_path
 
 
-def delete_file_sync(file_path: str):
+def delete_file_sync(file_path: str | Path):
     try:
         if not os.path.exists(file_path) and not os.path.islink(file_path):  # 不删除无效的符号链接
             return True, ""

@@ -691,7 +691,7 @@ class Config(BaseModel):
         ],
         title="清理规则: 文件名包含",
     )
-    clean_size: float = Field(default=0.0, title="清理小于此大小的文件（MB）")
+    clean_size: float = Field(default=0.0, title="清理小于此大小的文件（KB）")
     clean_ignore_ext: list[str] = Field(
         default_factory=list,
         title="清理规则: 排除扩展名",
@@ -1494,6 +1494,9 @@ class Config(BaseModel):
     @lru_cache
     def json_schema(cls) -> dict[str, Any]:
         return cls.model_json_schema()
+
+    def model_post_init(self, context) -> None:
+        self.can_clean = CleanAction.I_KNOW in self.clean_enable and CleanAction.I_AGREE in self.clean_enable
 
 
 @dataclass
