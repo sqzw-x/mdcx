@@ -131,7 +131,7 @@ class MonoParser(DetailPageParser):
 
     @override
     async def outline(self, ctx, html) -> str:
-        return extract_text(html, c(".wrapper-detailContents~div>p::text"))
+        return "\n".join(extract_all_texts(html, c(".wrapper-detailContents~div>p.mg-b20::text")))
 
     @override
     async def score(self, ctx, html) -> str:
