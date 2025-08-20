@@ -250,7 +250,7 @@ class ConfigSchema:
     api_key: str = r"ee9a2f2419704257b1dd60b975f2d64e"
     user_id: str = r""
     emby_on: str = r"actor_info_zh_cn,actor_info_miss,actor_photo_net,actor_photo_miss,"
-    use_database: int = 0
+    use_database: bool = False
     info_database_path: str = r""
     gfriends_github: str = r"https://github.com/gfriends/gfriends"
     actor_photo_folder: str = r""

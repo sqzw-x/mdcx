@@ -910,7 +910,7 @@ def load_config(self: "MyMAinWindow"):
         # 演员数据库路径
         self.Ui.lineEdit_actor_db_path.setText(convert_path(manager.config_v1.info_database_path))
         # 演员数据库
-        self.Ui.checkBox_actor_db.setChecked(manager.config_v1.use_database == 1)
+        self.Ui.checkBox_actor_db.setChecked(manager.config_v1.use_database)
         # endregion
 
         # region mark

@@ -474,7 +474,7 @@ def save_config(self: "MyMAinWindow"):
         manager.config_v1.gfriends_github = "https://github.com/gfriends/gfriends"
     elif "://" not in manager.config_v1.gfriends_github:
         manager.config_v1.gfriends_github = "https://" + manager.config_v1.gfriends_github
-    manager.config_v1.use_database = 1 if self.Ui.checkBox_actor_db.isChecked() else 0
+    manager.config_v1.use_database = self.Ui.checkBox_actor_db.isChecked()
     if manager.config_v1.use_database:
         ActressDB.init_db()
 

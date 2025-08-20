@@ -741,7 +741,7 @@ class Config(BaseModel):
     # region: Server Settings
     server_type: str = Field(default="emby", title="服务器类型")
     emby_url: HttpUrl = Field(default=HttpUrl("http://127.0.0.1:8096"), title="Emby网址")
-    api_key: str = Field(default="ee9a2f2419704257b1dd60b975f2d64e", title="API密钥")
+    api_key: str = Field(default="", title="API密钥")
     user_id: str = Field(default="", title="用户ID")
     emby_on: list[EmbyAction] = Field(
         default_factory=lambda: [
@@ -759,7 +759,7 @@ class Config(BaseModel):
         ],
         title="Emby功能开关",
     )
-    use_database: int = Field(default=0, title="使用数据库")
+    use_database: bool = Field(default=False, title="使用数据库")
     info_database_path: str = Field(default="", title="信息数据库路径")
     gfriends_github: HttpUrl = Field(default=HttpUrl("https://github.com/gfriends/gfriends"), title="Gfriends Github")
     actor_photo_folder: str = Field(default="", title="演员照片目录")
@@ -851,12 +851,14 @@ class Config(BaseModel):
     @model_validator(mode="before")
     def _update(cls, d: dict[str, Any]) -> dict[str, Any]:
         """
-        处理版本变更.
+        处理字段变更.
         """
         if "proxy_type" in d:
             d["use_proxy"] = d["proxy_type"] != "no"
         if isinstance(r := d.get("nfo_tag_actor_contains"), str):
             d["nfo_tag_actor_contains"] = str_to_list(r, "|")
+        if isinstance(r := d.get("use_database"), int):
+            d["use_database"] = bool(r)
         return d
 
     @field_validator("timed_interval", "rest_time", mode="before")

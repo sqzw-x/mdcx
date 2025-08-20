@@ -52,7 +52,7 @@ async def update_emby_actor_info() -> None:
     signal.change_buttons_status.emit()
     start_time = time.time()
     emby_on = manager.config_v1.emby_on
-    server_name = "Emby" if "emby" in manager.config_v1.server_type else "Jellyfin"
+    server_name = "Emby" if "emby" in manager.config.server_type else "Jellyfin"
     signal.show_log_text(f"👩🏻 开始补全 {server_name} 演员信息...")
 
     actor_list = await _get_emby_actor_list()
@@ -120,7 +120,7 @@ async def _process_actor_async(actor: dict, emby_on) -> tuple[int, str]:
             if result:  # 成功
                 wiki_found = 1
         # db
-        if manager.config_v1.use_database:
+        if manager.config.use_database:
             if "数据库补全" in overview and "actor_info_miss" in emby_on:  # 已有数据库信息
                 db_exist = 0
                 logs.append(f"{actor_name}: 已有数据库信息")

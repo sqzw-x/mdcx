@@ -20,7 +20,7 @@ from mdcx.utils import get_used_time
 
 async def update_emby_actor_photo() -> None:
     signal.change_buttons_status.emit()
-    server_type = manager.config_v1.server_type
+    server_type = manager.config.server_type
     if "emby" in server_type:
         signal.show_log_text("👩🏻 开始补全 Emby 演员头像...")
     else:
@@ -33,25 +33,23 @@ async def update_emby_actor_photo() -> None:
 
 
 async def _get_emby_actor_list() -> list:
+    url = str(manager.config.emby_url)
     # 获取 emby 的演员列表
-    if "emby" in manager.config_v1.server_type:
+    if "emby" in manager.config.server_type:
         server_name = "Emby"
-        url = manager.config_v1.emby_url + "/emby/Persons?api_key=" + manager.config_v1.api_key
+        url += "/emby/Persons?api_key=" + manager.config.api_key
         # http://192.168.5.191:8096/emby/Persons?api_key=ee9a2f2419704257b1dd60b975f2d64e
         # http://192.168.5.191:8096/emby/Persons/梦乃爱华?api_key=ee9a2f2419704257b1dd60b975f2d64e
     else:
         server_name = "Jellyfin"
-        url = manager.config_v1.emby_url + "/Persons?api_key=" + manager.config_v1.api_key
+        url += "/Persons?api_key=" + manager.config.api_key
 
-    if manager.config_v1.user_id:
-        url += f"&userid={manager.config_v1.user_id}"
+    if manager.config.user_id:
+        url += f"&userid={manager.config.user_id}"
 
     signal.show_log_text(f"⏳ 连接 {server_name} 服务器...")
 
-    if manager.config_v1.emby_url == "":
-        signal.show_log_text(f"🔴 {server_name} 地址未填写！")
-        signal.show_log_text("================================================================================")
-    if manager.config_v1.api_key == "":
+    if not manager.config.api_key:
         signal.show_log_text(f"🔴 {server_name} API 密钥未填写！")
         signal.show_log_text("================================================================================")
 
@@ -82,9 +80,9 @@ async def _upload_actor_photo(url, pic_path):
 
 
 def _generate_server_url(actor_js):
-    server_type = manager.config_v1.server_type
-    emby_url = manager.config_v1.emby_url
-    api_key = manager.config_v1.api_key
+    server_type = manager.config.server_type
+    emby_url = str(manager.config.emby_url)
+    api_key = manager.config.api_key
     actor_name = actor_js["Name"].replace(" ", "%20")
     actor_id = actor_js["Id"]
     server_id = actor_js["ServerId"]
@@ -109,8 +107,8 @@ def _generate_server_url(actor_js):
 
 
 async def _get_gfriends_actor_data():
-    emby_on = manager.config_v1.emby_on
-    gfriends_github = manager.config_v1.gfriends_github
+    emby_on = manager.config.emby_on
+    gfriends_github = manager.config.gfriends_github
     raw_url = f"{gfriends_github}".replace("github.com/", "raw.githubusercontent.com/").replace("://www.", "://")
     # 'https://raw.githubusercontent.com/gfriends/gfriends'
 
@@ -393,7 +391,7 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
 
 def _get_local_actor_photo():
     """This function is intended to be sync."""
-    actor_photo_folder = manager.config_v1.actor_photo_folder
+    actor_photo_folder = manager.config.actor_photo_folder
     if actor_photo_folder == "" or not os.path.isdir(actor_photo_folder):
         signal.show_log_text("🔴 本地头像库文件夹不存在！补全已停止！")
         signal.show_log_text("================================================================================")
