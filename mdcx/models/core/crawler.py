@@ -63,7 +63,7 @@ async def _call_crawler(task_input: CrawlerInput, website: Website, timeout: flo
 
     # 获取爬虫函数
     crawler = get_crawler_compat(website)
-    c = crawler(manager.config_v1.async_client, manager.config_v1.get_website_base_url(website))
+    c = crawler(manager.computed.async_client, manager.config_v1.get_website_base_url(website))
 
     # 对爬虫函数调用添加超时限制, 超时异常由调用者处理
     if os.getenv("DEBUG"):

@@ -226,7 +226,7 @@ async def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # 先使用scraper方法请求，失败时再使用get请求
-            html_search, error = await manager.config_v1.async_client.get_text(url_search, headers=header)
+            html_search, error = await manager.computed.async_client.get_text(url_search, headers=header)
             if html_search is None:
                 # 判断返回内容是否有问题
                 if "HTTP 403" in error:
@@ -270,7 +270,7 @@ async def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            html_info, error = await manager.config_v1.async_client.get_text(real_url, headers=header)
+            html_info, error = await manager.computed.async_client.get_text(real_url, headers=header)
             if html_info is None:
                 debug_info = f"请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)
@@ -294,7 +294,7 @@ async def main(
             if "/password_resets" in html_info:
                 debug_info = f"此內容需要登入才能查看或操作！点击 {real_url} 查看详情！"
                 LogBuffer.info().write(web_info + debug_info)
-                if manager.config_v1.javdb:
+                if manager.config.javdb:
                     debug_info = "Cookie 已失效，请到设置中更新 javdb Cookie！"
                     LogBuffer.info().write(web_info + debug_info)
                 else:

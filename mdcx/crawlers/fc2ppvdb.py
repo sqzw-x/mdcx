@@ -80,7 +80,7 @@ async def main(
         debug_info = f"番号地址: {real_url}"
         LogBuffer.info().write(web_info + debug_info)
         # ========================================================================番号详情页
-        html_content, error = await manager.config_v1.async_client.get_text(url_search)
+        html_content, error = await manager.computed.async_client.get_text(url_search)
         if html_content is None:
             debug_info = f"网络请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)

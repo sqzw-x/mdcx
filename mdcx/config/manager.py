@@ -7,7 +7,7 @@ from warnings import deprecated
 from mdcx.consts import MAIN_PATH, MARK_FILE
 from mdcx.manual import ManualConfig
 
-from .models import Config
+from .models import Computed, Config
 from .v1 import ConfigSchema, load_v1
 
 
@@ -15,6 +15,7 @@ class ConfigManager:
     def __init__(self):
         self._get_config_path()
         self.config = Config()
+        self.computed = Computed(self.config)
         self._config_v1 = ConfigSchema(**self.config.to_legacy())
         self._config_v1.init()
 
@@ -39,6 +40,7 @@ class ConfigManager:
             return self.handle_v1()
         try:
             self.config = Config.model_validate_json(self._path.read_text(encoding="UTF-8"))
+            self.computed = Computed(self.config)
             self._config_v1 = ConfigSchema(**self.config.to_legacy())
             return []
         except Exception as e:
@@ -60,6 +62,7 @@ class ConfigManager:
         self._config_v1 = ConfigSchema(**d)
         self._config_v1.init()
         self.config = self._config_v1.to_pydantic_model()
+        self.computed = Computed(self.config)
         self.save()
         return errors
 

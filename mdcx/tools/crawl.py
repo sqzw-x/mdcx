@@ -15,6 +15,7 @@ from mdcx.crawlers import get_crawler_compat
 from mdcx.crawlers.base import get_crawler
 from mdcx.manual import ManualConfig
 from mdcx.models.types import CrawlerInput
+from mdcx.utils import executor
 from mdcx.web_async import AsyncWebClient
 
 app = typer.Typer(help="爬虫调试工具", context_settings={"help_option_names": ["-h", "--help"]})
@@ -88,15 +89,15 @@ def _crawl(sites: list[Website], input: CrawlerInput, output: str | None, proxy:
 
     # v1 crawler 内部直接使用 config.async_client, 必须复用同一个 evantloop 以避免 Future attached to a different loop 错误
     client = AsyncWebClient(
-        loop=manager.config_v1.executor._loop,
-        proxy=proxy or manager.config_v1.httpx_proxy,
+        loop=executor._loop,
+        proxy=proxy or manager.config.httpx_proxy,
         retry=retry,
         timeout=timeout,
         log_fn=lambda msg: print(f"[dim][AsyncWebClient] {msg}[/dim]"),
     )
     crawlers = [c(client=client, base_url=manager.config_v1.get_website_base_url(c.site())) for c in classes]
-    futures = [manager.config_v1.executor.submit(crawler.run(input)) for crawler in crawlers]
-    manager.config_v1.executor.wait_all()
+    futures = [executor.submit(crawler.run(input)) for crawler in crawlers]
+    executor.wait_all()
 
     for i, f in enumerate(futures):
         print(f"\n[blue]====== Res from site: [bold]{sites[i]}[/bold] ======[/blue]")
@@ -163,7 +164,7 @@ def show_config():
     """显示当前配置信息"""
     console.print("[bold blue]当前配置信息:[/bold blue]")
     console.print()
-    console.print(f"代理: {manager.config_v1.httpx_proxy or '未设置'}")
+    console.print(f"代理: {manager.config.httpx_proxy or '未设置'}")
     console.print(f"超时时间: {manager.config_v1.timeout} 秒")
     console.print(f"重试次数: {manager.config_v1.retry}")
     console.print(f"配置文件路径: {manager.path}")
@@ -192,7 +193,7 @@ async def _fetch_async(
     """异步获取详情页内容"""
 
     # 配置网络客户端
-    client_proxy = proxy or manager.config_v1.httpx_proxy
+    client_proxy = proxy or manager.config.httpx_proxy
     client_timeout = timeout or manager.config_v1.timeout
     client_retry = retry or manager.config_v1.retry
 

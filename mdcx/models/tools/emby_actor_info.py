@@ -100,7 +100,7 @@ async def _process_actor_async(actor: dict, emby_on) -> tuple[int, str]:
         actor_id = actor.get("Id", "")
         # 已有资料时跳过
         actor_homepage, actor_person, _, _, _, update_url = _generate_server_url(actor)
-        res, error = await manager.config_v1.async_client.get_json(actor_person, use_proxy=False)
+        res, error = await manager.computed.async_client.get_json(actor_person, use_proxy=False)
         if res is None:
             return 0, f"🔴 {actor_name}: Emby/Jellyfin 获取演员信息错误！\n    错误信息: {error}"
 
@@ -130,7 +130,7 @@ async def _process_actor_async(actor: dict, emby_on) -> tuple[int, str]:
         # summary
         summary = "\n    " + "\n".join(logs) if logs else ""
         if db_exist or wiki_found:
-            res, error = await manager.config_v1.async_client.post_text(
+            res, error = await manager.computed.async_client.post_text(
                 update_url, json_data=actor_info.dump(), use_proxy=False
             )
             if res is not None:
@@ -213,7 +213,7 @@ async def show_emby_actor_list(mode: int) -> None:
                 count += 1
             else:
                 # http://192.168.5.191:8096/emby/Persons/梦乃爱华?api_key=ee9a2f2419704257b1dd60b975f2d64e
-                res, error = await manager.config_v1.async_client.get_json(actor_person, use_proxy=False)
+                res, error = await manager.computed.async_client.get_json(actor_person, use_proxy=False)
                 if res is None:
                     signal.show_log_text(
                         f"\n🔴 {count}/{total} Emby 获取演员信息错误！👩🏻 {actor_name} \n    错误信息: {error}"

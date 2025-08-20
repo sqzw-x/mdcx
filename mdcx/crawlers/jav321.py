@@ -131,7 +131,7 @@ async def main(
         else:
             debug_info = f'搜索地址: {result_url} {{"sn": {number}}}'
             LogBuffer.info().write(web_info + debug_info)
-        response, error = await manager.config_v1.async_client.post_text(result_url, data={"sn": number})
+        response, error = await manager.computed.async_client.post_text(result_url, data={"sn": number})
         if response is None:
             debug_info = f"网络请求错误: {error}"
             LogBuffer.info().write(web_info + debug_info)

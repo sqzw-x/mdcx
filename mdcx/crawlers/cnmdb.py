@@ -110,7 +110,7 @@ async def main(
         if real_url:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            response, error = await manager.config_v1.async_client.get_text(real_url)
+            response, error = await manager.computed.async_client.get_text(real_url)
             if response is not None:
                 detail_page = etree.fromstring(response, etree.HTMLParser())
                 result, number, title, actor, real_url, cover_url, studio, series = get_detail_info(
@@ -128,7 +128,7 @@ async def main(
                 real_url = "https://cnmdb.net/" + each
                 debug_info = f"请求地址: {real_url} "
                 LogBuffer.info().write(web_info + debug_info)
-                response, error = await manager.config_v1.async_client.get_text(real_url)
+                response, error = await manager.computed.async_client.get_text(real_url)
                 if response is not None:
                     detail_page = etree.fromstring(response, etree.HTMLParser())
                     result, number, title, actor, real_url, cover_url, studio, series = get_detail_info(
@@ -143,7 +143,7 @@ async def main(
                     search_url = f"https://cnmdb.net/s0?q={each}"
                     debug_info = f"请求地址: {search_url} "
                     LogBuffer.info().write(web_info + debug_info)
-                    response, error = await manager.config_v1.async_client.get_text(search_url)
+                    response, error = await manager.computed.async_client.get_text(search_url)
                     if response is None:
                         debug_info = f"网络请求错误: {error}"
                         LogBuffer.info().write(web_info + debug_info)

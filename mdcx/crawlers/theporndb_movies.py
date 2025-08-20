@@ -265,7 +265,7 @@ async def main(
     website_name = "theporndb"
     LogBuffer.req().write(f"-> {website_name}")
 
-    api_token = manager.config_v1.theporndb_api_token
+    api_token = manager.config.theporndb_api_token
     real_url = appoint_url.replace("//theporndb", "//api.theporndb")
     title = ""
     cover_url = ""
@@ -296,7 +296,7 @@ async def main(
                 url_hash = f"https://api.theporndb.net/movies/hash/{hash}"
                 debug_info = f"请求地址: {url_hash} "
                 LogBuffer.info().write(web_info + debug_info)
-                hash_search, error = await manager.config_v1.async_client.get_json(url_hash, headers=headers)
+                hash_search, error = await manager.computed.async_client.get_json(url_hash, headers=headers)
 
                 if hash_search is None:
                     # 判断返回内容是否有问题
@@ -339,7 +339,7 @@ async def main(
                     url_search = f"https://api.theporndb.net/movies?q={search_keyword}&per_page=100"
                     debug_info = f"请求地址: {url_search} "
                     LogBuffer.info().write(web_info + debug_info)
-                    res_search, error = await manager.config_v1.async_client.get_json(url_search, headers=headers)
+                    res_search, error = await manager.computed.async_client.get_json(url_search, headers=headers)
 
                     if res_search is None:
                         # 判断返回内容是否有问题
@@ -361,7 +361,7 @@ async def main(
         if real_url and not hash_data:
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
-            res_real, error = await manager.config_v1.async_client.get_json(real_url, headers=headers)
+            res_real, error = await manager.computed.async_client.get_json(real_url, headers=headers)
             if res_real is None:
                 # 判断返回内容是否有问题
                 debug_info = f"请求错误: {error} "

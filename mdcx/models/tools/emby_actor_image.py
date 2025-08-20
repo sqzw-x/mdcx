@@ -55,7 +55,7 @@ async def _get_emby_actor_list() -> list:
         signal.show_log_text(f"🔴 {server_name} API 密钥未填写！")
         signal.show_log_text("================================================================================")
 
-    response, error = await manager.config_v1.async_client.get_json(url, use_proxy=False)
+    response, error = await manager.computed.async_client.get_json(url, use_proxy=False)
     if response is None:
         signal.show_log_text(f"🔴 {server_name} 连接失败！请检查 {server_name} 地址 和 API 密钥是否正确填写！ {error}")
         signal.show_log_text(traceback.format_exc())
@@ -74,7 +74,7 @@ async def _upload_actor_photo(url, pic_path):
             content = await f.read()
             b6_pic = base64.b64encode(content)  # 读取文件内容, 转换为base64编码
         header = {"Content-Type": "image/jpeg" if pic_path.endswith("jpg") else "image/png"}
-        r, err = await manager.config_v1.async_client.post_content(url=url, data=b6_pic, headers=header)
+        r, err = await manager.computed.async_client.post_content(url=url, data=b6_pic, headers=header)
         return r is not None, err
     except Exception as e:
         signal.show_log_text(traceback.format_exc())
@@ -118,7 +118,7 @@ async def _get_gfriends_actor_data():
         update_data = False
         signal.show_log_text("⏳ 连接 Gfriends 网络头像库...")
         net_url = f"{gfriends_github}/commits/master/Filetree.json"
-        response, error = await manager.config_v1.async_client.get_text(net_url)
+        response, error = await manager.computed.async_client.get_text(net_url)
         if response is None:
             signal.show_log_text("🔴 Gfriends 查询最新数据更新时间失败！")
             net_float = 0
@@ -163,7 +163,7 @@ async def _get_gfriends_actor_data():
         if update_data:
             signal.show_log_text("⏳ 开始缓存 Gfriends 最新数据表...")
             filetree_url = f"{raw_url}/master/Filetree.json"
-            response, error = await manager.config_v1.async_client.get_content(filetree_url)
+            response, error = await manager.computed.async_client.get_content(filetree_url)
             if response is None:
                 signal.show_log_text("🔴 Gfriends 数据表获取失败！补全已停止！")
                 return False
@@ -247,7 +247,7 @@ async def _get_graphis_pic(actor_name):
         return pic_path, backdrop_path, ""
 
     # 请求图片
-    res, error = await manager.config_v1.async_client.get_text(url)
+    res, error = await manager.computed.async_client.get_text(url)
     if res is None:
         logs += f"🔴 graphis.ne.jp 请求失败！\n{error}"
         return "", "", logs
@@ -365,7 +365,7 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
         # 清理旧图片（backdrop可以多张，不清理会一直累积）
         if actor_backdrop_imagetages:
             for _ in range(len(actor_backdrop_imagetages)):
-                await manager.config_v1.async_client.request("DELETE", backdrop_url_0)
+                await manager.computed.async_client.request("DELETE", backdrop_url_0)
 
         # 上传头像到 emby
         r, err = await _upload_actor_photo(pic_url, pic_path)

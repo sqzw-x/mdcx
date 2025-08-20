@@ -1,4 +1,4 @@
-from mdcx.config.models import Website
+from mdcx.config.enums import Website
 from mdcx.gen.field_enums import CrawlerResultFields
 
 

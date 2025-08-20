@@ -5,15 +5,9 @@ from io import StringIO
 from pathlib import Path
 from typing import Any
 
-import httpx
-
 from mdcx.config.models import Config, Website
 from mdcx.consts import LOCAL_VERSION
-from mdcx.llm import LLMClient
 from mdcx.manual import ManualConfig
-from mdcx.signals import signal
-from mdcx.utils import executor, get_random_headers, get_user_agent
-from mdcx.web_async import AsyncWebClient
 
 
 def load_v1(path: str | Path) -> tuple[dict[str, Any], list[str]]:
@@ -242,7 +236,7 @@ class ConfigSchema:
 
     # subtitle
     cnword_char: str = r"-C.,-C-,ch.,字幕"
-    cnword_style: str = r"^-C^"
+    cnword_style: str = r"-C"
     folder_cnword: bool = True
     file_cnword: bool = True
     subtitle_folder: str = r""
@@ -330,28 +324,6 @@ class ConfigSchema:
             self.proxy = self.proxy.strip()
         else:
             self.proxy = "http://" + self.proxy.strip()
-        if self.type == "no":  # todo type 现在只需要 bool
-            self.proxies = None
-            self.httpx_proxy = None
-        else:
-            self.proxies = {
-                "http": self.proxy,
-                "https": self.proxy,
-            }
-            self.httpx_proxy = self.proxy
-
-        self.ipv4_only = "ipv4_only" in self.switch_on
-        self.theporndb_no_hash = "theporndb_no_hash" in self.switch_on
-
-        # 获取User-Agent
-        self.headers = {
-            "User-Agent": get_user_agent(),
-        }
-
-        self.random_headers = get_random_headers()
-
-        # 去掉^符号！！！
-        self.cnword_style = self.cnword_style.strip("^")
 
         # 获取 Google 下载关键词列表
         temp_list = re.split(r"[,，]", self.google_used)
@@ -359,12 +331,6 @@ class ConfigSchema:
         # 获取 Google 过滤关键词列表
         temp_list = re.split(r"[,，]", self.google_exclude)
         self.google_keyword = [each for each in temp_list if each.strip()]  # 去空
-
-        # 翻译源
-        self.translate_by_list = self.translate_by.strip(",").split(",")
-
-        # 是否记录刮削成功列表
-        self.record_success_file = "record_success_file" in self.no_escape
 
         # 获取排除字符列表
         temp_list = re.split("[,，]", self.string) + ManualConfig.REPL_LIST
@@ -388,31 +354,6 @@ class ConfigSchema:
         [new_str_list.append(i1) for i1 in all_str_list if i1 not in new_str_list]  # 补全
         new_str = ",".join(new_str_list)
         self.suffix_sort = new_str
-
-        # NFO 演员名白名单
-        self.nfo_tag_actor_contains_list = (
-            re.split(r"[|｜]", self.nfo_tag_actor_contains) if self.nfo_tag_actor_contains else []
-        )
-
-        # 依赖于 config 的类不能作为全局变量, 必须在 config 内构建, 以在 config 更新后正确重建
-        self.async_client = AsyncWebClient(
-            loop=executor._loop,
-            proxy=self.httpx_proxy,
-            retry=self.retry,
-            timeout=self.timeout,
-            log_fn=signal.add_log,
-        )
-
-        if self.llm_max_req_sec <= 0:
-            self.llm_max_req_sec = 1
-        self.llm_client = LLMClient(
-            api_key=self.llm_key,
-            base_url=self.llm_url,
-            proxy=self.httpx_proxy,
-            timeout=httpx.Timeout(self.timeout, read=None),  # 只设置连接超时, 不限制 llm 生成时间
-            rate=(max(self.llm_max_req_sec, 1), max(1, 1 / self.llm_max_req_sec)),
-        )
-        self.executor = executor  # 方便通过 config 访问 executor
 
     def get_website_base_url(self, website: str | Website) -> str:
         """获取指定网站的基础 URL"""

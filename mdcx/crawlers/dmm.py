@@ -155,7 +155,7 @@ async def get_trailer(htmlcode, real_url):
         else:
             url = f"https://www.dmm.com/service/digitalapi/-/html5_player/=/cid={cid}/mtype=AhRVShI_/service=digital/floor=videoa/mode=/"
 
-        htmlcode, error = await manager.config_v1.async_client.get_text(url)
+        htmlcode, error = await manager.computed.async_client.get_text(url)
         if htmlcode is None:
             return ""
         try:
@@ -246,7 +246,7 @@ def get_real_url(
 
 async def get_tv_jp_data(real_url):
     cid = re.findall(r"content=([^&/]+)", real_url)[0]
-    response, error = await manager.config_v1.async_client.post_json(
+    response, error = await manager.computed.async_client.post_json(
         "https://api.tv.dmm.co.jp/graphql", json_data=fanza_tv_payload(cid)
     )
     if response is None:
@@ -303,7 +303,7 @@ async def get_tv_jp_data(real_url):
 
 
 async def get_tv_com_data(number):
-    response, error = await manager.config_v1.async_client.post_json(
+    response, error = await manager.computed.async_client.post_json(
         "https://api.tv.dmm.com/graphql", json_data=dmm_tv_com_payload(number)
     )
     if response is None:
@@ -390,7 +390,7 @@ async def main(
     try:
         # tv.dmm未屏蔽非日本ip，此处请求页面，看是否可以访问
         if "tv.dmm." not in real_url:
-            htmlcode, error = await manager.config_v1.async_client.get_text(real_url, cookies=cookies)
+            htmlcode, error = await manager.computed.async_client.get_text(real_url, cookies=cookies)
             if htmlcode is None:  # 请求失败
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -413,7 +413,7 @@ async def main(
                         real_url = f"https://www.dmm.co.jp/search/=/searchstr={number_no_00}/sort=ranking/"  # 不带00，旧作 snis-027
                         debug_info = f"再次搜索地址: {real_url} "
                         LogBuffer.info().write(web_info + debug_info)
-                        htmlcode, error = await manager.config_v1.async_client.get_text(real_url, cookies=cookies)
+                        htmlcode, error = await manager.computed.async_client.get_text(real_url, cookies=cookies)
                         if htmlcode is None:  # 请求失败
                             debug_info = f"网络请求错误: {error} "
                             LogBuffer.info().write(web_info + debug_info)
@@ -429,7 +429,7 @@ async def main(
                     real_url = f"https://www.dmm.com/search/=/searchstr={number_no_00}/sort=ranking/"
                     debug_info = f"再次搜索地址: {real_url} "
                     LogBuffer.info().write(web_info + debug_info)
-                    htmlcode, error = await manager.config_v1.async_client.get_text(real_url, cookies=cookies)
+                    htmlcode, error = await manager.computed.async_client.get_text(real_url, cookies=cookies)
                     if htmlcode is None:  # 请求失败
                         debug_info = f"网络请求错误: {error} "
                         LogBuffer.info().write(web_info + debug_info)
@@ -518,7 +518,7 @@ async def main(
                 LogBuffer.info().write(web_info + debug_info)
                 raise Exception(debug_info)
         else:
-            htmlcode, error = await manager.config_v1.async_client.get_text(real_url, cookies=cookies)
+            htmlcode, error = await manager.computed.async_client.get_text(real_url, cookies=cookies)
             if htmlcode is None:
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)

@@ -11,14 +11,14 @@ import aiofiles.os
 
 from mdcx.config.extend import get_movie_path_setting, need_clean
 from mdcx.config.manager import manager
-from mdcx.config.models import CleanAction
+from mdcx.config.models import CleanAction, NoEscape
 from mdcx.config.resources import resources
 from mdcx.consts import IS_WINDOWS
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.signals import signal
-from mdcx.utils import convert_path, get_current_time, get_used_time, split_path
+from mdcx.utils import convert_path, executor, get_current_time, get_used_time, split_path
 from mdcx.utils.file import (
     copy_file_async,
     copy_file_sync,
@@ -141,9 +141,9 @@ def _deal_path_name(path: str) -> str:
 
 
 async def save_success_list(old_path: str = "", new_path: str = "") -> None:
-    if old_path and manager.config_v1.record_success_file:
+    if old_path and NoEscape.RECORD_SUCCESS_FILE in manager.config.no_escape:
         # 软硬链接时，保存原路径；否则保存新路径
-        if manager.config_v1.soft_link != 0:
+        if manager.config.soft_link != 0:
             Flags.success_list.add(convert_path(old_path))
         else:
             Flags.success_list.add(convert_path(new_path))
@@ -177,7 +177,7 @@ def save_remain_list() -> None:
 
 async def _clean_empty_fodlers(path: str, file_mode: FileMode) -> None:
     start_time = time.time()
-    if not manager.config_v1.del_empty_folder or file_mode == FileMode.Again:
+    if not manager.config.del_empty_folder or file_mode == FileMode.Again:
         return
     signal.set_label_file_path.emit("🗑 正在清理空文件夹，请等待...")
     signal.show_log_text(" ⏳ Cleaning empty folders...")
@@ -266,7 +266,7 @@ def get_success_list() -> None:
             Flags.success_list = set(temp.split("\n")) if temp.strip() else set()
             if "" in Flags.success_list:
                 Flags.success_list.remove("")
-            manager.config_v1.executor.run(save_success_list())
+            executor.run(save_success_list())
     signal.view_success_file_settext.emit(f"查看 ({len(Flags.success_list)})")
 
 

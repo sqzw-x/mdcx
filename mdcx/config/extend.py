@@ -10,21 +10,17 @@ from mdcx.utils.path import get_path
 
 def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str, str]:
     # 先把'\'转成'/'以便判断是路径还是目录
-    movie_path = manager.config_v1.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
+    movie_path = manager.config.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
     if movie_path == "":  # 未设置为空时，使用用户数据目录
         movie_path = manager.data_folder
     movie_path = nfd2c(movie_path)
     end_folder_name = split_path(movie_path)[1]
     # 用户设置的软链接输出目录
-    softlink_path = manager.config_v1.softlink_path.replace("\\", "/").replace("end_folder_name", end_folder_name)
+    softlink_path = manager.config.softlink_path.replace("\\", "/").replace("end_folder_name", end_folder_name)
     # 用户设置的成功输出目录
-    success_folder = manager.config_v1.success_output_folder.replace("\\", "/").replace(
-        "end_folder_name", end_folder_name
-    )
+    success_folder = manager.config.success_output_folder.replace("\\", "/").replace("end_folder_name", end_folder_name)
     # 用户设置的失败输出目录
-    failed_folder = manager.config_v1.failed_output_folder.replace("\\", "/").replace(
-        "end_folder_name", end_folder_name
-    )
+    failed_folder = manager.config.failed_output_folder.replace("\\", "/").replace("end_folder_name", end_folder_name)
     # 用户设置的排除目录
     escape_folder_list = (
         manager.config_v1.folders.replace("\\", "/")
@@ -33,7 +29,7 @@ def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str,
         .split(",")
     )
     # 用户设置的剧照副本目录
-    extrafanart_folder = manager.config_v1.extrafanart_folder.replace("\\", "/")
+    extrafanart_folder = manager.config.extrafanart_folder.replace("\\", "/")
 
     # 获取路径
     softlink_path = convert_path(get_path(movie_path, softlink_path))
@@ -57,7 +53,7 @@ def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str,
 
     if file_path:
         temp_path = movie_path
-        if manager.config_v1.scrape_softlink_path:
+        if manager.config.scrape_softlink_path:
             temp_path = softlink_path
         if "first_folder_name" in success_folder or "first_folder_name" in failed_folder:
             first_folder_name = re.findall(r"^/?([^/]+)/", file_path[len(temp_path) :].replace("\\", "/"))
@@ -77,7 +73,7 @@ def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str,
 
 def need_clean(file_path: Path, file_name: str, file_ext: str) -> bool:
     # 判断文件是否需清理
-    if not manager.config.can_clean:
+    if not manager.computed.can_clean:
         return False
 
     # 不清理的扩展名

@@ -52,7 +52,7 @@ from mdcx.models.tools.emby_actor_image import update_emby_actor_photo
 from mdcx.models.tools.emby_actor_info import creat_kodi_actors
 from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo, ScrapeResult, ShowData
 from mdcx.signals import signal
-from mdcx.utils import convert_path, get_current_time, get_real_time, get_used_time, split_path
+from mdcx.utils import convert_path, executor, get_current_time, get_real_time, get_used_time, split_path
 from mdcx.utils.dataclass import update
 from mdcx.utils.file import copy_file_async, move_file_async, read_link_async
 
@@ -730,7 +730,7 @@ def start_new_scrape(file_mode: FileMode, movie_list: list[str] | None = None) -
     signal.exec_set_processbar.emit(0)
     try:
         Flags.start_time = time.time()
-        manager.config_v1.executor.submit(scrape(file_mode, movie_list))
+        executor.submit(scrape(file_mode, movie_list))
     except Exception:
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())

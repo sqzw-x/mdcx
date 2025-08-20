@@ -14,7 +14,7 @@ from mdcx.models.base.image import add_mark_thread
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo
 from mdcx.signals import signal
-from mdcx.utils import get_used_time
+from mdcx.utils import executor, get_used_time
 from mdcx.utils.file import check_pic_async, copy_file_sync, delete_file_sync
 
 
@@ -129,7 +129,7 @@ def cut_thumb_to_poster(json_data: CrawlersResult, thumb_path: str, poster_path:
         img_new = cast("Image.Image", img_new)
         img_new_png = img_new.crop((ax, ay, bx, by))
         img_new_png.save(poster_path, quality=95, subsampling=0)
-        if manager.config_v1.executor.run(check_pic_async(poster_path)):
+        if executor.run(check_pic_async(poster_path)):
             LogBuffer.log().write(f"\n 🍀 Poster done! ({json_data.poster_from})({get_used_time(start_time)}s)")
             return True
         LogBuffer.log().write(f"\n 🥺 Poster cut failed! ({json_data.poster_from})({get_used_time(start_time)}s)")

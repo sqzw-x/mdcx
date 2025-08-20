@@ -194,7 +194,7 @@ async def main(
             search_url = f"{search_url}?search_keyword={search_keyword}&search_type=searchall&op=search"
             debug_info = f"搜索地址: {search_url} "
             LogBuffer.info().write(web_info + debug_info)
-            response, error = await manager.config_v1.async_client.get_text(search_url)
+            response, error = await manager.computed.async_client.get_text(search_url)
 
             if response is None:
                 debug_info = f"网络请求错误: {error}"
@@ -212,7 +212,7 @@ async def main(
                 raise Exception(debug_info)
 
         if real_url:
-            html_content, error = await manager.config_v1.async_client.get_text(real_url)
+            html_content, error = await manager.computed.async_client.get_text(real_url)
             if html_content is None:
                 debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)

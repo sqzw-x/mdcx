@@ -80,7 +80,7 @@ async def add_sub_for_all_video() -> None:
                             f" 🍀 字幕文件: '{file_name + sub_type}' 已被重命名为: '{split_path(sub_old_path_no_chs)[1]}' "
                         )
 
-                cnword_style = manager.config_v1.cnword_style
+                cnword_style = manager.config.cnword_style
                 if cnword_style and cnword_style not in sub_new_path:
                     folder_cnword = manager.config_v1.folder_cnword
                     file_cnword = manager.config_v1.file_cnword

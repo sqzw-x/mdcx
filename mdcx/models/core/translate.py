@@ -7,6 +7,7 @@ import traceback
 import zhconv
 
 from mdcx.config.manager import manager
+from mdcx.config.models import Translator
 from mdcx.config.resources import resources
 from mdcx.models.base.translate import (
     deepl_translate_async,
@@ -85,15 +86,10 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
         actor = json_data.actor
         actor_list: list = actor.split(",")
 
-        for each_actor in actor_list:
-            should_add = True
-            if len(manager.config_v1.nfo_tag_actor_contains_list) > 0:
-                # 按白名单筛选演员名
-                should_add = each_actor in manager.config_v1.nfo_tag_actor_contains_list
-
-            if should_add:
+        for actor in actor_list:
+            if actor in manager.config.nfo_tag_actor_contains:
                 # 按要求修改演员命名格式
-                nfo_tag_actor = manager.config_v1.nfo_tag_actor.replace("actor", each_actor)
+                nfo_tag_actor = manager.config.nfo_tag_actor.replace("actor", actor)
                 if nfo_tag_actor:
                     tag = nfo_tag_actor + "," + tag
 
@@ -291,23 +287,23 @@ async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie
         trans_outline = json_data.outline
 
     # 翻译
-    if manager.config_v1.translate_by_list and (
+    if manager.config.translate_config.translate_by and (
         (trans_title and title_translate) or (trans_outline and outline_translate)
     ):
         start_time = time.time()
-        translate_by_list = manager.config_v1.translate_by_list.copy()
+        translate_by_list = manager.config.translate_config.translate_by.copy()
         if not cd_part:
             random.shuffle(translate_by_list)
 
-        async def _task(each):
-            if each == "youdao":  # 使用有道翻译
+        async def _task(each: Translator):
+            if each == Translator.YOUDAO:  # 使用有道翻译
                 t, o, r = await youdao_translate_async(trans_title, trans_outline)
-            elif each == "google":  # 使用 google 翻译
-                t, o, r = await google_translate_async(trans_title, trans_outline)
-            elif each == "llm":  # 使用 llm 翻译
+            elif each == Translator.LLM:  # 使用 llm 翻译
                 t, o, r = await llm_translate_async(trans_title, trans_outline)
-            else:  # 使用deepl翻译
+            elif each == Translator.DEEPL:  # 使用deepl翻译
                 t, o, r = await deepl_translate_async(trans_title, trans_outline, "JA")
+            else:  # 使用 google 翻译
+                t, o, r = await google_translate_async(trans_title, trans_outline)
             if r:
                 LogBuffer.log().write(
                     f"\n 🔴 Translation failed!({each.capitalize()})({get_used_time(start_time)}s) Error: {r}"

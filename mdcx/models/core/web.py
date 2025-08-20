@@ -378,7 +378,7 @@ async def _get_big_thumb(result: CrawlersResult, other: OtherInfo):
         # faleno.jp 番号检查
         if re.findall(r"F[A-Z]{2}SS", number):
             req_url = f"https://faleno.jp/top/works/{number_lower_no_line}/"
-            response, error = await manager.config_v1.async_client.get_text(req_url)
+            response, error = await manager.computed.async_client.get_text(req_url)
             if response is not None:
                 temp_url = re.findall(
                     r'src="((https://cdn.faleno.net/top/wp-content/uploads/[^_]+_)([^?]+))\?output-quality=', response
@@ -490,7 +490,7 @@ async def _get_big_poster(result: CrawlersResult, other: OtherInfo):
         official_url = manager.config_v1.official_websites.get(letters)
         if official_url:
             url_search = official_url + "/search/list?keyword=" + number.replace("-", "")
-            html_search, error = await manager.config_v1.async_client.get_text(url_search)
+            html_search, error = await manager.computed.async_client.get_text(url_search)
             if html_search is not None:
                 poster_url_list = re.findall(r'img class="c-main-bg lazyload" data-src="([^"]+)"', html_search)
                 if poster_url_list:

@@ -231,7 +231,7 @@ async def main(
             for number in number_list_new:
                 debug_info = f'搜索地址: {search_url} {{"wd": {number}}}'
                 LogBuffer.info().write(web_info + debug_info)
-                response, error = await manager.config_v1.async_client.post_text(search_url, data={"wd": number})
+                response, error = await manager.computed.async_client.post_text(search_url, data={"wd": number})
                 if response is None:
                     debug_info = f"网络请求错误: {error}"
                     LogBuffer.info().write(web_info + debug_info)
@@ -255,7 +255,7 @@ async def main(
                 raise Exception(debug_info)
 
         if real_url:
-            html_content, error = await manager.config_v1.async_client.get_text(real_url)
+            html_content, error = await manager.computed.async_client.get_text(real_url)
             if html_content is None:
                 debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)

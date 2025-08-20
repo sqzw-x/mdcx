@@ -234,7 +234,7 @@ async def main(
                 LogBuffer.info().write(web_info + debug_info)
 
                 # ========================================================================搜索番号
-                html_search, error = await manager.config_v1.async_client.get_json(url_search)
+                html_search, error = await manager.computed.async_client.get_json(url_search)
                 if html_search is None:
                     debug_info = f"网络请求错误: {error} "
                     LogBuffer.info().write(web_info + debug_info)
@@ -277,7 +277,7 @@ async def main(
 
             detail_url = "https://api.6dccbca.com/api/movie/detail"
             data = {"id": str(detail_id[0])}
-            response, error = await manager.config_v1.async_client.post_json(detail_url, data=data)
+            response, error = await manager.computed.async_client.post_json(detail_url, data=data)
             if response is None:
                 debug_info = f"网络请求错误: {error}"
                 LogBuffer.info().write(web_info + debug_info)

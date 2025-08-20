@@ -485,7 +485,7 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
     youma = ""
     mosaic = ""
     sub_list = []
-    cnword_style = manager.config_v1.cnword_style
+    cnword_style = manager.config.cnword_style
     if Flags.file_mode == FileMode.Again and file_path in Flags.new_again_dic:
         temp_number, temp_url, temp_website = Flags.new_again_dic[file_path]
         if temp_number:  # 如果指定了番号，则使用指定番号
@@ -677,16 +677,16 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
             mosaic = "无码"
 
         # 判断是否有码
-        youma_style = str(manager.config_v1.youma_style)
+        youma_style = manager.config.youma_style
         if not mosaic and ("有码" in file_path or "有碼" in file_path):
             youma = youma_style
             mosaic = "有码"
 
         # 查找本地字幕文件
-        cnword_list = manager.config_v1.cnword_char.replace("，", ",").split(",")
+        cnword_list = manager.config.cnword_char
         if "-C." in str(cnword_list).upper():
             cnword_list.append("-C ")
-        sub_type_list = manager.config_v1.sub_type.split("|")  # 本地字幕后缀
+        sub_type_list = manager.config.sub_type  # 本地字幕后缀
         for sub_type in sub_type_list:  # 查找本地字幕, 可能多个
             sub_type_chs = ".chs" + sub_type
             sub_path_chs = os.path.join(folder_path, (file_name + sub_type_chs))

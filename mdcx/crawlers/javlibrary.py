@@ -153,7 +153,7 @@ async def main(
             debug_info = f"搜索地址: {url_search} "
             LogBuffer.info().write(web_info + debug_info)
 
-            html_search, error = await manager.config_v1.async_client.get_text(url_search, use_proxy=use_proxy)
+            html_search, error = await manager.computed.async_client.get_text(url_search, use_proxy=use_proxy)
             if html_search is None:
                 debug_info = f"请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -178,7 +178,7 @@ async def main(
             debug_info = f"番号地址: {real_url} "
             LogBuffer.info().write(web_info + debug_info)
 
-            html_info, error = await manager.config_v1.async_client.get_text(real_url, use_proxy=use_proxy)
+            html_info, error = await manager.computed.async_client.get_text(real_url, use_proxy=use_proxy)
             if html_info is None:
                 debug_info = f"请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)

@@ -46,9 +46,7 @@ async def youdao_translate_async(title: str, outline: str):
         ),
         "Referer": "https://fanyi.youdao.com/?keyfrom=dict2.top",
     }
-    headers_o = manager.config_v1.headers
-    headers.update(headers_o)
-    res, error = await manager.config_v1.async_client.post_json(url, data=data, headers=headers)
+    res, error = await manager.computed.async_client.post_json(url, data=data, headers=headers)
     if res is None:
         return title, outline, f"请求失败！可能是被封了，可尝试更换代理！错误：{error}"
     else:
@@ -95,7 +93,7 @@ async def _deepl_translate(text: str, source_lang: Literal["JA", "EN"] = "JA") -
     headers = {"Content-Type": "application/json", "Authorization": f"DeepL-Auth-Key {deepl_key}"}
     # 构造请求体
     data = {"text": [text], "source_lang": source_lang, "target_lang": "ZH"}
-    res, error = await manager.config_v1.async_client.post_json(url, json_data=data, headers=headers)
+    res, error = await manager.computed.async_client.post_json(url, json_data=data, headers=headers)
     if res is None:
         signal.add_log(f"DeepL API 请求失败: {error}")
         return None
@@ -118,12 +116,14 @@ async def _llm_translate(text: str, target_language: str = "简体中文") -> st
     """调用 LLM 翻译文本"""
     if not text:
         return ""
-    return await manager.config_v1.llm_client.ask(
-        model=manager.config_v1.llm_model,
+    return await manager.computed.llm_client.ask(
+        model=manager.config.translate_config.llm_model,
         system_prompt="You are a professional translator.",
-        user_prompt=manager.config_v1.llm_prompt.replace("{content}", text).replace("{lang}", target_language),
-        temperature=manager.config_v1.llm_temperature,
-        max_try=manager.config_v1.llm_max_try,
+        user_prompt=manager.config.translate_config.llm_prompt.replace("{content}", text).replace(
+            "{lang}", target_language
+        ),
+        temperature=manager.config.translate_config.llm_temperature,
+        max_try=manager.config.translate_config.llm_max_try,
         log_fn=signal.add_log,
     )
 
@@ -140,7 +140,7 @@ async def _google_translate(msg: str) -> tuple[str | None, str]:
         return "", ""
     msg_unquote = unquote(msg)
     url = f"https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}"
-    response, error = await manager.config_v1.async_client.get_json(url)
+    response, error = await manager.computed.async_client.get_json(url)
     if response is None:
         return None, error
     return "".join([sen[0] for sen in response[0]]), ""

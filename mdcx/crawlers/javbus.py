@@ -134,14 +134,7 @@ def getTag(html):  # 获取标签
     return result
 
 
-async def get_real_url(
-    number,
-    url_type,
-    javbus_url,
-    json_log,
-    headers,
-    cookie,
-):  # 获取详情页链接
+async def get_real_url(number, url_type, javbus_url, headers):  # 获取详情页链接
     if url_type == "us":  # 欧美
         url_search = "https://www.javbus.hair/search/" + number
     elif url_type == "censored":  # 有码
@@ -152,18 +145,14 @@ async def get_real_url(
     debug_info = f"搜索地址: {url_search} "
     LogBuffer.info().write(debug_info)
     # ========================================================================搜索番号
-    html_search, error = await manager.config_v1.async_client.get_text(url_search, headers=headers)
+    html_search, error = await manager.computed.async_client.get_text(url_search, headers=headers)
     # 判断是否需要登录
     if html_search is None:
         debug_info = f"网络请求错误: {error} "
         LogBuffer.info().write(debug_info)
         raise Exception(debug_info)
     if "lostpasswd" in html_search:
-        # 有 cookie
-        if cookie:
-            raise Exception("Cookie 无效！请重新填写 Cookie 或更新节点！")
-        else:
-            raise Exception("当前节点需要填写 Cookie 才能刮削！请到 设置-网络 填写 Cookie 或更换节点！")
+        raise Exception("Cookie 无效！请重新填写 Cookie 或更新节点！")
 
     html = etree.fromstring(html_search, etree.HTMLParser())
     url_list = html.xpath("//a[@class='movie-box']/@href")
@@ -191,13 +180,10 @@ async def main(
     LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
     javbus_url = getattr(manager.config_v1, "javbus_website", "https://www.javbus.com")
-    headers = manager.config_v1.headers
-    cookie = manager.config_v1.javbus
-    headers_o = {
+    headers = {
         "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6",
-        "cookie": cookie,
+        "cookie": manager.config.javbus,
     }
-    headers.update(headers_o)
 
     title = ""
     cover_url = ""
@@ -206,7 +192,6 @@ async def main(
     image_cut = "right"
     dic = {}
     debug_info = ""
-    json_log = {}
     LogBuffer.info().write(" \n    🌐 javbus")
 
     try:
@@ -214,7 +199,7 @@ async def main(
             # 欧美去搜索，其他尝试直接拼接地址，没有结果时再搜索
             if "." in number or re.search(r"[-_]\d{2}[-_]\d{2}[-_]\d{2}", number):  # 欧美影片
                 number = number.replace("-", ".").replace("_", ".")
-                real_url = await get_real_url(number, "us", javbus_url, json_log, headers, cookie)
+                real_url = await get_real_url(number, "us", javbus_url, headers)
             else:
                 real_url = javbus_url + "/" + number
                 if number.upper().startswith("CWP") or number.upper().startswith("LAF"):
@@ -225,7 +210,7 @@ async def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(debug_info)
-        htmlcode, error = await manager.config_v1.async_client.get_text(real_url, headers=headers)
+        htmlcode, error = await manager.computed.async_client.get_text(real_url, headers=headers)
 
         # 判断是否需要登录
         if htmlcode is None:
@@ -233,11 +218,7 @@ async def main(
             LogBuffer.info().write(debug_info)
             raise Exception(debug_info)
         if "lostpasswd" in htmlcode:
-            # 有 cookie
-            if cookie:
-                raise Exception("Cookie 无效！请重新填写 Cookie 或更新节点！")
-            else:
-                raise Exception("当前节点需要填写 Cookie 才能刮削！请到 设置-网络 填写 Cookie 或更换节点！")
+            raise Exception("Cookie 无效！请重新填写 Cookie 或更新节点！")
 
         if htmlcode is None:
             # 有404时尝试再次搜索 DV-1175
@@ -254,13 +235,13 @@ async def main(
 
             # 无码搜索结果
             elif mosaic == "无码" or mosaic == "無碼":
-                real_url = await get_real_url(number, "uncensored", javbus_url, json_log, headers, cookie)
+                real_url = await get_real_url(number, "uncensored", javbus_url, headers)
 
             # 有码搜索结果
             else:
-                real_url = await get_real_url(number, "censored", javbus_url, json_log, headers, cookie)
+                real_url = await get_real_url(number, "censored", javbus_url, headers)
 
-            htmlcode, error = await manager.config_v1.async_client.get_text(real_url, headers=headers)
+            htmlcode, error = await manager.computed.async_client.get_text(real_url, headers=headers)
             if htmlcode is None:
                 debug_info = "未匹配到番号！"
                 LogBuffer.info().write(debug_info)
