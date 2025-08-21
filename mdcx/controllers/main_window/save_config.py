@@ -662,13 +662,15 @@ def save_config(self: "MyMAinWindow"):
 
     custom_website_name = self.Ui.comboBox_custom_website.currentText()
     custom_website_url = self.Ui.lineEdit_custom_website.text()
-    if custom_website_url:
-        custom_website_url = custom_website_url.strip("/ ")
-        try:
-            website_enum = Website(custom_website_name)
+    custom_website_url = custom_website_url.strip("/ ")
+    try:
+        website_enum = Website(custom_website_name)
+        if custom_website_url:
             manager.config.site_configs.setdefault(website_enum, SiteConfig()).custom_url = HttpUrl(custom_website_url)
-        except ValueError:
-            pass  # 忽略无效的网站名
+        elif website_enum in manager.config.site_configs:
+            manager.config.site_configs[website_enum].custom_url = None
+    except ValueError:
+        pass  # 忽略无效的网站名
     manager.config.javdb = self.Ui.plainTextEdit_cookie_javdb.toPlainText()  # javdb cookie
     manager.config.javbus = self.Ui.plainTextEdit_cookie_javbus.toPlainText()  # javbus cookie
     manager.config.theporndb_api_token = self.Ui.lineEdit_api_token_theporndb.text()  # api token
