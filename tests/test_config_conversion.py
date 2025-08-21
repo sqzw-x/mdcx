@@ -1,4 +1,3 @@
-import json
 from dataclasses import fields
 from datetime import timedelta
 
@@ -95,6 +94,8 @@ class TestConfigConversion:
         for key in res:
             if key in {f"{w}_website" for w in Website}:
                 continue
+            if key == "unknown_fields":
+                continue
             assert type(res[key]) is v1_fields[key].type, (
                 f"to_legacy 和 ConfigV1 的字段 {key} 类型不匹配: to_legacy={type(res[key])}, ConfigV1={type(getattr(v1, key))}"
             )
@@ -106,15 +107,15 @@ class TestConfigConversion:
         # 生成随机 ConfigV1. 这依赖于 generate_random_config 和 to_legacy 的正确性.
         random_config = generate_random_config()
         legacy_1 = random_config.to_legacy()
-        v1 = ConfigV1()
-        v1.__dict__.update(legacy_1)
+        v1 = ConfigV1(**legacy_1)
+        v1.init()
 
         # 将 ConfigV1 转换回 Config, back_config 可能与 random_config 不同
         back_config = v1.to_pydantic_model()
         legacy_2 = back_config.to_legacy()
-        assert json.dumps(legacy_1, indent=2) == json.dumps(legacy_2, indent=2), (
-            "转换后的 ConfigV1 与原始 ConfigV1 不相等"
-        )
+        v2 = ConfigV1(**legacy_2)
+        v2.init()
+        assert v1.__dict__ == v2.__dict__, "转换后的 ConfigV1 与原始 ConfigV1 不相等"
 
     def test_empty_lists_handling(self):
         """测试空列表的处理"""

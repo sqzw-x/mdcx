@@ -313,6 +313,9 @@ class ConfigV1:
             del unknown_fields["trailer_name"]
         if "modified_time" in unknown_fields:  # 弃用
             del unknown_fields["modified_time"]
+        for site in Website:
+            if isinstance(u := unknown_fields.get(f"{site.value}_website"), str) and u:
+                setattr(self, f"{site.value}_website", u)
         # 2. 处理更名的配置字段
         self.read_mode = self.read_mode.replace("read_translate_again", "read_update_nfo")
         self.suffix_sort = self.suffix_sort.replace("mosaic", "moword")
@@ -360,4 +363,4 @@ class ConfigV1:
         return buffer.getvalue()
 
     def to_pydantic_model(self):
-        return Config.from_legacy(self.__dict__)
+        return Config.from_legacy(self.__dict__.copy())

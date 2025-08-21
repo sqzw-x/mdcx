@@ -623,8 +623,14 @@ class Config(BaseModel):
     studio_translate: bool = Field(default=True, title="翻译工作室")
     publisher_language: Language = Field(default=Language.ZH_CN, title="发行商语言")
     publisher_translate: bool = Field(default=True, title="翻译发行商")
+    # endregion
 
-    site_configs: dict[Website, SiteConfig] = Field(default_factory=dict, title="网站配置")
+    site_configs: dict[Website, SiteConfig] = Field(
+        default_factory=lambda: {
+            Website.DMM: SiteConfig(use_browser=True),
+        },
+        title="网站配置",
+    )
 
     translate_config: TranslateConfig = Field(default_factory=TranslateConfig, title="翻译配置")
 
@@ -857,6 +863,10 @@ class Config(BaseModel):
             d["nfo_tag_actor_contains"] = str_to_list(r, "|")
         if isinstance(r := d.get("use_database"), int):
             d["use_database"] = bool(r)
+        if "site_configs" not in d:
+            d["site_configs"] = {Website.DMM: SiteConfig(use_browser=True)}
+        elif Website.DMM not in d["site_configs"]:
+            d["site_configs"][Website.DMM] = SiteConfig(use_browser=True)
         return d
 
     @field_validator("timed_interval", "rest_time", mode="before")
@@ -877,10 +887,12 @@ class Config(BaseModel):
         """
         d = self.model_dump(mode="python")
 
+        unknown_fields: dict[str, str] = {}
         # 处理 site_configs
         site_configs = d.pop("site_configs", {})
         for site, config in site_configs.items():
-            d[f"{site}_website"] = config["custom_url"]
+            if config["custom_url"]:
+                unknown_fields[f"{site}_website"] = str(config["custom_url"])
 
         def handle_fields(data: dict) -> dict[str, Any]:
             res = {}
@@ -935,6 +947,9 @@ class Config(BaseModel):
             elif isinstance(rule, Add):
                 schema_dict.pop(rule.name, None)
 
+        # 添加未知字段
+        schema_dict["unknown_fields"] = unknown_fields
+
         return schema_dict
 
     @classmethod
@@ -954,12 +969,13 @@ class Config(BaseModel):
                 pass
 
         # 处理 site_configs
-        site_configs = {}
+        site_configs: dict[Website, SiteConfig] = {}
         for key, value in data.items():
             # custom url
             if key.endswith("_website") and key[:-8] in Website:
                 site_name = key.replace("_website", "")
                 site_configs[Website(site_name)] = SiteConfig(custom_url=value)
+        site_configs.setdefault(Website.DMM, SiteConfig()).use_browser = True
         data["site_configs"] = site_configs
 
         # 格式转换
