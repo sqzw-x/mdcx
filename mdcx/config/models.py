@@ -83,6 +83,11 @@ class TranslateConfig(BaseModel):
             self.llm_max_req_sec = 1
 
 
+class SiteConfig(BaseModel):
+    use_browser: bool = Field(default=False, title="使用无头浏览器")
+    custom_url: HttpUrl | None = Field(default=None, title="自定义网址")
+
+
 class Config(BaseModel):
     """
     Pydantic model for application configuration, converted from ConfigSchema.
@@ -623,12 +628,9 @@ class Config(BaseModel):
     publisher_language: Language = Field(default=Language.ZH_CN, title="发行商语言")
     publisher_translate: bool = Field(default=True, title="翻译发行商")
 
-    # region: Translation Settings
-    translate_config: TranslateConfig = Field(
-        default_factory=TranslateConfig,
-        title="翻译配置",
-    )
-    # endregion
+    site_configs: dict[Website, SiteConfig] = Field(default_factory=dict, title="网站配置")
+
+    translate_config: TranslateConfig = Field(default_factory=TranslateConfig, title="翻译配置")
 
     # region: Naming and Formatting
     nfo_include_new: list[NfoInclude] = Field(
@@ -1060,7 +1062,7 @@ COMPAT_RULES: list[CompatRule] = [
     Rename("tag_include", "nfo_tag_include", notes=["ConfigSchema.tag_include", Config().nfo_tag_include, "澄清语义"]),
     Remove("show_4k", notes=["ConfigSchema.show_4k", "功能与命名模板冲突"]),
     Remove("show_moword", notes=["ConfigSchema.show_moword", "功能与命名模板冲突"]),
-    Add("headless_browser_sites", notes=[Config().headless_browser_sites]),
+    Add("site_configs", notes=[Config().site_configs]),
 ]
 if TYPE_CHECKING:
     from .v1 import ConfigSchema
