@@ -82,7 +82,7 @@ async def _deepl_translate(text: str, source_lang: Literal["JA", "EN"] = "JA") -
     if not text:
         return ""
 
-    deepl_key = manager.config_v1.deepl_key
+    deepl_key = manager.config.deepl_key
     if not deepl_key:
         return None
 

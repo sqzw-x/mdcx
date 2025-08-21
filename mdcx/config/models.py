@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator, mod
 from pydantic.fields import FieldInfo
 
 from ..llm import LLMClient
+from ..manual import ManualConfig
 from ..server.config import SAFE_DIRS
 from ..signals import signal
 from ..utils import executor, get_random_headers
@@ -137,7 +138,7 @@ class Config(BaseModel):
     # endregion
 
     # region: Cleaning Settings
-    folders: list[str] = Field(default_factory=lambda: ["JAV_output", "examples"], title="要处理的目录")
+    folders: list[str] = Field(default_factory=lambda: ["JAV_output", "examples"], title="排除的目录")
     string: list[str] = Field(
         default_factory=lambda: [
             "h_720",
@@ -1032,6 +1033,21 @@ class Computed:
             timeout=config.timeout,
             log_fn=signal.add_log,
         )
+
+        official_websites_dic = {}
+        for key, value in ManualConfig.OFFICIAL.items():
+            temp_list = value.upper().split("|")
+            for each in temp_list:
+                official_websites_dic[each] = key
+        self.official_websites = official_websites_dic
+
+        self.escape_string_list = list(dict.fromkeys(k for k in config.string + ManualConfig.REPL_LIST if k.strip()))
+
+        # 生成 Google 关键词列表 迁移自 ConfigV1.init
+        temp_list = re.split(r"[,，]", ",".join(config.google_used))
+        self.google_keyused = [each for each in temp_list if each.strip()]  # 去空
+        temp_list = re.split(r"[,，]", ",".join(config.google_exclude))
+        self.google_keyword = [each for each in temp_list if each.strip()]  # 去空
 
 
 @dataclass

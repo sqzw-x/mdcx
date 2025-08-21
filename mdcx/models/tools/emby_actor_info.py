@@ -51,7 +51,7 @@ async def creat_kodi_actors(add: bool) -> None:
 async def update_emby_actor_info() -> None:
     signal.change_buttons_status.emit()
     start_time = time.time()
-    emby_on = manager.config_v1.emby_on
+    emby_on = manager.config.emby_on
     server_name = "Emby" if "emby" in manager.config.server_type else "Jellyfin"
     signal.show_log_text(f"👩🏻 开始补全 {server_name} 演员信息...")
 
@@ -308,7 +308,7 @@ async def _deal_kodi_actors(gfriends_actor_data, add):
         return False
     else:
         actor_folder = resources.userdata_path("actor")
-        emby_on = manager.config_v1.emby_on
+        emby_on = manager.config.emby_on
         all_files = await asyncio.to_thread(os.walk, vedio_path)
         all_actor = set()
         success = set()

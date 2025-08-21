@@ -115,7 +115,7 @@ async def main(
     website_name = "offical_failed"
 
     try:  # 捕获主动抛出的异常
-        official_url = manager.config_v1.official_websites.get(get_number_letters(number))
+        official_url = manager.computed.official_websites.get(get_number_letters(number))
         if not official_url:
             raise Exception("不在官网番号前缀列表中")
         elif official_url == "https://www.prestige-av.com":

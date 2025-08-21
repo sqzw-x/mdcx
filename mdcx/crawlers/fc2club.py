@@ -52,7 +52,7 @@ def getActor(html, studio):  # 获取演员
     if result:
         result = str(result).strip(" []").replace('"', "").replace("'", "").replace(", ", ",")
     else:
-        result = studio if "fc2_seller" in manager.config_v1.fields_rule else ""
+        result = studio if "fc2_seller" in manager.config.fields_rule else ""
     return result
 
 

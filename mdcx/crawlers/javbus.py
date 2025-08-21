@@ -4,6 +4,7 @@ import time
 
 from lxml import etree
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
 from mdcx.models.log_buffer import LogBuffer
 
@@ -179,7 +180,7 @@ async def main(
     website_name = "javbus"
     LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
-    javbus_url = getattr(manager.config_v1, "javbus_website", "https://www.javbus.com")
+    javbus_url = manager.config.get_site_url(Website.JAVBUS, "https://www.javbus.com")
     headers = {
         "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6",
         "cookie": manager.config.javbus,

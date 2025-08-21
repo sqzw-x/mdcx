@@ -1,11 +1,11 @@
 from asyncio import create_task
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 from mdcx.config.extend import deal_url
 from mdcx.config.manager import manager
-from mdcx.config.models import Website
+from mdcx.config.models import SiteConfig, Website
 from mdcx.models.base.file import newtdisk_creat_symlink
 from mdcx.models.core.scraper import start_new_scrape
 from mdcx.models.enums import FileMode
@@ -109,23 +109,23 @@ async def check_cookies():
 
 class SetSiteUrlBody(BaseModel):
     site: Website
-    url: str
+    url: HttpUrl
 
 
 @router.post("/sites", summary="设置网站自定义网址", operation_id="setSiteUrl")
 async def set_site_url(body: SetSiteUrlBody):
     """指定网站自定义网址设置"""
     try:
-        setattr(manager.config_v1, f"{body.site.value}_website", body.url)
+        manager.config.site_configs.setdefault(body.site, SiteConfig()).custom_url = body.url
         manager.save()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/sites", summary="获取网站自定义网址", operation_id="getSiteUrls")
-async def get_site_urls() -> dict[Website, str]:
-    """获取网站自定义网址设置, 对未设置的网站返回空字符串"""
+async def get_site_urls() -> dict[Website, HttpUrl]:
+    """获取网站自定义网址设置."""
     try:
-        return {w: getattr(manager.config_v1, f"{w.value}_website", "") for w in Website}
+        return {s: c.custom_url for s, c in manager.config.site_configs.items() if c.custom_url is not None}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

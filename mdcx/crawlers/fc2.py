@@ -4,6 +4,7 @@ import time
 
 from lxml import etree
 
+from mdcx.config.enums import FieldRule
 from mdcx.config.manager import manager
 from mdcx.models.log_buffer import LogBuffer
 
@@ -114,7 +115,7 @@ async def main(
         studio = getStudio(html_info)  # 使用卖家作为厂商
         mosaic = getMosaic(tag, title)
         tag = tag.replace("無修正,", "").replace("無修正", "").strip(",")
-        actor = studio if "fc2_seller" in manager.config_v1.fields_rule else ""
+        actor = studio if FieldRule.FC2_SELLER in manager.config.fields_rule else ""
 
         try:
             dic = {

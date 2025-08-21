@@ -12,12 +12,12 @@ async def main(
     **kwargs,
 ):
     all_language = (
-        manager.config_v1.title_language
-        + manager.config_v1.outline_language
-        + manager.config_v1.actor_language
-        + manager.config_v1.tag_language
-        + manager.config_v1.series_language
-        + manager.config_v1.studio_language
+        manager.config.title_language
+        + manager.config.outline_language
+        + manager.config.actor_language
+        + manager.config.tag_language
+        + manager.config.series_language
+        + manager.config.studio_language
     )
     appoint_url = appoint_url.replace("/cn/", "/ja/").replace("/tw/", "/ja/")
     json_data = await javlibrary.main(number, appoint_url, "jp")

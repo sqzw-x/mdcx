@@ -4,6 +4,7 @@ import time
 
 from lxml import etree
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
 from mdcx.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
 from mdcx.models.log_buffer import LogBuffer
@@ -200,7 +201,7 @@ async def main(
     LogBuffer.info().write(" \n    🌐 javday")
     debug_info = ""
 
-    javday_url = getattr(manager.config_v1, "javday_website", "https://javday.tv")
+    javday_url = manager.config.get_site_url(Website.JAVDAY, "https://javday.tv")
     real_url = appoint_url
     real_html_content = ""
     try:

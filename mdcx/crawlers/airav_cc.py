@@ -6,6 +6,7 @@ import urllib.parse
 
 from lxml import etree
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.signals import signal
@@ -152,7 +153,7 @@ async def main(
     image_cut = "right"
     image_download = False
     mosaic = "有码"
-    airav_url = getattr(manager.config_v1, "airav_cc_website", "https://airav.io")
+    airav_url = manager.config.get_site_url(Website.AIRAV_CC, "https://airav.io")
     if language == "zh_cn":
         airav_url += "/cn"
     web_info = "\n       "

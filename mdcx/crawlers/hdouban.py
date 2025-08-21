@@ -5,6 +5,7 @@ import time
 
 import zhconv
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
 from mdcx.models.log_buffer import LogBuffer
 
@@ -208,7 +209,7 @@ async def main(
     score = ""
     series = ""
     trailer = ""
-    hdouban_url = getattr(manager.config_v1, "hdouban_website", "https://ormtgu.com")
+    hdouban_url = manager.config.get_site_url(Website.HDOUBAN, "https://ormtgu.com")
 
     # real_url = 'https://byym21.com/moviedetail/153858'
     # real_url = 'https://byym21.com/moviedetail/2202'

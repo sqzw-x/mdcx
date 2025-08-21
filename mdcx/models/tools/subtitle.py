@@ -17,20 +17,20 @@ async def add_sub_for_all_video() -> None:
     signal.change_buttons_status.emit()
     sub_add = True
     signal.show_log_text("开始检查无字幕视频并为其添加字幕！\n")
-    if manager.config_v1.subtitle_folder == "" or not await aiofiles.os.path.exists(manager.config_v1.subtitle_folder):
+    if manager.config.subtitle_folder == "" or not await aiofiles.os.path.exists(manager.config.subtitle_folder):
         sub_add = False
         signal.show_log_text("字幕文件夹不存在！\n只能检查无字幕视频，无法添加字幕！")
         signal.show_log_text("================================================================================")
 
     movie_path, *_ = get_movie_path_setting()
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 正在检查所有视频，请稍候...")
-    if manager.config_v1.subtitle_add_chs:
+    if manager.config.subtitle_add_chs:
         signal.show_log_text(" 如果字幕文件名不以 .chs 结尾，则会自动添加！\n")
     else:
         signal.show_log_text(" 如果字幕文件名以 .chs 结尾，将被自动删除！\n")
-    movie_type = manager.config_v1.media_type
+    movie_type = manager.config.media_type
     movie_list = await movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
-    sub_type_list = manager.config_v1.sub_type.split("|")  # 本地字幕文件后缀
+    sub_type_list = manager.config.sub_type.split("|")  # 本地字幕文件后缀
 
     add_count = 0
     no_sub_count = 0
@@ -49,9 +49,9 @@ async def add_sub_for_all_video() -> None:
             if sub_add:
                 add_succ = False
                 for sub_type in sub_type_list:
-                    sub_path = os.path.join(manager.config_v1.subtitle_folder, (number + cd_part + sub_type))
+                    sub_path = os.path.join(manager.config.subtitle_folder, (number + cd_part + sub_type))
                     sub_file_name = file_name + sub_type
-                    if manager.config_v1.subtitle_add_chs:
+                    if manager.config.subtitle_add_chs:
                         sub_file_name = file_name + ".chs" + sub_type
                     sub_new_path = os.path.join(folder_old_path, sub_file_name)
 
@@ -66,7 +66,7 @@ async def add_sub_for_all_video() -> None:
             for sub_type in sub_list:
                 sub_old_path = os.path.join(folder_old_path, (file_name + sub_type))
                 sub_new_path = os.path.join(folder_old_path, (file_name + ".chs" + sub_type))
-                if manager.config_v1.subtitle_add_chs:
+                if manager.config.subtitle_add_chs:
                     if ".chs" not in sub_old_path and not await aiofiles.os.path.exists(sub_new_path):
                         await move_file_async(sub_old_path, sub_new_path)
                         signal.show_log_text(
@@ -82,11 +82,11 @@ async def add_sub_for_all_video() -> None:
 
                 cnword_style = manager.config.cnword_style
                 if cnword_style and cnword_style not in sub_new_path:
-                    folder_cnword = manager.config_v1.folder_cnword
-                    file_cnword = manager.config_v1.file_cnword
-                    folder_name = manager.config_v1.folder_name
-                    naming_file = manager.config_v1.naming_file
-                    naming_media = manager.config_v1.naming_media
+                    folder_cnword = manager.config.folder_cnword
+                    file_cnword = manager.config.file_cnword
+                    folder_name = manager.config.folder_name
+                    naming_file = manager.config.naming_file
+                    naming_media = manager.config.naming_media
                     if (
                         folder_cnword
                         or file_cnword
@@ -102,7 +102,7 @@ async def add_sub_for_all_video() -> None:
     list2 = list(set(new_sub_movie_list))  # 去重
     list3 = [each for each in list2 if each.strip()]  # 去空
     list3.sort(key=new_sub_movie_list.index)  # 排序（保持原顺序）
-    if list3 and manager.config_v1.subtitle_add_rescrape:
+    if list3 and manager.config.subtitle_add_rescrape:
         signal.show_log_text("开始对新添加字幕的视频重新刮削...")
         start_new_scrape(FileMode.Default, movie_list=list3)
     signal.reset_buttons_status.emit()

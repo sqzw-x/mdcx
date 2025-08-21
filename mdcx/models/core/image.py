@@ -9,6 +9,7 @@ from typing import cast
 
 from PIL import Image
 
+from mdcx.config.enums import DownloadableFile
 from mdcx.config.manager import manager
 from mdcx.models.base.image import add_mark_thread
 from mdcx.models.log_buffer import LogBuffer
@@ -22,8 +23,8 @@ async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):
     poster_marked = json_data.poster_marked
     thumb_marked = json_data.thumb_marked
     fanart_marked = json_data.fanart_marked
-    download_files = manager.config_v1.download_files
-    mark_type = manager.config_v1.mark_type.lower()
+    download_files = manager.config.download_files
+    mark_type = manager.config.mark_type.lower()
     has_sub = file_info.has_sub
     definition = file_info.definition
     mark_list = []
@@ -52,19 +53,34 @@ async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):
         mark_list.append("无码")
 
     if mark_list:
-        download_files = manager.config_v1.download_files
+        download_files = manager.config.download_files
         mark_show_type = ",".join(mark_list)
         poster_path = json_data.poster_path
         thumb_path = json_data.thumb_path
         fanart_path = json_data.fanart_path
 
-        if manager.config_v1.thumb_mark == 1 and "thumb" in download_files and thumb_path and not thumb_marked:
+        if (
+            manager.config.thumb_mark == 1
+            and DownloadableFile.THUMB in download_files
+            and thumb_path
+            and not thumb_marked
+        ):
             await add_mark_thread(thumb_path, mark_list)
             LogBuffer.log().write(f"\n 🍀 Thumb add watermark: {mark_show_type}!")
-        if manager.config_v1.poster_mark == 1 and "poster" in download_files and poster_path and not poster_marked:
+        if (
+            manager.config.poster_mark == 1
+            and DownloadableFile.POSTER in download_files
+            and poster_path
+            and not poster_marked
+        ):
             await add_mark_thread(poster_path, mark_list)
             LogBuffer.log().write(f"\n 🍀 Poster add watermark: {mark_show_type}!")
-        if manager.config_v1.fanart_mark == 1 and ",fanart" in download_files and fanart_path and not fanart_marked:
+        if (
+            manager.config.fanart_mark == 1
+            and DownloadableFile.FANART in download_files
+            and fanart_path
+            and not fanart_marked
+        ):
             await add_mark_thread(fanart_path, mark_list)
             LogBuffer.log().write(f"\n 🍀 Fanart add watermark: {mark_show_type}!")
 

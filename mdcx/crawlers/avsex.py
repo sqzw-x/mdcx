@@ -4,6 +4,7 @@ import time
 
 from lxml import etree
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
 from mdcx.models.log_buffer import LogBuffer
 
@@ -157,7 +158,7 @@ async def main(
 
     if not re.match(r"n\d{4}", number):
         number = number.upper()
-    avsex_url = getattr(manager.config_v1, "avsex_website", "https://gg5.co")
+    avsex_url = manager.config.get_site_url(Website.AVSEX, "https://gg5.co")
     if appoint_url:
         if "http" in appoint_url:
             avsex_url = re.findall(r"(.*//[^/]*)\/", appoint_url)[0]

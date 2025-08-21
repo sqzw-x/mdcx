@@ -3,6 +3,7 @@ import time
 
 from lxml import etree
 
+from mdcx.config.enums import FieldRule, Website
 from mdcx.config.manager import manager
 from mdcx.models.log_buffer import LogBuffer
 
@@ -72,7 +73,7 @@ async def main(
     website_name = "fc2hub"
     LogBuffer.req().write(f"-> {website_name}")
     real_url = appoint_url
-    root_url = getattr(manager.config_v1, "fc2hub_website", "https://javten.com")
+    root_url = manager.config.get_site_url(Website.FC2HUB, "https://javten.com")
 
     number = number.upper().replace("FC2PPV", "").replace("FC2-PPV-", "").replace("FC2-", "").replace("-", "").strip()
     dic = {}
@@ -127,7 +128,7 @@ async def main(
             studio = getStudio(html_info)  # 获取厂商
             extrafanart = getExtraFanart(html_info)
             mosaic = getMosaic(tag, title)
-            actor = studio if "fc2_seller" in manager.config_v1.fields_rule else ""
+            actor = studio if FieldRule.FC2_SELLER in manager.config.fields_rule else ""
 
             try:
                 dic = {

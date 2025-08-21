@@ -106,7 +106,7 @@ async def main(
         video_url = get_video_url(html_info)
         video_time = get_video_time(html_info)
         tag = tag.replace("無修正,", "").replace("無修正", "").strip(",")
-        if "fc2_seller" in manager.config_v1.fields_rule:
+        if "fc2_seller" in manager.config.fields_rule:
             actor = studio
 
         try:

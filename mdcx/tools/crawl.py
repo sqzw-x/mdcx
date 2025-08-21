@@ -95,7 +95,7 @@ def _crawl(sites: list[Website], input: CrawlerInput, output: str | None, proxy:
         timeout=timeout,
         log_fn=lambda msg: print(f"[dim][AsyncWebClient] {msg}[/dim]"),
     )
-    crawlers = [c(client=client, base_url=manager.config_v1.get_website_base_url(c.site())) for c in classes]
+    crawlers = [c(client=client, base_url=manager.config.get_website_base_url(c.site())) for c in classes]
     futures = [executor.submit(crawler.run(input)) for crawler in crawlers]
     executor.wait_all()
 
@@ -165,8 +165,8 @@ def show_config():
     console.print("[bold blue]当前配置信息:[/bold blue]")
     console.print()
     console.print(f"代理: {manager.config.httpx_proxy or '未设置'}")
-    console.print(f"超时时间: {manager.config_v1.timeout} 秒")
-    console.print(f"重试次数: {manager.config_v1.retry}")
+    console.print(f"超时时间: {manager.config.timeout} 秒")
+    console.print(f"重试次数: {manager.config.retry}")
     console.print(f"配置文件路径: {manager.path}")
 
 
@@ -194,8 +194,8 @@ async def _fetch_async(
 
     # 配置网络客户端
     client_proxy = proxy or manager.config.httpx_proxy
-    client_timeout = timeout or manager.config_v1.timeout
-    client_retry = retry or manager.config_v1.retry
+    client_timeout = timeout or manager.config.timeout
+    client_retry = retry or manager.config.retry
 
     console.print(f"[cyan]正在获取: {url}[/cyan]")
     if website:
@@ -224,7 +224,7 @@ async def _fetch_async(
                     console.print(f"[red]错误: 未找到 {website.value} Crawler[/red]")
                     exit(1)
 
-                crawler = crawler_class(client=async_client, base_url=manager.config_v1.get_website_base_url(website))
+                crawler = crawler_class(client=async_client, base_url=manager.config.get_website_base_url(website))
                 crawler_input = CrawlerInput.empty()
                 crawler_input.appoint_url = url
                 ctx = crawler.new_context(crawler_input)

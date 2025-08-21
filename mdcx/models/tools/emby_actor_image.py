@@ -201,7 +201,7 @@ async def _get_gfriends_actor_data():
 
 
 async def _get_graphis_pic(actor_name):
-    emby_on = manager.config_v1.emby_on
+    emby_on = manager.config.emby_on
 
     # 生成图片路径和请求地址
     actor_folder = resources.userdata_path("actor/graphis")
@@ -281,7 +281,7 @@ async def _get_graphis_pic(actor_name):
 
 async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
     start_time = time.time()
-    emby_on = manager.config_v1.emby_on
+    emby_on = manager.config.emby_on
     actor_folder = resources.userdata_path("actor")
 
     i = 0
@@ -371,7 +371,7 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
             r, err = await _upload_actor_photo(backdrop_url, backdrop_path)
         if r:
             if not logs or logs == "🍊 graphis.ne.jp 无结果！":
-                if "actor_photo_net" in manager.config_v1.emby_on:
+                if "actor_photo_net" in manager.config.emby_on:
                     logs += " ✅ 使用 Gfriends 头像和背景！"
                 else:
                     logs += " ✅ 使用本地头像库头像和背景！"

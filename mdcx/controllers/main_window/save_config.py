@@ -464,7 +464,7 @@ def save_config(self: "MyMAinWindow"):
         (self.Ui.checkBox_actor_fc2_seller, FieldRule.FC2_SELLER),
         (self.Ui.checkBox_number_del_num, FieldRule.DEL_NUM),
     )
-    # suffix_sort 在新配置中是枚举列表，需要解析
+
     suffix_sort_text = self.Ui.lineEdit_suffix_sort.text()
     suffix_sort_list = []
     for item in suffix_sort_text.split(","):

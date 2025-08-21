@@ -325,26 +325,6 @@ class ConfigV1:
         else:
             self.proxy = "http://" + self.proxy.strip()
 
-        # 获取 Google 下载关键词列表
-        temp_list = re.split(r"[,，]", self.google_used)
-        self.google_keyused = [each for each in temp_list if each.strip()]  # 去空
-        # 获取 Google 过滤关键词列表
-        temp_list = re.split(r"[,，]", self.google_exclude)
-        self.google_keyword = [each for each in temp_list if each.strip()]  # 去空
-
-        # 获取排除字符列表
-        temp_list = re.split("[,，]", self.string) + ManualConfig.REPL_LIST
-        self.escape_string_list = []
-        [self.escape_string_list.append(i) for i in temp_list if i.strip() and i not in self.escape_string_list]
-
-        # 番号对应官网
-        official_websites_dic = {}
-        for key, value in ManualConfig.OFFICIAL.items():
-            temp_list = value.upper().split("|")
-            for each in temp_list:
-                official_websites_dic[each] = key
-        self.official_websites = official_websites_dic
-
         # 字段命名规则-后缀字段顺序
         all_str_list = ["moword", "cnword", "definition"]
         read_str_list = re.split(r"[,，]", self.suffix_sort)

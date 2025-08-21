@@ -101,7 +101,7 @@ async def get_detail(url, url_log, actor_info: EMbyActressInfo) -> tuple[bool, s
     """异步版本的_get_wiki_detail函数"""
     try:
         ja = "ja." in url
-        emby_on = manager.config_v1.emby_on
+        emby_on = manager.config.emby_on
         res, error = await manager.computed.async_client.get_text(url, headers=manager.computed.random_headers)
         if res is None:
             return False, f"维基百科演员页请求失败: {error}"
@@ -228,7 +228,7 @@ def handle_search_res(res, wiki_id, actor_info, description_en) -> tuple[str | N
             ja_url: str = jawiki.get("url") if jawiki else ""
             zh_url: str = zhwiki.get("url") if zhwiki else ""
             url_final = ""
-            emby_on = manager.config_v1.emby_on
+            emby_on = manager.config.emby_on
             if "actor_info_zh_cn" in emby_on:
                 if zh_url:
                     url_final = zh_url.replace("zh.wikipedia.org/wiki/", "zh.m.wikipedia.org/zh-cn/")

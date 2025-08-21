@@ -7,6 +7,7 @@ import time
 
 from lxml import etree
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
 from mdcx.models.base.web import get_dmm_trailer
 from mdcx.models.log_buffer import LogBuffer
@@ -196,9 +197,9 @@ async def main(
     website_name = "javdb"
     LogBuffer.req().write(f"-> {website_name}")
 
-    javdb_time = manager.config_v1.javdb_time
-    header = {"cookie": manager.config_v1.javdb}
-    javdb_url = getattr(manager.config_v1, "javdb_website", "https://javdb.com")
+    javdb_time = manager.config.javdb_time
+    header = {"cookie": manager.config.javdb}
+    javdb_url = manager.config.get_site_url(Website.JAVDB, "https://javdb.com")
     if appoint_url and "?locale" not in appoint_url:
         appoint_url += "?locale=zh"
     real_url = appoint_url

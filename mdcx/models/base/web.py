@@ -217,7 +217,7 @@ def _ping_host_thread(host_address: str, result_list: list[int | None], i: int) 
 
 # todo 可以移除 ping, 仅靠 http request 检测网络连通性
 def ping_host(host_address: str) -> str:
-    count = manager.config_v1.retry
+    count = manager.config.retry
     result_list: list[int | None] = [None] * count
     thread_list: list[threading.Thread] = [None] * count  # type: ignore
     for i in range(count):
@@ -234,7 +234,7 @@ def ping_host(host_address: str) -> str:
 
 
 def check_version() -> int | None:
-    if manager.config_v1.update_check:
+    if manager.config.update_check:
         url = "https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
         res_json, error = get_json_sync(url)
         if res_json is not None:
@@ -249,7 +249,7 @@ def check_version() -> int | None:
 
 def check_theporndb_api_token() -> str:
     tips = "✅ 连接正常! "
-    api_token = manager.config_v1.theporndb_api_token
+    api_token = manager.config.theporndb_api_token
     url = "https://api.theporndb.net/scenes/hash/8679fcbdd29fa735"
     headers = {
         "Authorization": f"Bearer {api_token}",
@@ -275,8 +275,8 @@ def check_theporndb_api_token() -> str:
 
 
 async def _get_pic_by_google(pic_url):
-    google_keyused = manager.config_v1.google_keyused
-    google_keyword = manager.config_v1.google_keyword
+    google_keyused = manager.computed.google_keyused
+    google_keyword = manager.computed.google_keyword
     req_url = f"https://www.google.com/searchbyimage?sbisrc=2&image_url={pic_url}"
     # req_url = f'https://lens.google.com/uploadbyurl?url={pic_url}&hl=zh-CN&re=df&ep=gisbubu'
     response, error = await manager.computed.async_client.get_text(req_url)
@@ -306,7 +306,7 @@ async def _get_pic_by_google(pic_url):
                 new_url_list.append(each_url)
                 url_list.remove(each_url)
     # 只下载关时，追加剩余地址
-    if "goo_only" not in manager.config_v1.download_hd_pics:
+    if "goo_only" not in [item.value for item in manager.config.download_hd_pics]:
         new_url_list += url_list
     # 解析地址
     for each in new_url_list:

@@ -1500,9 +1500,6 @@ class MyMAinWindow(QMainWindow):
 
     def _move_file_thread(self):
         signal_qt.change_buttons_status.emit()
-        movie_type = self.Ui.lineEdit_movie_type.text().lower()
-        sub_type = self.Ui.lineEdit_sub_type.text().lower().replace("|.txt", "")
-        all_type = movie_type.strip("|") + "|" + sub_type.strip("|")
         movie_path = manager.config.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
         if movie_path == "":  # 未设置为空时，使用主程序目录
             movie_path = manager.data_folder
@@ -1517,7 +1514,9 @@ class MyMAinWindow(QMainWindow):
                 if es[-1] != "/":  # 路径尾部添加“/”，方便后面move_list查找时匹配路径
                     es += "/"
                 escape_folder_new_list.append(es)
-        movie_list = executor.run(movie_lists(escape_folder_new_list, all_type, movie_path))
+        movie_list = executor.run(
+            movie_lists(escape_folder_new_list, manager.config.media_type + manager.config.sub_type, movie_path)
+        )
         if not movie_list:
             signal_qt.show_log_text("No movie found!")
             signal_qt.show_log_text("================================================================================")
@@ -1535,7 +1534,7 @@ class MyMAinWindow(QMainWindow):
             try:
                 # move_file(file_path, des_path)
                 shutil.move(file_path, des_path)
-                if file_ext in movie_type:
+                if file_ext in manager.config.media_type:
                     signal_qt.show_log_text("   Move movie: " + file_name + " to Movie_moved Success!")
                 else:
                     signal_qt.show_log_text("   Move sub: " + file_name + " to Movie_moved Success!")

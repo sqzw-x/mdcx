@@ -4,6 +4,7 @@ import time
 
 from lxml import etree
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
 from mdcx.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
 from mdcx.models.log_buffer import LogBuffer
@@ -217,7 +218,7 @@ async def main(
     LogBuffer.info().write(" \n    🌐 mdtv")
     debug_info = ""
 
-    mdtv_url = getattr(manager.config_v1, "mdtv_website", "https://www.mdpjzip.xyz")
+    mdtv_url = manager.config.get_site_url(Website.MDTV, "https://www.mdpjzip.xyz")
     real_url = appoint_url
     search_url = f"{mdtv_url}/index.php/vodsearch/-------------.html"
 

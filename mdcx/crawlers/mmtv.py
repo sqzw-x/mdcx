@@ -4,6 +4,7 @@ import time
 
 from lxml import etree
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
 from mdcx.crawlers.guochan import get_extra_info
 from mdcx.models.log_buffer import LogBuffer
@@ -178,7 +179,7 @@ async def main(
     web_info = "\n       "
     LogBuffer.info().write(" \n    🌐 7mmtv")
     debug_info = ""
-    mmtv_url = getattr(manager.config_v1, "7mmtv_website", "https://www.7mmtv.sx")
+    mmtv_url = manager.config.get_site_url(Website.MMTV, "https://www.7mmtv.sx")
     real_url = appoint_url
     # search_url = "https://bb9711.com/zh/searchform_search/all/index.html"
     # search_url = "https://7mmtv.sx/zh/searchform_search/all/index.html"

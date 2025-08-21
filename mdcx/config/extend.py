@@ -23,12 +23,9 @@ def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str,
     # 用户设置的失败输出目录
     failed_folder = manager.config.failed_output_folder.replace("\\", "/").replace("end_folder_name", end_folder_name)
     # 用户设置的排除目录
-    escape_folder_list = (
-        manager.config_v1.folders.replace("\\", "/")
-        .replace("end_folder_name", end_folder_name)
-        .replace("，", ",")
-        .split(",")
-    )
+    escape_folder_list = [
+        f.replace("\\", "/").replace("end_folder_name", end_folder_name) for f in manager.config.folders
+    ]
     # 用户设置的剧照副本目录
     extrafanart_folder = manager.config.extrafanart_folder.replace("\\", "/")
 

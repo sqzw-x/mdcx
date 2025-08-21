@@ -9,9 +9,10 @@ from pathlib import Path
 import aiofiles
 import aiofiles.os
 
+from mdcx.config.enums import DownloadableFile, NoEscape, Switch
 from mdcx.config.extend import get_movie_path_setting, need_clean
 from mdcx.config.manager import manager
-from mdcx.config.models import CleanAction, NoEscape
+from mdcx.config.models import CleanAction
 from mdcx.config.resources import resources
 from mdcx.consts import IS_WINDOWS
 from mdcx.models.enums import FileMode
@@ -31,7 +32,7 @@ from mdcx.utils.file import (
 
 async def move_other_file(number: str, folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str):
     # 软硬链接模式不移动
-    if manager.config_v1.soft_link != 0:
+    if manager.config.soft_link != 0:
         return
 
     # 目录相同不移动
@@ -39,16 +40,16 @@ async def move_other_file(number: str, folder_old_path: str, folder_new_path: st
         return
 
     # 更新模式 或 读取模式
-    if manager.config_v1.main_mode == 3 or manager.config_v1.main_mode == 4:
-        if manager.config_v1.update_mode == "c" and not manager.config_v1.success_file_rename:
+    if manager.config.main_mode == 3 or manager.config.main_mode == 4:
+        if manager.config.update_mode == "c" and not manager.config.success_file_rename:
             return
 
-    elif not manager.config_v1.success_file_move and not manager.config_v1.success_file_rename:
+    elif not manager.config.success_file_move and not manager.config.success_file_rename:
         return
 
     files = await aiofiles.os.listdir(folder_old_path)
     for old_file in files:
-        if os.path.splitext(old_file)[1].lower() in manager.config_v1.media_type:
+        if os.path.splitext(old_file)[1].lower() in manager.config.media_type:
             continue
         if (
             number in old_file or file_name in old_file or naming_rule in old_file
@@ -66,28 +67,28 @@ async def move_other_file(number: str, folder_old_path: str, folder_new_path: st
 
 async def copy_trailer_to_theme_videos(folder_new_path: str, naming_rule: str) -> None:
     start_time = time.time()
-    download_files = manager.config_v1.download_files
-    keep_files = manager.config_v1.keep_files
+    download_files = manager.config.download_files
+    keep_files = manager.config.keep_files
     theme_videos_folder_path = os.path.join(folder_new_path, "backdrops")
     theme_videos_new_path = os.path.join(theme_videos_folder_path, "theme_video.mp4")
 
     # 不保留不下载主题视频时，删除
-    if "theme_videos" not in download_files and "theme_videos" not in keep_files:
+    if DownloadableFile.THEME_VIDEOS not in download_files and DownloadableFile.THEME_VIDEOS not in keep_files:
         if await aiofiles.os.path.exists(theme_videos_folder_path):
             shutil.rmtree(theme_videos_folder_path, ignore_errors=True)
         return
 
     # 保留主题视频并存在时返回
-    if "theme_videos" in keep_files and await aiofiles.os.path.exists(theme_videos_folder_path):
+    if DownloadableFile.THEME_VIDEOS in keep_files and await aiofiles.os.path.exists(theme_videos_folder_path):
         LogBuffer.log().write(f"\n 🍀 Theme video done! (old)({get_used_time(start_time)}s) ")
         return
 
     # 不下载主题视频时返回
-    if "theme_videos" not in download_files:
+    if DownloadableFile.THEME_VIDEOS not in download_files:
         return
 
     # 不存在预告片时返回
-    trailer_name = manager.config_v1.trailer_simple_name
+    trailer_name = manager.config.trailer_simple_name
     trailer_folder = ""
     if trailer_name:
         trailer_folder = os.path.join(folder_new_path, "trailers")
@@ -106,7 +107,7 @@ async def copy_trailer_to_theme_videos(folder_new_path: str, naming_rule: str) -
     LogBuffer.log().write("\n 🍀 Theme video done! (copy trailer)")
 
     # 不下载并且不保留预告片时，删除预告片
-    if "trailer" not in download_files and "trailer" not in manager.config_v1.keep_files:
+    if DownloadableFile.TRAILER not in download_files and DownloadableFile.TRAILER not in manager.config.keep_files:
         await delete_file_async(trailer_file_path)
         if trailer_name:
             shutil.rmtree(trailer_folder, ignore_errors=True)
@@ -118,7 +119,10 @@ async def pic_some_deal(number: str, thumb_final_path: str, fanart_final_path: s
     thumb、poster、fanart 删除冗余的图片
     """
     # 不保存thumb时，清理 thumb
-    if "thumb" not in manager.config_v1.download_files and "thumb" not in manager.config_v1.keep_files:
+    if (
+        DownloadableFile.THUMB not in manager.config.download_files
+        and DownloadableFile.THUMB not in manager.config.keep_files
+    ):
         if await aiofiles.os.path.exists(fanart_final_path):
             Flags.file_done_dic[number].update({"thumb": fanart_final_path})
         else:
@@ -166,7 +170,7 @@ async def save_success_list(old_path: str = "", new_path: str = "") -> None:
 
 def save_remain_list() -> None:
     """This function is intended to be sync."""
-    if Flags.can_save_remain and "remain_task" in manager.config_v1.switch_on:
+    if Flags.can_save_remain and Switch.REMAIN_TASK in manager.config.switch_on:
         try:
             with open(resources.userdata_path("remain.txt"), "w", encoding="utf-8", errors="ignore") as f:
                 f.write("\n".join(Flags.remain_list))
@@ -181,7 +185,7 @@ async def _clean_empty_fodlers(path: str, file_mode: FileMode) -> None:
         return
     signal.set_label_file_path.emit("🗑 正在清理空文件夹，请等待...")
     signal.show_log_text(" ⏳ Cleaning empty folders...")
-    escape_folder_list = "" if "folder" in manager.config_v1.no_escape else get_movie_path_setting()[3]
+    escape_folder_list = "" if NoEscape.FOLDER in manager.config.no_escape else get_movie_path_setting()[3]
     if not await aiofiles.os.path.exists(path):
         signal.show_log_text(f" 🍀 Clean done!({get_used_time(start_time)}s)")
         signal.show_log_text("=" * 80)
@@ -270,12 +274,11 @@ def get_success_list() -> None:
     signal.view_success_file_settext.emit(f"查看 ({len(Flags.success_list)})")
 
 
-async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path: str) -> list[str]:
+async def movie_lists(escape_folder_list: list[str], media_type: list[str], movie_path: str) -> list[str]:
     start_time = time.time()
     total = []
-    media_type = movie_type.split("|")
     skip_list = ["skip", ".skip", ".ignore"]
-    not_skip_success = bool("skip_success_file" not in manager.config_v1.no_escape)
+    not_skip_success = NoEscape.SKIP_SUCCESS_FILE not in manager.config.no_escape
 
     signal.show_traceback_log("🔎 遍历待刮削目录....")
 
@@ -322,7 +325,7 @@ async def movie_lists(escape_folder_list: list[str], movie_type: str, movie_path
                         if os.path.islink(path):
                             real_path = path.readlink()
                             # 清理失效的软链接文件
-                            if "check_symlink" in manager.config_v1.no_escape and not os.path.exists(real_path):
+                            if NoEscape.CHECK_SYMLINK in manager.config.no_escape and not os.path.exists(real_path):
                                 result, error_info = delete_file_sync(path)
                                 if result:
                                     signal.show_log_text(f" 🗑 Clean dead link: {path} ")
@@ -388,14 +391,14 @@ async def get_movie_list(file_mode: FileMode, movie_path: str, escape_folder_lis
             signal.show_log_text(" 🔎 Searching all videos, Please wait...")
             signal.set_label_file_path.emit(f"正在遍历待刮削视频目录中的所有视频，请等待...\n {movie_path}")
             if (
-                "folder" in manager.config_v1.no_escape
-                or manager.config_v1.main_mode == 3
-                or manager.config_v1.main_mode == 4
+                NoEscape.FOLDER in manager.config.no_escape
+                or manager.config.main_mode == 3
+                or manager.config.main_mode == 4
             ):
                 escape_folder_list = []
             try:
                 # 获取所有需要刮削的影片列表
-                movie_list = await movie_lists(escape_folder_list, manager.config_v1.media_type, movie_path)
+                movie_list = await movie_lists(escape_folder_list, manager.config.media_type, movie_path)
             except Exception:
                 signal.show_traceback_log(traceback.format_exc())
                 signal.show_log_text(traceback.format_exc())
@@ -422,9 +425,9 @@ async def newtdisk_creat_symlink(copy_flag: bool, netdisk_path: str = "", local_
         signal.change_buttons_status.emit()
     start_time = time.time()
     if not netdisk_path:
-        netdisk_path = convert_path(manager.config_v1.netdisk_path)
+        netdisk_path = convert_path(manager.config.netdisk_path)
     if not local_path:
-        local_path = convert_path(manager.config_v1.localdisk_path)
+        local_path = convert_path(manager.config.localdisk_path)
     signal.show_log_text("🍯 🍯 🍯 NOTE: Begining creat symlink!!!")
     signal.show_log_text("\n ⏰ Start time: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     signal.show_log_text(f" 📁 Source path: {netdisk_path} \n 📁 Softlink path: {local_path} \n")
@@ -435,8 +438,8 @@ async def newtdisk_creat_symlink(copy_flag: bool, netdisk_path: str = "", local_
             if from_tool:
                 signal.reset_buttons_status.emit()
             return
-        copy_exts = [".nfo", ".jpg", ".png"] + manager.config_v1.sub_type.split("|")
-        file_exts = manager.config_v1.media_type.lower().split("|") + copy_exts + manager.config_v1.sub_type.split("|")
+        copy_exts = [".nfo", ".jpg", ".png"] + manager.config.sub_type
+        file_exts = "|".join(manager.config.media_type).lower().split("|") + copy_exts + manager.config.sub_type
 
         def task():
             total = 0
@@ -526,13 +529,13 @@ async def newtdisk_creat_symlink(copy_flag: bool, netdisk_path: str = "", local_
 
 async def move_file_to_failed_folder(failed_folder: str, file_path: str, folder_old_path: str) -> str:
     # 更新模式、读取模式，不移动失败文件；不移动文件-关时，不移动； 软硬链接开时，不移动
-    main_mode = manager.config_v1.main_mode
-    if main_mode == 3 or main_mode == 4 or not manager.config_v1.failed_file_move or manager.config_v1.soft_link != 0:
+    main_mode = manager.config.main_mode
+    if main_mode == 3 or main_mode == 4 or not manager.config.failed_file_move or manager.config.soft_link != 0:
         LogBuffer.log().write(f"\n 🙊 [Movie] {file_path}")
         return file_path
 
     # 创建failed文件夹
-    if manager.config_v1.failed_file_move == 1 and not await aiofiles.os.path.exists(failed_folder):
+    if manager.config.failed_file_move == 1 and not await aiofiles.os.path.exists(failed_folder):
         try:
             await aiofiles.os.makedirs(failed_folder)
         except Exception:
@@ -577,7 +580,7 @@ async def move_file_to_failed_folder(failed_folder: str, file_path: str, folder_
                 LogBuffer.log().write(f"\n 🔴 Failed to move trailer to the failed folder! \n    {str(e)}")
 
         # 同步移动字幕
-        sub_type_list = manager.config_v1.sub_type.split("|")
+        sub_type_list = manager.config.sub_type
         sub_type_new_list = []
         [sub_type_new_list.append(".chs" + i) for i in sub_type_list if ".chs" not in i]
         for sub in sub_type_new_list:
@@ -599,13 +602,13 @@ async def move_file_to_failed_folder(failed_folder: str, file_path: str, folder_
 async def check_file(file_path: str, file_escape_size: float) -> bool:
     if await aiofiles.os.path.islink(file_path):
         file_path = await read_link_async(file_path)
-        if "check_symlink" not in manager.config_v1.no_escape:
+        if NoEscape.CHECK_SYMLINK not in manager.config.no_escape:
             return True
 
     if not await aiofiles.os.path.exists(file_path):
         LogBuffer.error().write("文件不存在")
         return False
-    if "no_skip_small_file" not in manager.config_v1.no_escape:
+    if NoEscape.NO_SKIP_SMALL_FILE not in manager.config.no_escape:
         file_size = await aiofiles.os.path.getsize(file_path) / float(1024 * 1024)
         if file_size < file_escape_size:
             LogBuffer.error().write(
@@ -617,15 +620,13 @@ async def check_file(file_path: str, file_escape_size: float) -> bool:
 
 async def move_torrent(folder_old_path: str, folder_new_path: str, file_name: str, movie_number: str, naming_rule: str):
     # 更新模式 或 读取模式
-    if manager.config_v1.main_mode == 3 or manager.config_v1.main_mode == 4:
-        if manager.config_v1.update_mode == "c" and not manager.config_v1.success_file_rename:
+    if manager.config.main_mode == 3 or manager.config.main_mode == 4:
+        if manager.config.update_mode == "c" and not manager.config.success_file_rename:
             return
 
     # 软硬链接开时，不移动
     elif (
-        manager.config_v1.soft_link != 0
-        or not manager.config_v1.success_file_move
-        and not manager.config_v1.success_file_rename
+        manager.config.soft_link != 0 or not manager.config.success_file_move and not manager.config.success_file_rename
     ):
         return
     torrent_file1 = os.path.join(folder_old_path, (file_name + ".torrent"))
@@ -651,11 +652,11 @@ async def move_torrent(folder_old_path: str, folder_new_path: str, file_name: st
 
 async def move_bif(folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str) -> None:
     # 更新模式 或 读取模式
-    if manager.config_v1.main_mode == 3 or manager.config_v1.main_mode == 4:
-        if manager.config_v1.update_mode == "c" and not manager.config_v1.success_file_rename:
+    if manager.config.main_mode == 3 or manager.config.main_mode == 4:
+        if manager.config.update_mode == "c" and not manager.config.success_file_rename:
             return
 
-    elif not manager.config_v1.success_file_move and not manager.config_v1.success_file_rename:
+    elif not manager.config.success_file_move and not manager.config.success_file_rename:
         return
     bif_old_path = os.path.join(folder_old_path, (file_name + "-320-10.bif"))
     bif_new_path = os.path.join(folder_new_path, (naming_rule + "-320-10.bif"))
@@ -669,18 +670,14 @@ async def move_bif(folder_old_path: str, folder_new_path: str, file_name: str, n
 
 
 async def move_trailer_video(folder_old_path: str, folder_new_path: str, file_name: str, naming_rule: str) -> None:
-    if (
-        manager.config_v1.main_mode < 2
-        and not manager.config_v1.success_file_move
-        and not manager.config_v1.success_file_rename
-    ):
+    if manager.config.main_mode < 2 and not manager.config.success_file_move and not manager.config.success_file_rename:
         return
-    if manager.config_v1.main_mode > 2:
-        update_mode = manager.config_v1.update_mode
-        if update_mode == "c" and not manager.config_v1.success_file_rename:
+    if manager.config.main_mode > 2:
+        update_mode = manager.config.update_mode
+        if update_mode == "c" and not manager.config.success_file_rename:
             return
 
-    media_type_list = manager.config_v1.media_type.split("|")
+    media_type_list = "|".join(manager.config.media_type).split("|")
     for media_type in media_type_list:
         trailer_old_path = os.path.join(folder_old_path, (file_name + "-trailer" + media_type))
         trailer_new_path = os.path.join(folder_new_path, (naming_rule + "-trailer" + media_type))

@@ -5,6 +5,7 @@ import time
 import zhconv
 from lxml import etree
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
 from mdcx.crawlers.guochan import get_extra_info, get_number_list
 from mdcx.models.log_buffer import LogBuffer
@@ -63,7 +64,7 @@ async def main(
     LogBuffer.info().write(" \n    🌐 cableav")
     debug_info = ""
     real_url = appoint_url
-    cableav_url = getattr(manager.config_v1, "cableav_website", "https://cableav.tv")
+    cableav_url = manager.config.get_site_url(Website.CABLEAV, "https://cableav.tv")
 
     try:
         if not real_url:

@@ -31,9 +31,9 @@ async def write_nfo(
     update=False,
 ) -> bool:
     start_time = time.time()
-    download_files = manager.config_v1.download_files
-    keep_files = manager.config_v1.keep_files
-    outline_show = manager.config_v1.outline_show
+    download_files = manager.config.download_files
+    keep_files = manager.config.keep_files
+    outline_show = manager.config.outline_format
 
     if not update:
         # 不写nfo
@@ -46,10 +46,10 @@ async def write_nfo(
         LogBuffer.log().write(f"\n 🍀 Nfo done! (old)({get_used_time(start_time)}s)")
         return True
 
-    if manager.config_v1.main_mode == 3 or manager.config_v1.main_mode == 4:
-        nfo_title_template = manager.config_v1.update_titletemplate
+    if manager.config.main_mode == 3 or manager.config.main_mode == 4:
+        nfo_title_template = manager.config.update_titletemplate
     else:
-        nfo_title_template = manager.config_v1.naming_media
+        nfo_title_template = manager.config.naming_media
 
     # 字符转义，避免emby无法解析
     json_data_nfo = CrawlersResult(**asdict(json_data))
@@ -106,7 +106,7 @@ async def write_nfo(
 
     # 获取字段
     # 只有nfo的title用替换后的，其他字段用原始的
-    nfo_include_new = manager.config_v1.nfo_include_new
+    nfo_include_new = manager.config.nfo_include_new
     cd_part = file_info.cd_part
     originaltitle = json_data_nfo.originaltitle
     originalplot = json_data_nfo.originalplot
@@ -172,7 +172,7 @@ async def write_nfo(
 
         # 输出发行日期
         if release:
-            nfo_tagline = manager.config_v1.nfo_tagline.replace("release", release)
+            nfo_tagline = manager.config.nfo_tagline.replace("release", release)
             if nfo_tagline:
                 print("  <tagline>" + nfo_tagline + "</tagline>", file=code)
             if "premiered," in nfo_include_new:
@@ -235,7 +235,7 @@ async def write_nfo(
         # 有演员时输出演员
         if "actor," in nfo_include_new:
             if not actor:
-                actor = manager.config_v1.actor_no_name
+                actor = manager.config.actor_no_name
             actor_list = actor.split(",")  # 字符串转列表
             actor_list = [actor.strip() for actor in actor_list if actor.strip()]  # 去除空白
         if actor_list:
@@ -503,7 +503,7 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResul
 
     # 返回数据
     json_data.title = title
-    if manager.config_v1.title_language == "jp" and "read_update_nfo" in manager.config_v1.read_mode and originaltitle:
+    if manager.config.title_language == "jp" and "read_update_nfo" in manager.config.read_mode and originaltitle:
         json_data.title = originaltitle
     json_data.originaltitle = originaltitle
     if is_japanese(originaltitle):
@@ -515,11 +515,11 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResul
     json_data.actor = actor
     json_data.all_actor = actor
     json_data.outline = outline
-    if manager.config_v1.outline_language == "jp" and "read_update_nfo" in manager.config_v1.read_mode and originalplot:
+    if manager.config.outline_language == "jp" and "read_update_nfo" in manager.config.read_mode and originalplot:
         json_data.outline = originalplot
     json_data.originalplot = originalplot
     json_data.tag = tag
-    if "read_update_nfo" in manager.config_v1.read_mode:
+    if "read_update_nfo" in manager.config.read_mode:
         json_data.tag = tag_only
     json_data.release = release
     json_data.year = year

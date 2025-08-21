@@ -4,6 +4,7 @@ import time
 
 from lxml import etree
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
 from mdcx.models.log_buffer import LogBuffer
 
@@ -127,8 +128,8 @@ async def main(
     website_name = "javlibrary"
     LogBuffer.req().write(f"-> {website_name}[{language}]")
 
-    use_proxy = not hasattr(manager.config_v1, "javlibrary_website")
-    domain = getattr(manager.config_v1, "javlibrary_website", "https://www.javlibrary.com")
+    use_proxy = not manager.config.get_site_config(Website.JAVLIBRARY).custom_url
+    domain = manager.config.get_site_url(Website.JAVLIBRARY, "https://www.javlibrary.com")
     real_url = appoint_url
     title = ""
     cover_url = ""

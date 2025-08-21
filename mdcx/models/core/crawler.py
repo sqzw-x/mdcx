@@ -63,7 +63,7 @@ async def _call_crawler(task_input: CrawlerInput, website: Website, timeout: flo
 
     # 获取爬虫函数
     crawler = get_crawler_compat(website)
-    c = crawler(manager.computed.async_client, manager.config_v1.get_website_base_url(website))
+    c = crawler(manager.computed.async_client, manager.config.get_site_url(website, ""))
 
     # 对爬虫函数调用添加超时限制, 超时异常由调用者处理
     if os.getenv("DEBUG"):
@@ -85,8 +85,8 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
     """
     number = task_input.number
     short_number = task_input.short_number
-    scrape_like = manager.config_v1.scrape_like
-    none_fields = manager.config_v1.none_fields  # 不单独刮削的字段
+    scrape_like = manager.config.scrape_like
+    none_fields = manager.config.none_fields  # 不单独刮削的字段
 
     def get_field_websites(field: str) -> list[Website]:
         """
@@ -106,7 +106,7 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
         # 指定字段排除网站列表
         field_ex_list: list[Website] = getattr(manager.config, f"{field_no_zh}_website_exclude", [])
         # 所有设定的本字段来源失败时, 是否继续使用类型网站补全
-        include_others = field == "title" or field in manager.config_v1.whole_fields
+        include_others = field == "title" or field in manager.config.whole_fields
         if include_others and field != "trailer":  # 取剩余未相交网站， trailer 不取未相交网站
             field_list.extend([i for i in number_website_list if i not in field_list])
         # 排除指定网站
@@ -143,9 +143,9 @@ async def _call_crawlers(task_input: CrawlerInput, number_website_list: list[Web
     else:  # 全部模式
         # 各字段网站列表
         all_field_websites = {field: get_field_websites(field) for field in all_fields}
-        if manager.config_v1.outline_language == "jp" and "outline_zh" in all_field_websites:
+        if manager.config.outline_language == "jp" and "outline_zh" in all_field_websites:
             del all_field_websites["outline_zh"]
-        if manager.config_v1.title_language == "jp" and "title_zh" in all_field_websites:
+        if manager.config.title_language == "jp" and "title_zh" in all_field_websites:
             del all_field_websites["title_zh"]
 
     # 各字段语言
@@ -478,8 +478,8 @@ def _get_website_name(task_input: CrawlTask, file_mode: FileMode) -> str:
         website_temp = task_input.website_name
         if website_temp:
             website_name = website_temp
-    elif manager.config_v1.scrape_like == "single":
-        website_name = manager.config_v1.website_single
+    elif manager.config.scrape_like == "single":
+        website_name = manager.config.website_single
 
     return website_name
 
