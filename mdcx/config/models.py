@@ -88,10 +88,6 @@ class SiteConfig(BaseModel):
 
 
 class Config(BaseModel):
-    """
-    Pydantic model for application configuration, converted from ConfigSchema.
-    """
-
     model_config = ConfigDict()
     # region: General Settings
     media_path: str = ServerPathDirectory("./media", title="媒体路径", initial_path=SAFE_DIRS[0].as_posix())
@@ -867,12 +863,17 @@ class Config(BaseModel):
 
     def to_legacy(self) -> dict[str, Any]:
         """
-        将 Pydantic 模型转换为可用于构造 ConfigSchema 的 dict.
+        将 Pydantic 模型转换为可用于构造 ConfigV1 的 dict.
 
         Returns:
-            d: 与 ConfigSchema 兼容的 dict.
+            d: 与 ConfigV1 兼容的 dict.
         """
         d = self.model_dump(mode="python")
+
+        # 处理 site_configs
+        site_configs = d.pop("site_configs", {})
+        for site, config in site_configs.items():
+            d[f"{site}_website"] = config["custom_url"]
 
         def handle_fields(data: dict) -> dict[str, Any]:
             res = {}
@@ -932,7 +933,7 @@ class Config(BaseModel):
     @classmethod
     def from_legacy(cls, data: dict[str, Any]) -> "Config":
         """
-        从 ConfigSchema 创建 Config 实例.
+        从 ConfigV1 创建 Config 实例.
         """
         # 应用兼容规则
         for rule in COMPAT_RULES:
@@ -944,6 +945,15 @@ class Config(BaseModel):
                 data.pop(rule.name, None)
             elif isinstance(rule, Add):  # 新增字段会自动使用默认值初始化
                 pass
+
+        # 处理 site_configs
+        site_configs = {}
+        for key, value in data.items():
+            # custom url
+            if key.endswith("_website") and key[:-8] in Website:
+                site_name = key.replace("_website", "")
+                site_configs[Website(site_name)] = SiteConfig(custom_url=value)
+        data["site_configs"] = site_configs
 
         # 格式转换
         def handle_dict(model_fields: dict[str, FieldInfo], data: dict[str, Any]) -> dict[str, Any]:
@@ -1042,29 +1052,31 @@ class Add(CompatRule):
     name: str
 
 
-# 描述 Config 相比于 ConfigSchema 的变更并添加相应的兼容规则
+# 描述 Config 相比于 ConfigV1 的变更并添加相应的兼容规则
 COMPAT_RULES: list[CompatRule] = [
+    Remove("version"),
+    Remove("unknown_fields"),
     Rename[str, bool](
         "type",
         "use_proxy",
         to_new=lambda x: x != "no",
         to_old=lambda x: "no" if not x else "yes",
-        notes=["ConfigSchema.type", Config().use_proxy, "与关键词冲突"],
+        notes=["ConfigV1.type", Config().use_proxy, "与关键词冲突"],
     ),
-    Rename("outline_show", "outline_format", notes=["ConfigSchema.outline_show", Config().outline_format, "澄清语义"]),
-    Rename("tag_include", "nfo_tag_include", notes=["ConfigSchema.tag_include", Config().nfo_tag_include, "澄清语义"]),
-    Remove("show_4k", notes=["ConfigSchema.show_4k", "功能与命名模板冲突"]),
-    Remove("show_moword", notes=["ConfigSchema.show_moword", "功能与命名模板冲突"]),
+    Rename("outline_show", "outline_format", notes=["ConfigV1.outline_show", Config().outline_format, "澄清语义"]),
+    Rename("tag_include", "nfo_tag_include", notes=["ConfigV1.tag_include", Config().nfo_tag_include, "澄清语义"]),
+    Remove("show_4k", notes=["ConfigV1.show_4k", "功能与命名模板冲突"]),
+    Remove("show_moword", notes=["ConfigV1.show_moword", "功能与命名模板冲突"]),
     Add("site_configs", notes=[Config().site_configs]),
 ]
 if TYPE_CHECKING:
-    from .v1 import ConfigSchema
+    from .v1 import ConfigV1
 
-    # 方便快速查看 ConfigSchema 的字段
+    # 方便快速查看 ConfigV1 的字段
     _ = [
-        ConfigSchema.type,
-        ConfigSchema.outline_show,
-        ConfigSchema.tag_include,
-        ConfigSchema.show_4k,
-        ConfigSchema.show_moword,
+        ConfigV1.type,
+        ConfigV1.outline_show,
+        ConfigV1.tag_include,
+        ConfigV1.show_4k,
+        ConfigV1.show_moword,
     ]

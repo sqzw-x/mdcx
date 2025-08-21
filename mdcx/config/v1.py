@@ -1,6 +1,6 @@
 import re
 from configparser import ConfigParser, RawConfigParser
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import dataclass, field, fields
 from io import StringIO
 from pathlib import Path
 from typing import Any
@@ -13,7 +13,7 @@ from mdcx.manual import ManualConfig
 def load_v1(path: str | Path) -> tuple[dict[str, Any], list[str]]:
     reader = RawConfigParser(interpolation=None)
     reader.read(path, encoding="UTF-8")
-    field_types = {f.name: f.type for f in fields(ConfigSchema)}
+    field_types = {f.name: f.type for f in fields(ConfigV1)}
     errors = []
     unknown_fields: dict[str, str] = {}  # 原样保留未知字段
     d = {}
@@ -62,7 +62,7 @@ def ini_value_to_bool(value: str) -> bool:
 
 
 @dataclass
-class ConfigSchema:
+class ConfigV1:
     version: int = 120240924
 
     # media
@@ -380,4 +380,4 @@ class ConfigSchema:
         return buffer.getvalue()
 
     def to_pydantic_model(self):
-        return Config.from_legacy(asdict(self))
+        return Config.from_legacy(self.__dict__)

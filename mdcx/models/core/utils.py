@@ -303,7 +303,6 @@ def render_name_template(
     # 判断后缀字段顺序
     suffix_sort_list = manager.config_v1.suffix_sort.split(",")
     for each in suffix_sort_list:
-        # "mosaic" 已在ConfigSchema.init()中替换为 "moword"
         if each == "moword":
             number += m_word
         elif each == "cnword":

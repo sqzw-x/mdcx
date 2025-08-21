@@ -14,23 +14,23 @@ from PyQt5.QtWidgets import QCheckBox, QRadioButton
 T = TypeVar("T")
 
 
-def get_checkboxes(*component_value_pairs: tuple[QCheckBox | QRadioButton | bool, str]) -> str:
+def get_checkboxes[T](*component_value_pairs: tuple[QCheckBox | QRadioButton | bool, T]) -> list[T]:
     """
-    根据二值输入组件 (复选框, 单选按钮等) 或布尔值生成配置字符串
+    根据二值输入组件 (复选框, 单选按钮等) 或布尔值生成值列表
 
     Args:
-        component_value_pairs: 包含 (条件对象或布尔值, 对应字符串值) 的元组
+        component_value_pairs: 包含 (条件对象或布尔值, 对应值) 的元组
 
     Returns:
-        生成的配置字符串，满足条件的选项用逗号分隔
+        满足条件的值列表
     """
-    result = ""
+    result = []
     for condition, value in component_value_pairs:
         if not isinstance(condition, bool):
             condition = condition.isChecked()
         # 如果条件为真，添加对应的值
         if condition:
-            result += f"{value},"
+            result.append(value)
     return result
 
 

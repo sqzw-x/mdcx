@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from mdcx.config.manager import manager
 from mdcx.config.models import Config
-from mdcx.config.v1 import ConfigSchema
+from mdcx.config.v1 import ConfigV1
 from mdcx.utils.dataclass import update_existing
 
 from .utils import check_path_access
@@ -24,7 +24,7 @@ async def get_config():
 @router.put("/", operation_id="updateConfig", summary="更新配置")
 async def update_config(new_config: Config):
     # config 被用作全局变量, 必须就地更新
-    # 由于 ConfigSchema 没有嵌套字段, 因此可以直接更新 __dict__
+    # 由于 ConfigV1 没有嵌套字段, 因此可以直接更新 __dict__
     update_existing(manager.config_v1.__dict__, new_config.to_legacy())
     manager.config_v1.init()
     manager.save()
@@ -55,7 +55,7 @@ async def create_config(name: Annotated[str, Query(description="配置文件名 
     check_path_access(p, manager.data_folder)
     if p.exists():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"名称为 {name} 的配置文件已存在.")
-    p.write_text(ConfigSchema().format_ini(), encoding="UTF-8")
+    p.write_text(ConfigV1().format_ini(), encoding="UTF-8")
 
 
 class ConfigSwitchResponse(BaseModel):
@@ -97,4 +97,4 @@ async def get_default_config() -> Config:
     """
     返回默认配置。
     """
-    return Config.from_legacy(asdict(ConfigSchema()))
+    return Config.from_legacy(asdict(ConfigV1()))

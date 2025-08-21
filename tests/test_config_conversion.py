@@ -1,19 +1,21 @@
+import json
 from dataclasses import fields
 from datetime import timedelta
 
 import pytest
 from pydantic import HttpUrl
 
-from mdcx.config.manager import ConfigSchema
+from mdcx.config.manager import ConfigV1
 from mdcx.config.models import (
+    COMPAT_RULES,
     Config,
     MarkType,
     ReadMode,
+    Remove,
     TranslateConfig,
     Translator,
     Website,
 )
-from mdcx.utils.dataclass import update
 from tests.random_generator import generate_random_pydantic_instance
 
 
@@ -65,63 +67,54 @@ def generate_random_config() -> Config:
 
 
 class TestConfigConversion:
-    """测试 Config 与 ConfigSchema 之间的转换"""
+    """
+    测试 Config 与 ConfigV1 之间的转换.
 
-    @pytest.mark.parametrize("test_round", range(5))
-    def test_to_legacy_and_from_legacy_equivalence(self, test_round):
-        """测试 to_legacy 和 from_legacy 的等价性"""
-        # 生成随机 Config 实例
-        original_config = generate_random_config()
+    Config 的语义是 ConfigV1 的超集, 因此只需保证转换过程中 ConfigV1 的信息不会丢失.
+    """
 
-        # 调用 to_legacy 转换为 dict
-        legacy_dict = original_config.to_legacy()
-
-        # 创建 ConfigSchema 实例并使用 update 方法更新
-        config_schema = ConfigSchema()
-        updated_config_schema = update(config_schema, legacy_dict)
-
-        converted_config = updated_config_schema.to_pydantic_model()
-
-        # 验证两个 Config 实例深度相等
-        assert converted_config.model_dump_json(indent=2) == original_config.model_dump_json(indent=2), (
-            "转换后的 Config 与原始 Config 不相等"
-        )
-
-    @pytest.mark.parametrize("test_round", range(5))
-    def test_to_legacy_and_from_legacy_multiple_rounds(self, test_round):
-        """测试多轮转换的稳定性"""
-        # 生成随机 Config 实例
-        original_config = generate_random_config()
-        current_config = original_config
-
-        # 进行多轮转换
-        for i in range(3):
-            # to_legacy -> from_legacy
-            legacy_dict = current_config.to_legacy()
-            config_schema = ConfigSchema()
-            updated_config_schema = update(config_schema, legacy_dict)
-            current_config = updated_config_schema.to_pydantic_model()
-            # 每轮都应该与原始配置相等
-            assert current_config.model_dump_json(indent=2) == original_config.model_dump_json(indent=2), (
-                f"第 {i + 1} 轮转换后配置不一致"
-            )
-
-    def test_to_legacy_dict_compatibility(self):
-        """测试 to_legacy 返回的 dict 与 ConfigSchema 字段兼容"""
+    def test_to_legacy(self):
+        """测试 to_legacy 返回的 dict 包含且仅包含 ConfigV1 中的所有字段, 且类型正确."""
         config = generate_random_config()
-        legacy_dict = config.to_legacy()
+        res = config.to_legacy()
+        res_names = set(res.keys())
 
-        # 创建 ConfigSchema 实例
-        config_schema = ConfigSchema()
-        schema_fields = fields(config_schema)
+        v1 = ConfigV1()
+        v1_fields = fields(v1)
+        v1_fields = {f.name: f for f in v1_fields}
+        v1_names = set(v1_fields.keys())
 
-        # 检查 legacy_dict 中的所有键都能被 ConfigSchema 接受
-        for key in legacy_dict:
-            schema_field = next((f for f in schema_fields if f.name == key), None)
-            assert schema_field is not None, f"to_legacy 返回的 dict 中包含 ConfigSchema 中不存在的字段: {key}"
-            assert type(legacy_dict[key]) is schema_field.type, (
-                f"to_legacy 中的字段 {key} 类型不匹配: {type(legacy_dict[key])} != {type(getattr(config_schema, key))}"
+        # 特殊处理 ConfigV1 中 *_website 字段
+        assert res_names - {f"{w}_website" for w in Website} - v1_names == set(), (
+            "to_legacy 返回值冗余字段 (与 ConfigV1 相比)"
+        )
+        # Config 中已标记移除的字段
+        removed = {r.name for r in COMPAT_RULES if isinstance(r, Remove)}
+        assert v1_names - removed - res_names == set(), "to_legacy 返回值缺少字段 (与 ConfigV1 相比)"
+
+        for key in res:
+            if key in {f"{w}_website" for w in Website}:
+                continue
+            assert type(res[key]) is v1_fields[key].type, (
+                f"to_legacy 和 ConfigV1 的字段 {key} 类型不匹配: to_legacy={type(res[key])}, ConfigV1={type(getattr(v1, key))}"
             )
+
+    @pytest.mark.parametrize("test_round", range(5))
+    def test_convert(self, test_round):
+        """测试转换不会造成 ConfigV1 上的字段丢失."""
+
+        # 生成随机 ConfigV1. 这依赖于 generate_random_config 和 to_legacy 的正确性.
+        random_config = generate_random_config()
+        legacy_1 = random_config.to_legacy()
+        v1 = ConfigV1()
+        v1.__dict__.update(legacy_1)
+
+        # 将 ConfigV1 转换回 Config, back_config 可能与 random_config 不同
+        back_config = v1.to_pydantic_model()
+        legacy_2 = back_config.to_legacy()
+        assert json.dumps(legacy_1, indent=2) == json.dumps(legacy_2, indent=2), (
+            "转换后的 ConfigV1 与原始 ConfigV1 不相等"
+        )
 
     def test_empty_lists_handling(self):
         """测试空列表的处理"""

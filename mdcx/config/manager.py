@@ -8,7 +8,7 @@ from mdcx.consts import MAIN_PATH, MARK_FILE
 from mdcx.manual import ManualConfig
 
 from .models import Computed, Config
-from .v1 import ConfigSchema, load_v1
+from .v1 import ConfigV1, load_v1
 
 
 class ConfigManager:
@@ -16,7 +16,7 @@ class ConfigManager:
         self._get_config_path()
         self.config = Config()
         self.computed = Computed(self.config)
-        self._config_v1 = ConfigSchema(**self.config.to_legacy())
+        self._config_v1 = ConfigV1(**self.config.to_legacy())
         self._config_v1.init()
 
     @property
@@ -32,7 +32,7 @@ class ConfigManager:
 
     @property
     @deprecated("v1 config is deprecated, use config instead")
-    def config_v1(self) -> ConfigSchema:
+    def config_v1(self) -> ConfigV1:
         return self._config_v1
 
     def load(self) -> list[str]:
@@ -41,7 +41,7 @@ class ConfigManager:
         try:
             self.config = Config.model_validate_json(self._path.read_text(encoding="UTF-8"))
             self.computed = Computed(self.config)
-            self._config_v1 = ConfigSchema(**self.config.to_legacy())
+            self._config_v1 = ConfigV1(**self.config.to_legacy())
             return []
         except Exception as e:
             return str(e).splitlines()
@@ -59,7 +59,7 @@ class ConfigManager:
             f"{v1path} 是旧版配置文件, 将自动转换为新版配置并保存到 {v2path}",
             "旧版配置文件不会被删除. 当保存配置时, 仅会写入新版配置文件, 后续会自动使用新版配置文件",
         ] + errors
-        self._config_v1 = ConfigSchema(**d)
+        self._config_v1 = ConfigV1(**d)
         self._config_v1.init()
         self.config = self._config_v1.to_pydantic_model()
         self.computed = Computed(self.config)

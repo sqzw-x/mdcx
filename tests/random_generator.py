@@ -2,6 +2,7 @@ import random
 import string
 from datetime import timedelta
 from enum import Enum
+from types import UnionType
 from typing import Any, Literal, Union, get_args, get_origin
 
 from pydantic import BaseModel, HttpUrl
@@ -92,13 +93,25 @@ def generate_random_value_for_type(field_type: type, field_info: FieldInfo | Non
     origin = get_origin(field_type)
     args = get_args(field_type)
 
-    if origin is Union:
+    if origin in (Union, UnionType):
         # 如果是 Optional (Union[T, None])，选择非 None 的类型
         non_none_types = [arg for arg in args if arg is not type(None)]
         if non_none_types:
             field_type = non_none_types[0]
         else:
             return None
+
+    if origin is dict:
+        if args and len(args) == 2:
+            key_type, value_type = args
+            # 生成随机字典
+            size = random.randint(1, 5)
+            return {
+                generate_random_value_for_type(key_type): generate_random_value_for_type(value_type)
+                for _ in range(size)
+            }
+        else:
+            raise ValueError("Dict type must have exactly two arguments (key type and value type)")
 
     # 处理 list 类型
     if origin is list:
