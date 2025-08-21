@@ -35,7 +35,6 @@ from .enums import (
     Translator,
     Website,
     WebsiteSet,
-    WebsiteSupportBrowser,
     WholeField,
 )
 from .ui_schema import Enum, ServerPathDirectory, extract_ui_schema_recursive
@@ -800,12 +799,6 @@ class Config(BaseModel):
     theporndb_api_token: str = Field(default="", title="Theporndb API令牌")
     javdb: str = Field(default="", title="Javdb")
     javbus: str = Field(default="", title="Javbus")
-    headless_browser_sites: list[WebsiteSupportBrowser] = Field(
-        default_factory=lambda: [
-            Website.DMM,
-        ],
-        title="使用无头浏览器进行请求的网站",
-    )
     # endregion
 
     # region: Log Settings
