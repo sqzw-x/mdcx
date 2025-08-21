@@ -1,5 +1,3 @@
-from typing import Literal
-
 from .ui_schema import Enum
 
 
@@ -533,9 +531,6 @@ class Website(Enum):
     DAHLIA = "dahlia"
     GETCHU_DMM = "getchu_dmm"
     OFFICIAL = "official"
-
-
-WebsiteSupportBrowser = Literal[Website.DMM]
 
 
 class Language(Enum):

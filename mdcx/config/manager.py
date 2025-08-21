@@ -5,8 +5,8 @@ from pathlib import Path
 from warnings import deprecated
 
 from mdcx.consts import MAIN_PATH, MARK_FILE
-from mdcx.manual import ManualConfig
 
+from .enums import Website
 from .models import Computed, Config
 from .v1 import ConfigV1, load_v1
 
@@ -112,13 +112,11 @@ manager = ConfigManager()
 
 
 def get_new_str(a: str, wanted=False):
-    all_website_list = ManualConfig.SUPPORTED_WEBSITES
+    all_website_list = [w.value for w in Website]
     if wanted:
         all_website_list = ["javlibrary", "javdb"]
     read_web_list = re.split(r"[,，]", a)
     new_website_list1 = [i for i in read_web_list if i in all_website_list]  # 去除错误网站
-    new_website_list = []
-    # 此处配置包含优先级, 因此必须按顺序去重
-    [new_website_list.append(i) for i in new_website_list1 if i not in new_website_list]  # 去重
+    new_website_list = dict.fromkeys(new_website_list1)
     new_str = ",".join(new_website_list)
     return new_str

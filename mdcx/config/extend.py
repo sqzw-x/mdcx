@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
 from mdcx.config.models import CleanAction
 from mdcx.manual import ManualConfig
@@ -118,10 +119,9 @@ def deal_url(url: str) -> tuple[str | None, str]:
             return site.value, url
 
     # 自定义的网址
-    for web_name in ManualConfig.SUPPORTED_WEBSITES:
-        if hasattr(manager.config_v1, web_name + "_website"):
-            web_url = getattr(manager.config_v1, web_name + "_website")
-            if web_url in url:
-                return web_name, url
+    for site in Website:
+        if (r := manager.config.site_configs.get(site)) and r.custom_url:
+            if str(r.custom_url) in url:
+                return site.value, url
 
     return None, url

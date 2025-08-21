@@ -22,7 +22,7 @@ from PyQt5.QtWidgets import (
     QTreeWidgetItem,
 )
 
-from mdcx.config.enums import NfoInclude, Switch
+from mdcx.config.enums import NfoInclude, Switch, Website
 from mdcx.config.extend import deal_url, get_movie_path_setting
 from mdcx.config.manager import manager
 from mdcx.config.resources import resources
@@ -34,7 +34,6 @@ from mdcx.controllers.main_window.load_config import load_config
 from mdcx.controllers.main_window.save_config import save_config
 from mdcx.controllers.main_window.style import set_dark_style, set_style
 from mdcx.image import get_pixmap
-from mdcx.manual import ManualConfig
 from mdcx.models.base.file import (
     check_and_clean_files,
     get_success_list,
@@ -1850,7 +1849,7 @@ class MyMAinWindow(QMainWindow):
 
     # 设置-网络-网址设置-下拉框切换
     def switch_custom_website_change(self, new_website_name):
-        self.Ui.lineEdit_custom_website.setText(getattr(manager.config_v1, f"{new_website_name}_website", ""))
+        self.Ui.lineEdit_custom_website.setText(manager.config.get_site_url(Website(new_website_name)))
 
     # 切换配置
     def config_file_change(self, new_config_file):
@@ -2015,12 +2014,10 @@ class MyMAinWindow(QMainWindow):
                 "hhh-av": ["https://hhh-av.com", ""],
             }
 
-            for website in ManualConfig.SUPPORTED_WEBSITES:
-                if hasattr(manager.config_v1, f"{website}_website"):
-                    signal_qt.show_net_info(
-                        f"   ⚠️{website} 使用自定义网址：{getattr(manager.config_v1, f'{website}_website')}"
-                    )
-                    net_info[website][0] = getattr(manager.config_v1, f"{website}_website")
+            for website in Website:
+                if r := manager.config.get_site_url(website):
+                    signal_qt.show_net_info(f"   ⚠️{website} 使用自定义网址：{r}")
+                    net_info[website.value][0] = r
 
             net_info["javdb"][0] += "/v/D16Q5?locale=zh"
             net_info["seesaawiki"][0] += "/av_neme/d/%C9%F1%A5%EF%A5%A4%A5%D5"
@@ -2041,7 +2038,7 @@ class MyMAinWindow(QMainWindow):
                     each[1] = res_theporndb.replace("✅ 连接正常", f"✅ 连接正常{ping_host(host_address)}")
                 elif name == "javlibrary":
                     use_proxy = True
-                    if hasattr(manager.config_v1, "javlibrary_website"):
+                    if manager.config.get_site_url(Website.JAVLIBRARY):
                         use_proxy = False
                     html_info, error = get_text_sync(each[0], use_proxy=use_proxy)
                     if html_info is None:
@@ -2170,7 +2167,7 @@ class MyMAinWindow(QMainWindow):
         # self.Ui.pushButton_check_javdb_cookie.setEnabled(False)
         tips = "✅ 连接正常！"
         header = {"cookie": input_cookie}
-        javdb_url = getattr(manager.config_v1, "javdb_website", "https://javdb.com") + "/v/D16Q5?locale=zh"
+        javdb_url = manager.config.get_site_url(Website.JAVDB, "https://javdb.com") + "/v/D16Q5?locale=zh"
         try:
             response, error = get_text_sync(javdb_url, headers=header)
             if response is None:
@@ -2235,7 +2232,7 @@ class MyMAinWindow(QMainWindow):
         tips = "✅ 连接正常！"
         input_cookie = self.Ui.plainTextEdit_cookie_javbus.toPlainText()
         headers = {"Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6", "cookie": input_cookie}
-        javbus_url = getattr(manager.config_v1, "javbus_website", "https://javbus.com") + "/FSDSS-660"
+        javbus_url = manager.config.get_site_url(Website.JAVBUS, "https://javbus.com") + "/FSDSS-660"
 
         try:
             response, error = get_text_sync(javbus_url, headers=headers)

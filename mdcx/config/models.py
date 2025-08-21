@@ -839,6 +839,12 @@ class Config(BaseModel):
     statement: int = Field(default=3, title="声明")
     # endregion
 
+    def get_site_config(self, site: Website) -> SiteConfig:
+        return self.site_configs.get(site, SiteConfig())
+
+    def get_site_url(self, site: Website, default: str = "") -> str:
+        return str(self.get_site_config(site).custom_url or default)
+
     @model_validator(mode="before")
     def _update(cls, d: dict[str, Any]) -> dict[str, Any]:
         """
