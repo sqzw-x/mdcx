@@ -145,6 +145,7 @@ class WebSocketManager {
         handlers.forEach((handler) => handler(message.data, message));
       } else {
         console.warn(`No handlers registered for message type: ${message.type}`);
+        console.debug("Received message:", message);
       }
     } catch (error) {
       console.error("Failed to parse WebSocket message:", error);
