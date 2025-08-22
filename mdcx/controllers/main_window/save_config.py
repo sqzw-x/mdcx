@@ -20,7 +20,6 @@ from mdcx.config.enums import (
     MarkType,
     NfoInclude,
     NoEscape,
-    NoneField,
     OutlineShow,
     ReadMode,
     SuffixSort,
@@ -28,13 +27,12 @@ from mdcx.config.enums import (
     TagInclude,
     Translator,
     Website,
-    WebsiteSet,
-    WholeField,
 )
 from mdcx.config.extend import get_movie_path_setting
 from mdcx.config.manager import manager
-from mdcx.config.models import SiteConfig
+from mdcx.config.models import SiteConfig, str_to_list
 from mdcx.controllers.main_window.bind_utils import get_checkbox, get_checkboxes, get_radio_buttons
+from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.models.flags import Flags
 from mdcx.models.tools.actress_db import ActressDB
 from mdcx.signals import signal_qt
@@ -48,6 +46,25 @@ def save_config(self: "MyMAinWindow"):
     """
     从 UI 获取配置并保存到 config 对象中, 并更新配置文件
     """
+    field_mapping = {
+        "title": CrawlerResultFields.TITLE,
+        "outline": CrawlerResultFields.OUTLINE,
+        "actor": CrawlerResultFields.ACTORS,
+        "tag": CrawlerResultFields.TAGS,
+        "series": CrawlerResultFields.SERIES,
+        "studio": CrawlerResultFields.STUDIO,
+        "publisher": CrawlerResultFields.PUBLISHER,
+        "director": CrawlerResultFields.DIRECTORS,
+        "poster": CrawlerResultFields.POSTER,
+        "thumb": CrawlerResultFields.THUMB,
+        "extrafanart": CrawlerResultFields.EXTRAFANART,
+        "score": CrawlerResultFields.SCORE,
+        "release": CrawlerResultFields.RELEASE,
+        "runtime": CrawlerResultFields.RUNTIME,
+        "trailer": CrawlerResultFields.TRAILER,
+        "wanted": CrawlerResultFields.WANTED,
+    }
+
     # region media & escape
     manager.config.media_path = self.Ui.lineEdit_movie_path.text()  # 待刮削目录
     manager.config.softlink_path = self.Ui.lineEdit_movie_softlink_path.text()  # 软链接目录目录
@@ -121,17 +138,12 @@ def save_config(self: "MyMAinWindow"):
     except ValueError:
         manager.config.website_single = Website.AIRAV_CC  # 默认值
 
-    # 网站列表字段需要转换为Website枚举列表
-    def parse_website_list(text: str) -> list[Website]:
+    def parse_website_list(text: str) -> set[Website]:
         websites = []
-        for site in text.split(","):
-            site = site.strip()
-            if site:
-                try:
-                    websites.append(Website(site))
-                except ValueError:
-                    continue  # 忽略无效的网站
-        return list(dict.fromkeys(websites))
+        for site in str_to_list(text, ","):
+            if site in Website:
+                websites.append(Website(site))
+        return set(dict.fromkeys(websites))
 
     manager.config.website_youma = parse_website_list(self.Ui.lineEdit_website_youma.text())
     manager.config.website_wuma = parse_website_list(self.Ui.lineEdit_website_wuma.text())
@@ -144,55 +156,63 @@ def save_config(self: "MyMAinWindow"):
         (self.Ui.radioButton_scrape_speed, "speed"), (self.Ui.radioButton_scrape_info, "info"), default="single"
     )
 
-    manager.config.website_set = get_checkboxes(
-        (self.Ui.checkBox_use_official_data, WebsiteSet.OFFICIAL),
-    )
-    manager.config.title_website = parse_website_list(self.Ui.lineEdit_title_website.text())
-    manager.config.title_zh_website = parse_website_list(self.Ui.lineEdit_title_zh_website.text())
-    manager.config.title_website_exclude = parse_website_list(self.Ui.lineEdit_title_website_exclude.text())
-    manager.config.title_language = get_radio_buttons(
+    # 标题字段配置
+    manager.config.set_field_sites(field_mapping["title"], self.Ui.lineEdit_title_website.text())
+    title_language = get_radio_buttons(
         (self.Ui.radioButton_title_zh_cn, Language.ZH_CN),
         (self.Ui.radioButton_title_zh_tw, Language.ZH_TW),
         default=Language.JP,
     )
+    manager.config.set_field_language(field_mapping["title"], title_language)
+    manager.config.set_field_translate(field_mapping["title"], get_checkbox(self.Ui.checkBox_title_translate))
+    # originaltitle
+    manager.config.set_field_sites(CrawlerResultFields.ORIGINALTITLE, self.Ui.lineEdit_originaltitle_website.text())
+
     manager.config.title_sehua = get_checkbox(self.Ui.checkBox_title_sehua)
     manager.config.title_yesjav = get_checkbox(self.Ui.checkBox_title_yesjav)
-    manager.config.title_translate = get_checkbox(self.Ui.checkBox_title_translate)
     manager.config.title_sehua_zh = get_checkbox(self.Ui.checkBox_title_sehua_2)
 
-    manager.config.outline_website = parse_website_list(self.Ui.lineEdit_outline_website.text())
-    manager.config.outline_zh_website = parse_website_list(self.Ui.lineEdit_outline_zh_website.text())
-    manager.config.outline_website_exclude = parse_website_list(self.Ui.lineEdit_outline_website_exclude.text())
-    manager.config.outline_language = get_radio_buttons(
+    # 简介字段配置
+    manager.config.set_field_sites(field_mapping["outline"], self.Ui.lineEdit_outline_website.text())
+    outline_language = get_radio_buttons(
         (self.Ui.radioButton_outline_zh_cn, Language.ZH_CN),
         (self.Ui.radioButton_outline_zh_tw, Language.ZH_TW),
         default=Language.JP,
     )
-    manager.config.outline_translate = get_checkbox(self.Ui.checkBox_outline_translate)
+    manager.config.set_field_language(field_mapping["outline"], outline_language)
+    manager.config.set_field_translate(field_mapping["outline"], get_checkbox(self.Ui.checkBox_outline_translate))
     manager.config.outline_format = get_checkboxes(
         (self.Ui.checkBox_show_translate_from, OutlineShow.SHOW_FROM),
         (self.Ui.radioButton_trans_show_zh_jp, OutlineShow.SHOW_ZH_JP),
         (self.Ui.radioButton_trans_show_jp_zh, OutlineShow.SHOW_JP_ZH),
     )
+    # originalplot
+    manager.config.set_field_sites(CrawlerResultFields.ORIGINALPLOT, self.Ui.lineEdit_originalplot_website.text())
 
-    manager.config.actor_website = parse_website_list(self.Ui.lineEdit_actor_website.text())
-    manager.config.actor_website_exclude = parse_website_list(self.Ui.lineEdit_actor_website_exclude.text())
-    manager.config.actor_language = get_radio_buttons(
+    # 演员字段配置
+    manager.config.set_field_sites(field_mapping["actor"], self.Ui.lineEdit_actors_website.text())
+    actor_language = get_radio_buttons(
         (self.Ui.radioButton_actor_zh_cn, Language.ZH_CN),
         (self.Ui.radioButton_actor_zh_tw, Language.ZH_TW),
         default=Language.JP,
     )
+    manager.config.set_field_language(field_mapping["actor"], actor_language)
+    manager.config.set_field_translate(field_mapping["actor"], get_checkbox(self.Ui.checkBox_actor_translate))
     manager.config.actor_realname = get_checkbox(self.Ui.checkBox_actor_realname)
-    manager.config.actor_translate = get_checkbox(self.Ui.checkBox_actor_translate)
+    # all_actors
+    manager.config.set_field_sites(CrawlerResultFields.ALL_ACTORS, self.Ui.lineEdit_all_actors_website.text())
+    manager.config.set_field_language(CrawlerResultFields.ALL_ACTORS, actor_language)
+    manager.config.set_field_translate(CrawlerResultFields.ALL_ACTORS, get_checkbox(self.Ui.checkBox_actor_translate))
 
-    manager.config.tag_website = parse_website_list(self.Ui.lineEdit_tag_website.text())
-    manager.config.tag_website_exclude = parse_website_list(self.Ui.lineEdit_tag_website_exclude.text())
-    manager.config.tag_language = get_radio_buttons(
+    # 标签字段配置
+    manager.config.set_field_sites(field_mapping["tag"], self.Ui.lineEdit_tags_website.text())
+    tag_language = get_radio_buttons(
         (self.Ui.radioButton_tag_zh_cn, Language.ZH_CN),
         (self.Ui.radioButton_tag_zh_tw, Language.ZH_TW),
         default=Language.JP,
     )
-    manager.config.tag_translate = get_checkbox(self.Ui.checkBox_tag_translate)
+    manager.config.set_field_language(field_mapping["tag"], tag_language)
+    manager.config.set_field_translate(field_mapping["tag"], get_checkbox(self.Ui.checkBox_tag_translate))
 
     manager.config.nfo_tag_include = get_checkboxes(
         (self.Ui.checkBox_tag_actor, TagInclude.ACTOR),
@@ -205,57 +225,55 @@ def save_config(self: "MyMAinWindow"):
         (self.Ui.checkBox_tag_definition, TagInclude.DEFINITION),
     )
 
-    manager.config.series_website = parse_website_list(self.Ui.lineEdit_series_website.text())
-    manager.config.series_website_exclude = parse_website_list(self.Ui.lineEdit_series_website_exclude.text())
-    manager.config.series_language = get_radio_buttons(
+    # 系列字段配置
+    manager.config.set_field_sites(field_mapping["series"], self.Ui.lineEdit_series_website.text())
+    series_language = get_radio_buttons(
         (self.Ui.radioButton_series_zh_cn, Language.ZH_CN),
         (self.Ui.radioButton_series_zh_tw, Language.ZH_TW),
         default=Language.JP,
     )
-    manager.config.series_translate = get_checkbox(self.Ui.checkBox_series_translate)
+    manager.config.set_field_language(field_mapping["series"], series_language)
+    manager.config.set_field_translate(field_mapping["series"], get_checkbox(self.Ui.checkBox_series_translate))
 
-    manager.config.studio_website = parse_website_list(self.Ui.lineEdit_studio_website.text())
-    manager.config.studio_website_exclude = parse_website_list(self.Ui.lineEdit_studio_website_exclude.text())
-    manager.config.studio_language = get_radio_buttons(
+    # 工作室字段配置
+    manager.config.set_field_sites(field_mapping["studio"], self.Ui.lineEdit_studio_website.text())
+    studio_language = get_radio_buttons(
         (self.Ui.radioButton_studio_zh_cn, Language.ZH_CN),
         (self.Ui.radioButton_studio_zh_tw, Language.ZH_TW),
         default=Language.JP,
     )
-    manager.config.studio_translate = get_checkbox(self.Ui.checkBox_studio_translate)
+    manager.config.set_field_language(field_mapping["studio"], studio_language)
+    manager.config.set_field_translate(field_mapping["studio"], get_checkbox(self.Ui.checkBox_studio_translate))
 
-    manager.config.publisher_website = parse_website_list(self.Ui.lineEdit_publisher_website.text())
-    manager.config.publisher_website_exclude = parse_website_list(self.Ui.lineEdit_publisher_website_exclude.text())
-    manager.config.publisher_language = get_radio_buttons(
+    # 发行商字段配置
+    manager.config.set_field_sites(field_mapping["publisher"], self.Ui.lineEdit_publisher_website.text())
+    publisher_language = get_radio_buttons(
         (self.Ui.radioButton_publisher_zh_cn, Language.ZH_CN),
         (self.Ui.radioButton_publisher_zh_tw, Language.ZH_TW),
         default=Language.JP,
     )
-    manager.config.publisher_translate = get_checkbox(self.Ui.checkBox_publisher_translate)
+    manager.config.set_field_language(field_mapping["publisher"], publisher_language)
+    manager.config.set_field_translate(field_mapping["publisher"], get_checkbox(self.Ui.checkBox_publisher_translate))
 
-    manager.config.director_website = parse_website_list(self.Ui.lineEdit_director_website.text())
-    manager.config.director_website_exclude = parse_website_list(self.Ui.lineEdit_director_website_exclude.text())
-    manager.config.director_language = get_radio_buttons(
+    # 导演字段配置
+    manager.config.set_field_sites(field_mapping["director"], self.Ui.lineEdit_directors_website.text())
+    director_language = get_radio_buttons(
         (self.Ui.radioButton_director_zh_cn, Language.ZH_CN),
         (self.Ui.radioButton_director_zh_tw, Language.ZH_TW),
         default=Language.JP,
     )
-    manager.config.director_translate = get_checkbox(self.Ui.checkBox_director_translate)
+    manager.config.set_field_language(field_mapping["director"], director_language)
+    manager.config.set_field_translate(field_mapping["director"], get_checkbox(self.Ui.checkBox_director_translate))
 
-    manager.config.poster_website = parse_website_list(self.Ui.lineEdit_poster_website.text())
-    manager.config.poster_website_exclude = parse_website_list(self.Ui.lineEdit_poster_website_exclude.text())
-    manager.config.thumb_website = parse_website_list(self.Ui.lineEdit_thumb_website.text())
-    manager.config.thumb_website_exclude = parse_website_list(self.Ui.lineEdit_thumb_website_exclude.text())
-    manager.config.extrafanart_website = parse_website_list(self.Ui.lineEdit_extrafanart_website.text())
-    manager.config.extrafanart_website_exclude = parse_website_list(self.Ui.lineEdit_extrafanart_website_exclude.text())
-    manager.config.score_website = parse_website_list(self.Ui.lineEdit_score_website.text())
-    manager.config.score_website_exclude = parse_website_list(self.Ui.lineEdit_score_website_exclude.text())
-    manager.config.release_website = parse_website_list(self.Ui.lineEdit_release_website.text())
-    manager.config.release_website_exclude = parse_website_list(self.Ui.lineEdit_release_website_exclude.text())
-    manager.config.runtime_website = parse_website_list(self.Ui.lineEdit_runtime_website.text())
-    manager.config.runtime_website_exclude = parse_website_list(self.Ui.lineEdit_runtime_website_exclude.text())
-    manager.config.trailer_website = parse_website_list(self.Ui.lineEdit_trailer_website.text())
-    manager.config.trailer_website_exclude = parse_website_list(self.Ui.lineEdit_trailer_website_exclude.text())
-    manager.config.wanted_website = parse_website_list(self.Ui.lineEdit_wanted_website.text())
+    # 其他图片和媒体字段配置
+    manager.config.set_field_sites(field_mapping["poster"], self.Ui.lineEdit_poster_website.text())
+    manager.config.set_field_sites(field_mapping["thumb"], self.Ui.lineEdit_thumb_website.text())
+    manager.config.set_field_sites(field_mapping["extrafanart"], self.Ui.lineEdit_extrafanart_website.text())
+    manager.config.set_field_sites(field_mapping["score"], self.Ui.lineEdit_score_website.text())
+    manager.config.set_field_sites(field_mapping["release"], self.Ui.lineEdit_release_website.text())
+    manager.config.set_field_sites(field_mapping["runtime"], self.Ui.lineEdit_runtime_website.text())
+    manager.config.set_field_sites(field_mapping["trailer"], self.Ui.lineEdit_trailer_website.text())
+    manager.config.set_field_sites(field_mapping["wanted"], self.Ui.lineEdit_wanted_website.text())
     manager.config.nfo_tagline = self.Ui.lineEdit_nfo_tagline.text()  # tagline格式
     manager.config.nfo_tag_series = self.Ui.lineEdit_nfo_tag_series.text()  # nfo_tag_series 格式
     manager.config.nfo_tag_studio = self.Ui.lineEdit_nfo_tag_studio.text()  # nfo_tag_studio 格式
@@ -266,40 +284,8 @@ def save_config(self: "MyMAinWindow"):
         item.strip() for item in nfo_tag_actor_contains_text.split("|") if item.strip()
     ]
 
-    manager.config.whole_fields = get_checkboxes(
-        (self.Ui.radioButton_outline_more, WholeField.OUTLINE),
-        (self.Ui.radioButton_actor_more, WholeField.ACTOR),
-        (self.Ui.radioButton_thumb_more, WholeField.THUMB),
-        (self.Ui.radioButton_poster_more, WholeField.POSTER),
-        (self.Ui.radioButton_extrafanart_more, WholeField.EXTRAFANART),
-        (self.Ui.radioButton_trailer_more, WholeField.TRAILER),
-        (self.Ui.radioButton_release_more, WholeField.RELEASE),
-        (self.Ui.radioButton_runtime_more, WholeField.RUNTIME),
-        (self.Ui.radioButton_score_more, WholeField.SCORE),
-        (self.Ui.radioButton_tag_more, WholeField.TAG),
-        (self.Ui.radioButton_director_more, WholeField.DIRECTOR),
-        (self.Ui.radioButton_series_more, WholeField.SERIES),
-        (self.Ui.radioButton_studio_more, WholeField.STUDIO),
-        (self.Ui.radioButton_publisher_more, WholeField.PUBLISHER),
-    )
-
-    manager.config.none_fields = get_checkboxes(
-        (self.Ui.radioButton_outline_none, NoneField.OUTLINE),
-        (self.Ui.radioButton_actor_none, NoneField.ACTOR),
-        (self.Ui.radioButton_thumb_none, NoneField.THUMB),
-        (self.Ui.radioButton_poster_none, NoneField.POSTER),
-        (self.Ui.radioButton_extrafanart_none, NoneField.EXTRAFANART),
-        (self.Ui.radioButton_trailer_none, NoneField.TRAILER),
-        (self.Ui.radioButton_release_none, NoneField.RELEASE),
-        (self.Ui.radioButton_runtime_none, NoneField.RUNTIME),
-        (self.Ui.radioButton_score_none, NoneField.SCORE),
-        (self.Ui.radioButton_tag_none, NoneField.TAG),
-        (self.Ui.radioButton_director_none, NoneField.DIRECTOR),
-        (self.Ui.radioButton_series_none, NoneField.SERIES),
-        (self.Ui.radioButton_studio_none, NoneField.STUDIO),
-        (self.Ui.radioButton_publisher_none, NoneField.PUBLISHER),
-        (self.Ui.radioButton_wanted_none, NoneField.WANTED),
-    )
+    # 注意：whole_fields 和 none_fields 已弃用，不再设置这些字段
+    # 它们的功能已经通过新的字段配置API来实现
 
     # region nfo
     manager.config.nfo_include_new = get_checkboxes(

@@ -14,7 +14,7 @@ import aiofiles
 import aiofiles.os
 from lxml import etree
 
-from mdcx.config.enums import DownloadableFile, HDPicSource, WebsiteSet
+from mdcx.config.enums import DownloadableFile, HDPicSource
 from mdcx.config.manager import manager
 from mdcx.models.base.web import (
     check_url,
@@ -481,12 +481,7 @@ async def _get_big_poster(result: CrawlersResult, other: OtherInfo):
             result.image_download = True
 
     # 通过番号去 官网 查询获取稍微大一些的封面图，以便去 Google 搜索
-    if (
-        not hd_pic_url
-        and HDPicSource.OFFICIAL in manager.config.download_hd_pics
-        and WebsiteSet.OFFICIAL not in manager.config.website_set
-        and result.poster_from != "Amazon"
-    ):
+    if not hd_pic_url and HDPicSource.OFFICIAL in manager.config.download_hd_pics and result.poster_from != "Amazon":
         letters = result.letters.upper()
         official_url = manager.computed.official_websites.get(letters)
         if official_url:

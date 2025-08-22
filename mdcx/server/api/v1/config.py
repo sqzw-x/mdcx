@@ -22,8 +22,6 @@ async def get_config() -> Config:
 @router.put("/", operation_id="updateConfig", summary="更新配置")
 async def update_config(new_config: Config) -> Config:
     manager.config = new_config
-    manager._config_v1 = ConfigV1(**new_config.to_legacy())
-    manager._config_v1.init()
     manager.save()
     return manager.config
 

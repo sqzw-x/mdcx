@@ -192,7 +192,6 @@ def Init_Singal(self: "MyMAinWindow"):
     self.Ui.pushButton_start_single_file.clicked.connect(self.pushButton_start_single_file_clicked)
     self.Ui.pushButton_select_file_clear_info.clicked.connect(self.pushButton_select_file_clear_info_clicked)
     self.Ui.pushButton_scrape_note.clicked.connect(self.pushButton_scrape_note_clicked)
-    self.Ui.pushButton_field_tips_website.clicked.connect(self.pushButton_field_tips_website_clicked)
     self.Ui.pushButton_field_tips_nfo.clicked.connect(self.pushButton_field_tips_nfo_clicked)
     self.Ui.pushButton_tips_normal_mode.clicked.connect(self.pushButton_tips_normal_mode_clicked)
     self.Ui.pushButton_tips_sort_mode.clicked.connect(self.pushButton_tips_sort_mode_clicked)

@@ -1644,15 +1644,58 @@ class MyMAinWindow(QMainWindow):
 
     # 设置-刮削网站和字段中的详细说明弹窗
     def pushButton_scrape_note_clicked(self):
-        self._show_tips("""<html><head/><body><p><span style=" font-weight:700;">1、以下类型番号，请指定刮削网站，可以提供成功率，节省刮削用时</span></p><p>· 欧美：theporndb </p><p>· 国产：mdtv、madouqu、hdouban、cnmdb、love6</p><p>· 里番：getchu_dmm </p><p>· Mywife：mywife </p><p>· GIGA：giga </p><p>· Kin8：Kin8 </p><p><span style=" font-weight:700;">2、下不了预告片和剧照，请选择「字段优先」</span></p>\
-            <p>· 速度优先：字段来自一个网站 </p><p>· 字段优先：分字段刮削，不同字段来自不同网站</p><p>字段优先的信息会比速度优先好很多！建议默认使用「字段优先」</p><p>当文件数量较多，线程数量10+以上，两者耗时差不太多 </p><p><span style=" font-weight:700;">3、匹配到同名的另一个番号信息或者错误番号</span></p><p>请使用单文件刮削。路径：工具 - 单文件刮削 </p><p><span style=" font-weight:700;">4、频繁请求被封 IP 了</span></p><p>建议更换节点，启用「间歇刮削」： 设置 - 其他 - 间歇刮削</p></body></html>""")
+        self._show_tips("""<html>
+<head/>
+<body>
+  <p><span style=" font-weight:700;">所有可用网站:</span></p>
+  <li>airav</li>
+  <li>airav_cc</li>
+  <li>avsex</li>
+  <li>avsox</li>
+  <li>cableav</li>
+  <li>cnmdb</li>
+  <li>dmm</li>
+  <li>faleno</li>
+  <li>fantastica</li>
+  <li>fc2</li>
+  <li>fc2club</li>
+  <li>fc2hub</li>
+  <li>fc2ppvdb</li>
+  <li>freejavbt</li>
+  <li>getchu</li>
+  <li>giga</li>
+  <li>hdouban</li>
+  <li>hscangku</li>
+  <li>iqqtv</li>
+  <li>jav321</li>
+  <li>javbus</li>
+  <li>javday</li>
+  <li>javdb</li>
+  <li>javlibrary</li>
+  <li>kin8</li>
+  <li>love6</li>
+  <li>lulubar</li>
+  <li>madouqu</li>
+  <li>mdtv</li>
+  <li>mgstage</li>
+  <li>7mmtv</li>
+  <li>mywife</li>
+  <li>prestige</li>
+  <li>theporndb</li>
+  <li>xcity</li>
+  <li>dahlia</li>
+  <li>getchu_dmm</li>
+  <li>official</li>
+  <p><span style=" font-weight:700;">指定类型影片可指定刮削网站:<span></p>
+  <p>· 欧美：theporndb </p>
+  <p>· 国产：mdtv、madouqu、hdouban、cnmdb、love6</p>
+  <p>· 里番：getchu_dmm </p>
+  <p>· Mywife：mywife </p>
+  <p>· GIGA：giga </p>
+  <p>· Kin8：Kin8 </p>
+</body>
+</html>""")
 
-    # 设置-刮削网站和字段中的详细说明弹窗
-    def pushButton_field_tips_website_clicked(self):
-        self._show_tips("""<html><head/><body><p><span style=" font-weight:700;">字段说明</span></p><p>举个🌰，比如刮削一个有码番号的简介字段时，假定： </p><p>1，有码番号设置的网站为（1，2，3，4，5，6，7） </p><p>2，简介字段设置的网站为（9，5，2，7） </p><p>3，简介字段的排除网站为（3，6） （比如3和6的网站没有简介，这时没必要去请求，因此可以加入到排除网站）</p><p><br/></p><p><span style=" font-weight:700;">程序将通过以下方法生成请求网站的顺序表：</span></p><p>1，取简介字段网站和有码番号网站的交集：（5，2，7） （此顺序以简介字段设置的网站顺序为准） </p><p>\
-            2，取有码番号剩余的网站，补充在后面，结果为（5，2，7，1，3，4，6） （此顺序以有码番号设置的网站顺序为准。补充的原因是当设置的字段网站未请求到时，可以继续使用有码网站查询，如不想查询可加到排除网站或去掉尽量补全字段的勾选） </p><p>3，去除排除的网站，生成简介的网站请求顺序为（5，2，7，1，4） </p><p>程序将按此顺序进行刮削，即优先请求5，当5获取成功后，就不再继续请求。当5没有获取成功，继续按顺序请求2，依次类推……刮削其他番号和字段同理。</p></body></html>""")
-
-    # 设置-刮削网站和字段中的详细说明弹窗
     def pushButton_field_tips_nfo_clicked(self):
         msg = """
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n\

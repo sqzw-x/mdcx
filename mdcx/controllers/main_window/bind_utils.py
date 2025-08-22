@@ -85,13 +85,13 @@ def set_radio_buttons(value: T, *radio_mappings: tuple[QRadioButton, T], default
         default.setChecked(True)
 
 
-def set_checkboxes(string_value: str, *checkbox_mappings: tuple[QCheckBox, str]):
+def set_checkboxes[T](value: list[T] | set[T], *checkbox_mappings: tuple[QCheckBox, T]):
     """
-    根据字符串配置值设置多个复选框的选中状态
+    根据配置值设置多个复选框的选中状态
 
     Args:
         string_value: 配置字符串值
         checkbox_mappings: 包含 (复选框对象, 对应字符串标识) 的元组
     """
     for checkbox, identifier in checkbox_mappings:
-        checkbox.setChecked(identifier in string_value)
+        checkbox.setChecked(identifier in value)

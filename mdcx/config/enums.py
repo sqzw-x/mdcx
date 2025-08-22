@@ -47,14 +47,6 @@ class CleanAction(Enum):
         ]
 
 
-class WebsiteSet(Enum):
-    OFFICIAL = "official"
-
-    @classmethod
-    def names(cls):
-        return ["官网"]
-
-
 class OutlineShow(Enum):
     SHOW_FROM = "show_from"
     SHOW_ZH_JP = "show_zh_jp"
