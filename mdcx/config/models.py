@@ -9,6 +9,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 from pydantic.fields import FieldInfo
 
+from mdcx.browser import AsyncBrowser
 from mdcx.gen.field_enums import CrawlerResultFields
 
 from ..llm import LLMClient
@@ -925,6 +926,8 @@ class Computed:
             timeout=config.timeout,
             log_fn=signal.add_log,
         )
+
+        self.browser = AsyncBrowser(config)
 
         official_websites_dic = {}
         for key, value in ManualConfig.OFFICIAL.items():

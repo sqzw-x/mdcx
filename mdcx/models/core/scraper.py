@@ -25,8 +25,8 @@ from mdcx.models.base.file import (
     save_success_list,
 )
 from mdcx.models.base.image import extrafanart_copy2, extrafanart_extras_copy
-from mdcx.models.core.crawler import crawl
 from mdcx.models.core.file import creat_folder, deal_old_files, get_file_info_v2, get_output_name, move_movie
+from mdcx.models.core.file_crawler import FileCrawler
 from mdcx.models.core.image import add_mark
 from mdcx.models.core.nfo import get_nfo_data, write_nfo
 from mdcx.models.core.translate import translate_actor, translate_info, translate_title_outline
@@ -188,7 +188,9 @@ async def _scrape_one_file(file_info: FileInfo, file_mode: FileMode) -> tuple[Cr
 
     elif not is_nfo_existed:
         # ========================= call crawlers =========================
-        res = await crawl(file_info.crawl_task(), file_mode)
+        # res = await crawl(file_info.crawl_task(), file_mode)
+        crawler = FileCrawler(manager.config, manager.computed.async_client, manager.computed.browser)
+        res = await crawler.crawl(file_info.crawl_task(), file_mode)
         # 处理 FileInfo 和 CrawlersResult 的共同字段, 即 number/mosaic/letters
         # todo 理想情况, crawl 后应该以 res 为准, 后续不应再访问 file_info 的相关字段
         # todo 注意, 实际上目前各 crawler 返回的 mosaic 和 number 字段并未被使用
