@@ -17,7 +17,7 @@ from mdcx.web_async import AsyncWebClient
 
 if TYPE_CHECKING:
     from mdcx.config.models import Config
-    from mdcx.config.v1 import ConfigSchema
+    from mdcx.config.v1 import ConfigV1
 
 MULTI_LANGUAGE_WEBSITES = [  # 支持多语言, language 参数有意义
     Website.AIRAV_CC,
@@ -36,7 +36,7 @@ def clean_list(raw: list[str]) -> list[str]:
     return cleaned
 
 
-def _deal_some_list(field: str, website: Website, same_list: list[Website]) -> list[Website]:
+def _handle_site(field: str, website: Website, same_list: list[Website]) -> list[Website]:
     if website not in same_list:
         same_list.append(website)
     if field in ["title", "outline", "thumb", "poster", "trailer", "extrafanart"]:
@@ -125,7 +125,7 @@ def _deal_res(res: CrawlersResult) -> CrawlersResult:
 
 
 class FileCrawler:
-    def __init__(self, config_v1: ConfigSchema, config: Config, client: AsyncWebClient):
+    def __init__(self, config_v1: "ConfigV1", config: "Config", client: AsyncWebClient):
         self.config_v1 = config_v1
         self.config = config
         self.client = client
@@ -204,10 +204,10 @@ class FileCrawler:
                     field_list.insert(0, Website.MGSTAGE)
             # faleno.jp 番号检查 dldss177 dhla009
             elif re.findall(r"F[A-Z]{2}SS", number):
-                field_list = _deal_some_list(field, Website.FALENO, field_list)
+                field_list = _handle_site(field, Website.FALENO, field_list)
             # dahlia-av.jp 番号检查
             elif number.startswith("DLDSS") or number.startswith("DHLA"):
-                field_list = _deal_some_list(field, Website.DAHLIA, field_list)
+                field_list = _handle_site(field, Website.DAHLIA, field_list)
             # fantastica 番号检查 FAVI、FAAP、FAPL、FAKG、FAHO、FAVA、FAKY、FAMI、FAIT、FAKA、FAMO、FASO、FAIH、FASH、FAKS、FAAN
             elif (
                 re.search(r"FA[A-Z]{2}-?\d+", number.upper())
@@ -217,7 +217,7 @@ class FileCrawler:
                 or number.upper().startswith("FAKWM")
                 or number.upper().startswith("PDS")
             ):
-                field_list = _deal_some_list(field, Website.FANTASTICA, field_list)
+                field_list = _handle_site(field, Website.FANTASTICA, field_list)
             return field_list
 
         # 获取使用的网站
