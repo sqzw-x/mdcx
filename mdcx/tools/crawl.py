@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 from dataclasses import asdict
 from pathlib import Path
 from typing import Annotated
@@ -20,7 +21,7 @@ from mdcx.web_async import AsyncWebClient
 
 app = typer.Typer(help="爬虫调试工具", context_settings={"help_option_names": ["-h", "--help"]})
 console = Console()
-
+os.environ["MDCX_SHOW_BROWSER"] = "1"  # 显示浏览器界面
 
 proxy_help = "代理地址 (例如: http://127.0.0.1:7890). 如未指定将加载 config 设置"
 
@@ -87,15 +88,14 @@ def main(
 def _crawl(sites: list[Website], input: CrawlerInput, output: str | None, proxy: str | None, timeout: int, retry: int):
     classes = [get_crawler_compat(site) for site in sites]
 
-    # v1 crawler 内部直接使用 config.async_client, 必须复用同一个 evantloop 以避免 Future attached to a different loop 错误
     client = AsyncWebClient(
         loop=executor._loop,
-        proxy=proxy or manager.config.httpx_proxy,
+        proxy=proxy or manager.config.proxy,
         retry=retry,
         timeout=timeout,
         log_fn=lambda msg: print(f"[dim][AsyncWebClient] {msg}[/dim]"),
     )
-    crawlers = [c(client=client, base_url=manager.config.get_website_base_url(c.site())) for c in classes]
+    crawlers = [c(client=client, base_url=manager.config.get_site_url(c.site())) for c in classes]
     futures = [executor.submit(crawler.run(input)) for crawler in crawlers]
     executor.wait_all()
 
@@ -164,7 +164,7 @@ def show_config():
     """显示当前配置信息"""
     console.print("[bold blue]当前配置信息:[/bold blue]")
     console.print()
-    console.print(f"代理: {manager.config.httpx_proxy or '未设置'}")
+    console.print(f"代理: {manager.config.proxy or '未设置'}")
     console.print(f"超时时间: {manager.config.timeout} 秒")
     console.print(f"重试次数: {manager.config.retry}")
     console.print(f"配置文件路径: {manager.path}")
@@ -193,7 +193,7 @@ async def _fetch_async(
     """异步获取详情页内容"""
 
     # 配置网络客户端
-    client_proxy = proxy or manager.config.httpx_proxy
+    client_proxy = proxy or manager.config.proxy
     client_timeout = timeout or manager.config.timeout
     client_retry = retry or manager.config.retry
 
@@ -224,12 +224,15 @@ async def _fetch_async(
                     console.print(f"[red]错误: 未找到 {website.value} Crawler[/red]")
                     exit(1)
 
-                crawler = crawler_class(client=async_client, base_url=manager.config.get_website_base_url(website))
+                crawler = crawler_class(
+                    client=async_client,
+                    base_url=manager.config.get_site_url(website),
+                    browser=await manager.computed.browser_provider.get_browser(),
+                )
                 crawler_input = CrawlerInput.empty()
                 crawler_input.appoint_url = url
-                ctx = crawler.new_context(crawler_input)
                 progress.update(task, description="正在请求详情页...")
-                html, error = await crawler._fetch_detail(ctx, url)
+                html, error = await crawler._fetch_detail(crawler.new_context(crawler_input), url)
             else:
                 # 如果没有指定网站类型，直接使用客户端获取
                 progress.update(task, description="正在请求详情页...")

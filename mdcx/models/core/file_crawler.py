@@ -4,9 +4,7 @@ import re
 from itertools import chain
 from typing import TYPE_CHECKING
 
-from mdcx.browser import AsyncBrowser
 from mdcx.config.models import Language, Website
-from mdcx.crawlers import get_crawler_compat
 from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.manual import ManualConfig
 from mdcx.models.enums import FileMode
@@ -17,7 +15,8 @@ from mdcx.utils.dataclass import update
 
 if TYPE_CHECKING:
     from mdcx.config.models import Config
-    from mdcx.web_async import AsyncWebClient
+    from mdcx.crawler import CrawlerProvider
+
 
 MULTI_LANGUAGE_WEBSITES = [  # 支持多语言, language 参数有意义
     Website.AIRAV_CC,
@@ -101,11 +100,10 @@ def _deal_res(res: CrawlersResult) -> CrawlersResult:
     return res
 
 
-class FileCrawler:
-    def __init__(self, config: "Config", client: "AsyncWebClient", browser: "AsyncBrowser"):
+class FileScraper:
+    def __init__(self, config: "Config", crawler_provider: "CrawlerProvider"):
         self.config = config
-        self.client = client
-        self.browser = browser
+        self.crawler_provider = crawler_provider
 
     async def _call_crawler(
         self, task_input: CrawlerInput, website: Website, timeout: float | None = 30
@@ -128,14 +126,7 @@ class FileCrawler:
         if short_number and website != "mgstage" and website != "avsex":
             task_input.number = short_number
 
-        # 获取爬虫函数
-        crawler = get_crawler_compat(website)
-
-        browser = None
-        if self.config.get_site_config(website).use_browser:
-            browser = await self.browser.get_browser()
-
-        c = crawler(self.client, self.config.get_site_url(website), browser)
+        c = await self.crawler_provider.get(website)
 
         # 对爬虫函数调用添加超时限制, 超时异常由调用者处理
         if os.getenv("DEBUG"):
@@ -415,9 +406,9 @@ class FileCrawler:
 
         return res
 
-    def _get_website_name(self, task_input: CrawlTask, file_mode: FileMode) -> str:
+    def _get_site(self, task_input: CrawlTask, file_mode: FileMode):
         # 获取刮削网站
-        website_name = "all"
+        website_name = None
         if file_mode == FileMode.Single:  # 刮削单文件（工具页面）
             website_name = Flags.website_name
         elif file_mode == FileMode.Again:  # 重新刮削
@@ -429,12 +420,9 @@ class FileCrawler:
 
         return website_name
 
-    async def crawl(self, task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult:
-        # 从指定网站获取json_data
-        website_name = self._get_website_name(task_input, file_mode)
-        if website_name == "all":
-            website = None
-        else:
-            website = Website(website_name)
-        res = await self._crawl(task_input, website)
+    async def run(self, task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult:
+        site = self._get_site(task_input, file_mode)
+        if site is not None:
+            site = Website(site)
+        res = await self._crawl(task_input, site)
         return _deal_res(res)

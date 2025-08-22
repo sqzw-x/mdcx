@@ -45,7 +45,7 @@ def parse_category(url: str) -> Category:
 
 class MonoParser(DetailPageParser):
     """
-    适用类别: rental, monthly, digital, dvd # todo 测试具体适用哪些类别
+    适用类别: prime, monthly, mono
     """
 
     @override
@@ -54,7 +54,7 @@ class MonoParser(DetailPageParser):
         return title
 
     @override
-    async def release(self, ctx, html):
+    async def release(self, ctx, html) -> FieldRes[str]:
         release = extract_text(
             html,
             "//td[contains(text(),'発売日')]/following-sibling::td/text()",

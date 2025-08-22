@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from .config.models import Config
 
 
-class AsyncBrowser:
+class BrowserProvider:
     def __init__(self, config: "Config"):
         self.config = config
         self.playwright = None

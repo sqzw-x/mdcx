@@ -3,21 +3,15 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import timedelta
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
-import httpx
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 from pydantic.fields import FieldInfo
 
-from mdcx.browser import AsyncBrowser
 from mdcx.gen.field_enums import CrawlerResultFields
 
-from ..llm import LLMClient
 from ..manual import ManualConfig
 from ..server.config import SAFE_DIRS
-from ..signals import signal
-from ..utils import executor, get_random_headers
-from ..web_async import AsyncWebClient
 from .enums import (
     CDChar,
     CleanAction,
@@ -67,16 +61,17 @@ class TranslateConfig(BaseModel):
         title="翻译服务",
     )
     deepl_key: str = Field(default="", title="Deepl密钥")
-    llm_url: HttpUrl = Field(default=HttpUrl("https://api.llm.com/v1"), title="Llm网址")
-    llm_model: str = Field(default="gpt-3.5-turbo", title="Llm模型")
-    llm_key: str = Field(default="", title="Llm密钥")
+    llm_url: HttpUrl = Field(default=HttpUrl("https://api.llm.com/v1"), title="LLM API Host")
+    llm_model: str = Field(default="gpt-3.5-turbo", title="模型 ID")
+    llm_key: str = Field(default="", title="LLM API Key")
     llm_prompt: str = Field(
         default="Please translate the following text to {lang}. Output only the translation without any explanation.\n{content}",
-        title="Llm提示",
+        title="LLM 提示词",
     )
-    llm_max_req_sec: float = Field(default=1, title="Llm每秒最大请求数")
-    llm_max_try: int = Field(default=5, title="Llm最大尝试次数")
-    llm_temperature: float = Field(default=0.2, title="Llm温度")
+    llm_read_timeout: int = Field(default=60, title="LLM 读取超时 (秒)", description="LLM 生成耗时较长, 建议设置较大值")
+    llm_max_req_sec: float = Field(default=1, title="LLM 每秒最大请求数")
+    llm_max_try: int = Field(default=5, title="LLM 最大尝试次数")
+    llm_temperature: float = Field(default=0.2, title="LLM 温度")
 
     def model_post_init(self, context) -> None:
         if self.llm_max_req_sec <= 0:
@@ -215,7 +210,7 @@ class Config(BaseModel):
     # endregion
 
     # region: Scraping Settings
-    thread_number: int = Field(default=10, title="线程数")
+    thread_number: int = Field(default=50, title="并发数")
     thread_time: int = Field(default=0, title="线程时间")
     javdb_time: int = Field(default=10, title="Javdb时间")
     main_mode: int = Field(default=1, title="主模式")
@@ -546,8 +541,8 @@ class Config(BaseModel):
     )
     pic_simple_name: bool = Field(default=False, title="图片简化命名")
     trailer_simple_name: bool = Field(default=True, title="预告片简化命名")
-    hd_name: str = Field(default="height", title="高清名称")
-    hd_get: str = Field(default="video", title="获取高清")
+    hd_name: Literal["height", "hd"] = Field(default="height", title="高清名称")
+    hd_get: Literal["video", "path", "none"] = Field(default="video", title="获取高清")
     cnword_char: list[str] = Field(default_factory=lambda: ["-C.", "-C-", "ch.", "字幕"], title="中文字符")
     cnword_style: str = Field(default="-C", title="中文样式")
     folder_cnword: bool = Field(default=True, title="目录中文")
@@ -842,8 +837,6 @@ class Config(BaseModel):
                     data.pop(rule.old_name, None)
             elif isinstance(rule, Remove):
                 data.pop(rule.name, None)
-            elif isinstance(rule, Add):  # 新增字段会自动使用默认值初始化
-                pass
 
         # 处理 site_configs
         site_configs: dict[Website, SiteConfig] = {}
@@ -899,52 +892,6 @@ class Config(BaseModel):
         return cls.model_json_schema()
 
 
-class Computed:
-    def __init__(self, config: Config):
-        self.can_clean = CleanAction.I_KNOW in config.clean_enable and CleanAction.I_AGREE in config.clean_enable
-
-        if any(schema in config.proxy for schema in ["http://", "https://", "socks5://", "socks5h://"]):
-            self.proxy = config.proxy.strip()
-        else:
-            self.proxy = "http://" + config.proxy.strip()
-
-        self.random_headers = get_random_headers()
-
-        proxy = config.proxy if config.use_proxy else None
-        self.llm_client = LLMClient(
-            api_key=config.translate_config.llm_key,
-            base_url=config.translate_config.llm_url.unicode_string(),
-            proxy=proxy,
-            timeout=httpx.Timeout(config.timeout, read=None),  # 只设置连接超时, 不限制 llm 生成时间
-            rate=(max(config.translate_config.llm_max_req_sec, 1), max(1, 1 / config.translate_config.llm_max_req_sec)),
-        )
-
-        self.async_client = AsyncWebClient(
-            loop=executor._loop,
-            proxy=proxy,
-            retry=config.retry,
-            timeout=config.timeout,
-            log_fn=signal.add_log,
-        )
-
-        self.browser = AsyncBrowser(config)
-
-        official_websites_dic = {}
-        for key, value in ManualConfig.OFFICIAL.items():
-            temp_list = value.upper().split("|")
-            for each in temp_list:
-                official_websites_dic[each] = key
-        self.official_websites = official_websites_dic
-
-        self.escape_string_list = list(dict.fromkeys(k for k in config.string + ManualConfig.REPL_LIST if k.strip()))
-
-        # 生成 Google 关键词列表 迁移自 ConfigV1.init
-        temp_list = re.split(r"[,，]", ",".join(config.google_used))
-        self.google_keyused = [each for each in temp_list if each.strip()]  # 去空
-        temp_list = re.split(r"[,，]", ",".join(config.google_exclude))
-        self.google_keyword = [each for each in temp_list if each.strip()]  # 去空
-
-
 @dataclass
 class CompatRule:
     # 添加必要注释
@@ -964,11 +911,6 @@ class Remove(CompatRule):
     name: str
 
 
-@dataclass
-class Add(CompatRule):
-    name: str
-
-
 # 描述 Config 相比于 ConfigV1 的变更并添加相应的兼容规则
 COMPAT_RULES: list[CompatRule] = [
     Remove("version"),
@@ -984,8 +926,6 @@ COMPAT_RULES: list[CompatRule] = [
     Rename("tag_include", "nfo_tag_include", notes=["ConfigV1.tag_include", Config().nfo_tag_include, "澄清语义"]),
     Remove("show_4k", notes=["ConfigV1.show_4k", "功能与命名模板冲突"]),
     Remove("show_moword", notes=["ConfigV1.show_moword", "功能与命名模板冲突"]),
-    Add("site_configs", notes=[Config().site_configs]),
-    Add("field_configs", notes=[Config().field_configs, "网站优先级配置"]),
 ]
 if TYPE_CHECKING:
     from .v1 import ConfigV1

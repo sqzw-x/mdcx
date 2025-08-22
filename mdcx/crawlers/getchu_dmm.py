@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from mdcx.crawlers import dmm, getchu
+from mdcx.crawlers import getchu
 
 
 async def main(
@@ -19,14 +19,15 @@ async def main(
         number = json_data_new["number"]
         if number.startswith("DLID") or "dl.getchu" in appoint_url:
             return json_data_getchu
-    json_data_dmm = await dmm.main(number, appoint_url, file_path)
-    if json_data_dmm["dmm"]["jp"]["title"]:
-        json_data_new.update(json_data_dmm["dmm"]["jp"])
-        if poster:  # 使用 getchu 封面
-            json_data_new["poster"] = poster
-        if outline:  # 使用 getchu 简介
-            json_data_new["outline"] = outline
-            json_data_new["originalplot"] = outline
+    # todo 不清楚为何有这样一个组合 crawler, 理论上完全可以通过 dmm 和 getchu 分别获取然后通过优先级合并
+    # json_data_dmm = await dmm.main(number, appoint_url, file_path)
+    # if json_data_dmm["dmm"]["jp"]["title"]:
+    #     json_data_new.update(json_data_dmm["dmm"]["jp"])
+    #     if poster:  # 使用 getchu 封面
+    #         json_data_new["poster"] = poster
+    #     if outline:  # 使用 getchu 简介
+    #         json_data_new["outline"] = outline
+    #         json_data_new["originalplot"] = outline
     return {
         "getchu_dmm": {
             "zh_cn": json_data_new,

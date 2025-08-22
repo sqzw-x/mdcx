@@ -9,7 +9,7 @@ from typing import cast
 
 from PIL import Image
 
-from mdcx.config.enums import DownloadableFile
+from mdcx.config.enums import DownloadableFile, MarkType
 from mdcx.config.manager import manager
 from mdcx.models.base.image import add_mark_thread
 from mdcx.models.log_buffer import LogBuffer
@@ -24,11 +24,11 @@ async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):
     thumb_marked = json_data.thumb_marked
     fanart_marked = json_data.fanart_marked
     download_files = manager.config.download_files
-    mark_type = manager.config.mark_type.lower()
+    mark_type = manager.config.mark_type
     has_sub = file_info.has_sub
     definition = file_info.definition
     mark_list = []
-    if ("K" in definition or "UHD" in definition) and "hd" in mark_type:
+    if ("K" in definition or "UHD" in definition) and MarkType.HD in mark_type:
         if "8" in definition:
             mark_list.append("8K")
         else:
@@ -37,17 +37,17 @@ async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):
         mark_list.append("字幕")
 
     if mosaic == "有码" or mosaic == "有碼":
-        if "youma" in mark_type:
+        if MarkType.YOUMA in mark_type:
             mark_list.append("有码")
     elif mosaic == "无码破解" or mosaic == "無碼破解":
-        if "umr" in mark_type:
+        if MarkType.UMR in mark_type:
             mark_list.append("破解")
-        elif "uncensored" in mark_type:
+        elif MarkType.UNCENSORED in mark_type:
             mark_list.append("无码")
     elif mosaic == "无码流出" or mosaic == "無碼流出":
-        if "leak" in mark_type:
+        if MarkType.LEAK in mark_type:
             mark_list.append("流出")
-        elif "uncensored" in mark_type:
+        elif MarkType.UNCENSORED in mark_type:
             mark_list.append("无码")
     elif (mosaic == "无码" or mosaic == "無碼") and "uncensored" in mark_type:
         mark_list.append("无码")
