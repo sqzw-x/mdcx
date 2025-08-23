@@ -7,10 +7,12 @@ from PyQt5.QtCore import QPoint, QRect, Qt
 from PyQt5.QtGui import QCursor, QPixmap
 from PyQt5.QtWidgets import QDialog, QFileDialog, QPushButton
 
+from mdcx.config.enums import DownloadableFile
 from mdcx.config.manager import manager
+from mdcx.config.models import MarkType
 from mdcx.models.base.image import add_mark_thread
 from mdcx.models.core.file import get_file_info_v2
-from mdcx.utils import split_path
+from mdcx.utils import executor, split_path
 from mdcx.utils.file import delete_file_sync
 from mdcx.views.posterCutTool import Ui_Dialog_cut_poster
 
@@ -187,9 +189,9 @@ class CutWindow(QDialog):
         self.Ui.label_origin_size.setText(str(f"{str(self.pic_w)}, {str(self.pic_h)}"))  # 显示原图尺寸
 
         # 获取水印设置
-        poster_mark = manager.config_v1.poster_mark
-        mark_type = manager.config_v1.mark_type
-        pic_name = manager.config_v1.pic_simple_name
+        poster_mark = manager.config.poster_mark
+        mark_type = manager.config.mark_type
+        pic_name = manager.config.pic_simple_name
 
         # 显示图片及水印情况
         if img_path and os.path.exists(img_path):
@@ -232,7 +234,7 @@ class CutWindow(QDialog):
                         if ".nfo" in each:
                             temp_path = os.path.join(img_folder, each)
                             break
-                json_data = manager.config_v1.executor.run(get_file_info_v2(temp_path, copy_sub=False))
+                json_data = executor.run(get_file_info_v2(temp_path, copy_sub=False))
 
             self.setWindowTitle(json_data.number + " 封面图片裁剪")  # 设置窗口标题
 
@@ -255,25 +257,25 @@ class CutWindow(QDialog):
 
             # poster添加水印
             if poster_mark:
-                if definition and "hd" in mark_type:
+                if definition and MarkType.HD in mark_type:
                     if definition == "4K" or definition == "UHD":
                         self.Ui.radioButton_add_4k.setChecked(True)
                     elif definition == "8K" or definition == "UHD8":
                         self.Ui.radioButton_add_8k.setChecked(True)
-                if has_sub and "sub" in mark_type:
+                if has_sub and MarkType.SUB in mark_type:
                     self.Ui.checkBox_add_sub.setChecked(True)
                 if mosaic == "有码" or mosaic == "有碼":
-                    if "youma" in mark_type:
+                    if MarkType.YOUMA in mark_type:
                         self.Ui.radioButton_add_censored.setChecked(True)
                 elif "破解" in mosaic:
-                    if "umr" in mark_type:
+                    if MarkType.UMR in mark_type:
                         self.Ui.radioButton_add_umr.setChecked(True)
-                    elif "uncensored" in mark_type:
+                    elif MarkType.UNCENSORED in mark_type:
                         self.Ui.radioButton_add_uncensored.setChecked(True)
                 elif "流出" in mosaic:
-                    if "leak" in mark_type:
+                    if MarkType.LEAK in mark_type:
                         self.Ui.radioButton_add_leak.setChecked(True)
-                    elif "uncensored" in mark_type:
+                    elif MarkType.UNCENSORED in mark_type:
                         self.Ui.radioButton_add_uncensored.setChecked(True)
                 elif mosaic == "无码" or mosaic == "無碼":
                     self.Ui.radioButton_add_uncensored.setChecked(True)
@@ -362,11 +364,11 @@ class CutWindow(QDialog):
         return self.c_x, self.c_y, self.c_x2, self.c_y2
 
     def do_cut_and_close(self):
-        manager.config_v1.executor.submit(self.to_cut())
+        executor.submit(self.to_cut())
         self.close()
 
     def do_cut(self):
-        manager.config_v1.executor.run(self.to_cut())
+        executor.run(self.to_cut())
 
     async def to_cut(self):
         img_path = self.show_image_path  # 被裁剪的图片
@@ -410,29 +412,29 @@ class CutWindow(QDialog):
             return False
         img_new_png.save(self.cut_poster_path, quality=95, subsampling=0)
         # poster加水印
-        if manager.config_v1.poster_mark == 1:
+        if manager.config.poster_mark == 1:
             await add_mark_thread(self.cut_poster_path, mark_list)
 
         # 清理旧的thumb
-        if "thumb" in manager.config_v1.download_files:
+        if DownloadableFile.THUMB in manager.config.download_files:
             if thumb_path != img_path:
                 if os.path.exists(thumb_path):
                     delete_file_sync(thumb_path)
                 img.save(thumb_path, quality=95, subsampling=0)
             # thumb加水印
-            if manager.config_v1.thumb_mark == 1:
+            if manager.config.thumb_mark == 1:
                 await add_mark_thread(thumb_path, mark_list)
         else:
             thumb_path = img_path
 
         # 清理旧的fanart
-        if ",fanart" in manager.config_v1.download_files:
+        if DownloadableFile.FANART in manager.config.download_files:
             if self.cut_fanart_path != img_path:
                 if os.path.exists(self.cut_fanart_path):
                     delete_file_sync(self.cut_fanart_path)
                 img.save(self.cut_fanart_path, quality=95, subsampling=0)
             # fanart加水印
-            if manager.config_v1.fanart_mark == 1:
+            if manager.config.fanart_mark == 1:
                 await add_mark_thread(self.cut_fanart_path, mark_list)
 
         img.close()

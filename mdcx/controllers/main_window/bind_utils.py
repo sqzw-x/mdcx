@@ -1,40 +1,27 @@
-"""
-简化配置与 Qt 组件的绑定操作
-
-配置与 Qt 组件的绑定常见逻辑
-- 单字段与单组件绑定
-- 配置值为逗号分隔字符串, 分别对应多个二值组件
-- 配置值有两个以上的选项, 对应一组单选按钮
-"""
-
-from typing import TypeVar
-
 from PyQt5.QtWidgets import QCheckBox, QRadioButton
 
-T = TypeVar("T")
 
-
-def get_checkboxes(*component_value_pairs: tuple[QCheckBox | QRadioButton | bool, str]) -> str:
+def get_checkboxes[T](*component_value_pairs: tuple[QCheckBox | QRadioButton | bool, T]) -> list[T]:
     """
-    根据二值输入组件 (复选框, 单选按钮等) 或布尔值生成配置字符串
+    根据二值输入组件 (复选框, 单选按钮等) 或布尔值生成值列表
 
     Args:
-        component_value_pairs: 包含 (条件对象或布尔值, 对应字符串值) 的元组
+        component_value_pairs: 包含 (条件对象或布尔值, 对应值) 的元组
 
     Returns:
-        生成的配置字符串，满足条件的选项用逗号分隔
+        满足条件的值列表
     """
-    result = ""
+    result = []
     for condition, value in component_value_pairs:
         if not isinstance(condition, bool):
             condition = condition.isChecked()
         # 如果条件为真，添加对应的值
         if condition:
-            result += f"{value},"
+            result.append(value)
     return result
 
 
-def get_checkbox(component: QCheckBox | QRadioButton, on_value: T = True, off_value: T = False) -> T:
+def get_checkbox[T](component: QCheckBox | QRadioButton, on_value: T = True, off_value: T = False) -> T:
     """
     根据二值输入组件返回开启或关闭的配置值
 
@@ -49,7 +36,7 @@ def get_checkbox(component: QCheckBox | QRadioButton, on_value: T = True, off_va
     return on_value if component.isChecked() else off_value
 
 
-def get_radio_buttons(*radio_mappings: tuple[QRadioButton, T], default: T = "") -> T:
+def get_radio_buttons[T](*radio_mappings: tuple[QRadioButton, T], default: T = "") -> T:
     """
     根据一组单选按钮的选中状态生成配置值
 
@@ -66,7 +53,7 @@ def get_radio_buttons(*radio_mappings: tuple[QRadioButton, T], default: T = "") 
     return default
 
 
-def set_radio_buttons(value: T, *radio_mappings: tuple[QRadioButton, T], default: QRadioButton | None = None):
+def set_radio_buttons[T](value: T, *radio_mappings: tuple[QRadioButton, T], default: QRadioButton | None = None):
     """
     根据配置值设置一组单选按钮的选中状态
 
@@ -85,13 +72,13 @@ def set_radio_buttons(value: T, *radio_mappings: tuple[QRadioButton, T], default
         default.setChecked(True)
 
 
-def set_checkboxes(string_value: str, *checkbox_mappings: tuple[QCheckBox, str]):
+def set_checkboxes[T](value: list[T] | set[T], *checkbox_mappings: tuple[QCheckBox, T]):
     """
-    根据字符串配置值设置多个复选框的选中状态
+    根据配置值设置多个复选框的选中状态
 
     Args:
         string_value: 配置字符串值
         checkbox_mappings: 包含 (复选框对象, 对应字符串标识) 的元组
     """
     for checkbox, identifier in checkbox_mappings:
-        checkbox.setChecked(identifier in string_value)
+        checkbox.setChecked(identifier in value)

@@ -33,7 +33,7 @@ from mdcx.utils.file import copy_file_async
 
 async def creat_kodi_actors(add: bool) -> None:
     signal.change_buttons_status.emit()
-    signal.show_log_text(f"📂 待刮削目录: {get_movie_path_setting()[0]}")
+    signal.show_log_text(f"📂 待刮削目录: {get_movie_path_setting().movie_path}")
     if add:
         signal.show_log_text("💡 将为待刮削目录中的每个视频创建 .actors 文件夹，并补全演员图片到 .actors 文件夹中\n")
         signal.show_log_text("👩🏻 开始补全 Kodi/Plex/Jvedio 演员头像...")
@@ -51,8 +51,8 @@ async def creat_kodi_actors(add: bool) -> None:
 async def update_emby_actor_info() -> None:
     signal.change_buttons_status.emit()
     start_time = time.time()
-    emby_on = manager.config_v1.emby_on
-    server_name = "Emby" if "emby" in manager.config_v1.server_type else "Jellyfin"
+    emby_on = manager.config.emby_on
+    server_name = "Emby" if "emby" in manager.config.server_type else "Jellyfin"
     signal.show_log_text(f"👩🏻 开始补全 {server_name} 演员信息...")
 
     actor_list = await _get_emby_actor_list()
@@ -100,7 +100,7 @@ async def _process_actor_async(actor: dict, emby_on) -> tuple[int, str]:
         actor_id = actor.get("Id", "")
         # 已有资料时跳过
         actor_homepage, actor_person, _, _, _, update_url = _generate_server_url(actor)
-        res, error = await manager.config_v1.async_client.get_json(actor_person, use_proxy=False)
+        res, error = await manager.computed.async_client.get_json(actor_person, use_proxy=False)
         if res is None:
             return 0, f"🔴 {actor_name}: Emby/Jellyfin 获取演员信息错误！\n    错误信息: {error}"
 
@@ -120,7 +120,7 @@ async def _process_actor_async(actor: dict, emby_on) -> tuple[int, str]:
             if result:  # 成功
                 wiki_found = 1
         # db
-        if manager.config_v1.use_database:
+        if manager.config.use_database:
             if "数据库补全" in overview and "actor_info_miss" in emby_on:  # 已有数据库信息
                 db_exist = 0
                 logs.append(f"{actor_name}: 已有数据库信息")
@@ -130,7 +130,7 @@ async def _process_actor_async(actor: dict, emby_on) -> tuple[int, str]:
         # summary
         summary = "\n    " + "\n".join(logs) if logs else ""
         if db_exist or wiki_found:
-            res, error = await manager.config_v1.async_client.post_text(
+            res, error = await manager.computed.async_client.post_text(
                 update_url, json_data=actor_info.dump(), use_proxy=False
             )
             if res is not None:
@@ -213,7 +213,7 @@ async def show_emby_actor_list(mode: int) -> None:
                 count += 1
             else:
                 # http://192.168.5.191:8096/emby/Persons/梦乃爱华?api_key=ee9a2f2419704257b1dd60b975f2d64e
-                res, error = await manager.config_v1.async_client.get_json(actor_person, use_proxy=False)
+                res, error = await manager.computed.async_client.get_json(actor_person, use_proxy=False)
                 if res is None:
                     signal.show_log_text(
                         f"\n🔴 {count}/{total} Emby 获取演员信息错误！👩🏻 {actor_name} \n    错误信息: {error}"
@@ -302,13 +302,13 @@ async def show_emby_actor_list(mode: int) -> None:
 
 
 async def _deal_kodi_actors(gfriends_actor_data, add):
-    vedio_path = get_movie_path_setting()[0]
+    vedio_path = get_movie_path_setting().movie_path
     if vedio_path == "" or not await aiofiles.os.path.isdir(vedio_path):
         signal.show_log_text("🔴 待刮削目录不存在！任务已停止！")
         return False
     else:
         actor_folder = resources.userdata_path("actor")
-        emby_on = manager.config_v1.emby_on
+        emby_on = manager.config.emby_on
         all_files = await asyncio.to_thread(os.walk, vedio_path)
         all_actor = set()
         success = set()

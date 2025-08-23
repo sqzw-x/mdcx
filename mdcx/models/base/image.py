@@ -18,9 +18,9 @@ from mdcx.utils.file import check_pic_async, move_file_async
 
 async def extrafanart_copy2(folder_new_path: str):
     start_time = time.time()
-    download_files = manager.config_v1.download_files
-    keep_files = manager.config_v1.keep_files
-    extrafanart_copy_folder = manager.config_v1.extrafanart_folder
+    download_files = manager.config.download_files
+    keep_files = manager.config.keep_files
+    extrafanart_copy_folder = manager.config.extrafanart_folder
     extrafanart_path = convert_path(os.path.join(folder_new_path, "extrafanart"))
     extrafanart_copy_path = convert_path(os.path.join(folder_new_path, extrafanart_copy_folder))
 
@@ -57,8 +57,8 @@ async def extrafanart_copy2(folder_new_path: str):
 
 async def extrafanart_extras_copy(folder_new_path: str):
     start_time = time.time()
-    download_files = manager.config_v1.download_files
-    keep_files = manager.config_v1.keep_files
+    download_files = manager.config.download_files
+    keep_files = manager.config.keep_files
     extrafanart_path = convert_path(os.path.join(folder_new_path, "extrafanart"))
     extrafanart_extra_path = convert_path(os.path.join(folder_new_path, "behind the scenes"))
 
@@ -92,8 +92,8 @@ async def extrafanart_extras_copy(folder_new_path: str):
 
 async def _add_to_pic(pic_path: str, img_pic: Image.Image, mark_size: int, count: int, mark_name: str):
     # 获取水印图片，生成水印
-    mark_fixed = manager.config_v1.mark_fixed
-    mark_pos_corner = manager.config_v1.mark_pos_corner
+    mark_fixed = manager.config.mark_fixed
+    mark_pos_corner = manager.config.mark_pos_corner
     mark_pic_path = ""
     if mark_name == "4K":
         mark_pic_path = resources.icon_4k_path
@@ -175,13 +175,13 @@ async def _add_to_pic(pic_path: str, img_pic: Image.Image, mark_size: int, count
 
 
 async def add_mark_thread(pic_path: str, mark_list: list[str]):
-    mark_size = manager.config_v1.mark_size
-    mark_fixed = manager.config_v1.mark_fixed
-    mark_pos = manager.config_v1.mark_pos
-    mark_pos_hd = manager.config_v1.mark_pos_hd
-    mark_pos_sub = manager.config_v1.mark_pos_sub
-    mark_pos_mosaic = manager.config_v1.mark_pos_mosaic
-    mark_pos_corner = manager.config_v1.mark_pos_corner
+    mark_size = manager.config.mark_size
+    mark_fixed = manager.config.mark_fixed
+    mark_pos = manager.config.mark_pos
+    mark_pos_hd = manager.config.mark_pos_hd
+    mark_pos_sub = manager.config.mark_pos_sub
+    mark_pos_mosaic = manager.config.mark_pos_mosaic
+    mark_pos_corner = manager.config.mark_pos_corner
     try:
         img_pic = Image.open(pic_path)
     except Exception:
@@ -225,9 +225,11 @@ async def add_mark_thread(pic_path: str, mark_list: list[str]):
 async def add_del_extrafanart_copy(mode: str) -> None:
     signal.show_log_text(f"Start {mode} extrafanart copy! \n")
 
-    movie_path, *_, extrafanart_folder, _ = get_movie_path_setting()
+    path_settings = get_movie_path_setting()
+    movie_path = path_settings.movie_path
+    extrafanart_folder = path_settings.extrafanart_folder
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 Checking all videos, Please wait...")
-    movie_type = manager.config_v1.media_type
+    movie_type = manager.config.media_type
     movie_list = await movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
 
     extrafanart_folder_path_list = []

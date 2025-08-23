@@ -17,10 +17,10 @@ async def add_del_extras(mode: str) -> None:
     """
     signal.show_log_text(f"Start {mode} extrafanart extras! \n")
 
-    movie_path, *_ = get_movie_path_setting()
+    movie_path = get_movie_path_setting().movie_path
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 Checking all videos, Please wait...")
-    movie_type = manager.config_v1.media_type
-    movie_list = await movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
+    media_type = manager.config.media_type
+    movie_list = await movie_lists([], media_type, movie_path)  # 获取所有需要刮削的影片列表
 
     extrafanart_folder_path_list = []
     for movie in movie_list:
@@ -63,9 +63,9 @@ async def add_del_extras(mode: str) -> None:
 async def add_del_theme_videos(mode: str) -> None:
     signal.show_log_text(f"Start {mode} theme videos! \n")
 
-    movie_path, *_ = get_movie_path_setting()
+    movie_path = get_movie_path_setting().movie_path
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n 🔎 Checking all videos, Please wait...")
-    movie_type = manager.config_v1.media_type
+    movie_type = manager.config.media_type
     movie_list = await movie_lists([], movie_type, movie_path)  # 获取所有需要刮削的影片列表
 
     theme_videos_folder_path_dic: dict[str, str] = {}

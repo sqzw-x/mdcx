@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Literal
 
-from mdcx.config.models import Language
+from mdcx.config.enums import Language
 from mdcx.gen.field_enums import CrawlerResultFields
 
 

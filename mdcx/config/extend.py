@@ -1,38 +1,46 @@
-import os
 import re
+from dataclasses import dataclass
+from pathlib import Path
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
+from mdcx.config.models import CleanAction
 from mdcx.manual import ManualConfig
 from mdcx.utils import convert_path, nfd2c, split_path
 from mdcx.utils.path import get_path
 
 
-def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str, str]:
+@dataclass
+class MoviePathSetting:
+    """路径设置"""
+
+    movie_path: str  # 电影路径
+    success_folder: str  # 成功目录
+    failed_folder: str  # 失败目录
+    escape_folder_list: list[str]  # 排除目录列表
+    extrafanart_folder: str  # 剧照副本目录
+    softlink_path: str  # 软链接路径
+
+
+def get_movie_path_setting(file_path="") -> MoviePathSetting:
     # 先把'\'转成'/'以便判断是路径还是目录
-    movie_path = manager.config_v1.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
+    movie_path = manager.config.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
     if movie_path == "":  # 未设置为空时，使用用户数据目录
         movie_path = manager.data_folder
     movie_path = nfd2c(movie_path)
     end_folder_name = split_path(movie_path)[1]
     # 用户设置的软链接输出目录
-    softlink_path = manager.config_v1.softlink_path.replace("\\", "/").replace("end_folder_name", end_folder_name)
+    softlink_path = manager.config.softlink_path.replace("\\", "/").replace("end_folder_name", end_folder_name)
     # 用户设置的成功输出目录
-    success_folder = manager.config_v1.success_output_folder.replace("\\", "/").replace(
-        "end_folder_name", end_folder_name
-    )
+    success_folder = manager.config.success_output_folder.replace("\\", "/").replace("end_folder_name", end_folder_name)
     # 用户设置的失败输出目录
-    failed_folder = manager.config_v1.failed_output_folder.replace("\\", "/").replace(
-        "end_folder_name", end_folder_name
-    )
+    failed_folder = manager.config.failed_output_folder.replace("\\", "/").replace("end_folder_name", end_folder_name)
     # 用户设置的排除目录
-    escape_folder_list = (
-        manager.config_v1.folders.replace("\\", "/")
-        .replace("end_folder_name", end_folder_name)
-        .replace("，", ",")
-        .split(",")
-    )
+    escape_folder_list = [
+        f.replace("\\", "/").replace("end_folder_name", end_folder_name) for f in manager.config.folders
+    ]
     # 用户设置的剧照副本目录
-    extrafanart_folder = manager.config_v1.extrafanart_folder.replace("\\", "/")
+    extrafanart_folder = manager.config.extrafanart_folder.replace("\\", "/")
 
     # 获取路径
     softlink_path = convert_path(get_path(movie_path, softlink_path))
@@ -56,7 +64,7 @@ def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str,
 
     if file_path:
         temp_path = movie_path
-        if manager.config_v1.scrape_softlink_path:
+        if manager.config.scrape_softlink_path:
             temp_path = softlink_path
         if "first_folder_name" in success_folder or "first_folder_name" in failed_folder:
             first_folder_name = re.findall(r"^/?([^/]+)/", file_path[len(temp_path) :].replace("\\", "/"))
@@ -64,51 +72,49 @@ def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str,
             success_folder = success_folder.replace("first_folder_name", first_folder_name)
             failed_folder = failed_folder.replace("first_folder_name", first_folder_name)
 
-    return (
-        convert_path(movie_path),
-        success_folder,
-        failed_folder,
-        escape_folder_new_list,
-        extrafanart_folder,
-        softlink_path,
+    return MoviePathSetting(
+        movie_path=convert_path(movie_path),
+        success_folder=success_folder,
+        failed_folder=failed_folder,
+        escape_folder_list=escape_folder_new_list,
+        extrafanart_folder=extrafanart_folder,
+        softlink_path=softlink_path,
     )
 
 
-def need_clean(file_path: str, file_name: str, file_ext: str) -> bool:
+def need_clean(file_path: Path, file_name: str, file_ext: str) -> bool:
     # 判断文件是否需清理
-    if not manager.config_v1.can_clean:
+    if not manager.computed.can_clean:
         return False
 
     # 不清理的扩展名
-    if file_ext in manager.config_v1.clean_ignore_ext_list:
+    if CleanAction.CLEAN_IGNORE_EXT in manager.config.clean_enable and file_ext in manager.config.clean_ignore_ext:
         return False
 
     # 不清理的文件名包含
-    for each in manager.config_v1.clean_ignore_contains_list:
-        if each in file_name:
-            return False
+    if CleanAction.CLEAN_IGNORE_CONTAINS in manager.config.clean_enable:
+        for each in manager.config.clean_ignore_contains:
+            if each in file_name:
+                return False
 
     # 清理的扩展名
-    if file_ext in manager.config_v1.clean_ext_list:
+    if CleanAction.CLEAN_EXT in manager.config.clean_enable and file_ext in manager.config.clean_ext:
         return True
 
     # 清理的文件名等于
-    if file_name in manager.config_v1.clean_name_list:
+    if CleanAction.CLEAN_NAME in manager.config.clean_enable and file_name in manager.config.clean_name:
         return True
 
     # 清理的文件名包含
-    for each in manager.config_v1.clean_contains_list:
-        if each in file_name:
-            return True
+    if CleanAction.CLEAN_CONTAINS in manager.config.clean_enable:
+        for each in manager.config.clean_contains:
+            if each in file_name:
+                return True
 
     # 清理的文件大小<=(KB)
-    if os.path.islink(file_path):
-        file_path = os.readlink(file_path)
-    if manager.config_v1.clean_size_list is not None:
+    if CleanAction.CLEAN_SIZE in manager.config.clean_enable:
         try:  # 路径太长时，此处会报错 FileNotFoundError: [WinError 3] 系统找不到指定的路径。
-            stat_result = os.stat(file_path)
-            if stat_result.st_size <= manager.config_v1.clean_size_list * 1024:
-                return True
+            return file_path.stat().st_size <= manager.config.clean_size * 1024
         except Exception:
             pass
     return False
@@ -123,10 +129,9 @@ def deal_url(url: str) -> tuple[str | None, str]:
             return site.value, url
 
     # 自定义的网址
-    for web_name in ManualConfig.SUPPORTED_WEBSITES:
-        if hasattr(manager.config_v1, web_name + "_website"):
-            web_url = getattr(manager.config_v1, web_name + "_website")
-            if web_url in url:
-                return web_name, url
+    for site in Website:
+        if (r := manager.config.site_configs.get(site)) and r.custom_url:
+            if str(r.custom_url) in url:
+                return site.value, url
 
     return None, url

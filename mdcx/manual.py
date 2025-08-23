@@ -1,4 +1,4 @@
-from mdcx.config.models import Website
+from mdcx.config.enums import Website
 from mdcx.gen.field_enums import CrawlerResultFields
 
 
@@ -33,7 +33,7 @@ class ManualConfig:
         "tag": CrawlerResultFields.TAGS,
     }
     # 需聚合的爬虫字段. 此列表的顺序决定了日志顺序.
-    REDUCED_FIELDS = [
+    REDUCED_FIELDS = (
         CrawlerResultFields.TITLE,
         CrawlerResultFields.ORIGINALTITLE,
         CrawlerResultFields.OUTLINE,
@@ -53,8 +53,7 @@ class ManualConfig:
         CrawlerResultFields.PUBLISHER,
         CrawlerResultFields.TRAILER,
         CrawlerResultFields.WANTED,
-        CrawlerResultFields.YEAR,
-    ]
+    )
     OUMEI_NAME = {
         "wgp": "WhenGirlsPlay",
         "18og": "18OnlyGirls",

@@ -66,7 +66,7 @@ def set_style(self: "MyMAinWindow"):
             background-color: rgba(246, 246, 246, 0);
             border-color: rgba(246, 246, 246, 0);
         }
-        QWidget#scrollAreaWidgetContents_9{
+        QWidget#scrollAreaWidgetContents_gongju{
             background-color: rgba(246, 246, 246, 0);
             border-color: rgba(246, 246, 246, 255);
         }
@@ -134,7 +134,7 @@ def set_style(self: "MyMAinWindow"):
             background-color:#2080F7;
             border-radius: 1px;
         }
-        QWidget#tab1,#scrollAreaWidgetContents,#tab2,#scrollAreaWidgetContents_2,#tab3,#scrollAreaWidgetContents_3,#tab4,#scrollAreaWidgetContents_4,#tab5,#scrollAreaWidgetContents_5,#tab,#tab_2,#tab_3,#tab_4,#tab_5,#tab_6,#tab_7,#scrollAreaWidgetContents_6,#scrollAreaWidgetContents_7,#scrollAreaWidgetContents_8,#scrollAreaWidgetContents_10,#scrollAreaWidgetContents_11,#scrollAreaWidgetContents_12,#scrollAreaWidgetContents_13{
+        QWidget#tab1,#tab2,#tab3,#tab4,#tab5,#tab,#tab_2,#tab_3,#tab_4,#tab_5,#tab_6,#tab_7,#scrollAreaWidgetContents_guaxiaomulu,#scrollAreaWidgetContents_guaxiaomoshi,#scrollAreaWidgetContents_guaxiaowangzhan,#scrollAreaWidgetContents_xiazai,#scrollAreaWidgetContents_mingming,#scrollAreaWidgetContents_fanyi,#scrollAreaWidgetContents_zimu,#scrollAreaWidgetContents_shuiyin,#scrollAreaWidgetContents_nfo,#scrollAreaWidgetContents_yanyuan,#scrollAreaWidgetContents_wangluo,#scrollAreaWidgetContents_gaoji{
             background-color: rgba(255, 255, 255, 255);
             border-color: rgba(246, 246, 246, 255);
         }
@@ -219,7 +219,7 @@ def set_style(self: "MyMAinWindow"):
             border: 1px solid rgba(20,20,20,50);
             border-radius: 10px;
        }}
-        QWidget#scrollAreaWidgetContents_nfo{{
+        QWidget#scrollAreaWidgetContents_nfo_editor{{
             background-color: rgba(240, 245, 240, 240);
             border: 0px solid rgba(0,0,0,150);
         }}
@@ -370,7 +370,7 @@ def set_dark_style(self: "MyMAinWindow"):
             background-color: rgba(246, 246, 246, 0);
             border-color: rgba(246, 246, 246, 0);
         }
-        QWidget#scrollAreaWidgetContents_9{
+        QWidget#scrollAreaWidgetContents_gongju{
             background-color: rgba(246, 246, 246, 0);
             border-color: rgba(246, 246, 246, 255);
         }
@@ -428,7 +428,7 @@ def set_dark_style(self: "MyMAinWindow"):
             background-color:#2080F7;
             border-radius: 1px;
         }
-        QWidget#tab1,#scrollAreaWidgetContents,#tab2,#scrollAreaWidgetContents_2,#tab3,#scrollAreaWidgetContents_3,#tab4,#scrollAreaWidgetContents_4,#tab5,#scrollAreaWidgetContents_5,#tab,#tab_2,#tab_3,#tab_4,#tab_5,#tab_6,#tab_7,#scrollAreaWidgetContents_6,#scrollAreaWidgetContents_7,#scrollAreaWidgetContents_8,#scrollAreaWidgetContents_10,#scrollAreaWidgetContents_11,#scrollAreaWidgetContents_12,#scrollAreaWidgetContents_13{
+        QWidget#tab1,#tab2,#tab3,#tab4,#tab5,#tab,#tab_2,#tab_3,#tab_4,#tab_5,#tab_6,#tab_7,#scrollAreaWidgetContents_guaxiaomulu,#scrollAreaWidgetContents_guaxiaomoshi,#scrollAreaWidgetContents_guaxiaowangzhan,#scrollAreaWidgetContents_xiazai,#scrollAreaWidgetContents_mingming,#scrollAreaWidgetContents_fanyi,#scrollAreaWidgetContents_zimu,#scrollAreaWidgetContents_shuiyin,#scrollAreaWidgetContents_nfo,#scrollAreaWidgetContents_yanyuan,#scrollAreaWidgetContents_wangluo,#scrollAreaWidgetContents_gaoji{
             background-color: #18222D;
             border-color: rgba(246, 246, 246, 0);
         }
@@ -514,7 +514,7 @@ def set_dark_style(self: "MyMAinWindow"):
             border: 1px solid rgba(240,240,240,150);
             border-radius: 10px;
        }}
-        QWidget#scrollAreaWidgetContents_nfo{{
+        QWidget#scrollAreaWidgetContents_nfo_editor{{
             background-color: #18222D;
             border: 0px solid rgba(0,0,0,150);
         }}

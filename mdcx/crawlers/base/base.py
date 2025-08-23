@@ -1,9 +1,11 @@
 import time
 import traceback
 from abc import ABC, abstractmethod
+from asyncio import Lock
 from typing import TYPE_CHECKING, Any, Never
 
 from parsel import Selector
+from patchright.async_api import Browser
 
 from mdcx.config.models import Website
 from mdcx.models.types import CrawlerInput, CrawlerResponse, CrawlerResult
@@ -18,16 +20,32 @@ class GenericBaseCrawler[T: Context = Context](ABC):
     """
     爬虫基类. 所有具体爬虫均应继承此类并实现其抽象方法.
 
-    Crawler 本身应该是无状态的, 所有与单次爬取相关的数据均应存储在 `Context` 中, 可在所有方法中通过 `ctx` 参数访问.
+    Crawler 实例的生命周期是一次刮削任务, 即刮削一批文件. 此次任务内对同一网站的请求将使用同一实例.
+    所有与单次爬取相关的数据均应存储在 `Context` 中, 可在所有方法中通过 `ctx` 参数访问.
 
     `Context` 是默认类型, 必要时可实现子类并通过泛型参数 T 指定.
 
     由于爬取逻辑因网站而异, 在最极端情况下可以重写 `_run` 方法以完全自定义爬取流程.
     """
 
-    def __init__(self, client: "AsyncWebClient", base_url: str = ""):
+    def __init__(self, client: "AsyncWebClient", base_url: str = "", browser: Browser | None = None):
+        """
+        初始化爬虫实例.
+
+        Args:
+            client (AsyncWebClient): 异步 HTTP 客户端, 用于发送请求.
+            base_url (str, optional): 基础 URL, 用于支持自定义 URL. 不提供则使用默认值.
+            browser (_type_, optional): 浏览器实例, 如果提供则某些请求可以改用浏览器进行处理.
+        """
         self.async_client = client
         self.base_url: str = base_url or self.base_url_()
+        self.browser = browser
+        """此实例会被多个 Crawler 复用, 其生命周期由调用方负责管理. 但创建的 Context 由每个 Crawler 独立管理."""
+        self.lock = Lock()
+
+    async def close(self):
+        """释放资源, 如关闭浏览器上下文等."""
+        return
 
     @classmethod
     @abstractmethod
@@ -38,7 +56,7 @@ class GenericBaseCrawler[T: Context = Context](ABC):
     @classmethod
     @abstractmethod
     def base_url_(cls) -> str:
-        """支持自定义 URL 的爬虫在不提供自定义值时的默认值. 可以通过 self.base_url 访问实际值."""
+        """默认 URL, 结尾无斜杠. 可以通过 self.base_url 访问实际值."""
         raise NotImplementedError
 
     @abstractmethod
@@ -162,10 +180,9 @@ class GenericBaseCrawler[T: Context = Context](ABC):
         """
         return res
 
-    async def _fetch_search(self, ctx: T, url: str) -> tuple[str | None, str]:
+    async def _fetch_search(self, ctx: T, url: str, use_browser: bool | None = False) -> tuple[str | None, str]:
         """
         获取搜索页. 此方法不应抛出异常.
-
         """
         return await self.async_client.get_text(url, headers=self._get_headers(ctx), cookies=self._get_cookies(ctx))
 

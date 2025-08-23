@@ -2,13 +2,38 @@ import os
 import platform
 import re
 import traceback
+from contextlib import suppress
+from datetime import timedelta
 from typing import TYPE_CHECKING
 
+from pydantic import HttpUrl, ValidationError
 from PyQt5.QtCore import Qt
 
+from mdcx.config.enums import (
+    CDChar,
+    CleanAction,
+    DownloadableFile,
+    EmbyAction,
+    FieldRule,
+    HDPicSource,
+    KeepableFile,
+    Language,
+    MarkType,
+    NfoInclude,
+    NoEscape,
+    OutlineShow,
+    ReadMode,
+    SuffixSort,
+    Switch,
+    TagInclude,
+    Translator,
+    Website,
+)
 from mdcx.config.extend import get_movie_path_setting
 from mdcx.config.manager import manager
+from mdcx.config.models import SiteConfig, str_to_list
 from mdcx.controllers.main_window.bind_utils import get_checkbox, get_checkboxes, get_radio_buttons
+from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.models.flags import Flags
 from mdcx.models.tools.actress_db import ActressDB
 from mdcx.signals import signal_qt
@@ -22,281 +47,310 @@ def save_config(self: "MyMAinWindow"):
     """
     从 UI 获取配置并保存到 config 对象中, 并更新配置文件
     """
+    field_mapping = {
+        "title": CrawlerResultFields.TITLE,
+        "outline": CrawlerResultFields.OUTLINE,
+        "actor": CrawlerResultFields.ACTORS,
+        "tag": CrawlerResultFields.TAGS,
+        "series": CrawlerResultFields.SERIES,
+        "studio": CrawlerResultFields.STUDIO,
+        "publisher": CrawlerResultFields.PUBLISHER,
+        "director": CrawlerResultFields.DIRECTORS,
+        "poster": CrawlerResultFields.POSTER,
+        "thumb": CrawlerResultFields.THUMB,
+        "extrafanart": CrawlerResultFields.EXTRAFANART,
+        "score": CrawlerResultFields.SCORE,
+        "release": CrawlerResultFields.RELEASE,
+        "runtime": CrawlerResultFields.RUNTIME,
+        "trailer": CrawlerResultFields.TRAILER,
+        "wanted": CrawlerResultFields.WANTED,
+    }
+
     # region media & escape
-    manager.config_v1.media_path = self.Ui.lineEdit_movie_path.text()  # 待刮削目录
-    manager.config_v1.softlink_path = self.Ui.lineEdit_movie_softlink_path.text()  # 软链接目录目录
-    manager.config_v1.success_output_folder = self.Ui.lineEdit_success.text()  # 成功输出目录
-    manager.config_v1.failed_output_folder = self.Ui.lineEdit_fail.text()  # 失败输出目录
-    manager.config_v1.extrafanart_folder = self.Ui.lineEdit_extrafanart_dir.text().strip()  # 剧照目录
-    manager.config_v1.media_type = self.Ui.lineEdit_movie_type.text().lower()  # 视频格式
-    manager.config_v1.sub_type = self.Ui.lineEdit_sub_type.text()  # 字幕格式
-    manager.config_v1.folders = self.Ui.lineEdit_escape_dir.text()  # 排除文件夹
-    manager.config_v1.string = self.Ui.lineEdit_escape_string.text()  # 过滤字符
-    manager.config_v1.scrape_softlink_path = get_checkbox(self.Ui.checkBox_scrape_softlink_path)
+    manager.config.media_path = self.Ui.lineEdit_movie_path.text()  # 待刮削目录
+    manager.config.softlink_path = self.Ui.lineEdit_movie_softlink_path.text()  # 软链接目录目录
+    manager.config.success_output_folder = self.Ui.lineEdit_success.text()  # 成功输出目录
+    manager.config.failed_output_folder = self.Ui.lineEdit_fail.text()  # 失败输出目录
+    manager.config.extrafanart_folder = self.Ui.lineEdit_extrafanart_dir.text().strip()  # 剧照目录
+    # 对于 media_type 和 sub_type，新配置中是列表类型，需要转换
+    media_type_text = self.Ui.lineEdit_movie_type.text().lower()
+    manager.config.media_type = [ext.strip() for ext in media_type_text.split("|") if ext.strip()]
+    sub_type_text = self.Ui.lineEdit_sub_type.text()
+    manager.config.sub_type = [ext.strip() for ext in sub_type_text.split("|") if ext.strip()]
+    # folders 和 string 在新配置中也是列表类型
+    folders_text = self.Ui.lineEdit_escape_dir.text()
+    manager.config.folders = [folder.strip() for folder in folders_text.split(",") if folder.strip()]
+    string_text = self.Ui.lineEdit_escape_string.text()
+    manager.config.string = [s.strip() for s in string_text.split(",") if s.strip()]
+    manager.config.scrape_softlink_path = get_checkbox(self.Ui.checkBox_scrape_softlink_path)
 
     try:  # 过滤小文件大小
-        manager.config_v1.file_size = float(self.Ui.lineEdit_escape_size.text())
+        manager.config.file_size = float(self.Ui.lineEdit_escape_size.text())
     except Exception:
-        manager.config_v1.file_size = 0.0
-    manager.config_v1.no_escape = get_checkboxes(
-        (self.Ui.checkBox_no_escape_file, "no_skip_small_file"),
-        (self.Ui.checkBox_no_escape_dir, "folder"),
-        (self.Ui.checkBox_skip_success_file, "skip_success_file"),
-        (self.Ui.checkBox_record_success_file, "record_success_file"),
-        (self.Ui.checkBox_check_symlink, "check_symlink"),
-        (self.Ui.checkBox_check_symlink_definition, "symlink_definition"),
+        manager.config.file_size = 0.0
+    manager.config.no_escape = get_checkboxes(
+        (self.Ui.checkBox_no_escape_file, NoEscape.NO_SKIP_SMALL_FILE),
+        (self.Ui.checkBox_no_escape_dir, NoEscape.FOLDER),
+        (self.Ui.checkBox_skip_success_file, NoEscape.SKIP_SUCCESS_FILE),
+        (self.Ui.checkBox_record_success_file, NoEscape.RECORD_SUCCESS_FILE),
+        (self.Ui.checkBox_check_symlink, NoEscape.CHECK_SYMLINK),
+        (self.Ui.checkBox_check_symlink_definition, NoEscape.SYMLINK_DEFINITION),
     )
     # endregion
 
     # region clean
-    manager.config_v1.clean_ext = self.Ui.lineEdit_clean_file_ext.text().strip(" |｜")  # 清理扩展名
-    manager.config_v1.clean_name = self.Ui.lineEdit_clean_file_name.text().strip(" |｜")  # 清理文件名
-    manager.config_v1.clean_contains = self.Ui.lineEdit_clean_file_contains.text().strip(" |｜")  # 清理文件名包含
+    # 清理相关字段在新配置中是列表类型
+    clean_ext_text = self.Ui.lineEdit_clean_file_ext.text().strip(" |｜")
+    manager.config.clean_ext = [ext.strip() for ext in clean_ext_text.split("|") if ext.strip()]
+    clean_name_text = self.Ui.lineEdit_clean_file_name.text().strip(" |｜")
+    manager.config.clean_name = [name.strip() for name in clean_name_text.split("|") if name.strip()]
+    clean_contains_text = self.Ui.lineEdit_clean_file_contains.text().strip(" |｜")
+    manager.config.clean_contains = [
+        contains.strip() for contains in clean_contains_text.split("|") if contains.strip()
+    ]
     try:
-        manager.config_v1.clean_size = float(
-            self.Ui.lineEdit_clean_file_size.text().strip(" |｜")
-        )  # 清理文件大小小于等于
+        manager.config.clean_size = float(self.Ui.lineEdit_clean_file_size.text().strip(" |｜"))  # 清理文件大小小于等于
     except Exception:
-        manager.config_v1.clean_size = 0.0
-    manager.config_v1.clean_ignore_ext = self.Ui.lineEdit_clean_excluded_file_ext.text().strip(" |｜")  # 不清理扩展名
-    manager.config_v1.clean_ignore_contains = self.Ui.lineEdit_clean_excluded_file_contains.text().strip(
-        " |｜"
-    )  # 不清理文件名包含
-    manager.config_v1.clean_enable = get_checkboxes(
-        (self.Ui.checkBox_clean_file_ext, "clean_ext"),
-        (self.Ui.checkBox_clean_file_name, "clean_name"),
-        (self.Ui.checkBox_clean_file_contains, "clean_contains"),
-        (self.Ui.checkBox_clean_file_size, "clean_size"),
-        (self.Ui.checkBox_clean_excluded_file_ext, "clean_ignore_ext"),
-        (self.Ui.checkBox_clean_excluded_file_contains, "clean_ignore_contains"),
-        (self.Ui.checkBox_i_understand_clean, "i_know"),
-        (self.Ui.checkBox_i_agree_clean, "i_agree"),
-        (self.Ui.checkBox_auto_clean, "auto_clean"),
+        manager.config.clean_size = 0.0
+    clean_ignore_ext_text = self.Ui.lineEdit_clean_excluded_file_ext.text().strip(" |｜")
+    manager.config.clean_ignore_ext = [ext.strip() for ext in clean_ignore_ext_text.split("|") if ext.strip()]
+    clean_ignore_contains_text = self.Ui.lineEdit_clean_excluded_file_contains.text().strip(" |｜")
+    manager.config.clean_ignore_contains = [
+        contains.strip() for contains in clean_ignore_contains_text.split("|") if contains.strip()
+    ]
+    manager.config.clean_enable = get_checkboxes(
+        (self.Ui.checkBox_clean_file_ext, CleanAction.CLEAN_EXT),
+        (self.Ui.checkBox_clean_file_name, CleanAction.CLEAN_NAME),
+        (self.Ui.checkBox_clean_file_contains, CleanAction.CLEAN_CONTAINS),
+        (self.Ui.checkBox_clean_file_size, CleanAction.CLEAN_SIZE),
+        (self.Ui.checkBox_clean_excluded_file_ext, CleanAction.CLEAN_IGNORE_EXT),
+        (self.Ui.checkBox_clean_excluded_file_contains, CleanAction.CLEAN_IGNORE_CONTAINS),
+        (self.Ui.checkBox_i_understand_clean, CleanAction.I_KNOW),
+        (self.Ui.checkBox_i_agree_clean, CleanAction.I_AGREE),
+        (self.Ui.checkBox_auto_clean, CleanAction.AUTO_CLEAN),
     )
     # endregion
 
     # region website
-    manager.config_v1.website_single = self.Ui.comboBox_website_all.currentText()  # 指定单个网站
-    manager.config_v1.website_youma = self.Ui.lineEdit_website_youma.text()  # 有码番号刮削网站
-    manager.config_v1.website_wuma = self.Ui.lineEdit_website_wuma.text()  # 无码番号刮削网站
-    manager.config_v1.website_suren = self.Ui.lineEdit_website_suren.text()  # 素人番号刮削网站
-    manager.config_v1.website_fc2 = self.Ui.lineEdit_website_fc2.text()  # FC2番号刮削网站
-    manager.config_v1.website_oumei = self.Ui.lineEdit_website_oumei.text()  # 欧美番号刮削网站
-    manager.config_v1.website_guochan = self.Ui.lineEdit_website_guochan.text()  # 国产番号刮削网站
+    # 网站相关字段需要转换为枚举或列表
+    website_single_text = self.Ui.comboBox_website_all.currentText()
+    try:
+        manager.config.website_single = Website(website_single_text)
+    except ValueError:
+        manager.config.website_single = Website.AIRAV_CC  # 默认值
 
-    manager.config_v1.scrape_like = get_radio_buttons(
+    def parse_website_list(text: str) -> set[Website]:
+        websites = []
+        for site in str_to_list(text, ","):
+            if site in Website:
+                websites.append(Website(site))
+        return set(dict.fromkeys(websites))
+
+    manager.config.website_youma = parse_website_list(self.Ui.lineEdit_website_youma.text())
+    manager.config.website_wuma = parse_website_list(self.Ui.lineEdit_website_wuma.text())
+    manager.config.website_suren = parse_website_list(self.Ui.lineEdit_website_suren.text())
+    manager.config.website_fc2 = parse_website_list(self.Ui.lineEdit_website_fc2.text())
+    manager.config.website_oumei = parse_website_list(self.Ui.lineEdit_website_oumei.text())
+    manager.config.website_guochan = parse_website_list(self.Ui.lineEdit_website_guochan.text())
+
+    manager.config.scrape_like = get_radio_buttons(
         (self.Ui.radioButton_scrape_speed, "speed"), (self.Ui.radioButton_scrape_info, "info"), default="single"
     )
 
-    manager.config_v1.website_set = get_checkboxes(
-        (self.Ui.checkBox_use_official_data, "official"),
+    # 标题字段配置
+    manager.config.set_field_sites(field_mapping["title"], self.Ui.lineEdit_title_website.text())
+    title_language = get_radio_buttons(
+        (self.Ui.radioButton_title_zh_cn, Language.ZH_CN),
+        (self.Ui.radioButton_title_zh_tw, Language.ZH_TW),
+        default=Language.JP,
     )
-    manager.config_v1.title_website = self.Ui.lineEdit_title_website.text()  # 标题字段网站优先级
-    manager.config_v1.title_zh_website = self.Ui.lineEdit_title_zh_website.text()  # 中文标题字段网站优先级
-    manager.config_v1.title_website_exclude = self.Ui.lineEdit_title_website_exclude.text()  # 标题字段排除网站
-    manager.config_v1.title_language = get_radio_buttons(
-        (self.Ui.radioButton_title_zh_cn, "zh_cn"), (self.Ui.radioButton_title_zh_tw, "zh_tw"), default="jp"
-    )
-    manager.config_v1.title_sehua = get_checkbox(self.Ui.checkBox_title_sehua)
-    manager.config_v1.title_yesjav = get_checkbox(self.Ui.checkBox_title_yesjav)
-    manager.config_v1.title_translate = get_checkbox(self.Ui.checkBox_title_translate)
-    manager.config_v1.title_sehua_zh = get_checkbox(self.Ui.checkBox_title_sehua_2)
+    manager.config.set_field_language(field_mapping["title"], title_language)
+    manager.config.set_field_translate(field_mapping["title"], get_checkbox(self.Ui.checkBox_title_translate))
+    # originaltitle
+    manager.config.set_field_sites(CrawlerResultFields.ORIGINALTITLE, self.Ui.lineEdit_originaltitle_website.text())
 
-    manager.config_v1.outline_website = self.Ui.lineEdit_outline_website.text()  # 简介字段网站优先级
-    manager.config_v1.outline_zh_website = self.Ui.lineEdit_outline_zh_website.text()  # 中文简介字段网站优先级
-    manager.config_v1.outline_website_exclude = self.Ui.lineEdit_outline_website_exclude.text()  # 简介字段排除网站
-    manager.config_v1.outline_language = get_radio_buttons(
-        (self.Ui.radioButton_outline_zh_cn, "zh_cn"), (self.Ui.radioButton_outline_zh_tw, "zh_tw"), default="jp"
-    )
-    manager.config_v1.outline_translate = get_checkbox(self.Ui.checkBox_outline_translate)
-    manager.config_v1.outline_show = get_checkboxes(
-        (self.Ui.checkBox_show_translate_from, "show_from"),
-        (self.Ui.radioButton_trans_show_zh_jp, "show_zh_jp"),
-        (self.Ui.radioButton_trans_show_jp_zh, "show_jp_zh"),
-    )
+    manager.config.title_sehua = get_checkbox(self.Ui.checkBox_title_sehua)
+    manager.config.title_yesjav = get_checkbox(self.Ui.checkBox_title_yesjav)
+    manager.config.title_sehua_zh = get_checkbox(self.Ui.checkBox_title_sehua_2)
 
-    manager.config_v1.actor_website = self.Ui.lineEdit_actor_website.text()  # 演员字段网站优先级
-    manager.config_v1.actor_website_exclude = self.Ui.lineEdit_actor_website_exclude.text()  # 演员字段排除网站
-    manager.config_v1.actor_language = get_radio_buttons(
-        (self.Ui.radioButton_actor_zh_cn, "zh_cn"), (self.Ui.radioButton_actor_zh_tw, "zh_tw"), default="jp"
+    # 简介字段配置
+    manager.config.set_field_sites(field_mapping["outline"], self.Ui.lineEdit_outline_website.text())
+    outline_language = get_radio_buttons(
+        (self.Ui.radioButton_outline_zh_cn, Language.ZH_CN),
+        (self.Ui.radioButton_outline_zh_tw, Language.ZH_TW),
+        default=Language.JP,
     )
-    manager.config_v1.actor_realname = get_checkbox(self.Ui.checkBox_actor_realname)
-    manager.config_v1.actor_translate = get_checkbox(self.Ui.checkBox_actor_translate)
-
-    manager.config_v1.tag_website = self.Ui.lineEdit_tag_website.text()  # 标签字段网站优先级
-    manager.config_v1.tag_website_exclude = self.Ui.lineEdit_tag_website_exclude.text()  # 标签字段排除网站
-    manager.config_v1.tag_language = get_radio_buttons(
-        (self.Ui.radioButton_tag_zh_cn, "zh_cn"), (self.Ui.radioButton_tag_zh_tw, "zh_tw"), default="jp"
+    manager.config.set_field_language(field_mapping["outline"], outline_language)
+    manager.config.set_field_translate(field_mapping["outline"], get_checkbox(self.Ui.checkBox_outline_translate))
+    manager.config.outline_format = get_checkboxes(
+        (self.Ui.checkBox_show_translate_from, OutlineShow.SHOW_FROM),
+        (self.Ui.radioButton_trans_show_zh_jp, OutlineShow.SHOW_ZH_JP),
+        (self.Ui.radioButton_trans_show_jp_zh, OutlineShow.SHOW_JP_ZH),
     )
-    manager.config_v1.tag_translate = get_checkbox(self.Ui.checkBox_tag_translate)
+    # originalplot
+    manager.config.set_field_sites(CrawlerResultFields.ORIGINALPLOT, self.Ui.lineEdit_originalplot_website.text())
 
-    manager.config_v1.tag_include = get_checkboxes(
-        (self.Ui.checkBox_tag_actor, "actor"),
-        (self.Ui.checkBox_tag_letters, "letters"),
-        (self.Ui.checkBox_tag_series, "series"),
-        (self.Ui.checkBox_tag_studio, "studio"),
-        (self.Ui.checkBox_tag_publisher, "publisher"),
-        (self.Ui.checkBox_tag_cnword, "cnword"),
-        (self.Ui.checkBox_tag_mosaic, "mosaic"),
-        (self.Ui.checkBox_tag_definition, "definition"),
+    # 演员字段配置
+    manager.config.set_field_sites(field_mapping["actor"], self.Ui.lineEdit_actors_website.text())
+    actor_language = get_radio_buttons(
+        (self.Ui.radioButton_actor_zh_cn, Language.ZH_CN),
+        (self.Ui.radioButton_actor_zh_tw, Language.ZH_TW),
+        default=Language.JP,
     )
+    manager.config.set_field_language(field_mapping["actor"], actor_language)
+    manager.config.set_field_translate(field_mapping["actor"], get_checkbox(self.Ui.checkBox_actor_translate))
+    manager.config.actor_realname = get_checkbox(self.Ui.checkBox_actor_realname)
+    # all_actors
+    manager.config.set_field_sites(CrawlerResultFields.ALL_ACTORS, self.Ui.lineEdit_all_actors_website.text())
+    manager.config.set_field_language(CrawlerResultFields.ALL_ACTORS, actor_language)
+    manager.config.set_field_translate(CrawlerResultFields.ALL_ACTORS, get_checkbox(self.Ui.checkBox_actor_translate))
 
-    manager.config_v1.series_website = self.Ui.lineEdit_series_website.text()  # 系列字段网站优先级
-    manager.config_v1.series_website_exclude = self.Ui.lineEdit_series_website_exclude.text()  # 系列字段排除网站
-    manager.config_v1.series_language = get_radio_buttons(
-        (self.Ui.radioButton_series_zh_cn, "zh_cn"),
-        (self.Ui.radioButton_series_zh_tw, "zh_tw"),
-        default="jp",
+    # 标签字段配置
+    manager.config.set_field_sites(field_mapping["tag"], self.Ui.lineEdit_tags_website.text())
+    tag_language = get_radio_buttons(
+        (self.Ui.radioButton_tag_zh_cn, Language.ZH_CN),
+        (self.Ui.radioButton_tag_zh_tw, Language.ZH_TW),
+        default=Language.JP,
     )
-    manager.config_v1.series_translate = get_checkbox(self.Ui.checkBox_series_translate)
+    manager.config.set_field_language(field_mapping["tag"], tag_language)
+    manager.config.set_field_translate(field_mapping["tag"], get_checkbox(self.Ui.checkBox_tag_translate))
 
-    manager.config_v1.studio_website = self.Ui.lineEdit_studio_website.text()  # 片商字段网站优先级
-    manager.config_v1.studio_website_exclude = self.Ui.lineEdit_studio_website_exclude.text()  # 片商字段排除网站
-    manager.config_v1.studio_language = get_radio_buttons(
-        (self.Ui.radioButton_studio_zh_cn, "zh_cn"),
-        (self.Ui.radioButton_studio_zh_tw, "zh_tw"),
-        default="jp",
-    )
-    manager.config_v1.studio_translate = get_checkbox(self.Ui.checkBox_studio_translate)
-
-    manager.config_v1.publisher_website = self.Ui.lineEdit_publisher_website.text()  # 发行字段网站优先级
-    manager.config_v1.publisher_website_exclude = self.Ui.lineEdit_publisher_website_exclude.text()  # 发行字段排除网站
-    manager.config_v1.publisher_language = get_radio_buttons(
-        (self.Ui.radioButton_publisher_zh_cn, "zh_cn"),
-        (self.Ui.radioButton_publisher_zh_tw, "zh_tw"),
-        default="jp",
-    )
-    manager.config_v1.publisher_translate = get_checkbox(self.Ui.checkBox_publisher_translate)
-
-    manager.config_v1.director_website = self.Ui.lineEdit_director_website.text()  # 导演字段网站优先级
-    manager.config_v1.director_website_exclude = self.Ui.lineEdit_director_website_exclude.text()  # 导演字段排除网站
-    manager.config_v1.director_language = get_radio_buttons(
-        (self.Ui.radioButton_director_zh_cn, "zh_cn"), (self.Ui.radioButton_director_zh_tw, "zh_tw"), default="jp"
-    )
-    manager.config_v1.director_translate = get_checkbox(self.Ui.checkBox_director_translate)
-
-    manager.config_v1.poster_website = self.Ui.lineEdit_poster_website.text()  # 封面字段网站优先级
-    manager.config_v1.poster_website_exclude = self.Ui.lineEdit_poster_website_exclude.text()  # 封面字段排除网站
-    manager.config_v1.thumb_website = self.Ui.lineEdit_thumb_website.text()  # 背景字段网站优先级
-    manager.config_v1.thumb_website_exclude = self.Ui.lineEdit_thumb_website_exclude.text()  # 背景字段排除网站
-    manager.config_v1.extrafanart_website = self.Ui.lineEdit_extrafanart_website.text()  # 剧照字段网站优先级
-    manager.config_v1.extrafanart_website_exclude = (
-        self.Ui.lineEdit_extrafanart_website_exclude.text()
-    )  # 剧照字段排除网站
-    manager.config_v1.score_website = self.Ui.lineEdit_score_website.text()  # 评分字段网站优先级
-    manager.config_v1.score_website_exclude = self.Ui.lineEdit_score_website_exclude.text()  # 评分字段排除网站
-    manager.config_v1.release_website = self.Ui.lineEdit_release_website.text()  # 发行日期字段网站优先级
-    manager.config_v1.release_website_exclude = self.Ui.lineEdit_release_website_exclude.text()  # 发行日期字段排除网站
-    manager.config_v1.runtime_website = self.Ui.lineEdit_runtime_website.text()  # 时长字段网站优先级
-    manager.config_v1.runtime_website_exclude = self.Ui.lineEdit_runtime_website_exclude.text()  # 时长字段排除网站
-    manager.config_v1.trailer_website = self.Ui.lineEdit_trailer_website.text()  # 预告片字段网站优先级
-    manager.config_v1.trailer_website_exclude = self.Ui.lineEdit_trailer_website_exclude.text()  # 预告片字段排除网站
-    manager.config_v1.wanted_website = self.Ui.lineEdit_wanted_website.text()  # 想看人数网站
-    manager.config_v1.nfo_tagline = self.Ui.lineEdit_nfo_tagline.text()  # tagline格式
-    manager.config_v1.nfo_tag_series = self.Ui.lineEdit_nfo_tag_series.text()  # nfo_tag_series 格式
-    manager.config_v1.nfo_tag_studio = self.Ui.lineEdit_nfo_tag_studio.text()  # nfo_tag_studio 格式
-    manager.config_v1.nfo_tag_publisher = self.Ui.lineEdit_nfo_tag_publisher.text()  # nfo_tag_publisher 格式
-    manager.config_v1.nfo_tag_actor = self.Ui.lineEdit_nfo_tag_actor.text()  # nfo_tag_actor 格式
-    manager.config_v1.nfo_tag_actor_contains = self.Ui.lineEdit_nfo_tag_actor_contains.text().strip(
-        " |｜"
-    )  # nfo_tag_actor_contains 格式
-
-    manager.config_v1.whole_fields = get_checkboxes(
-        (self.Ui.radioButton_outline_more, "outline"),
-        (self.Ui.radioButton_actor_more, "actor"),
-        (self.Ui.radioButton_thumb_more, "thumb"),
-        (self.Ui.radioButton_poster_more, "poster"),
-        (self.Ui.radioButton_extrafanart_more, "extrafanart"),
-        (self.Ui.radioButton_trailer_more, "trailer"),
-        (self.Ui.radioButton_release_more, "release"),
-        (self.Ui.radioButton_runtime_more, "runtime"),
-        (self.Ui.radioButton_score_more, "score"),
-        (self.Ui.radioButton_tag_more, "tag"),
-        (self.Ui.radioButton_director_more, "director"),
-        (self.Ui.radioButton_series_more, "series"),
-        (self.Ui.radioButton_studio_more, "studio"),
-        (self.Ui.radioButton_publisher_more, "publisher"),
+    manager.config.nfo_tag_include = get_checkboxes(
+        (self.Ui.checkBox_tag_actor, TagInclude.ACTOR),
+        (self.Ui.checkBox_tag_letters, TagInclude.LETTERS),
+        (self.Ui.checkBox_tag_series, TagInclude.SERIES),
+        (self.Ui.checkBox_tag_studio, TagInclude.STUDIO),
+        (self.Ui.checkBox_tag_publisher, TagInclude.PUBLISHER),
+        (self.Ui.checkBox_tag_cnword, TagInclude.CNWORD),
+        (self.Ui.checkBox_tag_mosaic, TagInclude.MOSAIC),
+        (self.Ui.checkBox_tag_definition, TagInclude.DEFINITION),
     )
 
-    manager.config_v1.none_fields = get_checkboxes(
-        (self.Ui.radioButton_outline_none, "outline"),
-        (self.Ui.radioButton_actor_none, "actor"),
-        (self.Ui.radioButton_thumb_none, "thumb"),
-        (self.Ui.radioButton_poster_none, "poster"),
-        (self.Ui.radioButton_extrafanart_none, "extrafanart"),
-        (self.Ui.radioButton_trailer_none, "trailer"),
-        (self.Ui.radioButton_release_none, "release"),
-        (self.Ui.radioButton_runtime_none, "runtime"),
-        (self.Ui.radioButton_score_none, "score"),
-        (self.Ui.radioButton_tag_none, "tag"),
-        (self.Ui.radioButton_director_none, "director"),
-        (self.Ui.radioButton_series_none, "series"),
-        (self.Ui.radioButton_studio_none, "studio"),
-        (self.Ui.radioButton_publisher_none, "publisher"),
-        (self.Ui.radioButton_wanted_none, "wanted"),
+    # 系列字段配置
+    manager.config.set_field_sites(field_mapping["series"], self.Ui.lineEdit_series_website.text())
+    series_language = get_radio_buttons(
+        (self.Ui.radioButton_series_zh_cn, Language.ZH_CN),
+        (self.Ui.radioButton_series_zh_tw, Language.ZH_TW),
+        default=Language.JP,
     )
+    manager.config.set_field_language(field_mapping["series"], series_language)
+    manager.config.set_field_translate(field_mapping["series"], get_checkbox(self.Ui.checkBox_series_translate))
+
+    # 工作室字段配置
+    manager.config.set_field_sites(field_mapping["studio"], self.Ui.lineEdit_studio_website.text())
+    studio_language = get_radio_buttons(
+        (self.Ui.radioButton_studio_zh_cn, Language.ZH_CN),
+        (self.Ui.radioButton_studio_zh_tw, Language.ZH_TW),
+        default=Language.JP,
+    )
+    manager.config.set_field_language(field_mapping["studio"], studio_language)
+    manager.config.set_field_translate(field_mapping["studio"], get_checkbox(self.Ui.checkBox_studio_translate))
+
+    # 发行商字段配置
+    manager.config.set_field_sites(field_mapping["publisher"], self.Ui.lineEdit_publisher_website.text())
+    publisher_language = get_radio_buttons(
+        (self.Ui.radioButton_publisher_zh_cn, Language.ZH_CN),
+        (self.Ui.radioButton_publisher_zh_tw, Language.ZH_TW),
+        default=Language.JP,
+    )
+    manager.config.set_field_language(field_mapping["publisher"], publisher_language)
+    manager.config.set_field_translate(field_mapping["publisher"], get_checkbox(self.Ui.checkBox_publisher_translate))
+
+    # 导演字段配置
+    manager.config.set_field_sites(field_mapping["director"], self.Ui.lineEdit_directors_website.text())
+    director_language = get_radio_buttons(
+        (self.Ui.radioButton_director_zh_cn, Language.ZH_CN),
+        (self.Ui.radioButton_director_zh_tw, Language.ZH_TW),
+        default=Language.JP,
+    )
+    manager.config.set_field_language(field_mapping["director"], director_language)
+    manager.config.set_field_translate(field_mapping["director"], get_checkbox(self.Ui.checkBox_director_translate))
+
+    # 其他图片和媒体字段配置
+    manager.config.set_field_sites(field_mapping["poster"], self.Ui.lineEdit_poster_website.text())
+    manager.config.set_field_sites(field_mapping["thumb"], self.Ui.lineEdit_thumb_website.text())
+    manager.config.set_field_sites(field_mapping["extrafanart"], self.Ui.lineEdit_extrafanart_website.text())
+    manager.config.set_field_sites(field_mapping["score"], self.Ui.lineEdit_score_website.text())
+    manager.config.set_field_sites(field_mapping["release"], self.Ui.lineEdit_release_website.text())
+    manager.config.set_field_sites(field_mapping["runtime"], self.Ui.lineEdit_runtime_website.text())
+    manager.config.set_field_sites(field_mapping["trailer"], self.Ui.lineEdit_trailer_website.text())
+    manager.config.set_field_sites(field_mapping["wanted"], self.Ui.lineEdit_wanted_website.text())
+    manager.config.nfo_tagline = self.Ui.lineEdit_nfo_tagline.text()  # tagline格式
+    manager.config.nfo_tag_series = self.Ui.lineEdit_nfo_tag_series.text()  # nfo_tag_series 格式
+    manager.config.nfo_tag_studio = self.Ui.lineEdit_nfo_tag_studio.text()  # nfo_tag_studio 格式
+    manager.config.nfo_tag_publisher = self.Ui.lineEdit_nfo_tag_publisher.text()  # nfo_tag_publisher 格式
+    manager.config.nfo_tag_actor = self.Ui.lineEdit_nfo_tag_actor.text()  # nfo_tag_actor 格式
+    nfo_tag_actor_contains_text = self.Ui.lineEdit_nfo_tag_actor_contains.text().strip(" |｜")
+    manager.config.nfo_tag_actor_contains = [
+        item.strip() for item in nfo_tag_actor_contains_text.split("|") if item.strip()
+    ]
+
+    # 注意：whole_fields 和 none_fields 已弃用，不再设置这些字段
+    # 它们的功能已经通过新的字段配置API来实现
 
     # region nfo
-    manager.config_v1.nfo_include_new = get_checkboxes(
-        (self.Ui.checkBox_nfo_sorttitle, "sorttitle"),
-        (self.Ui.checkBox_nfo_originaltitle, "originaltitle"),
-        (self.Ui.checkBox_nfo_title_cd, "title_cd"),
-        (self.Ui.checkBox_nfo_outline, "outline"),
-        (self.Ui.checkBox_nfo_plot, "plot_"),
-        (self.Ui.checkBox_nfo_originalplot, "originalplot"),
-        (self.Ui.checkBox_outline_cdata, "outline_no_cdata"),
-        (self.Ui.checkBox_nfo_release, "release_"),
-        (self.Ui.checkBox_nfo_relasedate, "releasedate"),
-        (self.Ui.checkBox_nfo_premiered, "premiered"),
-        (self.Ui.checkBox_nfo_country, "country"),
-        (self.Ui.checkBox_nfo_mpaa, "mpaa"),
-        (self.Ui.checkBox_nfo_customrating, "customrating"),
-        (self.Ui.checkBox_nfo_year, "year"),
-        (self.Ui.checkBox_nfo_runtime, "runtime"),
-        (self.Ui.checkBox_nfo_wanted, "wanted"),
-        (self.Ui.checkBox_nfo_score, "score"),
-        (self.Ui.checkBox_nfo_criticrating, "criticrating"),
-        (self.Ui.checkBox_nfo_actor, "actor"),
-        (self.Ui.checkBox_nfo_all_actor, "actor_all"),
-        (self.Ui.checkBox_nfo_director, "director"),
-        (self.Ui.checkBox_nfo_series, "series"),
-        (self.Ui.checkBox_nfo_tag, "tag"),
-        (self.Ui.checkBox_nfo_genre, "genre"),
-        (self.Ui.checkBox_nfo_actor_set, "actor_set"),
-        (self.Ui.checkBox_nfo_set, "series_set"),
-        (self.Ui.checkBox_nfo_studio, "studio"),
-        (self.Ui.checkBox_nfo_maker, "maker"),
-        (self.Ui.checkBox_nfo_publisher, "publisher"),
-        (self.Ui.checkBox_nfo_label, "label"),
-        (self.Ui.checkBox_nfo_poster, "poster"),
-        (self.Ui.checkBox_nfo_cover, "cover"),
-        (self.Ui.checkBox_nfo_trailer, "trailer"),
-        (self.Ui.checkBox_nfo_website, "website"),
+    manager.config.nfo_include_new = get_checkboxes(
+        (self.Ui.checkBox_nfo_sorttitle, NfoInclude.SORTTITLE),
+        (self.Ui.checkBox_nfo_originaltitle, NfoInclude.ORIGINALTITLE),
+        (self.Ui.checkBox_nfo_title_cd, NfoInclude.TITLE_CD),
+        (self.Ui.checkBox_nfo_outline, NfoInclude.OUTLINE),
+        (self.Ui.checkBox_nfo_plot, NfoInclude.PLOT_),
+        (self.Ui.checkBox_nfo_originalplot, NfoInclude.ORIGINALPLOT),
+        (self.Ui.checkBox_outline_cdata, NfoInclude.OUTLINE_NO_CDATA),
+        (self.Ui.checkBox_nfo_release, NfoInclude.RELEASE_),
+        (self.Ui.checkBox_nfo_relasedate, NfoInclude.RELEASEDATE),
+        (self.Ui.checkBox_nfo_premiered, NfoInclude.PREMIERED),
+        (self.Ui.checkBox_nfo_country, NfoInclude.COUNTRY),
+        (self.Ui.checkBox_nfo_mpaa, NfoInclude.MPAA),
+        (self.Ui.checkBox_nfo_customrating, NfoInclude.CUSTOMRATING),
+        (self.Ui.checkBox_nfo_year, NfoInclude.YEAR),
+        (self.Ui.checkBox_nfo_runtime, NfoInclude.RUNTIME),
+        (self.Ui.checkBox_nfo_wanted, NfoInclude.WANTED),
+        (self.Ui.checkBox_nfo_score, NfoInclude.SCORE),
+        (self.Ui.checkBox_nfo_criticrating, NfoInclude.CRITICRATING),
+        (self.Ui.checkBox_nfo_actor, NfoInclude.ACTOR),
+        (self.Ui.checkBox_nfo_all_actor, NfoInclude.ACTOR_ALL),
+        (self.Ui.checkBox_nfo_director, NfoInclude.DIRECTOR),
+        (self.Ui.checkBox_nfo_series, NfoInclude.SERIES),
+        (self.Ui.checkBox_nfo_tag, NfoInclude.TAG),
+        (self.Ui.checkBox_nfo_genre, NfoInclude.GENRE),
+        (self.Ui.checkBox_nfo_actor_set, NfoInclude.ACTOR_SET),
+        (self.Ui.checkBox_nfo_set, NfoInclude.SERIES_SET),
+        (self.Ui.checkBox_nfo_studio, NfoInclude.STUDIO),
+        (self.Ui.checkBox_nfo_maker, NfoInclude.MAKER),
+        (self.Ui.checkBox_nfo_publisher, NfoInclude.PUBLISHER),
+        (self.Ui.checkBox_nfo_label, NfoInclude.LABEL),
+        (self.Ui.checkBox_nfo_poster, NfoInclude.POSTER),
+        (self.Ui.checkBox_nfo_cover, NfoInclude.COVER),
+        (self.Ui.checkBox_nfo_trailer, NfoInclude.TRAILER),
+        (self.Ui.checkBox_nfo_website, NfoInclude.WEBSITE),
     )
     # endregion
-    manager.config_v1.translate_by = get_checkboxes(
-        (self.Ui.checkBox_youdao, "youdao"),
-        (self.Ui.checkBox_google, "google"),
-        (self.Ui.checkBox_deepl, "deepl"),
-        (self.Ui.checkBox_llm, "llm"),
+    manager.config.translate_config.translate_by = get_checkboxes(
+        (self.Ui.checkBox_youdao, Translator.YOUDAO),
+        (self.Ui.checkBox_google, Translator.GOOGLE),
+        (self.Ui.checkBox_deepl, Translator.DEEPL),
+        (self.Ui.checkBox_llm, Translator.LLM),
     )
-    manager.config_v1.deepl_key = self.Ui.lineEdit_deepl_key.text()  # deepl key
+    manager.config.translate_config.deepl_key = self.Ui.lineEdit_deepl_key.text()  # deepl key
 
-    manager.config_v1.llm_url = self.Ui.lineEdit_llm_url.text()
-    manager.config_v1.llm_model = self.Ui.lineEdit_llm_model.text()
-    manager.config_v1.llm_key = self.Ui.lineEdit_llm_key.text()
-    manager.config_v1.llm_prompt = self.Ui.textEdit_llm_prompt.toPlainText()
-    manager.config_v1.llm_max_req_sec = self.Ui.doubleSpinBox_llm_max_req_sec.value()
-    manager.config_v1.llm_max_try = self.Ui.spinBox_llm_max_try.value()
-    manager.config_v1.llm_temperature = self.Ui.doubleSpinBox_llm_temperature.value()
+    llm_url_text = self.Ui.lineEdit_llm_url.text()
+    if llm_url_text:
+        manager.config.translate_config.llm_url = HttpUrl(llm_url_text)
+    manager.config.translate_config.llm_model = self.Ui.lineEdit_llm_model.text()
+    manager.config.translate_config.llm_key = self.Ui.lineEdit_llm_key.text()
+    manager.config.translate_config.llm_prompt = self.Ui.textEdit_llm_prompt.toPlainText()
+    manager.config.translate_config.llm_max_req_sec = self.Ui.doubleSpinBox_llm_max_req_sec.value()
+    manager.config.translate_config.llm_max_try = self.Ui.spinBox_llm_max_try.value()
+    manager.config.translate_config.llm_temperature = self.Ui.doubleSpinBox_llm_temperature.value()
     # endregion
 
     # region common
-    manager.config_v1.thread_number = self.Ui.horizontalSlider_thread.value()  # 线程数量
-    manager.config_v1.thread_time = self.Ui.horizontalSlider_thread_time.value()  # 线程延时
-    manager.config_v1.javdb_time = self.Ui.horizontalSlider_javdb_time.value()  # javdb 延时
+    manager.config.thread_number = self.Ui.horizontalSlider_thread.value()  # 线程数量
+    manager.config.thread_time = self.Ui.horizontalSlider_thread_time.value()  # 线程延时
+    manager.config.javdb_time = self.Ui.horizontalSlider_javdb_time.value()  # javdb 延时
     # 主模式设置
-    manager.config_v1.main_mode = get_radio_buttons(
+    manager.config.main_mode = get_radio_buttons(
         (self.Ui.radioButton_mode_common, 1),
         (self.Ui.radioButton_mode_sort, 2),
         (self.Ui.radioButton_mode_update, 3),
@@ -304,144 +358,150 @@ def save_config(self: "MyMAinWindow"):
         default=1,
     )
 
-    manager.config_v1.read_mode = get_checkboxes(
-        (self.Ui.checkBox_read_has_nfo_update, "has_nfo_update"),
-        (self.Ui.checkBox_read_no_nfo_scrape, "no_nfo_scrape"),
-        (self.Ui.checkBox_read_download_file_again, "read_download_again"),
-        (self.Ui.checkBox_read_update_nfo, "read_update_nfo"),
+    manager.config.read_mode = get_checkboxes(
+        (self.Ui.checkBox_read_has_nfo_update, ReadMode.HAS_NFO_UPDATE),
+        (self.Ui.checkBox_read_no_nfo_scrape, ReadMode.NO_NFO_SCRAPE),
+        (self.Ui.checkBox_read_download_file_again, ReadMode.READ_DOWNLOAD_AGAIN),
+        (self.Ui.checkBox_read_update_nfo, ReadMode.READ_UPDATE_NFO),
     )
     # update 模式设置
     if self.Ui.radioButton_update_c.isChecked():
-        manager.config_v1.update_mode = "c"
+        manager.config.update_mode = "c"
     elif self.Ui.radioButton_update_b_c.isChecked():
-        manager.config_v1.update_mode = "abc" if self.Ui.checkBox_update_a.isChecked() else "bc"
+        manager.config.update_mode = "abc" if self.Ui.checkBox_update_a.isChecked() else "bc"
     elif self.Ui.radioButton_update_d_c.isChecked():
-        manager.config_v1.update_mode = "d"
+        manager.config.update_mode = "d"
     else:
-        manager.config_v1.update_mode = "c"
-    manager.config_v1.update_a_folder = self.Ui.lineEdit_update_a_folder.text()  # 更新模式 - a 目录
-    manager.config_v1.update_b_folder = self.Ui.lineEdit_update_b_folder.text()  # 更新模式 - b 目录
-    manager.config_v1.update_c_filetemplate = self.Ui.lineEdit_update_c_filetemplate.text()  # 更新模式 - c 文件命名规则
-    manager.config_v1.update_d_folder = self.Ui.lineEdit_update_d_folder.text()  # 更新模式 - d 目录
-    manager.config_v1.update_titletemplate = self.Ui.lineEdit_update_titletemplate.text()  # 更新模式 - emby视频标题
+        manager.config.update_mode = "c"
+    manager.config.update_a_folder = self.Ui.lineEdit_update_a_folder.text()  # 更新模式 - a 目录
+    manager.config.update_b_folder = self.Ui.lineEdit_update_b_folder.text()  # 更新模式 - b 目录
+    manager.config.update_c_filetemplate = self.Ui.lineEdit_update_c_filetemplate.text()  # 更新模式 - c 文件命名规则
+    manager.config.update_d_folder = self.Ui.lineEdit_update_d_folder.text()  # 更新模式 - d 目录
+    manager.config.update_titletemplate = self.Ui.lineEdit_update_titletemplate.text()  # 更新模式 - emby视频标题
     # 链接模式设置
     if self.Ui.radioButton_soft_on.isChecked():  # 软链接开
-        manager.config_v1.soft_link = 1
+        manager.config.soft_link = 1
     elif self.Ui.radioButton_hard_on.isChecked():  # 硬链接开
-        manager.config_v1.soft_link = 2
+        manager.config.soft_link = 2
     else:  # 软链接关
-        manager.config_v1.soft_link = 0
+        manager.config.soft_link = 0
 
     # 文件操作设置
-    manager.config_v1.success_file_move = self.Ui.radioButton_succ_move_on.isChecked()
-    manager.config_v1.failed_file_move = self.Ui.radioButton_fail_move_on.isChecked()
-    manager.config_v1.success_file_rename = self.Ui.radioButton_succ_rename_on.isChecked()
-    manager.config_v1.del_empty_folder = self.Ui.radioButton_del_empty_folder_on.isChecked()
-    manager.config_v1.show_poster = self.Ui.checkBox_cover.isChecked()
+    manager.config.success_file_move = self.Ui.radioButton_succ_move_on.isChecked()
+    manager.config.failed_file_move = self.Ui.radioButton_fail_move_on.isChecked()
+    manager.config.success_file_rename = self.Ui.radioButton_succ_rename_on.isChecked()
+    manager.config.del_empty_folder = self.Ui.radioButton_del_empty_folder_on.isChecked()
+    manager.config.show_poster = self.Ui.checkBox_cover.isChecked()
     # endregion
 
     # region download
-    manager.config_v1.download_files = "," + get_checkboxes(
-        (self.Ui.checkBox_download_poster, "poster"),
-        (self.Ui.checkBox_download_thumb, "thumb"),
-        (self.Ui.checkBox_download_fanart, "fanart"),
-        (self.Ui.checkBox_download_extrafanart, "extrafanart"),
-        (self.Ui.checkBox_download_trailer, "trailer"),
-        (self.Ui.checkBox_download_nfo, "nfo"),
-        (self.Ui.checkBox_extras, "extrafanart_extras"),
-        (self.Ui.checkBox_download_extrafanart_copy, "extrafanart_copy"),
-        (self.Ui.checkBox_theme_videos, "theme_videos"),
-        (self.Ui.checkBox_ignore_pic_fail, "ignore_pic_fail"),
-        (self.Ui.checkBox_ignore_youma, "ignore_youma"),
-        (self.Ui.checkBox_ignore_wuma, "ignore_wuma"),
-        (self.Ui.checkBox_ignore_fc2, "ignore_fc2"),
-        (self.Ui.checkBox_ignore_guochan, "ignore_guochan"),
-        (self.Ui.checkBox_ignore_size, "ignore_size"),
+    manager.config.download_files = get_checkboxes(
+        (self.Ui.checkBox_download_poster, DownloadableFile.POSTER),
+        (self.Ui.checkBox_download_thumb, DownloadableFile.THUMB),
+        (self.Ui.checkBox_download_fanart, DownloadableFile.FANART),
+        (self.Ui.checkBox_download_extrafanart, DownloadableFile.EXTRAFANART),
+        (self.Ui.checkBox_download_trailer, DownloadableFile.TRAILER),
+        (self.Ui.checkBox_download_nfo, DownloadableFile.NFO),
+        (self.Ui.checkBox_extras, DownloadableFile.EXTRAFANART_EXTRAS),
+        (self.Ui.checkBox_download_extrafanart_copy, DownloadableFile.EXTRAFANART_COPY),
+        (self.Ui.checkBox_theme_videos, DownloadableFile.THEME_VIDEOS),
+        (self.Ui.checkBox_ignore_pic_fail, DownloadableFile.IGNORE_PIC_FAIL),
+        (self.Ui.checkBox_ignore_youma, DownloadableFile.IGNORE_YOUMA),
+        (self.Ui.checkBox_ignore_wuma, DownloadableFile.IGNORE_WUMA),
+        (self.Ui.checkBox_ignore_fc2, DownloadableFile.IGNORE_FC2),
+        (self.Ui.checkBox_ignore_guochan, DownloadableFile.IGNORE_GUOCHAN),
+        (self.Ui.checkBox_ignore_size, DownloadableFile.IGNORE_SIZE),
     )
 
-    manager.config_v1.keep_files = "," + get_checkboxes(
-        (self.Ui.checkBox_old_poster, "poster"),
-        (self.Ui.checkBox_old_thumb, "thumb"),
-        (self.Ui.checkBox_old_fanart, "fanart"),
-        (self.Ui.checkBox_old_extrafanart, "extrafanart"),
-        (self.Ui.checkBox_old_trailer, "trailer"),
-        (self.Ui.checkBox_old_nfo, "nfo"),
-        (self.Ui.checkBox_old_extrafanart_copy, "extrafanart_copy"),
-        (self.Ui.checkBox_old_theme_videos, "theme_videos"),
+    manager.config.keep_files = get_checkboxes(
+        (self.Ui.checkBox_old_poster, KeepableFile.POSTER),
+        (self.Ui.checkBox_old_thumb, KeepableFile.THUMB),
+        (self.Ui.checkBox_old_fanart, KeepableFile.FANART),
+        (self.Ui.checkBox_old_extrafanart, KeepableFile.EXTRAFANART),
+        (self.Ui.checkBox_old_trailer, KeepableFile.TRAILER),
+        (self.Ui.checkBox_old_nfo, KeepableFile.NFO),
+        (self.Ui.checkBox_old_extrafanart_copy, KeepableFile.EXTRAFANART_COPY),
+        (self.Ui.checkBox_old_theme_videos, KeepableFile.THEME_VIDEOS),
     )
 
-    manager.config_v1.download_hd_pics = get_checkboxes(
-        (self.Ui.checkBox_hd_poster, "poster"),
-        (self.Ui.checkBox_hd_thumb, "thumb"),
-        (self.Ui.checkBox_amazon_big_pic, "amazon"),
-        (self.Ui.checkBox_official_big_pic, "official"),
-        (self.Ui.checkBox_google_big_pic, "google"),
-        (self.Ui.radioButton_google_only, "goo_only"),
+    manager.config.download_hd_pics = get_checkboxes(
+        (self.Ui.checkBox_hd_poster, HDPicSource.POSTER),
+        (self.Ui.checkBox_hd_thumb, HDPicSource.THUMB),
+        (self.Ui.checkBox_amazon_big_pic, HDPicSource.AMAZON),
+        (self.Ui.checkBox_official_big_pic, HDPicSource.OFFICIAL),
+        (self.Ui.checkBox_google_big_pic, HDPicSource.GOOGLE),
+        (self.Ui.radioButton_google_only, HDPicSource.GOO_ONLY),
     )
 
-    manager.config_v1.google_used = self.Ui.lineEdit_google_used.text()  # google 下载词
-    manager.config_v1.google_exclude = self.Ui.lineEdit_google_exclude.text()  # google 过滤词
+    google_used_text = self.Ui.lineEdit_google_used.text()
+    manager.config.google_used = [item.strip() for item in google_used_text.split(",") if item.strip()]
+    google_exclude_text = self.Ui.lineEdit_google_exclude.text()
+    manager.config.google_exclude = [item.strip() for item in google_exclude_text.split(",") if item.strip()]
     # endregion
 
     # region name
-    manager.config_v1.folder_name = self.Ui.lineEdit_dir_name.text()  # 视频文件夹命名
-    manager.config_v1.naming_file = self.Ui.lineEdit_local_name.text()  # 视频文件名命名
-    manager.config_v1.naming_media = self.Ui.lineEdit_media_name.text()  # nfo标题命名
-    manager.config_v1.prevent_char = self.Ui.lineEdit_prevent_char.text()  # 防屏蔽字符
+    manager.config.folder_name = self.Ui.lineEdit_dir_name.text()  # 视频文件夹命名
+    manager.config.naming_file = self.Ui.lineEdit_local_name.text()  # 视频文件名命名
+    manager.config.naming_media = self.Ui.lineEdit_media_name.text()  # nfo标题命名
+    manager.config.prevent_char = self.Ui.lineEdit_prevent_char.text()  # 防屏蔽字符
 
-    manager.config_v1.fields_rule = get_checkboxes(
-        (self.Ui.checkBox_title_del_actor, "del_actor"),
-        (self.Ui.checkBox_actor_del_char, "del_char"),
-        (self.Ui.checkBox_actor_fc2_seller, "fc2_seller"),
-        (self.Ui.checkBox_number_del_num, "del_num"),
+    manager.config.fields_rule = get_checkboxes(
+        (self.Ui.checkBox_title_del_actor, FieldRule.DEL_ACTOR),
+        (self.Ui.checkBox_actor_del_char, FieldRule.DEL_CHAR),
+        (self.Ui.checkBox_actor_fc2_seller, FieldRule.FC2_SELLER),
+        (self.Ui.checkBox_number_del_num, FieldRule.DEL_NUM),
     )
-    manager.config_v1.suffix_sort = self.Ui.lineEdit_suffix_sort.text()  # 后缀字段顺序
-    manager.config_v1.actor_no_name = self.Ui.lineEdit_actor_no_name.text()  # 未知演员
-    manager.config_v1.actor_name_more = self.Ui.lineEdit_actor_name_more.text()  # 等演员
+
+    suffix_sort_text = self.Ui.lineEdit_suffix_sort.text()
+    suffix_sort_list = []
+    for item in suffix_sort_text.split(","):
+        item = item.strip()
+        if item == "moword":
+            suffix_sort_list.append(SuffixSort.MOWORD)
+        elif item == "cnword":
+            suffix_sort_list.append(SuffixSort.CNWORD)
+        elif item == "definition":
+            suffix_sort_list.append(SuffixSort.DEFINITION)
+    manager.config.suffix_sort = suffix_sort_list
+
+    manager.config.actor_no_name = self.Ui.lineEdit_actor_no_name.text()  # 未知演员
+    manager.config.actor_name_more = self.Ui.lineEdit_actor_name_more.text()  # 等演员
     release_rule = self.Ui.lineEdit_release_rule.text()  # 发行日期
-    manager.config_v1.release_rule = re.sub(r'[\\/:*?"<>|\r\n]+', "-", release_rule).strip()
+    manager.config.release_rule = re.sub(r'[\\/:*?"<>|\r\n]+', "-", release_rule).strip()
 
-    manager.config_v1.folder_name_max = int(self.Ui.lineEdit_folder_name_max.text())  # 长度命名规则-目录
-    manager.config_v1.file_name_max = int(self.Ui.lineEdit_file_name_max.text())  # 长度命名规则-文件名
-    manager.config_v1.actor_name_max = int(self.Ui.lineEdit_actor_name_max.text())  # 长度命名规则-演员数量
+    manager.config.folder_name_max = int(self.Ui.lineEdit_folder_name_max.text())  # 长度命名规则-目录
+    manager.config.file_name_max = int(self.Ui.lineEdit_file_name_max.text())  # 长度命名规则-文件名
+    manager.config.actor_name_max = int(self.Ui.lineEdit_actor_name_max.text())  # 长度命名规则-演员数量
 
-    manager.config_v1.umr_style = self.Ui.lineEdit_umr_style.text()  # 无码破解版本命名
-    manager.config_v1.leak_style = self.Ui.lineEdit_leak_style.text()  # 无码流出版本命名
-    manager.config_v1.wuma_style = self.Ui.lineEdit_wuma_style.text()  # 无码版本命名
-    manager.config_v1.youma_style = self.Ui.lineEdit_youma_style.text()  # 有码版本命名
-    manager.config_v1.show_moword = get_checkboxes(
-        (self.Ui.checkBox_foldername_mosaic, "folder"),
-        (self.Ui.checkBox_filename_mosaic, "file"),
-    )
-    manager.config_v1.show_4k = get_checkboxes(
-        (self.Ui.checkBox_foldername_4k, "folder"),
-        (self.Ui.checkBox_filename_4k, "file"),
-    )
+    manager.config.umr_style = self.Ui.lineEdit_umr_style.text()  # 无码破解版本命名
+    manager.config.leak_style = self.Ui.lineEdit_leak_style.text()  # 无码流出版本命名
+    manager.config.wuma_style = self.Ui.lineEdit_wuma_style.text()  # 无码版本命名
+    manager.config.youma_style = self.Ui.lineEdit_youma_style.text()  # 有码版本命名
 
     # 分集命名规则
-    manager.config_v1.cd_name = get_radio_buttons(
+    manager.config.cd_name = get_radio_buttons(
         (self.Ui.radioButton_cd_part_lower, 0),
         (self.Ui.radioButton_cd_part_upper, 1),
         default=2,
     )
 
-    manager.config_v1.cd_char = get_checkboxes(
-        (self.Ui.checkBox_cd_part_a, "letter"),
-        (self.Ui.checkBox_cd_part_c, "endc"),
-        (self.Ui.checkBox_cd_part_01, "digital"),
-        (self.Ui.checkBox_cd_part_1_xxx, "middle_number"),
-        (self.Ui.checkBox_cd_part_underline, "underline"),
-        (self.Ui.checkBox_cd_part_space, "space"),
-        (self.Ui.checkBox_cd_part_point, "point"),
+    manager.config.cd_char = get_checkboxes(
+        (self.Ui.checkBox_cd_part_a, CDChar.LETTER),
+        (self.Ui.checkBox_cd_part_c, CDChar.ENDC),
+        (self.Ui.checkBox_cd_part_01, CDChar.DIGITAL),
+        (self.Ui.checkBox_cd_part_1_xxx, CDChar.MIDDLE_NUMBER),
+        (self.Ui.checkBox_cd_part_underline, CDChar.UNDERLINE),
+        (self.Ui.checkBox_cd_part_space, CDChar.SPACE),
+        (self.Ui.checkBox_cd_part_point, CDChar.POINT),
     )
 
     # 图片和预告片命名规则
-    manager.config_v1.pic_simple_name = not self.Ui.radioButton_pic_with_filename.isChecked()
-    manager.config_v1.trailer_simple_name = not self.Ui.radioButton_trailer_with_filename.isChecked()
-    manager.config_v1.hd_name = "height" if self.Ui.radioButton_definition_height.isChecked() else "hd"
+    manager.config.pic_simple_name = not self.Ui.radioButton_pic_with_filename.isChecked()
+    manager.config.trailer_simple_name = not self.Ui.radioButton_trailer_with_filename.isChecked()
+    manager.config.hd_name = "height" if self.Ui.radioButton_definition_height.isChecked() else "hd"
 
     # 分辨率获取方式
-    manager.config_v1.hd_get = get_radio_buttons(
+    manager.config.hd_get = get_radio_buttons(
         (self.Ui.radioButton_videosize_video, "video"),
         (self.Ui.radioButton_videosize_path, "path"),
         default="none",
@@ -449,118 +509,123 @@ def save_config(self: "MyMAinWindow"):
     # endregion
 
     # region subtitle
-    manager.config_v1.cnword_char = self.Ui.lineEdit_cnword_char.text()  # 中文字幕判断字符
-    manager.config_v1.cnword_style = self.Ui.lineEdit_cnword_style.text()  # 中文字幕字符样式
-    manager.config_v1.folder_cnword = get_checkbox(self.Ui.checkBox_foldername)
-    manager.config_v1.file_cnword = get_checkbox(self.Ui.checkBox_filename)
-    manager.config_v1.subtitle_folder = self.Ui.lineEdit_sub_folder.text()  # 字幕文件目录
-    manager.config_v1.subtitle_add = get_checkbox(self.Ui.radioButton_add_sub_on)
-    manager.config_v1.subtitle_add_chs = get_checkbox(self.Ui.checkBox_sub_add_chs)
-    manager.config_v1.subtitle_add_rescrape = get_checkbox(self.Ui.checkBox_sub_rescrape)
+    cnword_char_text = self.Ui.lineEdit_cnword_char.text()
+    manager.config.cnword_char = [char.strip() for char in cnword_char_text.split(",") if char.strip()]
+    manager.config.cnword_style = self.Ui.lineEdit_cnword_style.text()  # 中文字幕字符样式
+    manager.config.folder_cnword = get_checkbox(self.Ui.checkBox_foldername)
+    manager.config.file_cnword = get_checkbox(self.Ui.checkBox_filename)
+    manager.config.subtitle_folder = self.Ui.lineEdit_sub_folder.text()  # 字幕文件目录
+    manager.config.subtitle_add = get_checkbox(self.Ui.radioButton_add_sub_on)
+    manager.config.subtitle_add_chs = get_checkbox(self.Ui.checkBox_sub_add_chs)
+    manager.config.subtitle_add_rescrape = get_checkbox(self.Ui.checkBox_sub_rescrape)
     # endregion
 
     # region emby
-    manager.config_v1.server_type = "emby" if self.Ui.radioButton_server_emby.isChecked() else "jellyfin"
-    manager.config_v1.emby_url = self.Ui.lineEdit_emby_url.text()  # emby地址
-    manager.config_v1.emby_url = manager.config_v1.emby_url.replace("：", ":").strip("/ ")
-    if manager.config_v1.emby_url and "://" not in manager.config_v1.emby_url:
-        manager.config_v1.emby_url = "http://" + manager.config_v1.emby_url
-    manager.config_v1.api_key = self.Ui.lineEdit_api_key.text()  # emby密钥
-    manager.config_v1.user_id = self.Ui.lineEdit_user_id.text()  # emby用户ID
-    manager.config_v1.actor_photo_folder = self.Ui.lineEdit_actor_photo_folder.text()  # 头像图片目录
-    manager.config_v1.gfriends_github = self.Ui.lineEdit_net_actor_photo.text().strip(" /")  # gfriends github 项目地址
-    manager.config_v1.info_database_path = self.Ui.lineEdit_actor_db_path.text()  # 信息数据库
-    if not manager.config_v1.gfriends_github:
-        manager.config_v1.gfriends_github = "https://github.com/gfriends/gfriends"
-    elif "://" not in manager.config_v1.gfriends_github:
-        manager.config_v1.gfriends_github = "https://" + manager.config_v1.gfriends_github
-    manager.config_v1.use_database = 1 if self.Ui.checkBox_actor_db.isChecked() else 0
-    if manager.config_v1.use_database:
+    manager.config.server_type = "emby" if self.Ui.radioButton_server_emby.isChecked() else "jellyfin"
+    emby_url = self.Ui.lineEdit_emby_url.text()  # emby地址
+    emby_url = emby_url.replace("：", ":").strip("/ ")
+    if emby_url and "://" not in emby_url:
+        emby_url = "http://" + emby_url
+    if emby_url:
+        manager.config.emby_url = HttpUrl(emby_url)
+    manager.config.api_key = self.Ui.lineEdit_api_key.text()  # emby密钥
+    manager.config.user_id = self.Ui.lineEdit_user_id.text()  # emby用户ID
+    manager.config.actor_photo_folder = self.Ui.lineEdit_actor_photo_folder.text()  # 头像图片目录
+    gfriends_github = self.Ui.lineEdit_net_actor_photo.text().strip(" /")  # gfriends github 项目地址
+    if not gfriends_github:
+        gfriends_github = "https://github.com/gfriends/gfriends"
+    elif "://" not in gfriends_github:
+        gfriends_github = "https://" + gfriends_github
+    manager.config.gfriends_github = HttpUrl(gfriends_github)
+    manager.config.info_database_path = self.Ui.lineEdit_actor_db_path.text()  # 信息数据库
+    manager.config.use_database = self.Ui.checkBox_actor_db.isChecked()
+    if manager.config.use_database:
         ActressDB.init_db()
 
-    # 构建 emby_on 配置字符串
+    # 构建 emby_on 配置
     actor_info_lang = get_radio_buttons(
-        (self.Ui.radioButton_actor_info_zh_cn, "actor_info_zh_cn"),
-        (self.Ui.radioButton_actor_info_zh_tw, "actor_info_zh_tw"),
-        default="actor_info_ja",
+        (self.Ui.radioButton_actor_info_zh_cn, EmbyAction.ACTOR_INFO_ZH_CN),
+        (self.Ui.radioButton_actor_info_zh_tw, EmbyAction.ACTOR_INFO_ZH_TW),
+        default=EmbyAction.ACTOR_INFO_JA,
     )
     actor_info_mode = get_radio_buttons(
-        (self.Ui.radioButton_actor_info_all, "actor_info_all"), default="actor_info_miss"
+        (self.Ui.radioButton_actor_info_all, EmbyAction.ACTOR_INFO_ALL), default=EmbyAction.ACTOR_INFO_MISS
     )
     actor_photo_source = get_radio_buttons(
-        (self.Ui.radioButton_actor_photo_net, "actor_photo_net"), default="actor_photo_local"
+        (self.Ui.radioButton_actor_photo_net, EmbyAction.ACTOR_PHOTO_NET), default=EmbyAction.ACTOR_PHOTO_LOCAL
     )
     actor_photo_mode = get_radio_buttons(
-        (self.Ui.radioButton_actor_photo_all, "actor_photo_all"), default="actor_photo_miss"
+        (self.Ui.radioButton_actor_photo_all, EmbyAction.ACTOR_PHOTO_ALL), default=EmbyAction.ACTOR_PHOTO_MISS
+    )
+    emby_actions = [actor_info_lang, actor_info_mode, actor_photo_source, actor_photo_mode]
+
+    # 添加其他emby选项
+    emby_actions.extend(
+        get_checkboxes(
+            (self.Ui.checkBox_actor_info_translate, EmbyAction.ACTOR_INFO_TRANSLATE),
+            (self.Ui.checkBox_actor_info_photo, EmbyAction.ACTOR_INFO_PHOTO),
+            (self.Ui.checkBox_actor_photo_ne_backdrop, EmbyAction.GRAPHIS_BACKDROP),
+            (self.Ui.checkBox_actor_photo_ne_face, EmbyAction.GRAPHIS_FACE),
+            (self.Ui.checkBox_actor_photo_ne_new, EmbyAction.GRAPHIS_NEW),
+            (self.Ui.checkBox_actor_photo_auto, EmbyAction.ACTOR_PHOTO_AUTO),
+            (self.Ui.checkBox_actor_pic_replace, EmbyAction.ACTOR_REPLACE),
+        )
     )
 
-    manager.config_v1.emby_on = get_checkboxes(
-        (True, actor_info_lang),
-        (True, actor_info_mode),
-        (True, actor_photo_source),
-        (True, actor_photo_mode),
-        (self.Ui.checkBox_actor_info_translate, "actor_info_translate"),
-        (self.Ui.checkBox_actor_info_photo, "actor_info_photo"),
-        (self.Ui.checkBox_actor_photo_ne_backdrop, "graphis_backdrop"),
-        (self.Ui.checkBox_actor_photo_ne_face, "graphis_face"),
-        (self.Ui.checkBox_actor_photo_ne_new, "graphis_new"),
-        (self.Ui.checkBox_actor_photo_auto, "actor_photo_auto"),
-        (self.Ui.checkBox_actor_pic_replace, "actor_replace"),
-    )
-
-    manager.config_v1.actor_photo_kodi_auto = get_checkbox(self.Ui.checkBox_actor_photo_kodi)
+    manager.config.emby_on = emby_actions
+    manager.config.actor_photo_kodi_auto = get_checkbox(self.Ui.checkBox_actor_photo_kodi)
     # endregion
 
     # region mark
-    manager.config_v1.poster_mark = 1 if self.Ui.checkBox_poster_mark.isChecked() else 0
-    manager.config_v1.thumb_mark = 1 if self.Ui.checkBox_thumb_mark.isChecked() else 0
-    manager.config_v1.fanart_mark = 1 if self.Ui.checkBox_fanart_mark.isChecked() else 0
-    manager.config_v1.mark_size = self.Ui.horizontalSlider_mark_size.value()  # 水印大小
+    manager.config.poster_mark = 1 if self.Ui.checkBox_poster_mark.isChecked() else 0
+    manager.config.thumb_mark = 1 if self.Ui.checkBox_thumb_mark.isChecked() else 0
+    manager.config.fanart_mark = 1 if self.Ui.checkBox_fanart_mark.isChecked() else 0
+    manager.config.mark_size = self.Ui.horizontalSlider_mark_size.value()  # 水印大小
 
-    manager.config_v1.mark_type = get_checkboxes(
-        (self.Ui.checkBox_sub, "sub"),
-        (self.Ui.checkBox_censored, "youma"),
-        (self.Ui.checkBox_umr, "umr"),
-        (self.Ui.checkBox_leak, "leak"),
-        (self.Ui.checkBox_uncensored, "uncensored"),
-        (self.Ui.checkBox_hd, "hd"),
+    manager.config.mark_type = get_checkboxes(
+        (self.Ui.checkBox_sub, MarkType.SUB),
+        (self.Ui.checkBox_censored, MarkType.YOUMA),
+        (self.Ui.checkBox_umr, MarkType.UMR),
+        (self.Ui.checkBox_leak, MarkType.LEAK),
+        (self.Ui.checkBox_uncensored, MarkType.UNCENSORED),
+        (self.Ui.checkBox_hd, MarkType.HD),
     )
 
     # 水印位置设置
-    manager.config_v1.mark_fixed = get_radio_buttons(
+    manager.config.mark_fixed = get_radio_buttons(
         (self.Ui.radioButton_not_fixed_position, "not_fixed"),
         (self.Ui.radioButton_fixed_corner, "corner"),
         default="fixed",
     )
-    manager.config_v1.mark_pos = get_radio_buttons(
+    manager.config.mark_pos = get_radio_buttons(
         (self.Ui.radioButton_top_left, "top_left"),
         (self.Ui.radioButton_top_right, "top_right"),
         (self.Ui.radioButton_bottom_left, "bottom_left"),
         (self.Ui.radioButton_bottom_right, "bottom_right"),
         default="top_left",
     )
-    manager.config_v1.mark_pos_corner = get_radio_buttons(
+    manager.config.mark_pos_corner = get_radio_buttons(
         (self.Ui.radioButton_top_left_corner, "top_left"),
         (self.Ui.radioButton_top_right_corner, "top_right"),
         (self.Ui.radioButton_bottom_left_corner, "bottom_left"),
         (self.Ui.radioButton_bottom_right_corner, "bottom_right"),
         default="top_left",
     )
-    manager.config_v1.mark_pos_hd = get_radio_buttons(
+    manager.config.mark_pos_hd = get_radio_buttons(
         (self.Ui.radioButton_top_left_hd, "top_left"),
         (self.Ui.radioButton_top_right_hd, "top_right"),
         (self.Ui.radioButton_bottom_left_hd, "bottom_left"),
         (self.Ui.radioButton_bottom_right_hd, "bottom_right"),
         default="top_left",
     )
-    manager.config_v1.mark_pos_sub = get_radio_buttons(
+    manager.config.mark_pos_sub = get_radio_buttons(
         (self.Ui.radioButton_top_left_sub, "top_left"),
         (self.Ui.radioButton_top_right_sub, "top_right"),
         (self.Ui.radioButton_bottom_left_sub, "bottom_left"),
         (self.Ui.radioButton_bottom_right_sub, "bottom_right"),
         default="top_left",
     )
-    manager.config_v1.mark_pos_mosaic = get_radio_buttons(
+    manager.config.mark_pos_mosaic = get_radio_buttons(
         (self.Ui.radioButton_top_left_mosaic, "top_left"),
         (self.Ui.radioButton_top_right_mosaic, "top_right"),
         (self.Ui.radioButton_bottom_left_mosaic, "bottom_left"),
@@ -570,103 +635,122 @@ def save_config(self: "MyMAinWindow"):
     # endregion
 
     # region network
-    manager.config_v1.type = get_radio_buttons(
+    proxy_type = get_radio_buttons(
         (self.Ui.radioButton_proxy_http, "http"),
         (self.Ui.radioButton_proxy_socks5, "socks5"),
         (self.Ui.radioButton_proxy_nouse, "no"),
         default="no",
     )
+    manager.config.use_proxy = proxy_type != "no"
     proxy = self.Ui.lineEdit_proxy.text()  # 代理地址
-    manager.config_v1.proxy = proxy.replace("https://", "").replace("http://", "")
-    manager.config_v1.timeout = self.Ui.horizontalSlider_timeout.value()  # 超时时间
-    manager.config_v1.retry = self.Ui.horizontalSlider_retry.value()  # 重试次数
+    manager.config.proxy = proxy.replace("https://", "").replace("http://", "")
+    manager.config.timeout = self.Ui.horizontalSlider_timeout.value()  # 超时时间
+    manager.config.retry = self.Ui.horizontalSlider_retry.value()  # 重试次数
 
-    custom_website_name = self.Ui.comboBox_custom_website.currentText()
-    custom_website_url = self.Ui.lineEdit_custom_website.text()
-    if custom_website_url:
-        custom_website_url = custom_website_url.strip("/ ")
-        setattr(manager.config_v1, f"{custom_website_name}_website", custom_website_url)
-    elif hasattr(manager.config_v1, f"{custom_website_name}_website"):
-        delattr(manager.config_v1, f"{custom_website_name}_website")
-    manager.config_v1.javdb = self.Ui.plainTextEdit_cookie_javdb.toPlainText()  # javdb cookie
-    manager.config_v1.javbus = self.Ui.plainTextEdit_cookie_javbus.toPlainText()  # javbus cookie
-    manager.config_v1.theporndb_api_token = self.Ui.lineEdit_api_token_theporndb.text()  # api token
-    if manager.config_v1.javdb:
-        manager.config_v1.javdb = manager.config_v1.javdb.replace("locale=en", "locale=zh")
+    site = self.Ui.comboBox_custom_website.currentText()
+    if site in Website:
+        site = Website(site)
+        url = self.Ui.lineEdit_site_custom_url.text().strip("/ ")
+        use_browser = self.Ui.checkBox_site_use_browser.isChecked()
+        if url:
+            with suppress(ValidationError):
+                manager.config.site_configs.setdefault(site, SiteConfig()).custom_url = HttpUrl(url)
+        elif site in manager.config.site_configs:
+            manager.config.site_configs[site].custom_url = None
+        manager.config.site_configs.setdefault(site, SiteConfig()).use_browser = use_browser
+
+    manager.config.javdb = self.Ui.plainTextEdit_cookie_javdb.toPlainText()  # javdb cookie
+    manager.config.javbus = self.Ui.plainTextEdit_cookie_javbus.toPlainText()  # javbus cookie
+    manager.config.theporndb_api_token = self.Ui.lineEdit_api_token_theporndb.text()  # api token
+    if manager.config.javdb:
+        manager.config.javdb = manager.config.javdb.replace("locale=en", "locale=zh")
     # endregion
 
     # region other
-    manager.config_v1.rest_count = int(self.Ui.lineEdit_rest_count.text())  # 间歇刮削文件数量
-    manager.config_v1.rest_time = self.Ui.lineEdit_rest_time.text()  # 间歇刮削休息时间
-    manager.config_v1.timed_interval = self.Ui.lineEdit_timed_interval.text()  # 循环任务间隔时间
+    manager.config.rest_count = int(self.Ui.lineEdit_rest_count.text())  # 间歇刮削文件数量
+
+    rest_time_text = self.Ui.lineEdit_rest_time.text()  # 格式: HH:MM:SS
+    if re.match(r"^\d{2}:\d{2}:\d{2}$", rest_time_text):
+        h, m, s = map(int, rest_time_text.split(":"))
+        manager.config.rest_time = timedelta(hours=h, minutes=m, seconds=s)
+    else:
+        manager.config.rest_time = timedelta(minutes=1, seconds=2)  # 默认值
+
+    timed_interval_text = self.Ui.lineEdit_timed_interval.text()  # 格式: HH:MM:SS
+    if re.match(r"^\d{2}:\d{2}:\d{2}$", timed_interval_text):
+        h, m, s = map(int, timed_interval_text.split(":"))
+        manager.config.timed_interval = timedelta(hours=h, minutes=m, seconds=s)
+    else:
+        manager.config.timed_interval = timedelta(minutes=30)  # 默认值
 
     # 开关汇总和其他设置
     show_logs_value = not self.Ui.textBrowser_log_main_2.isHidden()
-    manager.config_v1.switch_on = get_checkboxes(
-        (self.Ui.checkBox_auto_start, "auto_start"),
-        (self.Ui.checkBox_auto_exit, "auto_exit"),
-        (self.Ui.checkBox_rest_scrape, "rest_scrape"),
-        (self.Ui.checkBox_timed_scrape, "timed_scrape"),
-        (self.Ui.checkBox_remain_task, "remain_task"),
-        (self.Ui.checkBox_show_dialog_exit, "show_dialog_exit"),
-        (self.Ui.checkBox_show_dialog_stop_scrape, "show_dialog_stop_scrape"),
-        (self.Ui.checkBox_sortmode_delpic, "sort_del"),
-        (self.Ui.checkBox_net_ipv4_only, "ipv4_only"),
-        (self.Ui.checkBox_dialog_qt, "qt_dialog"),
-        (self.Ui.checkBox_theporndb_hash, "theporndb_no_hash"),
-        (self.Ui.checkBox_hide_dock_icon, "hide_dock"),
-        (self.Ui.checkBox_highdpi_passthrough, "passthrough"),
-        (self.Ui.checkBox_hide_menu_icon, "hide_menu"),
-        (self.Ui.checkBox_dark_mode, "dark_mode"),
-        (self.Ui.checkBox_copy_netdisk_nfo, "copy_netdisk_nfo"),
+    switch_actions = get_checkboxes(
+        (self.Ui.checkBox_auto_start, Switch.AUTO_START),
+        (self.Ui.checkBox_auto_exit, Switch.AUTO_EXIT),
+        (self.Ui.checkBox_rest_scrape, Switch.REST_SCRAPE),
+        (self.Ui.checkBox_timed_scrape, Switch.TIMED_SCRAPE),
+        (self.Ui.checkBox_remain_task, Switch.REMAIN_TASK),
+        (self.Ui.checkBox_show_dialog_exit, Switch.SHOW_DIALOG_EXIT),
+        (self.Ui.checkBox_show_dialog_stop_scrape, Switch.SHOW_DIALOG_STOP_SCRAPE),
+        (self.Ui.checkBox_sortmode_delpic, Switch.SORT_DEL),
+        (self.Ui.checkBox_net_ipv4_only, Switch.IPV4_ONLY),
+        (self.Ui.checkBox_dialog_qt, Switch.QT_DIALOG),
+        (self.Ui.checkBox_theporndb_hash, Switch.THEPORNDB_NO_HASH),
+        (self.Ui.checkBox_hide_dock_icon, Switch.HIDE_DOCK),
+        (self.Ui.checkBox_highdpi_passthrough, Switch.PASSTHROUGH),
+        (self.Ui.checkBox_hide_menu_icon, Switch.HIDE_MENU),
+        (self.Ui.checkBox_dark_mode, Switch.DARK_MODE),
+        (self.Ui.checkBox_copy_netdisk_nfo, Switch.COPY_NETDISK_NFO),
     )
 
     # 手动添加 show_logs 设置
     if show_logs_value:
-        manager.config_v1.switch_on += "show_logs,"
+        switch_actions.append(Switch.SHOW_LOGS)
 
     # 添加隐藏设置
-    hide_setting = get_radio_buttons(
-        (self.Ui.radioButton_hide_close, "hide_close"),
-        (self.Ui.radioButton_hide_mini, "hide_mini"),
-        default="hide_none",
+    switch_actions.append(
+        get_radio_buttons(
+            (self.Ui.radioButton_hide_close, Switch.HIDE_CLOSE),
+            (self.Ui.radioButton_hide_mini, Switch.HIDE_MINI),
+            default=Switch.HIDE_NONE,
+        )
     )
-    manager.config_v1.switch_on += f"{hide_setting},"
+
+    manager.config.switch_on = switch_actions
 
     # 日志设置
-    manager.config_v1.show_web_log = get_checkbox(self.Ui.checkBox_show_web_log)
-    manager.config_v1.show_from_log = get_checkbox(self.Ui.checkBox_show_from_log)
-    manager.config_v1.show_data_log = get_checkbox(self.Ui.checkBox_show_data_log)
-    manager.config_v1.save_log = get_radio_buttons(
+    manager.config.show_web_log = get_checkbox(self.Ui.checkBox_show_web_log)
+    manager.config.show_from_log = get_checkbox(self.Ui.checkBox_show_from_log)
+    manager.config.show_data_log = get_checkbox(self.Ui.checkBox_show_data_log)
+    manager.config.save_log = get_radio_buttons(
         (self.Ui.radioButton_log_on, True),
         (self.Ui.radioButton_log_off, False),
         default=True,
     )
-    manager.config_v1.update_check = get_radio_buttons(
+    manager.config.update_check = get_radio_buttons(
         (self.Ui.radioButton_update_on, True),
         (self.Ui.radioButton_update_off, False),
         default=True,
     )
-    manager.config_v1.local_library = self.Ui.lineEdit_local_library_path.text()  # 本地资源库
-    manager.config_v1.actors_name = self.Ui.lineEdit_actors_name.text().replace("\n", "")  # 演员名
-    manager.config_v1.netdisk_path = self.Ui.lineEdit_netdisk_path.text()  # 网盘路径
-    manager.config_v1.localdisk_path = self.Ui.lineEdit_localdisk_path.text()  # 本地磁盘路径
-    manager.config_v1.window_title = "hide" if self.Ui.checkBox_hide_window_title.isChecked() else "show"
+    manager.config.local_library = self.Ui.lineEdit_local_library_path.text()  # 本地资源库
+    manager.config.actors_name = self.Ui.lineEdit_actors_name.text().replace("\n", "")  # 演员名
+    manager.config.netdisk_path = self.Ui.lineEdit_netdisk_path.text()  # 网盘路径
+    manager.config.localdisk_path = self.Ui.lineEdit_localdisk_path.text()  # 本地磁盘路径
+    manager.config.window_title = "hide" if self.Ui.checkBox_hide_window_title.isChecked() else "show"
     # endregion
 
-    manager.config_v1.auto_link = get_checkbox(self.Ui.checkBox_create_link)  # 刮削中自动创建软链接
+    manager.config.auto_link = get_checkbox(self.Ui.checkBox_create_link)  # 刮削中自动创建软链接
 
     config_folder: str = self.Ui.lineEdit_config_folder.text()  # 配置文件目录
     if not os.path.exists(config_folder):
         config_folder = manager.data_folder
     manager.path = convert_path(os.path.join(config_folder, manager.file))
-    manager.config_v1.version = self.localversion
-    manager.config = manager.config_v1.to_pydantic_model()
+    # 保存配置到文件
     manager.save()
-    manager.config_v1.init()
 
     # 刮削偏好
-    scrape_like = manager.config_v1.scrape_like
+    scrape_like = manager.config.scrape_like
     if "speed" in scrape_like:
         Flags.scrape_like_text = "速度优先"
     elif "single" in scrape_like:
@@ -674,7 +758,7 @@ def save_config(self: "MyMAinWindow"):
     else:
         Flags.scrape_like_text = "字段优先"
 
-    main_mode = int(manager.config_v1.main_mode)  # 刮削模式
+    main_mode = int(manager.config.main_mode)  # 刮削模式
     mode_mapping = {
         1: ("common", "正常模式"),
         2: ("sort", "整理模式"),
@@ -687,16 +771,16 @@ def save_config(self: "MyMAinWindow"):
 
     try:
         scrape_like_text = Flags.scrape_like_text
-        if manager.config_v1.scrape_like == "single":
-            scrape_like_text += f" · {manager.config_v1.website_single}"
-        if manager.config_v1.soft_link == 1:
+        if manager.config.scrape_like == "single":
+            scrape_like_text += f" · {manager.config.website_single.value}"
+        if manager.config.soft_link == 1:
             scrape_like_text += " · 软连接开"
-        elif manager.config_v1.soft_link == 2:
+        elif manager.config.soft_link == 2:
             scrape_like_text += " · 硬连接开"
         signal_qt.show_log_text(
             f" 🛠 当前配置：{manager.path} 保存完成！\n "
             f"📂 程序目录：{manager.data_folder} \n "
-            f"📂 刮削目录：{get_movie_path_setting()[0]} \n "
+            f"📂 刮削目录：{get_movie_path_setting().movie_path} \n "
             f"💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n "
             f"🖥️ 系统信息：{platform.platform()} \n "
             f"🐰 软件版本：{self.localversion} \n"
@@ -710,6 +794,8 @@ def save_config(self: "MyMAinWindow"):
     self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)  # type: ignore
     self.activateWindow()
     try:
-        self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")  # 主界面右上角显示提示信息
+        self.set_label_file_path.emit(
+            f"🎈 当前刮削路径: \n {get_movie_path_setting().movie_path}"
+        )  # 主界面右上角显示提示信息
     except Exception:
         signal_qt.show_traceback_log(traceback.format_exc())

@@ -21,7 +21,7 @@ from mdcx.utils import get_used_time
 
 
 async def _scraper_web(url):
-    html, error = await manager.config_v1.async_client.get_text(url)
+    html, error = await manager.computed.async_client.get_text(url)
     if html is None:
         signal.show_log_text(f"请求错误: {error}")
         return ""
@@ -44,9 +44,9 @@ async def _get_actor_numbers(actor_url, actor_single_url):
     i = 1
     while next_page:
         page_url = f"{actor_url}?page={i}&t=s"
-        html, error = await manager.config_v1.async_client.get_text(page_url)
+        html, error = await manager.computed.async_client.get_text(page_url)
         if html is None:
-            html, error = await manager.config_v1.async_client.get_text(page_url)
+            html, error = await manager.computed.async_client.get_text(page_url)
         if html is None:
             return
         if "pagination-next" not in html or i >= 60:
@@ -190,8 +190,8 @@ async def check_missing_number(actor_flag):
     json_data_new = {}
 
     # 获取资源库配置
-    movie_type = manager.config_v1.media_type
-    movie_path = manager.config_v1.local_library.replace("\\", "/")  # 用户设置的扫描媒体路径
+    movie_type = manager.config.media_type
+    movie_path = manager.config.local_library.replace("\\", "/")  # 用户设置的扫描媒体路径
     movie_path_list = set(re.split(r"[,，]", movie_path))  # 转成集合，去重
     new_movie_path_list = set()
     for i in movie_path_list:
@@ -273,8 +273,8 @@ async def check_missing_number(actor_flag):
         signal.show_log_text(f"🎉 获取完毕！共获取番号数量（{len(json_data_new)}）({get_used_time(start_time_local)}s)")
 
     # 查询演员番号
-    if manager.config_v1.actors_name:
-        actor_list = re.split(r"[,，]", manager.config_v1.actors_name)
+    if manager.config.actors_name:
+        actor_list = re.split(r"[,，]", manager.config.actors_name)
         signal.show_log_text(
             f"\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n🔍 需要查询的演员：\n   {', '.join(actor_list)}"
         )

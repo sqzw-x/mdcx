@@ -3,13 +3,36 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import timedelta
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, cast
 
-from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 from pydantic.fields import FieldInfo
 
+from mdcx.gen.field_enums import CrawlerResultFields
+
+from ..manual import ManualConfig
 from ..server.config import SAFE_DIRS
-from .ui_schema import Enum, ServerPathDirectory, extract_ui_schema_recursive
+from .enums import (
+    CDChar,
+    CleanAction,
+    DownloadableFile,
+    EmbyAction,
+    FieldRule,
+    HDPicSource,
+    KeepableFile,
+    Language,
+    MarkType,
+    NfoInclude,
+    NoEscape,
+    OutlineShow,
+    ReadMode,
+    SuffixSort,
+    Switch,
+    TagInclude,
+    Translator,
+    Website,
+)
+from .ui_schema import ServerPathDirectory, extract_ui_schema_recursive
 
 
 # Helper function to convert comma/pipe separated strings to lists
@@ -32,570 +55,46 @@ def list_to_str(v: list[Any] | None, separator: str = ",") -> str:
     return separator + separator.join(map(str, v)) + separator
 
 
-class NoEscape(Enum):
-    NO_SKIP_SMALL_FILE = "no_skip_small_file"
-    FOLDER = "folder"
-    SKIP_SUCCESS_FILE = "skip_success_file"
-    RECORD_SUCCESS_FILE = "record_success_file"
-    CHECK_SYMLINK = "check_symlink"
-    SYMLINK_DEFINITION = "symlink_definition"
-
-    @classmethod
-    def names(cls):
-        return [
-            "不跳过小文件",
-            "目录",
-            "跳过成功文件",
-            "记录成功文件",
-            "检查符号链接",
-            "符号链接定义",
-        ]
-
-
-class CleanAction(Enum):
-    CLEAN_EXT = "clean_ext"
-    CLEAN_NAME = "clean_name"
-    CLEAN_CONTAINS = "clean_contains"
-    CLEAN_SIZE = "clean_size"
-    CLEAN_IGNORE_EXT = "clean_ignore_ext"
-    CLEAN_IGNORE_CONTAINS = "clean_ignore_contains"
-    I_KNOW = "i_know"
-    I_AGREE = "i_agree"
-    AUTO_CLEAN = "auto_clean"
-
-    @classmethod
-    def names(cls):
-        return [
-            "清理指定后缀文件",
-            "清理指定文件名",
-            "清理包含特定字符串的文件",
-            "清理小于指定大小的文件",
-            "忽略指定后缀",
-            "忽略包含特定字符串的文件",
-            "我知道",
-            "我同意",
-            "自动清理",
-        ]
-
-
-class WebsiteSet(Enum):
-    OFFICIAL = "official"
-
-    @classmethod
-    def names(cls):
-        return ["官网"]
-
-
-class OutlineShow(Enum):
-    SHOW_FROM = "show_from"
-    SHOW_ZH_JP = "show_zh_jp"
-    SHOW_JP_ZH = "show_jp_zh"
-
-    @classmethod
-    def names(cls):
-        return ["显示来源", "显示中日", "显示日中"]
-
-
-class TagInclude(Enum):
-    ACTOR = "actor"
-    LETTERS = "letters"
-    SERIES = "series"
-    STUDIO = "studio"
-    PUBLISHER = "publisher"
-    CNWORD = "cnword"
-    MOSAIC = "mosaic"
-    DEFINITION = "definition"
-
-    @classmethod
-    def names(cls):
-        return [
-            "演员",
-            "字母",
-            "Series",
-            "Studio",
-            "Publisher",
-            "Cnword",
-            "Mosaic",
-            "Definition",
-        ]
-
-
-class WholeField(Enum):
-    OUTLINE = "outline"
-    ACTOR = "actor"
-    THUMB = "thumb"
-    POSTER = "poster"
-    EXTRAFANART = "extrafanart"
-    TRAILER = "trailer"
-    RELEASE = "release"
-    RUNTIME = "runtime"
-    SCORE = "score"
-    TAG = "tag"
-    DIRECTOR = "director"
-    SERIES = "series"
-    STUDIO = "studio"
-    PUBLISHER = "publisher"
-
-    @classmethod
-    def names(cls):
-        return [
-            "简介",
-            "演员",
-            "缩略图",
-            "海报",
-            "附加剧照",
-            "预告片",
-            "发布日期",
-            "时长",
-            "评分",
-            "标签",
-            "导演",
-            "系列",
-            "工作室",
-            "发行商",
-        ]
-
-
-class NoneField(Enum):
-    OUTLINE = "outline"
-    ACTOR = "actor"
-    THUMB = "thumb"
-    POSTER = "poster"
-    EXTRAFANART = "extrafanart"
-    TRAILER = "trailer"
-    RELEASE = "release"
-    RUNTIME = "runtime"
-    SCORE = "score"
-    TAG = "tag"
-    DIRECTOR = "director"
-    SERIES = "series"
-    STUDIO = "studio"
-    PUBLISHER = "publisher"
-    WANTED = "wanted"
-
-    @classmethod
-    def names(cls):
-        return [
-            "简介",
-            "演员",
-            "缩略图",
-            "海报",
-            "附加剧照",
-            "预告片",
-            "发布日期",
-            "时长",
-            "评分",
-            "标签",
-            "导演",
-            "系列",
-            "工作室",
-            "发行商",
-            "想看",
-        ]
-
-
-class NfoInclude(Enum):
-    SORTTITLE = "sorttitle"
-    ORIGINALTITLE = "originaltitle"
-    TITLE_CD = "title_cd"
-    OUTLINE = "outline"
-    PLOT_ = "plot_"
-    ORIGINALPLOT = "originalplot"
-    OUTLINE_NO_CDATA = "outline_no_cdata"
-    RELEASE_ = "release_"
-    RELEASEDATE = "releasedate"
-    PREMIERED = "premiered"
-    COUNTRY = "country"
-    MPAA = "mpaa"
-    CUSTOMRATING = "customrating"
-    YEAR = "year"
-    RUNTIME = "runtime"
-    WANTED = "wanted"
-    SCORE = "score"
-    CRITICRATING = "criticrating"
-    ACTOR = "actor"
-    ACTOR_ALL = "actor_all"
-    DIRECTOR = "director"
-    SERIES = "series"
-    TAG = "tag"
-    GENRE = "genre"
-    ACTOR_SET = "actor_set"
-    SERIES_SET = "series_set"
-    STUDIO = "studio"
-    MAKER = "maker"
-    PUBLISHER = "publisher"
-    LABEL = "label"
-    POSTER = "poster"
-    COVER = "cover"
-    TRAILER = "trailer"
-    WEBSITE = "website"
-
-    @classmethod
-    def names(cls):
-        return [
-            "排序标题",
-            "原始标题",
-            "标题CD",
-            "简介",
-            "剧情",
-            "原始剧情",
-            "无CDATA简介",
-            "发布",
-            "发布日期",
-            "首映",
-            "国家",
-            "MPAA",
-            "自定义评分",
-            "年份",
-            "时长",
-            "想看",
-            "评分",
-            "评论家评分",
-            "演员",
-            "所有演员",
-            "导演",
-            "系列",
-            "标签",
-            "类型",
-            "演员集",
-            "系列集",
-            "工作室",
-            "制造商",
-            "发行商",
-            "标签",
-            "海报",
-            "封面",
-            "预告片",
-            "网站",
-        ]
-
-
-class Translator(Enum):
-    YOUDAO = "youdao"
-    GOOGLE = "google"
-    DEEPL = "deepl"
-    LLM = "llm"
-
-    @classmethod
-    def names(cls):
-        return ["有道", "谷歌", "Deepl", "LLM"]
-
-
-class ReadMode(Enum):
-    HAS_NFO_UPDATE = "has_nfo_update"
-    NO_NFO_SCRAPE = "no_nfo_scrape"
-    READ_DOWNLOAD_AGAIN = "read_download_again"
-    READ_UPDATE_NFO = "read_update_nfo"
-
-    @classmethod
-    def names(cls):
-        return ["有NFO时更新", "无NFO时刮削", "重新下载", "更新NFO"]
-
-
-class DownloadableFile(Enum):
-    POSTER = "poster"
-    THUMB = "thumb"
-    FANART = "fanart"
-    EXTRAFANART = "extrafanart"
-    TRAILER = "trailer"
-    NFO = "nfo"
-    EXTRAFANART_EXTRAS = "extrafanart_extras"
-    EXTRAFANART_COPY = "extrafanart_copy"
-    THEME_VIDEOS = "theme_videos"
-    IGNORE_PIC_FAIL = "ignore_pic_fail"
-    IGNORE_YOUMA = "ignore_youma"
-    IGNORE_WUMA = "ignore_wuma"
-    IGNORE_FC2 = "ignore_fc2"
-    IGNORE_GUOCHAN = "ignore_guochan"
-    IGNORE_SIZE = "ignore_size"
-
-    @classmethod
-    def names(cls):
-        return [
-            "海报",
-            "缩略图",
-            "剧照",
-            "额外剧照",
-            "预告片",
-            "Nfo",
-            "额外剧照扩展",
-            "额外剧照复制",
-            "主题视频",
-            "忽略图片失败",
-            "忽略有码",
-            "忽略无码",
-            "忽略FC2",
-            "忽略国产",
-            "忽略大小",
-        ]
-
-
-class KeepableFile(Enum):
-    POSTER = "poster"
-    THUMB = "thumb"
-    FANART = "fanart"
-    EXTRAFANART = "extrafanart"
-    TRAILER = "trailer"
-    NFO = "nfo"
-    EXTRAFANART_COPY = "extrafanart_copy"
-    THEME_VIDEOS = "theme_videos"
-
-    @classmethod
-    def names(cls):
-        return [
-            "海报",
-            "缩略图",
-            "剧照",
-            "额外剧照",
-            "预告片",
-            "nfo",
-            "复制额外剧照",
-            "主题视频",
-        ]
-
-
-class HDPicSource(Enum):
-    POSTER = "poster"
-    THUMB = "thumb"
-    AMAZON = "amazon"
-    OFFICIAL = "official"
-    GOOGLE = "google"
-    GOO_ONLY = "goo_only"
-
-    @classmethod
-    def names(cls):
-        return ["poster", "thumb", "Amazon", "官网", "Google", "仅 Google"]
-
-
-class FieldRule(Enum):
-    DEL_ACTOR = "del_actor"
-    DEL_CHAR = "del_char"
-    FC2_SELLER = "fc2_seller"
-    DEL_NUM = "del_num"
-
-    @classmethod
-    def names(cls):
-        return ["移除标题后的演员名", "移除演员名中的括号", "使用 FC2 卖家作为演员名", "移除番号前缀数字"]
-
-
-class ShowLocation(Enum):
-    FOLDER = "folder"
-    FILE = "file"
-
-    @classmethod
-    def names(cls):
-        return ["目录", "文件"]
-
-
-class CDChar(Enum):
-    LETTER = "letter"
-    ENDC = "endc"
-    DIGITAL = "digital"
-    MIDDLE_NUMBER = "middle_number"
-    UNDERLINE = "underline"
-    SPACE = "space"
-    POINT = "point"
-
-    @classmethod
-    def names(cls):
-        return [
-            "除C以外的字母",
-            "C结尾也视为分集而非字幕",
-            "末尾两位数字",
-            "不在结尾的数字",
-            "分集分隔符: 下划线",
-            "分集分隔符: 空格",
-            "分集分隔符: 英文句号",
-        ]
-
-
-class EmbyAction(Enum):
-    # todo 这些枚举对应 Emby 操作及配置的组合, 需简化
-    ACTOR_INFO_ZH_CN = "actor_info_zh_cn"
-    ACTOR_INFO_ZH_TW = "actor_info_zh_tw"
-    ACTOR_INFO_JA = "actor_info_ja"
-    ACTOR_INFO_ALL = "actor_info_all"
-    ACTOR_INFO_MISS = "actor_info_miss"
-    ACTOR_PHOTO_NET = "actor_photo_net"
-    ACTOR_PHOTO_LOCAL = "actor_photo_local"
-    ACTOR_PHOTO_ALL = "actor_photo_all"
-    ACTOR_PHOTO_MISS = "actor_photo_miss"
-    ACTOR_INFO_TRANSLATE = "actor_info_translate"
-    ACTOR_INFO_PHOTO = "actor_info_photo"
-    GRAPHIS_BACKDROP = "graphis_backdrop"
-    GRAPHIS_FACE = "graphis_face"
-    GRAPHIS_NEW = "graphis_new"
-    ACTOR_PHOTO_AUTO = "actor_photo_auto"
-    ACTOR_REPLACE = "actor_replace"
-
-    @classmethod
-    def names(cls):
-        return [
-            "获取简体中文演员信息",
-            "获取繁体中文演员信息",
-            "Actor Info Ja",
-            "Actor Info All",
-            "Actor Info Miss",
-            "Actor Photo Net",
-            "Actor Photo Local",
-            "Actor Photo All",
-            "Actor Photo Miss",
-            "Actor Info Translate",
-            "Actor Info Photo",
-            "Graphis Backdrop",
-            "Graphis Face",
-            "Graphis New",
-            "Actor Photo Auto",
-            "Actor Replace",
-        ]
-
-
-class MarkType(Enum):
-    SUB = "sub"
-    YOUMA = "youma"
-    UMR = "umr"
-    LEAK = "leak"
-    UNCENSORED = "uncensored"
-    HD = "hd"
-
-    @classmethod
-    def names(cls):
-        return ["字幕", "有码", "破解", "流出", "无码", "高清"]
-
-
-class Switch(Enum):
-    # todo 许多配置项不适用 web 应用
-    AUTO_START = "auto_start"
-    AUTO_EXIT = "auto_exit"
-    REST_SCRAPE = "rest_scrape"
-    TIMED_SCRAPE = "timed_scrape"
-    REMAIN_TASK = "remain_task"
-    SHOW_DIALOG_EXIT = "show_dialog_exit"
-    SHOW_DIALOG_STOP_SCRAPE = "show_dialog_stop_scrape"
-    SORT_DEL = "sort_del"
-    IPV4_ONLY = "ipv4_only"
-    QT_DIALOG = "qt_dialog"
-    THEPORNDB_NO_HASH = "theporndb_no_hash"
-    HIDE_DOCK = "hide_dock"
-    PASSTHROUGH = "passthrough"
-    HIDE_MENU = "hide_menu"
-    DARK_MODE = "dark_mode"
-    COPY_NETDISK_NFO = "copy_netdisk_nfo"
-    SHOW_LOGS = "show_logs"
-    HIDE_CLOSE = "hide_close"
-    HIDE_MINI = "hide_mini"
-    HIDE_NONE = "hide_none"
-
-    @classmethod
-    def names(cls):
-        return [
-            "自动开始",
-            "自动退出",
-            "Rest Scrape",
-            "Timed Scrape",
-            "Remain Task",
-            "Show Dialog Exit",
-            "Show Dialog Stop Scrape",
-            "Sort Del",
-            "Ipv4 Only",
-            "Qt Dialog",
-            "Theporndb No Hash",
-            "Hide Dock",
-            "Passthrough",
-            "Hide Menu",
-            "Dark Mode",
-            "Copy Netdisk Nfo",
-            "Show Logs",
-            "Hide Close",
-            "Hide Mini",
-            "Hide None",
-        ]
-
-
-class SuffixSort(Enum):
-    MOWORD = "moword"
-    CNWORD = "cnword"
-    DEFINITION = "definition"
-
-    @classmethod
-    def names(cls):
-        return ["马赛克", "中文字幕", "清晰度"]
-
-
-class Website(Enum):
-    AIRAV = "airav"
-    AIRAV_CC = "airav_cc"
-    AVSEX = "avsex"
-    AVSOX = "avsox"
-    CABLEAV = "cableav"
-    CNMDB = "cnmdb"
-    DMM = "dmm"
-    FALENO = "faleno"
-    FANTASTICA = "fantastica"
-    FC2 = "fc2"
-    FC2CLUB = "fc2club"
-    FC2HUB = "fc2hub"
-    FC2PPVDB = "fc2ppvdb"
-    FREEJAVBT = "freejavbt"
-    GETCHU = "getchu"
-    GIGA = "giga"
-    HDOUBAN = "hdouban"
-    HSCANGKU = "hscangku"
-    IQQTV = "iqqtv"
-    JAV321 = "jav321"
-    JAVBUS = "javbus"
-    JAVDAY = "javday"
-    JAVDB = "javdb"
-    JAVLIBRARY = "javlibrary"
-    KIN8 = "kin8"
-    LOVE6 = "love6"
-    LULUBAR = "lulubar"
-    MADOUQU = "madouqu"
-    MDTV = "mdtv"
-    MGSTAGE = "mgstage"
-    MMTV = "7mmtv"
-    MYWIFE = "mywife"
-    PRESTIGE = "prestige"
-    THEPORNDB = "theporndb"
-    XCITY = "xcity"
-
-    DAHLIA = "dahlia"
-    GETCHU_DMM = "getchu_dmm"
-    OFFICIAL = "official"
-
-
-class Language(Enum):
-    UNDEFINED = "undefined"
-    UNKNOWN = "unknown"
-    ZH_CN = "zh_cn"
-    ZH_TW = "zh_tw"
-    JP = "jp"
-    EN = "en"
-
-
 class TranslateConfig(BaseModel):
     translate_by: list[Translator] = Field(
         default_factory=lambda: [Translator.YOUDAO, Translator.GOOGLE, Translator.DEEPL, Translator.LLM],
         title="翻译服务",
     )
     deepl_key: str = Field(default="", title="Deepl密钥")
-    llm_url: HttpUrl = Field(default=HttpUrl("https://api.llm.com/v1"), title="Llm网址")
-    llm_model: str = Field(default="gpt-3.5-turbo", title="Llm模型")
-    llm_key: str = Field(default="", title="Llm密钥")
+    llm_url: HttpUrl = Field(default=HttpUrl("https://api.llm.com/v1"), title="LLM API Host")
+    llm_model: str = Field(default="gpt-3.5-turbo", title="模型 ID")
+    llm_key: str = Field(default="", title="LLM API Key")
     llm_prompt: str = Field(
         default="Please translate the following text to {lang}. Output only the translation without any explanation.\n{content}",
-        title="Llm提示",
+        title="LLM 提示词",
     )
-    llm_max_req_sec: float = Field(default=1, title="Llm每秒最大请求数")
-    llm_max_try: int = Field(default=5, title="Llm最大尝试次数")
-    llm_temperature: float = Field(default=0.2, title="Llm温度")
+    llm_read_timeout: int = Field(default=60, title="LLM 读取超时 (秒)", description="LLM 生成耗时较长, 建议设置较大值")
+    llm_max_req_sec: float = Field(default=1, title="LLM 每秒最大请求数")
+    llm_max_try: int = Field(default=5, title="LLM 最大尝试次数")
+    llm_temperature: float = Field(default=0.2, title="LLM 温度")
+
+    def model_post_init(self, context) -> None:
+        if self.llm_max_req_sec <= 0:
+            self.llm_max_req_sec = 1
+
+
+class SiteConfig(BaseModel):
+    use_browser: bool = Field(default=False, title="使用无头浏览器")
+    custom_url: HttpUrl | None = Field(default=None, title="自定义网址")
+
+
+class FieldConfig(BaseModel):
+    site_prority: list[Website] = Field(default_factory=list, title="来源网站优先级")
+    language: Language = Field(default=Language.UNDEFINED, title="语言偏好")
+    translate: bool = Field(
+        default=True,
+        title="翻译此字段",
+        description="若启用则使用首个来源的数据并翻译为指定语言; 否则使用第一个指定语言的数据, 如果所有来源都没有指定语言数据则视为失败.",
+    )
 
 
 class Config(BaseModel):
-    """
-    Pydantic model for application configuration, converted from ConfigSchema.
-    """
-
+    model_config = ConfigDict()
     # region: General Settings
     media_path: str = ServerPathDirectory("./media", title="媒体路径", initial_path=SAFE_DIRS[0].as_posix())
     softlink_path: str = ServerPathDirectory("softlink", title="软链接路径", ref_field="media_path")
@@ -644,7 +143,7 @@ class Config(BaseModel):
     # endregion
 
     # region: Cleaning Settings
-    folders: list[str] = Field(default_factory=lambda: ["JAV_output", "examples"], title="要处理的目录")
+    folders: list[str] = Field(default_factory=lambda: ["JAV_output", "examples"], title="排除的目录")
     string: list[str] = Field(
         default_factory=lambda: [
             "h_720",
@@ -688,7 +187,7 @@ class Config(BaseModel):
         ],
         title="清理规则: 文件名包含",
     )
-    clean_size: float = Field(default=0.0, title="清理小于此大小的文件（MB）")
+    clean_size: float = Field(default=0.0, title="清理小于此大小的文件（KB）")
     clean_ignore_ext: list[str] = Field(
         default_factory=list,
         title="清理规则: 排除扩展名",
@@ -711,7 +210,7 @@ class Config(BaseModel):
     # endregion
 
     # region: Scraping Settings
-    thread_number: int = Field(default=10, title="线程数")
+    thread_number: int = Field(default=50, title="并发数")
     thread_time: int = Field(default=0, title="线程时间")
     javdb_time: int = Field(default=10, title="Javdb时间")
     main_mode: int = Field(default=1, title="主模式")
@@ -790,34 +289,37 @@ class Config(BaseModel):
         ],
         title="Google搜图排除的网址",
     )
-    scrape_like: str = Field(default="info", title="刮削收藏")
+    scrape_like: str = Field(default="info", title="刮削模式")  # speed, info, single
     # endregion
 
     # region: Website Settings
-    # todo 简化以下配置
     website_single: Website = Field(default=Website.AIRAV_CC, title="单个网站")  # todo 移除
-    website_youma: list[Website] = Field(
-        default_factory=lambda: [
-            Website.AIRAV_CC,
+    website_youma: set[Website] = Field(
+        default_factory=lambda: {
+            Website.OFFICIAL,
             Website.IQQTV,
-            Website.JAVBUS,
-            Website.FREEJAVBT,
-            Website.JAV321,
-            Website.DMM,
-            Website.JAVLIBRARY,
-            Website.MMTV,
-            Website.HDOUBAN,
-            Website.JAVDB,
             Website.AVSEX,
-            Website.LULUBAR,
-            Website.AIRAV,
-            Website.XCITY,
             Website.AVSOX,
-        ],
+            Website.CABLEAV,
+            Website.DMM,
+            Website.FALENO,
+            Website.FANTASTICA,
+            Website.GIGA,
+            Website.JAV321,
+            Website.JAVBUS,
+            Website.JAVDAY,
+            Website.JAVDB,
+            Website.LOVE6,
+            Website.LULUBAR,
+            Website.MGSTAGE,
+            Website.MYWIFE,
+            Website.PRESTIGE,
+            Website.XCITY,
+        },
         title="有码网站源",
     )
-    website_wuma: list[Website] = Field(
-        default_factory=lambda: [
+    website_wuma: set[Website] = Field(
+        default_factory=lambda: {
             Website.IQQTV,
             Website.JAVBUS,
             Website.FREEJAVBT,
@@ -827,11 +329,11 @@ class Config(BaseModel):
             Website.HDOUBAN,
             Website.JAVDB,
             Website.AIRAV,
-        ],
+        },
         title="无码网站源",
     )
-    website_suren: list[Website] = Field(
-        default_factory=lambda: [
+    website_suren: set[Website] = Field(
+        default_factory=lambda: {
             Website.MGSTAGE,
             Website.AVSEX,
             Website.JAV321,
@@ -839,11 +341,11 @@ class Config(BaseModel):
             Website.MMTV,
             Website.JAVBUS,
             Website.JAVDB,
-        ],
+        },
         title="素人网站源",
     )
-    website_fc2: list[Website] = Field(
-        default_factory=lambda: [
+    website_fc2: set[Website] = Field(
+        default_factory=lambda: {
             Website.FC2,
             Website.FC2CLUB,
             Website.FC2HUB,
@@ -853,289 +355,95 @@ class Config(BaseModel):
             Website.JAVDB,
             Website.AVSOX,
             Website.AIRAV,
-        ],
+        },
         title="FC2网站源",
     )
-    website_oumei: list[Website] = Field(
-        default_factory=lambda: [Website.THEPORNDB, Website.JAVDB, Website.JAVBUS, Website.HDOUBAN],
+    website_oumei: set[Website] = Field(
+        default_factory=lambda: {Website.THEPORNDB, Website.JAVDB, Website.JAVBUS, Website.HDOUBAN},
         title="欧美网站源",
     )
-    website_guochan: list[Website] = Field(
-        default_factory=lambda: [Website.MADOUQU, Website.MDTV, Website.HDOUBAN, Website.CNMDB, Website.JAVDAY],
+    website_guochan: set[Website] = Field(
+        default_factory=lambda: {Website.MADOUQU, Website.MDTV, Website.HDOUBAN, Website.CNMDB, Website.JAVDAY},
         title="国产网站源",
     )
-    whole_fields: list[WholeField] = Field(
-        default_factory=lambda: [
-            WholeField.OUTLINE,
-            WholeField.ACTOR,
-            WholeField.THUMB,
-            WholeField.POSTER,
-            WholeField.EXTRAFANART,
-            WholeField.TRAILER,
-            WholeField.RELEASE,
-            WholeField.RUNTIME,
-            WholeField.SCORE,
-            WholeField.TAG,
-            WholeField.DIRECTOR,
-            WholeField.SERIES,
-            WholeField.STUDIO,
-            WholeField.PUBLISHER,
-        ],
-        title="完整字段",
-    )
-    none_fields: list[NoneField] = Field(
-        default_factory=lambda: [
-            NoneField.OUTLINE,
-            NoneField.ACTOR,
-            NoneField.THUMB,
-            NoneField.POSTER,
-            NoneField.EXTRAFANART,
-            NoneField.TRAILER,
-            NoneField.RELEASE,
-            NoneField.RUNTIME,
-            NoneField.SCORE,
-            NoneField.TAG,
-            NoneField.DIRECTOR,
-            NoneField.SERIES,
-            NoneField.STUDIO,
-            NoneField.PUBLISHER,
-            NoneField.WANTED,
-        ],
-        title="空字段",
-    )
-    website_set: list[WebsiteSet] = Field(
-        default_factory=lambda: [WebsiteSet.OFFICIAL],
-        title="网站设置",
-    )
-    title_website: list[Website] = Field(
-        default_factory=lambda: [
-            Website.THEPORNDB,
-            Website.MGSTAGE,
-            Website.DMM,
-            Website.JAVBUS,
-            Website.JAV321,
-            Website.JAVLIBRARY,
-        ],
-        title="标题网站源",
-    )
-    title_zh_website: list[Website] = Field(
-        default_factory=lambda: [Website.AIRAV_CC, Website.IQQTV, Website.AVSEX, Website.LULUBAR],
-        title="中文标题网站源",
-    )
-    title_website_exclude: list[Website] = Field(
-        default_factory=list,
-        title="排除的标题网站源",
-    )
-    outline_website: list[Website] = Field(
-        default_factory=lambda: [Website.THEPORNDB, Website.DMM, Website.JAV321],
-        title="简介网站源",
-    )
-    outline_zh_website: list[Website] = Field(
-        default_factory=lambda: [Website.AIRAV_CC, Website.AVSEX, Website.IQQTV, Website.LULUBAR],
-        title="中文简介网站源",
-    )
-    outline_website_exclude: list[Website] = Field(
-        default_factory=lambda: [
-            Website.AVSOX,
-            Website.FC2CLUB,
-            Website.JAVBUS,
-            Website.JAVDB,
-            Website.JAVLIBRARY,
-            Website.FREEJAVBT,
-            Website.HDOUBAN,
-        ],
-        title="排除的简介网站源",
-    )
-    actor_website: list[Website] = Field(
-        default_factory=lambda: [Website.THEPORNDB, Website.JAVBUS, Website.JAVLIBRARY, Website.JAVDB],
-        title="演员网站源",
-    )
-    actor_website_exclude: list[Website] = Field(
-        default_factory=list,
-        title="排除的演员网站源",
-    )
-    thumb_website: list[Website] = Field(
-        default_factory=lambda: [Website.THEPORNDB, Website.JAVBUS],
-        title="缩略图网站源",
-    )
-    thumb_website_exclude: list[Website] = Field(
-        default_factory=lambda: [Website.JAVDB],
-        title="排除的缩略图网站源",
-    )
-    poster_website: list[Website] = Field(
-        default_factory=lambda: [Website.THEPORNDB, Website.AVSEX, Website.JAVBUS],
-        title="海报网站源",
-    )
-    poster_website_exclude: list[Website] = Field(
-        default_factory=lambda: [
-            Website.AIRAV,
-            Website.FC2CLUB,
-            Website.FC2HUB,
-            Website.IQQTV,
-            Website.MMTV,
-            Website.JAVLIBRARY,
-            Website.LULUBAR,
-        ],
-        title="排除的海报网站源",
-    )
-    extrafanart_website: list[Website] = Field(
-        default_factory=lambda: [Website.JAVBUS, Website.FREEJAVBT],
-        title="剧照网站源",
-    )
-    extrafanart_website_exclude: list[Website] = Field(
-        default_factory=lambda: [
-            Website.AIRAV,
-            Website.AIRAV_CC,
-            Website.AVSEX,
-            Website.AVSOX,
-            Website.IQQTV,
-            Website.JAVLIBRARY,
-            Website.LULUBAR,
-        ],
-        title="排除的剧照网站源",
-    )
-    trailer_website: list[Website] = Field(
-        default_factory=lambda: [Website.FREEJAVBT, Website.MGSTAGE, Website.DMM],
-        title="预告片网站源",
-    )
-    trailer_website_exclude: list[Website] = Field(
-        default_factory=lambda: [Website.MMTV, Website.LULUBAR],
-        title="排除的预告片网站源",
-    )
-    tag_website: list[Website] = Field(
-        default_factory=lambda: [Website.JAVBUS, Website.FREEJAVBT],
-        title="标签网站源",
-    )
-    tag_website_exclude: list[Website] = Field(
-        default_factory=list,
-        title="排除的标签网站源",
-    )
-    release_website: list[Website] = Field(
-        default_factory=lambda: [Website.JAVBUS, Website.FREEJAVBT, Website.MMTV],
-        title="发布日期网站源",
-    )
-    release_website_exclude: list[Website] = Field(
-        default_factory=lambda: [Website.FC2CLUB, Website.FC2HUB],
-        title="排除的发布日期网站源",
-    )
-    runtime_website: list[Website] = Field(
-        default_factory=lambda: [Website.JAVBUS, Website.FREEJAVBT],
-        title="时长网站源",
-    )
-    runtime_website_exclude: list[Website] = Field(
-        default_factory=lambda: [
-            Website.AIRAV,
-            Website.AIRAV_CC,
-            Website.FC2,
-            Website.FC2CLUB,
-            Website.FC2HUB,
-            Website.LULUBAR,
-        ],
-        title="排除的时长网站源",
-    )
-    score_website: list[Website] = Field(
-        default_factory=lambda: [Website.JAV321, Website.JAVLIBRARY, Website.JAVDB],
-        title="评分网站源",
-    )
-    score_website_exclude: list[Website] = Field(
-        default_factory=lambda: [
-            Website.AIRAV,
-            Website.AIRAV_CC,
-            Website.AVSEX,
-            Website.AVSOX,
-            Website.MMTV,
-            Website.FC2,
-            Website.FC2HUB,
-            Website.IQQTV,
-            Website.JAVBUS,
-            Website.XCITY,
-            Website.LULUBAR,
-        ],
-        title="排除的评分网站源",
-    )
-    director_website: list[Website] = Field(
-        default_factory=lambda: [Website.JAVBUS, Website.FREEJAVBT],
-        title="导演网站源",
-    )
-    director_website_exclude: list[Website] = Field(
-        default_factory=lambda: [
-            Website.AIRAV,
-            Website.AIRAV_CC,
-            Website.AVSEX,
-            Website.AVSOX,
-            Website.FC2,
-            Website.FC2HUB,
-            Website.IQQTV,
-            Website.JAV321,
-            Website.MGSTAGE,
-            Website.LULUBAR,
-        ],
-        title="排除的导演网站源",
-    )
-    series_website: list[Website] = Field(
-        default_factory=lambda: [Website.JAVBUS, Website.FREEJAVBT],
-        title="系列网站源",
-    )
-    series_website_exclude: list[Website] = Field(
-        default_factory=lambda: [
-            Website.AIRAV,
-            Website.AIRAV_CC,
-            Website.AVSEX,
-            Website.IQQTV,
-            Website.MMTV,
-            Website.JAVLIBRARY,
-            Website.LULUBAR,
-        ],
-        title="排除的系列网站源",
-    )
-    studio_website: list[Website] = Field(
-        default_factory=lambda: [Website.JAVBUS, Website.FREEJAVBT],
-        title="工作室网站源",
-    )
-    studio_website_exclude: list[Website] = Field(
-        default_factory=lambda: [Website.AVSEX],
-        title="排除的工作室网站源",
-    )
-    publisher_website: list[Website] = Field(
-        default_factory=lambda: [Website.JAVBUS],
-        title="发行商网站源",
-    )
-    publisher_website_exclude: list[Website] = Field(
-        default_factory=lambda: [Website.AIRAV, Website.AIRAV_CC, Website.AVSEX, Website.IQQTV, Website.LULUBAR],
-        title="排除的发行商网站源",
-    )
-    wanted_website: list[Website] = Field(
-        default_factory=lambda: [Website.JAVLIBRARY, Website.JAVDB],
-        title="想看网站源",
-    )
-    title_language: Language = Field(default=Language.ZH_CN, title="标题语言")
+
     title_sehua: bool = Field(default=True, title="使用色花标题")
     title_yesjav: bool = Field(default=False, title="使用 Yesjav 标题")
-    title_translate: bool = Field(default=True, title="翻译标题")
     title_sehua_zh: bool = Field(default=True, title="使用色花中文标题")
-    outline_language: Language = Field(default=Language.ZH_CN, title="简介语言")
-    outline_translate: bool = Field(default=True, title="翻译简介")
-    outline_format: list[OutlineShow] = Field(default_factory=list, title="简介格式")
-    actor_language: Language = Field(default=Language.ZH_CN, title="演员语言")
     actor_realname: bool = Field(default=True, title="演员真名")
-    actor_translate: bool = Field(default=True, title="翻译演员")
-    tag_language: Language = Field(default=Language.ZH_CN, title="标签语言")
-    tag_translate: bool = Field(default=True, title="翻译标签")
-    director_language: Language = Field(default=Language.ZH_CN, title="导演语言")
-    director_translate: bool = Field(default=True, title="翻译导演")
-    series_language: Language = Field(default=Language.ZH_CN, title="系列语言")
-    series_translate: bool = Field(default=True, title="翻译系列")
-    studio_language: Language = Field(default=Language.ZH_CN, title="工作室语言")
-    studio_translate: bool = Field(default=True, title="翻译工作室")
-    publisher_language: Language = Field(default=Language.ZH_CN, title="发行商语言")
-    publisher_translate: bool = Field(default=True, title="翻译发行商")
-
-    # region: Translation Settings
-    translate_config: TranslateConfig = Field(
-        default_factory=TranslateConfig,
-        title="翻译配置",
-    )
+    outline_format: list[OutlineShow] = Field(default_factory=list, title="简介格式")
     # endregion
+
+    field_configs: dict[CrawlerResultFields, FieldConfig] = Field(
+        default_factory=lambda: {
+            CrawlerResultFields.TITLE: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB],
+                language=Language.JP,
+            ),
+            CrawlerResultFields.ORIGINALTITLE: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB],
+            ),
+            CrawlerResultFields.OUTLINE: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB],
+                language=Language.JP,
+            ),
+            CrawlerResultFields.ORIGINALPLOT: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB],
+            ),
+            CrawlerResultFields.ACTORS: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB],
+                language=Language.JP,
+            ),
+            CrawlerResultFields.ALL_ACTORS: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.JAVDB],
+                language=Language.JP,
+            ),
+            CrawlerResultFields.TAGS: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB],
+                language=Language.ZH_CN,
+            ),
+            CrawlerResultFields.DIRECTORS: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB],
+                language=Language.JP,
+            ),
+            CrawlerResultFields.SERIES: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB],
+                language=Language.JP,
+            ),
+            CrawlerResultFields.STUDIO: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB],
+                language=Language.JP,
+            ),
+            CrawlerResultFields.PUBLISHER: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB],
+                language=Language.JP,
+            ),
+            CrawlerResultFields.THUMB: FieldConfig(site_prority=[Website.THEPORNDB, Website.DMM]),
+            CrawlerResultFields.POSTER: FieldConfig(site_prority=[Website.THEPORNDB, Website.DMM]),
+            CrawlerResultFields.EXTRAFANART: FieldConfig(site_prority=[Website.THEPORNDB, Website.DMM]),
+            CrawlerResultFields.TRAILER: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB]
+            ),
+            CrawlerResultFields.RELEASE: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB]
+            ),
+            CrawlerResultFields.RUNTIME: FieldConfig(
+                site_prority=[Website.THEPORNDB, Website.OFFICIAL, Website.DMM, Website.JAVDB]
+            ),
+            CrawlerResultFields.SCORE: FieldConfig(site_prority=[Website.THEPORNDB, Website.DMM, Website.JAVDB]),
+            CrawlerResultFields.WANTED: FieldConfig(site_prority=[Website.DMM, Website.JAVDB]),
+        },
+        title="字段配置",
+    )
+
+    site_configs: dict[Website, SiteConfig] = Field(
+        default_factory=lambda: {
+            Website.DMM: SiteConfig(use_browser=True),
+        },
+        title="网站配置",
+    )
+
+    translate_config: TranslateConfig = Field(default_factory=TranslateConfig, title="翻译配置")
 
     # region: Naming and Formatting
     nfo_include_new: list[NfoInclude] = Field(
@@ -1195,7 +503,7 @@ class Config(BaseModel):
     nfo_tag_studio: str = Field(default="片商: studio", title="NFO工作室标签")
     nfo_tag_publisher: str = Field(default="发行: publisher", title="NFO发行商标签")
     nfo_tag_actor: str = Field(default="actor", title="NFO演员标签")
-    nfo_tag_actor_contains: str = Field(default="", title="NFO演员包含标签")
+    nfo_tag_actor_contains: list[str] = Field(default_factory=list, title="NFO 演员名白名单")
     folder_name: str = Field(default="actor/number actor", title="目录名称")
     naming_file: str = Field(default="number", title="文件命名")
     naming_media: str = Field(default="number title", title="媒体命名")
@@ -1233,10 +541,10 @@ class Config(BaseModel):
     )
     pic_simple_name: bool = Field(default=False, title="图片简化命名")
     trailer_simple_name: bool = Field(default=True, title="预告片简化命名")
-    hd_name: str = Field(default="height", title="高清名称")
-    hd_get: str = Field(default="video", title="获取高清")
+    hd_name: Literal["height", "hd"] = Field(default="height", title="高清名称")
+    hd_get: Literal["video", "path", "none"] = Field(default="video", title="获取高清")
     cnword_char: list[str] = Field(default_factory=lambda: ["-C.", "-C-", "ch.", "字幕"], title="中文字符")
-    cnword_style: str = Field(default="^-C^", title="中文样式")
+    cnword_style: str = Field(default="-C", title="中文样式")
     folder_cnword: bool = Field(default=True, title="目录中文")
     file_cnword: bool = Field(default=True, title="文件中文")
     subtitle_folder: str = Field(default="", title="字幕目录")
@@ -1248,7 +556,7 @@ class Config(BaseModel):
     # region: Server Settings
     server_type: str = Field(default="emby", title="服务器类型")
     emby_url: HttpUrl = Field(default=HttpUrl("http://127.0.0.1:8096"), title="Emby网址")
-    api_key: str = Field(default="ee9a2f2419704257b1dd60b975f2d64e", title="API密钥")
+    api_key: str = Field(default="", title="API密钥")
     user_id: str = Field(default="", title="用户ID")
     emby_on: list[EmbyAction] = Field(
         default_factory=lambda: [
@@ -1266,7 +574,7 @@ class Config(BaseModel):
         ],
         title="Emby功能开关",
     )
-    use_database: int = Field(default=0, title="使用数据库")
+    use_database: bool = Field(default=False, title="使用数据库")
     info_database_path: str = Field(default="", title="信息数据库路径")
     gfriends_github: HttpUrl = Field(default=HttpUrl("https://github.com/gfriends/gfriends"), title="Gfriends Github")
     actor_photo_folder: str = Field(default="", title="演员照片目录")
@@ -1298,7 +606,7 @@ class Config(BaseModel):
     # endregion
 
     # region: Network Settings
-    proxy_type: str = Field(default="no", title="代理类型")
+    use_proxy: bool = Field(default=False, title="代理类型")
     proxy: str = Field(default="127.0.0.1:7890", title="代理地址")
     timeout: int = Field(default=10, title="超时")
     retry: int = Field(default=3, title="重试")
@@ -1349,12 +657,164 @@ class Config(BaseModel):
     statement: int = Field(default=3, title="声明")
     # endregion
 
-    @model_validator(mode="before")
-    def _update(cls, d: dict[str, Any]) -> dict[str, Any]:
+    # region: deperated
+    # website_set: list[WebsiteSet] = Field(default_factory=list, title="网站设置")
+    # whole_fields: list[WholeField] = Field(default_factory=list, title="完整字段")
+    # none_fields: list[NoneField] = Field(default_factory=list, title="空字段")
+    # title_website: list[Website] = Field(default_factory=list, title="标题网站源")
+    # title_zh_website: list[Website] = Field(default_factory=list, title="中文标题网站源")
+    # title_website_exclude: list[Website] = Field(default_factory=list, title="排除的标题网站源")
+    # outline_website: list[Website] = Field(default_factory=list, title="简介网站源")
+    # outline_zh_website: list[Website] = Field(default_factory=list, title="中文简介网站源")
+    # outline_website_exclude: list[Website] = Field(default_factory=list, title="排除的简介网站源")
+    # actor_website: list[Website] = Field(default_factory=list, title="演员网站源")
+    # actor_website_exclude: list[Website] = Field(default_factory=list, title="排除的演员网站源")
+    # thumb_website: list[Website] = Field(default_factory=list, title="缩略图网站源")
+    # thumb_website_exclude: list[Website] = Field(default_factory=list, title="排除的缩略图网站源")
+    # poster_website: list[Website] = Field(default_factory=list, title="海报网站源")
+    # poster_website_exclude: list[Website] = Field(default_factory=list, title="排除的海报网站源")
+    # extrafanart_website: list[Website] = Field(default_factory=list, title="剧照网站源")
+    # extrafanart_website_exclude: list[Website] = Field(default_factory=list, title="排除的剧照网站源")
+    # trailer_website: list[Website] = Field(default_factory=list, title="预告片网站源")
+    # trailer_website_exclude: list[Website] = Field(default_factory=list, title="排除的预告片网站源")
+    # tag_website: list[Website] = Field(default_factory=list, title="标签网站源")
+    # tag_website_exclude: list[Website] = Field(default_factory=list, title="排除的标签网站源")
+    # release_website: list[Website] = Field(default_factory=list, title="发布日期网站源")
+    # release_website_exclude: list[Website] = Field(default_factory=list, title="排除的发布日期网站源")
+    # runtime_website: list[Website] = Field(default_factory=list, title="时长网站源")
+    # runtime_website_exclude: list[Website] = Field(default_factory=list, title="排除的时长网站源")
+    # score_website: list[Website] = Field(default_factory=list, title="评分网站源")
+    # score_website_exclude: list[Website] = Field(default_factory=list, title="排除的评分网站源")
+    # director_website: list[Website] = Field(default_factory=list, title="导演网站源")
+    # director_website_exclude: list[Website] = Field(default_factory=list, title="排除的导演网站源")
+    # series_website: list[Website] = Field(default_factory=list, title="系列网站源")
+    # series_website_exclude: list[Website] = Field(default_factory=list, title="排除的系列网站源")
+    # studio_website: list[Website] = Field(default_factory=list, title="工作室网站源")
+    # studio_website_exclude: list[Website] = Field(default_factory=list, title="排除的工作室网站源")
+    # publisher_website: list[Website] = Field(default_factory=list, title="发行商网站源")
+    # publisher_website_exclude: list[Website] = Field(default_factory=list, title="排除的发行商网站源")
+    # wanted_website: list[Website] = Field(default_factory=list, title="想看网站源")
+    # title_language: Language = Field(default=Language.ZH_CN, title="标题语言")
+    # title_translate: bool = Field(default=True, title="翻译标题")
+    # outline_language: Language = Field(default=Language.ZH_CN, title="简介语言")
+    # outline_translate: bool = Field(default=True, title="翻译简介")
+    # actor_language: Language = Field(default=Language.ZH_CN, title="演员语言")
+    # actor_translate: bool = Field(default=True, title="翻译演员")
+    # tag_language: Language = Field(default=Language.ZH_CN, title="标签语言")
+    # tag_translate: bool = Field(default=True, title="翻译标签")
+    # director_language: Language = Field(default=Language.ZH_CN, title="导演语言")
+    # director_translate: bool = Field(default=True, title="翻译导演")
+    # series_language: Language = Field(default=Language.ZH_CN, title="系列语言")
+    # series_translate: bool = Field(default=True, title="翻译系列")
+    # studio_language: Language = Field(default=Language.ZH_CN, title="工作室语言")
+    # studio_translate: bool = Field(default=True, title="翻译工作室")
+    # publisher_language: Language = Field(default=Language.ZH_CN, title="发行商语言")
+    # publisher_translate: bool = Field(default=True, title="翻译发行商")
+    # endregion
+
+    def get_site_config(self, site: Website) -> SiteConfig:
+        return self.site_configs.get(site, SiteConfig())
+
+    def get_site_url(self, site: Website, default: str = "") -> str:
+        """获取指定网站的用户自定义 URL, 结尾无斜杠."""
+        return str(self.get_site_config(site).custom_url or default).rstrip("/")
+
+    def get_field_config(self, field: CrawlerResultFields) -> FieldConfig:
+        return self.field_configs.get(field, FieldConfig())
+
+    def set_field_sites(self, field: CrawlerResultFields, sites: list[Website] | str):
+        sites = self.parse_sites(sites)
+        self.field_configs.setdefault(field, FieldConfig()).site_prority = sites
+
+    def set_field_language(self, field: CrawlerResultFields, language: Language):
+        self.field_configs.setdefault(field, FieldConfig()).language = language
+
+    def set_field_translate(self, field: CrawlerResultFields, translate: bool):
+        self.field_configs.setdefault(field, FieldConfig()).translate = translate
+
+    @staticmethod
+    def parse_sites(sites: list | set | str) -> list[Website]:
+        if isinstance(sites, str):
+            sites = str_to_list(sites, ",")
+        return list(dict.fromkeys(Website(s) for s in sites if s in Website))
+
+    @staticmethod
+    def update(d: dict[str, Any]) -> list[str]:
         """
-        处理版本变更.
+        处理字段变更.
         """
-        return d
+        if "proxy_type" in d:
+            d["use_proxy"] = d["proxy_type"] != "no"
+        if isinstance(r := d.get("nfo_tag_actor_contains"), str):
+            d["nfo_tag_actor_contains"] = str_to_list(r, "|")
+        if isinstance(r := d.get("use_database"), int):
+            d["use_database"] = bool(r)
+        if "site_configs" not in d:
+            d["site_configs"] = {Website.DMM: SiteConfig(use_browser=True)}
+        elif Website.DMM not in d["site_configs"]:
+            d["site_configs"][Website.DMM] = SiteConfig(use_browser=True)
+
+        # 处理旧版字段设置
+        if "field_configs" not in d:
+            Config._convert_field_configs(d)
+
+        return []
+
+    @staticmethod
+    def _convert_field_configs(d):
+        field_configs: dict[CrawlerResultFields, FieldConfig] = {}
+        whole_fields: list[str] = d.get("whole_fields", [])
+        none_fields: list[str] = d.get("none_fields", [])
+        website_youma = Config.parse_sites(d.get("website_youma", []))
+        website_wuma = Config.parse_sites(d.get("website_wuma", []))
+        website_suren = Config.parse_sites(d.get("website_suren", []))
+        website_fc2 = Config.parse_sites(d.get("website_fc2", []))
+        website_oumei = Config.parse_sites(d.get("website_oumei", []))
+        website_guochan = Config.parse_sites(d.get("website_youma", []))
+        all_enabled_sites = list(
+            dict.fromkeys(website_youma + website_wuma + website_suren + website_fc2 + website_oumei + website_guochan)
+        )
+        for field_name in ManualConfig.CONFIG_DATA_FIELDS:
+            if field_name in ("outline_zh", "title_zh"):
+                continue
+            if field_name in ManualConfig.RENAME_MAP:
+                new_key = ManualConfig.RENAME_MAP[field_name]
+            else:
+                new_key = field_name
+            assert new_key in CrawlerResultFields, f"Field {new_key} is not a valid CrawlerResultFields"
+            new_key = cast(CrawlerResultFields, new_key)
+
+            field_site = Config.parse_sites(d.get(f"{field_name}_website", []))
+            if field_name in ("outline", "title"):
+                field_site += Config.parse_sites(d.get(f"{field_name}_zh_website", []))
+            if len(d.get("website_set", [])) > 0:
+                field_site.insert(0, Website.OFFICIAL)
+            field_site_exclude = Config.parse_sites(d.get(f"{field_name}_website_exclude", []))
+            field_lang = Language(d.get(f"{field_name}_language", Language.UNDEFINED))
+            field_translate: bool = d.get(f"{field_name}_translate", False)
+
+            if field_name in none_fields:  # 不单独刮削
+                field_configs[new_key] = FieldConfig(language=field_lang, translate=field_translate)
+                continue
+            if field_name in whole_fields:
+                sites = list(dict.fromkeys(s for s in field_site + all_enabled_sites if s not in field_site_exclude))
+            else:
+                sites = list(dict.fromkeys(s for s in field_site if s not in field_site_exclude))
+            field_configs[new_key] = FieldConfig(site_prority=sites, language=field_lang, translate=field_translate)
+            # 处理旧版无配置项的字段
+        field_configs[CrawlerResultFields.ALL_ACTORS] = field_configs.get(
+            CrawlerResultFields.ACTORS,
+            FieldConfig(site_prority=[Website.JAVDB], language=Language.JP),
+        )
+        field_configs[CrawlerResultFields.ORIGINALPLOT] = field_configs.get(
+            CrawlerResultFields.OUTLINE,
+            FieldConfig(site_prority=[Website.THEPORNDB, Website.DMM, Website.JAV321], language=Language.ZH_CN),
+        )
+        field_configs[CrawlerResultFields.ORIGINALTITLE] = field_configs.get(
+            CrawlerResultFields.TITLE,
+            FieldConfig(site_prority=[Website.THEPORNDB, Website.DMM, Website.JAV321], language=Language.ZH_CN),
+        )
+        d["field_configs"] = field_configs
 
     @field_validator("timed_interval", "rest_time", mode="before")
     def convert_time_str_to_timedelta(cls, v):
@@ -1365,73 +825,10 @@ class Config(BaseModel):
             return timedelta(hours=h, minutes=m, seconds=s)
         return v
 
-    def to_legacy(self) -> dict[str, Any]:
-        """
-        将 Pydantic 模型转换为可用于构造 ConfigSchema 的 dict.
-
-        Returns:
-            d: 与 ConfigSchema 兼容的 dict.
-        """
-        d = self.model_dump(mode="python")
-
-        def handle_fields(data: dict) -> dict[str, Any]:
-            res = {}
-            for key, value in data.items():
-                # | 分隔的字符串列表. 如果在 Config 中重命名了这些字段需要修改此处
-                if key in (
-                    "media_type",
-                    "sub_type",
-                    "clean_ext",
-                    "clean_name",
-                    "clean_contains",
-                    "clean_ignore_ext",
-                    "clean_ignore_contains",
-                ):
-                    res[key] = list_to_str(value, "|")
-                # 逗号分隔的字符串列表
-                elif isinstance(value, list):
-                    str_list = [item.value if isinstance(item, Enum) else str(item) for item in value]
-                    res[key] = list_to_str(str_list, ",")
-                # Convert timedelta to HH:MM:SS string
-                elif isinstance(value, timedelta):
-                    total_seconds = int(value.total_seconds())
-                    hours, remainder = divmod(total_seconds, 3600)
-                    minutes, seconds = divmod(remainder, 60)
-                    res[key] = f"{hours:02}:{minutes:02}:{seconds:02}"
-                # Convert Enum to its value
-                elif isinstance(value, Enum):
-                    res[key] = value.value
-                elif isinstance(value, dict):  # 展开嵌套模型
-                    res.update(handle_fields(value))
-                else:
-                    if not isinstance(value, str | int | bool | float):
-                        res[key] = str(value)
-                    else:
-                        res[key] = value
-            return res
-
-        schema_dict = handle_fields(d)
-        # breakpoint()
-
-        # 应用兼容规则
-        for rule in COMPAT_RULES:
-            if isinstance(rule, Rename):
-                if rule.new_name in schema_dict:
-                    schema_dict[rule.old_name] = (
-                        rule.to_old(schema_dict[rule.new_name]) if rule.to_old else schema_dict[rule.new_name]
-                    )
-                    schema_dict.pop(rule.new_name, None)
-            elif isinstance(rule, Remove):
-                schema_dict.pop(rule.name, None)
-            elif isinstance(rule, Add):
-                pass
-
-        return schema_dict
-
     @classmethod
     def from_legacy(cls, data: dict[str, Any]) -> "Config":
         """
-        从 ConfigSchema 创建 Config 实例.
+        从 ConfigV1 创建 Config 实例. 此方法仅用于转换旧版配置文件.
         """
         # 应用兼容规则
         for rule in COMPAT_RULES:
@@ -1441,14 +838,28 @@ class Config(BaseModel):
                     data.pop(rule.old_name, None)
             elif isinstance(rule, Remove):
                 data.pop(rule.name, None)
-            elif isinstance(rule, Add):  # 新增字段会自动使用默认值初始化
-                pass
+
+        # 处理 site_configs
+        site_configs: dict[Website, SiteConfig] = {}
+        for key, value in data.items():
+            # custom url
+            if key.endswith("_website") and key[:-8] in Website:
+                site_name = key.replace("_website", "")
+                site_configs[Website(site_name)] = SiteConfig(custom_url=value)
+        data["site_configs"] = site_configs
 
         # 格式转换
         def handle_dict(model_fields: dict[str, FieldInfo], data: dict[str, Any]) -> dict[str, Any]:
             for name, info in model_fields.items():
                 assert info.annotation is not None, f"Field {name} has no annotation"
-                if "list" in str(info.annotation):
+                # 处理嵌套
+                if issubclass(info.annotation, BaseModel):
+                    sub_dict = handle_dict(info.annotation.model_fields, data)
+                    data[name] = sub_dict
+                    continue
+                if name not in data:
+                    continue
+                if "list" in str(info.annotation) or "set" in str(info.annotation):
                     if name in (
                         "media_type",
                         "sub_type",
@@ -1457,6 +868,7 @@ class Config(BaseModel):
                         "clean_contains",
                         "clean_ignore_ext",
                         "clean_ignore_contains",
+                        "nfo_tag_actor_contains",
                     ):
                         data[name] = str_to_list(data[name], "|")
                     else:
@@ -1464,13 +876,10 @@ class Config(BaseModel):
                 if info.annotation is type(timedelta) and re.match(r"^\d{2}:\d{2}:\d{2}$", data[name]):
                     h, m, s = map(int, data[name].split(":"))
                     data[name] = timedelta(hours=h, minutes=m, seconds=s)
-                # 处理嵌套
-                if issubclass(info.annotation, BaseModel):
-                    sub_dict = handle_dict(info.annotation.model_fields, data)
-                    data[name] = sub_dict
             return data
 
         data = handle_dict(cls.model_fields, data)
+        cls.update(data)
         return cls.model_validate(data)
 
     @classmethod
@@ -1503,27 +912,30 @@ class Remove(CompatRule):
     name: str
 
 
-@dataclass
-class Add(CompatRule):
-    name: str
-
-
-# 描述 Config 相比于 ConfigSchema 的变更并添加相应的兼容规则
+# 描述 Config 相比于 ConfigV1 的变更并添加相应的兼容规则
 COMPAT_RULES: list[CompatRule] = [
-    Rename("type", "proxy_type", notes=["ConfigSchema.type", Config().proxy_type, "与关键词冲突"]),
-    Rename("outline_show", "outline_format", notes=["ConfigSchema.outline_show", Config().outline_format, "澄清语义"]),
-    Rename("tag_include", "nfo_tag_include", notes=["ConfigSchema.tag_include", Config().nfo_tag_include, "澄清语义"]),
-    Remove("show_4k", notes=["ConfigSchema.show_4k", "功能与命名模板冲突"]),
-    Remove("show_moword", notes=["ConfigSchema.show_moword", "功能与命名模板冲突"]),
+    Remove("version"),
+    Remove("unknown_fields"),
+    Rename[str, bool](
+        "type",
+        "use_proxy",
+        to_new=lambda x: x != "no",
+        to_old=lambda x: "no" if not x else "yes",
+        notes=["ConfigV1.type", Config().use_proxy, "与关键词冲突"],
+    ),
+    Rename("outline_show", "outline_format", notes=["ConfigV1.outline_show", Config().outline_format, "澄清语义"]),
+    Rename("tag_include", "nfo_tag_include", notes=["ConfigV1.tag_include", Config().nfo_tag_include, "澄清语义"]),
+    Remove("show_4k", notes=["ConfigV1.show_4k", "功能与命名模板冲突"]),
+    Remove("show_moword", notes=["ConfigV1.show_moword", "功能与命名模板冲突"]),
 ]
 if TYPE_CHECKING:
-    from .v1 import ConfigSchema
+    from .v1 import ConfigV1
 
-    # 方便快速查看 ConfigSchema 的字段
+    # 方便快速查看 ConfigV1 的字段
     _ = [
-        ConfigSchema.type,
-        ConfigSchema.outline_show,
-        ConfigSchema.tag_include,
-        ConfigSchema.show_4k,
-        ConfigSchema.show_moword,
+        ConfigV1.type,
+        ConfigV1.outline_show,
+        ConfigV1.tag_include,
+        ConfigV1.show_4k,
+        ConfigV1.show_moword,
     ]

@@ -84,7 +84,7 @@ async def main(
             LogBuffer.info().write(web_info + debug_info)
 
             # ========================================================================搜索番号
-            html_search, error = await manager.config_v1.async_client.get_json(search_url)
+            html_search, error = await manager.computed.async_client.get_json(search_url)
             if html_search is None:
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)
@@ -101,7 +101,7 @@ async def main(
             # 'https://www.prestige-av.com/api/product/2e4a2de8-7275-4803-bb07-7585fd4f2ff3'
             debug_info = f"番号地址: {real_url.replace('api/product', 'goods')} "
             LogBuffer.info().write(web_info + debug_info)
-            page_data, error = await manager.config_v1.async_client.get_json(real_url)
+            page_data, error = await manager.computed.async_client.get_json(real_url)
             if page_data is None:
                 debug_info = f"网络请求错误: {error} "
                 LogBuffer.info().write(web_info + debug_info)

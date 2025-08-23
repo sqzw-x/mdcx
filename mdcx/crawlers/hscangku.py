@@ -4,6 +4,7 @@ import time
 
 from lxml import etree
 
+from mdcx.config.enums import Website
 from mdcx.config.manager import manager
 from mdcx.crawlers.guochan import get_extra_info, get_number_list
 from mdcx.models.log_buffer import LogBuffer
@@ -53,13 +54,13 @@ def get_real_url(html, number_list, hscangku_url):
 
 
 async def get_redirected_url(url):
-    response, err = await manager.config_v1.async_client.get_text(url)
+    response, err = await manager.computed.async_client.get_text(url)
     if response is None:
         return
     if (redirected_url := re.search(r'"(https?://.*?)"', response)) is None:
         return
     redirected_url = redirected_url.group(1)
-    response, err = await manager.config_v1.async_client.request(
+    response, err = await manager.computed.async_client.request(
         "GET", f"{redirected_url}{url}&p=", allow_redirects=False
     )
     if response and response.redirect_url:
@@ -82,7 +83,7 @@ async def main(
     LogBuffer.info().write(" \n    🌐 hscangku")
     debug_info = ""
     real_url = appoint_url
-    hscangku_url = getattr(manager.config_v1, "hscangku_website", "http://hsck.net")
+    hscangku_url = manager.config.get_site_url(Website.HSCANGKU, "http://hsck.net")
 
     try:
         if not real_url:
@@ -100,7 +101,7 @@ async def main(
                 # real_url = 'http://hsck860.cc/vodsearch/-------------.html?wd=%E6%9F%9A%E5%AD%90%E7%8C%AB&submit='
                 debug_info = f"请求地址: {real_url} "
                 LogBuffer.info().write(web_info + debug_info)
-                response, error = await manager.config_v1.async_client.get_text(real_url)
+                response, error = await manager.computed.async_client.get_text(real_url)
 
                 if response is None:
                     debug_info = f"网络请求错误: {error}"
@@ -118,7 +119,7 @@ async def main(
 
         debug_info = f"番号地址: {real_url} "
         LogBuffer.info().write(web_info + debug_info)
-        response, error = await manager.config_v1.async_client.get_text(real_url)
+        response, error = await manager.computed.async_client.get_text(real_url)
 
         if response is None:
             debug_info = f"没有找到数据 {error} "

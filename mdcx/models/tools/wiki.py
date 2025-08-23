@@ -7,6 +7,7 @@ import bs4
 import zhconv
 
 from mdcx.config.manager import manager
+from mdcx.config.models import Translator
 from mdcx.config.resources import resources
 from mdcx.manual import ManualConfig
 from mdcx.models.base.translate import (
@@ -44,7 +45,7 @@ async def search_wiki(actor_info: EMbyActressInfo) -> tuple[str | None, str]:
 
         # 请求维基百科搜索页接口
         url = f"https://www.wikidata.org/w/api.php?action=wbsearchentities&search={actor_name}&language=zh&format=json"
-        res, error = await manager.config_v1.async_client.get_json(url, headers=manager.config_v1.random_headers)
+        res, error = await manager.computed.async_client.get_json(url, headers=manager.computed.random_headers)
         if res is None:
             return None, f"维基百科搜索结果请求失败: {error}"
 
@@ -55,7 +56,7 @@ async def search_wiki(actor_info: EMbyActressInfo) -> tuple[str | None, str]:
             if not actor_name_tw:
                 return None, "维基百科暂未收录"
             url = f"https://www.wikidata.org/w/api.php?action=wbsearchentities&search={actor_name_tw}&language=zh&format=json"
-            res, error = await manager.config_v1.async_client.get_json(url)
+            res, error = await manager.computed.async_client.get_json(url)
             if res is None:
                 return None, f"维基百科搜索结果请求失败: {error}"
             search_results = res.get("search")
@@ -82,7 +83,7 @@ async def search_wiki(actor_info: EMbyActressInfo) -> tuple[str | None, str]:
             # 通过id请求数据，获取 wiki url
             wiki_id = each_result.get("id")
             url = f"https://m.wikidata.org/wiki/Special:EntityData/{wiki_id}.json"
-            res, error = await manager.config_v1.async_client.get_json(url, headers=manager.config_v1.random_headers)
+            res, error = await manager.computed.async_client.get_json(url, headers=manager.computed.random_headers)
             if res is None:
                 continue
             # 获取详细信息并返回URL
@@ -100,8 +101,8 @@ async def get_detail(url, url_log, actor_info: EMbyActressInfo) -> tuple[bool, s
     """异步版本的_get_wiki_detail函数"""
     try:
         ja = "ja." in url
-        emby_on = manager.config_v1.emby_on
-        res, error = await manager.config_v1.async_client.get_text(url, headers=manager.config_v1.random_headers)
+        emby_on = manager.config.emby_on
+        res, error = await manager.computed.async_client.get_text(url, headers=manager.computed.random_headers)
         if res is None:
             return False, f"维基百科演员页请求失败: {error}"
         if "noarticletext mw-content-ltr" in res:
@@ -227,7 +228,7 @@ def handle_search_res(res, wiki_id, actor_info, description_en) -> tuple[str | N
             ja_url: str = jawiki.get("url") if jawiki else ""
             zh_url: str = zhwiki.get("url") if zhwiki else ""
             url_final = ""
-            emby_on = manager.config_v1.emby_on
+            emby_on = manager.config.emby_on
             if "actor_info_zh_cn" in emby_on:
                 if zh_url:
                     url_final = zh_url.replace("zh.wikipedia.org/wiki/", "zh.m.wikipedia.org/zh-cn/")
@@ -483,7 +484,7 @@ async def _process_translation(actor_info, overview, ja, emby_on):
     if not (ja or tag_trans) or "actor_info_translate" not in emby_on or "actor_info_ja" in emby_on:
         return overview
 
-    translate_by_list = manager.config_v1.translate_by_list.copy()
+    translate_by_list = manager.config.translate_config.translate_by.copy()
     random.shuffle(translate_by_list)
 
     if not translate_by_list:
@@ -506,11 +507,11 @@ async def _process_translation(actor_info, overview, ja, emby_on):
 async def _translate_english_tag(tag_req, translate_by_list, actor_info):
     """翻译英文标签"""
     for each in translate_by_list:
-        if each == "youdao":
+        if each == Translator.YOUDAO:
             t, o, r = await youdao_translate_async(tag_req, "")
-        elif each == "google":
+        elif each == Translator.GOOGLE:
             t, o, r = await google_translate_async(tag_req, "")
-        elif each == "llm":
+        elif each == Translator.LLM:
             t, o, r = await llm_translate_async(tag_req, "")
         else:  # deepl
             t, o, r = await deepl_translate_async(tag_req, "", ls="EN")
@@ -518,17 +519,17 @@ async def _translate_english_tag(tag_req, translate_by_list, actor_info):
         if not r:
             actor_info.taglines = [t]
             return ""  # 清空tag_req表示已翻译
-    return tag_req
+        return tag_req
 
 
 async def _translate_content(tag_req, overview_req, translate_by_list, actor_info, overview):
     """翻译主要内容"""
     for each in translate_by_list:
-        if each == "youdao":
+        if each == Translator.YOUDAO:
             t, o, r = await youdao_translate_async(tag_req, overview_req)
-        elif each == "google":
+        elif each == Translator.GOOGLE:
             t, o, r = await google_translate_async(tag_req, overview_req)
-        elif each == "llm":
+        elif each == Translator.LLM:
             t, o, r = await llm_translate_async(tag_req, overview_req)
         else:  # deepl
             t, o, r = await deepl_translate_async(tag_req, overview_req)

@@ -6,6 +6,7 @@ import traceback
 import aiofiles
 import aiofiles.os
 
+from mdcx.config.enums import CDChar, MarkType, Switch
 from mdcx.config.manager import manager
 from mdcx.consts import IS_MAC, IS_WINDOWS
 from mdcx.models.base.file import _deal_path_name
@@ -38,16 +39,16 @@ async def creat_folder(
     dont_creat_folder = False  # 不需要创建文件夹
 
     # 正常模式、视频模式时，软连接关，成功后不移动文件开时，这时不创建文件夹
-    if manager.config_v1.main_mode < 3 and manager.config_v1.soft_link == 0 and not manager.config_v1.success_file_move:
+    if manager.config.main_mode < 3 and manager.config.soft_link == 0 and not manager.config.success_file_move:
         dont_creat_folder = True
 
     # 更新模式、读取模式，选择更新c文件时，不创建文件夹
-    if manager.config_v1.main_mode > 2 and manager.config_v1.update_mode == "c":
+    if manager.config.main_mode > 2 and manager.config.update_mode == "c":
         dont_creat_folder = True
 
     # 如果不需要创建文件夹，当不重命名时，直接返回
     if dont_creat_folder:
-        if not manager.config_v1.success_file_rename:
+        if not manager.config.success_file_rename:
             other.dont_move_movie = True
             return True
 
@@ -104,7 +105,7 @@ async def creat_folder(
                     # 当都指向同一个文件时(此处路径不能用小写，因为Linux大小写敏感)
                     if (await aiofiles.os.stat(file_path)).st_ino == (await aiofiles.os.stat(file_new_path)).st_ino:
                         # 硬链接开时，不需要处理
-                        if manager.config_v1.soft_link == 2:
+                        if manager.config.soft_link == 2:
                             other.dont_move_movie = True
                         # 非硬链接模式，删除目标文件
                         else:
@@ -127,7 +128,7 @@ async def creat_folder(
             real_file_path = await read_link_async(file_path)
             if convert_path(real_file_path).lower() == convert_file_new_path:
                 # 非软硬链接时，标记删除待刮削文件自身
-                if manager.config_v1.soft_link == 0:
+                if manager.config.soft_link == 0:
                     other.del_file_path = True
                 # 软硬链接时，标记不处理
                 else:
@@ -162,7 +163,7 @@ async def move_movie(other: OtherInfo, file_info: FileInfo, file_path: str, file
         return True
 
     # 软链接模式开时，先删除目标文件，再创建软链接(需考虑自身是软链接的情况)
-    if manager.config_v1.soft_link == 1:
+    if manager.config.soft_link == 1:
         temp_path = file_path
         # 自身是软链接时，获取真实路径
         if await aiofiles.os.path.islink(file_path):
@@ -190,7 +191,7 @@ async def move_movie(other: OtherInfo, file_info: FileInfo, file_path: str, file
             return False
 
     # 硬链接模式开时，创建硬链接
-    elif manager.config_v1.soft_link == 2:
+    elif manager.config.soft_link == 2:
         try:
             await delete_file_async(file_new_path)
             await aiofiles.os.link(file_path, file_new_path)
@@ -243,32 +244,32 @@ async def move_movie(other: OtherInfo, file_info: FileInfo, file_path: str, file
 
 
 def _get_folder_path(file_path: str, success_folder: str, file_info: FileInfo, res: CrawlersResult) -> tuple[str, str]:
-    folder_name: str = manager.config_v1.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
+    folder_name: str = manager.config.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
     folder_path, file_name = split_path(file_path)  # 当前文件的目录和文件名
 
     # 更新模式 或 读取模式
-    if manager.config_v1.main_mode == 3 or manager.config_v1.main_mode == 4:
-        if manager.config_v1.update_mode == "c":
+    if manager.config.main_mode == 3 or manager.config.main_mode == 4:
+        if manager.config.update_mode == "c":
             folder_name = split_path(folder_path)[1]
             return folder_path, folder_name
-        elif "bc" in manager.config_v1.update_mode:
-            folder_name = manager.config_v1.update_b_folder
+        elif "bc" in manager.config.update_mode:
+            folder_name = manager.config.update_b_folder
             success_folder = split_path(folder_path)[0]
-            if "a" in manager.config_v1.update_mode:
+            if "a" in manager.config.update_mode:
                 success_folder = split_path(success_folder)[0]
                 folder_name = (
-                    os.path.join(manager.config_v1.update_a_folder, manager.config_v1.update_b_folder)
+                    os.path.join(manager.config.update_a_folder, manager.config.update_b_folder)
                     .replace("\\", "/")
                     .strip("/")
                 )
-        elif manager.config_v1.update_mode == "d":
-            folder_name = manager.config_v1.update_d_folder
+        elif manager.config.update_mode == "d":
+            folder_name = manager.config.update_d_folder
             success_folder = split_path(file_path)[0]
 
     # 正常模式 或 整理模式
     else:
         # 关闭软连接，并且成功后移动文件关时，使用原来文件夹
-        if manager.config_v1.soft_link == 0 and not manager.config_v1.success_file_move:
+        if manager.config.soft_link == 0 and not manager.config.success_file_move:
             folder_path = split_path(file_path)[0]
             return folder_path, folder_name
 
@@ -276,9 +277,9 @@ def _get_folder_path(file_path: str, success_folder: str, file_info: FileInfo, r
     if not folder_name:
         return success_folder, ""
 
-    show_4k = "folder" in manager.config_v1.show_4k
-    show_cnword = manager.config_v1.folder_cnword
-    show_moword = "folder" in manager.config_v1.show_moword
+    show_4k = MarkType.HD in manager.config.mark_type
+    show_cnword = manager.config.folder_cnword
+    show_moword = MarkType.SUB in manager.config.mark_type
     should_escape_result = True
     folder_new_name, folder_name, number, originaltitle, outline, title = render_name_template(
         folder_name,
@@ -298,7 +299,7 @@ def _get_folder_path(file_path: str, success_folder: str, file_info: FileInfo, r
         folder_new_name = number
 
     # 判断文件夹名长度，超出长度时，截短标题名
-    folder_name_max = int(manager.config_v1.folder_name_max)
+    folder_name_max = int(manager.config.folder_name_max)
     if len(folder_new_name) > folder_name_max:
         cut_index = folder_name_max - len(folder_new_name)
         if "originaltitle" in folder_name:
@@ -342,20 +343,20 @@ def _generate_file_name(file_path: str, cd_part, folder_name, file_info: FileInf
     file_name, file_ex = os.path.splitext(file_full_name)
 
     # 如果成功后不重命名，则返回原来名字
-    if not manager.config_v1.success_file_rename:
+    if not manager.config.success_file_rename:
         return file_name
 
     # 更新模式 或 读取模式
-    if manager.config_v1.main_mode == 3 or manager.config_v1.main_mode == 4:
-        file_name_template = manager.config_v1.update_c_filetemplate
+    if manager.config.main_mode == 3 or manager.config.main_mode == 4:
+        file_name_template = manager.config.update_c_filetemplate
     # 正常模式 或 整理模式
     else:
-        file_name_template = manager.config_v1.naming_file
+        file_name_template = manager.config.naming_file
 
     # 获取文件信息
-    show_4k = "file" in manager.config_v1.show_4k
-    show_cnword = manager.config_v1.file_cnword
-    show_moword = "file" in manager.config_v1.show_moword
+    show_4k = MarkType.HD in manager.config.mark_type
+    show_cnword = manager.config.file_cnword
+    show_moword = MarkType.SUB in manager.config.mark_type
     should_escape_result = True
     file_name, file_name_template, number, originaltitle, outline, title = render_name_template(
         file_name_template,
@@ -377,13 +378,13 @@ def _generate_file_name(file_path: str, cd_part, folder_name, file_info: FileInf
         file_name = number
 
     # 插入防屏蔽字符（115）
-    prevent_char = manager.config_v1.prevent_char
+    prevent_char = manager.config.prevent_char
     if prevent_char:
         file_char_list = list(file_name)
         file_name = prevent_char.join(file_char_list)
 
     # 判断文件名长度，超出长度时，截短文件名
-    file_name_max = int(manager.config_v1.file_name_max)
+    file_name_max = int(manager.config.file_name_max)
     if len(file_name) > file_name_max:
         cut_index = file_name_max - len(file_name) - len(file_ex)
 
@@ -447,7 +448,7 @@ def get_output_name(
     fanart_new_path_with_filename = convert_path(os.path.join(folder_new_path, fanart_new_name))
     # =====================================================================================生成图片最终路径
     # 如果图片命名规则不加文件名并且视频目录不为空
-    if manager.config_v1.pic_simple_name and folder_name:
+    if manager.config.pic_simple_name and folder_name:
         poster_final_name = "poster.jpg"
         thumb_final_name = "thumb.jpg"
         fanart_final_name = "fanart.jpg"
@@ -485,7 +486,7 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
     youma = ""
     mosaic = ""
     sub_list = []
-    cnword_style = manager.config_v1.cnword_style
+    cnword_style = manager.config.cnword_style
     if Flags.file_mode == FileMode.Again and file_path in Flags.new_again_dic:
         temp_number, temp_url, temp_website = Flags.new_again_dic[file_path]
         if temp_number:  # 如果指定了番号，则使用指定番号
@@ -517,14 +518,14 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
 
     try:
         # 清除防屏蔽字符
-        prevent_char = manager.config_v1.prevent_char
+        prevent_char = manager.config.prevent_char
         if prevent_char:
             file_path = file_path.replace(prevent_char, "")
             file_name = file_name.replace(prevent_char, "")
 
         # 获取番号
         if not movie_number:
-            movie_number = get_file_number(file_path, manager.config_v1.escape_string_list)
+            movie_number = get_file_number(file_path, manager.computed.escape_string_list)
 
         # 259LUXU-1111, 非mgstage、avsex去除前面的数字前缀
         temp_n = re.findall(r"\d{3,}([a-zA-Z]+-\d+)", movie_number)
@@ -534,12 +535,12 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
         file_name_cd = remove_escape_string(file_name, "-").replace(movie_number, "-").replace("--", "-").strip()
 
         # 替换分隔符为-
-        cd_char = manager.config_v1.cd_char
-        if "underline" in cd_char:
+        cd_char = manager.config.cd_char
+        if CDChar.UNDERLINE in cd_char:
             file_name_cd = file_name_cd.replace("_", "-")
-        if "space" in cd_char:
+        if CDChar.SPACE in cd_char:
             file_name_cd = file_name_cd.replace(" ", "-")
-        if "point" in cd_char:
+        if CDChar.POINT in cd_char:
             file_name_cd = file_name_cd.replace(".", "-")
         file_name_cd = file_name_cd.lower() + "."  # .作为结尾
 
@@ -560,9 +561,9 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
         if cd_path_1 and int(cd_path_1[0][1]) > 0:
             cd_part = cd_path_1[0][1]
         elif cd_path_2:
-            if len(cd_path_2[0]) == 1 or "digital" in cd_char:
+            if len(cd_path_2[0]) == 1 or CDChar.DIGITAL in cd_char:
                 cd_part = str(int(cd_path_2[0]))
-        elif cd_path_3 and "letter" in cd_char:
+        elif cd_path_3 and CDChar.LETTER in cd_char:
             letter_list = [
                 "",
                 "a",
@@ -592,14 +593,14 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
                 "y",
                 "z",
             ]
-            if cd_path_3[0][1] != "c" or "endc" in cd_char:
+            if cd_path_3[0][1] != "c" or CDChar.ENDC in cd_char:
                 cd_part = str(letter_list.index(cd_path_3[0][1]))
-        elif cd_path_4 and "middle_number" in cd_char:
+        elif cd_path_4 and CDChar.MIDDLE_NUMBER in cd_char:
             cd_part = str(int(cd_path_4[0]))
 
         # 判断分集命名规则
         if cd_part:
-            cd_name = manager.config_v1.cd_name
+            cd_name = manager.config.cd_name
             if int(cd_part) == 0:
                 cd_part = ""
             elif cd_name == 0:
@@ -610,7 +611,7 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
                 cd_part = "-" + str(cd_part)
 
         # 判断是否是马赛克破坏版
-        umr_style = str(manager.config_v1.umr_style)
+        umr_style = str(manager.config.umr_style)
         if (
             "-uncensored." in file_path.lower()
             or "umr." in file_path.lower()
@@ -657,7 +658,7 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
                         mosaic = "国产"
 
         # 判断是否流出
-        leak_style = str(manager.config_v1.leak_style)
+        leak_style = str(manager.config.leak_style)
         if not mosaic and (
             "流出" in file_path or "leaked" in file_path.lower() or (leak_style and leak_style in file_path)
         ):
@@ -665,7 +666,7 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
             mosaic = "无码流出"
 
         # 判断是否无码
-        wuma_style = str(manager.config_v1.wuma_style)
+        wuma_style = str(manager.config.wuma_style)
         if not mosaic and (
             "无码" in file_path
             or "無碼" in file_path
@@ -677,16 +678,16 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
             mosaic = "无码"
 
         # 判断是否有码
-        youma_style = str(manager.config_v1.youma_style)
+        youma_style = manager.config.youma_style
         if not mosaic and ("有码" in file_path or "有碼" in file_path):
             youma = youma_style
             mosaic = "有码"
 
         # 查找本地字幕文件
-        cnword_list = manager.config_v1.cnword_char.replace("，", ",").split(",")
+        cnword_list = manager.config.cnword_char
         if "-C." in str(cnword_list).upper():
             cnword_list.append("-C ")
-        sub_type_list = manager.config_v1.sub_type.split("|")  # 本地字幕后缀
+        sub_type_list = manager.config.sub_type  # 本地字幕后缀
         for sub_type in sub_type_list:  # 查找本地字幕, 可能多个
             sub_type_chs = ".chs" + sub_type
             sub_path_chs = os.path.join(folder_path, (file_name + sub_type_chs))
@@ -709,7 +710,7 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
         if not has_sub:
             cnword_list.append("-uc.")
             file_name_temp = file_name_temp.upper().replace("CD", "").replace("CARIB", "")  # 去掉cd/carib，避免-c误判
-            if "letter" in cd_char and "endc" in cd_char:
+            if CDChar.LETTER in cd_char and CDChar.ENDC in cd_char:
                 file_name_temp = re.sub(r"(-|\d{2,}|\.)C\.$", ".", file_name_temp)
 
             for each in cnword_list:
@@ -762,17 +763,17 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
                 signal.show_traceback_log(traceback.format_exc())
 
         # 查找字幕包目录字幕文件
-        subtitle_add = manager.config_v1.subtitle_add
+        subtitle_add = manager.config.subtitle_add
         if not has_sub and copy_sub and subtitle_add:
-            subtitle_folder = manager.config_v1.subtitle_folder
-            subtitle_add = manager.config_v1.subtitle_add
+            subtitle_folder = manager.config.subtitle_folder
+            subtitle_add = manager.config.subtitle_add
             if subtitle_add and subtitle_folder:  # 复制字幕开
                 for sub_type in sub_type_list:
                     sub_path_1 = os.path.join(subtitle_folder, (movie_number + cd_part + sub_type))
                     sub_path_2 = os.path.join(subtitle_folder, file_name + sub_type)
                     sub_path_list = [sub_path_1, sub_path_2]
                     sub_file_name = file_name + sub_type
-                    if manager.config_v1.subtitle_add_chs:
+                    if manager.config.subtitle_add_chs:
                         sub_file_name = file_name + ".chs" + sub_type
                         sub_type = ".chs" + sub_type
                     sub_new_path = os.path.join(folder_path, sub_file_name)
@@ -786,7 +787,7 @@ async def get_file_info_v2(file_path: str, copy_sub: bool = True) -> FileInfo:
                             break
 
         file_show_name = movie_number
-        suffix_sort_list = manager.config_v1.suffix_sort.split(",")
+        suffix_sort_list = manager.config.suffix_sort
         for each in suffix_sort_list:
             if each == "moword":
                 file_show_name += destroyed + leak + wuma + youma
@@ -855,10 +856,10 @@ async def deal_old_files(
     folder_new_path = convert_path(folder_new_path)
     extrafanart_old_path = convert_path(os.path.join(folder_old_path, "extrafanart"))
     extrafanart_new_path = convert_path(os.path.join(folder_new_path, "extrafanart"))
-    extrafanart_folder = manager.config_v1.extrafanart_folder
+    extrafanart_folder = manager.config.extrafanart_folder
     extrafanart_copy_old_path = convert_path(os.path.join(folder_old_path, extrafanart_folder))
     extrafanart_copy_new_path = convert_path(os.path.join(folder_new_path, extrafanart_folder))
-    trailer_name = manager.config_v1.trailer_simple_name
+    trailer_name = manager.config.trailer_simple_name
     trailer_old_folder_path = convert_path(os.path.join(folder_old_path, "trailers"))
     trailer_new_folder_path = convert_path(os.path.join(folder_new_path, "trailers"))
     trailer_old_file_path = convert_path(os.path.join(trailer_old_folder_path, "trailer.mp4"))
@@ -909,8 +910,8 @@ async def deal_old_files(
     }
 
     # 视频模式进行清理
-    main_mode = manager.config_v1.main_mode
-    if main_mode == 2 and "sort_del" in manager.config_v1.switch_on:
+    main_mode = manager.config.main_mode
+    if main_mode == 2 and Switch.SORT_DEL in manager.config.switch_on:
         for each in file_path_list:
             if await aiofiles.os.path.exists(each):
                 await delete_file_async(each)
@@ -951,7 +952,7 @@ async def deal_old_files(
     trailer_exists = True
 
     # 软硬链接模式，不处理旧的图片
-    if manager.config_v1.soft_link != 0:
+    if manager.config.soft_link != 0:
         return pic_final_catched, single_folder_catched
 
     """

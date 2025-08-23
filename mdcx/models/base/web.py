@@ -15,7 +15,7 @@ from mdcx.manual import ManualConfig
 from mdcx.models.base.web_sync import get_json_sync
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.signals import signal
-from mdcx.utils import get_user_agent
+from mdcx.utils import executor
 from mdcx.utils.file import check_pic_async
 
 
@@ -41,7 +41,7 @@ async def check_url(url: str, length: bool = False, real_url: bool = False):
 
     try:
         # 使用 request 方法发送 HEAD 请求
-        response, error = await manager.config_v1.async_client.request("HEAD", url)
+        response, error = await manager.computed.async_client.request("HEAD", url)
 
         # 处理请求失败的情况
         if response is None:
@@ -73,7 +73,7 @@ async def check_url(url: str, length: bool = False, real_url: bool = False):
         content_length = response.headers.get("Content-Length")
         if not content_length:
             # 如果没有获取到文件大小，尝试下载数据
-            content, error = await manager.config_v1.async_client.get_content(true_url)
+            content, error = await manager.computed.async_client.get_content(true_url)
 
             if content is not None and len(content) > 0:
                 signal.add_log(f"✅ 检测链接通过: 预下载成功 {true_url}")
@@ -96,7 +96,7 @@ async def check_url(url: str, length: bool = False, real_url: bool = False):
 
 async def get_avsox_domain() -> str:
     issue_url = "https://tellme.pw/avsox"
-    response, error = await manager.config_v1.async_client.get_text(issue_url)
+    response, error = await manager.computed.async_client.get_text(issue_url)
     domain = "https://avsox.click"
     if response is not None:
         res = re.findall(r'(https://[^"]+)', response)
@@ -113,11 +113,10 @@ async def get_amazon_data(req_url: str) -> tuple[bool, str]:
     headers = {
         "accept-encoding": "gzip, deflate, br",
         "Host": "www.amazon.co.jp",
-        "User-Agent": get_user_agent(),
     }
-    html_info, error = await manager.config_v1.async_client.get_text(req_url, encoding="Shift_JIS")
+    html_info, error = await manager.computed.async_client.get_text(req_url, encoding="Shift_JIS")
     if html_info is None:
-        html_info, error = await manager.config_v1.async_client.get_text(req_url, headers=headers, encoding="Shift_JIS")
+        html_info, error = await manager.computed.async_client.get_text(req_url, headers=headers, encoding="Shift_JIS")
     if html_info is None:
         session_id = ""
         ubid_acbjp = ""
@@ -129,22 +128,19 @@ async def get_amazon_data(req_url: str) -> tuple[bool, str]:
             "cookie": f"session-id={session_id}; ubid_acbjp={ubid_acbjp}",
         }
         headers.update(headers_o)
-        html_info, error = await manager.config_v1.async_client.get_text(req_url, headers=headers, encoding="Shift_JIS")
+        html_info, error = await manager.computed.async_client.get_text(req_url, headers=headers, encoding="Shift_JIS")
     if html_info is None:
         return False, error
     if "HTTP 503" in html_info:
-        headers = {
-            "Host": "www.amazon.co.jp",
-            "User-Agent": get_user_agent(),
-        }
-        html_info, error = await manager.config_v1.async_client.get_text(req_url, headers=headers, encoding="Shift_JIS")
+        headers = {"Host": "www.amazon.co.jp"}
+        html_info, error = await manager.computed.async_client.get_text(req_url, headers=headers, encoding="Shift_JIS")
     if html_info is None:
         return False, error
     return True, html_info
 
 
 async def get_imgsize(url) -> tuple[int, int]:
-    response, _ = await manager.config_v1.async_client.request("GET", url, stream=True)
+    response, _ = await manager.computed.async_client.request("GET", url, stream=True)
     if response is None or response.status_code != 200:
         return 0, 0
     file_head = BytesIO()
@@ -221,7 +217,7 @@ def _ping_host_thread(host_address: str, result_list: list[int | None], i: int) 
 
 # todo 可以移除 ping, 仅靠 http request 检测网络连通性
 def ping_host(host_address: str) -> str:
-    count = manager.config_v1.retry
+    count = manager.config.retry
     result_list: list[int | None] = [None] * count
     thread_list: list[threading.Thread] = [None] * count  # type: ignore
     for i in range(count):
@@ -238,7 +234,7 @@ def ping_host(host_address: str) -> str:
 
 
 def check_version() -> int | None:
-    if manager.config_v1.update_check:
+    if manager.config.update_check:
         url = "https://api.github.com/repos/sqzw-x/mdcx/releases/latest"
         res_json, error = get_json_sync(url)
         if res_json is not None:
@@ -253,7 +249,7 @@ def check_version() -> int | None:
 
 def check_theporndb_api_token() -> str:
     tips = "✅ 连接正常! "
-    api_token = manager.config_v1.theporndb_api_token
+    api_token = manager.config.theporndb_api_token
     url = "https://api.theporndb.net/scenes/hash/8679fcbdd29fa735"
     headers = {
         "Authorization": f"Bearer {api_token}",
@@ -263,9 +259,7 @@ def check_theporndb_api_token() -> str:
     if not api_token:
         tips = "❌ 未填写 API Token，影响欧美刮削！可在「设置」-「网络」添加！"
     else:
-        response, err = manager.config_v1.executor.run(
-            manager.config_v1.async_client.request("GET", url, headers=headers)
-        )
+        response, err = executor.run(manager.computed.async_client.request("GET", url, headers=headers))
         if response is None:
             tips = f"❌ ThePornDB 连接失败: {err}"
             signal.show_log_text(tips)
@@ -281,11 +275,11 @@ def check_theporndb_api_token() -> str:
 
 
 async def _get_pic_by_google(pic_url):
-    google_keyused = manager.config_v1.google_keyused
-    google_keyword = manager.config_v1.google_keyword
+    google_keyused = manager.computed.google_keyused
+    google_keyword = manager.computed.google_keyword
     req_url = f"https://www.google.com/searchbyimage?sbisrc=2&image_url={pic_url}"
     # req_url = f'https://lens.google.com/uploadbyurl?url={pic_url}&hl=zh-CN&re=df&ep=gisbubu'
-    response, error = await manager.config_v1.async_client.get_text(req_url)
+    response, error = await manager.computed.async_client.get_text(req_url)
     big_pic = True
     if response is None:
         return "", (0, 0), False
@@ -296,7 +290,7 @@ async def _get_pic_by_google(pic_url):
         big_pic = False
     if url_list:
         req_url = "https://www.google.com" + url_list[0].replace("amp;", "")
-        response, error = await manager.config_v1.async_client.get_text(req_url)
+        response, error = await manager.computed.async_client.get_text(req_url)
     if response is None:
         return "", (0, 0), False
     url_list = re.findall(r'\["(http[^"]+)",(\d{3,4}),(\d{3,4})\],[^[]', response)
@@ -312,7 +306,7 @@ async def _get_pic_by_google(pic_url):
                 new_url_list.append(each_url)
                 url_list.remove(each_url)
     # 只下载关时，追加剩余地址
-    if "goo_only" not in manager.config_v1.download_hd_pics:
+    if "goo_only" not in [item.value for item in manager.config.download_hd_pics]:
         new_url_list += url_list
     # 解析地址
     for each in new_url_list:
@@ -361,7 +355,7 @@ async def get_big_pic_by_google(pic_url, poster=False) -> tuple[str, tuple[int, 
 async def get_actorname(number: str) -> tuple[bool, str]:
     # 获取真实演员名字
     url = f"https://av-wiki.net/?s={number}"
-    res, error = await manager.config_v1.async_client.get_text(url)
+    res, error = await manager.computed.async_client.get_text(url)
     if res is None:
         return False, f"Error: {error}"
     html_detail = etree.fromstring(res, etree.HTMLParser(encoding="utf-8"))
@@ -379,7 +373,7 @@ async def get_actorname(number: str) -> tuple[bool, str]:
 async def get_yesjav_title(movie_number: str) -> str:
     yesjav_url = f"http://www.yesjav101.com/search.asp?q={movie_number}&"
     movie_title = ""
-    response, error = await manager.config_v1.async_client.get_text(yesjav_url)
+    response, error = await manager.computed.async_client.get_text(yesjav_url)
     if response is not None:
         parser = etree.HTMLParser(encoding="utf-8")
         html = etree.HTML(response, parser)
@@ -402,7 +396,7 @@ async def download_file_with_filepath(url: str, file_path: str, folder_new_path:
     if not await aiofiles.os.path.exists(folder_new_path):
         await aiofiles.os.makedirs(folder_new_path)
     try:
-        if await manager.config_v1.async_client.download(url, file_path):
+        if await manager.computed.async_client.download(url, file_path):
             return True
     except Exception:
         pass

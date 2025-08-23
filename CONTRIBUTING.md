@@ -48,8 +48,8 @@ uv run pytest
 
 ## 如何添加新配置项
 
-1. 在 `mdcx/config/manager.py` `ConfigSchema` 类中添加配置键及默认值, 支持 str, int, float, bool 类型
-2. 通过 `from mdcx.models.config.manager import config` 导入配置, 并通过 `config.<key>` 访问配置项
+1. 在 `mdcx/config/models.py` `Config` 类中添加配置键及默认值, 支持 str, int, float, bool 类型
+2. 通过 `from mdcx.models.config.manager import manager` 导入配置, 并通过 `manager.config.<key>` 访问配置项
 3. 按下一节所述在设置界面中添加对应的控件, 修改 `mdcx/controllers/main_window/` 目录下 `load_config.py` 及 `save_config.py`, 以实现 UI 绑定
 
 ## 如何修改图形界面

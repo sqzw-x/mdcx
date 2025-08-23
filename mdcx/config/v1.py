@@ -1,25 +1,19 @@
 import re
 from configparser import ConfigParser, RawConfigParser
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import dataclass, field, fields
 from io import StringIO
 from pathlib import Path
 from typing import Any
 
-import httpx
-
 from mdcx.config.models import Config, Website
 from mdcx.consts import LOCAL_VERSION
-from mdcx.llm import LLMClient
 from mdcx.manual import ManualConfig
-from mdcx.signals import signal
-from mdcx.utils import executor, get_random_headers, get_user_agent
-from mdcx.web_async import AsyncWebClient
 
 
 def load_v1(path: str | Path) -> tuple[dict[str, Any], list[str]]:
     reader = RawConfigParser(interpolation=None)
     reader.read(path, encoding="UTF-8")
-    field_types = {f.name: f.type for f in fields(ConfigSchema)}
+    field_types = {f.name: f.type for f in fields(ConfigV1)}
     errors = []
     unknown_fields: dict[str, str] = {}  # 原样保留未知字段
     d = {}
@@ -68,7 +62,7 @@ def ini_value_to_bool(value: str) -> bool:
 
 
 @dataclass
-class ConfigSchema:
+class ConfigV1:
     version: int = 120240924
 
     # media
@@ -242,7 +236,7 @@ class ConfigSchema:
 
     # subtitle
     cnword_char: str = r"-C.,-C-,ch.,字幕"
-    cnword_style: str = r"^-C^"
+    cnword_style: str = r"-C"
     folder_cnword: bool = True
     file_cnword: bool = True
     subtitle_folder: str = r""
@@ -256,7 +250,7 @@ class ConfigSchema:
     api_key: str = r"ee9a2f2419704257b1dd60b975f2d64e"
     user_id: str = r""
     emby_on: str = r"actor_info_zh_cn,actor_info_miss,actor_photo_net,actor_photo_miss,"
-    use_database: int = 0
+    use_database: bool = False
     info_database_path: str = r""
     gfriends_github: str = r"https://github.com/gfriends/gfriends"
     actor_photo_folder: str = r""
@@ -319,6 +313,9 @@ class ConfigSchema:
             del unknown_fields["trailer_name"]
         if "modified_time" in unknown_fields:  # 弃用
             del unknown_fields["modified_time"]
+        for site in Website:
+            if isinstance(u := unknown_fields.get(f"{site.value}_website"), str) and u:
+                setattr(self, f"{site.value}_website", u)
         # 2. 处理更名的配置字段
         self.read_mode = self.read_mode.replace("read_translate_again", "read_update_nfo")
         self.suffix_sort = self.suffix_sort.replace("mosaic", "moword")
@@ -330,92 +327,6 @@ class ConfigSchema:
             self.proxy = self.proxy.strip()
         else:
             self.proxy = "http://" + self.proxy.strip()
-        if self.type == "no":  # todo type 现在只需要 bool
-            self.proxies = None
-            self.httpx_proxy = None
-        else:
-            self.proxies = {
-                "http": self.proxy,
-                "https": self.proxy,
-            }
-            self.httpx_proxy = self.proxy
-
-        self.ipv4_only = "ipv4_only" in self.switch_on
-        self.theporndb_no_hash = "theporndb_no_hash" in self.switch_on
-
-        # 获取User-Agent
-        self.headers = {
-            "User-Agent": get_user_agent(),
-        }
-
-        self.random_headers = get_random_headers()
-
-        # 去掉^符号！！！
-        self.cnword_style = self.cnword_style.strip("^")
-
-        # 获取 Google 下载关键词列表
-        temp_list = re.split(r"[,，]", self.google_used)
-        self.google_keyused = [each for each in temp_list if each.strip()]  # 去空
-        # 获取 Google 过滤关键词列表
-        temp_list = re.split(r"[,，]", self.google_exclude)
-        self.google_keyword = [each for each in temp_list if each.strip()]  # 去空
-
-        # 翻译源
-        self.translate_by_list = self.translate_by.strip(",").split(",")
-
-        # 是否记录刮削成功列表
-        self.record_success_file = "record_success_file" in self.no_escape
-
-        # 是否清理文件以及清理列表
-        can_clean = "i_know" in self.clean_enable and "i_agree" in self.clean_enable
-        can_clean_auto = can_clean and "clean_auto" in self.clean_enable
-        clean_ext_list = (
-            re.split(r"[|｜，,]", self.clean_ext)
-            if can_clean and self.clean_ext and "clean_ext" in self.clean_enable
-            else []
-        )
-        clean_name_list = (
-            re.split(r"[|｜，,]", self.clean_name)
-            if can_clean and self.clean_name and "clean_name" in self.clean_enable
-            else []
-        )
-        clean_contains_list = (
-            re.split(r"[|｜，,]", self.clean_contains)
-            if can_clean and self.clean_contains and "clean_contains" in self.clean_enable
-            else []
-        )
-        clean_size_list = self.clean_size if can_clean and "clean_size" in self.clean_enable else None
-        clean_ignore_ext_list = (
-            re.split(r"[|｜，,]", self.clean_ignore_ext)
-            if can_clean and self.clean_ignore_ext and "clean_ignore_ext" in self.clean_enable
-            else []
-        )
-        clean_ignore_contains_list = (
-            re.split(r"[|｜，,]", self.clean_ignore_contains)
-            if can_clean and self.clean_ignore_contains and "clean_ignore_contains" in self.clean_enable
-            else []
-        )
-        self.can_clean = can_clean
-        self.can_clean_auto = can_clean_auto
-        self.clean_ext_list = clean_ext_list
-        self.clean_name_list = clean_name_list
-        self.clean_contains_list = clean_contains_list
-        self.clean_size_list = clean_size_list
-        self.clean_ignore_ext_list = clean_ignore_ext_list
-        self.clean_ignore_contains_list = clean_ignore_contains_list
-
-        # 获取排除字符列表
-        temp_list = re.split("[,，]", self.string) + ManualConfig.REPL_LIST
-        self.escape_string_list = []
-        [self.escape_string_list.append(i) for i in temp_list if i.strip() and i not in self.escape_string_list]
-
-        # 番号对应官网
-        official_websites_dic = {}
-        for key, value in ManualConfig.OFFICIAL.items():
-            temp_list = value.upper().split("|")
-            for each in temp_list:
-                official_websites_dic[each] = key
-        self.official_websites = official_websites_dic
 
         # 字段命名规则-后缀字段顺序
         all_str_list = ["moword", "cnword", "definition"]
@@ -426,31 +337,6 @@ class ConfigSchema:
         [new_str_list.append(i1) for i1 in all_str_list if i1 not in new_str_list]  # 补全
         new_str = ",".join(new_str_list)
         self.suffix_sort = new_str
-
-        # NFO 演员名白名单
-        self.nfo_tag_actor_contains_list = (
-            re.split(r"[|｜]", self.nfo_tag_actor_contains) if self.nfo_tag_actor_contains else []
-        )
-
-        # 依赖于 config 的类不能作为全局变量, 必须在 config 内构建, 以在 config 更新后正确重建
-        self.async_client = AsyncWebClient(
-            loop=executor._loop,
-            proxy=self.httpx_proxy,
-            retry=self.retry,
-            timeout=self.timeout,
-            log_fn=signal.add_log,
-        )
-
-        if self.llm_max_req_sec <= 0:
-            self.llm_max_req_sec = 1
-        self.llm_client = LLMClient(
-            api_key=self.llm_key,
-            base_url=self.llm_url,
-            proxy=self.httpx_proxy,
-            timeout=httpx.Timeout(self.timeout, read=None),  # 只设置连接超时, 不限制 llm 生成时间
-            rate=(max(self.llm_max_req_sec, 1), max(1, 1 / self.llm_max_req_sec)),
-        )
-        self.executor = executor  # 方便通过 config 访问 executor
 
     def get_website_base_url(self, website: str | Website) -> str:
         """获取指定网站的基础 URL"""
@@ -477,4 +363,4 @@ class ConfigSchema:
         return buffer.getvalue()
 
     def to_pydantic_model(self):
-        return Config.from_legacy(asdict(self))
+        return Config.from_legacy(self.__dict__.copy())

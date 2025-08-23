@@ -221,13 +221,6 @@ def kill_a_thread(t: Thread):
         _async_raise(t.ident, SystemExit)
 
 
-def get_user_agent() -> str:
-    temp_l = random.randint(109, 129)
-    temp_m = random.randint(1, 5563)
-    temp_n = random.randint(1, 180)
-    return f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{temp_l}.0.{temp_m}.{temp_n} Safari/537.36"
-
-
 def get_random_headers() -> dict:
     """
     随机生成复杂的HTTP headers

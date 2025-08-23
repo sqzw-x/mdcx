@@ -146,8 +146,8 @@ class JavdbCrawler(BaseCrawler):
 
     @override
     def _get_headers(self, ctx) -> dict[str, str] | None:
-        if manager.config_v1.javdb:
-            return {"cookie": manager.config_v1.javdb}
+        if manager.config.javdb:
+            return {"cookie": manager.config.javdb}
 
     @override
     async def _generate_search_url(self, ctx) -> list[str]:
