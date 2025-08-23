@@ -144,7 +144,7 @@ def save_config(self: "MyMAinWindow"):
         for site in str_to_list(text, ","):
             if site in Website:
                 websites.append(Website(site))
-        return set(dict.fromkeys(websites))
+        return set(websites)
 
     manager.config.website_youma = parse_website_list(self.Ui.lineEdit_website_youma.text())
     manager.config.website_wuma = parse_website_list(self.Ui.lineEdit_website_wuma.text())

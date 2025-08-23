@@ -1962,7 +1962,7 @@ class MyMAinWindow(QMainWindow):
     # 设置-保存
     def pushButton_save_config_clicked(self):
         self.save_config()
-        # self.load_config()
+        self.load_config()  # 确保界面显示和实际配置一致
         signal_qt.show_scrape_info(f"💡 配置已保存！{get_current_time()}")
 
     # 设置-另存为

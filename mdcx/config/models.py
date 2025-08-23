@@ -766,6 +766,9 @@ class Config(BaseModel):
         whole_fields: list[str] = d.get("whole_fields", [])
         none_fields: list[str] = d.get("none_fields", [])
         website_youma = Config.parse_sites(d.get("website_youma", []))
+        if len(d.get("website_set", [])) > 0:
+            website_youma.insert(0, Website.OFFICIAL)
+            d["website_youma"] = website_youma
         website_wuma = Config.parse_sites(d.get("website_wuma", []))
         website_suren = Config.parse_sites(d.get("website_suren", []))
         website_fc2 = Config.parse_sites(d.get("website_fc2", []))
