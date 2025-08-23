@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MDCx(object):
     def setupUi(self, MDCx):
         MDCx.setObjectName("MDCx")
-        MDCx.resize(1029, 700)
+        MDCx.resize(1089, 700)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -534,11 +534,11 @@ class Ui_MDCx(object):
         self.scrollArea_10.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea_10.setWidgetResizable(False)
         self.scrollArea_10.setObjectName("scrollArea_10")
-        self.scrollAreaWidgetContents_9 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_9.setGeometry(QtCore.QRect(0, 0, 760, 1260))
-        self.scrollAreaWidgetContents_9.setAutoFillBackground(True)
-        self.scrollAreaWidgetContents_9.setObjectName("scrollAreaWidgetContents_9")
-        self.groupBox_7 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_9)
+        self.scrollAreaWidgetContents_gongju = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_gongju.setGeometry(QtCore.QRect(0, 0, 760, 1260))
+        self.scrollAreaWidgetContents_gongju.setAutoFillBackground(True)
+        self.scrollAreaWidgetContents_gongju.setObjectName("scrollAreaWidgetContents_gongju")
+        self.groupBox_7 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_gongju)
         self.groupBox_7.setGeometry(QtCore.QRect(30, 20, 701, 271))
         self.groupBox_7.setObjectName("groupBox_7")
         self.pushButton_select_file = QtWidgets.QPushButton(self.groupBox_7)
@@ -575,7 +575,7 @@ class Ui_MDCx(object):
         self.pushButton_select_file_clear_info = QtWidgets.QPushButton(self.groupBox_7)
         self.pushButton_select_file_clear_info.setGeometry(QtCore.QRect(510, 100, 151, 40))
         self.pushButton_select_file_clear_info.setObjectName("pushButton_select_file_clear_info")
-        self.groupBox_13 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_9)
+        self.groupBox_13 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_gongju)
         self.groupBox_13.setGeometry(QtCore.QRect(30, 760, 701, 141))
         self.groupBox_13.setStyleSheet("font:\"Courier\";")
         self.groupBox_13.setObjectName("groupBox_13")
@@ -587,7 +587,7 @@ class Ui_MDCx(object):
         self.label_6.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_6.setAlignment(QtCore.Qt.AlignCenter)
         self.label_6.setObjectName("label_6")
-        self.groupBox_19 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_9)
+        self.groupBox_19 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_gongju)
         self.groupBox_19.setGeometry(QtCore.QRect(30, 310, 701, 241))
         self.groupBox_19.setObjectName("groupBox_19")
         self.gridLayoutWidget_18 = QtWidgets.QWidget(self.groupBox_19)
@@ -663,7 +663,7 @@ class Ui_MDCx(object):
         self.label_62.setSizePolicy(sizePolicy)
         self.label_62.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_62.setObjectName("label_62")
-        self.groupBox_6 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_9)
+        self.groupBox_6 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_gongju)
         self.groupBox_6.setGeometry(QtCore.QRect(30, 570, 701, 171))
         self.groupBox_6.setObjectName("groupBox_6")
         self.pushButton_move_mp4 = QtWidgets.QPushButton(self.groupBox_6)
@@ -684,7 +684,7 @@ class Ui_MDCx(object):
         self.label_8.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_8.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.label_8.setObjectName("label_8")
-        self.groupBox_21 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_9)
+        self.groupBox_21 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_gongju)
         self.groupBox_21.setGeometry(QtCore.QRect(30, 920, 701, 311))
         self.groupBox_21.setObjectName("groupBox_21")
         self.gridLayoutWidget_36 = QtWidgets.QWidget(self.groupBox_21)
@@ -801,7 +801,7 @@ class Ui_MDCx(object):
         self.checkBox_create_link.setSizePolicy(sizePolicy)
         self.checkBox_create_link.setMinimumSize(QtCore.QSize(0, 30))
         self.checkBox_create_link.setObjectName("checkBox_create_link")
-        self.scrollArea_10.setWidget(self.scrollAreaWidgetContents_9)
+        self.scrollArea_10.setWidget(self.scrollAreaWidgetContents_gongju)
         self.stackedWidget.addWidget(self.page_tool)
         self.page_setting = QtWidgets.QWidget()
         self.page_setting.setObjectName("page_setting")
@@ -840,20 +840,20 @@ class Ui_MDCx(object):
         self.scrollArea_2.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea_2.setWidgetResizable(False)
         self.scrollArea_2.setObjectName("scrollArea_2")
-        self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 760, 1730))
+        self.scrollAreaWidgetContents_guaxiaomulu = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_guaxiaomulu.setGeometry(QtCore.QRect(0, 0, 760, 1770))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.scrollAreaWidgetContents_2.sizePolicy().hasHeightForWidth())
-        self.scrollAreaWidgetContents_2.setSizePolicy(sizePolicy)
-        self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
-        self.groupBox_16 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_2)
-        self.groupBox_16.setGeometry(QtCore.QRect(30, 20, 701, 561))
+        sizePolicy.setHeightForWidth(self.scrollAreaWidgetContents_guaxiaomulu.sizePolicy().hasHeightForWidth())
+        self.scrollAreaWidgetContents_guaxiaomulu.setSizePolicy(sizePolicy)
+        self.scrollAreaWidgetContents_guaxiaomulu.setObjectName("scrollAreaWidgetContents_guaxiaomulu")
+        self.groupBox_16 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomulu)
+        self.groupBox_16.setGeometry(QtCore.QRect(30, 20, 701, 591))
         self.groupBox_16.setStyleSheet("")
         self.groupBox_16.setObjectName("groupBox_16")
         self.gridLayoutWidget_7 = QtWidgets.QWidget(self.groupBox_16)
-        self.gridLayoutWidget_7.setGeometry(QtCore.QRect(20, 30, 688, 511))
+        self.gridLayoutWidget_7.setGeometry(QtCore.QRect(20, 30, 661, 537))
         self.gridLayoutWidget_7.setObjectName("gridLayoutWidget_7")
         self.gridLayout_7 = QtWidgets.QGridLayout(self.gridLayoutWidget_7)
         self.gridLayout_7.setContentsMargins(0, 0, 0, 0)
@@ -1097,8 +1097,8 @@ class Ui_MDCx(object):
         self.label_383.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_383.setObjectName("label_383")
         self.gridLayout_7.addWidget(self.label_383, 4, 1, 1, 1)
-        self.groupBox_32 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_2)
-        self.groupBox_32.setGeometry(QtCore.QRect(30, 600, 701, 351))
+        self.groupBox_32 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomulu)
+        self.groupBox_32.setGeometry(QtCore.QRect(30, 630, 701, 351))
         self.groupBox_32.setStyleSheet("")
         self.groupBox_32.setObjectName("groupBox_32")
         self.gridLayoutWidget_19 = QtWidgets.QWidget(self.groupBox_32)
@@ -1271,8 +1271,8 @@ class Ui_MDCx(object):
         self.label_93.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_93.setObjectName("label_93")
         self.gridLayout_19.addWidget(self.label_93, 2, 0, 1, 1)
-        self.groupBox_61 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_2)
-        self.groupBox_61.setGeometry(QtCore.QRect(30, 970, 701, 521))
+        self.groupBox_61 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomulu)
+        self.groupBox_61.setGeometry(QtCore.QRect(30, 1000, 701, 521))
         self.groupBox_61.setStyleSheet("")
         self.groupBox_61.setObjectName("groupBox_61")
         self.gridLayoutWidget_34 = QtWidgets.QWidget(self.groupBox_61)
@@ -1602,8 +1602,8 @@ class Ui_MDCx(object):
         self.label_271.setAlignment(QtCore.Qt.AlignCenter)
         self.label_271.setWordWrap(True)
         self.label_271.setObjectName("label_271")
-        self.groupBox_9 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_2)
-        self.groupBox_9.setGeometry(QtCore.QRect(30, 1510, 701, 131))
+        self.groupBox_9 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomulu)
+        self.groupBox_9.setGeometry(QtCore.QRect(30, 1540, 701, 131))
         self.groupBox_9.setStyleSheet("")
         self.groupBox_9.setObjectName("groupBox_9")
         self.gridLayoutWidget_16 = QtWidgets.QWidget(self.groupBox_9)
@@ -1660,7 +1660,7 @@ class Ui_MDCx(object):
         self.label_50.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_50.setObjectName("label_50")
         self.gridLayout_16.addWidget(self.label_50, 0, 0, 1, 1)
-        self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_2)
+        self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_guaxiaomulu)
         self.tabWidget.addTab(self.tab2, "")
         self.tab1 = QtWidgets.QWidget()
         self.tab1.setObjectName("tab1")
@@ -1679,16 +1679,16 @@ class Ui_MDCx(object):
         self.scrollArea.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
         self.scrollArea.setWidgetResizable(False)
         self.scrollArea.setObjectName("scrollArea")
-        self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 760, 1960))
-        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
-        self.groupBox = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
+        self.scrollAreaWidgetContents_guaxiaomoshi = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_guaxiaomoshi.setGeometry(QtCore.QRect(0, -1342, 760, 2000))
+        self.scrollAreaWidgetContents_guaxiaomoshi.setObjectName("scrollAreaWidgetContents_guaxiaomoshi")
+        self.groupBox = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomoshi)
         self.groupBox.setGeometry(QtCore.QRect(30, 260, 701, 421))
         self.groupBox.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox.setObjectName("groupBox")
         self.gridLayoutWidget_2 = QtWidgets.QWidget(self.groupBox)
-        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(50, 30, 794, 371))
+        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(50, 30, 631, 377))
         self.gridLayoutWidget_2.setObjectName("gridLayoutWidget_2")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.gridLayoutWidget_2)
         self.gridLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -2033,13 +2033,13 @@ class Ui_MDCx(object):
         self.pushButton_tips_normal_mode.setObjectName("pushButton_tips_normal_mode")
         self.horizontalLayout_126.addWidget(self.pushButton_tips_normal_mode)
         self.gridLayout_2.addLayout(self.horizontalLayout_126, 0, 1, 1, 1)
-        self.groupBox_27 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
+        self.groupBox_27 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomoshi)
         self.groupBox_27.setGeometry(QtCore.QRect(30, 1540, 701, 111))
         self.groupBox_27.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_27.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_27.setObjectName("groupBox_27")
         self.gridLayoutWidget_6 = QtWidgets.QWidget(self.groupBox_27)
-        self.gridLayoutWidget_6.setGeometry(QtCore.QRect(50, 30, 641, 71))
+        self.gridLayoutWidget_6.setGeometry(QtCore.QRect(50, 30, 631, 71))
         self.gridLayoutWidget_6.setObjectName("gridLayoutWidget_6")
         self.gridLayout_6 = QtWidgets.QGridLayout(self.gridLayoutWidget_6)
         self.gridLayout_6.setContentsMargins(0, 0, 0, 0)
@@ -2074,13 +2074,13 @@ class Ui_MDCx(object):
         self.radioButton_succ_move_off = QtWidgets.QRadioButton(self.gridLayoutWidget_6)
         self.radioButton_succ_move_off.setObjectName("radioButton_succ_move_off")
         self.gridLayout_6.addWidget(self.radioButton_succ_move_off, 1, 0, 1, 1)
-        self.groupBox_15 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
+        self.groupBox_15 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomoshi)
         self.groupBox_15.setGeometry(QtCore.QRect(30, 1670, 701, 111))
         self.groupBox_15.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_15.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_15.setObjectName("groupBox_15")
         self.gridLayoutWidget_3 = QtWidgets.QWidget(self.groupBox_15)
-        self.gridLayoutWidget_3.setGeometry(QtCore.QRect(50, 30, 641, 71))
+        self.gridLayoutWidget_3.setGeometry(QtCore.QRect(50, 30, 631, 71))
         self.gridLayoutWidget_3.setObjectName("gridLayoutWidget_3")
         self.gridLayout_3 = QtWidgets.QGridLayout(self.gridLayoutWidget_3)
         self.gridLayout_3.setContentsMargins(0, 0, 0, 0)
@@ -2115,13 +2115,13 @@ class Ui_MDCx(object):
         self.radioButton_fail_move_off = QtWidgets.QRadioButton(self.gridLayoutWidget_3)
         self.radioButton_fail_move_off.setObjectName("radioButton_fail_move_off")
         self.gridLayout_3.addWidget(self.radioButton_fail_move_off, 1, 0, 1, 1)
-        self.groupBox_30 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
+        self.groupBox_30 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomoshi)
         self.groupBox_30.setGeometry(QtCore.QRect(30, 1800, 701, 111))
         self.groupBox_30.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_30.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_30.setObjectName("groupBox_30")
         self.gridLayoutWidget_23 = QtWidgets.QWidget(self.groupBox_30)
-        self.gridLayoutWidget_23.setGeometry(QtCore.QRect(50, 30, 641, 71))
+        self.gridLayoutWidget_23.setGeometry(QtCore.QRect(50, 30, 631, 71))
         self.gridLayoutWidget_23.setObjectName("gridLayoutWidget_23")
         self.gridLayout_23 = QtWidgets.QGridLayout(self.gridLayoutWidget_23)
         self.gridLayout_23.setContentsMargins(0, 0, 0, 0)
@@ -2156,7 +2156,7 @@ class Ui_MDCx(object):
         self.radioButton_del_empty_folder_off = QtWidgets.QRadioButton(self.gridLayoutWidget_23)
         self.radioButton_del_empty_folder_off.setObjectName("radioButton_del_empty_folder_off")
         self.gridLayout_23.addWidget(self.radioButton_del_empty_folder_off, 1, 0, 1, 1)
-        self.groupBox_5 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
+        self.groupBox_5 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomoshi)
         self.groupBox_5.setGeometry(QtCore.QRect(30, 700, 701, 461))
         self.groupBox_5.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_5.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -2409,7 +2409,7 @@ class Ui_MDCx(object):
         self.label_12.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_12.setObjectName("label_12")
         self.label_21 = QtWidgets.QLabel(self.groupBox_5)
-        self.label_21.setGeometry(QtCore.QRect(50, 360, 631, 101))
+        self.label_21.setGeometry(QtCore.QRect(50, 370, 631, 81))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -2432,13 +2432,13 @@ class Ui_MDCx(object):
         self.label_304.setText("")
         self.label_304.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_304.setObjectName("label_304")
-        self.groupBox_18 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
+        self.groupBox_18 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomoshi)
         self.groupBox_18.setGeometry(QtCore.QRect(30, 1410, 701, 111))
         self.groupBox_18.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_18.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_18.setObjectName("groupBox_18")
         self.gridLayoutWidget_13 = QtWidgets.QWidget(self.groupBox_18)
-        self.gridLayoutWidget_13.setGeometry(QtCore.QRect(50, 30, 641, 71))
+        self.gridLayoutWidget_13.setGeometry(QtCore.QRect(50, 30, 631, 71))
         self.gridLayoutWidget_13.setObjectName("gridLayoutWidget_13")
         self.gridLayout_13 = QtWidgets.QGridLayout(self.gridLayoutWidget_13)
         self.gridLayout_13.setContentsMargins(0, 0, 0, 0)
@@ -2473,7 +2473,7 @@ class Ui_MDCx(object):
         self.radioButton_succ_rename_off = QtWidgets.QRadioButton(self.gridLayoutWidget_13)
         self.radioButton_succ_rename_off.setObjectName("radioButton_succ_rename_off")
         self.gridLayout_13.addWidget(self.radioButton_succ_rename_off, 1, 0, 1, 1)
-        self.groupBox_53 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
+        self.groupBox_53 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomoshi)
         self.groupBox_53.setGeometry(QtCore.QRect(30, 20, 701, 221))
         self.groupBox_53.setStyleSheet("font:\"Courier\";")
         self.groupBox_53.setObjectName("groupBox_53")
@@ -2627,13 +2627,13 @@ class Ui_MDCx(object):
         self.lcdNumber_thread.setObjectName("lcdNumber_thread")
         self.horizontalLayout_54.addWidget(self.lcdNumber_thread)
         self.gridLayout_15.addLayout(self.horizontalLayout_54, 0, 1, 1, 1)
-        self.groupBox_2 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents)
+        self.groupBox_2 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomoshi)
         self.groupBox_2.setGeometry(QtCore.QRect(30, 1180, 701, 211))
         self.groupBox_2.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_2.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_2.setObjectName("groupBox_2")
         self.gridLayoutWidget_4 = QtWidgets.QWidget(self.groupBox_2)
-        self.gridLayoutWidget_4.setGeometry(QtCore.QRect(50, 30, 730, 161))
+        self.gridLayoutWidget_4.setGeometry(QtCore.QRect(50, 30, 631, 161))
         self.gridLayoutWidget_4.setObjectName("gridLayoutWidget_4")
         self.gridLayout_4 = QtWidgets.QGridLayout(self.gridLayoutWidget_4)
         self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
@@ -2773,7 +2773,7 @@ class Ui_MDCx(object):
         self.label_342.setSizePolicy(sizePolicy)
         self.label_342.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_342.setObjectName("label_342")
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents_guaxiaomoshi)
         self.tabWidget.addTab(self.tab1, "")
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
@@ -2786,16 +2786,16 @@ class Ui_MDCx(object):
         self.scrollArea_8.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
         self.scrollArea_8.setWidgetResizable(False)
         self.scrollArea_8.setObjectName("scrollArea_8")
-        self.scrollAreaWidgetContents_8 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_8.setGeometry(QtCore.QRect(0, 0, 760, 2500))
-        self.scrollAreaWidgetContents_8.setObjectName("scrollAreaWidgetContents_8")
-        self.groupBox_80 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_8)
-        self.groupBox_80.setGeometry(QtCore.QRect(30, 290, 701, 741))
+        self.scrollAreaWidgetContents_guaxiaowangzhan = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_guaxiaowangzhan.setGeometry(QtCore.QRect(0, 0, 760, 2200))
+        self.scrollAreaWidgetContents_guaxiaowangzhan.setObjectName("scrollAreaWidgetContents_guaxiaowangzhan")
+        self.groupBox_80 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaowangzhan)
+        self.groupBox_80.setGeometry(QtCore.QRect(30, 290, 701, 591))
         self.groupBox_80.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_80.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_80.setObjectName("groupBox_80")
         self.layoutWidget_6 = QtWidgets.QWidget(self.groupBox_80)
-        self.layoutWidget_6.setGeometry(QtCore.QRect(20, 30, 661, 687))
+        self.layoutWidget_6.setGeometry(QtCore.QRect(20, 30, 661, 541))
         self.layoutWidget_6.setObjectName("layoutWidget_6")
         self.gridLayout_36 = QtWidgets.QGridLayout(self.layoutWidget_6)
         self.gridLayout_36.setContentsMargins(0, 0, 0, 0)
@@ -3048,8 +3048,8 @@ class Ui_MDCx(object):
         self.label_217.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_217.setObjectName("label_217")
         self.gridLayout_36.addWidget(self.label_217, 10, 0, 1, 1)
-        self.groupBox_35 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_8)
-        self.groupBox_35.setGeometry(QtCore.QRect(30, 1130, 701, 1171))
+        self.groupBox_35 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaowangzhan)
+        self.groupBox_35.setGeometry(QtCore.QRect(30, 970, 701, 1000))
         self.groupBox_35.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_35.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_35.setObjectName("groupBox_35")
@@ -3544,7 +3544,7 @@ class Ui_MDCx(object):
         self.label_325.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_325.setWordWrap(True)
         self.label_325.setObjectName("label_325")
-        self.groupBox_11 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_8)
+        self.groupBox_11 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaowangzhan)
         self.groupBox_11.setGeometry(QtCore.QRect(30, 20, 701, 251))
         self.groupBox_11.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_11.setMaximumSize(QtCore.QSize(739, 1600))
@@ -3696,8 +3696,8 @@ class Ui_MDCx(object):
         self.pushButton_scrape_note.setSizePolicy(sizePolicy)
         self.pushButton_scrape_note.setMinimumSize(QtCore.QSize(80, 26))
         self.pushButton_scrape_note.setObjectName("pushButton_scrape_note")
-        self.layoutWidget2 = QtWidgets.QWidget(self.scrollAreaWidgetContents_8)
-        self.layoutWidget2.setGeometry(QtCore.QRect(30, 1060, 701, 41))
+        self.layoutWidget2 = QtWidgets.QWidget(self.scrollAreaWidgetContents_guaxiaowangzhan)
+        self.layoutWidget2.setGeometry(QtCore.QRect(30, 910, 701, 41))
         self.layoutWidget2.setObjectName("layoutWidget2")
         self.horizontalLayout_107 = QtWidgets.QHBoxLayout(self.layoutWidget2)
         self.horizontalLayout_107.setContentsMargins(0, 0, 0, 0)
@@ -3729,7 +3729,7 @@ class Ui_MDCx(object):
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line.setObjectName("line")
         self.horizontalLayout_107.addWidget(self.line)
-        self.scrollArea_8.setWidget(self.scrollAreaWidgetContents_8)
+        self.scrollArea_8.setWidget(self.scrollAreaWidgetContents_guaxiaowangzhan)
         self.tabWidget.addTab(self.tab, "")
         self.tab_4 = QtWidgets.QWidget()
         self.tab_4.setObjectName("tab_4")
@@ -3747,10 +3747,10 @@ class Ui_MDCx(object):
         self.scrollArea_6.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea_6.setWidgetResizable(False)
         self.scrollArea_6.setObjectName("scrollArea_6")
-        self.scrollAreaWidgetContents_6 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_6.setGeometry(QtCore.QRect(0, 0, 760, 1870))
-        self.scrollAreaWidgetContents_6.setObjectName("scrollAreaWidgetContents_6")
-        self.groupBox_24 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_6)
+        self.scrollAreaWidgetContents_xiazai = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_xiazai.setGeometry(QtCore.QRect(0, 0, 760, 1870))
+        self.scrollAreaWidgetContents_xiazai.setObjectName("scrollAreaWidgetContents_xiazai")
+        self.groupBox_24 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_xiazai)
         self.groupBox_24.setGeometry(QtCore.QRect(30, 20, 701, 451))
         self.groupBox_24.setMinimumSize(QtCore.QSize(500, 0))
         self.groupBox_24.setObjectName("groupBox_24")
@@ -3948,7 +3948,7 @@ class Ui_MDCx(object):
         self.label_310.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.label_310.setWordWrap(True)
         self.label_310.setObjectName("label_310")
-        self.groupBox_33 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_6)
+        self.groupBox_33 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_xiazai)
         self.groupBox_33.setGeometry(QtCore.QRect(30, 490, 701, 131))
         self.groupBox_33.setMinimumSize(QtCore.QSize(500, 0))
         self.groupBox_33.setObjectName("groupBox_33")
@@ -3994,7 +3994,7 @@ class Ui_MDCx(object):
         self.label_79.setWordWrap(True)
         self.label_79.setTextInteractionFlags(QtCore.Qt.NoTextInteraction)
         self.label_79.setObjectName("label_79")
-        self.groupBox_51 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_6)
+        self.groupBox_51 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_xiazai)
         self.groupBox_51.setGeometry(QtCore.QRect(30, 1560, 701, 211))
         self.groupBox_51.setStyleSheet("font:\"Courier\";")
         self.groupBox_51.setObjectName("groupBox_51")
@@ -4026,7 +4026,7 @@ class Ui_MDCx(object):
         self.pushButton_del_all_theme_videos = QtWidgets.QPushButton(self.groupBox_51)
         self.pushButton_del_all_theme_videos.setGeometry(QtCore.QRect(340, 140, 181, 40))
         self.pushButton_del_all_theme_videos.setObjectName("pushButton_del_all_theme_videos")
-        self.groupBox_34 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_6)
+        self.groupBox_34 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_xiazai)
         self.groupBox_34.setGeometry(QtCore.QRect(30, 1280, 701, 261))
         self.groupBox_34.setMinimumSize(QtCore.QSize(500, 0))
         self.groupBox_34.setObjectName("groupBox_34")
@@ -4077,7 +4077,7 @@ class Ui_MDCx(object):
         self.pushButton_del_all_extrafanart_copy = QtWidgets.QPushButton(self.groupBox_34)
         self.pushButton_del_all_extrafanart_copy.setGeometry(QtCore.QRect(340, 190, 181, 40))
         self.pushButton_del_all_extrafanart_copy.setObjectName("pushButton_del_all_extrafanart_copy")
-        self.groupBox_52 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_6)
+        self.groupBox_52 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_xiazai)
         self.groupBox_52.setGeometry(QtCore.QRect(30, 640, 701, 401))
         self.groupBox_52.setMinimumSize(QtCore.QSize(500, 0))
         self.groupBox_52.setObjectName("groupBox_52")
@@ -4245,12 +4245,12 @@ class Ui_MDCx(object):
         self.label_398.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_398.setObjectName("label_398")
         self.horizontalLayout_130.addWidget(self.label_398)
-        self.groupBox_66 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_6)
+        self.groupBox_66 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_xiazai)
         self.groupBox_66.setGeometry(QtCore.QRect(30, 1060, 701, 201))
         self.groupBox_66.setStyleSheet("font:\"Courier\";")
         self.groupBox_66.setObjectName("groupBox_66")
         self.label_333 = QtWidgets.QLabel(self.groupBox_66)
-        self.label_333.setGeometry(QtCore.QRect(60, 70, 641, 51))
+        self.label_333.setGeometry(QtCore.QRect(60, 70, 641, 41))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -4277,7 +4277,7 @@ class Ui_MDCx(object):
         self.pushButton_del_all_extras = QtWidgets.QPushButton(self.groupBox_66)
         self.pushButton_del_all_extras.setGeometry(QtCore.QRect(340, 130, 181, 40))
         self.pushButton_del_all_extras.setObjectName("pushButton_del_all_extras")
-        self.scrollArea_6.setWidget(self.scrollAreaWidgetContents_6)
+        self.scrollArea_6.setWidget(self.scrollAreaWidgetContents_xiazai)
         self.tabWidget.addTab(self.tab_4, "")
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3.setObjectName("tab_3")
@@ -4289,15 +4289,15 @@ class Ui_MDCx(object):
         self.scrollArea_7.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea_7.setWidgetResizable(False)
         self.scrollArea_7.setObjectName("scrollArea_7")
-        self.scrollAreaWidgetContents_7 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_7.setGeometry(QtCore.QRect(0, 0, 760, 3420))
+        self.scrollAreaWidgetContents_mingming = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_mingming.setGeometry(QtCore.QRect(0, -2762, 760, 3420))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.scrollAreaWidgetContents_7.sizePolicy().hasHeightForWidth())
-        self.scrollAreaWidgetContents_7.setSizePolicy(sizePolicy)
-        self.scrollAreaWidgetContents_7.setObjectName("scrollAreaWidgetContents_7")
-        self.groupBox_8 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_7)
+        sizePolicy.setHeightForWidth(self.scrollAreaWidgetContents_mingming.sizePolicy().hasHeightForWidth())
+        self.scrollAreaWidgetContents_mingming.setSizePolicy(sizePolicy)
+        self.scrollAreaWidgetContents_mingming.setObjectName("scrollAreaWidgetContents_mingming")
+        self.groupBox_8 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
         self.groupBox_8.setGeometry(QtCore.QRect(30, 20, 701, 611))
         self.groupBox_8.setStyleSheet("font:\"Courier\";")
         self.groupBox_8.setObjectName("groupBox_8")
@@ -4434,7 +4434,7 @@ class Ui_MDCx(object):
         self.label_147.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_147.setObjectName("label_147")
         self.gridLayout_8.addWidget(self.label_147, 1, 0, 1, 1)
-        self.groupBox_38 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_7)
+        self.groupBox_38 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
         self.groupBox_38.setGeometry(QtCore.QRect(30, 1990, 701, 441))
         self.groupBox_38.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_38.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -4604,7 +4604,7 @@ class Ui_MDCx(object):
         self.label_430.setSizePolicy(sizePolicy)
         self.label_430.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_430.setObjectName("label_430")
-        self.groupBox_77 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_7)
+        self.groupBox_77 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
         self.groupBox_77.setGeometry(QtCore.QRect(30, 1080, 701, 351))
         self.groupBox_77.setStyleSheet("font:\"Courier\";")
         self.groupBox_77.setObjectName("groupBox_77")
@@ -4752,7 +4752,7 @@ class Ui_MDCx(object):
         self.label_290.setText("")
         self.label_290.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_290.setObjectName("label_290")
-        self.groupBox_46 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_7)
+        self.groupBox_46 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
         self.groupBox_46.setGeometry(QtCore.QRect(30, 1450, 701, 521))
         self.groupBox_46.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_46.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -4930,7 +4930,7 @@ class Ui_MDCx(object):
 "")
         self.lineEdit_leak_style.setObjectName("lineEdit_leak_style")
         self.label_145 = QtWidgets.QLabel(self.groupBox_46)
-        self.label_145.setGeometry(QtCore.QRect(157, 393, 464, 32))
+        self.label_145.setGeometry(QtCore.QRect(157, 393, 511, 32))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -4988,7 +4988,7 @@ class Ui_MDCx(object):
         self.checkBox_filename_mosaic.setSizePolicy(sizePolicy)
         self.checkBox_filename_mosaic.setMinimumSize(QtCore.QSize(100, 30))
         self.checkBox_filename_mosaic.setObjectName("checkBox_filename_mosaic")
-        self.groupBox_37 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_7)
+        self.groupBox_37 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
         self.groupBox_37.setGeometry(QtCore.QRect(30, 2450, 701, 121))
         self.groupBox_37.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_37.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -5032,7 +5032,7 @@ class Ui_MDCx(object):
         self.label_96.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_96.setObjectName("label_96")
         self.gridLayout_21.addWidget(self.label_96, 1, 1, 1, 1)
-        self.groupBox_62 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_7)
+        self.groupBox_62 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
         self.groupBox_62.setGeometry(QtCore.QRect(30, 2590, 701, 121))
         self.groupBox_62.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_62.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -5076,13 +5076,13 @@ class Ui_MDCx(object):
         self.label_122.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_122.setObjectName("label_122")
         self.gridLayout_38.addWidget(self.label_122, 1, 1, 1, 1)
-        self.groupBox_40 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_7)
+        self.groupBox_40 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
         self.groupBox_40.setGeometry(QtCore.QRect(30, 650, 701, 411))
         self.groupBox_40.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_40.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_40.setObjectName("groupBox_40")
         self.gridLayoutWidget_26 = QtWidgets.QWidget(self.groupBox_40)
-        self.gridLayoutWidget_26.setGeometry(QtCore.QRect(20, 30, 719, 369))
+        self.gridLayoutWidget_26.setGeometry(QtCore.QRect(20, 30, 661, 370))
         self.gridLayoutWidget_26.setObjectName("gridLayoutWidget_26")
         self.gridLayout_26 = QtWidgets.QGridLayout(self.gridLayoutWidget_26)
         self.gridLayout_26.setContentsMargins(0, 0, 0, 0)
@@ -5234,7 +5234,7 @@ class Ui_MDCx(object):
         self.checkBox_actor_fc2_seller.setMinimumSize(QtCore.QSize(100, 30))
         self.checkBox_actor_fc2_seller.setObjectName("checkBox_actor_fc2_seller")
         self.gridLayout_26.addWidget(self.checkBox_actor_fc2_seller, 3, 1, 1, 1)
-        self.groupBox_65 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_7)
+        self.groupBox_65 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
         self.groupBox_65.setGeometry(QtCore.QRect(30, 2730, 701, 301))
         self.groupBox_65.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_65.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -5364,7 +5364,7 @@ class Ui_MDCx(object):
         self.checkBox_foldername_4k.setSizePolicy(sizePolicy)
         self.checkBox_foldername_4k.setMinimumSize(QtCore.QSize(100, 30))
         self.checkBox_foldername_4k.setObjectName("checkBox_foldername_4k")
-        self.groupBox_67 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_7)
+        self.groupBox_67 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
         self.groupBox_67.setGeometry(QtCore.QRect(30, 3050, 701, 271))
         self.groupBox_67.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_67.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -5411,7 +5411,7 @@ class Ui_MDCx(object):
         self.label_354.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.label_354.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.label_354.setObjectName("label_354")
-        self.scrollArea_7.setWidget(self.scrollAreaWidgetContents_7)
+        self.scrollArea_7.setWidget(self.scrollAreaWidgetContents_mingming)
         self.tabWidget.addTab(self.tab_3, "")
         self.tab_6 = QtWidgets.QWidget()
         self.tab_6.setObjectName("tab_6")
@@ -5423,10 +5423,10 @@ class Ui_MDCx(object):
         self.scrollArea_11.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea_11.setWidgetResizable(False)
         self.scrollArea_11.setObjectName("scrollArea_11")
-        self.scrollAreaWidgetContents_11 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_11.setGeometry(QtCore.QRect(0, 0, 760, 2800))
-        self.scrollAreaWidgetContents_11.setObjectName("scrollAreaWidgetContents_11")
-        self.groupBox_trans = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_11)
+        self.scrollAreaWidgetContents_fanyi = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_fanyi.setGeometry(QtCore.QRect(0, -2092, 760, 2750))
+        self.scrollAreaWidgetContents_fanyi.setObjectName("scrollAreaWidgetContents_fanyi")
+        self.groupBox_trans = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_fanyi)
         self.groupBox_trans.setGeometry(QtCore.QRect(30, 20, 701, 181))
         self.groupBox_trans.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_trans.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -5530,7 +5530,7 @@ class Ui_MDCx(object):
         self.label_601.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_601.setObjectName("label_601")
         self.gridLayout_32.addWidget(self.label_601, 3, 1, 1, 1)
-        self.groupBox_llm = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_11)
+        self.groupBox_llm = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_fanyi)
         self.groupBox_llm.setGeometry(QtCore.QRect(30, 215, 701, 601))
         self.groupBox_llm.setObjectName("groupBox_llm")
         self.gridLayoutWidget_llm = QtWidgets.QWidget(self.groupBox_llm)
@@ -5641,7 +5641,7 @@ class Ui_MDCx(object):
         self.doubleSpinBox_llm_temperature.setSingleStep(0.1)
         self.doubleSpinBox_llm_temperature.setObjectName("doubleSpinBox_llm_temperature")
         self.gridLayout_llm.addWidget(self.doubleSpinBox_llm_temperature, 11, 1, 1, 1)
-        self.groupBox_82 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_11)
+        self.groupBox_82 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_fanyi)
         self.groupBox_82.setGeometry(QtCore.QRect(30, 836, 701, 250))
         self.groupBox_82.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_82.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -5730,7 +5730,7 @@ class Ui_MDCx(object):
         self.label_244.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_244.setObjectName("label_244")
         self.gridLayout_45.addWidget(self.label_244, 2, 0, 1, 1)
-        self.groupBox_83 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_11)
+        self.groupBox_83 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_fanyi)
         self.groupBox_83.setGeometry(QtCore.QRect(30, 1106, 701, 220))
         self.groupBox_83.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_83.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -5827,7 +5827,7 @@ class Ui_MDCx(object):
         self.label_328.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.label_328.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_328.setObjectName("label_328")
-        self.groupBox_84 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_11)
+        self.groupBox_84 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_fanyi)
         self.groupBox_84.setGeometry(QtCore.QRect(30, 1346, 701, 420))
         self.groupBox_84.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_84.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -5895,7 +5895,7 @@ class Ui_MDCx(object):
         self.label_248.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_248.setObjectName("label_248")
         self.gridLayout_50.addWidget(self.label_248, 0, 0, 1, 1)
-        self.groupBox_85 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_11)
+        self.groupBox_85 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_fanyi)
         self.groupBox_85.setGeometry(QtCore.QRect(30, 1786, 701, 151))
         self.groupBox_85.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_85.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -5955,7 +5955,7 @@ class Ui_MDCx(object):
         self.label_253.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_253.setObjectName("label_253")
         self.gridLayout_51.addWidget(self.label_253, 1, 0, 1, 1)
-        self.groupBox_86 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_11)
+        self.groupBox_86 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_fanyi)
         self.groupBox_86.setGeometry(QtCore.QRect(30, 1957, 701, 151))
         self.groupBox_86.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_86.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -6015,7 +6015,7 @@ class Ui_MDCx(object):
         self.checkBox_series_translate = QtWidgets.QCheckBox(self.layoutWidget_23)
         self.checkBox_series_translate.setObjectName("checkBox_series_translate")
         self.gridLayout_53.addWidget(self.checkBox_series_translate, 1, 1, 1, 1)
-        self.groupBox_87 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_11)
+        self.groupBox_87 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_fanyi)
         self.groupBox_87.setGeometry(QtCore.QRect(30, 2128, 701, 151))
         self.groupBox_87.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_87.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -6075,7 +6075,7 @@ class Ui_MDCx(object):
         self.checkBox_studio_translate = QtWidgets.QCheckBox(self.layoutWidget_25)
         self.checkBox_studio_translate.setObjectName("checkBox_studio_translate")
         self.gridLayout_55.addWidget(self.checkBox_studio_translate, 1, 1, 1, 1)
-        self.groupBox_88 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_11)
+        self.groupBox_88 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_fanyi)
         self.groupBox_88.setGeometry(QtCore.QRect(30, 2299, 701, 151))
         self.groupBox_88.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_88.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -6135,7 +6135,7 @@ class Ui_MDCx(object):
         self.checkBox_publisher_translate = QtWidgets.QCheckBox(self.layoutWidget_27)
         self.checkBox_publisher_translate.setObjectName("checkBox_publisher_translate")
         self.gridLayout_57.addWidget(self.checkBox_publisher_translate, 1, 1, 1, 1)
-        self.groupBox_89 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_11)
+        self.groupBox_89 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_fanyi)
         self.groupBox_89.setGeometry(QtCore.QRect(30, 2470, 701, 151))
         self.groupBox_89.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_89.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -6195,7 +6195,7 @@ class Ui_MDCx(object):
         self.radioButton_director_jp.setObjectName("radioButton_director_jp")
         self.horizontalLayout_49.addWidget(self.radioButton_director_jp)
         self.gridLayout_58.addLayout(self.horizontalLayout_49, 0, 1, 1, 1)
-        self.scrollArea_11.setWidget(self.scrollAreaWidgetContents_11)
+        self.scrollArea_11.setWidget(self.scrollAreaWidgetContents_fanyi)
         self.tabWidget.addTab(self.tab_6, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
@@ -6207,10 +6207,10 @@ class Ui_MDCx(object):
         self.scrollArea_9.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea_9.setWidgetResizable(False)
         self.scrollArea_9.setObjectName("scrollArea_9")
-        self.scrollAreaWidgetContents_10 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_10.setGeometry(QtCore.QRect(0, 0, 760, 860))
-        self.scrollAreaWidgetContents_10.setObjectName("scrollAreaWidgetContents_10")
-        self.groupBox_20 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_10)
+        self.scrollAreaWidgetContents_zimu = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_zimu.setGeometry(QtCore.QRect(0, 0, 760, 860))
+        self.scrollAreaWidgetContents_zimu.setObjectName("scrollAreaWidgetContents_zimu")
+        self.groupBox_20 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_zimu)
         self.groupBox_20.setGeometry(QtCore.QRect(30, 20, 701, 271))
         self.groupBox_20.setStyleSheet("font:\"Courier\";")
         self.groupBox_20.setObjectName("groupBox_20")
@@ -6318,7 +6318,7 @@ class Ui_MDCx(object):
         self.label_120.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_120.setObjectName("label_120")
         self.gridLayout_17.addWidget(self.label_120, 4, 0, 1, 1)
-        self.groupBox_45 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_10)
+        self.groupBox_45 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_zimu)
         self.groupBox_45.setGeometry(QtCore.QRect(30, 310, 701, 451))
         self.groupBox_45.setStyleSheet("font:\"Courier\";")
         self.groupBox_45.setObjectName("groupBox_45")
@@ -6463,7 +6463,7 @@ class Ui_MDCx(object):
         self.checkBox_sub_rescrape.setSizePolicy(sizePolicy)
         self.checkBox_sub_rescrape.setMinimumSize(QtCore.QSize(100, 30))
         self.checkBox_sub_rescrape.setObjectName("checkBox_sub_rescrape")
-        self.scrollArea_9.setWidget(self.scrollAreaWidgetContents_10)
+        self.scrollArea_9.setWidget(self.scrollAreaWidgetContents_zimu)
         self.tabWidget.addTab(self.tab_2, "")
         self.tab4 = QtWidgets.QWidget()
         self.tab4.setObjectName("tab4")
@@ -6475,10 +6475,10 @@ class Ui_MDCx(object):
         self.scrollArea_4.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea_4.setWidgetResizable(False)
         self.scrollArea_4.setObjectName("scrollArea_4")
-        self.scrollAreaWidgetContents_4 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_4.setGeometry(QtCore.QRect(0, 0, 760, 1670))
-        self.scrollAreaWidgetContents_4.setObjectName("scrollAreaWidgetContents_4")
-        self.groupBox_26 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_4)
+        self.scrollAreaWidgetContents_shuiyin = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_shuiyin.setGeometry(QtCore.QRect(0, -1012, 760, 1670))
+        self.scrollAreaWidgetContents_shuiyin.setObjectName("scrollAreaWidgetContents_shuiyin")
+        self.groupBox_26 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_shuiyin)
         self.groupBox_26.setGeometry(QtCore.QRect(30, 1010, 701, 561))
         self.groupBox_26.setStyleSheet("font:\"Courier\";")
         self.groupBox_26.setObjectName("groupBox_26")
@@ -6508,7 +6508,7 @@ class Ui_MDCx(object):
         self.label_download_mark_zip.setStyleSheet("color: rgb(10, 52, 255);")
         self.label_download_mark_zip.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.label_download_mark_zip.setObjectName("label_download_mark_zip")
-        self.groupBox_31 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_4)
+        self.groupBox_31 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_shuiyin)
         self.groupBox_31.setGeometry(QtCore.QRect(30, 20, 701, 511))
         self.groupBox_31.setStyleSheet("font:\"Courier\";")
         self.groupBox_31.setObjectName("groupBox_31")
@@ -6754,7 +6754,7 @@ class Ui_MDCx(object):
         self.label_130.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_130.setObjectName("label_130")
         self.gridLayout_24.addWidget(self.label_130, 1, 1, 1, 1)
-        self.groupBox_36 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_4)
+        self.groupBox_36 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_shuiyin)
         self.groupBox_36.setGeometry(QtCore.QRect(30, 550, 701, 101))
         self.groupBox_36.setStyleSheet("font:\"Courier\";")
         self.groupBox_36.setObjectName("groupBox_36")
@@ -6814,7 +6814,7 @@ class Ui_MDCx(object):
         self.label_126.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_126.setObjectName("label_126")
         self.gridLayout_30.addWidget(self.label_126, 0, 0, 1, 1)
-        self.groupBox_42 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_4)
+        self.groupBox_42 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_shuiyin)
         self.groupBox_42.setGeometry(QtCore.QRect(30, 790, 701, 201))
         self.groupBox_42.setStyleSheet("font:\"Courier\";")
         self.groupBox_42.setObjectName("groupBox_42")
@@ -6986,7 +6986,7 @@ class Ui_MDCx(object):
         self.label_216.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_216.setObjectName("label_216")
         self.gridLayout_39.addWidget(self.label_216, 0, 0, 1, 1)
-        self.groupBox_39 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_4)
+        self.groupBox_39 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_shuiyin)
         self.groupBox_39.setGeometry(QtCore.QRect(30, 670, 701, 101))
         self.groupBox_39.setStyleSheet("font:\"Courier\";")
         self.groupBox_39.setObjectName("groupBox_39")
@@ -7046,7 +7046,7 @@ class Ui_MDCx(object):
         self.label_233.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_233.setObjectName("label_233")
         self.gridLayout_42.addWidget(self.label_233, 0, 0, 1, 1)
-        self.scrollArea_4.setWidget(self.scrollAreaWidgetContents_4)
+        self.scrollArea_4.setWidget(self.scrollAreaWidgetContents_shuiyin)
         self.tabWidget.addTab(self.tab4, "")
         self.tab_7 = QtWidgets.QWidget()
         self.tab_7.setObjectName("tab_7")
@@ -7057,11 +7057,11 @@ class Ui_MDCx(object):
         self.scrollArea_13.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea_13.setWidgetResizable(False)
         self.scrollArea_13.setObjectName("scrollArea_13")
-        self.scrollAreaWidgetContents_13 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_13.setGeometry(QtCore.QRect(0, 0, 796, 1100))
-        self.scrollAreaWidgetContents_13.setObjectName("scrollAreaWidgetContents_13")
-        self.groupBox_81 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_13)
-        self.groupBox_81.setGeometry(QtCore.QRect(30, 20, 701, 981))
+        self.scrollAreaWidgetContents_nfo = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_nfo.setGeometry(QtCore.QRect(0, 0, 796, 1200))
+        self.scrollAreaWidgetContents_nfo.setObjectName("scrollAreaWidgetContents_nfo")
+        self.groupBox_81 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_nfo)
+        self.groupBox_81.setGeometry(QtCore.QRect(30, 20, 701, 1071))
         self.groupBox_81.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_81.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_81.setObjectName("groupBox_81")
@@ -7894,7 +7894,7 @@ class Ui_MDCx(object):
         self.label_389.setSizePolicy(sizePolicy)
         self.label_389.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_389.setObjectName("label_389")
-        self.pushButton_field_tips_nfo = QtWidgets.QPushButton(self.scrollAreaWidgetContents_13)
+        self.pushButton_field_tips_nfo = QtWidgets.QPushButton(self.scrollAreaWidgetContents_nfo)
         self.pushButton_field_tips_nfo.setGeometry(QtCore.QRect(640, 20, 80, 26))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -7903,7 +7903,7 @@ class Ui_MDCx(object):
         self.pushButton_field_tips_nfo.setSizePolicy(sizePolicy)
         self.pushButton_field_tips_nfo.setMinimumSize(QtCore.QSize(0, 0))
         self.pushButton_field_tips_nfo.setObjectName("pushButton_field_tips_nfo")
-        self.scrollArea_13.setWidget(self.scrollAreaWidgetContents_13)
+        self.scrollArea_13.setWidget(self.scrollAreaWidgetContents_nfo)
         self.tabWidget.addTab(self.tab_7, "")
         self.tab_5 = QtWidgets.QWidget()
         self.tab_5.setObjectName("tab_5")
@@ -7916,10 +7916,10 @@ class Ui_MDCx(object):
         self.scrollArea_12.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea_12.setWidgetResizable(False)
         self.scrollArea_12.setObjectName("scrollArea_12")
-        self.scrollAreaWidgetContents_12 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_12.setGeometry(QtCore.QRect(0, 0, 770, 1550))
-        self.scrollAreaWidgetContents_12.setObjectName("scrollAreaWidgetContents_12")
-        self.groupBox_43 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_12)
+        self.scrollAreaWidgetContents_yanyuan = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_yanyuan.setGeometry(QtCore.QRect(0, 0, 770, 1570))
+        self.scrollAreaWidgetContents_yanyuan.setObjectName("scrollAreaWidgetContents_yanyuan")
+        self.groupBox_43 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_yanyuan)
         self.groupBox_43.setGeometry(QtCore.QRect(30, 20, 701, 321))
         self.groupBox_43.setStyleSheet("font:\"Courier\";")
         self.groupBox_43.setObjectName("groupBox_43")
@@ -8094,7 +8094,7 @@ class Ui_MDCx(object):
         self.label_109.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_109.setObjectName("label_109")
         self.gridLayout_25.addWidget(self.label_109, 7, 1, 1, 1)
-        self.groupBox_41 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_12)
+        self.groupBox_41 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_yanyuan)
         self.groupBox_41.setGeometry(QtCore.QRect(30, 770, 701, 501))
         self.groupBox_41.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_41.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -8341,7 +8341,7 @@ class Ui_MDCx(object):
         self.checkBox_actor_photo_auto.raise_()
         self.layoutWidget_8.raise_()
         self.frame_2.raise_()
-        self.groupBox_64 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_12)
+        self.groupBox_64 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_yanyuan)
         self.groupBox_64.setGeometry(QtCore.QRect(30, 360, 701, 391))
         self.groupBox_64.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_64.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -8570,7 +8570,7 @@ class Ui_MDCx(object):
         self.checkBox_actor_info_photo.setSizePolicy(sizePolicy)
         self.checkBox_actor_info_photo.setMinimumSize(QtCore.QSize(0, 30))
         self.checkBox_actor_info_photo.setObjectName("checkBox_actor_info_photo")
-        self.groupBox_68 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_12)
+        self.groupBox_68 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_yanyuan)
         self.groupBox_68.setGeometry(QtCore.QRect(30, 1290, 701, 191))
         self.groupBox_68.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_68.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -8632,7 +8632,7 @@ class Ui_MDCx(object):
         self.checkBox_actor_photo_kodi.setSizePolicy(sizePolicy)
         self.checkBox_actor_photo_kodi.setMinimumSize(QtCore.QSize(0, 30))
         self.checkBox_actor_photo_kodi.setObjectName("checkBox_actor_photo_kodi")
-        self.scrollArea_12.setWidget(self.scrollAreaWidgetContents_12)
+        self.scrollArea_12.setWidget(self.scrollAreaWidgetContents_yanyuan)
         self.tabWidget.addTab(self.tab_5, "")
         self.tab3 = QtWidgets.QWidget()
         self.tab3.setObjectName("tab3")
@@ -8644,10 +8644,10 @@ class Ui_MDCx(object):
         self.scrollArea_3.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea_3.setWidgetResizable(False)
         self.scrollArea_3.setObjectName("scrollArea_3")
-        self.scrollAreaWidgetContents_3 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_3.setGeometry(QtCore.QRect(0, 0, 760, 1450))
-        self.scrollAreaWidgetContents_3.setObjectName("scrollAreaWidgetContents_3")
-        self.groupBox_10 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_3)
+        self.scrollAreaWidgetContents_wangluo = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_wangluo.setGeometry(QtCore.QRect(0, 0, 760, 1500))
+        self.scrollAreaWidgetContents_wangluo.setObjectName("scrollAreaWidgetContents_wangluo")
+        self.groupBox_10 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_wangluo)
         self.groupBox_10.setGeometry(QtCore.QRect(30, 350, 701, 531))
         self.groupBox_10.setStyleSheet("font:\"Courier\";")
         self.groupBox_10.setObjectName("groupBox_10")
@@ -8669,6 +8669,11 @@ class Ui_MDCx(object):
         self.label_45.setObjectName("label_45")
         self.gridLayout_10.addWidget(self.label_45, 0, 0, 1, 1)
         self.plainTextEdit_cookie_javdb = QtWidgets.QPlainTextEdit(self.gridLayoutWidget_10)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.plainTextEdit_cookie_javdb.sizePolicy().hasHeightForWidth())
+        self.plainTextEdit_cookie_javdb.setSizePolicy(sizePolicy)
         self.plainTextEdit_cookie_javdb.setMinimumSize(QtCore.QSize(300, 80))
         self.plainTextEdit_cookie_javdb.setStyleSheet(" border: 1px solid rgba(0,0,0, 50);\n"
 "                                border-radius: 1px;\n"
@@ -8767,7 +8772,7 @@ class Ui_MDCx(object):
         self.label_7.setGeometry(QtCore.QRect(60, 480, 71, 21))
         self.label_7.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_7.setObjectName("label_7")
-        self.groupBox_28 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_3)
+        self.groupBox_28 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_wangluo)
         self.groupBox_28.setGeometry(QtCore.QRect(30, 20, 701, 311))
         self.groupBox_28.setStyleSheet("font:\"Courier\";")
         self.groupBox_28.setObjectName("groupBox_28")
@@ -8948,26 +8953,27 @@ class Ui_MDCx(object):
         self.label_411.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_411.setObjectName("label_411")
         self.gridLayout_9.addWidget(self.label_411, 6, 1, 1, 1)
-        self.groupBox_44 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_3)
-        self.groupBox_44.setGeometry(QtCore.QRect(30, 1100, 701, 281))
+        self.groupBox_44 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_wangluo)
+        self.groupBox_44.setGeometry(QtCore.QRect(30, 1100, 701, 301))
         self.groupBox_44.setStyleSheet("font:\"Courier\";")
         self.groupBox_44.setObjectName("groupBox_44")
-        self.label_110 = QtWidgets.QLabel(self.groupBox_44)
-        self.label_110.setGeometry(QtCore.QRect(60, 120, 581, 111))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_110.sizePolicy().hasHeightForWidth())
-        self.label_110.setSizePolicy(sizePolicy)
-        self.label_110.setStyleSheet("color: rgb(8, 128, 128);")
-        self.label_110.setOpenExternalLinks(True)
-        self.label_110.setObjectName("label_110")
         self.gridLayoutWidget = QtWidgets.QWidget(self.groupBox_44)
-        self.gridLayoutWidget.setGeometry(QtCore.QRect(20, 30, 661, 62))
+        self.gridLayoutWidget.setGeometry(QtCore.QRect(20, 30, 661, 241))
         self.gridLayoutWidget.setObjectName("gridLayoutWidget")
         self.gridLayout_12 = QtWidgets.QGridLayout(self.gridLayoutWidget)
         self.gridLayout_12.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_12.setObjectName("gridLayout_12")
+        self.label_401 = QtWidgets.QLabel(self.gridLayoutWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_401.sizePolicy().hasHeightForWidth())
+        self.label_401.setSizePolicy(sizePolicy)
+        self.label_401.setMinimumSize(QtCore.QSize(130, 30))
+        self.label_401.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.label_401.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label_401.setObjectName("label_401")
+        self.gridLayout_12.addWidget(self.label_401, 0, 0, 1, 1)
         self.comboBox_custom_website = QtWidgets.QComboBox(self.gridLayoutWidget)
         self.comboBox_custom_website.setEnabled(True)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -8977,39 +8983,67 @@ class Ui_MDCx(object):
         self.comboBox_custom_website.setSizePolicy(sizePolicy)
         self.comboBox_custom_website.setMaxVisibleItems(20)
         self.comboBox_custom_website.setObjectName("comboBox_custom_website")
-        self.gridLayout_12.addWidget(self.comboBox_custom_website, 0, 0, 1, 2)
-        self.lineEdit_custom_website = QtWidgets.QLineEdit(self.gridLayoutWidget)
+        self.gridLayout_12.addWidget(self.comboBox_custom_website, 0, 1, 1, 1)
+        self.lineEdit_site_custom_url = QtWidgets.QLineEdit(self.gridLayoutWidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEdit_custom_website.sizePolicy().hasHeightForWidth())
-        self.lineEdit_custom_website.setSizePolicy(sizePolicy)
-        self.lineEdit_custom_website.setMinimumSize(QtCore.QSize(300, 30))
-        self.lineEdit_custom_website.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        self.lineEdit_custom_website.setStyleSheet(" font: \"Courier\";\n"
+        sizePolicy.setHeightForWidth(self.lineEdit_site_custom_url.sizePolicy().hasHeightForWidth())
+        self.lineEdit_site_custom_url.setSizePolicy(sizePolicy)
+        self.lineEdit_site_custom_url.setMinimumSize(QtCore.QSize(300, 30))
+        self.lineEdit_site_custom_url.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.lineEdit_site_custom_url.setStyleSheet(" font: \"Courier\";\n"
 "                                border: 1px solid rgba(0,0,0, 50);\n"
 "                                border-radius: 15px;\n"
 "")
-        self.lineEdit_custom_website.setObjectName("lineEdit_custom_website")
-        self.gridLayout_12.addWidget(self.lineEdit_custom_website, 0, 2, 1, 1)
-        self.gridLayout_12.setColumnStretch(0, 2)
-        self.gridLayout_12.setColumnStretch(2, 9)
-        self.label_324 = QtWidgets.QLabel(self.groupBox_44)
-        self.label_324.setGeometry(QtCore.QRect(140, 80, 621, 41))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.lineEdit_site_custom_url.setObjectName("lineEdit_site_custom_url")
+        self.gridLayout_12.addWidget(self.lineEdit_site_custom_url, 3, 1, 1, 1)
+        self.label_132 = QtWidgets.QLabel(self.gridLayoutWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_324.sizePolicy().hasHeightForWidth())
-        self.label_324.setSizePolicy(sizePolicy)
-        self.label_324.setMinimumSize(QtCore.QSize(130, 0))
-        self.label_324.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.label_324.setStyleSheet("color: rgb(255, 38, 0);\n"
-"                          font-weight:bold")
-        self.label_324.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.label_324.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
-        self.label_324.setWordWrap(True)
-        self.label_324.setObjectName("label_324")
-        self.groupBox_14 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_3)
+        sizePolicy.setHeightForWidth(self.label_132.sizePolicy().hasHeightForWidth())
+        self.label_132.setSizePolicy(sizePolicy)
+        self.label_132.setStyleSheet("color: rgb(8, 128, 128);")
+        self.label_132.setOpenExternalLinks(True)
+        self.label_132.setObjectName("label_132")
+        self.gridLayout_12.addWidget(self.label_132, 1, 1, 1, 1)
+        self.label_400 = QtWidgets.QLabel(self.gridLayoutWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_400.sizePolicy().hasHeightForWidth())
+        self.label_400.setSizePolicy(sizePolicy)
+        self.label_400.setMinimumSize(QtCore.QSize(130, 30))
+        self.label_400.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.label_400.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label_400.setObjectName("label_400")
+        self.gridLayout_12.addWidget(self.label_400, 3, 0, 1, 1)
+        self.checkBox_site_use_browser = QtWidgets.QCheckBox(self.gridLayoutWidget)
+        self.checkBox_site_use_browser.setObjectName("checkBox_site_use_browser")
+        self.gridLayout_12.addWidget(self.checkBox_site_use_browser, 5, 1, 1, 1)
+        self.label_110 = QtWidgets.QLabel(self.gridLayoutWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_110.sizePolicy().hasHeightForWidth())
+        self.label_110.setSizePolicy(sizePolicy)
+        self.label_110.setStyleSheet("color: rgb(8, 128, 128);")
+        self.label_110.setOpenExternalLinks(True)
+        self.label_110.setObjectName("label_110")
+        self.gridLayout_12.addWidget(self.label_110, 4, 1, 1, 1)
+        self.label_136 = QtWidgets.QLabel(self.gridLayoutWidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_136.sizePolicy().hasHeightForWidth())
+        self.label_136.setSizePolicy(sizePolicy)
+        self.label_136.setStyleSheet("color: rgb(8, 128, 128);")
+        self.label_136.setOpenExternalLinks(True)
+        self.label_136.setObjectName("label_136")
+        self.gridLayout_12.addWidget(self.label_136, 6, 1, 1, 1)
+        self.gridLayout_12.setColumnStretch(0, 2)
+        self.groupBox_14 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_wangluo)
         self.groupBox_14.setGeometry(QtCore.QRect(30, 900, 701, 181))
         self.groupBox_14.setStyleSheet("font:\"Courier\";")
         self.groupBox_14.setObjectName("groupBox_14")
@@ -9085,7 +9119,7 @@ class Ui_MDCx(object):
         self.label_422.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse)
         self.label_422.setObjectName("label_422")
         self.horizontalLayout_150.addWidget(self.label_422)
-        self.scrollArea_3.setWidget(self.scrollAreaWidgetContents_3)
+        self.scrollArea_3.setWidget(self.scrollAreaWidgetContents_wangluo)
         self.tabWidget.addTab(self.tab3, "")
         self.tab5 = QtWidgets.QWidget()
         self.tab5.setEnabled(True)
@@ -9098,10 +9132,10 @@ class Ui_MDCx(object):
         self.scrollArea_5.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea_5.setWidgetResizable(False)
         self.scrollArea_5.setObjectName("scrollArea_5")
-        self.scrollAreaWidgetContents_5 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_5.setGeometry(QtCore.QRect(0, 0, 770, 1000))
-        self.scrollAreaWidgetContents_5.setObjectName("scrollAreaWidgetContents_5")
-        self.groupBox_17 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_5)
+        self.scrollAreaWidgetContents_gaoji = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_gaoji.setGeometry(QtCore.QRect(0, 0, 770, 1000))
+        self.scrollAreaWidgetContents_gaoji.setObjectName("scrollAreaWidgetContents_gaoji")
+        self.groupBox_17 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_gaoji)
         self.groupBox_17.setGeometry(QtCore.QRect(30, 720, 701, 81))
         self.groupBox_17.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_17.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -9118,7 +9152,7 @@ class Ui_MDCx(object):
         self.radioButton_log_off = QtWidgets.QRadioButton(self.horizontalLayoutWidget_11)
         self.radioButton_log_off.setObjectName("radioButton_log_off")
         self.horizontalLayout_13.addWidget(self.radioButton_log_off)
-        self.groupBox_3 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_5)
+        self.groupBox_3 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_gaoji)
         self.groupBox_3.setGeometry(QtCore.QRect(30, 620, 701, 81))
         self.groupBox_3.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_3.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -9156,7 +9190,7 @@ class Ui_MDCx(object):
         self.checkBox_show_data_log.setMinimumSize(QtCore.QSize(100, 30))
         self.checkBox_show_data_log.setObjectName("checkBox_show_data_log")
         self.horizontalLayout_29.addWidget(self.checkBox_show_data_log)
-        self.groupBox_4 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_5)
+        self.groupBox_4 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_gaoji)
         self.groupBox_4.setGeometry(QtCore.QRect(30, 820, 701, 81))
         self.groupBox_4.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_4.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -9173,7 +9207,7 @@ class Ui_MDCx(object):
         self.radioButton_update_off = QtWidgets.QRadioButton(self.horizontalLayoutWidget_7)
         self.radioButton_update_off.setObjectName("radioButton_update_off")
         self.horizontalLayout_9.addWidget(self.radioButton_update_off)
-        self.groupBox_12 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_5)
+        self.groupBox_12 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_gaoji)
         self.groupBox_12.setGeometry(QtCore.QRect(30, 20, 701, 581))
         self.groupBox_12.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_12.setMaximumSize(QtCore.QSize(739, 16777215))
@@ -9606,7 +9640,7 @@ class Ui_MDCx(object):
         self.label_427.setObjectName("label_427")
         self.horizontalLayout_dock_2.addWidget(self.label_427)
         self.gridLayout_20.addLayout(self.horizontalLayout_dock_2, 11, 1, 1, 1)
-        self.scrollArea_5.setWidget(self.scrollAreaWidgetContents_5)
+        self.scrollArea_5.setWidget(self.scrollAreaWidgetContents_gaoji)
         self.tabWidget.addTab(self.tab5, "")
         self.label_config = QtWidgets.QLabel(self.page_setting)
         self.label_config.setGeometry(QtCore.QRect(0, 620, 799, 74))
@@ -9938,106 +9972,106 @@ class Ui_MDCx(object):
         self.scrollArea_nfo.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         self.scrollArea_nfo.setWidgetResizable(False)
         self.scrollArea_nfo.setObjectName("scrollArea_nfo")
-        self.scrollAreaWidgetContents_nfo = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_nfo.setGeometry(QtCore.QRect(0, 0, 752, 1300))
-        self.scrollAreaWidgetContents_nfo.setObjectName("scrollAreaWidgetContents_nfo")
-        self.label_19 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.scrollAreaWidgetContents_nfo_editor = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_nfo_editor.setGeometry(QtCore.QRect(0, 0, 752, 1300))
+        self.scrollAreaWidgetContents_nfo_editor.setObjectName("scrollAreaWidgetContents_nfo_editor")
+        self.label_19 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_19.setGeometry(QtCore.QRect(9, 330, 81, 40))
         self.label_19.setLineWidth(0)
         self.label_19.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_19.setObjectName("label_19")
-        self.label_359 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_359 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_359.setGeometry(QtCore.QRect(40, 140, 50, 40))
         self.label_359.setLineWidth(0)
         self.label_359.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_359.setObjectName("label_359")
-        self.label_360 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_360 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_360.setGeometry(QtCore.QRect(40, 80, 50, 40))
         self.label_360.setLineWidth(0)
         self.label_360.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_360.setObjectName("label_360")
-        self.label_361 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_361 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_361.setGeometry(QtCore.QRect(9, 220, 81, 40))
         self.label_361.setLineWidth(0)
         self.label_361.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_361.setObjectName("label_361")
-        self.label_362 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_362 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_362.setGeometry(QtCore.QRect(40, 660, 50, 40))
         self.label_362.setLineWidth(0)
         self.label_362.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_362.setObjectName("label_362")
-        self.label_363 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_363 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_363.setGeometry(QtCore.QRect(9, 800, 81, 40))
         self.label_363.setLineWidth(0)
         self.label_363.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_363.setObjectName("label_363")
-        self.label_364 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_364 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_364.setGeometry(QtCore.QRect(380, 800, 81, 40))
         self.label_364.setLineWidth(0)
         self.label_364.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_364.setObjectName("label_364")
-        self.label_365 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_365 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_365.setGeometry(QtCore.QRect(380, 920, 81, 40))
         self.label_365.setLineWidth(0)
         self.label_365.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_365.setObjectName("label_365")
-        self.label_366 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_366 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_366.setGeometry(QtCore.QRect(9, 920, 81, 40))
         self.label_366.setLineWidth(0)
         self.label_366.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_366.setObjectName("label_366")
-        self.label_367 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_367 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_367.setGeometry(QtCore.QRect(380, 980, 81, 40))
         self.label_367.setLineWidth(0)
         self.label_367.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_367.setObjectName("label_367")
-        self.label_368 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_368 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_368.setGeometry(QtCore.QRect(9, 980, 81, 40))
         self.label_368.setLineWidth(0)
         self.label_368.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_368.setObjectName("label_368")
-        self.label_369 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_369 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_369.setGeometry(QtCore.QRect(360, 80, 50, 40))
         self.label_369.setLineWidth(0)
         self.label_369.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_369.setObjectName("label_369")
-        self.comboBox_nfo = QtWidgets.QComboBox(self.scrollAreaWidgetContents_nfo)
+        self.comboBox_nfo = QtWidgets.QComboBox(self.scrollAreaWidgetContents_nfo_editor)
         self.comboBox_nfo.setGeometry(QtCore.QRect(420, 80, 103, 40))
         self.comboBox_nfo.setObjectName("comboBox_nfo")
         self.comboBox_nfo.addItem("")
         self.comboBox_nfo.addItem("")
         self.comboBox_nfo.addItem("")
-        self.label_371 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_371 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_371.setGeometry(QtCore.QRect(9, 490, 81, 40))
         self.label_371.setLineWidth(0)
         self.label_371.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_371.setObjectName("label_371")
-        self.label_372 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_372 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_372.setGeometry(QtCore.QRect(9, 270, 81, 40))
         self.label_372.setLineWidth(0)
         self.label_372.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_372.setObjectName("label_372")
-        self.label_375 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_375 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_375.setGeometry(QtCore.QRect(9, 1050, 81, 40))
         self.label_375.setLineWidth(0)
         self.label_375.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_375.setObjectName("label_375")
-        self.label_376 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_376 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_376.setGeometry(QtCore.QRect(-1, 1110, 91, 40))
         self.label_376.setLineWidth(0)
         self.label_376.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_376.setObjectName("label_376")
-        self.label_377 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_377 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_377.setGeometry(QtCore.QRect(-1, 1170, 91, 40))
         self.label_377.setLineWidth(0)
         self.label_377.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_377.setObjectName("label_377")
-        self.label_378 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_378 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_378.setGeometry(QtCore.QRect(0, 1230, 91, 40))
         self.label_378.setLineWidth(0)
         self.label_378.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_378.setObjectName("label_378")
-        self.label_370 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_370 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_370.setGeometry(QtCore.QRect(100, 190, 561, 20))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -10046,7 +10080,7 @@ class Ui_MDCx(object):
         self.label_370.setSizePolicy(sizePolicy)
         self.label_370.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_370.setObjectName("label_370")
-        self.label_379 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_379 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_379.setGeometry(QtCore.QRect(100, 770, 561, 20))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -10055,92 +10089,92 @@ class Ui_MDCx(object):
         self.label_379.setSizePolicy(sizePolicy)
         self.label_379.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_379.setObjectName("label_379")
-        self.label_373 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_373 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_373.setGeometry(QtCore.QRect(9, 860, 81, 40))
         self.label_373.setLineWidth(0)
         self.label_373.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_373.setObjectName("label_373")
-        self.label_374 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_374 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_374.setGeometry(QtCore.QRect(380, 860, 81, 40))
         self.label_374.setLineWidth(0)
         self.label_374.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_374.setObjectName("label_374")
-        self.label_380 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_380 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_380.setGeometry(QtCore.QRect(540, 80, 51, 40))
         self.label_380.setLineWidth(0)
         self.label_380.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_380.setObjectName("label_380")
-        self.lineEdit_nfo_number = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_number = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_number.setGeometry(QtCore.QRect(100, 80, 241, 40))
         self.lineEdit_nfo_number.setObjectName("lineEdit_nfo_number")
-        self.lineEdit_nfo_year = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_year = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_year.setGeometry(QtCore.QRect(600, 80, 121, 40))
         self.lineEdit_nfo_year.setObjectName("lineEdit_nfo_year")
-        self.lineEdit_nfo_actor = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_actor = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_actor.setGeometry(QtCore.QRect(100, 140, 621, 40))
         self.lineEdit_nfo_actor.setObjectName("lineEdit_nfo_actor")
-        self.lineEdit_nfo_title = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_title = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_title.setGeometry(QtCore.QRect(100, 220, 621, 40))
         self.lineEdit_nfo_title.setObjectName("lineEdit_nfo_title")
-        self.lineEdit_nfo_originaltitle = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_originaltitle = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_originaltitle.setGeometry(QtCore.QRect(100, 270, 621, 40))
         self.lineEdit_nfo_originaltitle.setObjectName("lineEdit_nfo_originaltitle")
-        self.textEdit_nfo_outline = QtWidgets.QTextEdit(self.scrollAreaWidgetContents_nfo)
+        self.textEdit_nfo_outline = QtWidgets.QTextEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.textEdit_nfo_outline.setGeometry(QtCore.QRect(100, 330, 621, 151))
         self.textEdit_nfo_outline.setObjectName("textEdit_nfo_outline")
-        self.textEdit_nfo_originalplot = QtWidgets.QTextEdit(self.scrollAreaWidgetContents_nfo)
+        self.textEdit_nfo_originalplot = QtWidgets.QTextEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.textEdit_nfo_originalplot.setGeometry(QtCore.QRect(100, 490, 621, 151))
         self.textEdit_nfo_originalplot.setObjectName("textEdit_nfo_originalplot")
-        self.lineEdit_nfo_release = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_release = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_release.setGeometry(QtCore.QRect(100, 800, 241, 40))
         self.lineEdit_nfo_release.setObjectName("lineEdit_nfo_release")
-        self.lineEdit_nfo_score = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_score = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_score.setGeometry(QtCore.QRect(100, 860, 241, 40))
         self.lineEdit_nfo_score.setObjectName("lineEdit_nfo_score")
-        self.lineEdit_nfo_director = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_director = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_director.setGeometry(QtCore.QRect(100, 920, 241, 40))
         self.lineEdit_nfo_director.setObjectName("lineEdit_nfo_director")
-        self.lineEdit_nfo_studio = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_studio = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_studio.setGeometry(QtCore.QRect(100, 980, 241, 40))
         self.lineEdit_nfo_studio.setObjectName("lineEdit_nfo_studio")
-        self.lineEdit_nfo_series = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_series = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_series.setGeometry(QtCore.QRect(480, 920, 241, 40))
         self.lineEdit_nfo_series.setObjectName("lineEdit_nfo_series")
-        self.lineEdit_nfo_publisher = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_publisher = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_publisher.setGeometry(QtCore.QRect(480, 980, 241, 40))
         self.lineEdit_nfo_publisher.setObjectName("lineEdit_nfo_publisher")
-        self.lineEdit_nfo_wanted = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_wanted = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_wanted.setGeometry(QtCore.QRect(480, 860, 241, 40))
         self.lineEdit_nfo_wanted.setObjectName("lineEdit_nfo_wanted")
-        self.lineEdit_nfo_runtime = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_runtime = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_runtime.setGeometry(QtCore.QRect(480, 800, 241, 40))
         self.lineEdit_nfo_runtime.setObjectName("lineEdit_nfo_runtime")
-        self.lineEdit_nfo_poster = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_poster = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_poster.setGeometry(QtCore.QRect(100, 1050, 621, 40))
         self.lineEdit_nfo_poster.setObjectName("lineEdit_nfo_poster")
-        self.lineEdit_nfo_cover = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_cover = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_cover.setGeometry(QtCore.QRect(100, 1110, 621, 40))
         self.lineEdit_nfo_cover.setObjectName("lineEdit_nfo_cover")
-        self.lineEdit_nfo_trailer = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_trailer = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_trailer.setGeometry(QtCore.QRect(100, 1170, 621, 40))
         self.lineEdit_nfo_trailer.setObjectName("lineEdit_nfo_trailer")
-        self.lineEdit_nfo_website = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo)
+        self.lineEdit_nfo_website = QtWidgets.QLineEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.lineEdit_nfo_website.setGeometry(QtCore.QRect(100, 1230, 621, 40))
         self.lineEdit_nfo_website.setObjectName("lineEdit_nfo_website")
-        self.label_nfo = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_nfo = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_nfo.setGeometry(QtCore.QRect(100, 20, 621, 41))
         self.label_nfo.setText("")
         self.label_nfo.setWordWrap(True)
         self.label_nfo.setObjectName("label_nfo")
-        self.label_381 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo)
+        self.label_381 = QtWidgets.QLabel(self.scrollAreaWidgetContents_nfo_editor)
         self.label_381.setGeometry(QtCore.QRect(40, 20, 50, 40))
         self.label_381.setLineWidth(0)
         self.label_381.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_381.setObjectName("label_381")
-        self.textEdit_nfo_tag = QtWidgets.QTextEdit(self.scrollAreaWidgetContents_nfo)
+        self.textEdit_nfo_tag = QtWidgets.QTextEdit(self.scrollAreaWidgetContents_nfo_editor)
         self.textEdit_nfo_tag.setGeometry(QtCore.QRect(100, 660, 621, 101))
         self.textEdit_nfo_tag.setObjectName("textEdit_nfo_tag")
-        self.scrollArea_nfo.setWidget(self.scrollAreaWidgetContents_nfo)
+        self.scrollArea_nfo.setWidget(self.scrollAreaWidgetContents_nfo_editor)
         self.pushButton_nfo_save = QtWidgets.QPushButton(self.widget_nfo)
         self.pushButton_nfo_save.setGeometry(QtCore.QRect(260, 630, 91, 40))
         self.pushButton_nfo_save.setObjectName("pushButton_nfo_save")
@@ -10176,7 +10210,7 @@ class Ui_MDCx(object):
         MDCx.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MDCx)
-        self.stackedWidget.setCurrentIndex(2)
+        self.stackedWidget.setCurrentIndex(4)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MDCx)
 
@@ -10210,31 +10244,43 @@ class Ui_MDCx(object):
         self.label_file_path.setText(_translate("MDCx", "视频目录设置：【设置】-【目录】-【待刮削视频目录】。程序将刮削该目录及子目录的所有文件。"))
         self.pushButton_select_media_folder.setText(_translate("MDCx", "选择目录"))
         self.textBrowser_log_main_2.setHtml(_translate("MDCx", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
+"                <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"                p, li { white-space: pre-wrap; }\n"
+"                </style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
         self.pushButton_start_cap2.setText(_translate("MDCx", "开始"))
         self.textBrowser_log_main.setHtml(_translate("MDCx", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
+"                <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"                p, li { white-space: pre-wrap; }\n"
+"                </style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
         self.pushButton_view_failed_list.setText(_translate("MDCx", "失败 0"))
         self.textBrowser_log_main_3.setHtml(_translate("MDCx", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
+"                <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"                p, li { white-space: pre-wrap; }\n"
+"                </style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
         self.pushButton_scraper_failed_list.setText(_translate("MDCx", "当有失败任务时，点击可以一键刮削当前失败列表"))
         self.pushButton_check_net.setText(_translate("MDCx", "开始检测"))
         self.groupBox_7.setTitle(_translate("MDCx", "单文件刮削（指定某个文件的番号网址进行刮削，当存在相同番号时可用这个）"))
@@ -10282,11 +10328,7 @@ class Ui_MDCx(object):
         self.label_46.setText(_translate("MDCx", "失败输出目录："))
         self.pushButton_select_sucess_folder.setText(_translate("MDCx", "选择目录"))
         self.label_29.setText(_translate("MDCx", "指刮削成功时，视频将移动到这个文件夹。输出目录可以不在待刮削视频目录下"))
-        self.label_383.setText(_translate("MDCx", "如果创建软链接时要复制图片和NFO，请到「工具」-「软链接助手」勾选即可\n"
-"                                1，软链接路径支持命名字段：\n"
-"                                end_folder_name （指待刮削目录上最后的文件夹名，是固定的名字）\n"
-"                                2，成功/失败输出目录支持命名字段：end_folder_name、\n"
-"                                first_folder_name （指待刮削目录下第一层子文件夹名，是动态的名字）"))
+        self.label_383.setText(_translate("MDCx", "<p>如果创建软链接时要复制图片和NFO，请到「工具」-「软链接助手」勾选即可</p><p>1，软链接路径支持命名字段：</p><p>end_folder_name （指待刮削目录上最后的文件夹名）</p><p>2，成功/失败输出目录支持命名字段：</p><p>end_folder_name，first_folder_name （指待刮削目录下第一层子文件夹名）</p>"))
         self.groupBox_32.setTitle(_translate("MDCx", "文件扫描设置"))
         self.label_336.setText(_translate("MDCx", "检查软链接："))
         self.label_337.setText(_translate("MDCx", "勾选后将检查软链接文件指向的目标文件是否存在，若不存在则会删除该软链接"))
@@ -10335,8 +10377,7 @@ class Ui_MDCx(object):
         self.checkBox_read_has_nfo_update.setText(_translate("MDCx", "本地已刮削成功的文件，重新整理分类（按更新模式规则）"))
         self.label_345.setText(_translate("MDCx", "无需联网"))
         self.checkBox_read_update_nfo.setText(_translate("MDCx", "允许更新 nfo 文件"))
-        self.label_37.setText(_translate("MDCx", "将按 下方「Emby视频标题」、「设置」-「翻译」、\n"
-"                                                    「设置」-「NFO」等的设置项，利用本地 nfo 更新 nfo 信息"))
+        self.label_37.setText(_translate("MDCx", "<p>将按 下方「Emby视频标题」、「设置」-「翻译」、<br>「设置」-「NFO」等的设置项，利用本地 nfo 更新 nfo 信息</p>"))
         self.checkBox_read_download_file_again.setText(_translate("MDCx", "重新下载图片等文件（nfo 需有链接）"))
         self.label_347.setText(_translate("MDCx", "将按「设置」-「下载」，更新文件"))
         self.checkBox_read_no_nfo_scrape.setText(_translate("MDCx", "本地之前刮削失败的文件和没有nfo的文件，重新刮削（按更新模式规则）"))
@@ -10394,27 +10435,24 @@ class Ui_MDCx(object):
         self.groupBox_2.setTitle(_translate("MDCx", "刮削成功后在输出目录创建软链接或硬链接"))
         self.radioButton_soft_off.setText(_translate("MDCx", "关"))
         self.radioButton_soft_on.setText(_translate("MDCx", "创建软链接"))
-        self.label_link_off.setText(_translate("MDCx", "适合 NAS 和硬盘用户。本地党可随心所欲整理文件。\n"
-"                                注意：选择此项，下面的「成功后移动文件」「失败后移动文件」才会生效"))
+        self.label_link_off.setText(_translate("MDCx", "<span>适合 NAS 和硬盘用户。本地党可随心所欲整理文件。<br>注意：选择此项，下面的「成功后移动文件」「失败后移动文件」才会生效</span>"))
         self.radioButton_hard_on.setText(_translate("MDCx", "创建硬链接"))
-        self.label_softlink.setText(_translate("MDCx", "适合网盘用户。刮削资料存本地，Emby 加载快，网盘读写少。\n"
-"                                    注意：Windows 用户，成功后的输出目录必须选择本地磁盘（系统限制）"))
-        self.label_hardlink.setText(_translate("MDCx", "适合 PT 用户。刮削资料同盘单独存放，不影响分享率。\n"
-"                                    注意：Mac 用户，请选择创建软连接，输出目录同盘即可（硬链接有权限问题）"))
+        self.label_softlink.setText(_translate("MDCx", "<span>适合网盘用户。刮削资料存本地，Emby 加载快，网盘读写少。<br>注意：Windows 用户，成功后的输出目录必须选择本地磁盘（系统限制）</span>"))
+        self.label_hardlink.setText(_translate("MDCx", "<span>适合 PT 用户。刮削资料同盘单独存放，不影响分享率。<br>注意：Mac 用户，请选择创建软连接，输出目录同盘即可（硬链接有权限问题）</span>"))
         self.label_342.setText(_translate("MDCx", "注：软硬链接不会移动和重命名原视频文件，仅移动和重命名链接文件"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab1), _translate("MDCx", " 刮削模式 "))
         self.groupBox_80.setTitle(_translate("MDCx", "类型刮削网站"))
         self.label_151.setText(_translate("MDCx", "无码番号："))
         self.label_316.setText(_translate("MDCx", "动漫里番："))
         self.label_322.setText(_translate("MDCx", "Mywife："))
-        self.label_232.setText(_translate("MDCx", "<html><head/><body><p>「网站偏好」-「指定网站」指定 mdtv、hdouban，或文件路径含有「国产」、「麻豆」时，将自动使用以上网站刮削国产番号</p></body></html>"))
+        self.label_232.setText(_translate("MDCx", "<p>「网站偏好」-「指定网站」指定 mdtv、hdouban，或文件路径含有「国产」、「麻豆」时，将自动使用以上网站刮削国产番号</p>"))
         self.label_156.setText(_translate("MDCx", "比如：259LUXU-1111"))
         self.label_157.setText(_translate("MDCx", "比如：FC2-111111"))
         self.label_158.setText(_translate("MDCx", "比如：sexart.11.11.11"))
         self.label_149.setText(_translate("MDCx", "欧美番号："))
         self.label_155.setText(_translate("MDCx", "比如：111111-111，111111_111，n1111，HEYZO-1111，SMD-111"))
-        self.label_318.setText(_translate("MDCx", "<html><head/><body><p>「网站偏好」-「指定网站」指定 getchu、dmm、getchu_dmm，或文件路径含有「里番」、「动漫」时，将自动使用 getchu_dmm（二合一） 刮削</p></body></html>"))
-        self.label_323.setText(_translate("MDCx", "<html><head/><body><p>「网站偏好」-「指定网站」指定 mywife，或文件路径含有 mywife时，将自动使用 mywife 刮削（Mywife 番号规则： Mywife No.1230）</p></body></html>"))
+        self.label_318.setText(_translate("MDCx", "<p>「网站偏好」-「指定网站」指定 getchu、dmm、getchu_dmm，或文件路径含有「里番」、「动漫」时，将自动使用 getchu_dmm（二合一） 刮削</p>"))
+        self.label_323.setText(_translate("MDCx", "<p>「网站偏好」-「指定网站」指定 mywife，或文件路径含有 mywife时，将自动使用 mywife 刮削（Mywife 番号规则： Mywife No.1230）</p>"))
         self.label_154.setText(_translate("MDCx", "比如：MIDE-111，以及不符合以下类型的番号"))
         self.label_152.setText(_translate("MDCx", "素人番号："))
         self.label_153.setText(_translate("MDCx", "有码番号："))
@@ -10440,7 +10478,7 @@ class Ui_MDCx(object):
         self.label_206.setText(_translate("MDCx", "预告片："))
         self.label_201.setText(_translate("MDCx", "系列："))
         self.label_179.setText(_translate("MDCx", "所有演员："))
-        self.label_325.setText(_translate("MDCx", "<html><head/><body><p>说明：对于某个字段，如果不指定刮削网站，则将使用任意已获取网站的数据；否则将依次使用字段刮削网站与该类型的刮削网站的交集。</p><p>例如，若标题设置为 theporndb,dmm,javdb,fc2ppvdb，有码设置为 dmm,javdb,javbus，FC2设置为 fc2,fc2ppvdb</p><p>则对于有码影片，将依次使用 dmm,javdb 的标题数据；对于FC2影片将使用 fc2ppvdb 的标题数据</p></body></html>"))
+        self.label_325.setText(_translate("MDCx", "<p>说明：对于某个字段，如果不指定刮削网站，则将使用任意已获取网站的数据；否则将依次使用字段刮削网站与该类型的刮削网站的交集。</p><p>例如，若标题设置为 theporndb,dmm,javdb,fc2ppvdb，有码设置为 dmm,javdb,javbus，FC2设置为 fc2,fc2ppvdb</p><p>则对于有码影片，将依次使用 dmm,javdb 的标题数据；对于FC2影片将使用 fc2ppvdb 的标题数据</p>"))
         self.groupBox_11.setTitle(_translate("MDCx", "网站偏好"))
         self.radioButton_scrape_single.setText(_translate("MDCx", "指定网站"))
         self.label_32.setText(_translate("MDCx", "按各个字段设置的刮削网站进行刮削，字段来自多个网站。字段全一些。"))
@@ -10630,8 +10668,8 @@ class Ui_MDCx(object):
 "                          style=\'line-height:20px\'>指马赛克有损去除版本，当视频文件路径中含有「-uncensored.」、「破解」、「克破」、「UMR.」等字样时，该文件识别为无码破解版本。<br>\n"
 "                          在重命名文件名及目录名时，在番号后显示该字符表示为无码破解版本</p>"))
         self.label_174.setText(_translate("MDCx", "无码破解："))
-        self.label_145.setText(_translate("MDCx", "指有码版本，当视频文件路径中含有「有码」、「有碼」字样时，该文件识别为\n"
-"                          有码版本，重命名文件名及目录名时，在番号后显示该字符表示为有码版本"))
+        self.label_145.setText(_translate("MDCx", "<p>指有码版本，当视频文件路径中含有「有码」、「有碼」字样时，该文件识别为\n"
+"                          有码版本，重命名文件名及目录名时，在番号后显示该字符表示为有码版本</p>"))
         self.label_235.setText(_translate("MDCx", "指命名时在番号后添加版本命名字符。你也可以使用 moword 字段来调整添加位置"))
         self.label_234.setText(_translate("MDCx", "添加马赛克命名字符："))
         self.checkBox_foldername_mosaic.setText(_translate("MDCx", "视频目录名"))
@@ -10648,8 +10686,8 @@ class Ui_MDCx(object):
         self.label_122.setText(_translate("MDCx", "在视频目录创建「trailers」文件夹，多分集共用一个「trailer.mp4」"))
         self.groupBox_40.setTitle(_translate("MDCx", "字段命名规则"))
         self.label_407.setText(_translate("MDCx", "演员："))
-        self.label_146.setText(_translate("MDCx", "比如moword(自定义的无码标识),cnword(字幕)将显示为: 番号-流出-C\n"
-"                                此处只控制顺序，需要在对应位置（如“添加 4K 字符”）勾选才能控制是否显示"))
+        self.label_146.setText(_translate("MDCx", "<p>比如moword(自定义的无码标识),cnword(字幕)将显示为: 番号-流出-C<br>\n"
+"                                此处只控制顺序，需要在对应位置（如“添加 4K 字符”）勾选才能控制是否显示</p>"))
         self.checkBox_number_del_num.setText(_translate("MDCx", "去除素人番号前缀数字（比如：259LUXU-1488 将修改为 LUXU-1488，建议保留）"))
         self.checkBox_actor_del_char.setText(_translate("MDCx", "去除演员名括号中的名字（比如：Rio（柚木ティナ）将修改为 Rio）"))
         self.label_319.setText(_translate("MDCx", "素人番号："))
@@ -10666,8 +10704,7 @@ class Ui_MDCx(object):
         self.radioButton_definition_hd.setText(_translate("MDCx", "HD、FHD、QHD、UHD"))
         self.label_329.setText(_translate("MDCx", "以视频分辨率的高度数值来命名不同画质"))
         self.label_330.setText(_translate("MDCx", "以视频清晰度的英文缩写来命名不同画质"))
-        self.label_331.setText(_translate("MDCx", "\n"
-"                          说明：qHD=540P，HD=720P/960P，FHD=1080P，QHD=1440P(2K)，UHD=4K/8K。低于540P时默认使用高度值命名"))
+        self.label_331.setText(_translate("MDCx", "<p>说明：qHD=540P，HD=720P/960P，FHD=1080P，QHD=1440P(2K)，UHD=4K/8K。低于540P时默认使用高度值命名</p>"))
         self.radioButton_videosize_video.setText(_translate("MDCx", "读取视频画面的高度"))
         self.radioButton_videosize_path.setText(_translate("MDCx", "使用路径中包含的画质信息"))
         self.radioButton_videosize_none.setText(_translate("MDCx", "不获取分辨率"))
@@ -10678,13 +10715,12 @@ class Ui_MDCx(object):
         self.checkBox_foldername_4k.setText(_translate("MDCx", "视频目录名"))
         self.groupBox_67.setTitle(_translate("MDCx", "其他说明"))
         self.label_353.setText(_translate("MDCx", "1，多版本显示："))
-        self.label_352.setText(_translate("MDCx", "\n"
-"                          <html><head/><body><p>1）Emby 支持多版本显示（类似选集），\n"
+        self.label_352.setText(_translate("MDCx", "<p>1）Emby 支持多版本显示（类似选集），\n"
 "                          需要：</p><p>视频文件名的开头部分必须包含视频目录名。（比如：SSIS-111/SSIS-111-4K.mp4）\n"
 "                          </p><p>查看规则：<a\n"
 "                          href=\"https://support.emby.media/support/solutions/articles/44001159102-movie-naming\"><span\n"
 "                          style=\" text-decoration: underline;\n"
-"                          color:#094fd1;\">https://support.emby.media/support/solutions/articles/44001159102-movie-naming</span></a></p><p>2）分集视频默认会显示为附加视频，如果要以多版本样式显示，分集命名规则还需要选择「-1」</p></body></html>"))
+"                          color:#094fd1;\">https://support.emby.media/support/solutions/articles/44001159102-movie-naming</span></a></p><p>2）分集视频默认会显示为附加视频，如果要以多版本样式显示，分集命名规则还需要选择「-1」</p>"))
         self.label_351.setText(_translate("MDCx", "Emby 分集封面需要每个分集都提供图片，图片命名规则需要选择「视频文件名-poster.jpg」"))
         self.label_354.setText(_translate("MDCx", "2，分集封面显示："))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MDCx", " 命名 "))
@@ -11027,8 +11063,7 @@ class Ui_MDCx(object):
         self.label_download_actor_zip.setText(_translate("MDCx", "点击下载头像包"))
         self.pushButton_select_actor_photo_folder.setText(_translate("MDCx", "选择目录"))
         self.label_303.setText(_translate("MDCx", "网络头像库："))
-        self.label_123.setText(_translate("MDCx", "支持优先使用 Graphis.ne.jp 的图片作为演员头像和演员背景；\n"
-"                                Graphis.ne.jp 提供了演员不同时期的图片，默认请求早期的图片。"))
+        self.label_123.setText(_translate("MDCx", "<p>支持优先使用 Graphis.ne.jp 的图片作为演员头像和演员背景；<br>Graphis.ne.jp 提供了演员不同时期的图片，默认请求早期的图片。</p>"))
         self.label_159.setText(_translate("MDCx", "建议 Fork 该项目到你的 Github，当项目故障时，可填写你 Fork 后的项目地址"))
         self.groupBox_64.setTitle(_translate("MDCx", "补全 Emby/Jellyfin 演员信息"))
         self.radioButton_actor_info_zh_cn.setText(_translate("MDCx", "中文简体"))
@@ -11091,17 +11126,13 @@ class Ui_MDCx(object):
         self.label_70.setText(_translate("MDCx", "代理："))
         self.label_73.setText(_translate("MDCx", "超时时间："))
         self.label_411.setText(_translate("MDCx", "一些网站（Javbus、Amazon）使用 IPv6 请求会失败，建议使用 IPv4（重启后生效）"))
-        self.groupBox_44.setTitle(_translate("MDCx", "网址设置"))
-        self.label_110.setText(_translate("MDCx", "<p\n"
-"                          style=\'line-height:15px\'>自定义刮削指定网站时使用的网址，目前支持以下网站：<br>\n"
-"                          &nbsp;&nbsp;&nbsp;&nbsp;airavcc avsex hdouban iqqtv\n"
-"                          lulubar mdtv javbus javdb javlibrary* <br>\n"
-"                          &nbsp;&nbsp;&nbsp;&nbsp;* 配置后将直连访问<br>\n"
-"                          <br>欢迎 pr 实现其它网站的自定义网址功能，参考：<a\n"
-"                          href=\"https://github.com/sqzw-x/mdcx/wiki/自定义网址\"><span\n"
-"                          style=\"color:#094fd1;\" > Github wiki<span/><a/>\n"
-"                          </p>"))
-        self.label_324.setText(_translate("MDCx", "⚠️ 修改后先点击保存再切换，否则修改将丢失"))
+        self.groupBox_44.setTitle(_translate("MDCx", "网站设置"))
+        self.label_401.setText(_translate("MDCx", "当前网站："))
+        self.label_132.setText(_translate("MDCx", "<p>可在下方设置选定网站的配置。<span style=\" color:#d9001f;\">切换网站前需先保存，否则不会生效</span></p><p>注意：当前并非所有网站均支持这些配置，某些设置可能无效</p>"))
+        self.label_400.setText(_translate("MDCx", "自定义网址："))
+        self.checkBox_site_use_browser.setText(_translate("MDCx", "使用浏览器请求"))
+        self.label_110.setText(_translate("MDCx", "<html><head/><body><p>自定义指定网站的网址，刮削时将用其代替默认网址</p></body></html>"))
+        self.label_136.setText(_translate("MDCx", "<html><head/><body><p>必须安装 Chrome 浏览器。可处理某些无法获取的网站，内存占用会显著提高</p></body></html>"))
         self.groupBox_14.setTitle(_translate("MDCx", "API Token"))
         self.label_355.setText(_translate("MDCx", "ThePornDB："))
         self.label_356.setText(_translate("MDCx", "<html><head/><body><p><a\n"
@@ -11166,161 +11197,173 @@ class Ui_MDCx(object):
         self.label_241.setText(_translate("MDCx", "当前配置："))
         self.pushButton_save_new_config.setText(_translate("MDCx", "另存为"))
         self.textBrowser_show_success_list.setHtml(_translate("MDCx", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">                  </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                  </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                  </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
+"                  <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"                  p, li { white-space: pre-wrap; }\n"
+"                  </style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
         self.pushButton_success_list_close.setText(_translate("MDCx", "关闭"))
         self.pushButton_success_list_clear.setText(_translate("MDCx", "清空列表"))
         self.pushButton_success_list_save.setText(_translate("MDCx", "保存"))
         self.label_success_title.setText(_translate("MDCx", "已刮削成功文件列表"))
         self.textBrowser_show_tips.setHtml(_translate("MDCx", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">                  </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                  </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                  </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
+"                  <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"                  p, li { white-space: pre-wrap; }\n"
+"                  </style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
         self.pushButton_show_tips_close.setText(_translate("MDCx", "关闭"))
         self.label_show_tips_title.setText(_translate("MDCx", "说明"))
         self.textBrowser_about.setHtml(_translate("MDCx", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">· Movie_Data_Capture 项目地址：https://github.com/yoshiko2/Movie_Data_Capture</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">· AVDC-GUI 项目地址：https://github.com/moyy996/AVDC</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">· MDCx-docker 项目地址：https://github.com/northsea4/mdcx-docker</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">使用说明 （内容来自 AVDC-GUI ：https://github.com/moyy996/AVDC ）</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">目录</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">一、功能简介</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">二、项目简介</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">三、常见番号命名参考</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">四、设置说明</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">一、功能简介</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 日本电影元数据抓取工具/刮削器，配合本地影片管理软件EMBY,KODI，PLEX等管理本地影片，该软件起到分类与元数据抓取作用，利用元数据信息来分类，供本地影片分类整理使用。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">二、项目简介</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Gui made by moyy996，Core made by yoshiko2</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 命令行版项目地址：https://github.com/yoshiko2/Movie_Data_Capture</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> GUI版项目地址：https://github.com/moyy996/AVDC</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> GUI版EXE下载地址：https://github.com/moyy996/AVDC/releases</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">三、常见番号命名参考</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">不区分大小写、刮削前尽量命名规范！！！！</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.1.标准有码</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Javdb、Javbus:SSNI-111</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Dmm：ssni00111</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.2.无码</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Javdb、Javbus、Avsox:111111-1111、111111_111、HEYZO-1111、n1111</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.3.素人</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Mgstage:259LUXU-1111</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Javdb:LUXU-1111</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Fc2club:FC2-111111、FC2-PPV-111111、FC2PPV-111111</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.4.欧美</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Javdb、Javbus:sexart.11.11.11(系列.年.月.日)</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.5.自带字幕影片</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 可以把电影命名为类似ssni-xxx-c.mp4,ssni-xxx-C.mp4，abp-xxx-CD1-C.mp4 的规则。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.6.多集影片</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 可以把多集电影按照集数后缀命名为类似ssni-xxx-cd1.mp4, ssni-xxx-cd2.mp4, abp-xxx-CD1-C.mp4的规则，只要含有-CDn/-cdn类似命名规则，即可使用分集功能.**不支持-A -B -1 -2,容易跟字幕的-C混淆**.</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.7.多集、字幕顺序</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> abp-xxx-CD1-C.mp4，分集在前，字幕在后，字幕必须与拓展名靠近，-C.mp4.</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.8.外挂字幕文件</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 字幕文件名必须与影片文件名一致，才可以一起移动到新目录，目前支持srt ass sub类型的字幕文件。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">四、设置说明</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">详细的说明： https://github.com/moyy996/AVDC/blob/master/README.md</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.1.刮削模式/整理模式</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 1、刮削模式：通过番号刮削数据，包括元数据、封面图、缩略图、背景图。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 2、整理模式：仅根据女优把电影命名为番号并分类到女优名称的文件夹下。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.2.软链接模式：使用此模式，要以管理员身份运行。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 刮削完不移动视频，而是在相应目录创建软链接（类似于快捷方式），方便PT下载完既想刮削又想继续上传的仓鼠党同志。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 但是，只能在媒体库展示，不能在媒体库播放。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.3.调试模式</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 输出番号的元数据，包括封面，导演，演员，简介等。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.4.排除目录</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 在多层目录刮削时排除所填目录。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.5.视频目录</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 要整理的视频的目录，会遍历此目录下的所有视频，包括子目录中。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.6.命名规则</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 1、目录命名：存放视频数据的目录名，支持多层目录，支持自定义符号，例：[actor]/studio/number-【title】。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 2、视频标题（媒体库中）：nfo中的标题命名。例：number-[title]。可以自定义符号。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 3、视频标题（本地文件）：本地视频、图片的命名。例：number-[title]。可以自定义符号。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 4、可选项为title（片名）、actor（演员）、studio（制作商）、director（导演）、release（发售日）、year（发行年份）、number（番号）、runtime（时长）、series（系列）、publisher（发行商）</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.7.代理设置</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 1、代理</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> proxy=127.0.0.1:1080</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> proxy行设置本地代理地址和端口，支持Shadowxxxx/X,V2XXX本地代理端口，代理软件开全局模式 ,建议使用日本代理。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 如果一直报Connect Failed! Please check your Proxy or Network!错误，请检查端口号是否正确，或者把proxy=后面的地址和端口删除，并开启代理软件全局模式，或者重启电脑，代理软件，网卡。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 2、连接超时重试设置</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> timeout=10 </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 10为超时重试时间 单位：秒，可选范围3-10</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 3、连接重试次数设置</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> retry=3 </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 3即为重试次数，可选范围2-5</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.8.媒体库选择</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 如果是PLEX，请安装插件：XBMCnfoMoviesImporter</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.9.排除指定字符和目录，字符串</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 1、排除字符:指定字符删除，例如排除字符： \\()，删除创建文件夹时的\\()字符</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 2、排除目录:指定目录，例如排除目录： failed,JAV_output，多目录刮削时跳过failed,JAV_output</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 3、排除字符串:提取番号时，先删除指定字符串，提高成功率，字符串之间用\',\'隔开。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.10.网站选择</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 可以使用所有网站，或者指定网站（avsox,javbus,dmm,javdb,fc2club，mgstage）进行刮削。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 仅使用javdb进行刮削，尽量不要用，刮削30左右会被JAVDB封IP一段时间。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.11.保存日志</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 开启后日志保存在程序目录的Log目录下的txt文件内，每次运行会产生一个txt文件，txt文件可以删除，不影响程序运行。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.12.失败后移动文件</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 如果刮削不到影片信息，可选择不移动视频，或者自动移动到失败输出目录中。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span>                </p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
+"                <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"                p, li { white-space: pre-wrap; }\n"
+"                </style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">· Movie_Data_Capture 项目地址：https://github.com/yoshiko2/Movie_Data_Capture</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">· AVDC-GUI 项目地址：https://github.com/moyy996/AVDC</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">· MDCx-docker 项目地址：https://github.com/northsea4/mdcx-docker</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">使用说明 （内容来自 AVDC-GUI ：https://github.com/moyy996/AVDC ）</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">目录</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">一、功能简介</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">二、项目简介</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">三、常见番号命名参考</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">四、设置说明</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">一、功能简介</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 日本电影元数据抓取工具/刮削器，配合本地影片管理软件EMBY,KODI，PLEX等管理本地影片，该软件起到分类与元数据抓取作用，利用元数据信息来分类，供本地影片分类整理使用。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">二、项目简介</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Gui made by moyy996，Core made by yoshiko2</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 命令行版项目地址：https://github.com/yoshiko2/Movie_Data_Capture</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> GUI版项目地址：https://github.com/moyy996/AVDC</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> GUI版EXE下载地址：https://github.com/moyy996/AVDC/releases</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">三、常见番号命名参考</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">不区分大小写、刮削前尽量命名规范！！！！</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.1.标准有码</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Javdb、Javbus:SSNI-111</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Dmm：ssni00111</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.2.无码</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Javdb、Javbus、Avsox:111111-1111、111111_111、HEYZO-1111、n1111</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.3.素人</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Mgstage:259LUXU-1111</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Javdb:LUXU-1111</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Fc2club:FC2-111111、FC2-PPV-111111、FC2PPV-111111</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.4.欧美</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> Javdb、Javbus:sexart.11.11.11(系列.年.月.日)</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.5.自带字幕影片</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 可以把电影命名为类似ssni-xxx-c.mp4,ssni-xxx-C.mp4，abp-xxx-CD1-C.mp4 的规则。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.6.多集影片</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 可以把多集电影按照集数后缀命名为类似ssni-xxx-cd1.mp4, ssni-xxx-cd2.mp4, abp-xxx-CD1-C.mp4的规则，只要含有-CDn/-cdn类似命名规则，即可使用分集功能.**不支持-A -B -1 -2,容易跟字幕的-C混淆**.</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.7.多集、字幕顺序</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> abp-xxx-CD1-C.mp4，分集在前，字幕在后，字幕必须与拓展名靠近，-C.mp4.</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">3.8.外挂字幕文件</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 字幕文件名必须与影片文件名一致，才可以一起移动到新目录，目前支持srt ass sub类型的字幕文件。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">四、设置说明</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">详细的说明： https://github.com/moyy996/AVDC/blob/master/README.md</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.1.刮削模式/整理模式</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 1、刮削模式：通过番号刮削数据，包括元数据、封面图、缩略图、背景图。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 2、整理模式：仅根据女优把电影命名为番号并分类到女优名称的文件夹下。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.2.软链接模式：使用此模式，要以管理员身份运行。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 刮削完不移动视频，而是在相应目录创建软链接（类似于快捷方式），方便PT下载完既想刮削又想继续上传的仓鼠党同志。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 但是，只能在媒体库展示，不能在媒体库播放。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.3.调试模式</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 输出番号的元数据，包括封面，导演，演员，简介等。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.4.排除目录</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 在多层目录刮削时排除所填目录。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.5.视频目录</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 要整理的视频的目录，会遍历此目录下的所有视频，包括子目录中。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.6.命名规则</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 1、目录命名：存放视频数据的目录名，支持多层目录，支持自定义符号，例：[actor]/studio/number-【title】。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 2、视频标题（媒体库中）：nfo中的标题命名。例：number-[title]。可以自定义符号。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 3、视频标题（本地文件）：本地视频、图片的命名。例：number-[title]。可以自定义符号。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 4、可选项为title（片名）、actor（演员）、studio（制作商）、director（导演）、release（发售日）、year（发行年份）、number（番号）、runtime（时长）、series（系列）、publisher（发行商）</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.7.代理设置</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 1、代理</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> proxy=127.0.0.1:1080</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> proxy行设置本地代理地址和端口，支持Shadowxxxx/X,V2XXX本地代理端口，代理软件开全局模式 ,建议使用日本代理。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 如果一直报Connect Failed! Please check your Proxy or Network!错误，请检查端口号是否正确，或者把proxy=后面的地址和端口删除，并开启代理软件全局模式，或者重启电脑，代理软件，网卡。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 2、连接超时重试设置</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> timeout=10 </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 10为超时重试时间 单位：秒，可选范围3-10</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 3、连接重试次数设置</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> retry=3 </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 3即为重试次数，可选范围2-5</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.8.媒体库选择</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 如果是PLEX，请安装插件：XBMCnfoMoviesImporter</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.9.排除指定字符和目录，字符串</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 1、排除字符:指定字符删除，例如排除字符： \\()，删除创建文件夹时的\\()字符</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 2、排除目录:指定目录，例如排除目录： failed,JAV_output，多目录刮削时跳过failed,JAV_output</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 3、排除字符串:提取番号时，先删除指定字符串，提高成功率，字符串之间用\',\'隔开。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.10.网站选择</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 可以使用所有网站，或者指定网站（avsox,javbus,dmm,javdb,fc2club，mgstage）进行刮削。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 仅使用javdb进行刮削，尽量不要用，刮削30左右会被JAVDB封IP一段时间。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.11.保存日志</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 开启后日志保存在程序目录的Log目录下的txt文件内，每次运行会产生一个txt文件，txt文件可以删除，不影响程序运行。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"><br /> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\">4.12.失败后移动文件</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> 如果刮削不到影片信息，可选择不移动视频，或者自动移动到失败输出目录中。</span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Consolas,PingFang SC,Microsoft YaHei UI\';\"> </span><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
         self.pushButton_main.setText(_translate("MDCx", " 主界面"))
         self.pushButton_log.setText(_translate("MDCx", " 日志"))
         self.pushButton_tool.setText(_translate("MDCx", " 工具"))

@@ -35,6 +35,8 @@ class LegacyCrawler:
     def __call__(self, client, base_url, *args, **kwargs) -> "LegacyCrawler":
         return self
 
+    async def close(self): ...
+
     async def run(self, input: CrawlerInput) -> CrawlerResponse:
         """与 `GenericBaseCrawler.run` 兼容的包装器."""
         start_time = time.time()

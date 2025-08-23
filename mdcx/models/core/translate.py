@@ -6,9 +6,11 @@ import traceback
 
 import zhconv
 
+from mdcx.config.enums import Language
 from mdcx.config.manager import manager
 from mdcx.config.models import Translator
 from mdcx.config.resources import resources
+from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.models.base.translate import (
     deepl_translate_async,
     google_translate_async,
@@ -28,16 +30,16 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
     xml_info = resources.info_mapping_data
     if xml_info is not None and len(xml_info) == 0:
         return json_data
-    tag_translate = manager.config.tag_translate
-    series_translate = manager.config.series_translate
-    studio_translate = manager.config.studio_translate
-    publisher_translate = manager.config.publisher_translate
-    director_translate = manager.config.director_translate
-    tag_language = manager.config.tag_language
-    series_language = manager.config.series_language
-    studio_language = manager.config.studio_language
-    publisher_language = manager.config.publisher_language
-    director_language = manager.config.director_language
+    tag_translate = manager.config.get_field_config(CrawlerResultFields.TAGS).translate
+    series_translate = manager.config.get_field_config(CrawlerResultFields.SERIES).translate
+    studio_translate = manager.config.get_field_config(CrawlerResultFields.STUDIO).translate
+    publisher_translate = manager.config.get_field_config(CrawlerResultFields.PUBLISHER).translate
+    director_translate = manager.config.get_field_config(CrawlerResultFields.DIRECTORS).translate
+    tag_language = manager.config.get_field_config(CrawlerResultFields.TAGS).language
+    series_language = manager.config.get_field_config(CrawlerResultFields.SERIES).language
+    studio_language = manager.config.get_field_config(CrawlerResultFields.STUDIO).language
+    publisher_language = manager.config.get_field_config(CrawlerResultFields.PUBLISHER).language
+    director_language = manager.config.get_field_config(CrawlerResultFields.DIRECTORS).language
     fields_rule = manager.config.fields_rule
 
     tag_include = manager.config.nfo_tag_include
@@ -158,9 +160,9 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
         info_data = resources.get_info_data(director)
         director = info_data.get(director_language, "")
 
-    if tag_language == "zh_cn":
+    if tag_language == Language.ZH_CN:
         tag = zhconv.convert(tag, "zh-cn")
-    elif tag_language == "zh_tw":
+    elif tag_language == Language.ZH_TW:
         tag = zhconv.convert(tag, "zh-hant")
 
     # tag去重/去空/排序
@@ -204,7 +206,7 @@ async def translate_actor(res: CrawlersResult):
                 LogBuffer.log().write(f"\n 🔴 Av-wiki failed! {temp_actor} ({get_used_time(start_time)}s)")
 
     # 如果不映射，返回
-    if not manager.config.actor_translate:
+    if not manager.config.get_field_config(CrawlerResultFields.ACTORS).translate:
         return res
 
     # 映射表数据加载失败，返回
@@ -223,7 +225,7 @@ async def translate_actor(res: CrawlersResult):
     actor_list = actor.split(",")
     actor_new_list = []
     actor_href_list = []
-    actor_language = manager.config.actor_language
+    actor_language = manager.config.get_field_config(CrawlerResultFields.ACTORS).language
     for each_actor in actor_list:
         if each_actor:
             actor_data = resources.get_actor_data(each_actor)
@@ -240,12 +242,12 @@ async def translate_actor(res: CrawlersResult):
 
 
 async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie_number: str):
-    title_language = manager.config.title_language
-    title_translate = manager.config.title_translate
-    outline_language = manager.config.outline_language
-    outline_translate = manager.config.outline_translate
+    title_language = manager.config.get_field_config(CrawlerResultFields.TITLE).language
+    title_translate = manager.config.get_field_config(CrawlerResultFields.TITLE).translate
+    outline_language = manager.config.get_field_config(CrawlerResultFields.OUTLINE).language
+    outline_translate = manager.config.get_field_config(CrawlerResultFields.OUTLINE).translate
     translate_by = manager.config.translate_config.translate_by
-    if title_language == "jp" and outline_language == "jp":
+    if title_language == Language.JP and outline_language == Language.JP:
         return
     trans_title = ""
     trans_outline = ""
@@ -255,7 +257,7 @@ async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie
     title_is_jp = is_japanese(json_data.title)
 
     # 处理title
-    if title_language != "jp":
+    if title_language != Language.JP:
         movie_title = ""
 
         # 匹配本地高质量标题(色花标题数据)
@@ -283,7 +285,7 @@ async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie
             trans_title = json_data.title
 
     # 处理outline
-    if json_data.outline and outline_language != "jp" and outline_translate and is_japanese(json_data.outline):
+    if json_data.outline and outline_language != Language.JP and outline_translate and is_japanese(json_data.outline):
         trans_outline = json_data.outline
 
     # 翻译
@@ -322,7 +324,6 @@ async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie
             if r == "break":
                 break
         else:
-            translate_by = translate_by.strip(",").capitalize()
             LogBuffer.log().write(f"\n 🔴 Translation failed! {translate_by} 不可用！({get_used_time(start_time)}s)")
 
     # 简繁转换

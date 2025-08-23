@@ -1,4 +1,5 @@
 import re
+from dataclasses import dataclass
 from pathlib import Path
 
 from mdcx.config.enums import Website
@@ -9,7 +10,19 @@ from mdcx.utils import convert_path, nfd2c, split_path
 from mdcx.utils.path import get_path
 
 
-def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str, str]:
+@dataclass
+class MoviePathSetting:
+    """路径设置"""
+
+    movie_path: str  # 电影路径
+    success_folder: str  # 成功目录
+    failed_folder: str  # 失败目录
+    escape_folder_list: list[str]  # 排除目录列表
+    extrafanart_folder: str  # 剧照副本目录
+    softlink_path: str  # 软链接路径
+
+
+def get_movie_path_setting(file_path="") -> MoviePathSetting:
     # 先把'\'转成'/'以便判断是路径还是目录
     movie_path = manager.config.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
     if movie_path == "":  # 未设置为空时，使用用户数据目录
@@ -59,13 +72,13 @@ def get_movie_path_setting(file_path="") -> tuple[str, str, str, list[str], str,
             success_folder = success_folder.replace("first_folder_name", first_folder_name)
             failed_folder = failed_folder.replace("first_folder_name", first_folder_name)
 
-    return (
-        convert_path(movie_path),
-        success_folder,
-        failed_folder,
-        escape_folder_new_list,
-        extrafanart_folder,
-        softlink_path,
+    return MoviePathSetting(
+        movie_path=convert_path(movie_path),
+        success_folder=success_folder,
+        failed_folder=failed_folder,
+        escape_folder_list=escape_folder_new_list,
+        extrafanart_folder=extrafanart_folder,
+        softlink_path=softlink_path,
     )
 
 

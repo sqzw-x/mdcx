@@ -5,8 +5,10 @@ import traceback
 
 import aiofiles.os
 
+from mdcx.config.enums import FieldRule, Language, NfoInclude
 from mdcx.config.manager import manager
 from mdcx.config.resources import resources
+from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.manual import ManualConfig
 from mdcx.models.base.number import deal_actor_more
 from mdcx.models.log_buffer import LogBuffer
@@ -26,9 +28,9 @@ def replace_word(json_data: BaseCrawlerResult):
 
     # 简体时替换的字符
     key_word = []
-    if manager.config.title_language == "zh_cn":
+    if manager.config.get_field_config(CrawlerResultFields.TITLE).language == Language.ZH_CN:
         key_word.append("title")
-    if manager.config.outline_language == "zh_cn":
+    if manager.config.get_field_config(CrawlerResultFields.OUTLINE).language == Language.ZH_CN:
         key_word.append("outline")
 
     for key, value in ManualConfig.CHINESE_REP_WORD.items():
@@ -36,8 +38,7 @@ def replace_word(json_data: BaseCrawlerResult):
             setattr(json_data, each, getattr(json_data, each).replace(key, value))
 
     # 替换标题的上下集信息
-    fields_word = ["title", "originaltitle"]
-    for field in fields_word:
+    for field in (CrawlerResultFields.TITLE, CrawlerResultFields.ORIGINALTITLE):
         for each in ManualConfig.TITLE_REP:
             setattr(json_data, field, getattr(json_data, field).replace(each, "").strip(":， ").strip())
 
@@ -78,7 +79,7 @@ def deal_some_field(json_data: CrawlersResult):
                 continue
             cleaned = re.findall(r"[^\(\)\（\）]+", raw_name)
             temp_actor_list.extend(cleaned)
-            if "del_char" in fields_rule:
+            if FieldRule.DEL_CHAR in fields_rule:
                 json_data.actors.append(cleaned[0])
             else:
                 json_data.actors.append(raw_name)
@@ -90,13 +91,13 @@ def deal_some_field(json_data: CrawlersResult):
             if not raw_name:
                 continue
             cleaned = re.findall(r"[^\(\)\（\）]+", raw_name)
-            if "del_char" in fields_rule:
+            if FieldRule.DEL_CHAR in fields_rule:
                 json_data.all_actors.append(cleaned[0])
             else:
                 json_data.all_actors.append(raw_name)
 
         # 去除标题后的演员名
-        if "del_actor" in fields_rule:
+        if FieldRule.DEL_ACTOR in fields_rule:
             new_all_actor_name_list = []
             for each_actor in json_data.actor_amazon + temp_actor_list:
                 # 获取演员映射表的所有演员别名进行替换
@@ -125,7 +126,7 @@ def deal_some_field(json_data: CrawlersResult):
     json_data.originaltitle = json_data.originaltitle.replace("/", "#").strip(" -")
 
     # 去除素人番号前缀数字
-    if "del_num" in fields_rule:
+    if FieldRule.DEL_NUM in fields_rule:
         temp_n = re.findall(r"\d{3,}([a-zA-Z]+-\d+)", number)
         if temp_n:
             json_data.number = temp_n[0]
@@ -143,11 +144,11 @@ def show_movie_info(file_info: FileInfo, result: CrawlersResult):
         value = getattr(result, key, getattr(file_info, key, ""))
         if not value:
             continue
-        if key == "outline" or key == "originalplot" and len(value) > 100:
+        if key == CrawlerResultFields.OUTLINE or key == CrawlerResultFields.ORIGINALPLOT and len(value) > 100:
             value = str(value)[:98] + "……（略）"
         elif key == "has_sub":
             value = "中文字幕"
-        elif key == "actor" and "actor_all," in manager.config.nfo_include_new:
+        elif key == CrawlerResultFields.ACTORS and NfoInclude.ACTOR_ALL in manager.config.nfo_include_new:
             value = result.all_actor
         LogBuffer.log().write(f"\n     {key:<13}: {value}")
 

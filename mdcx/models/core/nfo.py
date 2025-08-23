@@ -9,6 +9,7 @@ import aiofiles
 import aiofiles.os
 from lxml import etree
 
+from mdcx.config.enums import Language, ReadMode
 from mdcx.config.manager import manager
 from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.manual import ManualConfig
@@ -503,7 +504,11 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResul
 
     # 返回数据
     json_data.title = title
-    if manager.config.title_language == "jp" and "read_update_nfo" in manager.config.read_mode and originaltitle:
+    if (
+        manager.config.get_field_config(CrawlerResultFields.TITLE).language == Language.JP
+        and ReadMode.READ_UPDATE_NFO in manager.config.read_mode
+        and originaltitle
+    ):
         json_data.title = originaltitle
     json_data.originaltitle = originaltitle
     if is_japanese(originaltitle):
@@ -515,11 +520,15 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResul
     json_data.actor = actor
     json_data.all_actor = actor
     json_data.outline = outline
-    if manager.config.outline_language == "jp" and "read_update_nfo" in manager.config.read_mode and originalplot:
+    if (
+        manager.config.get_field_config(CrawlerResultFields.OUTLINE).language == Language.JP
+        and ReadMode.READ_UPDATE_NFO in manager.config.read_mode
+        and originalplot
+    ):
         json_data.outline = originalplot
     json_data.originalplot = originalplot
     json_data.tag = tag
-    if "read_update_nfo" in manager.config.read_mode:
+    if ReadMode.READ_UPDATE_NFO in manager.config.read_mode:
         json_data.tag = tag_only
     json_data.release = release
     json_data.year = year

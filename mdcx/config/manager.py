@@ -3,17 +3,24 @@ import os
 import os.path
 from pathlib import Path
 
-from mdcx.consts import MAIN_PATH, MARK_FILE
-
-from .models import Computed, Config
+from ..consts import MAIN_PATH, MARK_FILE
+from .computed import Computed
+from .models import Config
 from .v1 import ConfigV1, load_v1
 
 
 class ConfigManager:
     def __init__(self):
-        self._get_config_path()
-        self.config = Config()
-        self.computed = Computed(self.config)
+        if not os.path.exists(MARK_FILE):  # 标记文件不存在
+            self.path = os.path.join(MAIN_PATH, "config.json")  # 默认配置文件路径
+        else:
+            self._path = Path(self.read_mark_file())
+            self.data_folder, self.file = os.path.split(self._path)
+        if not os.path.exists(self._path):  # 配置文件不存在, 写入默认值
+            if self._path.suffix == ".ini":
+                self.path = self._path.with_suffix(".json")
+            self.reset()
+        self.load()
 
     @property
     def path(self) -> str:
@@ -64,17 +71,6 @@ class ConfigManager:
     def reset(self):
         """写入默认配置"""
         self._path.write_text(Config().model_dump_json(indent=2), encoding="UTF-8")
-
-    def _get_config_path(self):
-        if not os.path.exists(MARK_FILE):  # 标记文件不存在
-            self.path = os.path.join(MAIN_PATH, "config.json")  # 默认配置文件路径
-        else:
-            self._path = Path(self.read_mark_file())
-            self.data_folder, self.file = os.path.split(self._path)
-        if not os.path.exists(self._path):  # 配置文件不存在, 写入默认值
-            if self._path.suffix == ".ini":
-                self.path = self._path.with_suffix(".json")
-            self.reset()
 
     def list_configs(self) -> list[str]:
         """列出配置文件夹中的所有配置文件名."""

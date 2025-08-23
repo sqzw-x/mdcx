@@ -3,12 +3,14 @@ from collections import defaultdict
 from typing import override
 
 from parsel import Selector
+from patchright.async_api import Browser
 
 from mdcx.config.models import Website
 from mdcx.models.base.web import check_url
 from mdcx.models.types import CrawlerInput
 from mdcx.utils.dataclass import update_valid
 from mdcx.utils.gather_group import GatherGroup
+from mdcx.web_async import AsyncWebClient
 
 from ..base import Context, CralwerException, CrawlerData, DetailPageParser, GenericBaseCrawler, is_valid
 from .parsers import Category, DigitalParser, MonoParser, RentalParser, parse_category
@@ -24,6 +26,19 @@ class DmmCrawler(GenericBaseCrawler[DMMContext]):
     mono = MonoParser()
     digital = DigitalParser()
     rental = RentalParser()
+
+    def __init__(self, client: AsyncWebClient, base_url: str = "", browser: Browser | None = None):
+        super().__init__(client, base_url, browser)
+        self.browser_context = None
+
+    @override
+    async def close(self):
+        if self.browser_context is not None:
+            try:
+                await self.browser_context.close()
+            except Exception as e:
+                print(f"Error closing browser context: {e}")
+            self.browser_context = None
 
     @classmethod
     @override
@@ -122,11 +137,11 @@ class DmmCrawler(GenericBaseCrawler[DMMContext]):
                 group.add(self.fetch_dmm_tv(ctx, url))
 
             for category in (
+                Category.DIGITAL,
                 Category.MONO,
                 Category.RENTAL,
                 Category.PRIME,
                 Category.MONTHLY,
-                # Category.DIGITAL,
             ):  # 优先级
                 parser = self._get_parser(category)
                 if parser is None:
@@ -245,6 +260,31 @@ class DmmCrawler(GenericBaseCrawler[DMMContext]):
             return CrawlerData()
         ctx.debug(f"详情页请求成功: {detail_url=}")
         return await parser.parse(ctx, Selector(html), url=detail_url)
+
+    @override
+    async def _fetch_detail(self, ctx: DMMContext, url: str) -> tuple[str | None, str]:
+        if parse_category(url) not in (Category.DIGITAL):
+            return await super()._fetch_detail(ctx, url)
+        if self.browser is None:
+            ctx.debug("期望使用浏览器但不可用, 回退到 client")
+            return await super()._fetch_detail(ctx, url)
+        # init context
+        if self.browser_context is None:
+            async with self.lock:
+                if self.browser_context is None:
+                    context = await self.browser.new_context(ignore_https_errors=True)
+                    await context.add_cookies(
+                        [{"name": "age_check_done", "value": "1", "domain": ".dmm.co.jp", "path": "/"}]
+                    )
+                    self.browser_context = context
+        try:
+            page = await self.browser_context.new_page()
+            await page.goto(url, wait_until="load")
+            html = await page.content()
+            await page.close()
+            return html, ""
+        except Exception as e:
+            return None, f"browser 请求失败: {e}"
 
     @override
     async def post_process(self, ctx, res):

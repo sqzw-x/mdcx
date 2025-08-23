@@ -1293,7 +1293,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_save_failed_list_clicked(self):
         if len(Flags.failed_file_list) or True:
             log_name = "failed_" + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + ".txt"
-            log_name = convert_path(os.path.join(get_movie_path_setting()[0], log_name))
+            log_name = convert_path(os.path.join(get_movie_path_setting().movie_path, log_name))
             filename, filetype = QFileDialog.getSaveFileName(
                 None, "保存失败文件列表", log_name, "Text Files (*.txt)", options=self.options
             )
@@ -1890,8 +1890,12 @@ class MyMAinWindow(QMainWindow):
         self.Ui.lcdNumber_mark_size.display(mark_size)
 
     # 设置-网络-网址设置-下拉框切换
-    def switch_custom_website_change(self, new_website_name):
-        self.Ui.lineEdit_custom_website.setText(manager.config.get_site_url(Website(new_website_name)))
+    def switch_custom_website_change(self, site):
+        if site not in Website:
+            return
+        site = Website(site)
+        self.Ui.lineEdit_site_custom_url.setText(manager.config.get_site_url(site))
+        self.Ui.checkBox_site_use_browser.setChecked(manager.config.get_site_config(site).use_browser)
 
     # 切换配置
     def config_file_change(self, new_config_file):

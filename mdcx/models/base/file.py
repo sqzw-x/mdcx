@@ -185,7 +185,9 @@ async def _clean_empty_fodlers(path: str, file_mode: FileMode) -> None:
         return
     signal.set_label_file_path.emit("🗑 正在清理空文件夹，请等待...")
     signal.show_log_text(" ⏳ Cleaning empty folders...")
-    escape_folder_list = "" if NoEscape.FOLDER in manager.config.no_escape else get_movie_path_setting()[3]
+    escape_folder_list = (
+        "" if NoEscape.FOLDER in manager.config.no_escape else get_movie_path_setting().escape_folder_list
+    )
     if not await aiofiles.os.path.exists(path):
         signal.show_log_text(f" 🍀 Clean done!({get_used_time(start_time)}s)")
         signal.show_log_text("=" * 80)
@@ -228,7 +230,7 @@ async def _clean_empty_fodlers(path: str, file_mode: FileMode) -> None:
 async def check_and_clean_files() -> None:
     signal.change_buttons_status.emit()
     start_time = time.time()
-    movie_path = get_movie_path_setting()[0]
+    movie_path = get_movie_path_setting().movie_path
     signal.show_log_text("🍯 🍯 🍯 NOTE: START CHECKING AND CLEAN FILE NOW!!!")
     signal.show_log_text(f"\n ⏰ Start time: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())}")
     signal.show_log_text(f" 🖥 Movie path: {movie_path} \n ⏳ Checking all videos and cleaning, Please wait...")

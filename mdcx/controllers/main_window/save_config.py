@@ -2,10 +2,11 @@ import os
 import platform
 import re
 import traceback
+from contextlib import suppress
 from datetime import timedelta
 from typing import TYPE_CHECKING
 
-from pydantic import HttpUrl
+from pydantic import HttpUrl, ValidationError
 from PyQt5.QtCore import Qt
 
 from mdcx.config.enums import (
@@ -646,17 +647,18 @@ def save_config(self: "MyMAinWindow"):
     manager.config.timeout = self.Ui.horizontalSlider_timeout.value()  # 超时时间
     manager.config.retry = self.Ui.horizontalSlider_retry.value()  # 重试次数
 
-    custom_website_name = self.Ui.comboBox_custom_website.currentText()
-    custom_website_url = self.Ui.lineEdit_custom_website.text()
-    custom_website_url = custom_website_url.strip("/ ")
-    try:
-        website_enum = Website(custom_website_name)
-        if custom_website_url:
-            manager.config.site_configs.setdefault(website_enum, SiteConfig()).custom_url = HttpUrl(custom_website_url)
-        elif website_enum in manager.config.site_configs:
-            manager.config.site_configs[website_enum].custom_url = None
-    except ValueError:
-        pass  # 忽略无效的网站名
+    site = self.Ui.comboBox_custom_website.currentText()
+    if site in Website:
+        site = Website(site)
+        url = self.Ui.lineEdit_site_custom_url.text().strip("/ ")
+        use_browser = self.Ui.checkBox_site_use_browser.isChecked()
+        if url:
+            with suppress(ValidationError):
+                manager.config.site_configs.setdefault(site, SiteConfig()).custom_url = HttpUrl(url)
+        elif site in manager.config.site_configs:
+            manager.config.site_configs[site].custom_url = None
+        manager.config.site_configs.setdefault(site, SiteConfig()).use_browser = use_browser
+
     manager.config.javdb = self.Ui.plainTextEdit_cookie_javdb.toPlainText()  # javdb cookie
     manager.config.javbus = self.Ui.plainTextEdit_cookie_javbus.toPlainText()  # javbus cookie
     manager.config.theporndb_api_token = self.Ui.lineEdit_api_token_theporndb.text()  # api token
@@ -778,7 +780,7 @@ def save_config(self: "MyMAinWindow"):
         signal_qt.show_log_text(
             f" 🛠 当前配置：{manager.path} 保存完成！\n "
             f"📂 程序目录：{manager.data_folder} \n "
-            f"📂 刮削目录：{get_movie_path_setting()[0]} \n "
+            f"📂 刮削目录：{get_movie_path_setting().movie_path} \n "
             f"💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n "
             f"🖥️ 系统信息：{platform.platform()} \n "
             f"🐰 软件版本：{self.localversion} \n"
@@ -792,6 +794,8 @@ def save_config(self: "MyMAinWindow"):
     self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)  # type: ignore
     self.activateWindow()
     try:
-        self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")  # 主界面右上角显示提示信息
+        self.set_label_file_path.emit(
+            f"🎈 当前刮削路径: \n {get_movie_path_setting().movie_path}"
+        )  # 主界面右上角显示提示信息
     except Exception:
         signal_qt.show_traceback_log(traceback.format_exc())
