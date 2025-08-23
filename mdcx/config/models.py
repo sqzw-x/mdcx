@@ -716,7 +716,8 @@ class Config(BaseModel):
         return self.site_configs.get(site, SiteConfig())
 
     def get_site_url(self, site: Website, default: str = "") -> str:
-        return str(self.get_site_config(site).custom_url or default)
+        """获取指定网站的用户自定义 URL, 结尾无斜杠."""
+        return str(self.get_site_config(site).custom_url or default).rstrip("/")
 
     def get_field_config(self, field: CrawlerResultFields) -> FieldConfig:
         return self.field_configs.get(field, FieldConfig())

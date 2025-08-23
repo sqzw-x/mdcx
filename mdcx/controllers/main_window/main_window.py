@@ -1890,8 +1890,12 @@ class MyMAinWindow(QMainWindow):
         self.Ui.lcdNumber_mark_size.display(mark_size)
 
     # 设置-网络-网址设置-下拉框切换
-    def switch_custom_website_change(self, new_website_name):
-        self.Ui.lineEdit_custom_website.setText(manager.config.get_site_url(Website(new_website_name)))
+    def switch_custom_website_change(self, site):
+        if site not in Website:
+            return
+        site = Website(site)
+        self.Ui.lineEdit_site_custom_url.setText(manager.config.get_site_url(site))
+        self.Ui.checkBox_site_use_browser.setChecked(manager.config.get_site_config(site).use_browser)
 
     # 切换配置
     def config_file_change(self, new_config_file):

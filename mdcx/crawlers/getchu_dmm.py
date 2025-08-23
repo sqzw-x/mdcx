@@ -13,8 +13,8 @@ async def main(
     json_data_getchu = await getchu.main(number, appoint_url)
     json_data_new = json_data_getchu["getchu"]["jp"]
 
-    poster = json_data_new.get("poster")
-    outline = json_data_new.get("outline")
+    # poster = json_data_new.get("poster")
+    # outline = json_data_new.get("outline")
     if json_data_new["title"]:
         number = json_data_new["number"]
         if number.startswith("DLID") or "dl.getchu" in appoint_url:

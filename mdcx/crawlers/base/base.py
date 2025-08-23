@@ -56,7 +56,7 @@ class GenericBaseCrawler[T: Context = Context](ABC):
     @classmethod
     @abstractmethod
     def base_url_(cls) -> str:
-        """支持自定义 URL 的爬虫在不提供自定义值时的默认值. 可以通过 self.base_url 访问实际值."""
+        """默认 URL, 结尾无斜杠. 可以通过 self.base_url 访问实际值."""
         raise NotImplementedError
 
     @abstractmethod

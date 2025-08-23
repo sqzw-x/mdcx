@@ -23,6 +23,7 @@ from mdcx.config.enums import (
     Switch,
     TagInclude,
     Translator,
+    Website,
 )
 from mdcx.config.extend import get_movie_path_setting
 from mdcx.config.manager import manager
@@ -948,14 +949,12 @@ def load_config(self: "MyMAinWindow"):
         self.Ui.horizontalSlider_retry.setValue(int(manager.config.retry))
         self.Ui.lcdNumber_retry.display(int(manager.config.retry))
 
-        custom_website_name = self.Ui.comboBox_custom_website.currentText()
-        # 自定义网站 - 需要动态获取字段
-        custom_website_value = (
-            getattr(manager.config, f"{custom_website_name}_website", "")
-            if hasattr(manager.config, f"{custom_website_name}_website")
-            else ""
-        )
-        self.Ui.lineEdit_custom_website.setText(custom_website_value)
+        # site config
+        site = self.Ui.comboBox_custom_website.currentText()
+        if site in Website:
+            self.Ui.lineEdit_site_custom_url.setText(manager.config.get_site_url(Website(site)))
+            site_config = manager.config.get_site_config(Website(site))
+            self.Ui.checkBox_site_use_browser.setChecked(site_config.use_browser)
 
         self.Ui.lineEdit_api_token_theporndb.setText(convert_path(manager.config.theporndb_api_token))
         # javdb cookie
