@@ -1293,7 +1293,7 @@ class MyMAinWindow(QMainWindow):
     def pushButton_save_failed_list_clicked(self):
         if len(Flags.failed_file_list) or True:
             log_name = "failed_" + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + ".txt"
-            log_name = convert_path(os.path.join(get_movie_path_setting()[0], log_name))
+            log_name = convert_path(os.path.join(get_movie_path_setting().movie_path, log_name))
             filename, filetype = QFileDialog.getSaveFileName(
                 None, "保存失败文件列表", log_name, "Text Files (*.txt)", options=self.options
             )

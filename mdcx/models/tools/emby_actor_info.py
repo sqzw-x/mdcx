@@ -33,7 +33,7 @@ from mdcx.utils.file import copy_file_async
 
 async def creat_kodi_actors(add: bool) -> None:
     signal.change_buttons_status.emit()
-    signal.show_log_text(f"📂 待刮削目录: {get_movie_path_setting()[0]}")
+    signal.show_log_text(f"📂 待刮削目录: {get_movie_path_setting().movie_path}")
     if add:
         signal.show_log_text("💡 将为待刮削目录中的每个视频创建 .actors 文件夹，并补全演员图片到 .actors 文件夹中\n")
         signal.show_log_text("👩🏻 开始补全 Kodi/Plex/Jvedio 演员头像...")
@@ -302,7 +302,7 @@ async def show_emby_actor_list(mode: int) -> None:
 
 
 async def _deal_kodi_actors(gfriends_actor_data, add):
-    vedio_path = get_movie_path_setting()[0]
+    vedio_path = get_movie_path_setting().movie_path
     if vedio_path == "" or not await aiofiles.os.path.isdir(vedio_path):
         signal.show_log_text("🔴 待刮削目录不存在！任务已停止！")
         return False

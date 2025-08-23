@@ -60,7 +60,7 @@ from mdcx.utils.file import copy_file_async, move_file_async, read_link_async
 
 
 class Scraper:
-    async def scrape(self, file_mode: FileMode, movie_list: list[str] | None) -> None:
+    async def run(self, file_mode: FileMode, movie_list: list[str] | None) -> None:
         Flags.reset()
         if movie_list is None:
             movie_list = []
@@ -90,7 +90,10 @@ class Scraper:
                     signal.show_log_text(f"{n} 🖥 File path: {each_f}\n 🌐 File url: {each_i[1]}")
 
         # 获取设置的媒体目录、失败目录、成功目录
-        movie_path, _, _, escape_folder_list, _, softlink_path = get_movie_path_setting()
+        path_settings = get_movie_path_setting()
+        movie_path = path_settings.movie_path
+        escape_folder_list = path_settings.escape_folder_list
+        softlink_path = path_settings.softlink_path
 
         # 获取待刮削文件列表的相关信息
         if not movie_list:
@@ -133,7 +136,7 @@ class Scraper:
 
             async def limited_scrape_exec_thread(task):
                 async with semaphore:
-                    await self._scrape_exec_thread(task)
+                    await self.process_one_file(task)
 
             # 异步并发
             await asyncio.gather(*[limited_scrape_exec_thread(task) for task in task_list])
@@ -194,7 +197,7 @@ class Scraper:
                 await asyncio.sleep(1)
             signal.exec_exit_app.emit()
 
-    async def _scrape_exec_thread(self, task: tuple[str, int, int]) -> None:
+    async def process_one_file(self, task: tuple[str, int, int]) -> None:
         # 获取顺序
         file_path, count, count_all = task
         Flags.counting_order += 1
@@ -278,7 +281,7 @@ class Scraper:
         json_data = None
         other = None
         try:
-            json_data, other = await self._scrape_one_file(file_info, file_mode)
+            json_data, other = await self._process_one_file(file_info, file_mode)
             if json_data and other:
                 if manager.config.main_mode == 4:
                     number = json_data.number  # 读取模式且存在nfo时，可能会导致movie_number改变，需要更新
@@ -326,7 +329,7 @@ class Scraper:
                         LogBuffer.log().write(
                             "\n 🔴 该问题为权限问题：请尝试以管理员身份运行，同时关闭其他正在运行的Python脚本！"
                         )
-                _, _, failed_folder, *_ = get_movie_path_setting(file_path)
+                failed_folder = get_movie_path_setting(file_path).failed_folder
                 fail_file_path = await move_file_to_failed_folder(failed_folder, file_path, folder_old_path)
                 Flags.failed_list.append([fail_file_path, LogBuffer.error().get()])
                 Flags.failed_file_list.append(fail_file_path)
@@ -410,7 +413,7 @@ class Scraper:
 
         LogBuffer.clear_thread()
 
-    async def _scrape_one_file(
+    async def _process_one_file(
         self, file_info: FileInfo, file_mode: FileMode
     ) -> tuple[CrawlersResult | None, OtherInfo | None]:
         # 处理单个文件刮削
@@ -429,7 +432,7 @@ class Scraper:
         sub_list = file_info.sub_list
 
         # 获取设置的媒体目录、失败目录、成功目录
-        _, success_folder, *_ = get_movie_path_setting(file_path)
+        success_folder = get_movie_path_setting(file_path).success_folder
 
         # 检查文件大小
         result = await check_file(file_path, file_escape_size)
@@ -772,7 +775,7 @@ def start_new_scrape(file_mode: FileMode, movie_list: list[str] | None = None) -
     try:
         Flags.start_time = time.time()
         scraper = Scraper()
-        executor.submit(scraper.scrape(file_mode, movie_list))
+        executor.submit(scraper.run(file_mode, movie_list))
     except Exception:
         signal.show_traceback_log(traceback.format_exc())
         signal.show_log_text(traceback.format_exc())

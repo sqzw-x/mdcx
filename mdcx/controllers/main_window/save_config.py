@@ -778,7 +778,7 @@ def save_config(self: "MyMAinWindow"):
         signal_qt.show_log_text(
             f" 🛠 当前配置：{manager.path} 保存完成！\n "
             f"📂 程序目录：{manager.data_folder} \n "
-            f"📂 刮削目录：{get_movie_path_setting()[0]} \n "
+            f"📂 刮削目录：{get_movie_path_setting().movie_path} \n "
             f"💠 刮削模式：{Flags.main_mode_text} · {scrape_like_text} \n "
             f"🖥️ 系统信息：{platform.platform()} \n "
             f"🐰 软件版本：{self.localversion} \n"
@@ -792,6 +792,8 @@ def save_config(self: "MyMAinWindow"):
     self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)  # type: ignore
     self.activateWindow()
     try:
-        self.set_label_file_path.emit(f"🎈 当前刮削路径: \n {get_movie_path_setting()[0]}")  # 主界面右上角显示提示信息
+        self.set_label_file_path.emit(
+            f"🎈 当前刮削路径: \n {get_movie_path_setting().movie_path}"
+        )  # 主界面右上角显示提示信息
     except Exception:
         signal_qt.show_traceback_log(traceback.format_exc())
