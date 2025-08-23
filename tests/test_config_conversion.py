@@ -60,5 +60,5 @@ def test_from_legacy():
     config = Config.from_legacy(config_v1.__dict__.copy())
 
     assert Website.JAVDB in config.site_configs
-    assert config.get_site_url(Website.JAVDB) == "https://test.com/"
+    assert config.get_site_url(Website.JAVDB) == "https://test.com"
     assert config.wuma_style == "test_value"
