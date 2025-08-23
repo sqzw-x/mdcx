@@ -32,7 +32,7 @@ class DmmCrawler(GenericBaseCrawler[DMMContext]):
         self.browser_context = None
 
     @override
-    async def clean(self):
+    async def close(self):
         if self.browser_context is not None:
             try:
                 await self.browser_context.close()

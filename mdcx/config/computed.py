@@ -2,7 +2,6 @@ import re
 
 import httpx
 
-from ..browser import BrowserProvider
 from ..llm import LLMClient
 from ..manual import ManualConfig
 from ..signals import signal
@@ -39,8 +38,6 @@ class Computed:
             timeout=config.timeout,
             log_fn=signal.add_log,
         )
-
-        self.browser_provider = BrowserProvider(config)
 
         official_websites_dic = {}
         for key, value in ManualConfig.OFFICIAL.items():

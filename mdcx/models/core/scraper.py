@@ -3,6 +3,7 @@ import os
 import re
 import time
 import traceback
+from typing import TYPE_CHECKING
 
 import aiofiles.os
 from PyQt5.QtWidgets import QMessageBox
@@ -58,9 +59,24 @@ from mdcx.utils import convert_path, executor, get_current_time, get_real_time, 
 from mdcx.utils.dataclass import update
 from mdcx.utils.file import copy_file_async, move_file_async, read_link_async
 
+if TYPE_CHECKING:
+    from mdcx.crawler import CrawlerProviderProtocol
+
+
+class StopScrape(Exception): ...
+
 
 class Scraper:
+    def __init__(self, crawler_provider: "CrawlerProviderProtocol"):
+        self.crawler_provider = crawler_provider
+
     async def run(self, file_mode: FileMode, movie_list: list[str] | None) -> None:
+        try:
+            await self._run(file_mode, movie_list)
+        finally:
+            await self.crawler_provider.close()
+
+    async def _run(self, file_mode: FileMode, movie_list: list[str] | None) -> None:
         Flags.reset()
         if movie_list is None:
             movie_list = []
@@ -195,6 +211,7 @@ class Scraper:
             for i in range(count):
                 signal.show_log_text(f" {count - i} 秒后将自动退出！")
                 await asyncio.sleep(1)
+            await self.crawler_provider.close()
             signal.exec_exit_app.emit()
 
     async def process_one_file(self, task: tuple[str, int, int]) -> None:
@@ -424,7 +441,6 @@ class Scraper:
         file_path = file_info.file_path
 
         # 获取文件信息
-
         movie_number = file_info.number
         folder_old_path = file_info.folder_path
         file_name = file_info.file_name
@@ -546,11 +562,8 @@ class Scraper:
         elif not is_nfo_existed:
             # ========================= call crawlers =========================
             # res = await crawl(file_info.crawl_task(), file_mode)
-            # todo crawler_provider 应更大程度共享, browser_provider 应更小程度共享, 预计二者生命周期为单次 scrape
-            crawler_provider = CrawlerProvider(
-                manager.config, manager.computed.async_client, manager.computed.browser_provider
-            )
-            scraper = FileScraper(manager.config, crawler_provider)
+
+            scraper = FileScraper(manager.config, self.crawler_provider)
             res = await scraper.run(file_info.crawl_task(), file_mode)
             # 处理 FileInfo 和 CrawlersResult 的共同字段, 即 number/mosaic/letters
             # todo 理想情况, crawl 后应该以 res 为准, 后续不应再访问 file_info 的相关字段
@@ -756,8 +769,7 @@ class Scraper:
             signal.set_label_file_path.emit(
                 f"⛔️ 正在停止刮削...\n   正在停止已在运行的任务线程（{Flags.now_kill}/{Flags.total_kills}）..."
             )
-            # exceptions must derive from BaseException
-            raise Exception("手动停止刮削")
+            raise StopScrape("手动停止刮削")
 
     async def _failed_file_info_show(self, count: str, path: str, error_info: str) -> None:
         folder = os.path.dirname(path)
@@ -774,7 +786,8 @@ def start_new_scrape(file_mode: FileMode, movie_list: list[str] | None = None) -
     signal.exec_set_processbar.emit(0)
     try:
         Flags.start_time = time.time()
-        scraper = Scraper()
+        crawler_provider = CrawlerProvider(manager.config, manager.computed.async_client)
+        scraper = Scraper(crawler_provider)
         executor.submit(scraper.run(file_mode, movie_list))
     except Exception:
         signal.show_traceback_log(traceback.format_exc())

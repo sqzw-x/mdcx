@@ -43,7 +43,7 @@ class GenericBaseCrawler[T: Context = Context](ABC):
         """此实例会被多个 Crawler 复用, 其生命周期由调用方负责管理. 但创建的 Context 由每个 Crawler 独立管理."""
         self.lock = Lock()
 
-    async def clean(self):
+    async def close(self):
         """释放资源, 如关闭浏览器上下文等."""
         return
 

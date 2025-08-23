@@ -4,6 +4,8 @@ import re
 from itertools import chain
 from typing import TYPE_CHECKING
 
+from patchright.async_api import Error as PatchrightError
+
 from mdcx.config.models import Language, Website
 from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.manual import ManualConfig
@@ -15,7 +17,7 @@ from mdcx.utils.dataclass import update
 
 if TYPE_CHECKING:
     from mdcx.config.models import Config
-    from mdcx.crawler import CrawlerProvider
+    from mdcx.crawler import CrawlerProviderProtocol
 
 
 MULTI_LANGUAGE_WEBSITES = [  # 支持多语言, language 参数有意义
@@ -101,7 +103,7 @@ def _deal_res(res: CrawlersResult) -> CrawlersResult:
 
 
 class FileScraper:
-    def __init__(self, config: "Config", crawler_provider: "CrawlerProvider"):
+    def __init__(self, config: "Config", crawler_provider: "CrawlerProviderProtocol"):
         self.config = config
         self.crawler_provider = crawler_provider
 
@@ -194,6 +196,9 @@ class FileScraper:
                         if site in MULTI_LANGUAGE_WEBSITES and (site, Language.UNDEFINED) not in all_res:
                             all_res[(site, Language.UNDEFINED)] = web_data.data
                     except Exception as e:
+                        if isinstance(e, PatchrightError):
+                            if "BrowserType.launch: Executable doesn't exist" in e.message:
+                                e = "找不到 Chrome 浏览器, 请安装或关闭对应网站的 use_browser 选项"
                         reduced.field_log += f"\n    🔴 {site:<15} (失败: {str(e)})"
                         failed.add(key)
                         continue

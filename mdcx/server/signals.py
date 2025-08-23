@@ -12,11 +12,12 @@ from .ws.types import MessageType, WebSocketMessage
 
 
 class Signal[*T = *tuple[()]]:
-    def __init__(self, fn: Callable[[*T], None]):
+    def __init__(self, fn: Callable[[*T], None] | None = None):
         self.fn = fn
 
     def emit(self, *args: *T):
-        self.fn(*args)
+        if self.fn:
+            self.fn(*args)
 
 
 class ServerSignals:
@@ -34,14 +35,14 @@ class ServerSignals:
         self.scrape_info = Signal(self._emit_scrape_info)
         self.net_info = Signal(self._emit_net_info)
         self.exec_set_main_info = Signal(self._emit_set_main_info)
-        self.change_buttons_status = Signal(self._emit_change_buttons_status)
-        self.reset_buttons_status = Signal(self._emit_reset_buttons_status)
-        self.set_label_file_path = Signal(self._emit_set_label_file_path)
-        self.label_result = Signal(self._emit_label_result)
+        self.change_buttons_status = Signal()
+        self.reset_buttons_status = Signal()
+        self.set_label_file_path = Signal[str]()
+        self.label_result = Signal[str]()
         self.logs_failed_settext = Signal(self._emit_logs_failed_settext)
         self.view_success_file_settext = Signal(self._emit_view_success_file_settext)
         self.exec_set_processbar = Signal(self._emit_set_processbar)
-        self.exec_exit_app = Signal(self._emit_exit_app)
+        self.exec_exit_app = Signal()
         self.view_failed_list_settext = Signal(self._emit_view_failed_list_settext)
         self.exec_show_list_name = Signal(self._emit_show_list_name)
         self.logs_failed_show = Signal(self._emit_logs_failed_show)
@@ -87,22 +88,6 @@ class ServerSignals:
             print(f"Failed to serialize ShowData: {e}")
             self._broadcast_message("set_main_info", {"show_data": None})
 
-    def _emit_change_buttons_status(self):
-        """发送按钮状态变更"""
-        # self._broadcast_message("change_buttons_status", None)
-
-    def _emit_reset_buttons_status(self):
-        """发送按钮状态重置"""
-        # self._broadcast_message("reset_buttons_status", None)
-
-    def _emit_set_label_file_path(self, path: str):
-        """发送文件路径标签设置"""
-        # self._broadcast_message("set_label_file_path", path)
-
-    def _emit_label_result(self, result: str):
-        """发送结果标签"""
-        # self._broadcast_message("label_result", result)
-
     def _emit_logs_failed_settext(self, text: str):
         """发送失败日志"""
         self._broadcast_message("logs_failed_settext", text)
@@ -129,10 +114,6 @@ class ServerSignals:
                 asyncio.run(websocket_manager.broadcast(message))
             except Exception as e:
                 print(f"Failed to broadcast progress: {e}")
-
-    def _emit_exit_app(self):
-        """发送应用退出信号（Web应用可能无需处理）"""
-        # self._broadcast_message("exit_app", None)
 
     def _emit_view_failed_list_settext(self, text: str):
         """发送失败列表文本"""
