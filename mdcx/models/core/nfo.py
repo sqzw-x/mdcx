@@ -1,9 +1,9 @@
-import os
 import re
 import time
 import traceback
 from dataclasses import asdict
 from io import StringIO
+from pathlib import Path
 
 import aiofiles
 import aiofiles.os
@@ -18,7 +18,7 @@ from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo
 from mdcx.number import get_number_letters
 from mdcx.signals import signal
-from mdcx.utils import convert_path, get_used_time, split_path
+from mdcx.utils import get_used_time
 from mdcx.utils.file import delete_file_async
 from mdcx.utils.language import is_japanese
 
@@ -26,9 +26,9 @@ from mdcx.utils.language import is_japanese
 async def write_nfo(
     file_info: FileInfo,
     json_data: CrawlersResult,
-    nfo_new_path: str,
-    folder_new_path: str,
-    file_path: str,
+    nfo_new_path: Path,
+    folder_new_path: Path,
+    file_path: Path,
     update=False,
 ) -> bool:
     start_time = time.time()
@@ -358,17 +358,17 @@ async def write_nfo(
         return False
 
 
-async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResult | None, OtherInfo | None]:
-    local_nfo_path = os.path.splitext(file_path)[0] + ".nfo"
-    local_nfo_name = split_path(local_nfo_path)[1]
-    file_folder = split_path(file_path)[0]
+async def get_nfo_data(file_path: Path, movie_number: str) -> tuple[CrawlersResult | None, OtherInfo | None]:
+    local_nfo_path = file_path.with_suffix(".nfo")
+    local_nfo_name = local_nfo_path.name
+    file_folder = file_path.parent
     json_data = CrawlersResult.empty()
     json_data.field_sources = dict.fromkeys(CrawlerResultFields, "local")
 
     if not await aiofiles.os.path.exists(local_nfo_path):
         LogBuffer.error().write("nfo文件不存在")
-        json_data.outline = split_path(file_path)[1]
-        json_data.tag = file_path
+        json_data.outline = file_path.name
+        json_data.tag = str(file_path)
         return None, None
 
     async with aiofiles.open(local_nfo_path, encoding="utf-8") as f:
@@ -382,8 +382,8 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResul
     # 获取不到标题，表示xml错误，重新刮削
     if not title:
         LogBuffer.error().write("nfo文件损坏")
-        json_data.outline = split_path(file_path)[1]
-        json_data.tag = file_path
+        json_data.outline = file_path.name
+        json_data.tag = str(file_path)
         return None, None
     title = re.sub(r" (CD)?\d{1}$", "", title)
 
@@ -477,30 +477,30 @@ async def get_nfo_data(file_path: str, movie_number: str) -> tuple[CrawlersResul
     tag_only = ",".join(only_tag_list)
 
     # 获取本地图片路径
-    poster_path_1 = convert_path(os.path.splitext(file_path)[0] + "-poster.jpg")
-    poster_path_2 = convert_path(os.path.join(file_folder, "poster.jpg"))
-    thumb_path_1 = convert_path(os.path.splitext(file_path)[0] + "-thumb.jpg")
-    thumb_path_2 = convert_path(os.path.join(file_folder, "thumb.jpg"))
-    fanart_path_1 = convert_path(os.path.splitext(file_path)[0] + "-fanart.jpg")
-    fanart_path_2 = convert_path(os.path.join(file_folder, "fanart.jpg"))
+    poster_path_1 = file_path.with_name(file_path.stem + "-poster.jpg")
+    poster_path_2 = file_folder / "poster.jpg"
+    thumb_path_1 = file_path.with_name(file_path.stem + "-thumb.jpg")
+    thumb_path_2 = file_folder / "thumb.jpg"
+    fanart_path_1 = file_path.with_name(file_path.stem + "-fanart.jpg")
+    fanart_path_2 = file_folder / "fanart.jpg"
     if await aiofiles.os.path.isfile(poster_path_1):
         poster_path = poster_path_1
     elif await aiofiles.os.path.isfile(poster_path_2):
         poster_path = poster_path_2
     else:
-        poster_path = ""
+        poster_path = None
     if await aiofiles.os.path.isfile(thumb_path_1):
         thumb_path = thumb_path_1
     elif await aiofiles.os.path.isfile(thumb_path_2):
         thumb_path = thumb_path_2
     else:
-        thumb_path = ""
+        thumb_path = None
     if await aiofiles.os.path.isfile(fanart_path_1):
         fanart_path = fanart_path_1
     elif await aiofiles.os.path.isfile(fanart_path_2):
         fanart_path = fanart_path_2
     else:
-        fanart_path = ""
+        fanart_path = None
 
     # 返回数据
     json_data.title = title

@@ -11,11 +11,11 @@ from .v1 import ConfigV1, load_v1
 
 class ConfigManager:
     def __init__(self):
-        if not os.path.exists(MARK_FILE):  # 标记文件不存在
-            self.path = os.path.join(MAIN_PATH, "config.json")  # 默认配置文件路径
+        if not MARK_FILE.is_file():  # 标记文件不存在
+            self.path = MAIN_PATH / "config.json"  # 默认配置文件路径
         else:
             self._path = Path(self.read_mark_file())
-            self.data_folder, self.file = os.path.split(self._path)
+            self.data_folder, self.file = self._path.parent, self._path.name
         if not os.path.exists(self._path):  # 配置文件不存在, 写入默认值
             if self._path.suffix == ".ini":
                 self.path = self._path.with_suffix(".json")
@@ -23,18 +23,18 @@ class ConfigManager:
         self.load()
 
     @property
-    def path(self) -> str:
-        return str(self._path)
+    def path(self) -> Path:
+        return self._path
 
     @path.setter
     def path(self, path: str | Path):
         p = Path(path)
-        self.data_folder, self.file = os.path.split(p)
+        self.data_folder, self.file = p.parent, p.name
         self.write_mark_file(p)  # 更新标记文件路径
         self._path = p
 
     def load(self) -> list[str]:
-        if self.file.endswith(".ini"):  # handle v1 config
+        if self._path.suffix == ".ini":  # handle v1 config
             return self.handle_v1()
         try:
             d = json.loads(self._path.read_text(encoding="UTF-8"))
@@ -43,10 +43,13 @@ class ConfigManager:
             self.computed = Computed(self.config)
             return errors
         except Exception as e:
-            return str(e).splitlines()
+            self.config = Config()
+            self.computed = Computed(self.config)
+            msg = f" 配置文件 {self._path} 验证失败. 错误信息: \n{str(e)}"
+            return msg.splitlines()
 
     def handle_v1(self):
-        v2path = self.path.removesuffix(".ini") + ".v2.json"
+        v2path = self.path.with_suffix(".v2.json")
         v1path = self.path
         if os.path.exists(v2path):
             self.path = v2path
@@ -92,8 +95,6 @@ class ConfigManager:
     @staticmethod
     def read_mark_file() -> str:
         """读取 MARK_FILE"""
-        if not os.path.exists(MARK_FILE):
-            raise FileNotFoundError(f"标记文件 {MARK_FILE} 不存在, 请先运行配置初始化.")
         with open(MARK_FILE, encoding="UTF-8") as f:
             return f.read().strip()
 

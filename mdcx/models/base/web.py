@@ -3,6 +3,7 @@ import asyncio
 import re
 import threading
 from io import BytesIO
+from pathlib import Path
 from typing import Literal, overload
 
 import aiofiles.os
@@ -166,7 +167,7 @@ async def get_imgsize(url) -> tuple[int, int]:
     return 0, 0
 
 
-async def get_dmm_trailer(trailer_url):
+async def get_dmm_trailer(trailer_url: str) -> str:
     """
     尝试获取 dmm 最高分辨率预告片.
 
@@ -389,7 +390,7 @@ async def get_yesjav_title(movie_number: str) -> str:
     return movie_title
 
 
-async def download_file_with_filepath(url: str, file_path: str, folder_new_path: str) -> bool:
+async def download_file_with_filepath(url: str, file_path: Path, folder_new_path: Path) -> bool:
     if not url:
         return False
 
@@ -404,7 +405,7 @@ async def download_file_with_filepath(url: str, file_path: str, folder_new_path:
     return False
 
 
-async def download_extrafanart_task(task: tuple[str, str, str, str]) -> bool:
+async def download_extrafanart_task(task: tuple[str, Path, Path, str]) -> bool:
     extrafanart_url, extrafanart_file_path, extrafanart_folder_path, extrafanart_name = task
     if await download_file_with_filepath(extrafanart_url, extrafanart_file_path, extrafanart_folder_path):
         if await check_pic_async(extrafanart_file_path):

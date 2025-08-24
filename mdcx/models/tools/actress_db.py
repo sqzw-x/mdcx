@@ -1,11 +1,8 @@
-"""
-使用本地数据库数据补全女优信息
-"""
-
 import datetime
 import re
 import sqlite3
 import traceback
+from pathlib import Path
 
 from mdcx.config.manager import manager
 from mdcx.models.tools.emby import EMbyActressInfo
@@ -19,7 +16,7 @@ class ActressDB:
     def init_db(cls):
         try:
             #  https://ricardoanderegg.com/posts/python-sqlite-thread-safety/
-            cls.DB = sqlite3.connect(manager.config.info_database_path, check_same_thread=False)
+            cls.DB = sqlite3.connect(Path(manager.config.info_database_path), check_same_thread=False)
             info_count = cls.DB.execute("select count(*) from Info").fetchone()  # 必须实际执行查询才能判断是否连接成功
             signal.show_log_text(f" ✅ 数据库连接成功, 共有 {info_count[0]} 条女优信息")
         except Exception:

@@ -1,5 +1,6 @@
 import asyncio
 import traceback
+from pathlib import Path
 
 import aiofiles.os
 from PIL import Image, ImageFilter
@@ -9,11 +10,11 @@ from mdcx.signals import signal
 from mdcx.utils.file import delete_file_async
 
 
-async def get_pixmap(pic_path: str, poster=True, pic_from=""):
+async def get_pixmap(pic_path: Path, poster=True, pic_from=""):
     try:
         # 使用 QImageReader 加载，适合加载大文件，pixmap适合显示
         # 判断是否可读取
-        img = QImageReader(pic_path)
+        img = QImageReader(pic_path.as_posix())
         if img.canRead():
             img = img.read()
             pix = QPixmap(img)
@@ -46,7 +47,7 @@ async def get_pixmap(pic_path: str, poster=True, pic_from=""):
         return [False, "", "加载失败", 156, 220]
 
 
-def cut_pic(pic_path: str):
+def cut_pic(pic_path: Path):
     # 打开图片, 获取图片尺寸
     img = None
     img_new = None
@@ -88,11 +89,11 @@ def cut_pic(pic_path: str):
             img.close()
 
 
-async def fix_pic_async(pic_path: str, new_path: str):
+async def fix_pic_async(pic_path: Path, new_path: Path):
     await asyncio.to_thread(fix_pic, pic_path, new_path)
 
 
-def fix_pic(pic_path: str, new_path: str):
+def fix_pic(pic_path: Path, new_path: Path):
     pic = None
     fixed_pic = None
     try:

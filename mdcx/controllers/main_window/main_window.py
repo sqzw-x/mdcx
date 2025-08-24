@@ -5,6 +5,7 @@ import threading
 import time
 import traceback
 import webbrowser
+from pathlib import Path
 from typing import TYPE_CHECKING, Literal, cast
 
 from PyQt5.QtCore import QEvent, QPoint, Qt, QTimer, pyqtSignal
@@ -58,18 +59,8 @@ from mdcx.models.tools.missing import check_missing_number
 from mdcx.models.tools.subtitle import add_sub_for_all_video
 from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo, ShowData
 from mdcx.signals import signal_qt
-from mdcx.utils import (
-    _async_raise,
-    add_html,
-    convert_path,
-    executor,
-    get_current_time,
-    get_used_time,
-    kill_a_thread,
-    split_path,
-)
+from mdcx.utils import _async_raise, add_html, executor, get_current_time, get_used_time, kill_a_thread, split_path
 from mdcx.utils.file import delete_file_sync, open_file_thread
-from mdcx.utils.path import get_path
 from mdcx.views.MDCx import Ui_MDCx
 
 if TYPE_CHECKING:
@@ -114,12 +105,12 @@ class MyMAinWindow(QMainWindow):
         self.localversion = LOCAL_VERSION  # 当前版本号
         self.new_version = "\n🔍 点击检查最新版本"  # 有版本更新时在左下角显示的新版本信息
         self.show_data: ShowData | None = None  # 当前树状图选中文件的数据
-        self.img_path = ""  # 当前树状图选中文件的图片地址
+        self.img_path = None  # 当前树状图选中文件的图片地址
         self.m_drag = False  # 允许鼠标拖动的标识
         self.m_DragPosition: QPoint  # 鼠标拖动位置
         self.logs_counts = 0  # 日志次数（每1w次清屏）
         self.req_logs_counts = 0  # 日志次数（每1w次清屏）
-        self.file_main_open_path = ""  # 主界面打开的文件路径
+        self.file_main_open_path = Path()  # 主界面打开的文件路径
         self.json_array: dict[str, ShowData] = {}  # 主界面右侧结果树状数据
 
         self.window_radius = 0  # 窗口四角弧度，为0时表示显示窗口标题栏
@@ -870,27 +861,26 @@ class MyMAinWindow(QMainWindow):
             self.Ui.label_poster.setToolTip("点击裁剪图片")
             self.Ui.label_thumb.setToolTip("点击裁剪图片")
             # 生成img_path，用来裁剪使用
-            img_path = other.fanart_path if os.path.isfile(other.fanart_path) else other.thumb_path
+            img_path = other.fanart_path if other.fanart_path and other.fanart_path.is_file() else other.thumb_path
             self.img_path = img_path
             if self.Ui.checkBox_cover.isChecked():  # 主界面显示封面和缩略图
                 poster_path = other.poster_path
                 thumb_path = other.thumb_path
                 fanart_path = other.fanart_path
-                if not os.path.exists(thumb_path) and os.path.exists(fanart_path):
+                if not (thumb_path and thumb_path.is_file()) and fanart_path and fanart_path.is_file():
                     thumb_path = fanart_path
-
                 poster_from = data.poster_from
                 cover_from = data.thumb_from
-
-                executor.submit(self._set_pixmap(poster_path, thumb_path, poster_from, cover_from))
+                if poster_path and thumb_path:
+                    executor.submit(self._set_pixmap(poster_path, thumb_path, poster_from, cover_from))
         except Exception:
             if not signal_qt.stop:
                 signal_qt.show_traceback_log(traceback.format_exc())
 
     async def _set_pixmap(
         self,
-        poster_path="",
-        thumb_path="",
+        poster_path: Path,
+        thumb_path: Path,
         poster_from="",
         cover_from="",
     ):
@@ -936,7 +926,7 @@ class MyMAinWindow(QMainWindow):
                 signal_qt.show_traceback_log(item.text(0) + ": No info!")
 
     def _check_main_file_path(self):
-        if not self.file_main_open_path:
+        if self.file_main_open_path == Path() or not self.file_main_open_path.is_file():
             QMessageBox.about(self, "没有目标文件", "请刮削后再使用！！")
             signal_qt.show_scrape_info(f"💡 请刮削后使用！{get_current_time()}")
             return False
@@ -951,7 +941,6 @@ class MyMAinWindow(QMainWindow):
         event = QHoverEvent(QEvent.Type.HoverLeave, QPoint(40, 40), QPoint(0, 0))
         QApplication.sendEvent(self.Ui.pushButton_play, event)
         if self._check_main_file_path():
-            # file_path = convert_path(self.file_main_open_path)
             # mac需要改为无焦点状态，不然弹窗失去焦点后，再切换回来会有找不到焦点的问题（windows无此问题）
             # if not self.is_windows:
             #     self.setWindowFlags(self.windowFlags() | Qt.WindowDoesNotAcceptFocus)
@@ -968,7 +957,6 @@ class MyMAinWindow(QMainWindow):
         event = QHoverEvent(QEvent.Type.HoverLeave, QPoint(40, 40), QPoint(0, 0))
         QApplication.sendEvent(self.Ui.pushButton_open_folder, event)
         if self._check_main_file_path():
-            # file_path = convert_path(self.file_main_open_path)
             # mac需要改为无焦点状态，不然弹窗失去焦点后，再切换回来会有找不到焦点的问题（windows无此问题）
             # if not self.is_windows:
             #     self.setWindowFlags(self.windowFlags() | Qt.WindowDoesNotAcceptFocus)
@@ -1106,7 +1094,7 @@ class MyMAinWindow(QMainWindow):
             actor = json_data.actor
             if json_data.all_actor and NfoInclude.ACTOR_ALL in manager.config.nfo_include_new:
                 actor = json_data.all_actor
-            self.Ui.label_nfo.setText(file_info.file_path)
+            self.Ui.label_nfo.setText(str(file_info.file_path))
             self.Ui.lineEdit_nfo_number.setText(json_data.number)
             self.Ui.lineEdit_nfo_actor.setText(actor)
             self.Ui.lineEdit_nfo_year.setText(json_data.year)
@@ -1140,8 +1128,8 @@ class MyMAinWindow(QMainWindow):
             json_data = show_data.data
             file_info = show_data.file_info
             file_path = file_info.file_path
-            nfo_path = os.path.splitext(file_path)[0] + ".nfo"
-            nfo_folder = split_path(file_path)[0]
+            nfo_path = file_path.with_suffix(".nfo")
+            nfo_folder = nfo_path.parent
             json_data.number = self.Ui.lineEdit_nfo_number.text()
             if NfoInclude.ACTOR_ALL in manager.config.nfo_include_new:
                 json_data.all_actor = self.Ui.lineEdit_nfo_actor.text()
@@ -1201,7 +1189,7 @@ class MyMAinWindow(QMainWindow):
         box.setDefaultButton(QMessageBox.No)
         reply = box.exec()
         if reply == QMessageBox.Yes:
-            with open(resources.userdata_path("success.txt"), "w", encoding="utf-8", errors="ignore") as f:
+            with open(resources.u("success.txt"), "w", encoding="utf-8", errors="ignore") as f:
                 f.write(self.Ui.textBrowser_show_success_list.toPlainText().replace("暂无成功刮削的文件", "").strip())
             get_success_list()
             self.Ui.widget_show_success.hide()
@@ -1222,9 +1210,7 @@ class MyMAinWindow(QMainWindow):
         self.Ui.widget_show_success.show()
         info = "暂无成功刮削的文件"
         if len(Flags.success_list):
-            temp = list(Flags.success_list)
-            temp.sort()
-            info = "\n".join(temp)
+            info = "\n".join(sorted(str(p) for p in Flags.success_list))
         self.Ui.textBrowser_show_success_list.setText(info)
 
     # endregion
@@ -1285,17 +1271,17 @@ class MyMAinWindow(QMainWindow):
 
     # 日志页点一键刮削失败列表
     def pushButton_scraper_failed_list_clicked(self):
-        if len(Flags.failed_file_list) and self.Ui.pushButton_start_cap.text() == "开始":
-            start_new_scrape(FileMode.Default, movie_list=Flags.failed_file_list)
+        if len(Flags.failed_list) and self.Ui.pushButton_start_cap.text() == "开始":
+            start_new_scrape(FileMode.Default, movie_list=[s[0] for s in Flags.failed_list])
             self.show_hide_failed_list(False)
 
     # 日志页点另存失败列表
     def pushButton_save_failed_list_clicked(self):
-        if len(Flags.failed_file_list) or True:
+        if len(Flags.failed_list):
             log_name = "failed_" + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + ".txt"
-            log_name = convert_path(os.path.join(get_movie_path_setting().movie_path, log_name))
+            log_name = get_movie_path_setting().movie_path / log_name
             filename, filetype = QFileDialog.getSaveFileName(
-                None, "保存失败文件列表", log_name, "Text Files (*.txt)", options=self.options
+                None, "保存失败文件列表", log_name.as_posix(), "Text Files (*.txt)", options=self.options
             )
             if filename:
                 with open(filename, "w", encoding="utf-8") as f:
@@ -1322,14 +1308,14 @@ class MyMAinWindow(QMainWindow):
             try:
                 Flags.log_txt.write((text + "\n").encode("utf-8"))
             except Exception:
-                log_folder = os.path.join(manager.data_folder, "Log")
+                log_folder = manager.data_folder / "Log"
                 if not os.path.exists(log_folder):
                     os.makedirs(log_folder)
                 log_name = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + ".txt"
-                log_name = convert_path(os.path.join(log_folder, log_name))
+                log_name = log_folder / log_name
 
                 Flags.log_txt = open(log_name, "wb", buffering=0)
-                signal_qt.show_log_text("Create log file: " + log_name + "\n")
+                signal_qt.show_log_text(f"创建日志文件: {log_name}\n")
                 signal_qt.show_log_text(text)
                 return
         try:
@@ -1361,28 +1347,28 @@ class MyMAinWindow(QMainWindow):
     def pushButton_select_local_library_clicked(self):
         media_folder_path = self._get_select_folder_path()
         if media_folder_path:
-            self.Ui.lineEdit_local_library_path.setText(convert_path(media_folder_path))
+            self.Ui.lineEdit_local_library_path.setText(media_folder_path)
             self.pushButton_save_config_clicked()
 
     # 工具页面网盘目录点选择目录
     def pushButton_select_netdisk_path_clicked(self):
         media_folder_path = self._get_select_folder_path()
         if media_folder_path:
-            self.Ui.lineEdit_netdisk_path.setText(convert_path(media_folder_path))
+            self.Ui.lineEdit_netdisk_path.setText(media_folder_path)
             self.pushButton_save_config_clicked()
 
     # 工具页面本地目录点选择目录
     def pushButton_select_localdisk_path_clicked(self):
         media_folder_path = self._get_select_folder_path()
         if media_folder_path:
-            self.Ui.lineEdit_localdisk_path.setText(convert_path(media_folder_path))
+            self.Ui.lineEdit_localdisk_path.setText(media_folder_path)
             self.pushButton_save_config_clicked()
 
     # 工具/设置页面点选择目录
     def pushButton_select_media_folder_clicked(self):
         media_folder_path = self._get_select_folder_path()
         if media_folder_path:
-            self.Ui.lineEdit_movie_path.setText(convert_path(media_folder_path))
+            self.Ui.lineEdit_movie_path.setText(media_folder_path)
             self.pushButton_save_config_clicked()
 
     # 工具-软链接助手
@@ -1421,10 +1407,12 @@ class MyMAinWindow(QMainWindow):
         media_path = self.Ui.lineEdit_movie_path.text()  # 获取待刮削目录作为打开目录
         if not media_path:
             media_path = manager.data_folder
+        else:
+            media_path = Path(media_path)
         file_path, filetype = QFileDialog.getOpenFileName(
             None,
             "选取视频文件",
-            media_path,
+            media_path.as_posix(),
             "Movie Files(*.mp4 "
             "*.avi *.rmvb *.wmv "
             "*.mov *.mkv *.flv *.ts "
@@ -1435,10 +1423,10 @@ class MyMAinWindow(QMainWindow):
             options=self.options,
         )
         if file_path:
-            self.Ui.lineEdit_single_file_path.setText(convert_path(file_path))
+            self.Ui.lineEdit_single_file_path.setText(file_path)
 
     def pushButton_start_single_file_clicked(self):  # 点刮削
-        Flags.single_file_path = self.Ui.lineEdit_single_file_path.text().strip()
+        Flags.single_file_path = Path(self.Ui.lineEdit_single_file_path.text().strip())
         if not Flags.single_file_path:
             signal_qt.show_scrape_info("💡 请选择文件！")
             return
@@ -1472,12 +1460,12 @@ class MyMAinWindow(QMainWindow):
     def pushButton_select_thumb_clicked(self):
         path = self.Ui.lineEdit_movie_path.text()
         if not path:
-            path = manager.data_folder
+            path = manager.data_folder.as_posix()
         file_path, fileType = QFileDialog.getOpenFileName(
             None, "选取缩略图", path, "Picture Files(*.jpg *.png);;All Files(*)", options=self.options
         )
-        if file_path != "":
-            self.cutwindow.showimage(file_path)
+        if file_path:
+            self.cutwindow.showimage(Path(file_path))
             self.cutwindow.show()
 
     # 工具-视频移动
@@ -1500,39 +1488,28 @@ class MyMAinWindow(QMainWindow):
 
     def _move_file_thread(self):
         signal_qt.change_buttons_status.emit()
-        movie_path = manager.config.media_path.replace("\\", "/")  # 用户设置的扫描媒体路径
-        if movie_path == "":  # 未设置为空时，使用主程序目录
-            movie_path = manager.data_folder
-        escape_dir = self.Ui.lineEdit_escape_dir_move.text().replace("\\", "/")
-        escape_dir = escape_dir + ",Movie_moved"
-        escape_folder_list = escape_dir.split(",")
-        escape_folder_new_list = []
-        for es in escape_folder_list:  # 排除目录可以多个，以，,分割
-            es = es.strip(" ")
-            if es:
-                es = get_path(movie_path, es).replace("\\", "/")
-                if es[-1] != "/":  # 路径尾部添加“/”，方便后面move_list查找时匹配路径
-                    es += "/"
-                escape_folder_new_list.append(es)
+        c = get_movie_path_setting()
+        movie_path = c.movie_path
+        ignore_dirs = c.ignore_dirs
+        ignore_dirs.append(movie_path / "Movie_moved")
         movie_list = executor.run(
-            movie_lists(escape_folder_new_list, manager.config.media_type + manager.config.sub_type, movie_path)
+            movie_lists(ignore_dirs, manager.config.media_type + manager.config.sub_type, movie_path)
         )
         if not movie_list:
             signal_qt.show_log_text("No movie found!")
             signal_qt.show_log_text("================================================================================")
             signal_qt.reset_buttons_status.emit()
             return
-        des_path = os.path.join(movie_path, "Movie_moved")
-        if not os.path.exists(des_path):
+        des_path = movie_path / "Movie_moved"
+        if not des_path.exists():
             signal_qt.show_log_text("Created folder: Movie_moved")
             os.makedirs(des_path)
         signal_qt.show_log_text("Start move movies...")
         skip_list = []
         for file_path in movie_list:
-            file_name = split_path(file_path)[1]
-            file_ext = os.path.splitext(file_name)[1]
+            file_name = file_path.name
+            file_ext = file_path.suffix.lower()
             try:
-                # move_file(file_path, des_path)
                 shutil.move(file_path, des_path)
                 if file_ext in manager.config.media_type:
                     signal_qt.show_log_text("   Move movie: " + file_name + " to Movie_moved Success!")
@@ -1558,44 +1535,44 @@ class MyMAinWindow(QMainWindow):
     def pushButton_select_softlink_folder_clicked(self):
         media_folder_path = self._get_select_folder_path()
         if media_folder_path:
-            self.Ui.lineEdit_movie_softlink_path.setText(convert_path(media_folder_path))
+            self.Ui.lineEdit_movie_softlink_path.setText(media_folder_path)
             self.pushButton_save_config_clicked()
 
     # 设置-目录-成功输出目录-点选择目录
     def pushButton_select_sucess_folder_clicked(self):
         media_folder_path = self._get_select_folder_path()
         if media_folder_path:
-            self.Ui.lineEdit_success.setText(convert_path(media_folder_path))
+            self.Ui.lineEdit_success.setText(media_folder_path)
             self.pushButton_save_config_clicked()
 
     # 设置-目录-失败输出目录-点选择目录
     def pushButton_select_failed_folder_clicked(self):
         media_folder_path = self._get_select_folder_path()
         if media_folder_path:
-            self.Ui.lineEdit_fail.setText(convert_path(media_folder_path))
+            self.Ui.lineEdit_fail.setText(media_folder_path)
             self.pushButton_save_config_clicked()
 
     # 设置-字幕-字幕文件目录-点选择目录
     def pushButton_select_subtitle_folder_clicked(self):
         media_folder_path = self._get_select_folder_path()
         if media_folder_path:
-            self.Ui.lineEdit_sub_folder.setText(convert_path(media_folder_path))
+            self.Ui.lineEdit_sub_folder.setText(media_folder_path)
             self.pushButton_save_config_clicked()
 
     # 设置-头像-头像文件目录-点选择目录
     def pushButton_select_actor_photo_folder_clicked(self):
         media_folder_path = self._get_select_folder_path()
         if media_folder_path:
-            self.Ui.lineEdit_actor_photo_folder.setText(convert_path(media_folder_path))
+            self.Ui.lineEdit_actor_photo_folder.setText(media_folder_path)
             self.pushButton_save_config_clicked()
 
     # 设置-其他-配置文件目录-点选择目录
     def pushButton_select_config_folder_clicked(self):
-        media_folder_path = convert_path(self._get_select_folder_path())
-        if media_folder_path and media_folder_path != manager.data_folder:
-            config_path = os.path.join(media_folder_path, "config.json")
+        media_folder_path = Path(self._get_select_folder_path())
+        if media_folder_path.is_dir() and media_folder_path != manager.data_folder:
+            config_path = media_folder_path / "config.json"
             manager.path = media_folder_path
-            if os.path.isfile(config_path):
+            if config_path.is_file():
                 temp_dark = self.dark_mode
                 temp_window_radius = self.window_radius
                 self.load_config()
@@ -1603,7 +1580,7 @@ class MyMAinWindow(QMainWindow):
                     self.show_flag = True
                     self._windows_auto_adjust()
             else:
-                self.Ui.lineEdit_config_folder.setText(media_folder_path)
+                self.Ui.lineEdit_config_folder.setText(str(media_folder_path))
                 self.pushButton_save_config_clicked()
             signal_qt.show_scrape_info(f"💡 目录已切换！{get_current_time()}")
 
@@ -1612,10 +1589,10 @@ class MyMAinWindow(QMainWindow):
     # 设置-演员-补全信息-演员信息数据库-选择文件按钮
     def pushButton_select_actor_info_db_clicked(self):
         database_path, _ = QFileDialog.getOpenFileName(
-            None, "选择数据库文件", manager.data_folder, options=self.options
+            None, "选择数据库文件", manager.data_folder.as_posix(), options=self.options
         )
         if database_path:
-            self.Ui.lineEdit_actor_db_path.setText(convert_path(database_path))
+            self.Ui.lineEdit_actor_db_path.setText(database_path)
             self.pushButton_save_config_clicked()
 
     # region 设置-问号
@@ -1898,9 +1875,9 @@ class MyMAinWindow(QMainWindow):
         self.Ui.checkBox_site_use_browser.setChecked(manager.config.get_site_config(site).use_browser)
 
     # 切换配置
-    def config_file_change(self, new_config_file):
+    def config_file_change(self, new_config_file: str):
         if new_config_file != manager.file:
-            new_config_path = os.path.join(manager.data_folder, new_config_file)
+            new_config_path = manager.data_folder / new_config_file
             signal_qt.show_log_text(
                 f"\n================================================================================\n切换配置：{new_config_path}"
             )
@@ -1944,7 +1921,7 @@ class MyMAinWindow(QMainWindow):
 
     # 读取设置页的设置, 保存config.ini，然后重新加载
     def _check_mac_config_folder(self):
-        if self.check_mac and not IS_WINDOWS and ".app/Contents/Resources" in manager.data_folder:
+        if self.check_mac and not IS_WINDOWS and ".app/Contents/Resources" in manager.data_folder.as_posix():
             self.check_mac = False
             box = QMessageBox(
                 QMessageBox.Warning,
@@ -2309,9 +2286,9 @@ class MyMAinWindow(QMainWindow):
     def _get_select_folder_path(self):
         media_path = self.Ui.lineEdit_movie_path.text()  # 获取待刮削目录作为打开目录
         if not media_path:
-            media_path = manager.data_folder
+            media_path = manager.data_folder.as_posix()
         media_folder_path = QFileDialog.getExistingDirectory(None, "选择目录", media_path, options=self.options)
-        return convert_path(media_folder_path)
+        return media_folder_path
 
     # 改回接受焦点状态
     def recover_windowflags(self):

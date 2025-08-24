@@ -3,12 +3,12 @@
 """
 
 import asyncio
-import os
 import re
 import shutil
 import time
 import urllib.parse
 from asyncio import to_thread
+from pathlib import Path
 
 import aiofiles
 import aiofiles.os
@@ -208,8 +208,8 @@ async def get_big_pic_by_amazon(result: CrawlersResult, originaltitle_amazon: st
 
 async def trailer_download(
     result: CrawlersResult,
-    folder_new: str,
-    folder_old: str,
+    folder_new: Path,
+    folder_old: Path,
     naming_rule: str,
 ) -> bool | None:
     start_time = time.time()
@@ -218,14 +218,14 @@ async def trailer_download(
     trailer_name = manager.config.trailer_simple_name
     result.trailer = await get_dmm_trailer(result.trailer)  # todo 或许找一个更合适的地方进行统一后处理
     trailer_url = result.trailer
-    trailer_old_folder_path = os.path.join(folder_old, "trailers")
-    trailer_new_folder_path = os.path.join(folder_new, "trailers")
+    trailer_old_folder_path = folder_old / "trailers"
+    trailer_new_folder_path = folder_new / "trailers"
 
     # 预告片名字不含视频文件名（只让一个视频去下载即可）
     if trailer_name:
-        trailer_folder_path = os.path.join(folder_new, "trailers")
+        trailer_folder_path = folder_new / "trailers"
         trailer_file_name = "trailer.mp4"
-        trailer_file_path = os.path.join(trailer_folder_path, trailer_file_name)
+        trailer_file_path = trailer_folder_path / trailer_file_name
 
         # 预告片文件夹已在已处理列表时，返回（这时只需要下载一个，其他分集不需要下载）
         if trailer_folder_path in Flags.trailer_deal_set:
@@ -243,7 +243,7 @@ async def trailer_download(
         # 预告片带文件名（每个视频都有机会下载，如果已有下载好的，则使用已下载的）
         trailer_file_name = naming_rule + "-trailer.mp4"
         trailer_folder_path = folder_new
-        trailer_file_path = os.path.join(trailer_folder_path, trailer_file_name)
+        trailer_file_path = trailer_folder_path / trailer_file_name
 
         # 不下载不保留时删除返回
         if DownloadableFile.TRAILER not in download_files and DownloadableFile.TRAILER not in keep_files:
@@ -299,7 +299,7 @@ async def trailer_download(
         signal.show_traceback_log(f"🍔 {result.number} download trailer... {trailer_url}")
         trailer_file_path_temp = trailer_file_path
         if await aiofiles.os.path.exists(trailer_file_path):
-            trailer_file_path_temp = trailer_file_path + ".[DOWNLOAD].mp4"
+            trailer_file_path_temp = trailer_file_path.with_suffix(".[DOWNLOAD].mp4")
         if await download_file_with_filepath(trailer_url, trailer_file_path_temp, trailer_folder_path):
             file_size = await aiofiles.os.path.getsize(trailer_file_path_temp)
             if file_size >= content_length or DownloadableFile.IGNORE_SIZE in download_files:
@@ -528,8 +528,8 @@ async def thumb_download(
     result: CrawlersResult,
     other: OtherInfo,
     cd_part: str,
-    folder_new_path: str,
-    thumb_final_path: str,
+    folder_new_path: Path,
+    thumb_final_path: Path,
 ) -> bool:
     start_time = time.time()
     poster_path = other.poster_path
@@ -581,7 +581,7 @@ async def thumb_download(
 
         thumb_final_path_temp = thumb_final_path
         if await aiofiles.os.path.exists(thumb_final_path):
-            thumb_final_path_temp = thumb_final_path + ".[DOWNLOAD].jpg"
+            thumb_final_path_temp = thumb_final_path.with_suffix(".[DOWNLOAD].jpg")
         for each in cover_list:
             if not each[1]:
                 continue
@@ -649,8 +649,8 @@ async def poster_download(
     result: CrawlersResult,
     other: OtherInfo,
     cd_part: str,
-    folder_new_path: str,
-    poster_final_path: str,
+    folder_new_path: Path,
+    poster_final_path: Path,
 ) -> bool:
     start_time = time.time()
     download_files = manager.config.download_files
@@ -725,7 +725,7 @@ async def poster_download(
     poster_from = result.poster_from
     poster_final_path_temp = poster_final_path
     if await aiofiles.os.path.exists(poster_final_path):
-        poster_final_path_temp = poster_final_path + ".[DOWNLOAD].jpg"
+        poster_final_path_temp = poster_final_path.with_suffix(".[DOWNLOAD].jpg")
     if result.image_download:
         start_time = time.time()
         if await download_file_with_filepath(poster_url, poster_final_path_temp, folder_new_path):
@@ -752,7 +752,7 @@ async def poster_download(
 
     # 判断之前有没有 poster 和 thumb
     if not poster_path and not thumb_path:
-        other.poster_path = ""
+        other.poster_path = Path()
         if DownloadableFile.IGNORE_PIC_FAIL in download_files:
             LogBuffer.log().write("\n 🟠 Poster download failed! (你已勾选「图片下载失败时，不视为失败！」) ")
             LogBuffer.log().write(f"\n 🍀 Poster done! (none)({get_used_time(start_time)}s)")
@@ -767,10 +767,12 @@ async def poster_download(
             return False
 
     # 使用thumb裁剪
-    poster_final_path_temp = poster_final_path + ".[CUT].jpg"
+    poster_final_path_temp = poster_final_path.with_suffix(".[CUT].jpg")
     if fanart_path:
         thumb_path = fanart_path
-    if await asyncio.to_thread(cut_thumb_to_poster, result, thumb_path, poster_final_path_temp, image_cut):
+    if thumb_path and await asyncio.to_thread(
+        cut_thumb_to_poster, result, thumb_path, poster_final_path_temp, image_cut
+    ):
         # 裁剪成功，替换旧图
         await move_file_async(poster_final_path_temp, poster_final_path)
         if cd_part:
@@ -802,7 +804,7 @@ async def fanart_download(
     number: str,
     other: OtherInfo,
     cd_part: str,
-    fanart_final_path: str,
+    fanart_final_path: Path,
 ) -> bool:
     """
     复制thumb为fanart
@@ -834,7 +836,7 @@ async def fanart_download(
         if (
             done_fanart_path
             and await aiofiles.os.path.exists(done_fanart_path)
-            and split_path(done_fanart_path)[0] == split_path(fanart_final_path)[0]
+            and done_fanart_path.parent == fanart_final_path.parent
         ):
             if fanart_path:
                 await delete_file_async(fanart_path)
@@ -877,12 +879,12 @@ async def fanart_download(
                 return False
 
 
-async def extrafanart_download(extrafanart: list[str], extrafanart_from: str, folder_new_path: str) -> bool | None:
+async def extrafanart_download(extrafanart: list[str], extrafanart_from: str, folder_new_path: Path) -> bool | None:
     start_time = time.time()
     download_files = manager.config.download_files
     keep_files = manager.config.keep_files
     extrafanart_list = extrafanart
-    extrafanart_folder_path = os.path.join(folder_new_path, "extrafanart")
+    extrafanart_folder_path = folder_new_path / "extrafanart"
 
     # 不下载不保留时删除返回
     if DownloadableFile.EXTRAFANART not in download_files and DownloadableFile.EXTRAFANART not in keep_files:
@@ -903,7 +905,9 @@ async def extrafanart_download(extrafanart: list[str], extrafanart_from: str, fo
     if extrafanart_list and await check_url(extrafanart_list[0]):
         extrafanart_folder_path_temp = extrafanart_folder_path
         if await aiofiles.os.path.exists(extrafanart_folder_path_temp):
-            extrafanart_folder_path_temp = extrafanart_folder_path + "[DOWNLOAD]"
+            extrafanart_folder_path_temp = extrafanart_folder_path.with_name(
+                extrafanart_folder_path.name + "[DOWNLOAD]"
+            )
             if not await aiofiles.os.path.exists(extrafanart_folder_path_temp):
                 await aiofiles.os.makedirs(extrafanart_folder_path_temp)
         else:
@@ -915,7 +919,7 @@ async def extrafanart_download(extrafanart: list[str], extrafanart_from: str, fo
         for extrafanart_url in extrafanart_list:
             extrafanart_count += 1
             extrafanart_name = "fanart" + str(extrafanart_count) + ".jpg"
-            extrafanart_file_path = os.path.join(extrafanart_folder_path_temp, extrafanart_name)
+            extrafanart_file_path = extrafanart_folder_path_temp / extrafanart_name
             task_list.append((extrafanart_url, extrafanart_file_path, extrafanart_folder_path_temp, extrafanart_name))
 
         # 使用异步并发执行下载任务

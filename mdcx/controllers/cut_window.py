@@ -1,5 +1,6 @@
 import os
 import traceback
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from PIL import Image
@@ -12,7 +13,7 @@ from mdcx.config.manager import manager
 from mdcx.config.models import MarkType
 from mdcx.models.base.image import add_mark_thread
 from mdcx.models.core.file import get_file_info_v2
-from mdcx.utils import executor, split_path
+from mdcx.utils import executor
 from mdcx.utils.file import delete_file_sync
 from mdcx.views.posterCutTool import Ui_Dialog_cut_poster
 
@@ -169,13 +170,11 @@ class CutWindow(QDialog):
             None, "打开图片", "", "*.jpg *.png;;All Files(*)", options=self.main_window.options
         )
         if img_path:
-            self.showimage(img_path)
+            self.showimage(Path(img_path))
 
     # 显示要裁剪的图片
-    def showimage(self, img_path="", json_data: "FileInfo | None" = None):
-        # self.Ui.Dialog_cut_poster.setText(' ')                                # 清空背景
+    def showimage(self, img_path: Path | None = None, json_data: "FileInfo | None" = None):
         self.Ui.label_backgroud_pic.setText(" ")  # 清空背景
-
         # 初始化数据
         self.Ui.checkBox_add_sub.setChecked(False)
         self.Ui.radioButton_add_no.setChecked(True)
@@ -183,9 +182,9 @@ class CutWindow(QDialog):
         self.pic_h_w_ratio = 1.5
         self.rect_h_w_ratio = 536.6 / 379  # 裁剪框默认高宽比
         self.show_image_path = img_path
-        self.cut_thumb_path = ""  # 裁剪后的thumb路径
-        self.cut_poster_path = ""  # 裁剪后的poster路径
-        self.cut_fanart_path = ""  # 裁剪后的fanart路径
+        self.cut_thumb_path = Path()  # 裁剪后的thumb路径
+        self.cut_poster_path = Path()  # 裁剪后的poster路径
+        self.cut_fanart_path = Path()  # 裁剪后的fanart路径
         self.Ui.label_origin_size.setText(str(f"{str(self.pic_w)}, {str(self.pic_h)}"))  # 显示原图尺寸
 
         # 获取水印设置
@@ -220,8 +219,8 @@ class CutWindow(QDialog):
             self.Ui.label_backgroud_pic.setPixmap(pic)  # 背景区域显示缩放后的图片
 
             # 获取nfo文件名，用来设置裁剪后图片名称和裁剪时的水印状态
-            img_folder, img_fullname = split_path(img_path)
-            img_name, img_ex = os.path.splitext(img_fullname)
+            img_folder = img_path.parent
+            img_name, img_ex = img_path.stem, img_path.suffix
 
             # 如果没有json_data，则通过图片文件名或nfo文件名获取，目的是用来获取水印
             if not json_data:
@@ -232,7 +231,7 @@ class CutWindow(QDialog):
                     file_list = os.listdir(img_folder)
                     for each in file_list:
                         if ".nfo" in each:
-                            temp_path = os.path.join(img_folder, each)
+                            temp_path = img_folder / each
                             break
                 json_data = executor.run(get_file_info_v2(temp_path, copy_sub=False))
 
@@ -243,14 +242,18 @@ class CutWindow(QDialog):
             mosaic = json_data.mosaic
             definition = json_data.definition
             # 获取裁剪后的的poster和thumb路径
-            poster_path = os.path.join(img_folder, "poster.jpg")
+            poster_path = img_path.with_name("poster.jpg")
             if not pic_name and "-" in img_name:  # 文件名-poster.jpg
-                poster_path = (
-                    img_path.replace("-fanart", "").replace("-thumb", "").replace("-poster", "").replace(img_ex, "")
+                poster_path = img_path.with_name(
+                    img_path.name.replace("-fanart", "")
+                    .replace("-thumb", "")
+                    .replace("-poster", "")
+                    .replace(img_ex, "")
                     + "-poster.jpg"
                 )
-            thumb_path = poster_path.replace("poster.", "thumb.")
-            fanart_path = poster_path.replace("poster.", "fanart.")
+            poster_name = poster_path.name
+            thumb_path = img_path.with_name(poster_name.replace("poster.", "thumb."))
+            fanart_path = img_path.with_name(poster_name.replace("poster.", "fanart."))
             self.cut_thumb_path = thumb_path  # 裁剪后的thumb路径
             self.cut_poster_path = poster_path  # 裁剪后的poster路径
             self.cut_fanart_path = fanart_path  # 裁剪后的fanart路径

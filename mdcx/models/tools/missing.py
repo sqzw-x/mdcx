@@ -3,9 +3,10 @@
 """
 
 import json
-import os
 import re
 import time
+from pathlib import Path
+from typing import cast
 
 import aiofiles
 import aiofiles.os
@@ -187,90 +188,79 @@ async def check_missing_number(actor_flag):
     """
     signal.change_buttons_status.emit()
     start_time = time.time()
-    json_data_new = {}
+    local_movies: dict[str, tuple[str, bool]] = {}
 
     # 获取资源库配置
     movie_type = manager.config.media_type
-    movie_path = manager.config.local_library.replace("\\", "/")  # 用户设置的扫描媒体路径
-    movie_path_list = set(re.split(r"[,，]", movie_path))  # 转成集合，去重
-    new_movie_path_list = set()
-    for i in movie_path_list:
-        if i == "":  # 为空时，使用主程序目录
-            i = manager.data_folder
-        new_movie_path_list.add(i)
-    new_movie_path_list = sorted(new_movie_path_list)
+    libraries = manager.config.local_library  # 用户设置的扫描媒体路径
+    libraries = {Path(p) for p in libraries if p.strip()}
 
     # 遍历本地资源库
-    if Flags.local_number_flag != new_movie_path_list:
-        signal.show_log_text("")
-        s = "\n   ".join(new_movie_path_list)
+    signal.show_log_text("")
+    signal.show_log_text(
+        f"\n本地资源库地址:\n   {'\n   '.join(str(p) for p in libraries)}\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 开始遍历本地资源库，以获取本地视频的最新列表...\n   提示：每次启动第一次查询将更新本地视频数据。（大概1000个/30秒，如果视频较多，请耐心等待。）"
+    )
+    all_movies: list[Path] = []
+    for p in libraries:
+        movies = await movie_lists([], movie_type, p)  # 获取所有需要刮削的影片列表
+        all_movies.extend(movies)
+    signal.show_log_text(f"🎉 获取完毕！共找到视频数量（{len(all_movies)}）({get_used_time(start_time)}s)")
+
+    # 获取本地番号
+    start_time_local = time.time()
+    signal.show_log_text("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 开始获取本地视频的番号信息...")
+    local_number_list = resources.u("number_list.json")
+    if not await aiofiles.os.path.exists(local_number_list):
         signal.show_log_text(
-            f"\n本地资源库地址:\n   {s}\n\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 开始遍历本地资源库，以获取本地视频的最新列表...\n   提示：每次启动第一次查询将更新本地视频数据。（大概1000个/30秒，如果视频较多，请耐心等待。）"
+            "   提示：正在生成本地视频的番号信息数据...（第一次较慢，请耐心等待，以后只需要查找新视频，速度很快）"
         )
-        all_movie_list = []
-        for i in new_movie_path_list:
-            movie_list = await movie_lists([""], movie_type, i)  # 获取所有需要刮削的影片列表
-            all_movie_list.extend(movie_list)
-        signal.show_log_text(f"🎉 获取完毕！共找到视频数量（{len(all_movie_list)}）({get_used_time(start_time)}s)")
-
-        # 获取本地番号
-        start_time_local = time.time()
-        signal.show_log_text(
-            "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n⏳ 开始获取本地视频的番号信息..."
-        )
-        local_number_list = resources.userdata_path("number_list.json")
-        if not await aiofiles.os.path.exists(local_number_list):
-            signal.show_log_text(
-                "   提示：正在生成本地视频的番号信息数据...（第一次较慢，请耐心等待，以后只需要查找新视频，速度很快）"
-            )
-            async with aiofiles.open(local_number_list, "w", encoding="utf-8") as f:
-                await f.write("{}")
-        async with aiofiles.open(local_number_list, encoding="utf-8") as data:
-            json_data = json.loads(await data.read())
-        for movie_path in all_movie_list:
-            nfo_path = os.path.splitext(movie_path)[0] + ".nfo"
-            number = ""
-            has_sub = False  # 初始化has_sub变量
-            if json_data.get(movie_path):
-                number, has_sub = json_data.get(movie_path)
-
-            else:
-                if await aiofiles.os.path.exists(nfo_path):
-                    async with aiofiles.open(nfo_path, encoding="utf-8") as f:
-                        nfo_content = await f.read()
-                    number_result = re.findall(r"<num>(.+)</num>", nfo_content)
-                    if number_result:
-                        number = number_result[0]
-
-                        if "<genre>中文字幕</genre>" in nfo_content or "<tag>中文字幕</tag>" in nfo_content:
-                            has_sub = True
-                        else:
-                            has_sub = False
-                if not number:
-                    file_info = await get_file_info_v2(movie_path, copy_sub=False)
-                    has_sub = file_info.has_sub
-                    number = file_info.number
-                cn_word_icon = "🀄️" if has_sub else ""
-                signal.show_log_text(f"   发现新番号：{number:<10} {cn_word_icon}")
-            temp_number = re.findall(r"\d{3,}([a-zA-Z]+-\d+)", number)  # 去除前缀，因为 javdb 不带前缀
-            number = temp_number[0] if temp_number else number
-            json_data_new[movie_path] = [number, has_sub]  # 用新表，更新完重新写入到本地文件中
-            Flags.local_number_set.add(number)  # 添加到本地番号集合
-            if has_sub:
-                Flags.local_number_cnword_set.add(number)  # 添加到本地有字幕的番号集合
-
         async with aiofiles.open(local_number_list, "w", encoding="utf-8") as f:
-            await f.write(
-                json.dumps(
-                    json_data_new,
-                    ensure_ascii=False,
-                    sort_keys=True,
-                    indent=4,
-                    separators=(",", ": "),
-                )
+            await f.write("{}")
+    async with aiofiles.open(local_number_list, encoding="utf-8") as data:
+        json_data = json.loads(await data.read())
+        json_data = cast("dict[str, tuple[str, bool]]", json_data)
+    for movie in all_movies:
+        nfo_path = movie.with_suffix(".nfo")
+        number = ""
+        has_sub = False
+        if r := json_data.get(movie.as_posix()):
+            number, has_sub = r
+        else:
+            if await aiofiles.os.path.exists(nfo_path):
+                async with aiofiles.open(nfo_path, encoding="utf-8") as f:
+                    nfo_content = await f.read()
+                number_result = re.findall(r"<num>(.+)</num>", nfo_content)
+                if number_result:
+                    number = number_result[0]
+
+                    if "<genre>中文字幕</genre>" in nfo_content or "<tag>中文字幕</tag>" in nfo_content:
+                        has_sub = True
+                    else:
+                        has_sub = False
+            if not number:
+                file_info = await get_file_info_v2(movie, copy_sub=False)
+                has_sub = file_info.has_sub
+                number = file_info.number
+            cn_word_icon = "🀄️" if has_sub else ""
+            signal.show_log_text(f"   发现新番号：{number:<10} {cn_word_icon}")
+        temp_number = re.findall(r"\d{3,}([a-zA-Z]+-\d+)", number)  # 去除前缀，因为 javdb 不带前缀
+        number = temp_number[0] if temp_number else number
+        local_movies[movie.as_posix()] = (number, has_sub)  # 用新表，更新完重新写入到本地文件中
+        Flags.local_number_set.add(number)  # 添加到本地番号集合
+        if has_sub:
+            Flags.local_number_cnword_set.add(number)  # 添加到本地有字幕的番号集合
+
+    async with aiofiles.open(local_number_list, "w", encoding="utf-8") as f:
+        await f.write(
+            json.dumps(
+                local_movies,
+                ensure_ascii=False,
+                sort_keys=True,
+                indent=4,
+                separators=(",", ": "),
             )
-        Flags.local_number_flag = new_movie_path_list
-        signal.show_log_text(f"🎉 获取完毕！共获取番号数量（{len(json_data_new)}）({get_used_time(start_time_local)}s)")
+        )
+    signal.show_log_text(f"🎉 获取完毕！共获取番号数量（{len(local_movies)}）({get_used_time(start_time_local)}s)")
 
     # 查询演员番号
     if manager.config.actors_name:

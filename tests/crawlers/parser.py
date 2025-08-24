@@ -123,7 +123,7 @@ class ParserTestBase:
             input=CrawlerInput(
                 appoint_number="",
                 appoint_url="",
-                file_path="",
+                file_path=None,
                 mosaic="",
                 number="",
                 short_number="",

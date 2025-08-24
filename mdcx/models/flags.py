@@ -1,5 +1,6 @@
 from asyncio import Event
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from mdcx.models.enums import FileMode
@@ -21,9 +22,9 @@ class _Flags:
     next_start_time: float = 0.0
     count_claw: int = 0  # 批量刮削次数
     can_save_remain: bool = False  # 保存剩余任务
-    remain_list: list[str] = field(default_factory=list)
-    new_again_dic: dict[str, tuple[str, str, str]] = field(default_factory=dict)
-    again_dic: dict[str, tuple[str, str, str]] = field(default_factory=dict)  # 待重新刮削的字典
+    remain_list: list[Path] = field(default_factory=list)
+    new_again_dic: dict[Path, tuple[str, str, str]] = field(default_factory=dict)
+    again_dic: dict[Path, tuple[str, str, str]] = field(default_factory=dict)  # 待重新刮削的字典
     start_time: float = 0.0
     file_mode: FileMode = FileMode.Default  # 默认刮削待刮削目录
     counting_order: int = 0  # 刮削顺序
@@ -37,32 +38,28 @@ class _Flags:
     succ_count: int = 0  # 成功数量
     fail_count: int = 0  # 失败数量
     # 所有文件最终输出路径的字典（如已存在，则视为重复文件，直接跳过）
-    file_new_path_dic: dict[str, list[str]] = field(default_factory=dict)
+    file_new_path_dic: dict[Path, list[Path]] = field(default_factory=dict)
     # 当前文件的图片最终输出路径的字典（如已存在，则最终图片文件视为已处理过）
-    pic_catch_set: set[str] = field(default_factory=set)
+    pic_catch_set: set[Path] = field(default_factory=set)
     # 当前番号的图片已下载完成的标识（如已存在，视为图片已下载完成）
-    file_done_dic: dict[str, dict[str, str]] = field(default_factory=dict)
+    file_done_dic: dict[str, dict[str, Path]] = field(default_factory=dict)
     # 当前文件夹剧照已处理的标识（如已存在，视为剧照已处理过）
-    extrafanart_deal_set: set[str] = field(default_factory=set)
-    # 当前文件夹剧照副本已下载的标识（如已存在，视为剧照已处理过）
-    extrafanart_copy_deal_set: set[str] = field(default_factory=set)
+    extrafanart_deal_set: set[Path] = field(default_factory=set)
     # 当前文件trailer已处理的标识（如已存在，视为剧照已处理过）
-    trailer_deal_set: set[str] = field(default_factory=set)
+    trailer_deal_set: set[Path] = field(default_factory=set)
     # 当前文件夹剧照已下载的标识（如已存在，视为剧照已处理过）
-    theme_videos_deal_set: set[str] = field(default_factory=set)
+    theme_videos_deal_set: set[Path] = field(default_factory=set)
     # 当前文件nfo已处理的标识（如已存在，视为剧照已处理过）
-    nfo_deal_set: set[str] = field(default_factory=set)
+    nfo_deal_set: set[Path] = field(default_factory=set)
     # 去获取json的番号列表
     json_get_set: set[str] = field(default_factory=set)
     # 获取成功的json
     json_data_dic: dict[str, ScrapeResult] = field(default_factory=dict)
     img_path: str = ""
-    # 失败文件和错误原因记录
-    failed_list: list[list[str]] = field(default_factory=list)
-    # 失败文件记录
-    failed_file_list: list[str] = field(default_factory=list)
+    # 失败文件及其错误原因
+    failed_list: list[tuple[Path, str]] = field(default_factory=list)
     scrape_start_time: float = 0.0
-    success_list: set[str] = field(default_factory=set)
+    success_list: set[Path] = field(default_factory=set)
     stop_other: bool = True  # 非刮削线程停止标识
 
     # show
@@ -70,17 +67,15 @@ class _Flags:
     scrape_like_text: str = ""
     main_mode_text: str = ""
 
-    single_file_path: str = ""  # 工具-单文件刮削的文件路径
+    single_file_path: Path = field(default_factory=Path)  # 工具-单文件刮削的文件路径
 
     # for missing
-    local_number_flag: str = ""  # 启动后本地数据库是否扫描过
     actor_numbers_dic: dict[str, list[str]] = field(default_factory=dict)  # 每个演员所有番号的字典
     local_number_set: set[str] = field(default_factory=set)  # 本地所有番号的集合
     local_number_cnword_set: set[str] = field(default_factory=set)  # 本地所有有字幕的番号的集合
 
     def reset(self) -> None:
         self.failed_list = []
-        self.failed_file_list = []
         self.counting_order = 0
         self.total_count = 0
         self.rest_now_begin_count = 0
@@ -94,7 +89,6 @@ class _Flags:
         self.pic_catch_set = set()
         self.file_done_dic = {}
         self.extrafanart_deal_set = set()
-        self.extrafanart_copy_deal_set = set()
         self.trailer_deal_set = set()
         self.theme_videos_deal_set = set()
         self.nfo_deal_set = set()

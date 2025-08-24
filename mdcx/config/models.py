@@ -35,24 +35,24 @@ from .enums import (
 from .ui_schema import ServerPathDirectory, extract_ui_schema_recursive
 
 
-# Helper function to convert comma/pipe separated strings to lists
-def str_to_list(v: str | list[Any] | None, separator: str = ",") -> list[str]:
+def str_to_list(v: str | list[Any] | None, sep: Literal[",", "|"] = ",", unique: bool = True) -> list[str]:
+    """
+    将字符串转换为列表.
+    支持全/半角逗号或竖线作为分隔符, 将去除每项首尾的空白符, 去空, 去重.
+    """
     if v is None:
         return []
     if isinstance(v, list):
         return [str(item) for item in v]
     if isinstance(v, str):
-        # Filter out empty strings that result from trailing/leading separators
-        return [item.strip() for item in v.strip(separator).split(separator) if item.strip()]
+        if sep == ",":
+            v.replace("，", ",")
+        elif sep == "|":
+            v.replace("｜", "|")
+        if unique:
+            return list(dict.fromkeys([item.strip() for item in v.strip(sep).split(sep) if item.strip()]))
+        return [item.strip() for item in v.strip(sep).split(sep) if item.strip()]
     return []
-
-
-# Helper function to convert lists back to strings
-def list_to_str(v: list[Any] | None, separator: str = ",") -> str:
-    if not v:
-        return ""
-    # Ensure all items are strings before joining
-    return separator + separator.join(map(str, v)) + separator
 
 
 class TranslateConfig(BaseModel):
@@ -624,7 +624,7 @@ class Config(BaseModel):
 
     # region: Misc Settings
     update_check: bool = Field(default=True, title="检查更新")
-    local_library: str = Field(default="", title="本地库")
+    local_library: list[str] = Field(default_factory=list, title="本地库")
     actors_name: str = Field(default="", title="演员名称")
     netdisk_path: str = Field(default="", title="网盘路径")
     localdisk_path: str = Field(default="", title="本地磁盘路径")
@@ -736,7 +736,7 @@ class Config(BaseModel):
     def parse_sites(sites: list | set | str) -> list[Website]:
         if isinstance(sites, str):
             sites = str_to_list(sites, ",")
-        return list(dict.fromkeys(Website(s) for s in sites if s in Website))
+        return [Website(s) for s in sites if s in Website]
 
     @staticmethod
     def update(d: dict[str, Any]) -> list[str]:
@@ -749,6 +749,8 @@ class Config(BaseModel):
             d["nfo_tag_actor_contains"] = str_to_list(r, "|")
         if isinstance(r := d.get("use_database"), int):
             d["use_database"] = bool(r)
+        if isinstance(r := d.get("local_library"), str):
+            d["local_library"] = str_to_list(r, ",")
         if "site_configs" not in d:
             d["site_configs"] = {Website.DMM: SiteConfig(use_browser=True)}
         elif Website.DMM not in d["site_configs"]:

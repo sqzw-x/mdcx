@@ -1,4 +1,3 @@
-import os
 import platform
 import re
 import traceback
@@ -37,7 +36,6 @@ from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.models.flags import Flags
 from mdcx.models.tools.actress_db import ActressDB
 from mdcx.signals import signal_qt
-from mdcx.utils import convert_path
 
 if TYPE_CHECKING:
     from mdcx.controllers.main_window.main_window import MyMAinWindow
@@ -72,16 +70,16 @@ def save_config(self: "MyMAinWindow"):
     manager.config.success_output_folder = self.Ui.lineEdit_success.text()  # 成功输出目录
     manager.config.failed_output_folder = self.Ui.lineEdit_fail.text()  # 失败输出目录
     manager.config.extrafanart_folder = self.Ui.lineEdit_extrafanart_dir.text().strip()  # 剧照目录
-    # 对于 media_type 和 sub_type，新配置中是列表类型，需要转换
+
     media_type_text = self.Ui.lineEdit_movie_type.text().lower()
-    manager.config.media_type = [ext.strip() for ext in media_type_text.split("|") if ext.strip()]
+    manager.config.media_type = str_to_list(media_type_text, "|")
     sub_type_text = self.Ui.lineEdit_sub_type.text()
-    manager.config.sub_type = [ext.strip() for ext in sub_type_text.split("|") if ext.strip()]
-    # folders 和 string 在新配置中也是列表类型
+    manager.config.sub_type = str_to_list(sub_type_text, "|")
+
     folders_text = self.Ui.lineEdit_escape_dir.text()
-    manager.config.folders = [folder.strip() for folder in folders_text.split(",") if folder.strip()]
+    manager.config.folders = str_to_list(folders_text, ",")
     string_text = self.Ui.lineEdit_escape_string.text()
-    manager.config.string = [s.strip() for s in string_text.split(",") if s.strip()]
+    manager.config.string = str_to_list(string_text, ",")
     manager.config.scrape_softlink_path = get_checkbox(self.Ui.checkBox_scrape_softlink_path)
 
     try:  # 过滤小文件大小
@@ -99,25 +97,20 @@ def save_config(self: "MyMAinWindow"):
     # endregion
 
     # region clean
-    # 清理相关字段在新配置中是列表类型
-    clean_ext_text = self.Ui.lineEdit_clean_file_ext.text().strip(" |｜")
-    manager.config.clean_ext = [ext.strip() for ext in clean_ext_text.split("|") if ext.strip()]
-    clean_name_text = self.Ui.lineEdit_clean_file_name.text().strip(" |｜")
-    manager.config.clean_name = [name.strip() for name in clean_name_text.split("|") if name.strip()]
-    clean_contains_text = self.Ui.lineEdit_clean_file_contains.text().strip(" |｜")
-    manager.config.clean_contains = [
-        contains.strip() for contains in clean_contains_text.split("|") if contains.strip()
-    ]
+    clean_ext_text = self.Ui.lineEdit_clean_file_ext.text()
+    manager.config.clean_ext = str_to_list(clean_ext_text, "|")
+    clean_name_text = self.Ui.lineEdit_clean_file_name.text()
+    manager.config.clean_name = str_to_list(clean_name_text, "|")
+    clean_contains_text = self.Ui.lineEdit_clean_file_contains.text()
+    manager.config.clean_contains = str_to_list(clean_contains_text, "|")
     try:
-        manager.config.clean_size = float(self.Ui.lineEdit_clean_file_size.text().strip(" |｜"))  # 清理文件大小小于等于
+        manager.config.clean_size = float(self.Ui.lineEdit_clean_file_size.text())  # 清理文件大小小于等于
     except Exception:
         manager.config.clean_size = 0.0
-    clean_ignore_ext_text = self.Ui.lineEdit_clean_excluded_file_ext.text().strip(" |｜")
-    manager.config.clean_ignore_ext = [ext.strip() for ext in clean_ignore_ext_text.split("|") if ext.strip()]
-    clean_ignore_contains_text = self.Ui.lineEdit_clean_excluded_file_contains.text().strip(" |｜")
-    manager.config.clean_ignore_contains = [
-        contains.strip() for contains in clean_ignore_contains_text.split("|") if contains.strip()
-    ]
+    clean_ignore_ext_text = self.Ui.lineEdit_clean_excluded_file_ext.text()
+    manager.config.clean_ignore_ext = str_to_list(clean_ignore_ext_text, "|")
+    clean_ignore_contains_text = self.Ui.lineEdit_clean_excluded_file_contains.text()
+    manager.config.clean_ignore_contains = str_to_list(clean_ignore_contains_text, "|")
     manager.config.clean_enable = get_checkboxes(
         (self.Ui.checkBox_clean_file_ext, CleanAction.CLEAN_EXT),
         (self.Ui.checkBox_clean_file_name, CleanAction.CLEAN_NAME),
@@ -139,19 +132,15 @@ def save_config(self: "MyMAinWindow"):
     except ValueError:
         manager.config.website_single = Website.AIRAV_CC  # 默认值
 
-    def parse_website_list(text: str) -> set[Website]:
-        websites = []
-        for site in str_to_list(text, ","):
-            if site in Website:
-                websites.append(Website(site))
-        return set(websites)
+    def get_sites(text: str) -> set[Website]:
+        return {Website(site) for site in str_to_list(text, ",")}
 
-    manager.config.website_youma = parse_website_list(self.Ui.lineEdit_website_youma.text())
-    manager.config.website_wuma = parse_website_list(self.Ui.lineEdit_website_wuma.text())
-    manager.config.website_suren = parse_website_list(self.Ui.lineEdit_website_suren.text())
-    manager.config.website_fc2 = parse_website_list(self.Ui.lineEdit_website_fc2.text())
-    manager.config.website_oumei = parse_website_list(self.Ui.lineEdit_website_oumei.text())
-    manager.config.website_guochan = parse_website_list(self.Ui.lineEdit_website_guochan.text())
+    manager.config.website_youma = get_sites(self.Ui.lineEdit_website_youma.text())
+    manager.config.website_wuma = get_sites(self.Ui.lineEdit_website_wuma.text())
+    manager.config.website_suren = get_sites(self.Ui.lineEdit_website_suren.text())
+    manager.config.website_fc2 = get_sites(self.Ui.lineEdit_website_fc2.text())
+    manager.config.website_oumei = get_sites(self.Ui.lineEdit_website_oumei.text())
+    manager.config.website_guochan = get_sites(self.Ui.lineEdit_website_guochan.text())
 
     manager.config.scrape_like = get_radio_buttons(
         (self.Ui.radioButton_scrape_speed, "speed"), (self.Ui.radioButton_scrape_info, "info"), default="single"
@@ -280,10 +269,8 @@ def save_config(self: "MyMAinWindow"):
     manager.config.nfo_tag_studio = self.Ui.lineEdit_nfo_tag_studio.text()  # nfo_tag_studio 格式
     manager.config.nfo_tag_publisher = self.Ui.lineEdit_nfo_tag_publisher.text()  # nfo_tag_publisher 格式
     manager.config.nfo_tag_actor = self.Ui.lineEdit_nfo_tag_actor.text()  # nfo_tag_actor 格式
-    nfo_tag_actor_contains_text = self.Ui.lineEdit_nfo_tag_actor_contains.text().strip(" |｜")
-    manager.config.nfo_tag_actor_contains = [
-        item.strip() for item in nfo_tag_actor_contains_text.split("|") if item.strip()
-    ]
+    nfo_tag_actor_contains_text = self.Ui.lineEdit_nfo_tag_actor_contains.text()
+    manager.config.nfo_tag_actor_contains = str_to_list(nfo_tag_actor_contains_text, "|")
 
     # 注意：whole_fields 和 none_fields 已弃用，不再设置这些字段
     # 它们的功能已经通过新的字段配置API来实现
@@ -434,9 +421,9 @@ def save_config(self: "MyMAinWindow"):
     )
 
     google_used_text = self.Ui.lineEdit_google_used.text()
-    manager.config.google_used = [item.strip() for item in google_used_text.split(",") if item.strip()]
+    manager.config.google_used = str_to_list(google_used_text)
     google_exclude_text = self.Ui.lineEdit_google_exclude.text()
-    manager.config.google_exclude = [item.strip() for item in google_exclude_text.split(",") if item.strip()]
+    manager.config.google_exclude = str_to_list(google_exclude_text)
     # endregion
 
     # region name
@@ -454,8 +441,7 @@ def save_config(self: "MyMAinWindow"):
 
     suffix_sort_text = self.Ui.lineEdit_suffix_sort.text()
     suffix_sort_list = []
-    for item in suffix_sort_text.split(","):
-        item = item.strip()
+    for item in str_to_list(suffix_sort_text):
         if item == "moword":
             suffix_sort_list.append(SuffixSort.MOWORD)
         elif item == "cnword":
@@ -510,7 +496,7 @@ def save_config(self: "MyMAinWindow"):
 
     # region subtitle
     cnword_char_text = self.Ui.lineEdit_cnword_char.text()
-    manager.config.cnword_char = [char.strip() for char in cnword_char_text.split(",") if char.strip()]
+    manager.config.cnword_char = str_to_list(cnword_char_text)
     manager.config.cnword_style = self.Ui.lineEdit_cnword_style.text()  # 中文字幕字符样式
     manager.config.folder_cnword = get_checkbox(self.Ui.checkBox_foldername)
     manager.config.file_cnword = get_checkbox(self.Ui.checkBox_filename)
@@ -733,23 +719,18 @@ def save_config(self: "MyMAinWindow"):
         (self.Ui.radioButton_update_off, False),
         default=True,
     )
-    manager.config.local_library = self.Ui.lineEdit_local_library_path.text()  # 本地资源库
+    manager.config.local_library = str_to_list(self.Ui.lineEdit_local_library_path.text())  # 本地资源库
     manager.config.actors_name = self.Ui.lineEdit_actors_name.text().replace("\n", "")  # 演员名
     manager.config.netdisk_path = self.Ui.lineEdit_netdisk_path.text()  # 网盘路径
     manager.config.localdisk_path = self.Ui.lineEdit_localdisk_path.text()  # 本地磁盘路径
     manager.config.window_title = "hide" if self.Ui.checkBox_hide_window_title.isChecked() else "show"
     # endregion
-
     manager.config.auto_link = get_checkbox(self.Ui.checkBox_create_link)  # 刮削中自动创建软链接
 
-    config_folder: str = self.Ui.lineEdit_config_folder.text()  # 配置文件目录
-    if not os.path.exists(config_folder):
-        config_folder = manager.data_folder
-    manager.path = convert_path(os.path.join(config_folder, manager.file))
-    # 保存配置到文件
+    # 保存
     manager.save()
 
-    # 刮削偏好
+    # 根据配置更新界面显示
     scrape_like = manager.config.scrape_like
     if "speed" in scrape_like:
         Flags.scrape_like_text = "速度优先"

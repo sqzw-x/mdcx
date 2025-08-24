@@ -1,6 +1,6 @@
 import platform
 import sys
-from os.path import abspath, dirname, expanduser, join, realpath
+from pathlib import Path
 
 LOCAL_VERSION = 220250814
 
@@ -33,20 +33,20 @@ MAIN_PATH 是唯一硬编码的路径, 其定义如下:
 同时, 该配置文件所在的目录即为用户数据目录.
 """
 try:  # 从源代码运行时, 为 main.py 所在目录, 根据此文件路径确定, 若移动此文件需修改 i
-    MAIN_PATH = realpath(__file__)
+    MAIN_PATH = Path(__file__).resolve()
     i = 2
     for _ in range(i):
-        MAIN_PATH = dirname(MAIN_PATH)
+        MAIN_PATH = MAIN_PATH.parent
 except Exception:
-    MAIN_PATH = abspath(sys.path[0])
+    MAIN_PATH = Path(sys.path[0]).resolve()
 
 if IS_PYINSTALLER:
     if IS_MAC:
-        MAIN_PATH = join(expanduser("~"), ".mdcx")
+        MAIN_PATH = Path("~").expanduser() / ".mdcx"
     else:
-        MAIN_PATH = abspath("")
+        MAIN_PATH = Path("").resolve()
 
-MARK_FILE = join(MAIN_PATH, "MDCx.config")
+MARK_FILE = MAIN_PATH / "MDCx.config"
 
 
 def show_constants():

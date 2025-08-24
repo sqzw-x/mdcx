@@ -53,7 +53,7 @@ async def add_sub_for_all_video() -> None:
                     sub_file_name = file_name + sub_type
                     if manager.config.subtitle_add_chs:
                         sub_file_name = file_name + ".chs" + sub_type
-                    sub_new_path = os.path.join(folder_old_path, sub_file_name)
+                    sub_new_path = str(folder_old_path / sub_file_name)
 
                     if await aiofiles.os.path.exists(sub_path):
                         await copy_file_async(sub_path, sub_new_path)
@@ -64,8 +64,8 @@ async def add_sub_for_all_video() -> None:
                     add_count += 1
         elif sub_list:
             for sub_type in sub_list:
-                sub_old_path = os.path.join(folder_old_path, (file_name + sub_type))
-                sub_new_path = os.path.join(folder_old_path, (file_name + ".chs" + sub_type))
+                sub_old_path = str(folder_old_path / (file_name + sub_type))
+                sub_new_path = str(folder_old_path / (file_name + ".chs" + sub_type))
                 if manager.config.subtitle_add_chs:
                     if ".chs" not in sub_old_path and not await aiofiles.os.path.exists(sub_new_path):
                         await move_file_async(sub_old_path, sub_new_path)

@@ -5,10 +5,12 @@ import os
 import re
 import time
 import traceback
+from pathlib import Path
+from typing import cast
 
 import aiofiles
 import aiofiles.os
-from lxml import etree
+from parsel import Selector
 
 from mdcx.config.manager import manager
 from mdcx.config.resources import resources
@@ -133,7 +135,7 @@ async def _get_gfriends_actor_data():
             signal.show_log_text(f"✅ Gfriends 连接成功！最新数据更新时间: {net_time}")
 
         # 更新：本地无文件时；更新时间过期；本地文件读取失败时，重新更新
-        gfriends_json_path = resources.userdata_path("gfriends.json")
+        gfriends_json_path = resources.u("gfriends.json")
         if (
             not await aiofiles.os.path.exists(gfriends_json_path)
             or await aiofiles.os.path.getmtime(gfriends_json_path) < 1657285200
@@ -200,17 +202,17 @@ async def _get_gfriends_actor_data():
         return await asyncio.to_thread(_get_local_actor_photo)
 
 
-async def _get_graphis_pic(actor_name):
+async def _get_graphis_pic(actor_name: str) -> tuple[Path | None, Path | None, str]:
     emby_on = manager.config.emby_on
 
     # 生成图片路径和请求地址
-    actor_folder = resources.userdata_path("actor/graphis")
-    pic_old = os.path.join(actor_folder, f"{actor_name}-org-old.jpg")
-    fix_old = os.path.join(actor_folder, f"{actor_name}-fix-old.jpg")
-    big_old = os.path.join(actor_folder, f"{actor_name}-big-old.jpg")
-    pic_new = os.path.join(actor_folder, f"{actor_name}-org-new.jpg")
-    fix_new = os.path.join(actor_folder, f"{actor_name}-fix-new.jpg")
-    big_new = os.path.join(actor_folder, f"{actor_name}-big-new.jpg")
+    actor_folder = resources.u("actor/graphis")
+    pic_old = actor_folder / f"{actor_name}-org-old.jpg"
+    fix_old = actor_folder / f"{actor_name}-fix-old.jpg"
+    big_old = actor_folder / f"{actor_name}-big-old.jpg"
+    pic_new = actor_folder / f"{actor_name}-org-new.jpg"
+    fix_new = actor_folder / f"{actor_name}-fix-new.jpg"
+    big_new = actor_folder / f"{actor_name}-big-new.jpg"
     if "graphis_new" in emby_on:
         pic_path = pic_new
         backdrop_path = big_new
@@ -233,14 +235,14 @@ async def _get_graphis_pic(actor_name):
     if await aiofiles.os.path.isfile(backdrop_path):
         has_backdrop = True
     if "graphis_face" not in emby_on:
-        pic_path = ""
+        pic_path = None
         if has_backdrop:
             logs += "✅ graphis.ne.jp 本地背景！ "
-            return "", backdrop_path, logs
+            return None, backdrop_path, logs
     elif "graphis_backdrop" not in emby_on:
         if has_pic:
             logs += "✅ graphis.ne.jp 本地头像！ "
-            return pic_path, "", logs
+            return pic_path, None, logs
     elif has_pic and has_backdrop:
         return pic_path, backdrop_path, ""
 
@@ -248,13 +250,13 @@ async def _get_graphis_pic(actor_name):
     res, error = await manager.computed.async_client.get_text(url)
     if res is None:
         logs += f"🔴 graphis.ne.jp 请求失败！\n{error}"
-        return "", "", logs
-    html = etree.fromstring(res, etree.HTMLParser())
-    src = html.xpath("//div[@class='gp-model-box']/ul/li/a/img/@src")
-    jp_name = html.xpath("//li[@class='name-jp']/span/text()")
+        return None, None, logs
+    html = Selector(res)
+    src = html.xpath("//div[@class='gp-model-box']/ul/li/a/img/@src").getall()
+    jp_name = html.xpath("//li[@class='name-jp']/span/text()").getall()
     if actor_name not in jp_name:
         # logs += '🍊 graphis.ne.jp 无结果！'
-        return "", "", logs
+        return None, None, logs
     small_pic = src[jp_name.index(actor_name)]
     big_pic = small_pic.replace("/prof.jpg", "/model.jpg")
 
@@ -268,21 +270,19 @@ async def _get_graphis_pic(actor_name):
                 return pic_path, backdrop_path, logs
         else:
             logs += "🔴 graphis.ne.jp 头像获取失败！ "
-            pic_path = ""
     if not has_backdrop and "graphis_backdrop" in emby_on:
         if await download_file_with_filepath(big_pic, backdrop_path, actor_folder):
             logs += "🍊 使用 graphis.ne.jp 背景！ "
             await fix_pic_async(backdrop_path, backdrop_path)
         else:
             logs += "🔴 graphis.ne.jp 背景获取失败！ "
-            backdrop_path = ""
     return pic_path, backdrop_path, logs
 
 
 async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
     start_time = time.time()
     emby_on = manager.config.emby_on
-    actor_folder = resources.userdata_path("actor")
+    actor_folder = resources.u("actor")
 
     i = 0
     succ = 0
@@ -313,15 +313,15 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
             jp_name = actor_name_data["jp"]
 
         # graphis 判断
-        pic_path, backdrop_path, logs = "", "", ""
+        pic_path, backdrop_path, logs = None, None, ""
         if "actor_photo_net" in emby_on and has_name and ("graphis_backdrop" in emby_on or "graphis_face" in emby_on):
             pic_path, backdrop_path, logs = await _get_graphis_pic(jp_name)
 
         # 要上传的头像图片未找到时
         if not pic_path:
-            pic_path = gfriends_actor_data.get(f"{jp_name}.jpg")
+            pic_path = cast(str, gfriends_actor_data.get(f"{jp_name}.jpg"))
             if not pic_path:
-                pic_path = gfriends_actor_data.get(f"{jp_name}.png")
+                pic_path = cast(str, gfriends_actor_data.get(f"{jp_name}.png"))
                 if not pic_path:
                     if actor_imagetages:
                         signal.show_log_text(
@@ -338,10 +338,11 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
             pass
 
         # 头像需要下载时
-        if "https://" in pic_path:
+        if isinstance(pic_path, str) and "https://" in pic_path:
             file_name = pic_path.split("/")[-1]
-            file_name = re.findall(r"^[^?]+", file_name)[0]
-            file_path = os.path.join(actor_folder, file_name)
+            file_name = re.search(r"^[^?]+", file_name)
+            file_name = file_name.group(0) if file_name else f"{actor_name}.jpg"
+            file_path = actor_folder / file_name
             if not await aiofiles.os.path.isfile(file_path):
                 if not await download_file_with_filepath(pic_path, file_path, actor_folder):
                     signal.show_log_text(
@@ -350,10 +351,11 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
                     fail += 1
                     continue
             pic_path = file_path
+        pic_path = cast(Path, pic_path)
 
         # 检查背景是否存在
         if not backdrop_path:
-            backdrop_path = pic_path.replace(".jpg", "-big.jpg")
+            backdrop_path = pic_path.with_name(pic_path.stem + "-big.jpg")
             if not await aiofiles.os.path.isfile(backdrop_path):
                 await fix_pic_async(pic_path, backdrop_path)
 

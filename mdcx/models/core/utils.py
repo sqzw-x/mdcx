@@ -2,10 +2,11 @@ import asyncio
 import os
 import re
 import traceback
+from pathlib import Path
 
 import aiofiles.os
 
-from mdcx.config.enums import FieldRule, Language, NfoInclude
+from mdcx.config.enums import FieldRule, Language, NfoInclude, NoEscape
 from mdcx.config.manager import manager
 from mdcx.config.resources import resources
 from mdcx.gen.field_enums import CrawlerResultFields
@@ -16,7 +17,6 @@ from mdcx.models.types import BaseCrawlerResult, CrawlersResult, FileInfo
 from mdcx.number import get_number_first_letter, get_number_letters
 from mdcx.signals import signal
 from mdcx.utils import get_new_release, get_used_time, split_path
-from mdcx.utils.file import read_link_async
 from mdcx.utils.video import get_video_metadata
 
 
@@ -153,12 +153,12 @@ def show_movie_info(file_info: FileInfo, result: CrawlersResult):
         LogBuffer.log().write(f"\n     {key:<13}: {value}")
 
 
-async def get_video_size(file_path: str):
+async def get_video_size(file_path: Path):
     """
     获取视频分辨率和编码格式
 
     Args:
-        file_path (str): 视频文件的完整路径
+        file_path (Path): 视频文件的完整路径
 
     Returns:
         definition,codec (tuple[str, str]): 视频分辨率, 编码格式
@@ -168,8 +168,8 @@ async def get_video_size(file_path: str):
     height = 0
     hd_get = manager.config.hd_get
     if await aiofiles.os.path.islink(file_path):
-        if "symlink_definition" in manager.config.no_escape:
-            file_path = await read_link_async(file_path)
+        if NoEscape.SYMLINK_DEFINITION in manager.config.no_escape:
+            file_path = file_path.resolve()
         else:
             hd_get = "path"
     codec = ""
@@ -179,7 +179,7 @@ async def get_video_size(file_path: str):
         except Exception as e:
             signal.show_log_text(f" 🔴 无法获取视频分辨率! 文件地址: {file_path}  错误信息: {e}")
     elif hd_get == "path":
-        file_path_temp = file_path.upper()
+        file_path_temp = file_path.as_posix().upper()
         if "8K" in file_path_temp:
             height = 4000
         elif "4K" in file_path_temp or "UHD" in file_path_temp:
@@ -244,14 +244,14 @@ def show_result(res: CrawlersResult, start_time: float):
 
 def render_name_template(
     template: str,
-    file_path: str,
+    file_path: Path,
     file_info: FileInfo,
     json_data: CrawlersResult,
     show_4k: bool,
     show_cnword: bool,
     show_moword: bool,
     should_escape_result: bool,
-):
+) -> tuple[str, str, str, str, str, str]:
     """
     将模板字符串替换成实际值
 

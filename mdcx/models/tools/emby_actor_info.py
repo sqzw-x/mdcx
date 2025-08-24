@@ -307,7 +307,7 @@ async def _deal_kodi_actors(gfriends_actor_data, add):
         signal.show_log_text("🔴 待刮削目录不存在！任务已停止！")
         return False
     else:
-        actor_folder = resources.userdata_path("actor")
+        actor_folder = resources.u("actor")
         emby_on = manager.config.emby_on
         all_files = await asyncio.to_thread(os.walk, vedio_path)
         all_actor = set()
@@ -350,7 +350,7 @@ async def _deal_kodi_actors(gfriends_actor_data, add):
                                         if "https://" in net_pic_path:
                                             net_file_name = net_pic_path.split("/")[-1]
                                             net_file_name = re.findall(r"^[^?]+", net_file_name)[0]
-                                            local_file_path = os.path.join(actor_folder, net_file_name)
+                                            local_file_path = actor_folder / net_file_name
                                             if not await aiofiles.os.path.isfile(local_file_path):
                                                 if not await download_file_with_filepath(
                                                     net_pic_path, local_file_path, actor_folder

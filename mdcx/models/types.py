@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Literal
 
 from mdcx.config.enums import Language
@@ -22,10 +23,10 @@ class FileInfo:
     destroyed: str
     file_ex: str
     file_name: str
-    file_path: str
+    file_path: Path
     file_show_name: str
-    file_show_path: str
-    folder_path: str
+    file_show_path: Path
+    folder_path: Path
     has_sub: bool
     leak: str
     letters: str
@@ -38,6 +39,13 @@ class FileInfo:
     definition: str
     codec: str
 
+    @property
+    def optional_file_path(self) -> Path | None:
+        if self.file_path == Path() or not self.file_path.is_file():
+            return None
+        else:
+            return self.file_path
+
     def crawler_input(self) -> "CrawlerInput":
         """
         将 FileInfo 转换为 CallCrawlerInput 类型
@@ -45,7 +53,7 @@ class FileInfo:
         return CrawlerInput(
             appoint_number=self.appoint_number,
             appoint_url=self.appoint_url,
-            file_path=self.file_path,
+            file_path=self.optional_file_path,
             number=self.number,
             mosaic=self.mosaic,
             short_number=self.short_number,
@@ -60,7 +68,7 @@ class FileInfo:
         return CrawlTask(
             appoint_number=self.appoint_number,
             appoint_url=self.appoint_url,
-            file_path=self.file_path,
+            file_path=self.optional_file_path,
             number=self.number,
             mosaic=self.mosaic,
             short_number=self.short_number,
@@ -91,10 +99,10 @@ class FileInfo:
             destroyed="",
             file_ex="",
             file_name="",
-            file_path="",
+            file_path=Path(),
             file_show_name="",
-            file_show_path="",
-            folder_path="",
+            file_show_path=Path(),
+            folder_path=Path(),
             has_sub=False,
             leak="",
             letters="",
@@ -114,7 +122,7 @@ class CrawlerInput:
 
     appoint_number: str
     appoint_url: str
-    file_path: str
+    file_path: Path | None
     mosaic: str
     number: str
     short_number: str
@@ -422,9 +430,9 @@ class OtherInfo:
     poster_marked: bool
     thumb_marked: bool
     # 其它图片获取过程所需字段
-    fanart_path: str
-    poster_path: str
-    thumb_path: str
+    fanart_path: Path | None
+    poster_path: Path | None
+    thumb_path: Path | None
     poster_big: bool
     poster_size: tuple[int, int]
     thumb_size: tuple[int, int]
@@ -440,9 +448,9 @@ class OtherInfo:
             fanart_marked=True,
             poster_marked=True,
             thumb_marked=True,
-            fanart_path="",
-            poster_path="",
-            thumb_path="",
+            fanart_path=None,
+            poster_path=None,
+            thumb_path=None,
             poster_big=False,
             poster_size=(0, 0),
             thumb_size=(0, 0),

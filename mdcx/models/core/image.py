@@ -5,6 +5,7 @@
 import os
 import time
 import traceback
+from pathlib import Path
 from typing import cast
 
 from PIL import Image
@@ -85,7 +86,7 @@ async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):
             LogBuffer.log().write(f"\n 🍀 Fanart add watermark: {mark_show_type}!")
 
 
-def cut_thumb_to_poster(json_data: CrawlersResult, thumb_path: str, poster_path: str, image_cut):
+def cut_thumb_to_poster(json_data: CrawlersResult, thumb_path: Path, poster_path: Path, image_cut):
     start_time = time.time()
     if os.path.exists(poster_path):
         delete_file_sync(poster_path)

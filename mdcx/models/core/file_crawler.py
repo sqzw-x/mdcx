@@ -298,6 +298,7 @@ class FileScraper:
         destroyed = task_input.destroyed
         file_number = task_input.number
         file_path = task_input.file_path
+        file_path_str = str(file_path).lower() if file_path else ""
         leak = task_input.leak
         mosaic = task_input.mosaic
         short_number = task_input.short_number
@@ -328,12 +329,12 @@ class FileScraper:
                 res = await self._call_specific_crawler(task_input, website)
 
             # =======================================================================里番
-            elif "getchu" in file_path.lower() or "里番" in file_path or "裏番" in file_path:
+            elif "getchu" in file_path_str or "里番" in file_path_str or "裏番" in file_path_str:
                 website = Website.GETCHU_DMM
                 res = await self._call_specific_crawler(task_input, website)
 
             # =======================================================================Mywife No.1111
-            elif "mywife" in file_path.lower():
+            elif "mywife" in file_path_str:
                 website = Website.MYWIFE
                 res = await self._call_specific_crawler(task_input, website)
 
@@ -348,7 +349,7 @@ class FileScraper:
 
             # =======================================================================sexart.15.06.14
             elif re.search(r"[^.]+\.\d{2}\.\d{2}\.\d{2}", file_number) or (
-                "欧美" in file_path and "东欧美" not in file_path
+                "欧美" in file_path_str and "东欧美" not in file_path_str
             ):
                 res = await self._call_crawlers(task_input, self.config.website_oumei)
 

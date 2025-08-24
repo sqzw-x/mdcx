@@ -66,7 +66,7 @@ class LegacyCrawler:
                 "number": ctx.input.number,
                 "appoint_url": ctx.input.appoint_url,
                 "language": language,
-                "file_path": ctx.input.file_path,
+                "file_path": str(ctx.input.file_path) if ctx.input.file_path else "",
                 "appoint_number": ctx.input.appoint_number,
                 "mosaic": ctx.input.mosaic,
                 "short_number": ctx.input.short_number,

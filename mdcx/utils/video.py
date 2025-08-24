@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import subprocess
+from pathlib import Path
 
 try:
     import av
@@ -9,12 +10,12 @@ except ImportError:
     av = None
 
 
-def get_video_metadata_pyav(file_path: str) -> tuple[int, str]:
+def get_video_metadata_pyav(p: Path) -> tuple[int, str]:
     if av is None:
         raise ImportError("Should not be called if pyav is not available")
     height = 0
     codec_fourcc = ""
-    with av.open(file_path) as container:
+    with av.open(p) as container:
         # 查找第一个视频流
         video_stream = next((s for s in container.streams.video), None)
         if video_stream:
@@ -23,11 +24,11 @@ def get_video_metadata_pyav(file_path: str) -> tuple[int, str]:
     return height, codec_fourcc
 
 
-def get_video_metadata_ffmpeg(file_path: str) -> tuple[int, str]:
+def get_video_metadata_ffmpeg(p: Path) -> tuple[int, str]:
     if shutil.which("ffprobe") is None:
         raise RuntimeError("当前版本无 opencv/pyav. 若想获取视频分辨率请安装 ffprobe 或改用带 opencv/pyav 版本.")
     # Use ffprobe to get video information
-    cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", file_path]
+    cmd = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", str(p)]
 
     # macOS and Linux use default flags
     creationflags = 0

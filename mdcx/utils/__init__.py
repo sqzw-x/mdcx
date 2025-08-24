@@ -13,6 +13,7 @@ import traceback
 import unicodedata
 from collections.abc import Coroutine
 from concurrent.futures import Future
+from pathlib import Path
 from threading import Thread
 from typing import Any, TypeVar
 
@@ -377,10 +378,6 @@ def get_random_headers() -> dict:
     return headers
 
 
-def convert_path(path: str) -> str:
-    return path.replace("/", "\\") if IS_WINDOWS else path.replace("\\", "/")
-
-
 def singleton(cls):
     _instance = {}
 
@@ -398,11 +395,9 @@ def nfd2c(path: str) -> str:
     return unicodedata.normalize("NFC", path) if IS_NFC else unicodedata.normalize("NFD", path)
 
 
-def split_path(path: str) -> tuple[str, str]:
-    if "\\" in path:
-        p, f = os.path.split(path.replace("\\", "/"))
-        return p.replace("/", "\\"), f
-    return os.path.split(path)
+def split_path(path: str | Path) -> tuple[Path, str]:
+    path = Path(path)
+    return path.parent, path.name
 
 
 def get_new_release(release: str, release_rule: str) -> str:

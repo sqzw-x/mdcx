@@ -1,8 +1,8 @@
 import asyncio
 import os
-import re
 import time
 import traceback
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import aiofiles.os
@@ -55,9 +55,10 @@ from mdcx.models.tools.emby_actor_image import update_emby_actor_photo
 from mdcx.models.tools.emby_actor_info import creat_kodi_actors
 from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo, ScrapeResult, ShowData
 from mdcx.signals import signal
-from mdcx.utils import convert_path, executor, get_current_time, get_real_time, get_used_time, split_path
+from mdcx.utils import executor, get_current_time, get_real_time, get_used_time, split_path
 from mdcx.utils.dataclass import update
-from mdcx.utils.file import copy_file_async, move_file_async, read_link_async
+from mdcx.utils.file import copy_file_async, move_file_async
+from mdcx.utils.path import is_descendant
 
 if TYPE_CHECKING:
     from mdcx.crawler import CrawlerProviderProtocol
@@ -70,13 +71,13 @@ class Scraper:
     def __init__(self, crawler_provider: "CrawlerProviderProtocol"):
         self.crawler_provider = crawler_provider
 
-    async def run(self, file_mode: FileMode, movie_list: list[str] | None) -> None:
+    async def run(self, file_mode: FileMode, movie_list: list[Path] | None) -> None:
         try:
             await self._run(file_mode, movie_list)
         finally:
             await self.crawler_provider.close()
 
-    async def _run(self, file_mode: FileMode, movie_list: list[str] | None) -> None:
+    async def _run(self, file_mode: FileMode, movie_list: list[Path] | None) -> None:
         Flags.reset()
         if movie_list is None:
             movie_list = []
@@ -108,7 +109,7 @@ class Scraper:
         # 获取设置的媒体目录、失败目录、成功目录
         path_settings = get_movie_path_setting()
         movie_path = path_settings.movie_path
-        escape_folder_list = path_settings.escape_folder_list
+        ignore_dirs = path_settings.ignore_dirs
         softlink_path = path_settings.softlink_path
 
         # 获取待刮削文件列表的相关信息
@@ -119,7 +120,7 @@ class Scraper:
                 )
                 movie_path = softlink_path
             signal.show_log_text("\n ⏰ Start time: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-            movie_list = await get_movie_list(file_mode, movie_path, escape_folder_list)
+            movie_list = await get_movie_list(file_mode, movie_path, ignore_dirs)
         else:
             signal.show_log_text("\n ⏰ Start time: " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         Flags.remain_list = movie_list
@@ -214,16 +215,16 @@ class Scraper:
             await self.crawler_provider.close()
             signal.exec_exit_app.emit()
 
-    async def process_one_file(self, task: tuple[str, int, int]) -> None:
+    async def process_one_file(self, task: tuple[Path, int, int]) -> None:
         # 获取顺序
         file_path, count, count_all = task
         Flags.counting_order += 1
         count = Flags.counting_order
 
         # 名字缩写
-        file_name_temp = split_path(file_path)[1]
-        if len(file_name_temp) > 40:
-            file_name_temp = file_name_temp[:40] + "..."
+        show_name = file_path.name
+        if len(show_name) > 40:
+            show_name = show_name[:40] + "..."
 
         # 处理间歇任务
         while (
@@ -231,7 +232,7 @@ class Scraper:
             and Switch.REST_SCRAPE in manager.config.switch_on
             and count - Flags.rest_now_begin_count > manager.config.rest_count
         ):
-            self._check_stop(file_name_temp)
+            self._check_stop(show_name)
             await asyncio.sleep(1)
 
         # 非第一个加延时
@@ -240,9 +241,7 @@ class Scraper:
         thread_time = manager.config.thread_time
         if count == 1 or thread_time == 0 or manager.config.main_mode == 4:
             Flags.next_start_time = time.time()
-            signal.show_log_text(
-                f" 🕷 {get_current_time()} 开始刮削：{Flags.scrape_starting}/{count_all} {file_name_temp}"
-            )
+            signal.show_log_text(f" 🕷 {get_current_time()} 开始刮削：{Flags.scrape_starting}/{count_all} {show_name}")
             thread_time = 0
         else:
             Flags.next_start_time += thread_time
@@ -251,17 +250,15 @@ class Scraper:
         remain_time = int(Flags.next_start_time - time.time())
         if remain_time > 0:
             signal.show_log_text(
-                f" ⏱ {get_current_time()}（{remain_time}）秒后开始刮削：{count}/{count_all} {file_name_temp}"
+                f" ⏱ {get_current_time()}（{remain_time}）秒后开始刮削：{count}/{count_all} {show_name}"
             )
             for i in range(remain_time):
-                self._check_stop(file_name_temp)
+                self._check_stop(show_name)
                 await asyncio.sleep(1)
 
         Flags.scrape_started += 1
         if count > 1 and thread_time != 0:
-            signal.show_log_text(
-                f" 🕷 {get_current_time()} 开始刮削：{Flags.scrape_started}/{count_all} {file_name_temp}"
-            )
+            signal.show_log_text(f" 🕷 {get_current_time()} 开始刮削：{Flags.scrape_started}/{count_all} {show_name}")
 
         start_time = time.time()
         file_mode = Flags.file_mode
@@ -278,13 +275,13 @@ class Scraper:
         progress_percentage = f"{progress_value:.2f}%"
         signal.exec_set_processbar.emit(int(progress_value))
         signal.set_label_file_path.emit(
-            f"正在刮削： {Flags.scrape_started}/{count_all} {progress_percentage} \n {convert_path(file_show_path)}"
+            f"正在刮削： {Flags.scrape_started}/{count_all} {progress_percentage} \n {file_show_path}"
         )
         signal.label_result.emit(
             f" 刮削中：{Flags.scrape_started - Flags.succ_count - Flags.fail_count} 成功：{Flags.succ_count} 失败：{Flags.fail_count}"
         )
         LogBuffer.log().write("\n" + "👆" * 50)
-        LogBuffer.log().write("\n 🙈 [file] " + file_info.file_path)
+        LogBuffer.log().write("\n 🙈 [file] " + str(file_info.file_path))
         LogBuffer.log().write("\n 🚘 [number] " + number)
 
         # 如果指定了单一网站，进行提示
@@ -304,7 +301,7 @@ class Scraper:
                     number = json_data.number  # 读取模式且存在nfo时，可能会导致movie_number改变，需要更新
                 Flags.json_data_dic.update({number: ScrapeResult(file_info, json_data, other)})
         except Exception as e:
-            self._check_stop(file_name_temp)
+            self._check_stop(show_name)
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
             LogBuffer.error().write("scrape file error: " + str(e))
@@ -348,12 +345,11 @@ class Scraper:
                         )
                 failed_folder = get_movie_path_setting(file_path).failed_folder
                 fail_file_path = await move_file_to_failed_folder(failed_folder, file_path, folder_old_path)
-                Flags.failed_list.append([fail_file_path, LogBuffer.error().get()])
-                Flags.failed_file_list.append(fail_file_path)
+                Flags.failed_list.append((fail_file_path, LogBuffer.error().get()))
                 await self._failed_file_info_show(str(Flags.fail_count), fail_file_path, LogBuffer.error().get())
                 signal.view_failed_list_settext.emit(f"失败 {Flags.fail_count}")
         except Exception as e:
-            self._check_stop(file_name_temp)
+            self._check_stop(show_name)
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
             signal.show_log_text(str(e))
@@ -375,22 +371,20 @@ class Scraper:
             signal.label_result.emit(f" 刮削中：{remain_count} 成功：{Flags.succ_count} 失败：{Flags.fail_count}")
             signal.show_scrape_info(f"🔎 已刮削 {count}/{count_all}")
         except Exception as e:
-            self._check_stop(file_name_temp)
+            self._check_stop(show_name)
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
             signal.show_log_text(str(e))
 
         # 更新剩余任务
         try:
-            if file_path:
-                file_path = convert_path(file_path)
             try:
                 Flags.remain_list.remove(file_path)
                 Flags.can_save_remain = True
             except Exception as e1:
                 signal.show_log_text(f"remove:  {file_path}\n {str(e1)}\n {traceback.format_exc()}")
         except Exception as e:
-            self._check_stop(file_name_temp)
+            self._check_stop(show_name)
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
             signal.show_log_text(str(e))
@@ -423,7 +417,7 @@ class Scraper:
                     else:
                         await Flags.sleep_end.wait()
         except Exception as e:
-            self._check_stop(file_name_temp)
+            self._check_stop(show_name)
             signal.show_traceback_log(traceback.format_exc())
             signal.show_log_text(traceback.format_exc())
             signal.show_log_text(str(e))
@@ -448,7 +442,9 @@ class Scraper:
         sub_list = file_info.sub_list
 
         # 获取设置的媒体目录、失败目录、成功目录
-        success_folder = get_movie_path_setting(file_path).success_folder
+        paths = get_movie_path_setting(file_path)
+        success_folder = paths.success_folder
+        movie_path = paths.movie_path
 
         # 检查文件大小
         result = await check_file(file_path, file_escape_size)
@@ -620,10 +616,10 @@ class Scraper:
                 done_file_new_path_list.sort(reverse=True)
                 LogBuffer.error().write(
                     "存在重复文件（指刮削后的文件路径相同！），请检查:\n    🍁 "
-                    + "\n    🍁 ".join(done_file_new_path_list)
+                    + "\n    🍁 ".join(str(path) for path in done_file_new_path_list)
                 )
-                res.outline = split_path(file_path)[1]
-                res.tag = file_path
+                res.outline = split_path(str(file_path))[1]
+                res.tag = str(file_path)
                 return None, None
 
         # 判断输出文件夹和文件是否已存在，如无则创建输出文件夹
@@ -642,14 +638,14 @@ class Scraper:
         # 初始化图片已下载地址的字典
         if not Flags.file_done_dic.get(res.number):
             Flags.file_done_dic[res.number] = {
-                "poster": "",
-                "thumb": "",
-                "fanart": "",
-                "trailer": "",
-                "local_poster": "",
-                "local_thumb": "",
-                "local_fanart": "",
-                "local_trailer": "",
+                "poster": Path(),
+                "thumb": Path(),
+                "fanart": Path(),
+                "trailer": Path(),
+                "local_poster": Path(),
+                "local_thumb": Path(),
+                "local_fanart": Path(),
+                "local_trailer": Path(),
             }
 
         # 视频模式（原来叫整理模式）
@@ -746,10 +742,16 @@ class Scraper:
 
         # 创建软链接及复制文件
         if manager.config.auto_link:
-            target_dir = os.path.join(manager.config.localdisk_path, os.path.relpath(folder_new_path, success_folder))
-            await newtdisk_creat_symlink(
-                Switch.COPY_NETDISK_NFO in manager.config.switch_on, folder_new_path, target_dir
-            )
+            if manager.config.success_file_move:
+                # 此时 folder_new_path 在 success_folder 目录下
+                target_dir = Path(manager.config.localdisk_path) / folder_new_path.relative_to(
+                    success_folder, walk_up=True
+                )
+            else:
+                # 此时 folder_new_path == folder_old_path 且在 movie_path 目录下
+                target_dir = Path(manager.config.localdisk_path) / folder_old_path.relative_to(movie_path, walk_up=True)
+            copy = Switch.COPY_NETDISK_NFO in manager.config.switch_on
+            await newtdisk_creat_symlink(copy, folder_new_path, target_dir)
 
         # json添加封面缩略图路径
         other.poster_path = poster_final_path
@@ -760,28 +762,25 @@ class Scraper:
 
         return res, other
 
-    def _check_stop(self, file_name_temp: str) -> None:
+    def _check_stop(self, show_name: str) -> None:
         if signal.stop:
             Flags.now_kill += 1
             signal.show_log_text(
-                f" 🕷 {get_current_time()} 已停止刮削：{Flags.now_kill}/{Flags.total_kills} {file_name_temp}"
+                f" 🕷 {get_current_time()} 已停止刮削：{Flags.now_kill}/{Flags.total_kills} {show_name}"
             )
             signal.set_label_file_path.emit(
                 f"⛔️ 正在停止刮削...\n   正在停止已在运行的任务线程（{Flags.now_kill}/{Flags.total_kills}）..."
             )
             raise StopScrape("手动停止刮削")
 
-    async def _failed_file_info_show(self, count: str, path: str, error_info: str) -> None:
-        folder = os.path.dirname(path)
-        info_str = f"{'🔴 ' + count + '.':<3} {path} \n    所在目录: {folder} \n    失败原因: {error_info} \n"
-        if await aiofiles.os.path.islink(path):
-            real_path = await read_link_async(path)
-            real_folder = os.path.dirname(path)
-            info_str = f"{count + '.':<3} {path} \n    指向文件: {real_path} \n    所在目录: {real_folder} \n    失败原因: {error_info} \n"
+    async def _failed_file_info_show(self, count: str, p: Path, error_info: str) -> None:
+        info_str = f"{'🔴 ' + count + '.':<3} {p} \n    所在目录: {p.parent} \n    失败原因: {error_info} \n"
+        if await aiofiles.os.path.islink(p):
+            info_str = f"{'🔴 ' + count + '.':<3} {p} \n    指向文件: {p.resolve()} \n    失败原因: {error_info} \n"
         signal.logs_failed_show.emit(info_str)
 
 
-def start_new_scrape(file_mode: FileMode, movie_list: list[str] | None = None) -> None:
+def start_new_scrape(file_mode: FileMode, movie_list: list[Path] | None = None) -> None:
     signal.change_buttons_status.emit()
     signal.exec_set_processbar.emit(0)
     try:
@@ -796,11 +795,11 @@ def start_new_scrape(file_mode: FileMode, movie_list: list[str] | None = None) -
 
 def get_remain_list() -> bool:
     """This function is intended to be sync."""
-    remain_list_path = resources.userdata_path("remain.txt")
+    remain_list_path = resources.u("remain.txt")
     if os.path.isfile(remain_list_path):
         with open(remain_list_path, encoding="utf-8", errors="ignore") as f:
             temp = f.read()
-            Flags.remain_list = temp.split("\n") if temp.strip() else []
+            Flags.remain_list = [Path(path) for path in temp.split("\n") if path.strip()]
             if Switch.REMAIN_TASK in manager.config.switch_on and len(Flags.remain_list):
                 box = QMessageBox(QMessageBox.Information, "继续刮削", "上次刮削未完成，是否继续刮削剩余任务？")
                 box.setStandardButtons(QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
@@ -816,11 +815,10 @@ def get_remain_list() -> bool:
                     movie_path = manager.config.media_path
                     if movie_path == "":
                         movie_path = manager.data_folder
-                    if not re.findall(r"[/\\]$", movie_path):
-                        movie_path += "/"
-                    movie_path = convert_path(movie_path)
-                    temp_remain_path = convert_path(Flags.remain_list[0])
-                    if movie_path not in temp_remain_path:
+                    movie_path = Path(movie_path)
+
+                    temp_remain_path = Flags.remain_list[0]
+                    if not is_descendant(temp_remain_path, movie_path):
                         box = QMessageBox(
                             QMessageBox.Warning,
                             "提醒",
@@ -849,8 +847,8 @@ def again_search() -> None:
 
 
 async def move_sub(
-    folder_old_path: str,
-    folder_new_path: str,
+    folder_old_path: Path,
+    folder_new_path: Path,
     file_name: str,
     sub_list: list[str],
     naming_rule: str,
@@ -871,9 +869,9 @@ async def move_sub(
         return
 
     for sub in sub_list:
-        sub_old_path = os.path.join(folder_old_path, (file_name + sub))
-        sub_new_path = os.path.join(folder_new_path, (naming_rule + sub))
-        sub_new_path_chs = os.path.join(folder_new_path, (naming_rule + ".chs" + sub))
+        sub_old_path = str(folder_old_path / (file_name + sub))
+        sub_new_path = str(folder_new_path / (naming_rule + sub))
+        sub_new_path_chs = str(folder_new_path / (naming_rule + ".chs" + sub))
         if manager.config.subtitle_add_chs and ".chs" not in sub:
             sub_new_path = sub_new_path_chs
         if await aiofiles.os.path.exists(sub_old_path) and not await aiofiles.os.path.exists(sub_new_path):

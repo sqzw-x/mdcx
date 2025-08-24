@@ -1,7 +1,7 @@
-import os
 import shutil
 import time
 import traceback
+from pathlib import Path
 
 import aiofiles.os
 from PIL import Image
@@ -12,17 +12,17 @@ from mdcx.config.resources import resources
 from mdcx.models.base.file import movie_lists
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.signals import signal
-from mdcx.utils import convert_path, get_used_time, split_path
+from mdcx.utils import get_used_time
 from mdcx.utils.file import check_pic_async, move_file_async
 
 
-async def extrafanart_copy2(folder_new_path: str):
+async def extrafanart_copy2(folder_path: Path):
     start_time = time.time()
     download_files = manager.config.download_files
     keep_files = manager.config.keep_files
     extrafanart_copy_folder = manager.config.extrafanart_folder
-    extrafanart_path = convert_path(os.path.join(folder_new_path, "extrafanart"))
-    extrafanart_copy_path = convert_path(os.path.join(folder_new_path, extrafanart_copy_folder))
+    extrafanart_path = folder_path / "extrafanart"
+    extrafanart_copy_path = folder_path / extrafanart_copy_folder
 
     # 如果不保留，不下载，删除返回
     if "extrafanart_copy" not in keep_files and "extrafanart_copy" not in download_files:
@@ -49,18 +49,18 @@ async def extrafanart_copy2(folder_new_path: str):
     filelist = await aiofiles.os.listdir(extrafanart_copy_path)
     for each in filelist:
         file_new_name = each.replace("fanart", "")
-        file_path = os.path.join(extrafanart_copy_path, each)
-        file_new_path = os.path.join(extrafanart_copy_path, file_new_name)
+        file_path = extrafanart_copy_path / each
+        file_new_path = extrafanart_copy_path / file_new_name
         await move_file_async(file_path, file_new_path)
     LogBuffer.log().write(f"\n 🍀 ExtraFanart_copy done! (copy extrafanart)({get_used_time(start_time)}s)")
 
 
-async def extrafanart_extras_copy(folder_new_path: str):
+async def extrafanart_extras_copy(folder_path: Path):
     start_time = time.time()
     download_files = manager.config.download_files
     keep_files = manager.config.keep_files
-    extrafanart_path = convert_path(os.path.join(folder_new_path, "extrafanart"))
-    extrafanart_extra_path = convert_path(os.path.join(folder_new_path, "behind the scenes"))
+    extrafanart_path = folder_path / "extrafanart"
+    extrafanart_extra_path = folder_path / "behind the scenes"
 
     if "extrafanart_extras" not in download_files and "extrafanart_extras" not in keep_files:
         if await aiofiles.os.path.exists(extrafanart_extra_path):
@@ -83,14 +83,14 @@ async def extrafanart_extras_copy(folder_new_path: str):
     filelist = await aiofiles.os.listdir(extrafanart_extra_path)
     for each in filelist:
         file_new_name = each.replace("jpg", "mp4")
-        file_path = os.path.join(extrafanart_extra_path, each)
-        file_new_path = os.path.join(extrafanart_extra_path, file_new_name)
+        file_path = extrafanart_extra_path / each
+        file_new_path = extrafanart_extra_path / file_new_name
         await move_file_async(file_path, file_new_path)
     LogBuffer.log().write(f"\n 🍀 Extrafanart_extras done! (copy extrafanart)({get_used_time(start_time)}s)")
     return True
 
 
-async def _add_to_pic(pic_path: str, img_pic: Image.Image, mark_size: int, count: int, mark_name: str):
+async def _add_to_pic(pic_path: Path, img_pic: Image.Image, mark_size: int, count: int, mark_name: str):
     # 获取水印图片，生成水印
     mark_fixed = manager.config.mark_fixed
     mark_pos_corner = manager.config.mark_pos_corner
@@ -163,7 +163,7 @@ async def _add_to_pic(pic_path: str, img_pic: Image.Image, mark_size: int, count
         except Exception:
             signal.show_log_text(traceback.format_exc())
         img_pic = img_pic.convert("RGB")
-        temp_pic_path = pic_path + ".[MARK].jpg"
+        temp_pic_path = pic_path.with_suffix(".[MARK].jpg")
         try:
             img_pic.load()
             img_pic.save(temp_pic_path, quality=95, subsampling=0)
@@ -174,7 +174,7 @@ async def _add_to_pic(pic_path: str, img_pic: Image.Image, mark_size: int, count
             await move_file_async(temp_pic_path, pic_path)
 
 
-async def add_mark_thread(pic_path: str, mark_list: list[str]):
+async def add_mark_thread(pic_path: Path, mark_list: list[str]):
     mark_size = manager.config.mark_size
     mark_fixed = manager.config.mark_fixed
     mark_pos = manager.config.mark_pos
@@ -234,8 +234,8 @@ async def add_del_extrafanart_copy(mode: str) -> None:
 
     extrafanart_folder_path_list = []
     for movie in movie_list:
-        movie_file_folder_path = split_path(movie)[0]
-        extrafanart_folder_path = os.path.join(movie_file_folder_path, "extrafanart")
+        movie_file_folder_path = movie.parent
+        extrafanart_folder_path = movie_file_folder_path / "extrafanart"
         if await aiofiles.os.path.exists(extrafanart_folder_path):
             extrafanart_folder_path_list.append(movie_file_folder_path)
     extrafanart_folder_path_list = list(set(extrafanart_folder_path_list))
@@ -244,8 +244,8 @@ async def add_del_extrafanart_copy(mode: str) -> None:
     new_count = 0
     count = 0
     for each in extrafanart_folder_path_list:
-        extrafanart_folder_path = os.path.join(each, "extrafanart")
-        extrafanart_copy_folder_path = os.path.join(each, extrafanart_folder)
+        extrafanart_folder_path = each / "extrafanart"
+        extrafanart_copy_folder_path = each / extrafanart_folder
         count += 1
         if mode == "add":
             if not await aiofiles.os.path.exists(extrafanart_copy_folder_path):

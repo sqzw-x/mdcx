@@ -33,7 +33,6 @@ from mdcx.controllers.main_window.bind_utils import set_checkboxes, set_radio_bu
 from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.models.flags import Flags
 from mdcx.signals import signal_qt
-from mdcx.utils import convert_path
 from mdcx.utils.file import delete_file_sync
 
 if TYPE_CHECKING:
@@ -68,9 +67,7 @@ def load_config(self: "MyMAinWindow"):
 
     errors = manager.load()
     if errors:
-        signal_qt.show_log_text(
-            f"⚠️ 读取配置文件出错:\n\t{'\n\t'.join(errors)}\n💡 这不会阻止程序运行, 无效配置将使用默认值\n"
-        )
+        signal_qt.show_log_text(f"⚠️ 读取配置文件出错:\n\t{'\n\t'.join(errors)}\n\n")
     config_folder = manager.data_folder
     config_file = manager.file
     config_path = manager.path
@@ -93,13 +90,13 @@ def load_config(self: "MyMAinWindow"):
 
         # region media
         # 视频目录
-        self.Ui.lineEdit_movie_path.setText(convert_path(manager.config.media_path))
+        self.Ui.lineEdit_movie_path.setText(manager.config.media_path)
         # 软链接目录
-        self.Ui.lineEdit_movie_softlink_path.setText(convert_path(manager.config.softlink_path))
+        self.Ui.lineEdit_movie_softlink_path.setText(manager.config.softlink_path)
         # 成功目录
-        self.Ui.lineEdit_success.setText(convert_path(manager.config.success_output_folder))
+        self.Ui.lineEdit_success.setText(manager.config.success_output_folder)
         # 失败目录
-        self.Ui.lineEdit_fail.setText(convert_path(manager.config.failed_output_folder))
+        self.Ui.lineEdit_fail.setText(manager.config.failed_output_folder)
         # 剧照副本目录
         self.Ui.lineEdit_extrafanart_dir.setText(manager.config.extrafanart_folder)
         # 视频类型
@@ -762,7 +759,7 @@ def load_config(self: "MyMAinWindow"):
         # 显示中文字幕字符-视频文件名
         self.Ui.checkBox_filename.setChecked(manager.config.file_cnword)
         # 外挂字幕文件目录
-        self.Ui.lineEdit_sub_folder.setText(convert_path(manager.config.subtitle_folder))
+        self.Ui.lineEdit_sub_folder.setText(manager.config.subtitle_folder)
         # 自动添加字幕
         set_radio_buttons(
             manager.config.subtitle_add,
@@ -845,9 +842,9 @@ def load_config(self: "MyMAinWindow"):
         # 网络头像库 gfriends 项目地址
         self.Ui.lineEdit_net_actor_photo.setText(str(manager.config.gfriends_github))
         # 本地头像目录
-        self.Ui.lineEdit_actor_photo_folder.setText(convert_path(manager.config.actor_photo_folder))
+        self.Ui.lineEdit_actor_photo_folder.setText(manager.config.actor_photo_folder)
         # 演员数据库路径
-        self.Ui.lineEdit_actor_db_path.setText(convert_path(manager.config.info_database_path))
+        self.Ui.lineEdit_actor_db_path.setText(manager.config.info_database_path)
         # 演员数据库
         self.Ui.checkBox_actor_db.setChecked(manager.config.use_database)
         # endregion
@@ -956,7 +953,7 @@ def load_config(self: "MyMAinWindow"):
             site_config = manager.config.get_site_config(Website(site))
             self.Ui.checkBox_site_use_browser.setChecked(site_config.use_browser)
 
-        self.Ui.lineEdit_api_token_theporndb.setText(convert_path(manager.config.theporndb_api_token))
+        self.Ui.lineEdit_api_token_theporndb.setText(manager.config.theporndb_api_token)
         # javdb cookie
         self.set_javdb_cookie.emit(manager.config.javdb)
         # javbus cookie
@@ -965,7 +962,7 @@ def load_config(self: "MyMAinWindow"):
 
         # region other
         # 配置文件目录
-        self.Ui.lineEdit_config_folder.setText(convert_path(manager.data_folder))
+        self.Ui.lineEdit_config_folder.setText(str(manager.data_folder))
         # 间歇刮削文件数量
         rest_count = int(manager.config.rest_count)
         if rest_count == 0:
@@ -1013,13 +1010,13 @@ def load_config(self: "MyMAinWindow"):
         )
 
         # 本地资源库
-        self.Ui.lineEdit_local_library_path.setText(convert_path(manager.config.local_library))
+        self.Ui.lineEdit_local_library_path.setText(",".join(manager.config.local_library))
         # 演员名
         self.Ui.lineEdit_actors_name.setText(manager.config.actors_name)
         # 网盘目录
-        self.Ui.lineEdit_netdisk_path.setText(convert_path(manager.config.netdisk_path))
+        self.Ui.lineEdit_netdisk_path.setText(manager.config.netdisk_path)
         # 本地磁盘目录
-        self.Ui.lineEdit_localdisk_path.setText(convert_path(manager.config.localdisk_path))
+        self.Ui.lineEdit_localdisk_path.setText(manager.config.localdisk_path)
         # 窗口标题栏
         self.Ui.checkBox_hide_window_title.setChecked(manager.config.window_title == "hide")
         # endregion
