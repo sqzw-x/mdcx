@@ -3,9 +3,9 @@ import time
 
 from lxml import etree
 
-from mdcx.config.enums import FieldRule, Website
-from mdcx.config.manager import manager
-from mdcx.models.log_buffer import LogBuffer
+from ..config.enums import FieldRule, Website
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
 
 
 def getTitle(html):  # 获取标题

@@ -6,14 +6,14 @@ from pathlib import Path
 import aiofiles.os
 from PIL import Image
 
-from mdcx.config.extend import get_movie_path_setting
-from mdcx.config.manager import manager
-from mdcx.config.resources import resources
-from mdcx.models.base.file import movie_lists
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.signals import signal
-from mdcx.utils import get_used_time
-from mdcx.utils.file import check_pic_async, move_file_async
+from ..config.extend import get_movie_path_setting
+from ..config.manager import manager
+from ..config.resources import resources
+from ..models.log_buffer import LogBuffer
+from ..signals import signal
+from ..utils import get_used_time
+from ..utils.file import check_pic_async, move_file_async
+from .file import movie_lists
 
 
 async def extrafanart_copy2(folder_path: Path):

@@ -4,11 +4,11 @@ import time
 
 from lxml import etree
 
-from mdcx.config.enums import Website
-from mdcx.config.manager import manager
-from mdcx.crawlers.guochan import get_extra_info
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.number import is_uncensored
+from ..config.enums import Website
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
+from ..number import is_uncensored
+from .guochan import get_extra_info
 
 
 def get_actor_photo(actor):

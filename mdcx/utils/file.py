@@ -8,8 +8,8 @@ from pathlib import Path
 import aiofiles.os
 from PIL import Image
 
-from mdcx.consts import IS_MAC, IS_WINDOWS
-from mdcx.signals import signal
+from ..consts import IS_MAC, IS_WINDOWS
+from ..signals import signal
 
 
 def delete_file_sync(p: str | Path):

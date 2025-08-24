@@ -8,18 +8,18 @@ from PyQt5.QtCore import QPoint, QRect, Qt
 from PyQt5.QtGui import QCursor, QPixmap
 from PyQt5.QtWidgets import QDialog, QFileDialog, QPushButton
 
-from mdcx.config.enums import DownloadableFile
-from mdcx.config.manager import manager
-from mdcx.config.models import MarkType
-from mdcx.models.base.image import add_mark_thread
-from mdcx.models.core.file import get_file_info_v2
-from mdcx.utils import executor
-from mdcx.utils.file import delete_file_sync
-from mdcx.views.posterCutTool import Ui_Dialog_cut_poster
+from ..base.image import add_mark_thread
+from ..config.enums import DownloadableFile
+from ..config.manager import manager
+from ..config.models import MarkType
+from ..core.file import get_file_info_v2
+from ..utils import executor
+from ..utils.file import delete_file_sync
+from ..views.posterCutTool import Ui_Dialog_cut_poster
 
 if TYPE_CHECKING:
-    from mdcx.controllers.main_window.main_window import MyMAinWindow
-    from mdcx.models.types import FileInfo
+    from ..models.types import FileInfo
+    from .main_window.main_window import MyMAinWindow
 
 
 class DraggableButton(QPushButton):

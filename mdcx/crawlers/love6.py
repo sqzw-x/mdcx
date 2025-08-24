@@ -4,8 +4,8 @@ import time
 
 from lxml import etree
 
-from mdcx.config.manager import manager
-from mdcx.models.log_buffer import LogBuffer
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
 
 
 def get_web_number(html, number):

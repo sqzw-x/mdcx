@@ -5,9 +5,9 @@ from urllib.parse import unquote
 
 from lxml import etree
 
-from mdcx.config.manager import manager
-from mdcx.crawlers.guochan import get_number_list
-from mdcx.models.log_buffer import LogBuffer
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
+from .guochan import get_number_list
 
 
 def get_actor_photo(actor):

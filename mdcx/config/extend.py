@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from mdcx.config.enums import Website
-from mdcx.config.manager import manager
-from mdcx.config.models import CleanAction
-from mdcx.manual import ManualConfig
+from ..manual import ManualConfig
+from .enums import Website
+from .manager import manager
+from .models import CleanAction
 
 
 @dataclass

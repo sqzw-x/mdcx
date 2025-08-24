@@ -4,9 +4,9 @@ import time
 
 from lxml import etree
 
-from mdcx.config.manager import manager
-from mdcx.models.base.web import get_imgsize
-from mdcx.models.log_buffer import LogBuffer
+from ..base.web import get_imgsize
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
 
 
 def get_web_number(html, number):

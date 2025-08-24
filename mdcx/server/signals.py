@@ -5,8 +5,7 @@ from collections.abc import Callable
 from dataclasses import asdict
 from typing import Any, Literal
 
-from mdcx.models.types import ShowData
-
+from ..models.types import ShowData
 from .ws.manager import websocket_manager
 from .ws.types import MessageType, WebSocketMessage
 

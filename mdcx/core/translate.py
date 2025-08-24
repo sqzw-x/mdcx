@@ -6,24 +6,24 @@ import traceback
 
 import zhconv
 
-from mdcx.config.enums import Language
-from mdcx.config.manager import manager
-from mdcx.config.models import Translator
-from mdcx.config.resources import resources
-from mdcx.gen.field_enums import CrawlerResultFields
-from mdcx.models.base.translate import (
+from ..base.translate import (
     deepl_translate_async,
     google_translate_async,
     llm_translate_async,
     youdao_translate_async,
 )
-from mdcx.models.base.web import get_actorname, get_yesjav_title
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import CrawlersResult
-from mdcx.number import get_number_letters
-from mdcx.signals import signal
-from mdcx.utils import clean_list, get_used_time
-from mdcx.utils.language import is_japanese
+from ..base.web import get_actorname, get_yesjav_title
+from ..config.enums import Language
+from ..config.manager import manager
+from ..config.models import Translator
+from ..config.resources import resources
+from ..gen.field_enums import CrawlerResultFields
+from ..models.log_buffer import LogBuffer
+from ..models.types import CrawlersResult
+from ..number import get_number_letters
+from ..signals import signal
+from ..utils import clean_list, get_used_time
+from ..utils.language import is_japanese
 
 
 def translate_info(json_data: CrawlersResult, has_sub: bool):

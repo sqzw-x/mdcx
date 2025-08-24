@@ -14,9 +14,7 @@ import aiofiles
 import aiofiles.os
 from lxml import etree
 
-from mdcx.config.enums import DownloadableFile, HDPicSource
-from mdcx.config.manager import manager
-from mdcx.models.base.web import (
+from ..base.web import (
     check_url,
     download_extrafanart_task,
     download_file_with_filepath,
@@ -25,13 +23,15 @@ from mdcx.models.base.web import (
     get_dmm_trailer,
     get_imgsize,
 )
-from mdcx.models.core.image import cut_thumb_to_poster
-from mdcx.models.flags import Flags
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import CrawlersResult, OtherInfo
-from mdcx.signals import signal
-from mdcx.utils import convert_half, get_used_time, split_path
-from mdcx.utils.file import check_pic_async, copy_file_async, delete_file_async, move_file_async
+from ..config.enums import DownloadableFile, HDPicSource
+from ..config.manager import manager
+from ..models.flags import Flags
+from ..models.log_buffer import LogBuffer
+from ..models.types import CrawlersResult, OtherInfo
+from ..signals import signal
+from ..utils import convert_half, get_used_time, split_path
+from ..utils.file import check_pic_async, copy_file_async, delete_file_async, move_file_async
+from .image import cut_thumb_to_poster
 
 
 async def get_big_pic_by_amazon(result: CrawlersResult, originaltitle_amazon: str, actor_amazon: list[str]) -> str:

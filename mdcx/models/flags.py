@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, TypedDict
 
-from mdcx.models.enums import FileMode
-from mdcx.models.types import ScrapeResult
+from .enums import FileMode
+from .types import ScrapeResult
 
 
 class FileDoneDict(TypedDict):

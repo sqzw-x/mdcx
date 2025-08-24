@@ -5,8 +5,8 @@ import time
 from typing import Literal, cast
 from urllib.parse import unquote
 
-from mdcx.config.manager import manager
-from mdcx.signals import signal
+from ..config.manager import manager
+from ..signals import signal
 
 
 async def youdao_translate_async(title: str, outline: str):

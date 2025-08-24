@@ -6,9 +6,9 @@ import time
 from lxml import etree
 from lxml.html import soupparser
 
-from mdcx.config.manager import manager
-from mdcx.models.base.web import get_dmm_trailer
-from mdcx.models.log_buffer import LogBuffer
+from ..base.web import get_dmm_trailer
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
 
 
 def get_title(html):

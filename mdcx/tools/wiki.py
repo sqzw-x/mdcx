@@ -6,18 +6,18 @@ import urllib.parse
 import bs4
 import zhconv
 
-from mdcx.config.manager import manager
-from mdcx.config.models import Translator
-from mdcx.config.resources import resources
-from mdcx.manual import ManualConfig
-from mdcx.models.base.translate import (
+from ..base.translate import (
     deepl_translate_async,
     google_translate_async,
     llm_translate_async,
     youdao_translate_async,
 )
-from mdcx.models.tools.emby import EMbyActressInfo
-from mdcx.utils.language import is_english
+from ..config.manager import manager
+from ..config.models import Translator
+from ..config.resources import resources
+from ..manual import ManualConfig
+from ..models.emby import EMbyActressInfo
+from ..utils.language import is_english
 
 
 async def search_wiki(actor_info: EMbyActressInfo) -> tuple[str | None, str]:

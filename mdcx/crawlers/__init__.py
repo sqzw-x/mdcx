@@ -1,7 +1,6 @@
 from collections.abc import Callable
 
-from mdcx.config.models import Website
-
+from ..config.models import Website
 from . import (
     airav,
     airav_cc,

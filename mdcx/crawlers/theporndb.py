@@ -7,12 +7,12 @@ from difflib import SequenceMatcher
 
 import oshash
 
-from mdcx.config.enums import Switch
-from mdcx.config.manager import manager
-from mdcx.crawlers import theporndb_movies
-from mdcx.models.base.number import remove_escape_string
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.number import long_name
+from ..base.number import remove_escape_string
+from ..config.enums import Switch
+from ..config.manager import manager
+from ..crawlers import theporndb_movies
+from ..models.log_buffer import LogBuffer
+from ..number import long_name
 
 
 def similarity(a, b):

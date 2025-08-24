@@ -5,9 +5,9 @@ from io import StringIO
 from pathlib import Path
 from typing import Any
 
-from mdcx.config.models import Config, Website
-from mdcx.consts import LOCAL_VERSION
-from mdcx.manual import ManualConfig
+from ..consts import LOCAL_VERSION
+from ..manual import ManualConfig
+from .models import Config, Website
 
 
 def load_v1(path: str | Path) -> tuple[dict[str, Any], list[str]]:

@@ -3,8 +3,8 @@ import re
 import time
 import traceback
 
-from mdcx.config.manager import manager
-from mdcx.models.log_buffer import LogBuffer
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
 
 
 def get_actor(page_data):

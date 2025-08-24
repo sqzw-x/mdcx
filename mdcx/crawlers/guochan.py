@@ -5,7 +5,7 @@ import re
 
 import zhconv
 
-from mdcx.models.base.number import remove_escape_string
+from ..base.number import remove_escape_string
 
 
 def get_lable_list():

@@ -1,19 +1,20 @@
 from asyncio import create_task
+from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, HttpUrl
 
+from mdcx.base.file import newtdisk_creat_symlink
 from mdcx.config.extend import deal_url
 from mdcx.config.manager import manager
 from mdcx.config.models import SiteConfig, Website
-from mdcx.models.base.file import newtdisk_creat_symlink
-from mdcx.models.core.scraper import start_new_scrape
+from mdcx.core.scraper import start_new_scrape
 from mdcx.models.enums import FileMode
 from mdcx.models.flags import Flags
-from mdcx.models.tools.emby_actor_image import update_emby_actor_photo
-from mdcx.models.tools.emby_actor_info import show_emby_actor_list, update_emby_actor_info
-from mdcx.models.tools.subtitle import add_sub_for_all_video
 from mdcx.server.config import SAFE_DIRS
+from mdcx.tools.emby_actor_image import update_emby_actor_photo
+from mdcx.tools.emby_actor_info import show_emby_actor_list, update_emby_actor_info
+from mdcx.tools.subtitle import add_sub_for_all_video
 
 from .config import check_path_access
 
@@ -40,7 +41,9 @@ class ScrapeFileBody(BaseModel):
 
 @router.post("/scrape/single", summary="单文件刮削", operation_id="scrapeSingleFile")
 async def scrape_single(body: ScrapeFileBody):
-    Flags.single_file_path = body.path
+    p = Path(body.path)
+    check_path_access(p, *SAFE_DIRS)
+    Flags.single_file_path = p
     website, url = deal_url(body.url)
     if not website:
         raise HTTPException(status_code=400, detail="Unsupported URL")
@@ -64,7 +67,7 @@ async def create_symlink(body: CreateSoftlinksBody):
     check_path_access(body.source_dir, *SAFE_DIRS)
     check_path_access(body.dest_dir, *SAFE_DIRS)
     try:
-        create_task(newtdisk_creat_symlink(body.copy_files, body.source_dir, body.dest_dir))
+        create_task(newtdisk_creat_symlink(body.copy_files, Path(body.source_dir), Path(body.dest_dir)))
         return {"message": "Softlink creation completed."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

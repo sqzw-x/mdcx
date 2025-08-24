@@ -94,7 +94,7 @@ def gen(dataclass_types: list[type["DataclassInstance"]], output_file: str | Pat
 
 
 def main():
-    from mdcx.models.types import CrawlerResult
+    from ..models.types import CrawlerResult
 
     output_file = "mdcx/gen/field_enums.py"
     gen([CrawlerResult], output_file)

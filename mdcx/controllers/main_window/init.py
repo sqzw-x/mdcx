@@ -14,7 +14,7 @@ from mdcx.models.flags import Flags
 from mdcx.signals import signal_qt
 
 if TYPE_CHECKING:
-    from mdcx.controllers.main_window.main_window import MyMAinWindow
+    from .main_window import MyMAinWindow
 
 
 def Init_Ui(self: "MyMAinWindow"):

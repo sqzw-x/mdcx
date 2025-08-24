@@ -5,9 +5,9 @@ import time
 
 import zhconv
 
-from mdcx.config.enums import Website
-from mdcx.config.manager import manager
-from mdcx.models.log_buffer import LogBuffer
+from ..config.enums import Website
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
 
 
 def get_api_actor(actor_list):

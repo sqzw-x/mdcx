@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from mdcx.controllers.main_window.main_window import MyMAinWindow
+    from .main_window import MyMAinWindow
 
 
 def set_style(self: "MyMAinWindow"):

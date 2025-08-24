@@ -9,17 +9,17 @@ from pathlib import Path
 import aiofiles
 import aiofiles.os
 
-from mdcx.config.enums import DownloadableFile, NoEscape, Switch
-from mdcx.config.extend import get_movie_path_setting, need_clean
-from mdcx.config.manager import manager
-from mdcx.config.models import CleanAction
-from mdcx.config.resources import resources
-from mdcx.models.enums import FileMode
-from mdcx.models.flags import Flags
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.signals import signal
-from mdcx.utils import executor, get_current_time, get_used_time
-from mdcx.utils.file import copy_file_async, copy_file_sync, delete_file_async, delete_file_sync, move_file_async
+from ..config.enums import DownloadableFile, NoEscape, Switch
+from ..config.extend import get_movie_path_setting, need_clean
+from ..config.manager import manager
+from ..config.models import CleanAction
+from ..config.resources import resources
+from ..models.enums import FileMode
+from ..models.flags import Flags
+from ..models.log_buffer import LogBuffer
+from ..signals import signal
+from ..utils import executor, get_current_time, get_used_time
+from ..utils.file import copy_file_async, copy_file_sync, delete_file_async, delete_file_sync, move_file_async
 
 
 async def move_other_file(number: str, folder_old_path: Path, folder_new_path: Path, file_name: str, naming_rule: str):

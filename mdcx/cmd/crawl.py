@@ -10,14 +10,14 @@ from rich import print, print_json
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from mdcx.config.manager import manager
-from mdcx.config.models import Language, Website
-from mdcx.crawlers import get_crawler_compat
-from mdcx.crawlers.base import get_crawler
-from mdcx.manual import ManualConfig
-from mdcx.models.types import CrawlerInput
-from mdcx.utils import executor
-from mdcx.web_async import AsyncWebClient
+from ..config.manager import manager
+from ..config.models import Language, Website
+from ..crawlers import get_crawler_compat
+from ..crawlers.base import get_crawler
+from ..manual import ManualConfig
+from ..models.types import CrawlerInput
+from ..utils import executor
+from ..web_async import AsyncWebClient
 
 app = typer.Typer(help="爬虫调试工具", context_settings={"help_option_names": ["-h", "--help"]})
 console = Console()

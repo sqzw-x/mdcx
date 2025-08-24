@@ -4,9 +4,9 @@ import sqlite3
 import traceback
 from pathlib import Path
 
-from mdcx.config.manager import manager
-from mdcx.models.tools.emby import EMbyActressInfo
-from mdcx.signals import signal
+from ..config.manager import manager
+from ..models.emby import EMbyActressInfo
+from ..signals import signal
 
 
 class ActressDB:

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 
-from mdcx.config.manager import manager
-from mdcx.crawlers import javlibrary
+from ..config.manager import manager
+from ..crawlers import javlibrary
 
 
 async def main(

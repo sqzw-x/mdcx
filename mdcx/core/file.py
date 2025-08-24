@@ -7,20 +7,20 @@ from pathlib import Path
 import aiofiles
 import aiofiles.os
 
-from mdcx.config.enums import CDChar, MarkType, Switch
-from mdcx.config.manager import manager
-from mdcx.consts import IS_MAC, IS_WINDOWS
-from mdcx.models.base.number import remove_escape_string
-from mdcx.models.core.utils import render_name_template
-from mdcx.models.enums import FileMode
-from mdcx.models.flags import Flags
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import BaseCrawlerResult, CrawlersResult, FileInfo, OtherInfo
-from mdcx.number import get_file_number, get_number_letters, is_uncensored
-from mdcx.signals import signal
-from mdcx.utils import nfd2c, split_path
-from mdcx.utils.file import copy_file_async, delete_file_async, move_file_async
-from mdcx.utils.path import showFilePath
+from ..base.number import remove_escape_string
+from ..config.enums import CDChar, MarkType, Switch
+from ..config.manager import manager
+from ..consts import IS_MAC, IS_WINDOWS
+from ..models.enums import FileMode
+from ..models.flags import Flags
+from ..models.log_buffer import LogBuffer
+from ..models.types import BaseCrawlerResult, CrawlersResult, FileInfo, OtherInfo
+from ..number import get_file_number, get_number_letters, is_uncensored
+from ..signals import signal
+from ..utils import nfd2c, split_path
+from ..utils.file import copy_file_async, delete_file_async, move_file_async
+from ..utils.path import showFilePath
+from .utils import render_name_template
 
 
 async def creat_folder(

@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING, Never, Protocol
 
-from mdcx.browser import BrowserProvider
-
+from .browser import BrowserProvider
 from .config.enums import Website
 from .crawlers import get_crawler_compat
 

@@ -29,14 +29,15 @@ from mdcx.config.extend import get_movie_path_setting
 from mdcx.config.manager import manager
 from mdcx.config.resources import resources
 from mdcx.consts import IS_WINDOWS
-from mdcx.controllers.main_window.bind_utils import set_checkboxes, set_radio_buttons
 from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.models.flags import Flags
 from mdcx.signals import signal_qt
 from mdcx.utils.file import delete_file_sync
 
+from .bind_utils import set_checkboxes, set_radio_buttons
+
 if TYPE_CHECKING:
-    from mdcx.controllers.main_window.main_window import MyMAinWindow
+    from .main_window import MyMAinWindow
 
 
 def load_config(self: "MyMAinWindow"):

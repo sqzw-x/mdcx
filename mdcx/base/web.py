@@ -11,13 +11,13 @@ from lxml import etree
 from PIL import Image
 from ping3 import ping
 
-from mdcx.config.manager import manager
-from mdcx.manual import ManualConfig
-from mdcx.models.base.web_sync import get_json_sync
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.signals import signal
-from mdcx.utils import executor
-from mdcx.utils.file import check_pic_async
+from ..config.manager import manager
+from ..manual import ManualConfig
+from ..models.log_buffer import LogBuffer
+from ..signals import signal
+from ..utils import executor
+from ..utils.file import check_pic_async
+from .web_sync import get_json_sync
 
 
 @overload
