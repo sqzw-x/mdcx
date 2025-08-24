@@ -53,8 +53,8 @@ def get_video_metadata_ffmpeg(p: Path) -> tuple[int, str]:
 
 
 if av is not None:
-    print("Using PyAV for video metadata extraction")
+    VIDEO_BACKEND = "pyav"
     get_video_metadata = get_video_metadata_pyav
 else:
-    print("Using FFmpeg for video metadata extraction")
+    VIDEO_BACKEND = "ffmpeg"
     get_video_metadata = get_video_metadata_ffmpeg
