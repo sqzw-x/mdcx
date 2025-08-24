@@ -116,9 +116,9 @@ async def pic_some_deal(number: str, thumb_final_path: Path, fanart_final_path: 
         and DownloadableFile.THUMB not in manager.config.keep_files
     ):
         if await aiofiles.os.path.exists(fanart_final_path):
-            Flags.file_done_dic[number].update({"thumb": fanart_final_path})
+            Flags.file_done_dic[number].update(thumb=fanart_final_path)
         else:
-            Flags.file_done_dic[number].update({"thumb": Path()})
+            Flags.file_done_dic[number].update(thumb=None)
         if await aiofiles.os.path.exists(thumb_final_path):
             await delete_file_async(thumb_final_path)
             LogBuffer.log().write("\n 🍀 Thumb delete done!")

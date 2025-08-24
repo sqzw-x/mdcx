@@ -609,8 +609,7 @@ async def thumb_download(
                             await move_file_async(thumb_final_path_temp, thumb_final_path)
                             await delete_file_async(thumb_final_path_temp)
                         if cd_part:
-                            dic = {"thumb": thumb_final_path}
-                            Flags.file_done_dic[result.number].update(dic)
+                            Flags.file_done_dic[result.number].update({"thumb": thumb_final_path})
                         other.thumb_marked = False  # 表示还没有走加水印流程
                         LogBuffer.log().write(f"\n 🍀 Thumb done! ({result.thumb_from})({get_used_time(start_time)}s) ")
                         other.thumb_path = thumb_final_path
@@ -740,8 +739,7 @@ async def poster_download(
                         await move_file_async(poster_final_path_temp, poster_final_path)
                         await delete_file_async(poster_final_path_temp)
                     if cd_part:
-                        dic = {"poster": poster_final_path}
-                        Flags.file_done_dic[result.number].update(dic)
+                        Flags.file_done_dic[result.number].update({"poster": poster_final_path})
                     other.poster_marked = False  # 下载的图，还没加水印
                     other.poster_path = poster_final_path
                     LogBuffer.log().write(f"\n 🍀 Poster done! ({poster_from})({get_used_time(start_time)}s)")
@@ -776,8 +774,7 @@ async def poster_download(
         # 裁剪成功，替换旧图
         await move_file_async(poster_final_path_temp, poster_final_path)
         if cd_part:
-            dic = {"poster": poster_final_path}
-            Flags.file_done_dic[result.number].update(dic)
+            Flags.file_done_dic[result.number].update({"poster": poster_final_path})
         other.poster_path = poster_final_path
         other.poster_marked = False
         return True
@@ -854,8 +851,7 @@ async def fanart_download(
         other.fanart_marked = other.thumb_marked
         LogBuffer.log().write(f"\n 🍀 Fanart done! (copy thumb)({get_used_time(start_time)}s)")
         if cd_part:
-            dic = {"fanart": fanart_final_path}
-            Flags.file_done_dic[number].update(dic)
+            Flags.file_done_dic[number].update({"fanart": fanart_final_path})
         return True
     else:
         # 本地有 fanart 时，不下载

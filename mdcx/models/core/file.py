@@ -928,8 +928,8 @@ async def deal_old_files(
                 poster_final_path
             ).lower() and await aiofiles.os.path.exists(poster_new_path_with_filename):
                 await delete_file_async(poster_new_path_with_filename)
-        elif Flags.file_done_dic[number]["local_poster"]:
-            await copy_file_async(Flags.file_done_dic[number]["local_poster"], poster_final_path)
+        elif p := Flags.file_done_dic[number]["local_poster"]:
+            await copy_file_async(p, poster_final_path)
 
     except Exception:
         signal.show_log_text(traceback.format_exc())
@@ -977,8 +977,8 @@ async def deal_old_files(
                 thumb_final_path
             ).lower() and await aiofiles.os.path.exists(thumb_new_path_with_filename):
                 await delete_file_async(thumb_new_path_with_filename)
-        elif Flags.file_done_dic[number]["local_thumb"]:
-            await copy_file_async(Flags.file_done_dic[number]["local_thumb"], thumb_final_path)
+        elif p := Flags.file_done_dic[number]["local_thumb"]:
+            await copy_file_async(p, thumb_final_path)
 
     except Exception:
         signal.show_log_text(traceback.format_exc())
@@ -1026,8 +1026,8 @@ async def deal_old_files(
                 fanart_new_path_with_filename
             ):
                 await delete_file_async(fanart_new_path_with_filename)
-        elif Flags.file_done_dic[number]["local_fanart"]:
-            await copy_file_async(Flags.file_done_dic[number]["local_fanart"], fanart_final_path)
+        elif p := Flags.file_done_dic[number]["local_fanart"]:
+            await copy_file_async(p, fanart_final_path)
 
     except Exception:
         signal.show_log_text(traceback.format_exc())

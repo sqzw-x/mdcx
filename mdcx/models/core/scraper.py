@@ -49,7 +49,7 @@ from mdcx.models.core.web import (
     trailer_download,
 )
 from mdcx.models.enums import FileMode
-from mdcx.models.flags import Flags
+from mdcx.models.flags import FileDoneDict, Flags
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.tools.emby_actor_image import update_emby_actor_photo
 from mdcx.models.tools.emby_actor_info import creat_kodi_actors
@@ -637,16 +637,16 @@ class Scraper:
 
         # 初始化图片已下载地址的字典
         if not Flags.file_done_dic.get(res.number):
-            Flags.file_done_dic[res.number] = {
-                "poster": Path(),
-                "thumb": Path(),
-                "fanart": Path(),
-                "trailer": Path(),
-                "local_poster": Path(),
-                "local_thumb": Path(),
-                "local_fanart": Path(),
-                "local_trailer": Path(),
-            }
+            Flags.file_done_dic[res.number] = FileDoneDict(
+                poster=None,
+                thumb=None,
+                fanart=None,
+                trailer=None,
+                local_poster=None,
+                local_thumb=None,
+                local_fanart=None,
+                local_trailer=None,
+            )
 
         # 视频模式（原来叫整理模式）
         # 视频模式（仅根据刮削数据把电影命名为番号并分类到对应目录名称的文件夹下）
