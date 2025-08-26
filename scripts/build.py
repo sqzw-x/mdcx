@@ -135,6 +135,8 @@ class BuildManager:
             "_cffi_backend",
             "--collect-all",
             "curl_cffi",
+            "--collect-all",
+            "patchright",
         ]
         self._run_command(cmd, "✅ 生成 .spec 文件", "spec 文件生成失败")
 
