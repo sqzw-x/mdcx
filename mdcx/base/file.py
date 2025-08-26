@@ -260,90 +260,86 @@ async def movie_lists(ignore_dirs: list[Path], media_type: list[str], movie_path
     not_skip_success = NoEscape.SKIP_SUCCESS_FILE not in manager.config.no_escape
 
     signal.show_traceback_log("🔎 遍历待刮削目录....")
+    # 由于 movie_lists 不会并发, 因此此处直接使用阻塞文件操作
+    i = 100
+    skip = 0
+    skip_repeat_softlink = 0
+    for root, dirs, files in movie_path.walk(top_down=True):
+        if root in ignore_dirs or "behind the scenes" in root.as_posix().lower():
+            dirs.clear()  # 忽略当前文件夹子目录
+            continue
 
-    def task():
-        i = 100
-        skip = 0
-        skip_repeat_softlink = 0
-        for root, dirs, files in movie_path.walk(top_down=True):
-            if "behind the scenes" in root.as_posix() or root.as_posix() in ignore_dirs:
-                dirs.clear()  # 忽略当前文件夹子目录
-                continue
+        # 文件夹是否存在跳过文件
+        for skip_key in skip_list:
+            if skip_key in files:
+                dirs.clear()
+                break
+        else:
+            # 处理文件列表
+            for f in files:
+                file_name, file_ext = os.path.splitext(f)
 
-            # 文件夹是否存在跳过文件
-            for skip_key in skip_list:
-                if skip_key in files:
-                    dirs.clear()
-                    break
-            else:
-                # 处理文件列表
-                for f in files:
-                    file_name, file_ext = os.path.splitext(f)
+                # 跳过隐藏文件、预告片、主题视频
+                if re.search(r"^\..+", file_name):
+                    continue
+                if "trailer." in f or "trailers." in f:
+                    continue
+                if "theme_video." in f:
+                    continue
 
-                    # 跳过隐藏文件、预告片、主题视频
-                    if re.search(r"^\..+", file_name):
-                        continue
-                    if "trailer." in f or "trailers." in f:
-                        continue
-                    if "theme_video." in f:
-                        continue
+                # 判断清理文件
+                path = root / f
+                if CleanAction.AUTO_CLEAN in manager.config.clean_enable and need_clean(path, f, file_ext):
+                    result, error_info = delete_file_sync(path)
+                    if result:
+                        signal.show_log_text(f" 🗑 Clean: {path} ")
+                    else:
+                        signal.show_log_text(f" 🗑 Clean error: {error_info} ")
+                    continue
 
-                    # 判断清理文件
-                    path = root / f
-                    if CleanAction.AUTO_CLEAN in manager.config.clean_enable and need_clean(path, f, file_ext):
-                        result, error_info = delete_file_sync(path)
-                        if result:
-                            signal.show_log_text(f" 🗑 Clean: {path} ")
-                        else:
-                            signal.show_log_text(f" 🗑 Clean error: {error_info} ")
-                        continue
-
-                    # 添加文件
-                    temp_total = []
-                    if file_ext.lower() in media_type:
-                        if os.path.islink(path):
-                            real_path = path.readlink()
-                            # 清理失效的软链接文件
-                            if NoEscape.CHECK_SYMLINK in manager.config.no_escape and not os.path.exists(real_path):
-                                result, error_info = delete_file_sync(path)
-                                if result:
-                                    signal.show_log_text(f" 🗑 Clean dead link: {path} ")
-                                else:
-                                    signal.show_log_text(f" 🗑 Clean dead link error: {error_info} ")
-                                continue
-                            if real_path in temp_total:
-                                skip_repeat_softlink += 1
-                                delete_file_sync(path)
-                                continue
+                # 添加文件
+                temp_total = []
+                if file_ext.lower() in media_type:
+                    if os.path.islink(path):
+                        real_path = path.readlink()
+                        # 清理失效的软链接文件
+                        if NoEscape.CHECK_SYMLINK in manager.config.no_escape and not os.path.exists(real_path):
+                            result, error_info = delete_file_sync(path)
+                            if result:
+                                signal.show_log_text(f" 🗑 Clean dead link: {path} ")
                             else:
-                                temp_total.append(real_path)
-
-                        if path in temp_total:
+                                signal.show_log_text(f" 🗑 Clean dead link error: {error_info} ")
+                            continue
+                        if real_path in temp_total:
                             skip_repeat_softlink += 1
+                            await delete_file_async(path)
                             continue
                         else:
-                            temp_total.append(path)
-                        if not_skip_success or path not in Flags.success_list:
-                            total.append(path)
-                        else:
-                            skip += 1
+                            temp_total.append(real_path)
 
-            found_count = len(total)
-            if found_count >= i:
-                i = found_count + 100
-                signal.show_traceback_log(
-                    f"✅ Found ({found_count})! "
-                    f"Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! "
-                    f"({get_used_time(start_time)}s)... Still searching, please wait... \u3000"
-                )
-                signal.show_log_text(
-                    f"    {get_current_time()} Found ({found_count})! "
-                    f"Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! "
-                    f"({get_used_time(start_time)}s)... Still searching, please wait... \u3000"
-                )
-        return total, skip, skip_repeat_softlink
+                    if path in temp_total:
+                        skip_repeat_softlink += 1
+                        continue
+                    else:
+                        temp_total.append(path)
+                    if not_skip_success or path not in Flags.success_list:
+                        total.append(path)
+                    else:
+                        skip += 1
 
-    total, skip, skip_repeat_softlink = await asyncio.to_thread(task)
+        found_count = len(total)
+        if found_count >= i:
+            i = found_count + 100
+            signal.show_traceback_log(
+                f"✅ Found ({found_count})! "
+                f"Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! "
+                f"({get_used_time(start_time)}s)... Still searching, please wait... \u3000"
+            )
+            signal.show_log_text(
+                f"    {get_current_time()} Found ({found_count})! "
+                f"Skip successfully scraped ({skip}) repeat softlink ({skip_repeat_softlink})! "
+                f"({get_used_time(start_time)}s)... Still searching, please wait... \u3000"
+            )
 
     total.sort()
     signal.show_traceback_log(

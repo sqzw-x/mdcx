@@ -15,9 +15,7 @@ from ..signals import signal
 def delete_file_sync(p: str | Path):
     p = Path(p)
     try:
-        if not p.exists(follow_symlinks=True):  # 不删除无效的符号链接
-            return True, ""
-        p.unlink()
+        p.unlink(missing_ok=True)
         return True, ""
     except Exception as e:
         error_info = f" 删除文件: {p}\n 错误: {e}\n{traceback.format_exc()}"
@@ -113,9 +111,7 @@ async def delete_file_async(file_path: str | Path):
     """异步删除文件"""
     file_path = Path(file_path)
     try:
-        if not file_path.exists(follow_symlinks=False):  # 不删除无效的符号链接
-            return True, ""
-        file_path.unlink()
+        await aiofiles.os.unlink(file_path)
         return True, ""
     except Exception as e:
         error_info = f" 删除文件: {file_path}\n 错误: {e}\n{traceback.format_exc()}"
