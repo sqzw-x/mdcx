@@ -8,12 +8,7 @@ from typing import TYPE_CHECKING
 import aiofiles.os
 from PyQt5.QtWidgets import QMessageBox
 
-from mdcx.config.enums import DownloadableFile, EmbyAction, ReadMode, Switch
-from mdcx.config.extend import get_movie_path_setting
-from mdcx.config.manager import manager
-from mdcx.config.resources import resources
-from mdcx.crawler import CrawlerProvider
-from mdcx.models.base.file import (
+from ..base.file import (
     _clean_empty_fodlers,
     check_file,
     copy_trailer_to_theme_videos,
@@ -26,13 +21,29 @@ from mdcx.models.base.file import (
     pic_some_deal,
     save_success_list,
 )
-from mdcx.models.base.image import extrafanart_copy2, extrafanart_extras_copy
-from mdcx.models.core.file import creat_folder, deal_old_files, get_file_info_v2, get_output_name, move_movie
-from mdcx.models.core.file_crawler import FileScraper
-from mdcx.models.core.image import add_mark
-from mdcx.models.core.nfo import get_nfo_data, write_nfo
-from mdcx.models.core.translate import translate_actor, translate_info, translate_title_outline
-from mdcx.models.core.utils import (
+from ..base.image import extrafanart_copy2, extrafanart_extras_copy
+from ..config.enums import DownloadableFile, EmbyAction, ReadMode, Switch
+from ..config.extend import get_movie_path_setting
+from ..config.manager import manager
+from ..config.resources import resources
+from ..crawler import CrawlerProvider
+from ..models.enums import FileMode
+from ..models.flags import FileDoneDict, Flags
+from ..models.log_buffer import LogBuffer
+from ..models.types import CrawlersResult, FileInfo, OtherInfo, ScrapeResult, ShowData
+from ..signals import signal
+from ..tools.emby_actor_image import update_emby_actor_photo
+from ..tools.emby_actor_info import creat_kodi_actors
+from ..utils import executor, get_current_time, get_real_time, get_used_time, split_path
+from ..utils.dataclass import update
+from ..utils.file import copy_file_async, move_file_async
+from ..utils.path import is_descendant
+from .file import creat_folder, deal_old_files, get_file_info_v2, get_output_name, move_movie
+from .file_crawler import FileScraper
+from .image import add_mark
+from .nfo import get_nfo_data, write_nfo
+from .translate import translate_actor, translate_info, translate_title_outline
+from .utils import (
     add_definition_tag,
     deal_some_field,
     get_video_size,
@@ -41,27 +52,16 @@ from mdcx.models.core.utils import (
     show_movie_info,
     show_result,
 )
-from mdcx.models.core.web import (
+from .web import (
     extrafanart_download,
     fanart_download,
     poster_download,
     thumb_download,
     trailer_download,
 )
-from mdcx.models.enums import FileMode
-from mdcx.models.flags import Flags
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.tools.emby_actor_image import update_emby_actor_photo
-from mdcx.models.tools.emby_actor_info import creat_kodi_actors
-from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo, ScrapeResult, ShowData
-from mdcx.signals import signal
-from mdcx.utils import executor, get_current_time, get_real_time, get_used_time, split_path
-from mdcx.utils.dataclass import update
-from mdcx.utils.file import copy_file_async, move_file_async
-from mdcx.utils.path import is_descendant
 
 if TYPE_CHECKING:
-    from mdcx.crawler import CrawlerProviderProtocol
+    from ..crawler import CrawlerProviderProtocol
 
 
 class StopScrape(Exception): ...
@@ -637,16 +637,16 @@ class Scraper:
 
         # 初始化图片已下载地址的字典
         if not Flags.file_done_dic.get(res.number):
-            Flags.file_done_dic[res.number] = {
-                "poster": Path(),
-                "thumb": Path(),
-                "fanart": Path(),
-                "trailer": Path(),
-                "local_poster": Path(),
-                "local_thumb": Path(),
-                "local_fanart": Path(),
-                "local_trailer": Path(),
-            }
+            Flags.file_done_dic[res.number] = FileDoneDict(
+                poster=None,
+                thumb=None,
+                fanart=None,
+                trailer=None,
+                local_poster=None,
+                local_thumb=None,
+                local_fanart=None,
+                local_trailer=None,
+            )
 
         # 视频模式（原来叫整理模式）
         # 视频模式（仅根据刮削数据把电影命名为番号并分类到对应目录名称的文件夹下）

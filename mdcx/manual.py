@@ -1,5 +1,5 @@
-from mdcx.config.enums import Website
-from mdcx.gen.field_enums import CrawlerResultFields
+from .config.enums import Website
+from .gen.field_enums import CrawlerResultFields
 
 
 class ManualConfig:

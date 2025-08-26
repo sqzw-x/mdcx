@@ -10,14 +10,14 @@ from typing import cast
 
 from PIL import Image
 
-from mdcx.config.enums import DownloadableFile, MarkType
-from mdcx.config.manager import manager
-from mdcx.models.base.image import add_mark_thread
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo
-from mdcx.signals import signal
-from mdcx.utils import executor, get_used_time
-from mdcx.utils.file import check_pic_async, copy_file_sync, delete_file_sync
+from ..base.image import add_mark_thread
+from ..config.enums import DownloadableFile, MarkType
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
+from ..models.types import CrawlersResult, FileInfo, OtherInfo
+from ..signals import signal
+from ..utils import executor, get_used_time
+from ..utils.file import check_pic_async, copy_file_sync, delete_file_sync
 
 
 async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):

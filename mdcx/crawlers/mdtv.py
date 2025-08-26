@@ -4,10 +4,10 @@ import time
 
 from lxml import etree
 
-from mdcx.config.enums import Website
-from mdcx.config.manager import manager
-from mdcx.crawlers.guochan import get_actor_list, get_lable_list, get_number_list
-from mdcx.models.log_buffer import LogBuffer
+from ..config.enums import Website
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
+from .guochan import get_actor_list, get_lable_list, get_number_list
 
 
 def get_actor_photo(actor):

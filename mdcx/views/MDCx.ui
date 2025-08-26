@@ -1267,6 +1267,7 @@
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
+                &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1323,6 +1324,7 @@
                 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
                 p, li { white-space: pre-wrap; }
                 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.AppleSystemUIFont'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+                &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
@@ -1423,6 +1425,7 @@
                 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
                 p, li { white-space: pre-wrap; }
                 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.AppleSystemUIFont'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+                &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
@@ -4165,7 +4168,7 @@
                   <property name="geometry">
                     <rect>
                       <x>0</x>
-                      <y>-1342</y>
+                      <y>0</y>
                       <width>760</width>
                       <height>2000</height>
                     </rect>
@@ -6645,7 +6648,7 @@
                           <x>20</x>
                           <y>30</y>
                           <width>661</width>
-                          <height>541</height>
+                          <height>687</height>
                         </rect>
                       </property>
                       <layout class="QGridLayout" name="gridLayout_36">
@@ -9993,9 +9996,9 @@
                   <property name="geometry">
                     <rect>
                       <x>0</x>
-                      <y>-2762</y>
+                      <y>0</y>
                       <width>760</width>
-                      <height>3420</height>
+                      <height>3300</height>
                     </rect>
                   </property>
                   <property name="sizePolicy">
@@ -10314,7 +10317,7 @@
                     <property name="geometry">
                       <rect>
                         <x>30</x>
-                        <y>1990</y>
+                        <y>1900</y>
                         <width>701</width>
                         <height>441</height>
                       </rect>
@@ -11164,7 +11167,7 @@
                         <x>30</x>
                         <y>1450</y>
                         <width>701</width>
-                        <height>521</height>
+                        <height>431</height>
                       </rect>
                     </property>
                     <property name="minimumSize">
@@ -11671,59 +11674,6 @@
                           有码版本，重命名文件名及目录名时，在番号后显示该字符表示为有码版本&lt;/p&gt;</string>
                       </property>
                     </widget>
-                    <widget class="QLabel" name="label_235">
-                      <property name="geometry">
-                        <rect>
-                          <x>157</x>
-                          <y>479</y>
-                          <width>511</width>
-                          <height>16</height>
-                        </rect>
-                      </property>
-                      <property name="sizePolicy">
-                        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                        </sizepolicy>
-                      </property>
-                      <property name="styleSheet">
-                        <string notr="true">color: rgb(8, 128, 128);</string>
-                      </property>
-                      <property name="text">
-                        <string>指命名时在番号后添加版本命名字符。你也可以使用 moword 字段来调整添加位置</string>
-                      </property>
-                    </widget>
-                    <widget class="QLabel" name="label_234">
-                      <property name="geometry">
-                        <rect>
-                          <x>21</x>
-                          <y>437</y>
-                          <width>130</width>
-                          <height>30</height>
-                        </rect>
-                      </property>
-                      <property name="sizePolicy">
-                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                        </sizepolicy>
-                      </property>
-                      <property name="minimumSize">
-                        <size>
-                          <width>130</width>
-                          <height>30</height>
-                        </size>
-                      </property>
-                      <property name="layoutDirection">
-                        <enum>Qt::LeftToRight</enum>
-                      </property>
-                      <property name="text">
-                        <string>添加马赛克命名字符：</string>
-                      </property>
-                      <property name="alignment">
-                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                      </property>
-                    </widget>
                     <widget class="QLabel" name="label_286">
                       <property name="geometry">
                         <rect>
@@ -11755,62 +11705,12 @@
                         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                       </property>
                     </widget>
-                    <widget class="QCheckBox" name="checkBox_foldername_mosaic">
-                      <property name="geometry">
-                        <rect>
-                          <x>160</x>
-                          <y>440</y>
-                          <width>100</width>
-                          <height>30</height>
-                        </rect>
-                      </property>
-                      <property name="sizePolicy">
-                        <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                        </sizepolicy>
-                      </property>
-                      <property name="minimumSize">
-                        <size>
-                          <width>100</width>
-                          <height>30</height>
-                        </size>
-                      </property>
-                      <property name="text">
-                        <string>视频目录名</string>
-                      </property>
-                    </widget>
-                    <widget class="QCheckBox" name="checkBox_filename_mosaic">
-                      <property name="geometry">
-                        <rect>
-                          <x>410</x>
-                          <y>440</y>
-                          <width>206</width>
-                          <height>30</height>
-                        </rect>
-                      </property>
-                      <property name="sizePolicy">
-                        <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                        </sizepolicy>
-                      </property>
-                      <property name="minimumSize">
-                        <size>
-                          <width>100</width>
-                          <height>30</height>
-                        </size>
-                      </property>
-                      <property name="text">
-                        <string>视频文件名</string>
-                      </property>
-                    </widget>
                   </widget>
                   <widget class="QGroupBox" name="groupBox_37">
                     <property name="geometry">
                       <rect>
                         <x>30</x>
-                        <y>2450</y>
+                        <y>2360</y>
                         <width>701</width>
                         <height>121</height>
                       </rect>
@@ -11917,7 +11817,7 @@
                     <property name="geometry">
                       <rect>
                         <x>30</x>
-                        <y>2590</y>
+                        <y>2500</y>
                         <width>701</width>
                         <height>121</height>
                       </rect>
@@ -12372,9 +12272,9 @@
                     <property name="geometry">
                       <rect>
                         <x>30</x>
-                        <y>2730</y>
+                        <y>2640</y>
                         <width>701</width>
-                        <height>301</height>
+                        <height>221</height>
                       </rect>
                     </property>
                     <property name="minimumSize">
@@ -12594,115 +12494,12 @@
                         </property>
                       </widget>
                     </widget>
-                    <widget class="QLabel" name="label_357">
-                      <property name="geometry">
-                        <rect>
-                          <x>31</x>
-                          <y>218</y>
-                          <width>130</width>
-                          <height>30</height>
-                        </rect>
-                      </property>
-                      <property name="sizePolicy">
-                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                        </sizepolicy>
-                      </property>
-                      <property name="minimumSize">
-                        <size>
-                          <width>130</width>
-                          <height>30</height>
-                        </size>
-                      </property>
-                      <property name="layoutDirection">
-                        <enum>Qt::LeftToRight</enum>
-                      </property>
-                      <property name="text">
-                        <string>添加 4K 字符：</string>
-                      </property>
-                      <property name="alignment">
-                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                      </property>
-                    </widget>
-                    <widget class="QCheckBox" name="checkBox_filename_4k">
-                      <property name="geometry">
-                        <rect>
-                          <x>420</x>
-                          <y>221</y>
-                          <width>206</width>
-                          <height>30</height>
-                        </rect>
-                      </property>
-                      <property name="sizePolicy">
-                        <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                        </sizepolicy>
-                      </property>
-                      <property name="minimumSize">
-                        <size>
-                          <width>100</width>
-                          <height>30</height>
-                        </size>
-                      </property>
-                      <property name="text">
-                        <string>视频文件名</string>
-                      </property>
-                    </widget>
-                    <widget class="QLabel" name="label_358">
-                      <property name="geometry">
-                        <rect>
-                          <x>167</x>
-                          <y>260</y>
-                          <width>511</width>
-                          <height>16</height>
-                        </rect>
-                      </property>
-                      <property name="sizePolicy">
-                        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                        </sizepolicy>
-                      </property>
-                      <property name="styleSheet">
-                        <string notr="true">color: rgb(8, 128, 128);</string>
-                      </property>
-                      <property name="text">
-                        <string>指命名时在番号后添加 4K（仅4K）。你也可以使用 4K 字段来调整添加位置</string>
-                      </property>
-                    </widget>
-                    <widget class="QCheckBox" name="checkBox_foldername_4k">
-                      <property name="geometry">
-                        <rect>
-                          <x>170</x>
-                          <y>221</y>
-                          <width>100</width>
-                          <height>30</height>
-                        </rect>
-                      </property>
-                      <property name="sizePolicy">
-                        <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                        </sizepolicy>
-                      </property>
-                      <property name="minimumSize">
-                        <size>
-                          <width>100</width>
-                          <height>30</height>
-                        </size>
-                      </property>
-                      <property name="text">
-                        <string>视频目录名</string>
-                      </property>
-                    </widget>
                   </widget>
                   <widget class="QGroupBox" name="groupBox_67">
                     <property name="geometry">
                       <rect>
                         <x>30</x>
-                        <y>3050</y>
+                        <y>2880</y>
                         <width>701</width>
                         <height>271</height>
                       </rect>
@@ -12875,7 +12672,7 @@
                   <property name="geometry">
                     <rect>
                       <x>0</x>
-                      <y>-2092</y>
+                      <y>0</y>
                       <width>760</width>
                       <height>2750</height>
                     </rect>
@@ -15400,7 +15197,7 @@
                   <property name="geometry">
                     <rect>
                       <x>0</x>
-                      <y>-1012</y>
+                      <y>0</y>
                       <width>760</width>
                       <height>1670</height>
                     </rect>
@@ -22692,6 +22489,7 @@
                   &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                   &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                   &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
+                  &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                   &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt; &lt;/p&gt;
                   &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt; &lt;/p&gt;
                   &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -22832,6 +22630,7 @@
                   &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                   &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                   &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
+                  &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                   &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt; &lt;/p&gt;
                   &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt; &lt;/p&gt;
                   &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Microsoft YaHei UI'; font-size:9pt;&quot;&gt; &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -22916,6 +22715,7 @@
                 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
                 p, li { white-space: pre-wrap; }
                 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.AppleSystemUIFont'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+                &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;
                 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;/p&gt;

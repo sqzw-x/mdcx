@@ -1,5 +1,5 @@
-from mdcx.config.manager import manager
-from mdcx.utils import executor
+from ..config.manager import manager
+from ..utils import executor
 
 
 def get_text_sync(

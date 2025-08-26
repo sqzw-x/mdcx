@@ -6,8 +6,8 @@ import aiofiles.os
 from PIL import Image, ImageFilter
 from PyQt5.QtGui import QImageReader, QPixmap
 
-from mdcx.signals import signal
-from mdcx.utils.file import delete_file_async
+from .signals import signal
+from .utils.file import delete_file_async
 
 
 async def get_pixmap(pic_path: Path, poster=True, pic_from=""):

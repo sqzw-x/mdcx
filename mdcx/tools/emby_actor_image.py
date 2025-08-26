@@ -12,12 +12,12 @@ import aiofiles
 import aiofiles.os
 from parsel import Selector
 
-from mdcx.config.manager import manager
-from mdcx.config.resources import resources
-from mdcx.image import cut_pic, fix_pic_async
-from mdcx.models.base.web import download_file_with_filepath
-from mdcx.signals import signal
-from mdcx.utils import get_used_time
+from ..base.web import download_file_with_filepath
+from ..config.manager import manager
+from ..config.resources import resources
+from ..image import cut_pic, fix_pic_async
+from ..signals import signal
+from ..utils import get_used_time
 
 
 async def update_emby_actor_photo() -> None:

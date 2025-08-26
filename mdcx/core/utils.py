@@ -6,18 +6,18 @@ from pathlib import Path
 
 import aiofiles.os
 
-from mdcx.config.enums import FieldRule, Language, NfoInclude, NoEscape
-from mdcx.config.manager import manager
-from mdcx.config.resources import resources
-from mdcx.gen.field_enums import CrawlerResultFields
-from mdcx.manual import ManualConfig
-from mdcx.models.base.number import deal_actor_more
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import BaseCrawlerResult, CrawlersResult, FileInfo
-from mdcx.number import get_number_first_letter, get_number_letters
-from mdcx.signals import signal
-from mdcx.utils import get_new_release, get_used_time, split_path
-from mdcx.utils.video import get_video_metadata
+from ..base.number import deal_actor_more
+from ..config.enums import FieldRule, Language, NfoInclude, NoEscape
+from ..config.manager import manager
+from ..config.resources import resources
+from ..gen.field_enums import CrawlerResultFields
+from ..manual import ManualConfig
+from ..models.log_buffer import LogBuffer
+from ..models.types import BaseCrawlerResult, CrawlersResult, FileInfo
+from ..number import get_number_first_letter, get_number_letters
+from ..signals import signal
+from ..utils import get_new_release, get_used_time, split_path
+from ..utils.video import get_video_metadata
 
 
 def replace_word(json_data: BaseCrawlerResult):

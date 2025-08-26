@@ -8,12 +8,12 @@ import zhconv
 from lxml import etree
 from PyQt5.QtGui import QFontDatabase
 
-from mdcx.config.manager import manager
-from mdcx.consts import IS_PYINSTALLER, MAIN_PATH
-from mdcx.manual import ManualConfig
-from mdcx.signals import signal
-from mdcx.utils import singleton
-from mdcx.utils.file import copy_file_sync
+from ..consts import IS_PYINSTALLER, MAIN_PATH
+from ..manual import ManualConfig
+from ..signals import signal
+from ..utils import singleton
+from ..utils.file import copy_file_sync
+from .manager import manager
 
 
 @singleton

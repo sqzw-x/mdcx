@@ -4,9 +4,9 @@ import time
 
 from lxml import etree
 
-from mdcx.config.enums import Website
-from mdcx.config.manager import manager
-from mdcx.models.log_buffer import LogBuffer
+from ..config.enums import Website
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
 
 
 def get_real_url(html, number, domain_2):

@@ -12,13 +12,13 @@ import aiofiles
 import aiofiles.os
 from lxml import etree
 
-from mdcx.config.manager import manager
-from mdcx.config.resources import resources
-from mdcx.models.base.file import movie_lists
-from mdcx.models.core.file import get_file_info_v2
-from mdcx.models.flags import Flags
-from mdcx.signals import signal
-from mdcx.utils import get_used_time
+from ..base.file import movie_lists
+from ..config.manager import manager
+from ..config.resources import resources
+from ..core.file import get_file_info_v2
+from ..models.flags import Flags
+from ..signals import signal
+from ..utils import get_used_time
 
 
 async def _scraper_web(url):

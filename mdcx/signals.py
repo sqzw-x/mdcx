@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING, Literal
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
-from mdcx.models.types import ShowData
-from mdcx.utils import singleton
+from .models.types import ShowData
+from .utils import singleton
 
 if TYPE_CHECKING:
-    from mdcx.server.signals import ServerSignals
+    from .server.signals import ServerSignals
 
 
 @singleton

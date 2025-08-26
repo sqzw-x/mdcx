@@ -3,11 +3,11 @@ from pathlib import Path
 
 import aiofiles.os
 
-from mdcx.config.extend import get_movie_path_setting
-from mdcx.config.manager import manager
-from mdcx.models.base.file import movie_lists
-from mdcx.signals import signal
-from mdcx.utils.file import copy_file_async, move_file_async
+from ..config.extend import get_movie_path_setting
+from ..config.manager import manager
+from ..signals import signal
+from ..utils.file import copy_file_async, move_file_async
+from .file import movie_lists
 
 
 async def add_del_extras(mode: str) -> None:

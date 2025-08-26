@@ -9,18 +9,18 @@ import aiofiles
 import aiofiles.os
 from lxml import etree
 
-from mdcx.config.enums import Language, ReadMode
-from mdcx.config.manager import manager
-from mdcx.gen.field_enums import CrawlerResultFields
-from mdcx.manual import ManualConfig
-from mdcx.models.core.utils import render_name_template
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.models.types import CrawlersResult, FileInfo, OtherInfo
-from mdcx.number import get_number_letters
-from mdcx.signals import signal
-from mdcx.utils import get_used_time
-from mdcx.utils.file import delete_file_async
-from mdcx.utils.language import is_japanese
+from ..config.enums import Language, ReadMode
+from ..config.manager import manager
+from ..gen.field_enums import CrawlerResultFields
+from ..manual import ManualConfig
+from ..models.log_buffer import LogBuffer
+from ..models.types import CrawlersResult, FileInfo, OtherInfo
+from ..number import get_number_letters
+from ..signals import signal
+from ..utils import get_used_time
+from ..utils.file import delete_file_async
+from ..utils.language import is_japanese
+from .utils import render_name_template
 
 
 async def write_nfo(

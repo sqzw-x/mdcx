@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
 
-from mdcx.config.enums import Language
-from mdcx.gen.field_enums import CrawlerResultFields
+from ..config.enums import Language
+from ..gen.field_enums import CrawlerResultFields
 
 
 @dataclass

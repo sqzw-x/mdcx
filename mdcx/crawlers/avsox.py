@@ -4,9 +4,9 @@ import time
 
 from lxml import etree
 
-from mdcx.config.manager import manager
-from mdcx.models.base.web import get_avsox_domain
-from mdcx.models.log_buffer import LogBuffer
+from ..base.web import get_avsox_domain
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
 
 
 def get_actor_photo(actor):

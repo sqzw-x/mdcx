@@ -6,10 +6,10 @@ import urllib.parse
 
 from lxml import etree
 
-from mdcx.config.enums import Website
-from mdcx.config.manager import manager
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.signals import signal
+from ..config.enums import Website
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
+from ..signals import signal
 
 
 def get_web_number(html):

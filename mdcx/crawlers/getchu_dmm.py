@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from mdcx.crawlers import getchu
+from ..crawlers import getchu
 
 
 async def main(

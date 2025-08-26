@@ -2,15 +2,15 @@ import os
 
 import aiofiles.os
 
-from mdcx.config.extend import get_movie_path_setting
-from mdcx.config.manager import manager
-from mdcx.models.base.file import movie_lists
-from mdcx.models.core.file import get_file_info_v2
-from mdcx.models.core.scraper import start_new_scrape
-from mdcx.models.enums import FileMode
-from mdcx.signals import signal
-from mdcx.utils import split_path
-from mdcx.utils.file import copy_file_async, move_file_async
+from ..base.file import movie_lists
+from ..config.extend import get_movie_path_setting
+from ..config.manager import manager
+from ..core.file import get_file_info_v2
+from ..core.scraper import start_new_scrape
+from ..models.enums import FileMode
+from ..signals import signal
+from ..utils import split_path
+from ..utils.file import copy_file_async, move_file_async
 
 
 async def add_sub_for_all_video() -> None:

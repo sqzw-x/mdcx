@@ -1,5 +1,5 @@
-from mdcx.config.manager import manager
-from mdcx.number import remove_escape_string1
+from ..config.manager import manager
+from ..number import remove_escape_string1
 
 
 def remove_escape_string(filename: str, replace_char: str = "") -> str:

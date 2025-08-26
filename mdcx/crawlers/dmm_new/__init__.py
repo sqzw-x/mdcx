@@ -5,8 +5,8 @@ from typing import override
 from parsel import Selector
 from patchright.async_api import Browser
 
+from mdcx.base.web import check_url
 from mdcx.config.models import Website
-from mdcx.models.base.web import check_url
 from mdcx.models.types import CrawlerInput
 from mdcx.utils.dataclass import update_valid
 from mdcx.utils.gather_group import GatherGroup

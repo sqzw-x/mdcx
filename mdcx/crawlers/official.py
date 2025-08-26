@@ -4,10 +4,10 @@ import time
 
 from lxml import etree
 
-from mdcx.config.manager import manager
-from mdcx.crawlers import prestige
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.number import get_number_letters
+from ..config.manager import manager
+from ..crawlers import prestige
+from ..models.log_buffer import LogBuffer
+from ..number import get_number_letters
 
 
 def get_title(html):

@@ -7,10 +7,10 @@ from difflib import SequenceMatcher
 
 import oshash
 
-from mdcx.config.manager import manager
-from mdcx.models.base.number import remove_escape_string
-from mdcx.models.log_buffer import LogBuffer
-from mdcx.number import long_name
+from ..base.number import remove_escape_string
+from ..config.manager import manager
+from ..models.log_buffer import LogBuffer
+from ..number import long_name
 
 
 def similarity(a, b):

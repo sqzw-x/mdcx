@@ -6,10 +6,9 @@ from urllib.parse import urljoin
 
 from parsel import Selector
 
-from mdcx.config.manager import manager
-from mdcx.config.models import Website
-from mdcx.models.types import CrawlerResult
-
+from ..config.manager import manager
+from ..config.models import Website
+from ..models.types import CrawlerResult
 from .base import (
     BaseCrawler,
     CralwerException,

@@ -1,10 +1,21 @@
 from asyncio import Event
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
-from mdcx.models.enums import FileMode
-from mdcx.models.types import ScrapeResult
+from .enums import FileMode
+from .types import ScrapeResult
+
+
+class FileDoneDict(TypedDict):
+    poster: Path | None
+    thumb: Path | None
+    fanart: Path | None
+    trailer: Path | None
+    local_poster: Path | None
+    local_thumb: Path | None
+    local_fanart: Path | None
+    local_trailer: Path | None
 
 
 @dataclass
@@ -42,7 +53,7 @@ class _Flags:
     # 当前文件的图片最终输出路径的字典（如已存在，则最终图片文件视为已处理过）
     pic_catch_set: set[Path] = field(default_factory=set)
     # 当前番号的图片已下载完成的标识（如已存在，视为图片已下载完成）
-    file_done_dic: dict[str, dict[str, Path]] = field(default_factory=dict)
+    file_done_dic: dict[str, FileDoneDict] = field(default_factory=dict)
     # 当前文件夹剧照已处理的标识（如已存在，视为剧照已处理过）
     extrafanart_deal_set: set[Path] = field(default_factory=set)
     # 当前文件trailer已处理的标识（如已存在，视为剧照已处理过）

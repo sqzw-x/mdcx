@@ -47,18 +47,3 @@ if IS_PYINSTALLER:
         MAIN_PATH = Path("").resolve()
 
 MARK_FILE = MAIN_PATH / "MDCx.config"
-
-
-def show_constants():
-    """显示所有运行时常量"""
-    constants = {
-        "MAIN_PATH": MAIN_PATH,
-        "IS_WINDOWS": IS_WINDOWS,
-        "IS_MAC": IS_MAC,
-        "IS_DOCKER": IS_DOCKER,
-        "IS_NFC": IS_NFC,
-        "IS_PYINSTALLER": IS_PYINSTALLER,
-    }
-    print("Run time constants:")
-    for key, value in constants.items():
-        print(f"\t{key}: {value}")

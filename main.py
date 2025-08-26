@@ -8,10 +8,28 @@ from PyQt5.QtCore import QCoreApplication, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
 
-from mdcx.consts import show_constants
+from mdcx.consts import IS_DOCKER, IS_MAC, IS_NFC, IS_PYINSTALLER, IS_WINDOWS, MAIN_PATH
 from mdcx.controllers.main_window.main_window import MyMAinWindow
+from mdcx.utils.video import VIDEO_BACKEND
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+
+def show_constants():
+    """显示所有运行时常量"""
+    constants = {
+        "MAIN_PATH": MAIN_PATH,
+        "IS_WINDOWS": IS_WINDOWS,
+        "IS_MAC": IS_MAC,
+        "IS_DOCKER": IS_DOCKER,
+        "IS_NFC": IS_NFC,
+        "IS_PYINSTALLER": IS_PYINSTALLER,
+        "VIDEO_BACKEND": VIDEO_BACKEND,
+    }
+    print("Run time constants:")
+    for key, value in constants.items():
+        print(f"\t{key}: {value}")
+
 
 show_constants()
 

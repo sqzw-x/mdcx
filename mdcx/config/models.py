@@ -8,8 +8,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 from pydantic.fields import FieldInfo
 
-from mdcx.gen.field_enums import CrawlerResultFields
-
+from ..gen.field_enums import CrawlerResultFields
 from ..manual import ManualConfig
 from ..server.config import SAFE_DIRS
 from .enums import (

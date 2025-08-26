@@ -6,18 +6,18 @@ from typing import TYPE_CHECKING
 
 from patchright.async_api import Error as PatchrightError
 
-from mdcx.config.models import Language, Website
-from mdcx.gen.field_enums import CrawlerResultFields
-from mdcx.manual import ManualConfig
-from mdcx.models.enums import FileMode
-from mdcx.models.flags import Flags
-from mdcx.models.types import CrawlerInput, CrawlerResponse, CrawlerResult, CrawlersResult, CrawlTask
-from mdcx.number import is_uncensored
-from mdcx.utils.dataclass import update
+from ..config.models import Language, Website
+from ..gen.field_enums import CrawlerResultFields
+from ..manual import ManualConfig
+from ..models.enums import FileMode
+from ..models.flags import Flags
+from ..models.types import CrawlerInput, CrawlerResponse, CrawlerResult, CrawlersResult, CrawlTask
+from ..number import is_uncensored
+from ..utils.dataclass import update
 
 if TYPE_CHECKING:
-    from mdcx.config.models import Config
-    from mdcx.crawler import CrawlerProviderProtocol
+    from ..config.models import Config
+    from ..crawler import CrawlerProviderProtocol
 
 
 MULTI_LANGUAGE_WEBSITES = [  # 支持多语言, language 参数有意义
