@@ -434,7 +434,6 @@ class Switch(Enum):
     SHOW_DIALOG_EXIT = "show_dialog_exit"
     SHOW_DIALOG_STOP_SCRAPE = "show_dialog_stop_scrape"
     SORT_DEL = "sort_del"
-    IPV4_ONLY = "ipv4_only"
     QT_DIALOG = "qt_dialog"
     THEPORNDB_NO_HASH = "theporndb_no_hash"
     HIDE_DOCK = "hide_dock"
@@ -446,6 +445,8 @@ class Switch(Enum):
     HIDE_CLOSE = "hide_close"
     HIDE_MINI = "hide_mini"
     HIDE_NONE = "hide_none"
+    # deperated
+    IPV4_ONLY = "ipv4_only"
 
     @classmethod
     def names(cls):
@@ -458,7 +459,6 @@ class Switch(Enum):
             "Show Dialog Exit",
             "Show Dialog Stop Scrape",
             "Sort Del",
-            "Ipv4 Only",
             "Qt Dialog",
             "Theporndb No Hash",
             "Hide Dock",

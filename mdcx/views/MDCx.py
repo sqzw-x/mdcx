@@ -8572,7 +8572,7 @@ class Ui_MDCx(object):
         self.scrollAreaWidgetContents_wangluo.setGeometry(QtCore.QRect(0, 0, 760, 1500))
         self.scrollAreaWidgetContents_wangluo.setObjectName("scrollAreaWidgetContents_wangluo")
         self.groupBox_10 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_wangluo)
-        self.groupBox_10.setGeometry(QtCore.QRect(30, 350, 701, 531))
+        self.groupBox_10.setGeometry(QtCore.QRect(30, 280, 701, 531))
         self.groupBox_10.setStyleSheet("font:\"Courier\";")
         self.groupBox_10.setObjectName("groupBox_10")
         self.gridLayoutWidget_10 = QtWidgets.QWidget(self.groupBox_10)
@@ -8598,7 +8598,7 @@ class Ui_MDCx(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.plainTextEdit_cookie_javdb.sizePolicy().hasHeightForWidth())
         self.plainTextEdit_cookie_javdb.setSizePolicy(sizePolicy)
-        self.plainTextEdit_cookie_javdb.setMinimumSize(QtCore.QSize(300, 80))
+        self.plainTextEdit_cookie_javdb.setMinimumSize(QtCore.QSize(400, 80))
         self.plainTextEdit_cookie_javdb.setStyleSheet(" border: 1px solid rgba(0,0,0, 50);\n"
 "                                border-radius: 1px;\n"
 "                                font: \"Courier\";")
@@ -8639,7 +8639,7 @@ class Ui_MDCx(object):
         self.label_425.setObjectName("label_425")
         self.gridLayout_10.addWidget(self.label_425, 2, 0, 1, 1)
         self.plainTextEdit_cookie_javbus = QtWidgets.QPlainTextEdit(self.gridLayoutWidget_10)
-        self.plainTextEdit_cookie_javbus.setMinimumSize(QtCore.QSize(300, 80))
+        self.plainTextEdit_cookie_javbus.setMinimumSize(QtCore.QSize(400, 80))
         self.plainTextEdit_cookie_javbus.setAccessibleDescription("")
         self.plainTextEdit_cookie_javbus.setStyleSheet(" border: 1px solid rgba(0,0,0, 50);\n"
 "                                border-radius: 1px;\n"
@@ -8697,54 +8697,15 @@ class Ui_MDCx(object):
         self.label_7.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_7.setObjectName("label_7")
         self.groupBox_28 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_wangluo)
-        self.groupBox_28.setGeometry(QtCore.QRect(30, 20, 701, 311))
+        self.groupBox_28.setGeometry(QtCore.QRect(30, 20, 701, 241))
         self.groupBox_28.setStyleSheet("font:\"Courier\";")
         self.groupBox_28.setObjectName("groupBox_28")
         self.gridLayoutWidget_9 = QtWidgets.QWidget(self.groupBox_28)
-        self.gridLayoutWidget_9.setGeometry(QtCore.QRect(20, 30, 671, 261))
+        self.gridLayoutWidget_9.setGeometry(QtCore.QRect(20, 30, 661, 194))
         self.gridLayoutWidget_9.setObjectName("gridLayoutWidget_9")
         self.gridLayout_9 = QtWidgets.QGridLayout(self.gridLayoutWidget_9)
         self.gridLayout_9.setContentsMargins(0, 0, 0, 0)
         self.gridLayout_9.setObjectName("gridLayout_9")
-        self.checkBox_net_ipv4_only = QtWidgets.QCheckBox(self.gridLayoutWidget_9)
-        self.checkBox_net_ipv4_only.setObjectName("checkBox_net_ipv4_only")
-        self.gridLayout_9.addWidget(self.checkBox_net_ipv4_only, 5, 1, 1, 1)
-        self.label_64 = QtWidgets.QLabel(self.gridLayoutWidget_9)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_64.sizePolicy().hasHeightForWidth())
-        self.label_64.setSizePolicy(sizePolicy)
-        self.label_64.setMinimumSize(QtCore.QSize(0, 0))
-        self.label_64.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.label_64.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.label_64.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.label_64.setObjectName("label_64")
-        self.gridLayout_9.addWidget(self.label_64, 1, 0, 1, 1)
-        self.label_65 = QtWidgets.QLabel(self.gridLayoutWidget_9)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_65.sizePolicy().hasHeightForWidth())
-        self.label_65.setSizePolicy(sizePolicy)
-        self.label_65.setMinimumSize(QtCore.QSize(0, 0))
-        self.label_65.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.label_65.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.label_65.setObjectName("label_65")
-        self.gridLayout_9.addWidget(self.label_65, 4, 0, 1, 1)
-        self.lineEdit_proxy = QtWidgets.QLineEdit(self.gridLayoutWidget_9)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.lineEdit_proxy.sizePolicy().hasHeightForWidth())
-        self.lineEdit_proxy.setSizePolicy(sizePolicy)
-        self.lineEdit_proxy.setMinimumSize(QtCore.QSize(300, 30))
-        self.lineEdit_proxy.setStyleSheet(" font: \"Courier\";\n"
-"                                border: 1px solid rgba(0,0,0, 50);\n"
-"                                border-radius: 15px;\n"
-"")
-        self.lineEdit_proxy.setObjectName("lineEdit_proxy")
-        self.gridLayout_9.addWidget(self.lineEdit_proxy, 1, 1, 1, 1)
         self.label_103 = QtWidgets.QLabel(self.gridLayoutWidget_9)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -8756,18 +8717,9 @@ class Ui_MDCx(object):
         self.gridLayout_9.addWidget(self.label_103, 2, 1, 1, 1)
         self.horizontalLayout_17 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_17.setObjectName("horizontalLayout_17")
-        self.radioButton_proxy_http = QtWidgets.QRadioButton(self.gridLayoutWidget_9)
-        self.radioButton_proxy_http.setMinimumSize(QtCore.QSize(93, 30))
-        self.radioButton_proxy_http.setObjectName("radioButton_proxy_http")
-        self.horizontalLayout_17.addWidget(self.radioButton_proxy_http)
-        self.radioButton_proxy_socks5 = QtWidgets.QRadioButton(self.gridLayoutWidget_9)
-        self.radioButton_proxy_socks5.setMinimumSize(QtCore.QSize(93, 30))
-        self.radioButton_proxy_socks5.setObjectName("radioButton_proxy_socks5")
-        self.horizontalLayout_17.addWidget(self.radioButton_proxy_socks5)
-        self.radioButton_proxy_nouse = QtWidgets.QRadioButton(self.gridLayoutWidget_9)
-        self.radioButton_proxy_nouse.setMinimumSize(QtCore.QSize(93, 30))
-        self.radioButton_proxy_nouse.setObjectName("radioButton_proxy_nouse")
-        self.horizontalLayout_17.addWidget(self.radioButton_proxy_nouse)
+        self.checkBox_use_proxy = QtWidgets.QCheckBox(self.gridLayoutWidget_9)
+        self.checkBox_use_proxy.setObjectName("checkBox_use_proxy")
+        self.horizontalLayout_17.addWidget(self.checkBox_use_proxy)
         self.gridLayout_9.addLayout(self.horizontalLayout_17, 0, 1, 1, 1)
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
@@ -8803,17 +8755,6 @@ class Ui_MDCx(object):
         self.lcdNumber_timeout.setObjectName("lcdNumber_timeout")
         self.horizontalLayout_3.addWidget(self.lcdNumber_timeout)
         self.gridLayout_9.addLayout(self.horizontalLayout_3, 3, 1, 1, 1)
-        self.label_410 = QtWidgets.QLabel(self.gridLayoutWidget_9)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_410.sizePolicy().hasHeightForWidth())
-        self.label_410.setSizePolicy(sizePolicy)
-        self.label_410.setMinimumSize(QtCore.QSize(0, 30))
-        self.label_410.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.label_410.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.label_410.setObjectName("label_410")
-        self.gridLayout_9.addWidget(self.label_410, 5, 0, 1, 1)
         self.horizontalLayout_retry = QtWidgets.QHBoxLayout()
         self.horizontalLayout_retry.setObjectName("horizontalLayout_retry")
         self.horizontalSlider_retry = CustomQSlider(self.gridLayoutWidget_9)
@@ -8846,17 +8787,6 @@ class Ui_MDCx(object):
         self.lcdNumber_retry.setObjectName("lcdNumber_retry")
         self.horizontalLayout_retry.addWidget(self.lcdNumber_retry)
         self.gridLayout_9.addLayout(self.horizontalLayout_retry, 4, 1, 1, 1)
-        self.label_70 = QtWidgets.QLabel(self.gridLayoutWidget_9)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_70.sizePolicy().hasHeightForWidth())
-        self.label_70.setSizePolicy(sizePolicy)
-        self.label_70.setMinimumSize(QtCore.QSize(130, 0))
-        self.label_70.setLayoutDirection(QtCore.Qt.RightToLeft)
-        self.label_70.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.label_70.setObjectName("label_70")
-        self.gridLayout_9.addWidget(self.label_70, 0, 0, 1, 1)
         self.label_73 = QtWidgets.QLabel(self.gridLayoutWidget_9)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -8868,17 +8798,44 @@ class Ui_MDCx(object):
         self.label_73.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_73.setObjectName("label_73")
         self.gridLayout_9.addWidget(self.label_73, 3, 0, 1, 1)
-        self.label_411 = QtWidgets.QLabel(self.gridLayoutWidget_9)
+        self.lineEdit_proxy = QtWidgets.QLineEdit(self.gridLayoutWidget_9)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_411.sizePolicy().hasHeightForWidth())
-        self.label_411.setSizePolicy(sizePolicy)
-        self.label_411.setStyleSheet("color: rgb(8, 128, 128);")
-        self.label_411.setObjectName("label_411")
-        self.gridLayout_9.addWidget(self.label_411, 6, 1, 1, 1)
+        sizePolicy.setHeightForWidth(self.lineEdit_proxy.sizePolicy().hasHeightForWidth())
+        self.lineEdit_proxy.setSizePolicy(sizePolicy)
+        self.lineEdit_proxy.setMinimumSize(QtCore.QSize(300, 30))
+        self.lineEdit_proxy.setStyleSheet(" font: \"Courier\";\n"
+"                                border: 1px solid rgba(0,0,0, 50);\n"
+"                                border-radius: 15px;\n"
+"")
+        self.lineEdit_proxy.setObjectName("lineEdit_proxy")
+        self.gridLayout_9.addWidget(self.lineEdit_proxy, 1, 1, 1, 1)
+        self.label_65 = QtWidgets.QLabel(self.gridLayoutWidget_9)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_65.sizePolicy().hasHeightForWidth())
+        self.label_65.setSizePolicy(sizePolicy)
+        self.label_65.setMinimumSize(QtCore.QSize(0, 0))
+        self.label_65.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.label_65.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label_65.setObjectName("label_65")
+        self.gridLayout_9.addWidget(self.label_65, 4, 0, 1, 1)
+        self.label_64 = QtWidgets.QLabel(self.gridLayoutWidget_9)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_64.sizePolicy().hasHeightForWidth())
+        self.label_64.setSizePolicy(sizePolicy)
+        self.label_64.setMinimumSize(QtCore.QSize(130, 0))
+        self.label_64.setLayoutDirection(QtCore.Qt.RightToLeft)
+        self.label_64.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.label_64.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label_64.setObjectName("label_64")
+        self.gridLayout_9.addWidget(self.label_64, 1, 0, 1, 1)
         self.groupBox_44 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_wangluo)
-        self.groupBox_44.setGeometry(QtCore.QRect(30, 1100, 701, 301))
+        self.groupBox_44.setGeometry(QtCore.QRect(30, 1030, 701, 301))
         self.groupBox_44.setStyleSheet("font:\"Courier\";")
         self.groupBox_44.setObjectName("groupBox_44")
         self.gridLayoutWidget = QtWidgets.QWidget(self.groupBox_44)
@@ -8968,7 +8925,7 @@ class Ui_MDCx(object):
         self.gridLayout_12.addWidget(self.label_136, 6, 1, 1, 1)
         self.gridLayout_12.setColumnStretch(0, 2)
         self.groupBox_14 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_wangluo)
-        self.groupBox_14.setGeometry(QtCore.QRect(30, 900, 701, 181))
+        self.groupBox_14.setGeometry(QtCore.QRect(30, 830, 701, 181))
         self.groupBox_14.setStyleSheet("font:\"Courier\";")
         self.groupBox_14.setObjectName("groupBox_14")
         self.gridLayoutWidget_11 = QtWidgets.QWidget(self.groupBox_14)
@@ -10177,6 +10134,9 @@ class Ui_MDCx(object):
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
@@ -10191,6 +10151,9 @@ class Ui_MDCx(object):
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
@@ -10199,6 +10162,9 @@ class Ui_MDCx(object):
 "                <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "                p, li { white-space: pre-wrap; }\n"
 "                </style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
@@ -11033,18 +10999,12 @@ class Ui_MDCx(object):
 "                          （注意：Cookie 存在有效期，过期无效时请重新获取。）</p>"))
         self.label_get_cookie_url.setText(_translate("MDCx", "https://tieba.baidu.com/p/5492736764"))
         self.label_7.setText(_translate("MDCx", "演示动画："))
-        self.groupBox_28.setTitle(_translate("MDCx", "代理设置"))
-        self.checkBox_net_ipv4_only.setText(_translate("MDCx", "强制使用 IPv4 请求数据"))
-        self.label_64.setText(_translate("MDCx", "IP+端口号："))
-        self.label_65.setText(_translate("MDCx", "重试次数："))
-        self.label_103.setText(_translate("MDCx", "带用户名和密码时，填写格式: username:password@ip:port"))
-        self.radioButton_proxy_http.setText(_translate("MDCx", "http"))
-        self.radioButton_proxy_socks5.setText(_translate("MDCx", "socks5"))
-        self.radioButton_proxy_nouse.setText(_translate("MDCx", "不使用"))
-        self.label_410.setText(_translate("MDCx", "IPv4 only："))
-        self.label_70.setText(_translate("MDCx", "代理："))
+        self.groupBox_28.setTitle(_translate("MDCx", "网络设置"))
+        self.label_103.setText(_translate("MDCx", "<p>支持 http(s), socks5(h) 代理. 示例: http://127.0.0.1:7897<br>需要用户名和密码时格式为: schema://username:password@host:port</p>"))
+        self.checkBox_use_proxy.setText(_translate("MDCx", "使用代理"))
         self.label_73.setText(_translate("MDCx", "超时时间："))
-        self.label_411.setText(_translate("MDCx", "一些网站（Javbus、Amazon）使用 IPv6 请求会失败，建议使用 IPv4（重启后生效）"))
+        self.label_65.setText(_translate("MDCx", "重试次数："))
+        self.label_64.setText(_translate("MDCx", "代理地址："))
         self.groupBox_44.setTitle(_translate("MDCx", "网站设置"))
         self.label_401.setText(_translate("MDCx", "当前网站："))
         self.label_132.setText(_translate("MDCx", "<p>可在下方设置选定网站的配置。<span style=\" color:#d9001f;\">切换网站前需先保存，否则不会生效</span></p><p>注意：当前并非所有网站均支持这些配置，某些设置可能无效</p>"))
@@ -11125,6 +11085,9 @@ class Ui_MDCx(object):
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
@@ -11142,6 +11105,9 @@ class Ui_MDCx(object):
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
@@ -11151,6 +11117,9 @@ class Ui_MDCx(object):
 "                <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "                p, li { white-space: pre-wrap; }\n"
 "                </style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"

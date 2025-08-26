@@ -4,7 +4,6 @@ import concurrent.futures
 import contextlib
 import ctypes
 import inspect
-import os
 import random
 import re
 import threading
@@ -17,7 +16,7 @@ from pathlib import Path
 from threading import Thread
 from typing import Any, TypeVar
 
-from ..consts import IS_NFC, IS_WINDOWS
+from ..consts import IS_NFC
 from ..manual import ManualConfig
 
 T = TypeVar("T")
@@ -170,7 +169,7 @@ def get_real_time(t) -> str:
 
 def add_html(text: str) -> str:
     # 特殊字符转义
-    text = text.replace("=http", "🔮🧿⚔️")  # 例外不转换的
+    text = text.replace('href="https', "🔮🧿⚔️")  # 例外不转换的
 
     # 替换链接为超链接
     url_list = re.findall(r"http[s]?://\S+", text)
@@ -180,7 +179,7 @@ def add_html(text: str) -> str:
         for each_url in url_list:
             new_url = f'<a href="{each_url}">{each_url}</a>'
             text = text.replace(each_url, new_url)
-    text = text.replace("🔮🧿⚔️", "=http")  # 还原不转换的
+    text = text.replace("🔮🧿⚔️", 'href="https')  # 还原不转换的
 
     # 链接放在span里，避免点击后普通文本变超链接，设置样式为pre-wrap（保留空格换行）
     return f'<span style="white-space: pre-wrap;">{text}</span>'

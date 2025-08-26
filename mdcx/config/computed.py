@@ -15,11 +15,6 @@ class Computed:
     def __init__(self, config: Config):
         self.can_clean = CleanAction.I_KNOW in config.clean_enable and CleanAction.I_AGREE in config.clean_enable
 
-        if any(schema in config.proxy for schema in ["http://", "https://", "socks5://", "socks5h://"]):
-            self.proxy = config.proxy.strip()
-        else:
-            self.proxy = "http://" + config.proxy.strip()
-
         self.random_headers = get_random_headers()
 
         proxy = config.proxy if config.use_proxy else None

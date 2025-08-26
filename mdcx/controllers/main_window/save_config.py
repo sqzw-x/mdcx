@@ -622,15 +622,9 @@ def save_config(self: "MyMAinWindow"):
     # endregion
 
     # region network
-    proxy_type = get_radio_buttons(
-        (self.Ui.radioButton_proxy_http, "http"),
-        (self.Ui.radioButton_proxy_socks5, "socks5"),
-        (self.Ui.radioButton_proxy_nouse, "no"),
-        default="no",
-    )
-    manager.config.use_proxy = proxy_type != "no"
+    manager.config.use_proxy = self.Ui.checkBox_use_proxy.isChecked()
     proxy = self.Ui.lineEdit_proxy.text()  # 代理地址
-    manager.config.proxy = proxy.replace("https://", "").replace("http://", "")
+    manager.config.proxy = proxy
     manager.config.timeout = self.Ui.horizontalSlider_timeout.value()  # 超时时间
     manager.config.retry = self.Ui.horizontalSlider_retry.value()  # 重试次数
 
@@ -681,7 +675,6 @@ def save_config(self: "MyMAinWindow"):
         (self.Ui.checkBox_show_dialog_exit, Switch.SHOW_DIALOG_EXIT),
         (self.Ui.checkBox_show_dialog_stop_scrape, Switch.SHOW_DIALOG_STOP_SCRAPE),
         (self.Ui.checkBox_sortmode_delpic, Switch.SORT_DEL),
-        (self.Ui.checkBox_net_ipv4_only, Switch.IPV4_ONLY),
         (self.Ui.checkBox_dialog_qt, Switch.QT_DIALOG),
         (self.Ui.checkBox_theporndb_hash, Switch.THEPORNDB_NO_HASH),
         (self.Ui.checkBox_hide_dock_icon, Switch.HIDE_DOCK),

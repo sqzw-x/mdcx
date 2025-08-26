@@ -67,8 +67,18 @@ def load_config(self: "MyMAinWindow"):
     }
 
     errors = manager.load()
+    v1_msgs = [e for e in errors if e.startswith("[V1]")]
+    if v1_msgs:
+        signal_qt.show_log_text(f"\n\t{'\n\t'.join(v1_msgs)}\n\n")
+        errors = [e for e in errors if not e.startswith("[V1]")]
     if errors:
-        signal_qt.show_log_text(f"⚠️ 读取配置文件出错:\n\t{'\n\t'.join(errors)}\n\n")
+        signal_qt.show_log_text(
+            f"⚠️ 读取配置文件出错:\n\t{'\n\t'.join(errors)}\n\n"
+            "为避免破坏配置文件, 已自动切换为 _failed.json\n"
+            '这是非预期错误, 请提交 <a href="https://github.com/sqzw-x/mdcx/issues/new?template=bug_report_cn.yaml">GitHub Issue</a>\n'
+        )
+        manager.path = manager.data_folder / "_failed.json"
+        return
     config_folder = manager.data_folder
     config_file = manager.file
     config_path = manager.path
@@ -928,16 +938,8 @@ def load_config(self: "MyMAinWindow"):
         # endregion
 
         # region network
-        # 代理类型
-        proxy_type = "no" if not manager.config.use_proxy else "http"  # 简化代理类型判断
-        set_radio_buttons(
-            proxy_type,
-            (self.Ui.radioButton_proxy_nouse, "no"),
-            (self.Ui.radioButton_proxy_http, "http"),
-            (self.Ui.radioButton_proxy_socks5, "socks5"),
-            default=self.Ui.radioButton_proxy_nouse,
-        )
-
+        # 启用代理
+        self.Ui.checkBox_use_proxy.setChecked(manager.config.use_proxy)
         # 代理地址
         self.Ui.lineEdit_proxy.setText(manager.config.proxy)
         # 超时时间
@@ -1037,7 +1039,6 @@ def load_config(self: "MyMAinWindow"):
             (self.Ui.checkBox_show_dialog_stop_scrape, Switch.SHOW_DIALOG_STOP_SCRAPE),
             (self.Ui.checkBox_dark_mode, Switch.DARK_MODE),
             (self.Ui.checkBox_copy_netdisk_nfo, Switch.COPY_NETDISK_NFO),
-            (self.Ui.checkBox_net_ipv4_only, Switch.IPV4_ONLY),
             (self.Ui.checkBox_theporndb_hash, Switch.THEPORNDB_NO_HASH),
             (self.Ui.checkBox_sortmode_delpic, Switch.SORT_DEL),
         )

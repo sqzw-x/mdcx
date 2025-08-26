@@ -53,13 +53,13 @@ class ConfigManager:
         v1path = self.path
         if os.path.exists(v2path):
             self.path = v2path
-            return [f"{v1path} 是旧版配置文件, 对应的新版配置文件已存在, 改为加载新版配置: {v2path}"] + self.load()
+            return [f"[V1] {v1path} 是旧版配置文件, 对应的新版配置文件已存在, 改为加载新版配置: {v2path}"] + self.load()
 
         d, errors = load_v1(self.path)
         self.path = v2path
         errors = [
-            f"{v1path} 是旧版配置文件, 将自动转换为新版配置并保存到 {v2path}",
-            "旧版配置文件不会被删除. 当保存配置时, 仅会写入新版配置文件, 后续会自动使用新版配置文件",
+            f"[V1] {v1path} 是旧版配置文件, 将自动转换为新版配置并保存到 {v2path}",
+            "[V1] 旧版配置文件不会被删除. 当保存配置时, 仅会写入新版配置文件, 后续会自动使用新版配置文件",
         ] + errors
         config_v1 = ConfigV1(**d)
         config_v1.init()
