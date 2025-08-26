@@ -45,9 +45,9 @@ def str_to_list(v: str | list[Any] | None, sep: Literal[",", "|"] = ",", unique:
         return [str(item) for item in v]
     if isinstance(v, str):
         if sep == ",":
-            v.replace("，", ",")
+            v = v.replace("，", ",")
         elif sep == "|":
-            v.replace("｜", "|")
+            v = v.replace("｜", "|")
         if unique:
             return list(dict.fromkeys([item.strip() for item in v.strip(sep).split(sep) if item.strip()]))
         return [item.strip() for item in v.strip(sep).split(sep) if item.strip()]
