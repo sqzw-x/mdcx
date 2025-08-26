@@ -111,7 +111,7 @@ async def delete_file_async(file_path: str | Path):
     """异步删除文件"""
     file_path = Path(file_path)
     try:
-        await aiofiles.os.unlink(file_path)
+        await asyncio.to_thread(file_path.unlink, missing_ok=True)
         return True, ""
     except Exception as e:
         error_info = f" 删除文件: {file_path}\n 错误: {e}\n{traceback.format_exc()}"
