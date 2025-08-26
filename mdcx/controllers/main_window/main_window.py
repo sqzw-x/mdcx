@@ -1949,8 +1949,8 @@ class MyMAinWindow(QMainWindow):
         if ok and new_config_name:
             new_config_name = new_config_name.replace("/", "").replace("\\", "")
             new_config_name = re.sub(r'[\\:*?"<>|\r\n]+', "", new_config_name)
-            if os.path.splitext(new_config_name)[1] != ".ini":
-                new_config_name += ".ini"
+            if os.path.splitext(new_config_name)[1] != ".json":
+                new_config_name += ".json"
             if new_config_name != manager.file:
                 manager.file = new_config_name
                 self.pushButton_save_config_clicked()
