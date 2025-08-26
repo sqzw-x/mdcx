@@ -1952,7 +1952,7 @@ class MyMAinWindow(QMainWindow):
             if os.path.splitext(new_config_name)[1] != ".json":
                 new_config_name += ".json"
             if new_config_name != manager.file:
-                manager.file = new_config_name
+                manager.path = manager.data_folder / new_config_name
                 self.pushButton_save_config_clicked()
 
     def save_config(self): ...
