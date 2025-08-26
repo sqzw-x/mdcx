@@ -1,16 +1,25 @@
-## 重大变更
+## 新增
 
-* mdcx 现在使用 JSON 作为配置文件格式, 原 ini 配置可正常读取, 会被自动转换为 JSON;
-ini 配置文件现在是只读的, 所有对配置的更改都将**仅写入 JSON 文件**
+* ✨ 使用浏览器请求 dmm digital 页面; 需要安装 Chrome 浏览器
+* 重构 `刮削网站` 配置逻辑
+  * 移除 `优先使用官网数据` 选项, `official` 现在是一个普通的来源网站, 可在优先级设置中使用
+  * 移除各字段的 `排除网站` 和 `刮削设置 (列出的网站, 尽量补全, 不单独刮削)` 选项
+  * 将自动转换字段来源设置
 
 ## 修复
 
-* 某些情况下图片可访问但下载失败 (Content-Length 不存在)
-* fanza tv 刮削失败
+* dmm mono 多行简介获取
 
 <details>
 <summary>Full Changelog</summary>
 
+4bec690 chore: 调整项目结构; 修复 bug (#631)
+c7863ae refactor!: 使用 pathlib 处理路径
+287adb1 fix: website_youma 转换; 保存配置后重新加载
+e645f9d chore: fix test
+9838a89 feat!: add browser & migrate to pydantic config (#622)
+252d392 fix: mono multi line outline (fix #599)
+243d6ae Ready for 2.0-beta-8
 b566511 fix: 缺少某些 | 分隔字段
 e012654 chore: 用字段名区分 | 分隔的字符串列表
 4e81aad feat!: 使用 pydantic model 和 json 格式配置文件 (#587)
@@ -76,7 +85,7 @@ d15bd8b fix: CrawlersResult 未正确设置 number 字段
 d0b7f19 doc: add uv sync and pre-commit install to CONTRIBUTING.md
 d3ade91 CI: add lint workflow
 077ac5a chore!: add ruff lint rules and fix lint errors
-9b60a55 fix: not await_get_gfriends_actor_data (fix #524)
+9b60a55 fix: not await _get_gfriends_actor_data (fix #524)
 7b1df6e chore: add some type hints
 fe3990c refactor: 区分 qt 和其它部分的 signal 调用
 3d39257 chore
@@ -97,7 +106,7 @@ d59ab45 fix: 主界面右侧标题多余的横线
 5055df5 使用 CrawlTask dataclass 作为 crawler 输入
 daf3cdd update README and add CONTRIBUTING.md
 6bcd986 refactor!: 重组项目结构；初步消除 json data；添加 project.toml (#513)
-72b2219 fix: missing return in _get_folder_path
+72b2219 fix: missing return in_get_folder_path
 1b2886f CI: fix github var
 84b85e2 fix: cut_window (close #500)
 3e829a3 CI: use input tag for release action
