@@ -10,6 +10,7 @@ from rich import print, print_json
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
+from ..browser import BrowserProvider
 from ..config.manager import manager
 from ..config.models import Language, Website
 from ..crawlers import get_crawler_compat
@@ -33,7 +34,7 @@ def main(
     # CrawlerInput
     number: Annotated[str, typer.Option("--number", "-n", rich_help_panel="CrawlerInput")] = "",
     appoint_url: Annotated[str, typer.Option("--appoint-url", "-u", rich_help_panel="CrawlerInput")] = "",
-    file_path: Annotated[str, typer.Option("--file-path", "-f", rich_help_panel="CrawlerInput")] = "",
+    file_path: Annotated[Path | None, typer.Option("--file-path", "-f", rich_help_panel="CrawlerInput")] = None,
     short_number: Annotated[str, typer.Option("--short-number", rich_help_panel="CrawlerInput")] = "",
     mosaic: Annotated[str, typer.Option("--mosaic", "-m", rich_help_panel="CrawlerInput")] = "",
     appoint_number: Annotated[str, typer.Option("--appoint-number", rich_help_panel="CrawlerInput")] = "",
@@ -227,7 +228,7 @@ async def _fetch_async(
                 crawler = crawler_class(
                     client=async_client,
                     base_url=manager.config.get_site_url(website),
-                    browser=await manager.computed.browser_provider.get_browser(),
+                    browser=await BrowserProvider(manager.config).get_browser(),
                 )
                 crawler_input = CrawlerInput.empty()
                 crawler_input.appoint_url = url
