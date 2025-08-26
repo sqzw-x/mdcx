@@ -28,9 +28,9 @@ async def update_config(new_config: Config) -> Config:
 
 @router.delete("/", operation_id="deleteConfig", summary="删除配置文件")
 async def delete_config(name: Annotated[str, Query(description="待删除的配置文件名 (不含扩展名)")]):
-    if f"{name}.ini" == manager.file:
+    if f"{name}.json" == manager.file:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="无法删除当前激活的配置文件.")
-    p = Path(manager.data_folder) / f"{name}.ini"
+    p = Path(manager.data_folder) / f"{name}.json"
     check_path_access(p, manager.data_folder)
     p.unlink(True)
 
@@ -46,7 +46,7 @@ async def reset_config() -> Config:
 @router.post("/create", operation_id="createConfig", summary="创建配置文件")
 async def create_config(name: Annotated[str, Query(description="配置文件名 (不含扩展名)")]):
     """创建指定名称的配置文件"""
-    p = Path(manager.data_folder) / f"{name}.ini"
+    p = Path(manager.data_folder) / f"{name}.json"
     check_path_access(p, manager.data_folder)
     if p.exists():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"名称为 {name} 的配置文件已存在.")
@@ -65,10 +65,10 @@ async def switch_config(
     """
     切换到现有的配置文件。
     """
-    new_path = Path(manager.data_folder) / f"{name}.ini"
+    new_path = Path(manager.data_folder) / f"{name}.json"
     check_path_access(new_path, manager.data_folder)
     if not new_path.exists():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"配置文件 {name}.ini 不存在.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"配置文件 {name}.json 不存在.")
     new_path = str(new_path.resolve())
     manager.path = new_path
     errors = manager.load()
