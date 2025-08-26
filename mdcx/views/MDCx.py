@@ -1680,7 +1680,7 @@ class Ui_MDCx(object):
         self.scrollArea.setWidgetResizable(False)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents_guaxiaomoshi = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_guaxiaomoshi.setGeometry(QtCore.QRect(0, -1342, 760, 2000))
+        self.scrollAreaWidgetContents_guaxiaomoshi.setGeometry(QtCore.QRect(0, 0, 760, 2000))
         self.scrollAreaWidgetContents_guaxiaomoshi.setObjectName("scrollAreaWidgetContents_guaxiaomoshi")
         self.groupBox = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_guaxiaomoshi)
         self.groupBox.setGeometry(QtCore.QRect(30, 260, 701, 421))
@@ -2795,7 +2795,7 @@ class Ui_MDCx(object):
         self.groupBox_80.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_80.setObjectName("groupBox_80")
         self.layoutWidget_6 = QtWidgets.QWidget(self.groupBox_80)
-        self.layoutWidget_6.setGeometry(QtCore.QRect(20, 30, 661, 541))
+        self.layoutWidget_6.setGeometry(QtCore.QRect(20, 30, 661, 687))
         self.layoutWidget_6.setObjectName("layoutWidget_6")
         self.gridLayout_36 = QtWidgets.QGridLayout(self.layoutWidget_6)
         self.gridLayout_36.setContentsMargins(0, 0, 0, 0)
@@ -4290,7 +4290,7 @@ class Ui_MDCx(object):
         self.scrollArea_7.setWidgetResizable(False)
         self.scrollArea_7.setObjectName("scrollArea_7")
         self.scrollAreaWidgetContents_mingming = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_mingming.setGeometry(QtCore.QRect(0, -2762, 760, 3420))
+        self.scrollAreaWidgetContents_mingming.setGeometry(QtCore.QRect(0, 0, 760, 3300))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -4435,7 +4435,7 @@ class Ui_MDCx(object):
         self.label_147.setObjectName("label_147")
         self.gridLayout_8.addWidget(self.label_147, 1, 0, 1, 1)
         self.groupBox_38 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
-        self.groupBox_38.setGeometry(QtCore.QRect(30, 1990, 701, 441))
+        self.groupBox_38.setGeometry(QtCore.QRect(30, 1900, 701, 441))
         self.groupBox_38.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_38.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_38.setObjectName("groupBox_38")
@@ -4753,7 +4753,7 @@ class Ui_MDCx(object):
         self.label_290.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_290.setObjectName("label_290")
         self.groupBox_46 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
-        self.groupBox_46.setGeometry(QtCore.QRect(30, 1450, 701, 521))
+        self.groupBox_46.setGeometry(QtCore.QRect(30, 1450, 701, 431))
         self.groupBox_46.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_46.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_46.setObjectName("groupBox_46")
@@ -4938,26 +4938,6 @@ class Ui_MDCx(object):
         self.label_145.setSizePolicy(sizePolicy)
         self.label_145.setStyleSheet("color: rgb(8, 128, 128);")
         self.label_145.setObjectName("label_145")
-        self.label_235 = QtWidgets.QLabel(self.groupBox_46)
-        self.label_235.setGeometry(QtCore.QRect(157, 479, 511, 16))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_235.sizePolicy().hasHeightForWidth())
-        self.label_235.setSizePolicy(sizePolicy)
-        self.label_235.setStyleSheet("color: rgb(8, 128, 128);")
-        self.label_235.setObjectName("label_235")
-        self.label_234 = QtWidgets.QLabel(self.groupBox_46)
-        self.label_234.setGeometry(QtCore.QRect(21, 437, 130, 30))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_234.sizePolicy().hasHeightForWidth())
-        self.label_234.setSizePolicy(sizePolicy)
-        self.label_234.setMinimumSize(QtCore.QSize(130, 30))
-        self.label_234.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.label_234.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.label_234.setObjectName("label_234")
         self.label_286 = QtWidgets.QLabel(self.groupBox_46)
         self.label_286.setGeometry(QtCore.QRect(21, 479, 130, 16))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
@@ -4970,26 +4950,8 @@ class Ui_MDCx(object):
         self.label_286.setText("")
         self.label_286.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_286.setObjectName("label_286")
-        self.checkBox_foldername_mosaic = QtWidgets.QCheckBox(self.groupBox_46)
-        self.checkBox_foldername_mosaic.setGeometry(QtCore.QRect(160, 440, 100, 30))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.checkBox_foldername_mosaic.sizePolicy().hasHeightForWidth())
-        self.checkBox_foldername_mosaic.setSizePolicy(sizePolicy)
-        self.checkBox_foldername_mosaic.setMinimumSize(QtCore.QSize(100, 30))
-        self.checkBox_foldername_mosaic.setObjectName("checkBox_foldername_mosaic")
-        self.checkBox_filename_mosaic = QtWidgets.QCheckBox(self.groupBox_46)
-        self.checkBox_filename_mosaic.setGeometry(QtCore.QRect(410, 440, 206, 30))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.checkBox_filename_mosaic.sizePolicy().hasHeightForWidth())
-        self.checkBox_filename_mosaic.setSizePolicy(sizePolicy)
-        self.checkBox_filename_mosaic.setMinimumSize(QtCore.QSize(100, 30))
-        self.checkBox_filename_mosaic.setObjectName("checkBox_filename_mosaic")
         self.groupBox_37 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
-        self.groupBox_37.setGeometry(QtCore.QRect(30, 2450, 701, 121))
+        self.groupBox_37.setGeometry(QtCore.QRect(30, 2360, 701, 121))
         self.groupBox_37.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_37.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_37.setObjectName("groupBox_37")
@@ -5033,7 +4995,7 @@ class Ui_MDCx(object):
         self.label_96.setObjectName("label_96")
         self.gridLayout_21.addWidget(self.label_96, 1, 1, 1, 1)
         self.groupBox_62 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
-        self.groupBox_62.setGeometry(QtCore.QRect(30, 2590, 701, 121))
+        self.groupBox_62.setGeometry(QtCore.QRect(30, 2500, 701, 121))
         self.groupBox_62.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_62.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_62.setObjectName("groupBox_62")
@@ -5235,7 +5197,7 @@ class Ui_MDCx(object):
         self.checkBox_actor_fc2_seller.setObjectName("checkBox_actor_fc2_seller")
         self.gridLayout_26.addWidget(self.checkBox_actor_fc2_seller, 3, 1, 1, 1)
         self.groupBox_65 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
-        self.groupBox_65.setGeometry(QtCore.QRect(30, 2730, 701, 301))
+        self.groupBox_65.setGeometry(QtCore.QRect(30, 2640, 701, 221))
         self.groupBox_65.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_65.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_65.setObjectName("groupBox_65")
@@ -5326,46 +5288,8 @@ class Ui_MDCx(object):
         self.label_332.setLayoutDirection(QtCore.Qt.RightToLeft)
         self.label_332.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_332.setObjectName("label_332")
-        self.label_357 = QtWidgets.QLabel(self.groupBox_65)
-        self.label_357.setGeometry(QtCore.QRect(31, 218, 130, 30))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_357.sizePolicy().hasHeightForWidth())
-        self.label_357.setSizePolicy(sizePolicy)
-        self.label_357.setMinimumSize(QtCore.QSize(130, 30))
-        self.label_357.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.label_357.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.label_357.setObjectName("label_357")
-        self.checkBox_filename_4k = QtWidgets.QCheckBox(self.groupBox_65)
-        self.checkBox_filename_4k.setGeometry(QtCore.QRect(420, 221, 206, 30))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.checkBox_filename_4k.sizePolicy().hasHeightForWidth())
-        self.checkBox_filename_4k.setSizePolicy(sizePolicy)
-        self.checkBox_filename_4k.setMinimumSize(QtCore.QSize(100, 30))
-        self.checkBox_filename_4k.setObjectName("checkBox_filename_4k")
-        self.label_358 = QtWidgets.QLabel(self.groupBox_65)
-        self.label_358.setGeometry(QtCore.QRect(167, 260, 511, 16))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.label_358.sizePolicy().hasHeightForWidth())
-        self.label_358.setSizePolicy(sizePolicy)
-        self.label_358.setStyleSheet("color: rgb(8, 128, 128);")
-        self.label_358.setObjectName("label_358")
-        self.checkBox_foldername_4k = QtWidgets.QCheckBox(self.groupBox_65)
-        self.checkBox_foldername_4k.setGeometry(QtCore.QRect(170, 221, 100, 30))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.checkBox_foldername_4k.sizePolicy().hasHeightForWidth())
-        self.checkBox_foldername_4k.setSizePolicy(sizePolicy)
-        self.checkBox_foldername_4k.setMinimumSize(QtCore.QSize(100, 30))
-        self.checkBox_foldername_4k.setObjectName("checkBox_foldername_4k")
         self.groupBox_67 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_mingming)
-        self.groupBox_67.setGeometry(QtCore.QRect(30, 3050, 701, 271))
+        self.groupBox_67.setGeometry(QtCore.QRect(30, 2880, 701, 271))
         self.groupBox_67.setMinimumSize(QtCore.QSize(200, 0))
         self.groupBox_67.setMaximumSize(QtCore.QSize(739, 16777215))
         self.groupBox_67.setObjectName("groupBox_67")
@@ -5424,7 +5348,7 @@ class Ui_MDCx(object):
         self.scrollArea_11.setWidgetResizable(False)
         self.scrollArea_11.setObjectName("scrollArea_11")
         self.scrollAreaWidgetContents_fanyi = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_fanyi.setGeometry(QtCore.QRect(0, -2092, 760, 2750))
+        self.scrollAreaWidgetContents_fanyi.setGeometry(QtCore.QRect(0, 0, 760, 2750))
         self.scrollAreaWidgetContents_fanyi.setObjectName("scrollAreaWidgetContents_fanyi")
         self.groupBox_trans = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_fanyi)
         self.groupBox_trans.setGeometry(QtCore.QRect(30, 20, 701, 181))
@@ -6476,7 +6400,7 @@ class Ui_MDCx(object):
         self.scrollArea_4.setWidgetResizable(False)
         self.scrollArea_4.setObjectName("scrollArea_4")
         self.scrollAreaWidgetContents_shuiyin = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_shuiyin.setGeometry(QtCore.QRect(0, -1012, 760, 1670))
+        self.scrollAreaWidgetContents_shuiyin.setGeometry(QtCore.QRect(0, 0, 760, 1670))
         self.scrollAreaWidgetContents_shuiyin.setObjectName("scrollAreaWidgetContents_shuiyin")
         self.groupBox_26 = QtWidgets.QGroupBox(self.scrollAreaWidgetContents_shuiyin)
         self.groupBox_26.setGeometry(QtCore.QRect(30, 1010, 701, 561))
@@ -10252,6 +10176,7 @@ class Ui_MDCx(object):
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
@@ -10265,6 +10190,7 @@ class Ui_MDCx(object):
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
@@ -10273,6 +10199,7 @@ class Ui_MDCx(object):
 "                <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "                p, li { white-space: pre-wrap; }\n"
 "                </style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
@@ -10670,10 +10597,6 @@ class Ui_MDCx(object):
         self.label_174.setText(_translate("MDCx", "无码破解："))
         self.label_145.setText(_translate("MDCx", "<p>指有码版本，当视频文件路径中含有「有码」、「有碼」字样时，该文件识别为\n"
 "                          有码版本，重命名文件名及目录名时，在番号后显示该字符表示为有码版本</p>"))
-        self.label_235.setText(_translate("MDCx", "指命名时在番号后添加版本命名字符。你也可以使用 moword 字段来调整添加位置"))
-        self.label_234.setText(_translate("MDCx", "添加马赛克命名字符："))
-        self.checkBox_foldername_mosaic.setText(_translate("MDCx", "视频目录名"))
-        self.checkBox_filename_mosaic.setText(_translate("MDCx", "视频文件名"))
         self.groupBox_37.setTitle(_translate("MDCx", "图片命名规则"))
         self.radioButton_pic_with_filename.setText(_translate("MDCx", "视频文件名-poster.jpg "))
         self.radioButton_pic_no_filename.setText(_translate("MDCx", "poster.jpg"))
@@ -10709,10 +10632,6 @@ class Ui_MDCx(object):
         self.radioButton_videosize_path.setText(_translate("MDCx", "使用路径中包含的画质信息"))
         self.radioButton_videosize_none.setText(_translate("MDCx", "不获取分辨率"))
         self.label_332.setText(_translate("MDCx", "分辨率获取方式："))
-        self.label_357.setText(_translate("MDCx", "添加 4K 字符："))
-        self.checkBox_filename_4k.setText(_translate("MDCx", "视频文件名"))
-        self.label_358.setText(_translate("MDCx", "指命名时在番号后添加 4K（仅4K）。你也可以使用 4K 字段来调整添加位置"))
-        self.checkBox_foldername_4k.setText(_translate("MDCx", "视频目录名"))
         self.groupBox_67.setTitle(_translate("MDCx", "其他说明"))
         self.label_353.setText(_translate("MDCx", "1，多版本显示："))
         self.label_352.setText(_translate("MDCx", "<p>1）Emby 支持多版本显示（类似选集），\n"
@@ -11205,6 +11124,7 @@ class Ui_MDCx(object):
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
@@ -11221,6 +11141,7 @@ class Ui_MDCx(object):
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
+"                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span> </p>\n"
 "                  <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'Microsoft YaHei UI\'; font-size:9pt;\"> </span></p></body></html>"))
@@ -11230,6 +11151,7 @@ class Ui_MDCx(object):
 "                <html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "                p, li { white-space: pre-wrap; }\n"
 "                </style></head><body style=\" font-family:\'.AppleSystemUIFont\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
+"                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
 "                <p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"> </p>\n"
