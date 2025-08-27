@@ -6,7 +6,7 @@ import re
 import time
 import traceback
 from pathlib import Path
-from typing import cast
+from typing import Literal, cast
 
 import aiofiles
 import aiofiles.os
@@ -35,7 +35,7 @@ async def update_emby_actor_photo() -> None:
     signal.reset_buttons_status.emit()
 
 
-async def _get_emby_actor_list() -> list:
+async def _get_emby_actor_list() -> list[dict]:
     url = str(manager.config.emby_url)
     # 获取 emby 的演员列表
     if "emby" == manager.config.server_type:
@@ -69,12 +69,12 @@ async def _get_emby_actor_list() -> list:
     return actor_list
 
 
-async def _upload_actor_photo(url, pic_path):
+async def _upload_actor_photo(url: str, pic_path: Path) -> tuple[bool, str]:
     try:
         async with aiofiles.open(pic_path, "rb") as f:
             content = await f.read()
             b6_pic = base64.b64encode(content)  # 读取文件内容, 转换为base64编码
-        header = {"Content-Type": "image/jpeg" if pic_path.endswith("jpg") else "image/png"}
+        header = {"Content-Type": "image/jpeg" if pic_path.suffix in (".jpg", ".jpeg") else "image/png"}
         r, err = await manager.computed.async_client.post_content(url=url, data=b6_pic, headers=header)
         return r is not None, err
     except Exception as e:
@@ -82,7 +82,7 @@ async def _upload_actor_photo(url, pic_path):
         return False, f"上传头像失败: {url} {pic_path} {str(e)}"
 
 
-def _generate_server_url(actor_js):
+def _generate_server_url(actor_js: dict) -> tuple[str, str, str, str, str, str]:
     server_type = manager.config.server_type
     emby_url = str(manager.config.emby_url)
     api_key = manager.config.api_key
@@ -109,7 +109,7 @@ def _generate_server_url(actor_js):
     return actor_homepage, actor_person, pic_url, backdrop_url, backdrop_url_0, update_url
 
 
-async def _get_gfriends_actor_data():
+async def _get_gfriends_actor_data() -> dict[str, str] | Literal[False] | None:
     emby_on = manager.config.emby_on
     gfriends_github = manager.config.gfriends_github
     raw_url = f"{gfriends_github}".replace("github.com/", "raw.githubusercontent.com/").replace("://www.", "://")
@@ -280,7 +280,7 @@ async def _get_graphis_pic(actor_name: str) -> tuple[Path | None, Path | None, s
     return pic_path, backdrop_path, logs
 
 
-async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
+async def _update_emby_actor_photo_execute(actor_list: list[dict], gfriends_actor_data: dict[str, str]) -> None:
     start_time = time.time()
     emby_on = manager.config.emby_on
     actor_folder = resources.u("actor")
@@ -324,21 +324,21 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
 
         # 要上传的头像图片未找到时
         if not pic_path:
-            pic_path = cast(str, gfriends_actor_data.get(f"{jp_name}.jpg"))
+            pic_path = gfriends_actor_data.get(f"{jp_name}.jpg")
             if not pic_path:
-                pic_path = cast(str, gfriends_actor_data.get(f"{jp_name}.png"))
-                if not pic_path:
-                    if actor_imagetages:
-                        signal.show_log_text(
-                            f"\n{deal_percent} ✅ {i}/{count_all} 没有找到头像！继续使用原有头像！ 👩🏻 {actor_name} {logs}\n{actor_homepage}"
-                        )
-                        succ += 1
-                        continue
+                pic_path = gfriends_actor_data.get(f"{jp_name}.png")
+            if not pic_path:
+                if actor_imagetages:
                     signal.show_log_text(
-                        f"\n{deal_percent} 🔴 {i}/{count_all} 没有找到头像！ 👩🏻 {actor_name}  {logs}\n{actor_homepage}"
+                        f"\n{deal_percent} ✅ {i}/{count_all} 没有找到头像！继续使用原有头像！ 👩🏻 {actor_name} {logs}\n{actor_homepage}"
                     )
-                    fail += 1
+                    succ += 1
                     continue
+                signal.show_log_text(
+                    f"\n{deal_percent} 🔴 {i}/{count_all} 没有找到头像！ 👩🏻 {actor_name}  {logs}\n{actor_homepage}"
+                )
+                fail += 1
+                continue
         else:
             pass
 
@@ -396,7 +396,7 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
     )
 
 
-def _get_local_actor_photo():
+def _get_local_actor_photo() -> dict[str, str] | Literal[False]:
     """This function is intended to be sync."""
     actor_photo_folder = manager.config.actor_photo_folder
     if actor_photo_folder == "" or not os.path.isdir(actor_photo_folder):
