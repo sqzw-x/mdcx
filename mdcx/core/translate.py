@@ -6,14 +6,9 @@ import traceback
 
 import zhconv
 
-from ..base.translate import (
-    deepl_translate_async,
-    google_translate_async,
-    llm_translate_async,
-    youdao_translate_async,
-)
+from ..base.translate import deepl_translate, google_translate, llm_translate, youdao_translate
 from ..base.web import get_actorname, get_yesjav_title
-from ..config.enums import Language
+from ..config.enums import FieldRule, Language, NfoInclude, TagInclude
 from ..config.manager import manager
 from ..config.models import Translator
 from ..config.resources import resources
@@ -84,7 +79,7 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
     tag = clean_list(tag)
 
     # 添加演员
-    if "actor" in tag_include and json_data.actor:
+    if TagInclude.ACTOR in tag_include and json_data.actor:
         actor = json_data.actor
         actor_list: list = actor.split(",")
 
@@ -97,9 +92,9 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
 
     # 添加番号前缀
     letters = json_data.letters
-    if "letters" in tag_include and letters and letters != "未知车牌":
+    if TagInclude.LETTERS in tag_include and letters and letters != "未知车牌":
         # 去除素人番号前缀数字
-        if "del_num" in fields_rule:
+        if FieldRule.DEL_NUM in fields_rule:
             temp_n = re.findall(r"\d{3,}([a-zA-Z]+-\d+)", json_data.number)
             if temp_n:
                 letters = get_number_letters(temp_n[0])
@@ -110,9 +105,9 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
 
     # 添加字幕、马赛克信息到tag中
     mosaic = json_data.mosaic
-    if has_sub and "cnword" in tag_include:
+    if has_sub and TagInclude.CNWORD in tag_include:
         tag += ",中文字幕"
-    if mosaic and "mosaic" in tag_include:
+    if mosaic and TagInclude.MOSAIC in tag_include:
         tag += "," + mosaic
 
     # 添加系列、制作、发行信息到tag中
@@ -130,7 +125,7 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
         if series_translate:  # 映射
             info_data = resources.get_info_data(series)
             series = info_data.get(series_language, "")
-        if series and "series" in tag_include:  # 写nfo
+        if series and TagInclude.SERIES in tag_include:  # 写nfo
             nfo_tag_series = manager.config.nfo_tag_series.replace("series", series)
             if nfo_tag_series:
                 tag += f",{nfo_tag_series}"
@@ -140,7 +135,7 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
         if studio_translate:
             info_data = resources.get_info_data(studio)
             studio = info_data.get(studio_language, "")
-        if studio and "studio" in tag_include:
+        if studio and TagInclude.STUDIO in tag_include:
             nfo_tag_studio = manager.config.nfo_tag_studio.replace("studio", studio)
             if nfo_tag_studio:
                 tag += f",{nfo_tag_studio}"
@@ -150,7 +145,7 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
         if publisher_translate:
             info_data = resources.get_info_data(publisher)
             publisher = info_data.get(publisher_language, "")
-        if publisher and "publisher" in tag_include:
+        if publisher and TagInclude.PUBLISHER in tag_include:
             nfo_tag_publisher = manager.config.nfo_tag_publisher.replace("publisher", publisher)
             if nfo_tag_publisher:
                 tag += f",{nfo_tag_publisher}"
@@ -216,7 +211,7 @@ async def translate_actor(res: CrawlersResult):
 
     # 未知演员，返回
     actor = res.actor
-    if "actor_all," in manager.config.nfo_include_new:
+    if NfoInclude.ACTOR_ALL in manager.config.nfo_include_new:
         actor = res.all_actor
     if actor == manager.config.actor_no_name:
         return res
@@ -235,7 +230,7 @@ async def translate_actor(res: CrawlersResult):
                 if actor_data.get("href"):
                     actor_href_list.append(actor_data.get("href"))
     res.actor = ",".join(actor_new_list)
-    if "actor_all," in manager.config.nfo_include_new:
+    if NfoInclude.ACTOR_ALL in manager.config.nfo_include_new:
         res.all_actor = ",".join(actor_new_list)
 
     return res
@@ -299,13 +294,13 @@ async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie
 
         async def _task(each: Translator):
             if each == Translator.YOUDAO:  # 使用有道翻译
-                t, o, r = await youdao_translate_async(trans_title, trans_outline)
+                t, o, r = await youdao_translate(trans_title, trans_outline)
             elif each == Translator.LLM:  # 使用 llm 翻译
-                t, o, r = await llm_translate_async(trans_title, trans_outline)
+                t, o, r = await llm_translate(trans_title, trans_outline)
             elif each == Translator.DEEPL:  # 使用deepl翻译
-                t, o, r = await deepl_translate_async(trans_title, trans_outline, "JA")
+                t, o, r = await deepl_translate(trans_title, trans_outline, "JA")
             else:  # 使用 google 翻译
-                t, o, r = await google_translate_async(trans_title, trans_outline)
+                t, o, r = await google_translate(trans_title, trans_outline)
             if r:
                 LogBuffer.log().write(
                     f"\n 🔴 Translation failed!({each.capitalize()})({get_used_time(start_time)}s) Error: {r}"

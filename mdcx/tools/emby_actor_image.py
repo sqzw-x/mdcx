@@ -13,6 +13,7 @@ import aiofiles.os
 from parsel import Selector
 
 from ..base.web import download_file_with_filepath
+from ..config.enums import EmbyAction
 from ..config.manager import manager
 from ..config.resources import resources
 from ..image import cut_pic, fix_pic_async
@@ -23,7 +24,7 @@ from ..utils import get_used_time
 async def update_emby_actor_photo() -> None:
     signal.change_buttons_status.emit()
     server_type = manager.config.server_type
-    if "emby" in server_type:
+    if "emby" == server_type:
         signal.show_log_text("👩🏻 开始补全 Emby 演员头像...")
     else:
         signal.show_log_text("👩🏻 开始补全 Jellyfin 演员头像...")
@@ -37,7 +38,7 @@ async def update_emby_actor_photo() -> None:
 async def _get_emby_actor_list() -> list:
     url = str(manager.config.emby_url)
     # 获取 emby 的演员列表
-    if "emby" in manager.config.server_type:
+    if "emby" == manager.config.server_type:
         server_name = "Emby"
         url += "/emby/Persons?api_key=" + manager.config.api_key
         # http://192.168.5.191:8096/emby/Persons?api_key=ee9a2f2419704257b1dd60b975f2d64e
@@ -89,7 +90,7 @@ def _generate_server_url(actor_js):
     actor_id = actor_js["Id"]
     server_id = actor_js["ServerId"]
 
-    if "emby" in server_type:
+    if "emby" == server_type:
         actor_homepage = f"{emby_url}/web/index.html#!/item?id={actor_id}&serverId={server_id}"
         actor_person = f"{emby_url}/emby/Persons/{actor_name}?api_key={api_key}"
         pic_url = f"{emby_url}/emby/Items/{actor_id}/Images/Primary?api_key={api_key}"
@@ -114,7 +115,7 @@ async def _get_gfriends_actor_data():
     raw_url = f"{gfriends_github}".replace("github.com/", "raw.githubusercontent.com/").replace("://www.", "://")
     # 'https://raw.githubusercontent.com/gfriends/gfriends'
 
-    if "actor_photo_net" in emby_on:
+    if EmbyAction.ACTOR_PHOTO_NET in emby_on:
         update_data = False
         signal.show_log_text("⏳ 连接 Gfriends 网络头像库...")
         net_url = f"{gfriends_github}/commits/master/Filetree.json"
@@ -213,16 +214,16 @@ async def _get_graphis_pic(actor_name: str) -> tuple[Path | None, Path | None, s
     pic_new = actor_folder / f"{actor_name}-org-new.jpg"
     fix_new = actor_folder / f"{actor_name}-fix-new.jpg"
     big_new = actor_folder / f"{actor_name}-big-new.jpg"
-    if "graphis_new" in emby_on:
+    if EmbyAction.GRAPHIS_NEW in emby_on:
         pic_path = pic_new
         backdrop_path = big_new
-        if "graphis_backgrop" not in emby_on:
+        if EmbyAction.GRAPHIS_BACKDROP not in emby_on:
             backdrop_path = fix_new
         url = f"https://graphis.ne.jp/monthly/?K={actor_name}"
     else:
         pic_path = pic_old
         backdrop_path = big_old
-        if "graphis_backgrop" not in emby_on:
+        if EmbyAction.GRAPHIS_BACKDROP not in emby_on:
             backdrop_path = fix_old
         url = f"https://graphis.ne.jp/monthly/?S=1&K={actor_name}"  # https://graphis.ne.jp/monthly/?S=1&K=夢乃あいか
 
@@ -234,12 +235,12 @@ async def _get_graphis_pic(actor_name: str) -> tuple[Path | None, Path | None, s
         has_pic = True
     if await aiofiles.os.path.isfile(backdrop_path):
         has_backdrop = True
-    if "graphis_face" not in emby_on:
+    if EmbyAction.GRAPHIS_FACE not in emby_on:
         pic_path = None
         if has_backdrop:
             logs += "✅ graphis.ne.jp 本地背景！ "
             return None, backdrop_path, logs
-    elif "graphis_backdrop" not in emby_on:
+    elif EmbyAction.GRAPHIS_BACKDROP not in emby_on:
         if has_pic:
             logs += "✅ graphis.ne.jp 本地头像！ "
             return pic_path, None, logs
@@ -264,13 +265,13 @@ async def _get_graphis_pic(actor_name: str) -> tuple[Path | None, Path | None, s
     if not has_pic and pic_path:
         if await download_file_with_filepath(small_pic, pic_path, actor_folder):
             logs += "🍊 使用 graphis.ne.jp 头像！ "
-            if "graphis_backdrop" not in emby_on:
+            if EmbyAction.GRAPHIS_BACKDROP not in emby_on:
                 if not has_backdrop:
                     await fix_pic_async(pic_path, backdrop_path)
                 return pic_path, backdrop_path, logs
         else:
             logs += "🔴 graphis.ne.jp 头像获取失败！ "
-    if not has_backdrop and "graphis_backdrop" in emby_on:
+    if not has_backdrop and EmbyAction.GRAPHIS_BACKDROP in emby_on:
         if await download_file_with_filepath(big_pic, backdrop_path, actor_folder):
             logs += "🍊 使用 graphis.ne.jp 背景！ "
             await fix_pic_async(backdrop_path, backdrop_path)
@@ -300,7 +301,7 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
             skip += 1
             continue
         actor_homepage, actor_person, pic_url, backdrop_url, backdrop_url_0, update_url = _generate_server_url(actor_js)
-        if actor_imagetages and "actor_photo_miss" in emby_on:
+        if actor_imagetages and EmbyAction.ACTOR_PHOTO_MISS in emby_on:
             # self.show_log_text(f'\n{deal_percent} ✅ {i}/{count_all} 已有头像！跳过！ 👩🏻 {actor_name} \n{actor_homepage}')
             skip += 1
             continue
@@ -314,7 +315,11 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
 
         # graphis 判断
         pic_path, backdrop_path, logs = None, None, ""
-        if "actor_photo_net" in emby_on and has_name and ("graphis_backdrop" in emby_on or "graphis_face" in emby_on):
+        if (
+            EmbyAction.ACTOR_PHOTO_NET in emby_on
+            and has_name
+            and (EmbyAction.GRAPHIS_BACKDROP in emby_on or EmbyAction.GRAPHIS_FACE in emby_on)
+        ):
             pic_path, backdrop_path, logs = await _get_graphis_pic(jp_name)
 
         # 要上传的头像图片未找到时
@@ -373,7 +378,7 @@ async def _update_emby_actor_photo_execute(actor_list, gfriends_actor_data):
             r, err = await _upload_actor_photo(backdrop_url, backdrop_path)
         if r:
             if not logs or logs == "🍊 graphis.ne.jp 无结果！":
-                if "actor_photo_net" in manager.config.emby_on:
+                if EmbyAction.ACTOR_PHOTO_NET in manager.config.emby_on:
                     logs += " ✅ 使用 Gfriends 头像和背景！"
                 else:
                     logs += " ✅ 使用本地头像库头像和背景！"

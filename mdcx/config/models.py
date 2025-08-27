@@ -288,7 +288,7 @@ class Config(BaseModel):
         ],
         title="Google搜图排除的网址",
     )
-    scrape_like: str = Field(default="info", title="刮削模式")  # speed, info, single
+    scrape_like: Literal["info", "speed", "single"] = Field(default="info", title="刮削模式")  # speed, info, single
     # endregion
 
     # region: Website Settings
@@ -553,7 +553,7 @@ class Config(BaseModel):
     # endregion
 
     # region: Server Settings
-    server_type: str = Field(default="emby", title="服务器类型")
+    server_type: Literal["emby", "jellyfin"] = Field(default="emby", title="服务器类型")
     emby_url: HttpUrl = Field(default=HttpUrl("http://127.0.0.1:8096"), title="Emby网址")
     api_key: str = Field(default="", title="API密钥")
     user_id: str = Field(default="", title="用户ID")

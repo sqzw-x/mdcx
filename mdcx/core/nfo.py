@@ -9,7 +9,7 @@ import aiofiles
 import aiofiles.os
 from lxml import etree
 
-from ..config.enums import Language, ReadMode
+from ..config.enums import Language, NfoInclude, OutlineShow, ReadMode
 from ..config.manager import manager
 from ..gen.field_enums import CrawlerResultFields
 from ..manual import ManualConfig
@@ -143,29 +143,29 @@ async def write_nfo(
         if outline:
             outline = outline.replace("\n", "<br>")
             if originalplot and originalplot != outline:
-                if "show_zh_jp" in outline_show:
+                if OutlineShow.SHOW_ZH_JP in outline_show:
                     outline += f"<br>  <br>{originalplot}"
-                elif "show_jp_zh" in outline_show:
+                elif OutlineShow.SHOW_JP_ZH in outline_show:
                     outline = f"{originalplot}<br>  <br>{outline}"
                 outline_from = json_data.outline_from.capitalize().replace("Youdao", "有道")
-                if "show_from" in outline_show and outline_from:
+                if OutlineShow.SHOW_FROM in outline_show and outline_from:
                     outline += f"<br>  <br>由 {outline_from} 提供翻译"
-            if "outline_no_cdata," in nfo_include_new:
+            if NfoInclude.OUTLINE_NO_CDATA in nfo_include_new:
                 temp_outline = outline.replace("<br>", "")
-                if "plot_," in nfo_include_new:
+                if NfoInclude.PLOT_ in nfo_include_new:
                     print(f"  <plot>{temp_outline}</plot>", file=code)
-                if "outline," in nfo_include_new:
+                if NfoInclude.OUTLINE in nfo_include_new:
                     print(f"  <outline>{temp_outline}</outline>", file=code)
             else:
-                if "plot_," in nfo_include_new:
+                if NfoInclude.PLOT_ in nfo_include_new:
                     print("  <plot><![CDATA[" + outline + "]]></plot>", file=code)
-                if "outline," in nfo_include_new:
+                if NfoInclude.OUTLINE in nfo_include_new:
                     print("  <outline><![CDATA[" + outline + "]]></outline>", file=code)
 
         # 输出日文剧情简介
-        if originalplot and "originalplot," in nfo_include_new:
+        if originalplot and NfoInclude.ORIGINALPLOT in nfo_include_new:
             originalplot = originalplot.replace("\n", "<br>")
-            if "outline_no_cdata," in nfo_include_new:
+            if NfoInclude.OUTLINE_NO_CDATA in nfo_include_new:
                 temp_originalplot = originalplot.replace("<br>", "")
                 print(f"  <originalplot>{temp_originalplot}</originalplot>", file=code)
             else:
@@ -176,30 +176,30 @@ async def write_nfo(
             nfo_tagline = manager.config.nfo_tagline.replace("release", release)
             if nfo_tagline:
                 print("  <tagline>" + nfo_tagline + "</tagline>", file=code)
-            if "premiered," in nfo_include_new:
+            if NfoInclude.PREMIERED in nfo_include_new:
                 print("  <premiered>" + release + "</premiered>", file=code)
-            if "releasedate," in nfo_include_new:
+            if NfoInclude.RELEASEDATE in nfo_include_new:
                 print("  <releasedate>" + release + "</releasedate>", file=code)
-            if "release_," in nfo_include_new:
+            if NfoInclude.RELEASE_ in nfo_include_new:
                 print("  <release>" + release + "</release>", file=code)
 
         # 输出番号
         print("  <num>" + number + "</num>", file=code)
 
         # 输出标题
-        if cd_part and "title_cd," in nfo_include_new:
+        if cd_part and NfoInclude.TITLE_CD in nfo_include_new:
             nfo_title += " " + cd_part[1:].upper()
         print("  <title>" + nfo_title + "</title>", file=code)
 
         # 输出原标题
-        if "originaltitle," in nfo_include_new:
+        if NfoInclude.ORIGINALTITLE in nfo_include_new:
             if number != title:
                 print("  <originaltitle>" + number + " " + originaltitle + "</originaltitle>", file=code)
             else:
                 print("  <originaltitle>" + originaltitle + "</originaltitle>", file=code)
 
         # 输出类标题
-        if "sorttitle," in nfo_include_new:
+        if NfoInclude.SORTTITLE in nfo_include_new:
             if cd_part:
                 originaltitle += " " + cd_part[1:].upper()
             if number != title:
@@ -211,30 +211,30 @@ async def write_nfo(
         country = json_data.country
 
         # 输出家长分级
-        if "mpaa," in nfo_include_new:
+        if NfoInclude.MPAA in nfo_include_new:
             if country == "JP":
                 print("  <mpaa>JP-18+</mpaa>", file=code)
             else:
                 print("  <mpaa>NC-17</mpaa>", file=code)
 
         # 输出自定义分级
-        if "customrating," in nfo_include_new:
+        if NfoInclude.CUSTOMRATING in nfo_include_new:
             if country == "JP":
                 print("  <customrating>JP-18+</customrating>", file=code)
             else:
                 print("  <customrating>NC-17</customrating>", file=code)
 
         # 输出国家
-        if "country," in nfo_include_new:
+        if NfoInclude.COUNTRY in nfo_include_new:
             print(f"  <countrycode>{country}</countrycode>", file=code)
 
         # 初始化 actor_list
         actor_list = []
         # 输出男女演员
-        if "actor_all," in nfo_include_new:
+        if NfoInclude.ACTOR_ALL in nfo_include_new:
             actor = all_actor
         # 有演员时输出演员
-        if "actor," in nfo_include_new:
+        if NfoInclude.ACTOR in nfo_include_new:
             if not actor:
                 actor = manager.config.actor_no_name
             actor_list = actor.split(",")  # 字符串转列表
@@ -247,37 +247,37 @@ async def write_nfo(
                 print("  </actor>", file=code)
 
         # 输出导演
-        if director and "director," in nfo_include_new:
+        if director and NfoInclude.DIRECTOR in nfo_include_new:
             print("  <director>" + director + "</director>", file=code)
 
         # 输出公众评分、影评人评分
         try:
             if json_data.score:
                 score = float(json_data.score)
-                if "score," in nfo_include_new:
+                if NfoInclude.SCORE in nfo_include_new:
                     print("  <rating>" + str(score) + "</rating>", file=code)
-                if "criticrating," in nfo_include_new:
+                if NfoInclude.CRITICRATING in nfo_include_new:
                     print("  <criticrating>" + str(int(score * 10)) + "</criticrating>", file=code)
         except Exception:
             print(traceback.format_exc())
 
         # 输出我想看人数
         try:
-            if json_data.wanted and "wanted," in nfo_include_new:
+            if json_data.wanted and NfoInclude.WANTED in nfo_include_new:
                 print("  <votes>" + json_data.wanted + "</votes>", file=code)
         except Exception:
             pass
 
         # 输出年代
-        if str(year) and "year," in nfo_include_new:
+        if str(year) and NfoInclude.YEAR in nfo_include_new:
             print("  <year>" + str(year) + "</year>", file=code)
 
         # 输出时长
-        if str(runtime) and "runtime," in nfo_include_new:
+        if str(runtime) and NfoInclude.RUNTIME in nfo_include_new:
             print("  <runtime>" + str(runtime).replace(" ", "") + "</runtime>", file=code)
 
         # 输出合集(使用演员)
-        if "actor_set," in nfo_include_new and actor and actor != "未知演员" and actor != "未知演員":
+        if NfoInclude.ACTOR_SET in nfo_include_new and actor and actor != "未知演员" and actor != "未知演員":
             actor_list = actor.split(",")  # 字符串转列表
             actor_list = [actor.strip() for actor in actor_list if actor.strip()]  # 去除空白
             if actor_list:
@@ -287,31 +287,31 @@ async def write_nfo(
                     print("  </set>", file=code)
 
         # 输出合集(使用系列)
-        if "series_set," in nfo_include_new and series:
+        if NfoInclude.SERIES_SET in nfo_include_new and series:
             print("  <set>", file=code)
             print("    <name>" + series + "</name>", file=code)
             print("  </set>", file=code)
 
         # 输出系列
-        if series and "series," in nfo_include_new:
+        if series and NfoInclude.SERIES in nfo_include_new:
             print("  <series>" + series + "</series>", file=code)
 
         # 输出片商/制作商
         if studio:
-            if "studio," in nfo_include_new:
+            if NfoInclude.STUDIO in nfo_include_new:
                 print("  <studio>" + studio + "</studio>", file=code)
-            if "maker," in nfo_include_new:
+            if NfoInclude.MAKER in nfo_include_new:
                 print("  <maker>" + studio + "</maker>", file=code)
 
         # 输出发行商 label（厂牌/唱片公司） publisher（发行商）
         if publisher:
-            if "publisher," in nfo_include_new:
+            if NfoInclude.PUBLISHER in nfo_include_new:
                 print("  <publisher>" + publisher + "</publisher>", file=code)
-            if "label," in nfo_include_new:
+            if NfoInclude.LABEL in nfo_include_new:
                 print("  <label>" + publisher + "</label>", file=code)
 
         # 输出 tag
-        if tag and "tag," in nfo_include_new:
+        if tag and NfoInclude.TAG in nfo_include_new:
             try:
                 for i in tag:
                     if i:
@@ -320,7 +320,7 @@ async def write_nfo(
                 signal.show_log_text(traceback.format_exc())
 
         # 输出 genre
-        if tag and "genre," in nfo_include_new:
+        if tag and NfoInclude.GENRE in nfo_include_new:
             try:
                 for i in tag:
                     if i:
@@ -329,15 +329,15 @@ async def write_nfo(
                 signal.show_log_text(traceback.format_exc())
 
         # 输出封面地址
-        if poster and "poster," in nfo_include_new:
+        if poster and NfoInclude.POSTER in nfo_include_new:
             print("  <poster>" + poster + "</poster>", file=code)
 
         # 输出背景地址
-        if cover and "cover," in nfo_include_new:
+        if cover and NfoInclude.COVER in nfo_include_new:
             print("  <cover>" + cover + "</cover>", file=code)
 
         # 输出预告片
-        if trailer and "trailer," in nfo_include_new:
+        if trailer and NfoInclude.TRAILER in nfo_include_new:
             print("  <trailer>" + trailer + "</trailer>", file=code)
 
         # javdb id 输出, 没有时使用番号搜索页

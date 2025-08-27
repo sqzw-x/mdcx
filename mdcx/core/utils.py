@@ -7,7 +7,7 @@ from pathlib import Path
 import aiofiles.os
 
 from ..base.number import deal_actor_more
-from ..config.enums import FieldRule, Language, NfoInclude, NoEscape
+from ..config.enums import FieldRule, Language, NfoInclude, NoEscape, TagInclude
 from ..config.manager import manager
 from ..config.resources import resources
 from ..gen.field_enums import CrawlerResultFields
@@ -228,7 +228,7 @@ def add_definition_tag(res: BaseCrawlerResult, definition, codec):
     tag_list = re.split(r"[,，]", tag)
     new_tag_list = []
     [new_tag_list.append(i) for i in tag_list if i]
-    if definition and "definition" in manager.config.nfo_tag_include:
+    if definition and TagInclude.DEFINITION in manager.config.nfo_tag_include:
         new_tag_list.insert(0, definition)
         if manager.config.hd_get == "video" and codec and codec not in new_tag_list:
             new_tag_list.insert(0, codec)  # 插入编码格式

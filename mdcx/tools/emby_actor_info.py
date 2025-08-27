@@ -14,6 +14,7 @@ import aiofiles.os
 from lxml import etree
 
 from ..base.web import download_file_with_filepath
+from ..config.enums import EmbyAction
 from ..config.extend import get_movie_path_setting
 from ..config.manager import manager
 from ..config.resources import resources
@@ -52,7 +53,7 @@ async def update_emby_actor_info() -> None:
     signal.change_buttons_status.emit()
     start_time = time.time()
     emby_on = manager.config.emby_on
-    server_name = "Emby" if "emby" in manager.config.server_type else "Jellyfin"
+    server_name = "Emby" if "emby" == manager.config.server_type else "Jellyfin"
     signal.show_log_text(f"👩🏻 开始补全 {server_name} 演员信息...")
 
     actor_list = await _get_emby_actor_list()
@@ -81,7 +82,7 @@ async def update_emby_actor_info() -> None:
         f"\n🎉🎉🎉 补全完成！！！ 用时 {get_used_time(start_time)} 秒 共更新: {updated} Wiki 获取: {wiki} 数据库: {db}"
     )
 
-    if "actor_info_photo" in emby_on:
+    if EmbyAction.ACTOR_INFO_PHOTO in emby_on:
         signal.show_log_text("5 秒后开始补全演员头像头像...")
         await asyncio.sleep(5)
         signal.show_log_text("\n")
@@ -92,7 +93,7 @@ async def update_emby_actor_info() -> None:
         signal.reset_buttons_status.emit()
 
 
-async def _process_actor_async(actor: dict, emby_on) -> tuple[int, str]:
+async def _process_actor_async(actor: dict, emby_on: list[EmbyAction]) -> tuple[int, str]:
     """异步处理单个演员信息"""
     actor_name = actor.get("Name", "Unknown Actor")
     try:
@@ -105,7 +106,7 @@ async def _process_actor_async(actor: dict, emby_on) -> tuple[int, str]:
             return 0, f"🔴 {actor_name}: Emby/Jellyfin 获取演员信息错误！\n    错误信息: {error}"
 
         overview = res.get("Overview", "")
-        if overview and "无维基百科信息" not in overview and "actor_info_miss" in emby_on:
+        if overview and "无维基百科信息" not in overview and EmbyAction.ACTOR_INFO_MISS in emby_on:
             return 0, f"✅ {actor_name}: Emby/Jellyfin 已有演员信息！跳过！"
 
         actor_info = EMbyActressInfo(name=actor_name, server_id=server_id, id=actor_id)
@@ -121,7 +122,7 @@ async def _process_actor_async(actor: dict, emby_on) -> tuple[int, str]:
                 wiki_found = 1
         # db
         if manager.config.use_database:
-            if "数据库补全" in overview and "actor_info_miss" in emby_on:  # 已有数据库信息
+            if "数据库补全" in overview and EmbyAction.ACTOR_INFO_MISS in emby_on:  # 已有数据库信息
                 db_exist = 0
                 logs.append(f"{actor_name}: 已有数据库信息")
             else:

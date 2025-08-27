@@ -498,7 +498,7 @@ class Scraper:
             # 4（读取）模式默认不写nfo
             update_nfo = False
             # 除非
-            if is_nfo_existed and "has_nfo_update" in read_mode and "read_update_nfo" in read_mode:
+            if is_nfo_existed and ReadMode.HAS_NFO_UPDATE in read_mode and ReadMode.READ_UPDATE_NFO in read_mode:
                 # 启用"允许(使用本地 nfo)更新 nfo 文件"时
                 update_nfo = True
 

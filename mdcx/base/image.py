@@ -6,6 +6,7 @@ from pathlib import Path
 import aiofiles.os
 from PIL import Image
 
+from ..config.enums import DownloadableFile, KeepableFile
 from ..config.extend import get_movie_path_setting
 from ..config.manager import manager
 from ..config.resources import resources
@@ -25,18 +26,18 @@ async def extrafanart_copy2(folder_path: Path):
     extrafanart_copy_path = folder_path / extrafanart_copy_folder
 
     # 如果不保留，不下载，删除返回
-    if "extrafanart_copy" not in keep_files and "extrafanart_copy" not in download_files:
+    if KeepableFile.EXTRAFANART_COPY not in keep_files and DownloadableFile.EXTRAFANART_COPY not in download_files:
         if await aiofiles.os.path.exists(extrafanart_copy_path):
             shutil.rmtree(extrafanart_copy_path, ignore_errors=True)
         return
 
     # 如果保留，并且存在，返回
-    if "extrafanart_copy" in keep_files and await aiofiles.os.path.exists(extrafanart_copy_path):
+    if KeepableFile.EXTRAFANART_COPY in keep_files and await aiofiles.os.path.exists(extrafanart_copy_path):
         LogBuffer.log().write(f"\n 🍀 Extrafanart_copy done! (old)({get_used_time(start_time)}s) ")
         return
 
     # 如果不下载，返回
-    if "extrafanart_copy" not in download_files:
+    if DownloadableFile.EXTRAFANART_COPY not in download_files:
         return
 
     if not await aiofiles.os.path.exists(extrafanart_path):
@@ -58,20 +59,12 @@ async def extrafanart_copy2(folder_path: Path):
 async def extrafanart_extras_copy(folder_path: Path):
     start_time = time.time()
     download_files = manager.config.download_files
-    keep_files = manager.config.keep_files
     extrafanart_path = folder_path / "extrafanart"
     extrafanart_extra_path = folder_path / "behind the scenes"
 
-    if "extrafanart_extras" not in download_files and "extrafanart_extras" not in keep_files:
+    if DownloadableFile.EXTRAFANART_EXTRAS not in download_files:
         if await aiofiles.os.path.exists(extrafanart_extra_path):
             shutil.rmtree(extrafanart_extra_path, ignore_errors=True)
-        return True
-
-    if "extrafanart_extras" in keep_files and await aiofiles.os.path.exists(extrafanart_extra_path):
-        LogBuffer.log().write(f"\n 🍀 Extrafanart_extras done! (old)({get_used_time(start_time)}s)")
-        return True
-
-    if "extrafanart_extras" not in download_files:
         return True
 
     if not await aiofiles.os.path.exists(extrafanart_path):

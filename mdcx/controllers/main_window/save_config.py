@@ -726,9 +726,9 @@ def save_config(self: "MyMAinWindow"):
 
     # 根据配置更新界面显示
     scrape_like = manager.config.scrape_like
-    if "speed" in scrape_like:
+    if "speed" == scrape_like:
         Flags.scrape_like_text = "速度优先"
-    elif "single" in scrape_like:
+    elif "single" == scrape_like:
         Flags.scrape_like_text = "指定网站"
     else:
         Flags.scrape_like_text = "字段优先"

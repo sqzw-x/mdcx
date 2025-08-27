@@ -2,16 +2,13 @@ import contextlib
 import random
 import re
 import urllib.parse
+from typing import Any
 
 import bs4
 import zhconv
 
-from ..base.translate import (
-    deepl_translate_async,
-    google_translate_async,
-    llm_translate_async,
-    youdao_translate_async,
-)
+from ..base.translate import deepl_translate, google_translate, llm_translate, youdao_translate
+from ..config.enums import EmbyAction
 from ..config.manager import manager
 from ..config.models import Translator
 from ..config.resources import resources
@@ -97,7 +94,7 @@ async def search_wiki(actor_info: EMbyActressInfo) -> tuple[str | None, str]:
         return None, f"搜索过程发生异常: {str(e)}"
 
 
-async def get_detail(url, url_log, actor_info: EMbyActressInfo) -> tuple[bool, str]:
+async def get_detail(url: str, url_log: str, actor_info: EMbyActressInfo) -> tuple[bool, str]:
     """异步版本的_get_wiki_detail函数"""
     try:
         ja = "ja." in url
@@ -141,7 +138,9 @@ async def get_detail(url, url_log, actor_info: EMbyActressInfo) -> tuple[bool, s
         return False, f"获取维基百科详情时发生异常: {str(e)}"
 
 
-def handle_search_res(res, wiki_id, actor_info, description_en) -> tuple[str | None, str]:
+def handle_search_res(
+    res: dict, wiki_id: str, actor_info: EMbyActressInfo, description_en: str
+) -> tuple[str | None, str]:
     # 更新 descriptions
     description_zh = ""
     description_ja = ""
@@ -229,7 +228,7 @@ def handle_search_res(res, wiki_id, actor_info, description_en) -> tuple[str | N
             zh_url: str = zhwiki.get("url") if zhwiki else ""
             url_final = ""
             emby_on = manager.config.emby_on
-            if "actor_info_zh_cn" in emby_on:
+            if EmbyAction.ACTOR_INFO_ZH_CN in emby_on:
                 if zh_url:
                     url_final = zh_url.replace("zh.wikipedia.org/wiki/", "zh.m.wikipedia.org/zh-cn/")
                 elif ja_url:
@@ -243,10 +242,10 @@ def handle_search_res(res, wiki_id, actor_info, description_en) -> tuple[str | N
                         actor_info.taglines = [f"{description_ja}"]
                     elif description_en:
                         actor_info.taglines = [f"{description_en}"]
-                    if "actor_info_translate" in emby_on and (description_ja or description_en):
+                    if EmbyAction.ACTOR_INFO_TRANSLATE in emby_on and (description_ja or description_en):
                         actor_info.taglines_translate = True
 
-            elif "actor_info_zh_tw" in emby_on:
+            elif EmbyAction.ACTOR_INFO_ZH_TW in emby_on:
                 if zh_url:
                     url_final = zh_url.replace("zh.wikipedia.org/wiki/", "zh.m.wikipedia.org/zh-tw/")
                 elif ja_url:
@@ -261,7 +260,7 @@ def handle_search_res(res, wiki_id, actor_info, description_en) -> tuple[str | N
                     elif description_en:
                         actor_info.taglines = [f"{description_en}"]
 
-                    if "actor_info_translate" in emby_on and (description_ja or description_en):
+                    if EmbyAction.ACTOR_INFO_TRANSLATE in emby_on and (description_ja or description_en):
                         actor_info.taglines_translate = True
 
             elif ja_url:
@@ -284,7 +283,9 @@ def handle_search_res(res, wiki_id, actor_info, description_en) -> tuple[str | N
         return None, "维基百科数据处理异常"
 
 
-async def parse_detail(res, url, url_log, actor_info, ja, emby_on):
+async def parse_detail(
+    res: str, url: str, url_log: str, actor_info: EMbyActressInfo, ja: bool, emby_on: list[EmbyAction]
+) -> tuple[bool, str]:
     """处理维基百科页面内容的辅助函数"""
     try:
         res = re.sub(r"<a href=\"#cite_note.*?</a>", "", res)  # 替换[1],[2]等注释
@@ -349,7 +350,7 @@ async def parse_detail(res, url, url_log, actor_info, ja, emby_on):
         return False, f"处理维基百科页面内容时发生异常: {str(e)}"
 
 
-def _extract_introduction(actor_output):
+def _extract_introduction(actor_output: bs4.Tag) -> str:
     """提取开头简介"""
     actor_introduce_0 = actor_output.find(id="mf-section-0")
     overview = ""
@@ -364,7 +365,9 @@ def _extract_introduction(actor_output):
     return overview
 
 
-def _process_personal_profile(actor_output, actor_info, overview, url, ja, emby_on):
+def _process_personal_profile(
+    actor_output: bs4.Tag, actor_info: EMbyActressInfo, overview: str, url: str, ja: bool, emby_on: list[EmbyAction]
+) -> str:
     """处理个人资料表格"""
     actor_profile = actor_output.find("table", class_=["infobox", "infobox vcard plainlist"])
     if not actor_profile or not isinstance(actor_profile, bs4.Tag):
@@ -405,7 +408,7 @@ def _process_personal_profile(actor_output, actor_info, overview, url, ja, emby_
     return overview
 
 
-def _process_birth_info(info_left, info_right, actor_info):
+def _process_birth_info(info_left: str, info_right: str, actor_info: EMbyActressInfo) -> None:
     """处理出生信息"""
     if "出生" not in info_left and "生年" not in info_left:
         return
@@ -423,7 +426,9 @@ def _process_birth_info(info_left, info_right, actor_info):
     actor_info.year = year
 
 
-def _process_location_info(info_left, info_right, actor_info, ja, emby_on):
+def _process_location_info(
+    info_left: str, info_right: str, actor_info: EMbyActressInfo, ja: bool, emby_on: list[EmbyAction]
+) -> None:
     """处理出身地信息"""
     if "出身地" not in info_left and "出道地点" not in info_left:
         return
@@ -436,18 +441,20 @@ def _process_location_info(info_left, info_right, actor_info, ja, emby_on):
     if location == "日本":
         return
 
-    if ja and "actor_info_translate" in emby_on and "actor_info_ja" not in emby_on:
+    if ja and EmbyAction.ACTOR_INFO_TRANSLATE in emby_on and EmbyAction.ACTOR_INFO_JA not in emby_on:
         location = location.replace("県", "县")
-        if "actor_info_zh_cn" in emby_on:
+        if EmbyAction.ACTOR_INFO_ZH_CN in emby_on:
             location = zhconv.convert(location, "zh-cn")
-        elif "actor_info_zh_tw" in emby_on:
+        elif EmbyAction.ACTOR_INFO_ZH_TW in emby_on:
             location = zhconv.convert(location, "zh-hant")
 
     location = "日本·" + location.replace("日本・", "").replace("日本·", "").replace("日本", "")
     actor_info.locations = [f"{location}"]
 
 
-def _extract_section_content(actor_output, actor_introduce_0, section_name, section_title):
+def _extract_section_content(
+    actor_output: bs4.Tag, actor_introduce_0: Any, section_name: str, section_title: str
+) -> str:
     """提取指定章节内容的通用函数"""
     if not actor_introduce_0 or not isinstance(actor_introduce_0, bs4.Tag):
         return ""
@@ -478,10 +485,10 @@ def _extract_section_content(actor_output, actor_introduce_0, section_name, sect
     return content
 
 
-async def _process_translation(actor_info, overview, ja, emby_on):
+async def _process_translation(actor_info: EMbyActressInfo, overview: str, ja: bool, emby_on: list[EmbyAction]) -> str:
     """处理翻译逻辑"""
     tag_trans = actor_info.taglines_translate
-    if not (ja or tag_trans) or "actor_info_translate" not in emby_on or "actor_info_ja" in emby_on:
+    if not (ja or tag_trans) or EmbyAction.ACTOR_INFO_TRANSLATE not in emby_on or EmbyAction.ACTOR_INFO_JA in emby_on:
         return overview
 
     translate_by_list = manager.config.translate_config.translate_by.copy()
@@ -504,46 +511,48 @@ async def _process_translation(actor_info, overview, ja, emby_on):
     return overview
 
 
-async def _translate_english_tag(tag_req, translate_by_list, actor_info):
+async def _translate_english_tag(tag_req: str, translate_by_list: list[Translator], actor_info: EMbyActressInfo) -> str:
     """翻译英文标签"""
     for each in translate_by_list:
         if each == Translator.YOUDAO:
-            t, o, r = await youdao_translate_async(tag_req, "")
+            t, o, r = await youdao_translate(tag_req, "")
         elif each == Translator.GOOGLE:
-            t, o, r = await google_translate_async(tag_req, "")
+            t, o, r = await google_translate(tag_req, "")
         elif each == Translator.LLM:
-            t, o, r = await llm_translate_async(tag_req, "")
+            t, o, r = await llm_translate(tag_req, "")
         else:  # deepl
-            t, o, r = await deepl_translate_async(tag_req, "", ls="EN")
+            t, o, r = await deepl_translate(tag_req, "", ls="EN")
 
         if not r:
             actor_info.taglines = [t]
             return ""  # 清空tag_req表示已翻译
-        return tag_req
+    return tag_req
 
 
-async def _translate_content(tag_req, overview_req, translate_by_list, actor_info, overview):
+async def _translate_content(
+    tag: str, overview_req: str, translators: list[Translator], info: EMbyActressInfo, overview: str
+) -> str:
     """翻译主要内容"""
-    for each in translate_by_list:
+    for each in translators:
         if each == Translator.YOUDAO:
-            t, o, r = await youdao_translate_async(tag_req, overview_req)
+            t, o, r = await youdao_translate(tag, overview_req)
         elif each == Translator.GOOGLE:
-            t, o, r = await google_translate_async(tag_req, overview_req)
+            t, o, r = await google_translate(tag, overview_req)
         elif each == Translator.LLM:
-            t, o, r = await llm_translate_async(tag_req, overview_req)
+            t, o, r = await llm_translate(tag, overview_req)
         else:  # deepl
-            t, o, r = await deepl_translate_async(tag_req, overview_req)
+            t, o, r = await deepl_translate(tag, overview_req)
 
         if not r:
-            if tag_req:
-                actor_info.taglines = [t]
+            if tag:
+                info.taglines = [t]
             if overview_req:
                 overview = _clean_translated_overview(o)
             break
     return overview
 
 
-def _clean_translated_overview(overview):
+def _clean_translated_overview(overview: str) -> str:
     """清理翻译后的概述文本"""
     replacements = [
         ("\n= = = = = = = = = =个人资料\n", "\n===== 个人资料 =====\n"),
@@ -571,7 +580,9 @@ def _clean_translated_overview(overview):
     return overview
 
 
-def _finalize_overview(overview, url_log, res, actor_info, emby_on):
+def _finalize_overview(
+    overview: str, url_log: str, res: str, actor_info: EMbyActressInfo, emby_on: list[EmbyAction]
+) -> str:
     """最终处理概述信息"""
     # 外部链接
     overview += f"\n===== 外部链接 =====\n{url_log}"
@@ -580,24 +591,24 @@ def _finalize_overview(overview, url_log, res, actor_info, emby_on):
     # 设置默认标签
     if not actor_info.taglines:
         if "AV監督" in res:
-            if "actor_info_zh_cn" in emby_on:
+            if EmbyAction.ACTOR_INFO_ZH_CN in emby_on:
                 actor_info.taglines = ["日本成人影片导演"]
-            elif "actor_info_zh_tw" in emby_on:
+            elif EmbyAction.ACTOR_INFO_ZH_TW in emby_on:
                 actor_info.taglines = ["日本成人影片導演"]
-            elif "actor_info_ja" in emby_on:
+            elif EmbyAction.ACTOR_INFO_JA in emby_on:
                 actor_info.taglines = ["日本のAV監督"]
         elif "女優" in res or "女优" in res:
-            if "actor_info_zh_cn" in emby_on:
+            if EmbyAction.ACTOR_INFO_ZH_CN in emby_on:
                 actor_info.taglines = ["日本AV女优"]
-            elif "actor_info_zh_tw" in emby_on:
+            elif EmbyAction.ACTOR_INFO_ZH_TW in emby_on:
                 actor_info.taglines = ["日本AV女優"]
-            elif "actor_info_ja" in emby_on:
+            elif EmbyAction.ACTOR_INFO_JA in emby_on:
                 actor_info.taglines = ["日本のAV女優"]
 
     # 语言特定处理
-    if "actor_info_zh_tw" in emby_on and overview:
+    if EmbyAction.ACTOR_INFO_ZH_TW in emby_on and overview:
         overview = zhconv.convert(overview, "zh-hant")
-    elif "actor_info_ja" in emby_on:
+    elif EmbyAction.ACTOR_INFO_JA in emby_on:
         overview = overview.replace("== 个人资料 ==", "== 個人情報 ==")
         overview = overview.replace("== 人物介绍 ==", "== 人物紹介 ==")
         overview = overview.replace("== 个人经历 ==", "== 個人略歴 ==")

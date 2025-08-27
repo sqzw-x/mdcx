@@ -34,7 +34,7 @@ async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):
             mark_list.append("8K")
         else:
             mark_list.append("4K")
-    if has_sub and "sub" in mark_type:
+    if has_sub and MarkType.SUB in mark_type:
         mark_list.append("字幕")
 
     if mosaic == "有码" or mosaic == "有碼":
@@ -50,7 +50,7 @@ async def add_mark(json_data: OtherInfo, file_info: FileInfo, mosaic: str):
             mark_list.append("流出")
         elif MarkType.UNCENSORED in mark_type:
             mark_list.append("无码")
-    elif (mosaic == "无码" or mosaic == "無碼") and "uncensored" in mark_type:
+    elif (mosaic == "无码" or mosaic == "無碼") and MarkType.UNCENSORED in mark_type:
         mark_list.append("无码")
 
     if mark_list:

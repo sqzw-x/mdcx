@@ -9,7 +9,7 @@ from ..config.manager import manager
 from ..signals import signal
 
 
-async def youdao_translate_async(title: str, outline: str):
+async def youdao_translate(title: str, outline: str):
     url = "https://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule"
     msg = f"{title}\n{outline}"
     lts = str(int(time.time() * 1000))
@@ -104,7 +104,7 @@ async def _deepl_translate(text: str, source_lang: Literal["JA", "EN"] = "JA") -
         return None
 
 
-async def deepl_translate_async(title: str, outline: str, ls: Literal["JA", "EN"] = "JA"):
+async def deepl_translate(title: str, outline: str, ls: Literal["JA", "EN"] = "JA"):
     """DeepL 翻译接口"""
     r1, r2 = await asyncio.gather(_deepl_translate(title, ls), _deepl_translate(outline, ls))
     if r1 is None or r2 is None:
@@ -128,7 +128,7 @@ async def _llm_translate(text: str, target_language: str = "简体中文") -> st
     )
 
 
-async def llm_translate_async(title: str, outline: str, target_language: str = "简体中文"):
+async def llm_translate(title: str, outline: str, target_language: str = "简体中文"):
     r1, r2 = await asyncio.gather(_llm_translate(title, target_language), _llm_translate(outline, target_language))
     if r1 is None or r2 is None:
         return "", "", "LLM 翻译失败! 查看网络日志以获取更多信息"
@@ -146,7 +146,7 @@ async def _google_translate(msg: str) -> tuple[str | None, str]:
     return "".join([sen[0] for sen in response[0]]), ""
 
 
-async def google_translate_async(title: str, outline: str) -> tuple[str, str, str | None]:
+async def google_translate(title: str, outline: str) -> tuple[str, str, str | None]:
     (r1, e1), (r2, e2) = await asyncio.gather(_google_translate(title), _google_translate(outline))
     if r1 is None or r2 is None:
         return "", "", f"google 翻译失败! {e1} {e2}"

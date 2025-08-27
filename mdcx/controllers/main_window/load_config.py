@@ -182,25 +182,21 @@ def load_config(self: "MyMAinWindow"):
         # FC2番号刮削网站
         self.Ui.lineEdit_website_fc2.setText(",".join([site.value for site in manager.config.website_fc2]))
         # 欧美番号刮削网站
-        temp_oumei = ",".join([site.value for site in manager.config.website_oumei])
-        if "theporndb" not in temp_oumei:
-            temp_oumei = "theporndb," + temp_oumei
-        website_oumei = temp_oumei
-        self.Ui.lineEdit_website_oumei.setText(website_oumei)
+        self.Ui.lineEdit_website_oumei.setText(",".join([site.value for site in manager.config.website_oumei]))
         # 国产番号刮削网站
         self.Ui.lineEdit_website_guochan.setText(",".join([site.value for site in manager.config.website_guochan]))
 
         # 刮削偏好
         scrape_like = manager.config.scrape_like
-        if "speed" in scrape_like:
+        if "speed" == scrape_like:
             Flags.scrape_like_text = "速度优先"
-        elif "single" in scrape_like:
+        elif "single" == scrape_like:
             Flags.scrape_like_text = "指定网站"
         else:
             Flags.scrape_like_text = "字段优先"
 
         set_radio_buttons(
-            "speed" if "speed" in scrape_like else "single" if "single" in scrape_like else "info",
+            scrape_like,
             (self.Ui.radioButton_scrape_speed, "speed"),
             (self.Ui.radioButton_scrape_single, "single"),
             (self.Ui.radioButton_scrape_info, "info"),
@@ -786,7 +782,7 @@ def load_config(self: "MyMAinWindow"):
         # region emby
         # 服务器类型
         set_radio_buttons(
-            "emby" if "emby" in manager.config.server_type else "jellyfin",
+            manager.config.server_type,
             (self.Ui.radioButton_server_emby, "emby"),
             (self.Ui.radioButton_server_jellyfin, "jellyfin"),
             default=self.Ui.radioButton_server_emby,
