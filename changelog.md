@@ -1,18 +1,24 @@
-## 新增
-
-* ✨ 使用浏览器请求 dmm digital 页面; 需要安装 Chrome 浏览器
-* 重构 `刮削网站` 配置逻辑
-  * 移除 `优先使用官网数据` 选项, `official` 现在是一个普通的来源网站, 可在优先级设置中使用
-  * 移除各字段的 `排除网站` 和 `刮削设置 (列出的网站, 尽量补全, 不单独刮削)` 选项
-  * 将自动转换字段来源设置
-
 ## 修复
 
-* dmm mono 多行简介获取
+* 无法裁剪图片
+* 配置项无法另存为
+* nfo 无法正常写入
 
 <details>
 <summary>Full Changelog</summary>
 
+a7c9793 Ready for version 220250829
+f69f94b fix: 图片裁剪导致崩溃
+18ed067 fix: 使用枚举配置项
+55ddff3 fix: 配置无法另存为
+7a0a2b5 fix: 移除无用的网络配置项; 优化配置出错时的处理 (fix #634)
+90180b1 fix: patchright 依赖项未打包
+0d1f25f fix: config API 改为使用 JSON 格式
+f968082 fix: 另存为功能改为 JSON 格式
+2cf3afa fix: 删除不存在文件时忽略异常; 提前过滤忽略目录; 使 os.walk 非阻塞
+3291476 fix: 正确跳过忽略的目录
+9238ff1 fix: 全角分隔符识别
+ae60318 Ready for version 220250826
 4bec690 chore: 调整项目结构; 修复 bug (#631)
 c7863ae refactor!: 使用 pathlib 处理路径
 287adb1 fix: website_youma 转换; 保存配置后重新加载
