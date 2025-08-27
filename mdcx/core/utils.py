@@ -1,7 +1,6 @@
 import asyncio
 import os
 import re
-import traceback
 from pathlib import Path
 
 import aiofiles.os
@@ -104,12 +103,8 @@ def deal_some_field(json_data: CrawlersResult):
                 actor_keyword_list: list[str] = resources.get_actor_data(each_actor).get("keyword", [])
                 new_all_actor_name_list.extend(actor_keyword_list)
             for each_actor in set(new_all_actor_name_list):
-                try:
-                    end_actor = re.compile(rf" {each_actor}$")
-                    title = re.sub(end_actor, "", title)
-                    originaltitle = re.sub(end_actor, "", originaltitle)
-                except Exception:
-                    signal.show_traceback_log(traceback.format_exc())
+                title = title.removesuffix(f" {each_actor}")
+                originaltitle = originaltitle.removesuffix(f" {each_actor}")
         json_data.title = title.strip()
         json_data.originaltitle = originaltitle.strip()
 
