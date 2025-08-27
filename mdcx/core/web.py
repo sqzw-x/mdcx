@@ -586,7 +586,6 @@ async def thumb_download(
             if not each[1]:
                 continue
             cover_from, cover_url = each
-            cover_url = await check_url(cover_url)
             if not cover_url:
                 LogBuffer.log().write(
                     f"\n 🟠 检测到 Thumb 图片失效! 跳过！({cover_from})({get_used_time(start_time)}s) " + each[1]
