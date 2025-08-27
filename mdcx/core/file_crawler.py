@@ -195,10 +195,17 @@ class FileScraper:
                         # 多语言网站, 如果 undefined 尚不存在, 也使用当前语言数据
                         if site in MULTI_LANGUAGE_WEBSITES and (site, Language.UNDEFINED) not in all_res:
                             all_res[(site, Language.UNDEFINED)] = web_data.data
+                    except PatchrightError as e:
+                        if "BrowserType.launch: Executable doesn't exist" in e.message:
+                            e = "找不到 Chrome 浏览器, 请安装或关闭对应网站的 use_browser 选项"
+                        reduced.field_log += f"\n    🔴 {site:<15} (失败: {str(e)})"
+                        failed.add(key)
+                        continue
+                    except TimeoutError:
+                        reduced.field_log += f"\n    🔴 {site:<15} (请求超时)"
+                        failed.add(key)
+                        continue
                     except Exception as e:
-                        if isinstance(e, PatchrightError):
-                            if "BrowserType.launch: Executable doesn't exist" in e.message:
-                                e = "找不到 Chrome 浏览器, 请安装或关闭对应网站的 use_browser 选项"
                         reduced.field_log += f"\n    🔴 {site:<15} (失败: {str(e)})"
                         failed.add(key)
                         continue

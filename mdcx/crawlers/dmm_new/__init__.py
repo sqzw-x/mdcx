@@ -278,11 +278,10 @@ class DmmCrawler(GenericBaseCrawler[DMMContext]):
                     )
                     self.browser_context = context
         try:
-            page = await self.browser_context.new_page()
-            await page.goto(url, wait_until="load")
-            html = await page.content()
-            await page.close()
-            return html, ""
+            async with await self.browser_context.new_page() as page:
+                await page.goto(url, wait_until="load")
+                html = await page.content()
+                return html, ""
         except Exception as e:
             return None, f"browser 请求失败: {e}"
 
