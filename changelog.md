@@ -1,12 +1,19 @@
 ## 修复
 
-* 无法裁剪图片
-* 配置项无法另存为
-* nfo 无法正常写入
+* 无法补全头像
+* 其他问题修复和改进
 
 <details>
 <summary>Full Changelog</summary>
 
+40ed706 fix: emby url end slash
+b0123d8 fix: 无法补全头像
+203732c Ready for version 220250830
+44f2088 fix: 使用 removesuffix 替换 re.sub
+d3d8dc9 fix: 正确填充 year 字段
+8a994a4 fix: 移除下载图片时的冗余检查
+a480ec5 fix: 发生异常时正确关闭浏览器页面; 改进异常处理
+2b7659b update changelog; fix 拒绝未知的 delete Path('.') 调用
 a7c9793 Ready for version 220250829
 f69f94b fix: 图片裁剪导致崩溃
 18ed067 fix: 使用枚举配置项
