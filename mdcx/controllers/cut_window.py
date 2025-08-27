@@ -195,7 +195,7 @@ class CutWindow(QDialog):
         # 显示图片及水印情况
         if img_path and os.path.exists(img_path):
             # 显示背景
-            pic = QPixmap(img_path)
+            pic = QPixmap(img_path.as_posix())
             self.pic_w = pic.width()
             self.pic_h = pic.height()
             self.Ui.label_origin_size.setText(str(f"{str(self.pic_w)}, {str(self.pic_h)}"))  # 显示原图尺寸
