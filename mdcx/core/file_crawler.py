@@ -244,7 +244,7 @@ class FileScraper:
         reduced.actor_amazon = list(set(reduced.actor_amazon))
 
         # 处理 year
-        if reduced.year and (r := re.search(r"\d{4}", reduced.release)):
+        if not reduced.year and (r := re.search(r"\d{4}", reduced.release)):
             reduced.year = r.group()
 
         # 处理 javdbid
