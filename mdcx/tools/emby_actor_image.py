@@ -36,7 +36,7 @@ async def update_emby_actor_photo() -> None:
 
 
 async def _get_emby_actor_list() -> list[dict]:
-    url = str(manager.config.emby_url)
+    url = str(manager.config.emby_url).rstrip("/")
     # 获取 emby 的演员列表
     if "emby" == manager.config.server_type:
         server_name = "Emby"
@@ -84,7 +84,7 @@ async def _upload_actor_photo(url: str, pic_path: Path) -> tuple[bool, str]:
 
 def _generate_server_url(actor_js: dict) -> tuple[str, str, str, str, str, str]:
     server_type = manager.config.server_type
-    emby_url = str(manager.config.emby_url)
+    emby_url = str(manager.config.emby_url).rstrip("/")
     api_key = manager.config.api_key
     actor_name = actor_js["Name"].replace(" ", "%20")
     actor_id = actor_js["Id"]
