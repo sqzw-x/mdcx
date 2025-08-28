@@ -1,11 +1,15 @@
 ## 修复
 
-* 无法补全头像
-* 其他问题修复和改进
+* 初始化浏览器时的数据竞争
+* dmm digital 字段解析
 
 <details>
 <summary>Full Changelog</summary>
 
+61bed85 fix: 初始化部分加锁
+80028f6 fix: cli tool
+39458c1 fix: dmm digital parser
+f325daa Ready for version 220250831
 40ed706 fix: emby url end slash
 b0123d8 fix: 无法补全头像
 203732c Ready for version 220250830
