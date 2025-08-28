@@ -13,8 +13,10 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from ..browser import BrowserProvider
 from ..config.manager import manager
 from ..config.models import Language, Website
+from ..crawler import Never
 from ..crawlers import get_crawler_compat
-from ..crawlers.base import get_crawler
+from ..crawlers.base import GenericBaseCrawler, get_crawler
+from ..crawlers.base.compat import LegacyCrawler
 from ..manual import ManualConfig
 from ..models.types import CrawlerInput
 from ..utils import executor
@@ -91,13 +93,23 @@ def _crawl(sites: list[Website], input: CrawlerInput, output: str | None, proxy:
 
     client = AsyncWebClient(
         loop=executor._loop,
-        proxy=proxy or manager.config.proxy,
+        proxy=proxy or (manager.config.proxy if manager.config.use_proxy else None),
         retry=retry,
         timeout=timeout,
         log_fn=lambda msg: print(f"[dim][AsyncWebClient] {msg}[/dim]"),
     )
-    crawlers = [c(client=client, base_url=manager.config.get_site_url(c.site())) for c in classes]
-    futures = [executor.submit(crawler.run(input)) for crawler in crawlers]
+
+    browser_provider = BrowserProvider(manager.config)
+
+    async def task(c: type[GenericBaseCrawler[Never]] | LegacyCrawler):
+        crawler = c(
+            client=client,
+            base_url=manager.config.get_site_url(c.site()),
+            browser=await browser_provider.get_browser(),
+        )
+        return await crawler.run(input)
+
+    futures = [executor.submit(task(c)) for c in classes]
     executor.wait_all()
 
     for i, f in enumerate(futures):
@@ -165,7 +177,7 @@ def show_config():
     """显示当前配置信息"""
     console.print("[bold blue]当前配置信息:[/bold blue]")
     console.print()
-    console.print(f"代理: {manager.config.proxy or '未设置'}")
+    console.print(f"代理: {(manager.config.proxy if manager.config.use_proxy else None) or '未设置'}")
     console.print(f"超时时间: {manager.config.timeout} 秒")
     console.print(f"重试次数: {manager.config.retry}")
     console.print(f"配置文件路径: {manager.path}")
@@ -194,7 +206,7 @@ async def _fetch_async(
     """异步获取详情页内容"""
 
     # 配置网络客户端
-    client_proxy = proxy or manager.config.proxy
+    client_proxy = proxy or (manager.config.proxy if manager.config.use_proxy else None)
     client_timeout = timeout or manager.config.timeout
     client_retry = retry or manager.config.retry
 
