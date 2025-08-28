@@ -236,23 +236,15 @@ class DigitalParser(DetailPageParser):
 
     @override
     async def title(self, ctx, html) -> str:
-        return extract_text(
-            html,
-            '//h1[contains(@class, "text-lg")]/span/text()',
-            '//h1[@id="title"]/text()',
-            '//h1[@class="item fn bold"]/text()',
-        )
+        return extract_text(html, "//h1/span/text()")
 
     @override
     async def release(self, ctx, html) -> str | None:
         release = extract_text(
             html,
-            "//th[contains(text(),'配信開始日')]/following-sibling::td/span/text()",
-            "//th[contains(text(),'商品発売日')]/following-sibling::td/span/text()",
-            "//td[contains(text(),'発売日')]/following-sibling::td/text()",
-            "//th[contains(text(),'発売日')]/following-sibling::td/text()",
-            "//td[contains(text(),'配信開始日')]/following-sibling::td/text()",
-            "//th[contains(text(),'配信開始日')]/following-sibling::td/text()",
+            "//th[contains(.//text(),'配信開始日')]/following-sibling::td/span/text()",
+            "//th[contains(.//text(),'商品発売日')]/following-sibling::td/span/text()",
+            "//th[contains(.//text(),'発売日')]/following-sibling::td/text()",
         )
         if release:
             release = release.replace("/", "-")
@@ -261,67 +253,33 @@ class DigitalParser(DetailPageParser):
 
     @override
     async def runtime(self, ctx, html) -> str | None:
-        runtime = extract_text(
-            html,
-            "//th[contains(text(),'収録時間')]/following-sibling::td/span/text()",
-            "//td[contains(text(),'収録時間')]/following-sibling::td/text()",
-            "//th[contains(text(),'収録時間')]/following-sibling::td/text()",
-        )
+        runtime = extract_text(html, "//th[contains(.//text(),'収録時間')]/following-sibling::td//text()")
         if match := re.search(r"\d+", runtime):
             return match.group()
 
     @override
     async def studio(self, ctx, html) -> str | None:
-        return extract_text(
-            html,
-            "//th[contains(text(),'メーカー')]/following-sibling::td/span/a/text()",
-            "//td[contains(text(),'メーカー')]/following-sibling::td/a/text()",
-        )
+        return extract_text(html, "//th[contains(.//text(),'メーカー')]/following-sibling::td//a/text()")
 
     @override
     async def publisher(self, ctx, html) -> str | None:
-        return extract_text(
-            html,
-            "//th[contains(text(),'レーベル')]/following-sibling::td/span/a/text()",
-            "//td[contains(text(),'レーベル')]/following-sibling::td/a/text()",
-        )
+        return extract_text(html, "//th[contains(.//text(),'レーベル')]/following-sibling::td//a/text()")
 
     @override
     async def series(self, ctx, html) -> str | None:
-        return extract_text(
-            html,
-            "//th[contains(text(),'シリーズ')]/following-sibling::td/span/a/text()",
-            "//td[contains(text(),'シリーズ')]/following-sibling::td/a/text()",
-            "//th[contains(text(),'シリーズ')]/following-sibling::td/a/text()",
-        )
+        return extract_text(html, "//th[contains(.//text(),'シリーズ')]/following-sibling::td//a/text()")
 
     @override
     async def directors(self, ctx, html):
-        return extract_all_texts(
-            html,
-            "//th[contains(text(),'監督')]/following-sibling::td/span/a/text()",
-            "//td[contains(text(),'監督')]/following-sibling::td/a/text()",
-            "//th[contains(text(),'監督')]/following-sibling::td/a/text()",
-        )
+        return extract_all_texts(html, "//th[contains(.//text(),'監督')]/following-sibling::td//a/text()")
 
     @override
     async def actors(self, ctx, html) -> list[str]:
-        return extract_all_texts(
-            html,
-            "//th[contains(text(),'出演者')]/following-sibling::td/span/div/a/text()",
-            "//span[@id='performer']/a/text()",
-            "//td[@id='fn-visibleActor']/div/a/text()",
-            "//td[contains(text(),'出演者')]/following-sibling::td/a/text()",
-        )
+        return extract_all_texts(html, "//th[contains(.//text(),'出演者')]/following-sibling::td//a/text()")
 
     @override
     async def tags(self, ctx, html) -> list[str]:
-        return extract_all_texts(
-            html,
-            "//th[contains(text(),'ジャンル')]/following-sibling::td/span/div/a/text()",
-            "//td[contains(text(),'ジャンル')]/following-sibling::td/a/text()",
-            "//div[@class='info__item']/table/tbody/tr/th[contains(text(),'ジャンル')]/following-sibling::td/a/text()",
-        )
+        return extract_all_texts(html, "//th[contains(.//text(),'ジャンル')]/following-sibling::td//a/text()")
 
     @override
     async def thumb(self, ctx, html) -> str | None:
@@ -338,14 +296,6 @@ class DigitalParser(DetailPageParser):
         return [re.sub(r"-(\d+)\.jpg", r"jp-\1.jpg", i) for i in extrafanart]
 
     @override
-    async def outline(self, ctx, html) -> str:
-        outline = extract_text(
-            html,
-            "normalize-space(string(//div[@class='wp-smplex']/preceding-sibling::div[contains(@class, 'mg-b20')][1]))",
-        )
-        return outline.replace("「コンビニ受取」対象商品です。詳しくはこちらをご覧ください。", "")
-
-    @override
     async def score(self, ctx, html) -> str:
         score = extract_text(html, "//p[contains(@class,'d-review__average')]/strong/text()")
         return score.replace("点", "")
@@ -356,6 +306,6 @@ class DigitalParser(DetailPageParser):
 
     @override
     async def mosaic(self, ctx, html):
-        if extract_text(html, '//li[@class="on"]/a/text()') == "アニメ":
+        if "アニメ" in extract_all_texts(html, "//ol/li//text()"):
             return "里番"
         return "有码"
