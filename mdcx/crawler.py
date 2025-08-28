@@ -1,3 +1,4 @@
+import asyncio
 from typing import TYPE_CHECKING, Never, Protocol
 
 from .browser import BrowserProvider
@@ -23,18 +24,22 @@ class CrawlerProvider:
         self.client = client
         self.browser_provider = BrowserProvider(config)
         self.browser = None
+        self.lock = asyncio.Lock()
 
     async def get(self, site: Website):
-        if site not in self.instances:
-            use_browser = self.config.get_site_config(site).use_browser
-            if use_browser and self.browser is None:
-                self.browser = await self.browser_provider.get_browser()
-            crawler_cls = get_crawler_compat(site)
-            self.instances[site] = crawler_cls(
-                client=self.client,
-                base_url=self.config.get_site_url(site),
-                browser=self.browser,
-            )
+        if r := self.instances.get(site):
+            return r
+        async with self.lock:
+            if site not in self.instances:
+                use_browser = self.config.get_site_config(site).use_browser
+                if use_browser and self.browser is None:
+                    self.browser = await self.browser_provider.get_browser()
+                crawler_cls = get_crawler_compat(site)
+                self.instances[site] = crawler_cls(
+                    client=self.client,
+                    base_url=self.config.get_site_url(site),
+                    browser=self.browser,
+                )
         return self.instances[site]
 
     async def close(self):

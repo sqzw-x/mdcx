@@ -1,3 +1,4 @@
+import asyncio
 import os
 from typing import TYPE_CHECKING
 
@@ -14,15 +15,19 @@ class BrowserProvider:
         self.config = config
         self.playwright = None
         self.default_browser = None
+        self.lock = asyncio.Lock()
 
     async def get_browser(self) -> "Browser":
-        if self.playwright is None:
-            self.playwright = await async_playwright().start()
-        if self.default_browser is None:
-            self.default_browser = await self.playwright.chromium.launch(
-                channel="chrome",
-                headless=os.getenv("MDCX_SHOW_BROWSER") is None,
-            )
+        if self.default_browser is not None:
+            return self.default_browser
+        async with self.lock:
+            if self.playwright is None:
+                self.playwright = await async_playwright().start()
+            if self.default_browser is None:
+                self.default_browser = await self.playwright.chromium.launch(
+                    channel="chrome",
+                    headless=os.getenv("MDCX_SHOW_BROWSER") is None,
+                )
         return self.default_browser
 
     async def close(self):
