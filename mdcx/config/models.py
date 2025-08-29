@@ -634,10 +634,8 @@ class Config(BaseModel):
             Switch.REST_SCRAPE,
             Switch.TIMED_SCRAPE,
             Switch.REMAIN_TASK,
-            Switch.SHOW_DIALOG_EXIT,
             Switch.SHOW_DIALOG_STOP_SCRAPE,
             Switch.SORT_DEL,
-            Switch.QT_DIALOG,
             Switch.THEPORNDB_NO_HASH,
             Switch.HIDE_DOCK,
             Switch.PASSTHROUGH,
@@ -651,8 +649,8 @@ class Config(BaseModel):
     )
     timed_interval: timedelta = Field(default=timedelta(minutes=30), title="定时器间隔")
     rest_count: int = Field(default=20, title="休息计数")
-    rest_time: timedelta = Field(default=timedelta(minutes=1, seconds=2), title="休息时间")
-    statement: int = Field(default=3, title="声明")
+    rest_time: timedelta = Field(default=timedelta(), title="休息时间")
+    # statement: int = Field(default=3, title="声明")
     # endregion
 
     # region: deperated
