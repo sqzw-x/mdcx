@@ -1569,10 +1569,14 @@ class MyMAinWindow(QMainWindow):
 
     # 设置-其他-配置文件目录-点选择目录
     def pushButton_select_config_folder_clicked(self):
-        media_folder_path = Path(self._get_select_folder_path())
-        if media_folder_path.is_dir() and media_folder_path != manager.data_folder:
-            config_path = media_folder_path / "config.json"
-            manager.path = media_folder_path
+        p = self._get_select_folder_path()
+        if not p:
+            return
+        p = Path(p)
+        if p.is_dir() and p != manager.data_folder:
+            manager.list_configs()
+            config_path = p / "config.json"
+            manager.path = config_path
             if config_path.is_file():
                 temp_dark = self.dark_mode
                 temp_window_radius = self.window_radius
@@ -1581,7 +1585,7 @@ class MyMAinWindow(QMainWindow):
                     self.show_flag = True
                     self._windows_auto_adjust()
             else:
-                self.Ui.lineEdit_config_folder.setText(str(media_folder_path))
+                self.Ui.lineEdit_config_folder.setText(str(p))
                 self.pushButton_save_config_clicked()
             signal_qt.show_scrape_info(f"💡 目录已切换！{get_current_time()}")
 
