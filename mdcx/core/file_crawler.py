@@ -136,7 +136,7 @@ class FileScraper:
         r = await asyncio.wait_for(c.run(task_input), timeout=timeout)
         return r
 
-    async def _call_crawlers(self, task_input: CrawlerInput, type_sites: set[Website]) -> CrawlersResult:
+    async def _call_crawlers(self, task_input: CrawlerInput, type_sites: set[Website]) -> CrawlersResult | None:
         """
         获取一组网站的数据：按照设置的网站组，请求各字段数据，并返回最终的数据
         采用按需请求策略：仅请求必要的网站，失败时才请求下一优先级网站
@@ -231,6 +231,10 @@ class FileScraper:
             else:  # 所有来源都无此字段
                 reduced.field_log += "\n    🔴 所有来源均无数据"
 
+        # 所有来源均失败
+        if len(all_res) == 0:
+            return None
+
         # 需尽力收集的字段
         for data in all_res.values():
             # 记录所有来源的 thumb url 以便后续下载
@@ -259,7 +263,7 @@ class FileScraper:
 
         return reduced
 
-    async def _call_specific_crawler(self, task_input: CrawlerInput, website: Website) -> CrawlersResult:
+    async def _call_specific_crawler(self, task_input: CrawlerInput, website: Website) -> CrawlersResult | None:
         file_number = task_input.number
         short_number = task_input.short_number
 
@@ -277,7 +281,7 @@ class FileScraper:
         web_data = await self._call_crawler(task_input, website)
         web_data_json = web_data.data
         if web_data_json is None:
-            return CrawlersResult.empty()
+            return None
 
         res = update(CrawlersResult.empty(), web_data_json)
         if not res.title:
@@ -300,7 +304,7 @@ class FileScraper:
 
         return res
 
-    async def _crawl(self, task_input: CrawlTask, website: Website | None) -> CrawlersResult:  # 从JSON返回元数据
+    async def _crawl(self, task_input: CrawlTask, website: Website | None) -> CrawlersResult | None:  # 从JSON返回元数据
         appoint_number = task_input.appoint_number
         destroyed = task_input.destroyed
         file_number = task_input.number
@@ -381,6 +385,9 @@ class FileScraper:
         # ================================================网站请求结束================================================
         # ======================================超时或未找到返回
 
+        if res is None:
+            return None
+
         number = file_number  # res.number 实际上并未设置, 此处取 file_number
         if appoint_number:
             number = appoint_number
@@ -433,9 +440,11 @@ class FileScraper:
 
         return website_name
 
-    async def run(self, task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult:
+    async def run(self, task_input: CrawlTask, file_mode: FileMode) -> CrawlersResult | None:
         site = self._get_site(task_input, file_mode)
         if site is not None:
             site = Website(site)
         res = await self._crawl(task_input, site)
+        if res is None:
+            return None
         return _deal_res(res)

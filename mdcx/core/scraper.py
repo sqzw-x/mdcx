@@ -560,6 +560,8 @@ class Scraper:
 
             scraper = FileScraper(manager.config, self.crawler_provider)
             res = await scraper.run(file_info.crawl_task(), file_mode)
+            if res is None:
+                return None, None
             # 处理 FileInfo 和 CrawlersResult 的共同字段, 即 number/mosaic/letters
             # todo 理想情况, crawl 后应该以 res 为准, 后续不应再访问 file_info 的相关字段
             # todo 注意, 实际上目前各 crawler 返回的 mosaic 和 number 字段并未被使用
