@@ -246,7 +246,9 @@ def get_success_list() -> None:
     if os.path.isfile(resources.u("success.txt")):
         with open(resources.u("success.txt"), encoding="utf-8", errors="ignore") as f:
             paths = f.readlines()
-            Flags.success_list = {Path(path.strip()) for path in paths if path.strip()}
+            Flags.success_list = {
+                p for path in paths if path.strip() and (p := Path(path.strip())).is_file(follow_symlinks=False)
+            }
             executor.run(save_success_list())
     signal.view_success_file_settext.emit(f"查看 ({len(Flags.success_list)})")
 
