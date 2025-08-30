@@ -749,7 +749,7 @@ async def poster_download(
 
     # 判断之前有没有 poster 和 thumb
     if not poster_path and not thumb_path:
-        other.poster_path = Path()
+        other.poster_path = None
         if DownloadableFile.IGNORE_PIC_FAIL in download_files:
             LogBuffer.log().write("\n 🟠 Poster download failed! (你已勾选「图片下载失败时，不视为失败！」) ")
             LogBuffer.log().write(f"\n 🍀 Poster done! (none)({get_used_time(start_time)}s)")

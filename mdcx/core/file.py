@@ -1033,9 +1033,9 @@ async def deal_old_files(
         signal.show_log_text(traceback.format_exc())
 
     # 更新图片地址
-    info.poster_path = poster_final_path if poster_exists and done_poster_path_copy else Path()
-    info.thumb_path = thumb_final_path if thumb_exists and done_thumb_path_copy else Path()
-    info.fanart_path = fanart_final_path if fanart_exists and done_fanart_path_copy else Path()
+    info.poster_path = poster_final_path if poster_exists and done_poster_path_copy else None
+    info.thumb_path = thumb_final_path if thumb_exists and done_thumb_path_copy else None
+    info.fanart_path = fanart_final_path if fanart_exists and done_fanart_path_copy else None
 
     # nfo 处理
     try:

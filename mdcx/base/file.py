@@ -124,12 +124,12 @@ async def pic_some_deal(number: str, thumb_final_path: Path, fanart_final_path: 
             LogBuffer.log().write("\n 🍀 Thumb delete done!")
 
 
-async def save_success_list(old_path: Path = Path(), new_path: Path = Path()) -> None:
+async def save_success_list(old_path: Path | None = None, new_path: Path | None = None) -> None:
     if old_path and NoEscape.RECORD_SUCCESS_FILE in manager.config.no_escape:
         # 软硬链接时，保存原路径；否则保存新路径
         if manager.config.soft_link != 0:
             Flags.success_list.add(old_path)
-        else:
+        elif new_path:
             Flags.success_list.add(new_path)
             if await aiofiles.os.path.islink(new_path):
                 Flags.success_list.add(old_path)
@@ -247,8 +247,6 @@ def get_success_list() -> None:
         with open(resources.u("success.txt"), encoding="utf-8", errors="ignore") as f:
             paths = f.readlines()
             Flags.success_list = {Path(path.strip()) for path in paths if path.strip()}
-            if Path() in Flags.success_list:
-                Flags.success_list.remove(Path())
             executor.run(save_success_list())
     signal.view_success_file_settext.emit(f"查看 ({len(Flags.success_list)})")
 

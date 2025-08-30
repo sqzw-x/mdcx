@@ -182,9 +182,9 @@ class CutWindow(QDialog):
         self.pic_h_w_ratio = 1.5
         self.rect_h_w_ratio = 536.6 / 379  # 裁剪框默认高宽比
         self.show_image_path = img_path
-        self.cut_thumb_path = Path()  # 裁剪后的thumb路径
-        self.cut_poster_path = Path()  # 裁剪后的poster路径
-        self.cut_fanart_path = Path()  # 裁剪后的fanart路径
+        self.cut_thumb_path = None  # 裁剪后的thumb路径
+        self.cut_poster_path = None  # 裁剪后的poster路径
+        self.cut_fanart_path = None  # 裁剪后的fanart路径
         self.Ui.label_origin_size.setText(str(f"{str(self.pic_w)}, {str(self.pic_h)}"))  # 显示原图尺寸
 
         # 获取水印设置
@@ -375,11 +375,17 @@ class CutWindow(QDialog):
 
     async def to_cut(self):
         img_path = self.show_image_path  # 被裁剪的图片
+        thumb_path = self.cut_thumb_path  # 裁剪后的thumb路径
 
         # 路径为空时，跳过
-        if not img_path or not os.path.exists(img_path):
+        if (
+            not img_path
+            or not os.path.exists(img_path)
+            or not thumb_path
+            or not self.cut_poster_path
+            or not self.cut_fanart_path
+        ):
             return
-        thumb_path = self.cut_thumb_path  # 裁剪后的thumb路径
         self.main_window.img_path = img_path  # 裁剪后更新图片url，这样再次点击时才可以重新加载并裁剪
 
         # 读取配置信息
