@@ -765,7 +765,7 @@ class MyMAinWindow(QMainWindow):
         signal_qt.show_traceback_log(f"所有线程已停止！！！({self.stop_used_time}s)\n ⛔️ 刮削已手动停止！\n")
         signal_qt.show_log_text(f" ⛔️ {get_current_time()} 所有线程已停止！({self.stop_used_time}s)")
         thread_remain_list = []
-        [thread_remain_list.append(i.getName()) for i in threading.enumerate()]  # 剩余线程名字列表
+        [thread_remain_list.append(t.name) for t in threading.enumerate()]  # 剩余线程名字列表
         thread_remain = ", ".join(thread_remain_list)
         print(f"✅ 剩余线程 ({len(thread_remain_list)}): {thread_remain}")
         self.show_stop_info_thread()
