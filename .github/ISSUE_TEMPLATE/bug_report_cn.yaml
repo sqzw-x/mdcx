@@ -1,28 +1,35 @@
 name: 上报 Bug
 description: 使用中文进行 Bug 报告
-labels: ['bug / 缺陷']
+labels: ["bug / 缺陷"]
 body:
   - type: checkboxes
     id: checks
     attributes:
       label: 在提问之前...
       options:
-      - label: 我已经搜索了现有的 issues
-        required: true
-      - label: 我在提问题之前至少花费了 5 分钟来思考和准备
-        required: true
+        - label: 我已经搜索了现有的 issues
+          required: true
+        - label: 我在提问题之前至少花费了 5 分钟来思考和准备
+          required: true
   - type: textarea
     id: version
     attributes:
-      label: 你使用版本的 commit hash
-      description: 可在 mdcx 文件名最后部分获取, 若没有则可能使用的不是最新版
+      label: MDCx 版本
+      description: 可在主界面左下角找到. 若不是从 release 下载的请说明.
     validations:
       required: true
+  - type: textarea
+    id: min_version
+    attributes:
+      label: 出现此问题的最早的 MDCx 版本
+      description: 有助于定位问题可能的引入时间点, 如果不清楚可以不填.
+    validations:
+      required: false
   - type: textarea
     id: describe
     attributes:
       label: 描述你的问题
-      description: 简要描述你的问题
+      description: 简要描述你的问题. 不要将日志放在这里.
     validations:
       required: true
   - type: textarea
@@ -45,10 +52,18 @@ body:
     validations:
       required: false
   - type: textarea
+    id: config
+    attributes:
+      label: 相关配置
+      description: 可复现问题的相关配置片段. 如果不清楚哪些配置相关, 可全部贴出, 注意务必删除敏感信息.
+      render: Text
+    validations:
+      required: false
+  - type: textarea
     id: logs
     attributes:
       label: 相关 Logs
-      description: 请复制并粘贴任何相关的日志输出。
+      description: 发生问题时相关的日志输出. 注意务必删除敏感信息.
       render: Text
     validations:
       required: false
