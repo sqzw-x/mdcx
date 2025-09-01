@@ -1,13 +1,16 @@
 ## 修复
 
-* Windows 上以管理员身份运行时启动 Chrome 失败
-* 继续刮削导致程序卡死
-* 不能正确判断失败情况
-* 切换配置文件目录导致崩溃
+* 未向 tag 中添加演员
+* 写入 success.txt/remain.txt 时未换行
 
 <details>
 <summary>Full Changelog</summary>
 
+bbcc987 fix: 未向 tag 中添加演员 (fix #661)
+dda0432 refactor: 精简参数; 优化 nfo 输出逻辑
+5e731ee dev: 添加 bump 和 changelog 脚本
+4ecb46a fix: writelines does not add newlines (fix #660)
+cff48e2 Ready for version 220250901
 c7f7e80 fix: 在 Windows 上以管理员权限运行时启动 Chrome 失败 (fix #640)
 9df00a3 update lock file
 17b211b fix: 提高最低 Python 版本至 3.13.4 以支持 os.path.ALLOW_MISSING (fix #654)
