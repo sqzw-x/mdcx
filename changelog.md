@@ -1,11 +1,19 @@
 ## 修复
 
-* 未向 tag 中添加演员
-* 写入 success.txt/remain.txt 时未换行
+* 读取成功列表和剩余列表速度慢
+* 无效的 daily_release 链接
 
 <details>
 <summary>Full Changelog</summary>
 
+7382940 fix: 提高成功列表和剩余列表的读取效率, 避免访问文件系统 (fix #662)
+89f9e9f chore: 使用 issue 选择模板链接
+bbb4057 chore: update issue templates
+25a47d6 chore: update issue templates
+eb5bbd4 chore: update issue template
+e943894 chore: 使用 issue 模板链接
+959b8c7 chore: 移除 daily_release 链接
+f22d99a Ready for version 220250902
 bbcc987 fix: 未向 tag 中添加演员 (fix #661)
 dda0432 refactor: 精简参数; 优化 nfo 输出逻辑
 5e731ee dev: 添加 bump 和 changelog 脚本
@@ -117,7 +125,7 @@ d15bd8b fix: CrawlersResult 未正确设置 number 字段
 d0b7f19 doc: add uv sync and pre-commit install to CONTRIBUTING.md
 d3ade91 CI: add lint workflow
 077ac5a chore!: add ruff lint rules and fix lint errors
-9b60a55 fix: not await_get_gfriends_actor_data (fix #524)
+9b60a55 fix: not await _get_gfriends_actor_data (fix #524)
 7b1df6e chore: add some type hints
 fe3990c refactor: 区分 qt 和其它部分的 signal 调用
 3d39257 chore
@@ -138,7 +146,7 @@ d59ab45 fix: 主界面右侧标题多余的横线
 5055df5 使用 CrawlTask dataclass 作为 crawler 输入
 daf3cdd update README and add CONTRIBUTING.md
 6bcd986 refactor!: 重组项目结构；初步消除 json data；添加 project.toml (#513)
-72b2219 fix: missing return in _get_folder_path
+72b2219 fix: missing return in_get_folder_path
 1b2886f CI: fix github var
 84b85e2 fix: cut_window (close #500)
 3e829a3 CI: use input tag for release action
