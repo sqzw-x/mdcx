@@ -27,6 +27,7 @@ class BrowserProvider:
                 self.default_browser = await self.playwright.chromium.launch(
                     channel="chrome",
                     headless=os.getenv("MDCX_SHOW_BROWSER") is None,
+                    args=["--do-not-de-elevate"],
                 )
         return self.default_browser
 
