@@ -1,11 +1,23 @@
 ## 修复
 
-* 初始化浏览器时的数据竞争
-* dmm digital 字段解析
+* Windows 上以管理员身份运行时启动 Chrome 失败
+* 继续刮削导致程序卡死
+* 不能正确判断失败情况
+* 切换配置文件目录导致崩溃
 
 <details>
 <summary>Full Changelog</summary>
 
+c7f7e80 fix: 在 Windows 上以管理员权限运行时启动 Chrome 失败 (fix #640)
+9df00a3 update lock file
+17b211b fix: 提高最低 Python 版本至 3.13.4 以支持 os.path.ALLOW_MISSING (fix #654)
+46ef20a fix: 无法判断失败情况 (#656)
+42f8076 chore: 替换废弃的 thread getName 为 name 属性
+a6e0392 fix: 检查 remain/success.txt 中路径有效性 (fix #654)
+f3e5561 fix: 使用 None 代替 Path() 作为空值 (fix #648)
+bc1e092 chore: 调整部分默认设置
+1cfdc63 fix: 切换配置文件目录 (#648)
+77a6ba9 Ready for version 220250832
 61bed85 fix: 初始化部分加锁
 80028f6 fix: cli tool
 39458c1 fix: dmm digital parser
@@ -102,7 +114,7 @@ d15bd8b fix: CrawlersResult 未正确设置 number 字段
 d0b7f19 doc: add uv sync and pre-commit install to CONTRIBUTING.md
 d3ade91 CI: add lint workflow
 077ac5a chore!: add ruff lint rules and fix lint errors
-9b60a55 fix: not await _get_gfriends_actor_data (fix #524)
+9b60a55 fix: not await_get_gfriends_actor_data (fix #524)
 7b1df6e chore: add some type hints
 fe3990c refactor: 区分 qt 和其它部分的 signal 调用
 3d39257 chore
@@ -123,7 +135,7 @@ d59ab45 fix: 主界面右侧标题多余的横线
 5055df5 使用 CrawlTask dataclass 作为 crawler 输入
 daf3cdd update README and add CONTRIBUTING.md
 6bcd986 refactor!: 重组项目结构；初步消除 json data；添加 project.toml (#513)
-72b2219 fix: missing return in_get_folder_path
+72b2219 fix: missing return in _get_folder_path
 1b2886f CI: fix github var
 84b85e2 fix: cut_window (close #500)
 3e829a3 CI: use input tag for release action
