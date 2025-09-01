@@ -157,10 +157,8 @@ def get_current_time() -> str:
     return time.strftime("%H:%M:%S", time.localtime())
 
 
-def get_used_time(start_time: float) -> int:
-    return round(
-        (time.time() - start_time),
-    )
+def get_used_time(start_time: float) -> float:
+    return round((time.time() - start_time), 2)
 
 
 def get_real_time(t) -> str:

@@ -1128,8 +1128,7 @@ class MyMAinWindow(QMainWindow):
             show_data = self.json_array[self.now_show_name]
             json_data = show_data.data
             file_info = show_data.file_info
-            file_path = file_info.file_path
-            nfo_path = file_path.with_suffix(".nfo")
+            nfo_path = file_info.file_path.with_suffix(".nfo")
             nfo_folder = nfo_path.parent
             json_data.number = self.Ui.lineEdit_nfo_number.text()
             if NfoInclude.ACTOR_ALL in manager.config.nfo_include_new:
@@ -1152,7 +1151,7 @@ class MyMAinWindow(QMainWindow):
             json_data.poster = self.Ui.lineEdit_nfo_poster.text()
             json_data.thumb = self.Ui.lineEdit_nfo_cover.text()
             json_data.trailer = self.Ui.lineEdit_nfo_trailer.text()
-            if executor.run(write_nfo(file_info, json_data, nfo_path, nfo_folder, file_path, update=True)):
+            if executor.run(write_nfo(file_info, json_data, nfo_path, nfo_folder, update=True)):
                 self.Ui.label_save_tips.setText(f"已保存! {get_current_time()}")
                 self.set_main_info(show_data)
             else:

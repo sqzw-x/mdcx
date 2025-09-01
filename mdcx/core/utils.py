@@ -239,7 +239,6 @@ def show_result(res: CrawlersResult, start_time: float):
 
 def render_name_template(
     template: str,
-    file_path: Path,
     file_info: FileInfo,
     json_data: CrawlersResult,
     show_4k: bool,
@@ -254,6 +253,7 @@ def render_name_template(
     :param file_path: 当前文件的完整路径，用于替换filename字段
     :param should_escape_result: 作为文件名/文件夹名时需要去掉一些特殊字符，作为nfo的<title>时则不用
     """
+    file_path = file_info.file_path
     folder_path, file_full_name = split_path(file_path)  # 当前文件的目录和文件名
     filename = os.path.splitext(file_full_name)[0]
 

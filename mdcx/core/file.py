@@ -175,22 +175,20 @@ async def move_movie(other: OtherInfo, file_info: FileInfo, file_path: Path, fil
         return False
 
 
-def _get_folder_path(
-    file_path: Path, success_folder: Path, file_info: FileInfo, res: CrawlersResult
-) -> tuple[Path, str]:
+def _get_folder_path(success_folder: Path, file_info: FileInfo, res: CrawlersResult) -> tuple[Path, str]:
     folder_name: str = manager.config.folder_name.replace("\\", "/")  # 设置-命名-视频目录名
-    folder_path, file_name = split_path(file_path)  # 当前文件的目录和文件名
+    folder_path = file_info.file_path.parent
 
     # 更新模式 或 读取模式
     if manager.config.main_mode == 3 or manager.config.main_mode == 4:
         if manager.config.update_mode == "c":
-            folder_name = split_path(folder_path)[1]
+            folder_name = folder_path.name
             return folder_path, folder_name
         elif "bc" in manager.config.update_mode:
             folder_name = manager.config.update_b_folder
-            success_folder = split_path(folder_path)[0]
+            success_folder = folder_path.parent
             if "a" in manager.config.update_mode:
-                success_folder = split_path(success_folder)[0]
+                success_folder = success_folder.parent
                 folder_name = (
                     str(Path(manager.config.update_a_folder) / manager.config.update_b_folder)
                     .replace("\\", "/")
@@ -198,13 +196,12 @@ def _get_folder_path(
                 )
         elif manager.config.update_mode == "d":
             folder_name = manager.config.update_d_folder
-            success_folder = split_path(file_path)[0]
+            success_folder = folder_path
 
     # 正常模式 或 整理模式
     else:
         # 关闭软链接，并且成功后移动文件关时，使用原来文件夹
         if manager.config.soft_link == 0 and not manager.config.success_file_move:
-            folder_path = split_path(file_path)[0]
             return folder_path, folder_name
 
     # 当根据刮削模式得到的视频目录名为空时，使用成功输出目录
@@ -217,7 +214,6 @@ def _get_folder_path(
     should_escape_result = True
     folder_new_name, folder_name, number, originaltitle, outline, title = render_name_template(
         folder_name,
-        file_path,
         file_info,
         res,
         show_4k,
@@ -267,7 +263,8 @@ def _get_folder_path(
     return success_folder / folder_new_name, folder_new_name
 
 
-def _generate_file_name(file_path: Path, cd_part, folder_name, file_info: FileInfo, res: CrawlersResult) -> str:
+def _generate_file_name(cd_part, file_info: FileInfo, res: CrawlersResult) -> str:
+    file_path = file_info.file_path
     file_full_name = split_path(file_path)[1]
     file_name, file_ex = os.path.splitext(file_full_name)
 
@@ -289,7 +286,6 @@ def _generate_file_name(file_path: Path, cd_part, folder_name, file_info: FileIn
     should_escape_result = True
     file_name, file_name_template, number, originaltitle, outline, title = render_name_template(
         file_name_template,
-        file_path,
         file_info,
         res,
         show_4k,
@@ -355,12 +351,12 @@ def _generate_file_name(file_path: Path, cd_part, folder_name, file_info: FileIn
 
 
 def get_output_name(
-    file_info: FileInfo, json_data: CrawlersResult, file_path: Path, success_folder: Path, file_ex: str
+    file_info: FileInfo, json_data: CrawlersResult, success_folder: Path, file_ex: str
 ) -> tuple[Path, Path, Path, Path, Path, Path, str, Path, Path, Path]:
     # =====================================================================================更新输出文件夹名
-    folder_new_path, folder_name = _get_folder_path(file_path, success_folder, file_info, json_data)
+    folder_new_path, folder_name = _get_folder_path(success_folder, file_info, json_data)
     # =====================================================================================更新实体文件命名规则
-    naming_rule = _generate_file_name(file_path, file_info.cd_part, folder_name, file_info, json_data)
+    naming_rule = _generate_file_name(file_info.cd_part, file_info, json_data)
     # =====================================================================================生成文件和nfo新路径
     file_new_name = naming_rule + file_ex.lower()
     nfo_new_name = naming_rule + ".nfo"
@@ -759,12 +755,12 @@ async def deal_old_files(
     folder_old_path: Path,
     folder_new_path: Path,
     file_path: Path,
-    file_new_path: Path,
+    # file_new_path: Path,
     thumb_new_path_with_filename: Path,
     poster_new_path_with_filename: Path,
     fanart_new_path_with_filename: Path,
     nfo_new_path: Path,
-    file_ex: str,
+    # file_ex: str,
     poster_final_path: Path,
     thumb_final_path: Path,
     fanart_final_path: Path,

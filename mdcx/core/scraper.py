@@ -605,7 +605,7 @@ class Scraper:
             poster_final_path,
             thumb_final_path,
             fanart_final_path,
-        ) = get_output_name(file_info, res, file_path, success_folder, file_ex)
+        ) = get_output_name(file_info, res, success_folder, file_ex)
 
         # 判断输出文件的路径是否重复
         if manager.config.soft_link == 0:
@@ -661,12 +661,12 @@ class Scraper:
                         folder_old_path,
                         folder_new_path,
                         file_path,
-                        file_new_path,
+                        # file_new_path,
                         thumb_new_path_with_filename,
                         poster_new_path_with_filename,
                         fanart_new_path_with_filename,
                         nfo_new_path,
-                        file_ex,
+                        # file_ex,
                         poster_final_path,
                         thumb_final_path,
                         fanart_final_path,
@@ -684,12 +684,12 @@ class Scraper:
             folder_old_path,
             folder_new_path,
             file_path,
-            file_new_path,
+            # file_new_path,
             thumb_new_path_with_filename,
             poster_new_path_with_filename,
             fanart_new_path_with_filename,
             nfo_new_path,
-            file_ex,
+            # file_ex,
             poster_final_path,
             thumb_final_path,
             fanart_final_path,
@@ -726,7 +726,7 @@ class Scraper:
             await copy_trailer_to_theme_videos(folder_new_path, naming_rule)
 
         # 生成nfo文件
-        await write_nfo(file_info, res, nfo_new_path, folder_new_path, file_path, update_nfo)
+        await write_nfo(file_info, res, nfo_new_path, folder_new_path, update_nfo)
 
         # 移动字幕、种子、bif、trailer、其他文件
         if file_info.has_sub:

@@ -1,7 +1,6 @@
 import re
 import time
 import traceback
-from dataclasses import asdict
 from io import StringIO
 from pathlib import Path
 
@@ -9,7 +8,7 @@ import aiofiles
 import aiofiles.os
 from lxml import etree
 
-from ..config.enums import Language, NfoInclude, OutlineShow, ReadMode
+from ..config.enums import DownloadableFile, KeepableFile, Language, NfoInclude, OutlineShow, ReadMode
 from ..config.manager import manager
 from ..gen.field_enums import CrawlerResultFields
 from ..manual import ManualConfig
@@ -23,14 +22,7 @@ from ..utils.language import is_japanese
 from .utils import render_name_template
 
 
-async def write_nfo(
-    file_info: FileInfo,
-    json_data: CrawlersResult,
-    nfo_new_path: Path,
-    folder_new_path: Path,
-    file_path: Path,
-    update=False,
-) -> bool:
+async def write_nfo(file_info: FileInfo, data: CrawlersResult, nfo_file: Path, output_dir: Path, update=False) -> bool:
     start_time = time.time()
     download_files = manager.config.download_files
     keep_files = manager.config.keep_files
@@ -39,9 +31,9 @@ async def write_nfo(
     if not update:
         # 不写nfo
         # 不下载，不保留时
-        if "nfo" not in download_files:
-            if "nfo" not in keep_files and await aiofiles.os.path.exists(nfo_new_path):
-                await delete_file_async(nfo_new_path)
+        if DownloadableFile.NFO not in download_files:
+            if KeepableFile.NFO not in keep_files and await aiofiles.os.path.exists(nfo_file):
+                await delete_file_async(nfo_file)
             return True
 
         LogBuffer.log().write(f"\n 🍀 Nfo done! (old)({get_used_time(start_time)}s)")
@@ -53,22 +45,6 @@ async def write_nfo(
         nfo_title_template = manager.config.naming_media
 
     # 字符转义，避免emby无法解析
-    json_data_nfo = CrawlersResult(**asdict(json_data))
-    key_word = [
-        "title",
-        "originaltitle",
-        "outline",
-        "originalplot",
-        "actor",
-        "series",
-        "director",
-        "studio",
-        "publisher",
-        "tag",
-        "thumb",
-        "poster",
-        "trailer",
-    ]
     rep_word = {
         "&amp;": "&",
         "&lt;": "<",
@@ -84,10 +60,19 @@ async def write_nfo(
         "'": "&apos;",
         '"': "&quot;",
     }
-    for key, value in rep_word.items():
-        for each in key_word:
-            # json_data_nfo[each] = str(json_data_nfo[each]).replace(key, value)
-            setattr(json_data_nfo, each, str(getattr(json_data_nfo, each)).replace(key, value))
+
+    def rep(raw: str) -> str:
+        for key, value in rep_word.items():
+            raw = raw.replace(key, value)
+        return raw
+
+    originalplot = rep(data.originalplot)
+    originaltitle = rep(data.originaltitle)
+    outline = rep(data.outline)
+    publisher = rep(data.publisher)
+    series = rep(data.series)
+    studio = rep(data.studio)
+    title = rep(data.title)
 
     show_4k = False
     show_cnword = False
@@ -96,9 +81,8 @@ async def write_nfo(
     should_escape_result = False
     nfo_title, *_ = render_name_template(
         nfo_title_template,
-        file_path,
         file_info,
-        json_data_nfo,
+        data,
         show_4k,
         show_cnword,
         show_moword,
@@ -106,34 +90,22 @@ async def write_nfo(
     )
 
     # 获取字段
-    # 只有nfo的title用替换后的，其他字段用原始的
     nfo_include_new = manager.config.nfo_include_new
     cd_part = file_info.cd_part
-    originaltitle = json_data_nfo.originaltitle
-    originalplot = json_data_nfo.originalplot
-    title = json_data_nfo.title
-    studio = json_data_nfo.studio
-    publisher = json_data_nfo.publisher
-    year = json_data_nfo.year
-    outline = json_data_nfo.outline
-    runtime = json_data_nfo.runtime
-    director = json_data_nfo.director
-    actor = json_data_nfo.actor
-    release = json_data_nfo.release
-    tag = json_data_nfo.tag
-    number = json_data_nfo.number
-    cover = json_data_nfo.thumb
-    poster = json_data_nfo.poster
-    series = json_data_nfo.series
-    trailer = json_data_nfo.trailer
-    all_actor = json_data_nfo.all_actor
-
-    tag = re.split(r"[,，]", tag)  # tag str转list
+    cover = data.thumb
+    directors = data.directors
+    number = data.number
+    poster = data.poster
+    release = data.release
+    runtime = data.runtime
+    tags = data.tags
+    trailer = data.trailer
+    year = data.year
 
     try:
-        if not await aiofiles.os.path.exists(folder_new_path):
-            await aiofiles.os.makedirs(folder_new_path)
-        await delete_file_async(nfo_new_path)  # 避免115出现重复文件
+        if not await aiofiles.os.path.exists(output_dir):
+            await aiofiles.os.makedirs(output_dir)
+        await delete_file_async(nfo_file)  # 避免115出现重复文件
 
         code = StringIO()
         print('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', file=code)
@@ -147,7 +119,7 @@ async def write_nfo(
                     outline += f"<br>  <br>{originalplot}"
                 elif OutlineShow.SHOW_JP_ZH in outline_show:
                     outline = f"{originalplot}<br>  <br>{outline}"
-                outline_from = json_data.outline_from.capitalize().replace("Youdao", "有道")
+                outline_from = data.outline_from.capitalize().replace("Youdao", "有道").replace("Llm", "LLM")
                 if OutlineShow.SHOW_FROM in outline_show and outline_from:
                     outline += f"<br>  <br>由 {outline_from} 提供翻译"
             if NfoInclude.OUTLINE_NO_CDATA in nfo_include_new:
@@ -208,7 +180,7 @@ async def write_nfo(
                 print("  <sorttitle>" + number + "</sorttitle>", file=code)
 
         # 输出国家和分级
-        country = json_data.country
+        country = data.country
 
         # 输出家长分级
         if NfoInclude.MPAA in nfo_include_new:
@@ -228,32 +200,30 @@ async def write_nfo(
         if NfoInclude.COUNTRY in nfo_include_new:
             print(f"  <countrycode>{country}</countrycode>", file=code)
 
-        # 初始化 actor_list
-        actor_list = []
         # 输出男女演员
         if NfoInclude.ACTOR_ALL in nfo_include_new:
-            actor = all_actor
+            actors = data.all_actors
+        else:
+            actors = data.actors
         # 有演员时输出演员
         if NfoInclude.ACTOR in nfo_include_new:
-            if not actor:
-                actor = manager.config.actor_no_name
-            actor_list = actor.split(",")  # 字符串转列表
-            actor_list = [actor.strip() for actor in actor_list if actor.strip()]  # 去除空白
-        if actor_list:
-            for each in actor_list:
+            if not actors:
+                actors = [manager.config.actor_no_name]
+            for name in actors:
                 print("  <actor>", file=code)
-                print("    <name>" + each + "</name>", file=code)
+                print("    <name>" + name + "</name>", file=code)
                 print("    <type>Actor</type>", file=code)
                 print("  </actor>", file=code)
 
         # 输出导演
-        if director and NfoInclude.DIRECTOR in nfo_include_new:
-            print("  <director>" + director + "</director>", file=code)
+        if NfoInclude.DIRECTOR in nfo_include_new:
+            for name in directors:
+                print("  <director>" + name + "</director>", file=code)
 
         # 输出公众评分、影评人评分
         try:
-            if json_data.score:
-                score = float(json_data.score)
+            if data.score:
+                score = float(data.score)
                 if NfoInclude.SCORE in nfo_include_new:
                     print("  <rating>" + str(score) + "</rating>", file=code)
                 if NfoInclude.CRITICRATING in nfo_include_new:
@@ -263,8 +233,8 @@ async def write_nfo(
 
         # 输出我想看人数
         try:
-            if json_data.wanted and NfoInclude.WANTED in nfo_include_new:
-                print("  <votes>" + json_data.wanted + "</votes>", file=code)
+            if data.wanted and NfoInclude.WANTED in nfo_include_new:
+                print("  <votes>" + data.wanted + "</votes>", file=code)
         except Exception:
             pass
 
@@ -277,14 +247,11 @@ async def write_nfo(
             print("  <runtime>" + str(runtime).replace(" ", "") + "</runtime>", file=code)
 
         # 输出合集(使用演员)
-        if NfoInclude.ACTOR_SET in nfo_include_new and actor and actor != "未知演员" and actor != "未知演員":
-            actor_list = actor.split(",")  # 字符串转列表
-            actor_list = [actor.strip() for actor in actor_list if actor.strip()]  # 去除空白
-            if actor_list:
-                for each in actor_list:
-                    print("  <set>", file=code)
-                    print("    <name>" + each + "</name>", file=code)
-                    print("  </set>", file=code)
+        if NfoInclude.ACTOR_SET in nfo_include_new:
+            for name in data.actors:
+                print("  <set>", file=code)
+                print("    <name>" + name + "</name>", file=code)
+                print("  </set>", file=code)
 
         # 输出合集(使用系列)
         if NfoInclude.SERIES_SET in nfo_include_new and series:
@@ -311,22 +278,16 @@ async def write_nfo(
                 print("  <label>" + publisher + "</label>", file=code)
 
         # 输出 tag
-        if tag and NfoInclude.TAG in nfo_include_new:
-            try:
-                for i in tag:
-                    if i:
-                        print("  <tag>" + i + "</tag>", file=code)
-            except Exception:
-                signal.show_log_text(traceback.format_exc())
+        if NfoInclude.TAG in nfo_include_new:
+            for t in tags:
+                if t:
+                    print("  <tag>" + t + "</tag>", file=code)
 
         # 输出 genre
-        if tag and NfoInclude.GENRE in nfo_include_new:
-            try:
-                for i in tag:
-                    if i:
-                        print("  <genre>" + i + "</genre>", file=code)
-            except Exception:
-                signal.show_log_text(traceback.format_exc())
+        if NfoInclude.GENRE in nfo_include_new:
+            for t in tags:
+                if t:
+                    print("  <genre>" + t + "</genre>", file=code)
 
         # 输出封面地址
         if poster and NfoInclude.POSTER in nfo_include_new:
@@ -341,13 +302,13 @@ async def write_nfo(
             print("  <trailer>" + trailer + "</trailer>", file=code)
 
         # javdb id 输出, 没有时使用番号搜索页
-        if json_data_nfo.country == "JP":
-            if json_data_nfo.javdbid:
-                print("  <javdbid>" + json_data_nfo.javdbid + "</javdbid>", file=code)
+        if data.country == "JP":
+            if data.javdbid:
+                print("  <javdbid>" + data.javdbid + "</javdbid>", file=code)
             else:
                 print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
         print("</movie>", file=code)
-        async with aiofiles.open(nfo_new_path, "w", encoding="UTF-8") as f:
+        async with aiofiles.open(nfo_file, "w", encoding="UTF-8") as f:
             await f.write(code.getvalue())
             LogBuffer.log().write(f"\n 🍀 Nfo done! (new)({get_used_time(start_time)}s)")
             return True
@@ -437,7 +398,7 @@ async def get_nfo_data(file_path: Path, movie_number: str) -> tuple[CrawlersResu
         if score:
             score = str(int(score) / 10)
     series = "".join(xml_nfo.xpath("//series/text()"))
-    director = "".join(xml_nfo.xpath("//director/text()"))
+    director = ",".join(xml_nfo.xpath("//director/text()"))
     studio = "".join(xml_nfo.xpath("//studio/text()"))
     if not studio:
         studio = "".join(xml_nfo.xpath("//maker/text()"))
