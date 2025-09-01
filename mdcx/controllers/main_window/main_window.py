@@ -582,10 +582,7 @@ class MyMAinWindow(QMainWindow):
     # region 各种点击跳转浏览器
     def label_version_clicked(self, ev):
         try:
-            if "🔍" in self.new_version:
-                webbrowser.open("https://github.com/sqzw-x/mdcx/releases/tag/daily_release")
-            else:
-                webbrowser.open("https://github.com/sqzw-x/mdcx/releases")
+            webbrowser.open("https://github.com/sqzw-x/mdcx/releases")
         except Exception:
             signal_qt.show_traceback_log(traceback.format_exc())
 
