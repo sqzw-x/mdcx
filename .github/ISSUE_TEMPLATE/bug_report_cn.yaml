@@ -18,14 +18,14 @@ body:
       description: 例如 Windows 11, macOS 15.6, Ubuntu 22.04
     validations:
       required: true
-  - type: textarea
+  - type: input
     id: version
     attributes:
       label: MDCx 版本
       description: 可在主界面左下角找到. 若不是从 release 下载的请说明.
     validations:
       required: true
-  - type: textarea
+  - type: input
     id: min_version
     attributes:
       label: 出现此问题的最早的 MDCx 版本

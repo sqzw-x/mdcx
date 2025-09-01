@@ -52,7 +52,6 @@ body:
       options:
         - label: 我愿意帮助实现这个功能（如果技术能力允许）
         - label: 我可以提供更多的需求细节和测试反馈
-        - label: 我可以协助文档编写
     validations:
       required: false
   - type: textarea
