@@ -800,9 +800,7 @@ def get_remain_list() -> bool:
     if not remain_list_path.is_file():
         return False
     remains = remain_list_path.read_text(encoding="utf-8").strip()
-    remains = [
-        p for path in remains.split("\n") if path.strip() and (p := Path(path.strip())).is_file(follow_symlinks=False)
-    ]
+    remains = [p for path in remains.split("\n") if path.strip() and (p := Path(path.strip())).suffix]
     Flags.remain_list = remains
     if not len(Flags.remain_list) or Switch.REMAIN_TASK not in manager.config.switch_on:
         return False
