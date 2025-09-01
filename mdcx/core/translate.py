@@ -79,16 +79,12 @@ def translate_info(json_data: CrawlersResult, has_sub: bool):
     tag = clean_list(tag)
 
     # 添加演员
-    if TagInclude.ACTOR in tag_include and json_data.actor:
-        actor = json_data.actor
-        actor_list: list = actor.split(",")
-
-        for actor in actor_list:
-            if actor in manager.config.nfo_tag_actor_contains:
-                # 按要求修改演员命名格式
+    if TagInclude.ACTOR in tag_include:
+        whitelist = manager.config.nfo_tag_actor_contains
+        for actor in json_data.actors:
+            if not whitelist or actor in whitelist:
                 nfo_tag_actor = manager.config.nfo_tag_actor.replace("actor", actor)
-                if nfo_tag_actor:
-                    tag = nfo_tag_actor + "," + tag
+                tag = nfo_tag_actor + "," + tag
 
     # 添加番号前缀
     letters = json_data.letters

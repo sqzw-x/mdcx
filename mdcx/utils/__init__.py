@@ -185,7 +185,7 @@ def add_html(text: str) -> str:
 
 def clean_list(a: str) -> str:
     """
-    移除逗号分隔的字符串中的重复项, 同时移除每项首尾的空格.
+    移除逗号分隔的字符串中的重复项, 同时移除每项首尾的空格, 并保持顺序.
     """
     return ",".join(dict.fromkeys(w.strip() for w in a.split(",") if w.strip()).keys())
 
