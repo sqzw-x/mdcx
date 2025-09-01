@@ -1,0 +1,66 @@
+name: 功能请求
+description: 使用中文请求新功能或改进
+labels: ["enhancement / 功能增强"]
+body:
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 在提交功能请求之前...
+      options:
+        - label: 我已经搜索了现有的 issues 确认此功能尚未被提出
+          required: true
+        - label: 我在提交请求之前至少花费了 5 分钟来思考和准备
+          required: true
+        - label: 我确认这个功能适合 MDCx 项目的目标和范围
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题描述
+      description: 请描述您遇到的问题或不便之处。您希望解决什么问题？
+      placeholder: 例如：我在使用 MDCx 时总是需要手动...，这很麻烦
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: 期望的解决方案
+      description: 简要描述您希望看到的功能或改进
+      placeholder: 例如：我希望能有一个功能可以自动...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 考虑过的替代方案
+      description: 描述您考虑过的任何替代解决方案或功能
+      placeholder: 例如：我也考虑过使用...，但是...
+    validations:
+      required: false
+  - type: textarea
+    id: implementation
+    attributes:
+      label: 实现思路
+      description: 您认为该功能可以如何实现？如果不确定，可以留空。
+      placeholder: 例如：我认为可以通过修改...来实现
+    validations:
+      required: false
+  - type: checkboxes
+    id: willingness
+    attributes:
+      label: 实现意愿
+      options:
+        - label: 我愿意帮助实现这个功能（如果技术能力允许）
+        - label: 我可以提供更多的需求细节和测试反馈
+        - label: 我可以协助文档编写
+    validations:
+      required: false
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: 其他信息
+      description: |
+        其他相关信息：参考链接、相关功能、技术建议等
+        任何能帮助我们更好理解您功能请求的信息
+    validations:
+      required: false

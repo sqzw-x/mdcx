@@ -11,6 +11,13 @@ body:
           required: true
         - label: 我在提问题之前至少花费了 5 分钟来思考和准备
           required: true
+  - type: input
+    id: os_version
+    attributes:
+      label: 操作系统版本
+      description: 例如 Windows 11, macOS 15.6, Ubuntu 22.04
+    validations:
+      required: true
   - type: textarea
     id: version
     attributes:
