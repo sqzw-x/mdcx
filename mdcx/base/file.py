@@ -138,7 +138,7 @@ async def save_success_list(old_path: Path | None = None, new_path: Path | None 
         Flags.success_save_time = time.time()
         try:
             async with aiofiles.open(resources.u("success.txt"), "w", encoding="utf-8", errors="ignore") as f:
-                await f.writelines(sorted(str(p) for p in Flags.success_list))
+                await f.writelines(sorted(str(p) + "\n" for p in Flags.success_list))
         except Exception as e:
             signal.show_log_text(f"  Save success list Error {str(e)}\n {traceback.format_exc()}")
         signal.view_success_file_settext.emit(f"查看 ({len(Flags.success_list)})")
@@ -149,7 +149,7 @@ def save_remain_list() -> None:
     if Flags.can_save_remain and Switch.REMAIN_TASK in manager.config.switch_on:
         try:
             with open(resources.u("remain.txt"), "w", encoding="utf-8", errors="ignore") as f:
-                f.writelines(sorted(str(p) for p in Flags.success_list))
+                f.writelines(sorted(str(p) + "\n" for p in Flags.success_list))
                 Flags.can_save_remain = False
         except Exception as e:
             signal.show_log_text(f"save remain list error: {str(e)}\n {traceback.format_exc()}")
