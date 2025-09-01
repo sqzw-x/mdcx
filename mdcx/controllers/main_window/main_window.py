@@ -559,7 +559,7 @@ class MyMAinWindow(QMainWindow):
             else:
                 version_info = f'基于 MDC-GUI 修改 · 当前版本: {self.localversion} （ <font color="green">你使用的是最新版本！🎉 </font>）'
 
-        feedback = ' 💌 问题反馈: <a href="https://github.com/sqzw-x/mdcx/issues/new?template=bug_report_cn.yaml">GitHub Issues</a>'
+        feedback = ' 💌 问题反馈: <a href="https://github.com/sqzw-x/mdcx/issues/new/choose">GitHub Issues</a>'
 
         # 显示版本信息和反馈入口
         signal_qt.show_log_text(version_info)
