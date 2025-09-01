@@ -1,5 +1,5 @@
 [tool.setuptools]
-py-modules = ['mdcx']
+py-modules = ['mdcx', 'scripts']
 
 [project]
 name = "mdcx"
@@ -31,6 +31,9 @@ dependencies = [
 [project.scripts]
 crawl = "mdcx.cmd.crawl:app"
 gen_enums = "mdcx.cmd.gen_enums:main"
+build = "scripts.build:main"
+bump = "scripts.bump:app"
+changelog = "scripts.changelog:app"
 
 [project.optional-dependencies]
 web = ["fastapi>=0.116.1", "uvicorn[standard]>=0.35.0"]
