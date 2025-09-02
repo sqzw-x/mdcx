@@ -149,7 +149,7 @@ def save_remain_list() -> None:
     if Flags.can_save_remain and Switch.REMAIN_TASK in manager.config.switch_on:
         try:
             with open(resources.u("remain.txt"), "w", encoding="utf-8", errors="ignore") as f:
-                f.writelines(sorted(str(p) + "\n" for p in Flags.success_list))
+                f.writelines(sorted(str(p) + "\n" for p in Flags.remain_list))
                 Flags.can_save_remain = False
         except Exception as e:
             signal.show_log_text(f"save remain list error: {str(e)}\n {traceback.format_exc()}")
