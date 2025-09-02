@@ -260,14 +260,7 @@ class Config(BaseModel):
         title="保留文件类型",
     )
     download_hd_pics: list[HDPicSource] = Field(
-        default_factory=lambda: [
-            HDPicSource.POSTER,
-            HDPicSource.THUMB,
-            HDPicSource.AMAZON,
-            HDPicSource.OFFICIAL,
-            HDPicSource.GOOGLE,
-            HDPicSource.GOO_ONLY,
-        ],
+        default_factory=lambda: [HDPicSource.POSTER, HDPicSource.THUMB, HDPicSource.GOO_ONLY],
         title="高清图片来源",
     )
     google_used: list[str] = Field(
