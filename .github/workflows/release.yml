@@ -13,7 +13,6 @@ on:
         required: true
 
 env:
-    PYTHON_VERSION: "3.9"
     IS_PUSH: ${{ github.event_name == 'push' }}
 
 jobs:
