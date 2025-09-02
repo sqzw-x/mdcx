@@ -596,12 +596,16 @@ class Config(BaseModel):
         ],
         title="水印类型",
     )
-    mark_fixed: str = Field(default="not_fixed", title="固定水印")
-    mark_pos: str = Field(default="top_left", title="水印位置")
-    mark_pos_corner: str = Field(default="top_left", title="边角水印位置")
-    mark_pos_sub: str = Field(default="top_left", title="字幕水印位置")
-    mark_pos_mosaic: str = Field(default="top_right", title="马赛克水印位置")
-    mark_pos_hd: str = Field(default="bottom_right", title="高清水印位置")
+    mark_fixed: Literal["not_fixed", "fixed", "corner"] = Field(
+        default="not_fixed",
+        title="水印添加规则",
+        description="not_fixed: 不固定位置. 将从首个位置开始顺时针方向依次添加; fixed: 固定一个位置, 水印在此依次横向添加; corner: 分别设置不同种类水印的位置.",
+    )
+    mark_pos: str = Field(default="top_left", title="水印规则为不固定时首个水印的位置")
+    mark_pos_corner: str = Field(default="top_left", title="水印规则为固定时的位置")
+    mark_pos_sub: str = Field(default="top_left", title="中文字幕水印位置")
+    mark_pos_mosaic: str = Field(default="top_right", title="马赛克类型水印位置")
+    mark_pos_hd: str = Field(default="bottom_right", title="清晰度水印位置")
     # endregion
 
     # region: Network Settings

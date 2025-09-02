@@ -196,7 +196,7 @@ async def add_mark_thread(pic_path: Path, mark_list: list[str]):
             "bottom_left": 3,
         }
         mark_pos_count = pos.get(mark_pos, 0)  # 获取自定义位置, 取余配合pos达到顺时针添加的效果
-        count_hd = 0
+        count_hd = -1
         for mark_name in mark_list:
             if mark_name == "4K" or mark_name == "8K":  # 4K/8K使用固定位置
                 count_hd = pos.get(mark_pos_hd, 0)
