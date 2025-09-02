@@ -1,12 +1,35 @@
-## 修复
+## 重大变更
 
-* 读取成功列表和剩余列表速度慢
-* 无效的 daily_release 链接
-* 水印不固定位置时, 首个水印位置与设置不符
+* mdcx 现在使用 JSON 作为配置文件格式, 原 ini 配置可正常读取, 会被自动转换为 JSON;
+ini 配置文件现在是只读的, 所有对配置的更改都将**仅写入 JSON 文件**
+* mdcx 现在需要 Python 3.13.4 及以上版本, 因此不再支持 Windows 7
+* 重构 `刮削网站` 配置逻辑
+  * 移除 `优先使用官网数据` 选项, `official` 现在是一个普通的来源网站, 可在优先级设置中使用
+  * 移除各字段的 `排除网站` 和 `刮削设置 (列出的网站, 尽量补全, 不单独刮削)` 选项
+  * 旧配置将自动转换
+
+## 新增
+
+* ✨ 使用 LLM API 进行翻译; 支持任何兼容 OpenAI 接口的服务
+* ✨ 全新的 crawler 框架, 并基于此重新实现 dmm/javdb 刮削器
+* ✨ 支持使用浏览器请求 dmm digital 页面, 需要安装 Chrome 浏览器; 可在 `网络-网站设置` 中开启/关闭此功能
+
+## 开发
+
+* 彻底重构主要代码, 大大提升代码质量和可维护性
+* 并发策略由多线程改为异步
+* 使用 pydantic 进行配置管理
+* 全面迁移到 Python 3.13
+* 使用 pyproject.toml 和 uv 进行依赖管理
+* 重构项目结构
+* 添加 lint 规则, CI 流程和 pre-commit hook
 
 <details>
 <summary>Full Changelog</summary>
 
+54b1481 CI: remove unused environment variable
+cd79039 CI: 使用 220* 版本号创建正式发布
+ca4dea3 Ready for version 220250903
 512290a fix: 首个水印位置与设置不符 (fix #663)
 9f526dd Ready for version 220250903
 7382940 fix: 提高成功列表和剩余列表的读取效率, 避免访问文件系统 (fix #662)
