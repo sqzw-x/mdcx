@@ -144,6 +144,7 @@ site_help = "指定网站类型. 若未指定, 将尝试从 URL 自动检测. �
 def fetch(
     url: Annotated[str, typer.Argument(help="要获取的详情页URL")],
     site: Annotated[Website | None, typer.Option("--site", "-s", help=site_help)] = None,
+    use_browser: Annotated[bool, typer.Option("--use-browser", "-b", help="是否使用浏览器")] = False,
     output: Annotated[str | None, typer.Option("--output", "-o", help="保存文件路径")] = None,
     number: Annotated[str | None, typer.Option("--number", "-n")] = None,
     base_dir: Annotated[str, typer.Option("--base-dir", "-d", help="基础输出目录")] = "tests/crawlers/data",
@@ -162,6 +163,7 @@ def fetch(
         _fetch_async(
             url=url,
             website=site,
+            use_browser=use_browser,
             output_path=output,
             number=number,
             base_dir=base_dir,
@@ -196,6 +198,7 @@ def _detect_site_from_url(url: str) -> Website | None:
 async def _fetch_async(
     url: str,
     website: Website | None,
+    use_browser: bool,
     output_path: str | None,
     number: str | None,
     base_dir: str,
@@ -224,6 +227,8 @@ async def _fetch_async(
         log_fn=lambda msg: console.print(f"[dim][AsyncWebClient] {msg}[/dim]"),
     )
 
+    browser_provider = BrowserProvider(manager.config)
+
     try:
         with Progress(
             SpinnerColumn(),
@@ -240,14 +245,24 @@ async def _fetch_async(
                 crawler = crawler_class(
                     client=async_client,
                     base_url=manager.config.get_site_url(website),
-                    browser=await BrowserProvider(manager.config).get_browser(),
+                    browser=await browser_provider.get_browser() if use_browser else None,
                 )
                 crawler_input = CrawlerInput.empty()
                 crawler_input.appoint_url = url
                 progress.update(task, description="正在请求详情页...")
-                html, error = await crawler._fetch_detail(crawler.new_context(crawler_input), url)
+                # 设为 None 以根据是否传入 browser 参数决定是否使用浏览器
+                html, error = await crawler._fetch_detail(crawler.new_context(crawler_input), url, None)
+            elif use_browser:
+                progress.update(task, description="正在通过浏览器请求详情页...")
+                browser = await browser_provider.get_browser()
+                try:
+                    async with await browser.new_page() as page:
+                        await page.goto(url, wait_until="load")
+                        html = await page.content()
+                        error = ""
+                except Exception as e:
+                    html, error = None, str(e)
             else:
-                # 如果没有指定网站类型，直接使用客户端获取
                 progress.update(task, description="正在请求详情页...")
                 html, error = await async_client.get_text(url)
 
@@ -275,6 +290,8 @@ async def _fetch_async(
     except Exception as e:
         console.print(f"[red]错误: {str(e)}[/red]")
         raise typer.Exit(1)
+    finally:
+        await browser_provider.close()
 
 
 def _determine_output_path(

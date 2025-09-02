@@ -1,8 +1,10 @@
 import re
 from collections import defaultdict
+from collections.abc import Sequence
 from typing import override
 
 from parsel import Selector
+from patchright._impl._api_structures import SetCookieParam
 from patchright.async_api import Browser
 
 from mdcx.base.web import check_url
@@ -29,16 +31,6 @@ class DmmCrawler(GenericBaseCrawler[DMMContext]):
 
     def __init__(self, client: AsyncWebClient, base_url: str = "", browser: Browser | None = None):
         super().__init__(client, base_url, browser)
-        self.browser_context = None
-
-    @override
-    async def close(self):
-        if self.browser_context is not None:
-            try:
-                await self.browser_context.close()
-            except Exception as e:
-                print(f"Error closing browser context: {e}")
-            self.browser_context = None
 
     @classmethod
     @override
@@ -58,6 +50,13 @@ class DmmCrawler(GenericBaseCrawler[DMMContext]):
     @override
     def _get_cookies(self, ctx) -> dict[str, str] | None:
         return {"age_check_done": "1"}
+
+    @override
+    def _get_cookies_browser(self, ctx: DMMContext) -> Sequence[SetCookieParam] | None:
+        return [
+            SetCookieParam(name="age_check_done", value="1", domain=".dmm.co.jp", path="/"),
+            SetCookieParam(name="age_check_done", value="1", domain=".dmm.com", path="/"),
+        ]
 
     @override
     async def _generate_search_url(self, ctx) -> list[str] | None:
@@ -262,28 +261,10 @@ class DmmCrawler(GenericBaseCrawler[DMMContext]):
         return await parser.parse(ctx, Selector(html), url=detail_url)
 
     @override
-    async def _fetch_detail(self, ctx: DMMContext, url: str) -> tuple[str | None, str]:
+    async def _fetch_detail(self, ctx: DMMContext, url: str, use_browser=None) -> tuple[str | None, str]:
         if parse_category(url) not in (Category.DIGITAL):
-            return await super()._fetch_detail(ctx, url)
-        if self.browser is None:
-            ctx.debug("期望使用浏览器但不可用, 回退到 client")
-            return await super()._fetch_detail(ctx, url)
-        # init context
-        if self.browser_context is None:
-            async with self.lock:
-                if self.browser_context is None:
-                    context = await self.browser.new_context(ignore_https_errors=True)
-                    await context.add_cookies(
-                        [{"name": "age_check_done", "value": "1", "domain": ".dmm.co.jp", "path": "/"}]
-                    )
-                    self.browser_context = context
-        try:
-            async with await self.browser_context.new_page() as page:
-                await page.goto(url, wait_until="load")
-                html = await page.content()
-                return html, ""
-        except Exception as e:
-            return None, f"browser 请求失败: {e}"
+            return await super()._fetch_detail(ctx, url, False)  # 对于确定不需要浏览器的, 强制不使用
+        return await super()._fetch_detail(ctx, url, None)
 
     @override
     async def post_process(self, ctx, res):

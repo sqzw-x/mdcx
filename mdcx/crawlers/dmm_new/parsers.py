@@ -229,7 +229,7 @@ class DigitalParser(DetailPageParser):
                 if rating is not None:
                     d.score = str(rating)
         except Exception as e:
-            ctx.debug(f"解析 JSON-LD 失败: {e}")
+            ctx.debug(f"解析 JSON-LD 失败: {e} {json_data=}")
             pass
 
         return d

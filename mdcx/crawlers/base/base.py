@@ -2,10 +2,12 @@ import time
 import traceback
 from abc import ABC, abstractmethod
 from asyncio import Lock
-from typing import TYPE_CHECKING, Any, Never
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any, Literal, Never
 
 from parsel import Selector
-from patchright.async_api import Browser
+from patchright._impl._api_structures import SetCookieParam
+from patchright.async_api import Browser, BrowserContext
 
 from mdcx.config.models import Website
 from mdcx.models.types import CrawlerInput, CrawlerResponse, CrawlerResult
@@ -39,13 +41,15 @@ class GenericBaseCrawler[T: Context = Context](ABC):
         """
         self.async_client = client
         self.base_url: str = base_url or self.base_url_()
+        self.lock = Lock()
         self.browser = browser
         """此实例会被多个 Crawler 复用, 其生命周期由调用方负责管理. 但创建的 Context 由每个 Crawler 独立管理."""
-        self.lock = Lock()
+        self._browser_context: BrowserContext | None = None
 
     async def close(self):
         """释放资源, 如关闭浏览器上下文等."""
-        return
+        if self._browser_context is not None:
+            await self._browser_context.close()
 
     @classmethod
     @abstractmethod
@@ -184,15 +188,62 @@ class GenericBaseCrawler[T: Context = Context](ABC):
         """
         获取搜索页. 此方法不应抛出异常.
         """
-        return await self.async_client.get_text(url, headers=self._get_headers(ctx), cookies=self._get_cookies(ctx))
+        return await self._fetch(ctx, url, use_browser)
 
-    async def _fetch_detail(self, ctx: T, url: str) -> tuple[str | None, str]:
+    async def _fetch_detail(self, ctx: T, url: str, use_browser: bool | None = False) -> tuple[str | None, str]:
         """
         获取详情页. 此方法不应抛出异常.
         """
+        return await self._fetch(ctx, url, use_browser)
+
+    async def _fetch(self, ctx: T, url: str, use_browser: bool | None) -> tuple[str | None, str]:
+        if use_browser is not False:
+            content, error = await self._browser_fetch(ctx, url)
+            if content is not None:
+                return content, error
+            if use_browser is True:
+                return None, f"强制使用浏览器请求但失败: {error=}"
         return await self.async_client.get_text(url, headers=self._get_headers(ctx), cookies=self._get_cookies(ctx))
 
+    async def _browser_fetch(
+        self,
+        ctx: T,
+        url: str,
+        wait_until: Literal["commit", "domcontentloaded", "load", "networkidle"] | None = "load",
+    ) -> tuple[str | None, str]:
+        if not await self._init_browser_context(ctx, self._get_cookies_browser(ctx)):
+            return None, "浏览器初始化失败"
+        assert self._browser_context is not None
+        try:
+            async with await self._browser_context.new_page() as page:
+                await page.goto(url, wait_until=wait_until)
+                content = await page.content()
+                return content, ""
+        except Exception as e:
+            return None, f"浏览器请求失败: {e}"
+
+    async def _init_browser_context(self, ctx: T, cookies: Sequence[SetCookieParam] | None = None) -> bool:
+        if self.browser is None:
+            return False
+        if self._browser_context is not None:
+            return True
+        async with self.lock:
+            if self._browser_context is not None:
+                return True
+            try:
+                context = await self.browser.new_context(ignore_https_errors=True)
+                if cookies:
+                    await context.add_cookies(cookies)
+                self._browser_context = context
+            except Exception as e:
+                ctx.debug(f"创建浏览器上下文失败: {e}")
+                return False
+        return True
+
     def _get_cookies(self, ctx: T) -> dict[str, str] | None:
+        return None
+
+    def _get_cookies_browser(self, ctx: T) -> Sequence[SetCookieParam] | None:
         return None
 
     def _get_headers(self, ctx: T) -> dict[str, str] | None:
