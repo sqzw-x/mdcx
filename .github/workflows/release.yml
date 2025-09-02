@@ -3,6 +3,9 @@ name: Build and Release with Python3.13
 on:
   release:
     types: [published]
+  push:
+    tags:
+      - 220*
   workflow_dispatch:
     inputs:
       tag:

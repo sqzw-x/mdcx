@@ -2,10 +2,13 @@
 
 * 读取成功列表和剩余列表速度慢
 * 无效的 daily_release 链接
+* 水印不固定位置时, 首个水印位置与设置不符
 
 <details>
 <summary>Full Changelog</summary>
 
+512290a fix: 首个水印位置与设置不符 (fix #663)
+9f526dd Ready for version 220250903
 7382940 fix: 提高成功列表和剩余列表的读取效率, 避免访问文件系统 (fix #662)
 89f9e9f chore: 使用 issue 选择模板链接
 bbb4057 chore: update issue templates
