@@ -32,10 +32,10 @@ uv run main.py
 cd ui && pnpm i && pnpm build && cd ..
 
 # Windows
-$env:MDCX_DEV=1; uv run server.py
+$env:MDCX_DEV=1; fastapi dev server.py
 
 # Linux/macOS
-MDCX_DEV=1 uv run server.py
+MDCX_DEV=1 fastapi dev server.py
 ```
 
 ## Test
@@ -48,7 +48,7 @@ uv run pytest
 
 ## 如何添加新配置项
 
-1. 在 `mdcx/config/models.py` `Config` 类中添加配置键及默认值, 支持 str, int, float, bool 类型
+1. 在 `mdcx/config/models.py` `Config` 类中添加配置字段及默认值
 2. 通过 `from mdcx.models.config.manager import manager` 导入配置, 并通过 `manager.config.<key>` 访问配置项
 3. 按下一节所述在设置界面中添加对应的控件, 修改 `mdcx/controllers/main_window/` 目录下 `load_config.py` 及 `save_config.py`, 以实现 UI 绑定
 
