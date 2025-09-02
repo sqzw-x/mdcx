@@ -1,11 +1,6 @@
 name: Build and Release v1
 
 on:
-    release:
-        types: [published]
-    push:
-        tags:
-            - 120*
     workflow_dispatch:
         inputs:
             tag:

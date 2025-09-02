@@ -12,6 +12,10 @@ on:
         description: "Tag"
         required: true
 
+env:
+    PYTHON_VERSION: "3.9"
+    IS_PUSH: ${{ github.event_name == 'push' }}
+
 jobs:
   init-matrix:
     runs-on: ubuntu-latest
@@ -30,16 +34,6 @@ jobs:
           items+=('{"build": "macos", "os": "macos-13", "arch": "x86_64"}')
 
           items+=('{"build": "windows", "os": "windows-latest", "arch": "x86_64"}')
-
-          # macOS 10.15.7, x86_64, 指定opencv版本
-          if [[ -n "${{ vars.BUILD_FOR_MACOS_LEGACY }}" && -n "${{ vars.MACOS_LEGACY_CV_VERSION }}" ]]; then
-            items+=('{"build": "macos", "os": "macos-13", "arch": "x86_64", "cv": "${{ vars.MACOS_LEGACY_CV_VERSION }}", "tail": "-legacy"}')
-          fi
-
-          # win7, x86_64, python3.8
-          if [[ -n "${{ vars.BUILD_FOR_WINDOWS_LEGACY }}" ]]; then
-            items+=('{"build": "windows", "os": "windows-2019", "arch": "x86_64", "python": "3.8", "tail": "-legacy"}')
-          fi
 
           # 合并items到json数组
           matrix="matrix=["
@@ -86,7 +80,7 @@ jobs:
           if [ -n "${{ github.event.inputs.tag }}" ]; then
             version="${{ github.event.inputs.tag }}"
           fi
-          uv run scripts/build.py --create-dmg --version "$version" -n "${{ 'MDCx-v2-py3.13' }}" --debug
+          uv run scripts/build.py --create-dmg --version "$version" --debug
 
       - name: Build Windows app - Windows
         if: ${{ matrix.build == 'windows' }}
@@ -108,8 +102,8 @@ jobs:
         with:
           overwrite: true
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ github.sha }}.dmg
-          file: dist/MDCx-v2-py3.13.dmg
-          prerelease: true
+          file: dist/MDCx.dmg
+          prerelease: ${{ env.IS_PUSH != 'true' }}
           body: ${{ steps.get-changelog.outputs.CHANGELOG }}
           tag: ${{ github.event.inputs.tag || github.ref }}
 
@@ -120,5 +114,5 @@ jobs:
           overwrite: true
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ github.sha }}.exe
           file: dist/MDCx.exe
-          prerelease: true
+          prerelease: ${{ env.IS_PUSH != 'true' }}
           tag: ${{ github.event.inputs.tag || github.ref }}
