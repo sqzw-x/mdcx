@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import re
 from typing import override
 from urllib.parse import urljoin
@@ -9,14 +7,7 @@ from parsel import Selector
 from ..config.manager import manager
 from ..config.models import Website
 from ..models.types import CrawlerResult
-from .base import (
-    BaseCrawler,
-    CralwerException,
-    CrawlerData,
-    DetailPageParser,
-    extract_all_texts,
-    extract_text,
-)
+from .base import BaseCrawler, CralwerException, CrawlerData, DetailPageParser, extract_all_texts, extract_text
 
 
 class Parser(DetailPageParser):
