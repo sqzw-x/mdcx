@@ -283,10 +283,7 @@ class DigitalParser(DetailPageParser):
 
     @override
     async def thumb(self, ctx, html) -> str | None:
-        url = extract_text(html, '//meta[@property="og:image"]/@content')
-        if url:
-            aws_url = url.replace("pics.dmm.co.jp", "awsimgsrc.dmm.co.jp/pics_dig")
-            return aws_url.replace("ps.jpg", "pl.jpg")
+        return extract_text(html, '//meta[@property="og:image"]/@content').replace("ps.jpg", "pl.jpg")
 
     @override
     async def extrafanart(self, ctx, html) -> list[str]:
