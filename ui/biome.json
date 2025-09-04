@@ -39,6 +39,6 @@
     }
   },
   "files": {
-    "includes": ["**", "!**/*.gen.ts", "!src/client", "!.vscode"]
+    "includes": ["**", "!**/*.gen.ts", "!src/client", "!.vscode", "!dist/**"]
   }
 }
