@@ -12,9 +12,6 @@ on:
         description: "Tag"
         required: true
 
-env:
-    IS_PUSH: ${{ github.event_name == 'push' }}
-
 jobs:
   init-matrix:
     runs-on: ubuntu-latest
@@ -102,7 +99,7 @@ jobs:
           overwrite: true
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ github.sha }}.dmg
           file: dist/MDCx.dmg
-          prerelease: ${{ env.IS_PUSH != 'true' }}
+          prerelease: ${{ !startsWith(github.event.inputs.tag || github.ref_name, '220') }}
           body: ${{ steps.get-changelog.outputs.CHANGELOG }}
           tag: ${{ github.event.inputs.tag || github.ref }}
 
@@ -113,5 +110,5 @@ jobs:
           overwrite: true
           asset_name: MDCx-$tag-${{ matrix.build }}-${{ matrix.arch }}${{ matrix.tail }}-${{ github.sha }}.exe
           file: dist/MDCx.exe
-          prerelease: ${{ env.IS_PUSH != 'true' }}
+          prerelease: ${{ !startsWith(github.event.inputs.tag || github.ref_name, '220') }}
           tag: ${{ github.event.inputs.tag || github.ref }}
