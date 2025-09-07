@@ -1,7 +1,5 @@
 import os
-import shutil
 import subprocess
-import tempfile
 
 import pytest
 
@@ -26,13 +24,6 @@ VIDEO_CASES = [
     ("test_vp9_720p.webm", "1280x720", "libvpx-vp9", "webm", None, 720, "VP9"),
     ("test_h264_yuv420p.mp4", "320x240", "libx264", "mp4", "yuv420p", 240, "H264"),
 ]
-
-
-@pytest.fixture(scope="module")
-def tmpdir():
-    d = tempfile.mkdtemp()
-    yield d
-    shutil.rmtree(d)
 
 
 @pytest.mark.parametrize("fname,size,vcodec,fmt,pix_fmt,expect_height,expect_codec", VIDEO_CASES)
