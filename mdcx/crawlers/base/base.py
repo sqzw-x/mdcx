@@ -136,7 +136,7 @@ class GenericBaseCrawler[T: Context = Context](ABC):
             scraped_data = await self._parse_detail_page(ctx, selector, detail_url)
             if scraped_data and not scraped_data.external_id:
                 scraped_data.external_id = detail_url
-                return scraped_data
+            return scraped_data
 
     @abstractmethod
     async def _generate_search_url(self, ctx: T) -> list[str] | str | None:
