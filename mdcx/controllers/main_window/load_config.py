@@ -264,10 +264,9 @@ def load_config(self: "MyMAinWindow"):
         actor_field_config = manager.config.get_field_config(field_mapping["actor"])
         self.Ui.lineEdit_actors_website.setText(",".join([site.value for site in actor_field_config.site_prority]))
         # all_actors 字段配置
-        self.Ui.lineEdit_all_actors_website.setText(
-            ",".join(manager.config.get_field_config(CrawlerResultFields.ALL_ACTORS).site_prority)
-        )
-        # 演员映射表输出
+        all_actor_field_config = manager.config.get_field_config(CrawlerResultFields.ALL_ACTORS)
+        self.Ui.lineEdit_all_actors_website.setText(",".join(all_actor_field_config.site_prority))
+        # 演员映射语言
         set_radio_buttons(
             actor_field_config.language.value if actor_field_config.language.value != "undefined" else "jp",
             (self.Ui.radioButton_actor_zh_cn, "zh_cn"),
