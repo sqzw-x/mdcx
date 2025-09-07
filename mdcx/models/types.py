@@ -371,6 +371,7 @@ class CrawlersResult(BaseCrawlerResult):
             site_log="",
             field_log="",
             field_sources=dict.fromkeys(CrawlerResultFields, ""),
+            external_ids={},
             letters="",
         )
 
