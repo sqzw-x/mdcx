@@ -4,6 +4,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 
 from mdcx.config.models import Language, Website
+from mdcx.gen.field_enums import CrawlerResultFields
 from mdcx.models.log_buffer import LogBuffer
 from mdcx.models.types import CrawlerInput, CrawlerResponse, CrawlerResult
 from mdcx.utils.dataclass import update
@@ -93,15 +94,15 @@ class LegacyCrawler:
 
         # 处理字段重命名
         if r := res.get("actor"):
-            res["actors"] = to_list(r)
+            res[CrawlerResultFields.ACTORS] = to_list(r)
         if r := res.get("all_actor"):
-            res["all_actors"] = to_list(r)
+            res[CrawlerResultFields.ALL_ACTORS] = to_list(r)
         if r := res.get("director"):
-            res["directors"] = to_list(r)
+            res[CrawlerResultFields.DIRECTORS] = to_list(r)
         if r := res.get("tag"):
-            res["tags"] = to_list(r)
+            res[CrawlerResultFields.TAGS] = to_list(r)
         if r := res.get("website"):
-            res["url"] = r
+            res[CrawlerResultFields.EXTERNAL_ID] = r
 
         return update(CrawlerResult.empty(), res)
 

@@ -177,9 +177,8 @@ class DetailPageParser[T: Context = Context]:
         return self.NOT_SUPPORT
 
     class OtherFields(TypedDict, total=False):
-        externalId: str
+        external_id: str
         source: str
-        url: str
 
     async def parse(self, ctx: T, html: Selector, **kwargs: Unpack[OtherFields]) -> CrawlerData:
         """
@@ -216,7 +215,6 @@ class DetailPageParser[T: Context = Context]:
             image_download=await self.image_download(ctx, html),
             number=await self.number(ctx, html),
             mosaic=await self.mosaic(ctx, html),
-            externalId=kwargs.get("externalId", ""),
+            external_id=kwargs.get("external_id", ""),
             source=kwargs.get("source", ""),
-            url=kwargs.get("url", ""),
         )

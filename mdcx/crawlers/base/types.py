@@ -65,9 +65,8 @@ class CrawlerData:
     image_download: FieldValue[bool] = NOT_SUPPORT
     number: FieldValue = NOT_SUPPORT
     mosaic: FieldValue = NOT_SUPPORT
-    externalId: FieldValue = NOT_SUPPORT
+    external_id: FieldValue = NOT_SUPPORT
     source: FieldValue = NOT_SUPPORT
-    url: FieldValue = NOT_SUPPORT
 
     def to_result(self) -> "CrawlerResult":
         return update_valid(CrawlerResult.empty(), self, is_valid)

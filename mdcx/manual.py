@@ -688,8 +688,7 @@ class ManualConfig:
         CrawlerResultFields.STUDIO,
         CrawlerResultFields.PUBLISHER,
         CrawlerResultFields.TRAILER,
-        CrawlerResultFields.URL,
-        CrawlerResultFields.JAVDBID,
+        CrawlerResultFields.EXTERNAL_ID,
     ]
     FULL_HALF_CHAR = [
         ("・", "·"),

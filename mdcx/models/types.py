@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
 
-from ..config.enums import Language
+from ..config.enums import Language, Website
 from ..gen.field_enums import CrawlerResultFields
 
 
@@ -190,10 +190,6 @@ class BaseCrawlerResult:
     wanted: str
     year: str  # 发行年份 # todo 移除. 总是可以从 release 推断
 
-    # 用于写入 nfo 的特殊字段
-    javdbid: str  # JavDB ID # todo 移除, 统一使用 externalId
-    externalId: str
-
     @property
     def country(self) -> Literal["CN", "JP", "US"]:
         """
@@ -291,8 +287,6 @@ class BaseCrawlerResult:
             trailer="",
             wanted="",
             year="",
-            javdbid="",
-            externalId="",
         )
 
 
@@ -304,7 +298,7 @@ class CrawlerResult(BaseCrawlerResult):
 
     image_cut: str  # 图片裁剪方式
     source: str  # 数据来源（爬虫名称）
-    url: str  # 网站地址
+    external_id: str
 
     @classmethod
     def empty(cls) -> "CrawlerResult":
@@ -315,7 +309,7 @@ class CrawlerResult(BaseCrawlerResult):
             **BaseCrawlerResult.empty().__dict__,
             image_cut="",
             source="",
-            url="",
+            external_id="",
         )
 
 
@@ -356,6 +350,8 @@ class CrawlersResult(BaseCrawlerResult):
 
     # 字段来源
     field_sources: dict[CrawlerResultFields, str]
+    # 各来源的 externalId
+    external_ids: dict[Website, str]
 
     # in FileInfo
     # 除 letters 不确定外, 其它字段是只读的, 所以后续流程可以直接从 FileInfo 获取

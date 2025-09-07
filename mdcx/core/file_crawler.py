@@ -218,6 +218,9 @@ class FileScraper:
                 # 添加来源信息
                 reduced.field_sources[field] = site.value
 
+                # 添加 external_id
+                reduced.external_ids[site] = site_data.external_id
+
                 if field == CrawlerResultFields.POSTER:
                     reduced.image_download = site_data.image_download
                 elif field == CrawlerResultFields.ORIGINALTITLE and site_data.actor:
@@ -250,10 +253,6 @@ class FileScraper:
         # 处理 year
         if not reduced.year and (r := re.search(r"\d{4}", reduced.release)):
             reduced.year = r.group()
-
-        # 处理 javdbid
-        if r := all_res.get((Website.JAVDB, Language.UNDEFINED)):
-            reduced.javdbid = r.javdbid
 
         # 使用 actors 字段补全 all_actors, 理想情况下前者应该是后者的子集
         # 对 actors 的所有后处理都需要同样地应用到 all_actors
@@ -291,6 +290,9 @@ class FileScraper:
 
         # 加入来源信息
         res.field_sources = dict.fromkeys(CrawlerResultFields, website.value)
+
+        # external_id
+        res.external_ids[website] = web_data_json.external_id
 
         res.site_log = (
             f"\n 🌐 [website] {sprint_source(website, title_language)} ({web_data.debug_info.execution_time:.2f}s)"

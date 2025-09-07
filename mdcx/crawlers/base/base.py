@@ -134,8 +134,8 @@ class GenericBaseCrawler[T: Context = Context](ABC):
             ctx.debug(f"详情页请求成功: {detail_url=}")
             selector = Selector(text=html)
             scraped_data = await self._parse_detail_page(ctx, selector, detail_url)
-            if scraped_data:
-                scraped_data.url = detail_url
+            if scraped_data and not scraped_data.external_id:
+                scraped_data.external_id = detail_url
                 return scraped_data
 
     @abstractmethod

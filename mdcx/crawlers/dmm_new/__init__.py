@@ -210,7 +210,7 @@ class DmmCrawler(GenericBaseCrawler[DMMContext]):
             publisher=data.label.name,
             extrafanart=extrafanart,
             trailer=trailer,
-            url=detail_url,
+            external_id=detail_url,
         )
 
     async def fetch_dmm_tv(self, ctx: Context, detail_url: str) -> CrawlerData:
@@ -249,7 +249,7 @@ class DmmCrawler(GenericBaseCrawler[DMMContext]):
             directors=[item.staffName for item in data.staffs if item.roleName == "監督"],
             studio=studio,
             publisher=studio,
-            url=detail_url,
+            external_id=detail_url,
         )
 
     async def fetch_and_parse(self, ctx: DMMContext, detail_url: str, parser: DetailPageParser) -> CrawlerData:
@@ -258,7 +258,7 @@ class DmmCrawler(GenericBaseCrawler[DMMContext]):
             ctx.debug(f"详情页请求失败: {error=}")
             return CrawlerData()
         ctx.debug(f"详情页请求成功: {detail_url=}")
-        return await parser.parse(ctx, Selector(html), url=detail_url)
+        return await parser.parse(ctx, Selector(html), external_id=detail_url)
 
     @override
     async def _fetch_detail(self, ctx: DMMContext, url: str, use_browser=None) -> tuple[str | None, str]:
@@ -290,7 +290,6 @@ class DmmCrawler(GenericBaseCrawler[DMMContext]):
             res.publisher = res.studio
         if len(res.release) >= 4:
             res.year = res.release[:4]
-        res.externalId = res.url  # 由于 dmm 子类众多, 直接使用 url
         return res
 
     @override

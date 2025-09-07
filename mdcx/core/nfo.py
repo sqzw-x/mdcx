@@ -8,7 +8,7 @@ import aiofiles
 import aiofiles.os
 from lxml import etree
 
-from ..config.enums import DownloadableFile, KeepableFile, Language, NfoInclude, OutlineShow, ReadMode
+from ..config.enums import DownloadableFile, KeepableFile, Language, NfoInclude, OutlineShow, ReadMode, Website
 from ..config.manager import manager
 from ..gen.field_enums import CrawlerResultFields
 from ..manual import ManualConfig
@@ -301,17 +301,21 @@ async def write_nfo(file_info: FileInfo, data: CrawlersResult, nfo_file: Path, o
         if trailer and NfoInclude.TRAILER in nfo_include_new:
             print("  <trailer>" + trailer + "</trailer>", file=code)
 
-        # javdb id 输出, 没有时使用番号搜索页
-        if data.country == "JP":
-            if data.javdbid:
-                print("  <javdbid>" + data.javdbid + "</javdbid>", file=code)
-            else:
-                print("  <javdbsearchid>" + number + "</javdbsearchid>", file=code)
+        # external id
+        for site, u in data.external_ids.items():
+            if u:
+                print(f"  <{site}id>{u}</{site}id>", file=code)
+        # 没有时使用搜索关键词填充 javdbsearchid # todo 允许配置其他网站的后备字段, 允许控制是否输出该字段
+        if not data.external_ids.get(Website.JAVDB):
+            print(f"  <javdbsearchid>{number}</javdbsearchid>", file=code)
+
         print("</movie>", file=code)
+
         async with aiofiles.open(nfo_file, "w", encoding="UTF-8") as f:
             await f.write(code.getvalue())
             LogBuffer.log().write(f"\n 🍀 Nfo done! (new)({get_used_time(start_time)}s)")
             return True
+
     except Exception as e:
         LogBuffer.log().write(f"\n 🔴 Nfo failed! \n     {str(e)}")
         signal.show_traceback_log(traceback.format_exc())

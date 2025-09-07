@@ -198,18 +198,17 @@ class JavdbCrawler(BaseCrawler):
 
     @override
     async def _parse_detail_page(self, ctx, html: Selector, detail_url: str) -> CrawlerData | None:
-        return await self.parser.parse(ctx, html, url=detail_url)
+        # 提取 javdbid
+        javdbid = ""
+        if r := re.search(r"/v/([a-zA-Z0-9]+)", detail_url):
+            javdbid = r.group(1)
+        return await self.parser.parse(ctx, html, external_id=javdbid)
 
     @override
     async def post_process(self, ctx, res: CrawlerResult) -> CrawlerResult:
         if not res.originaltitle:
             res.originaltitle = res.title
         res.poster = res.thumb.replace("/covers/", "/thumbs/")
-        # 提取 javdbid
-        if res.url and (r := re.search(r"/v/([a-zA-Z0-9]+)", res.url)):
-            javdbid = r.group(1)
-            res.javdbid = javdbid
-            res.externalId = javdbid
         res.mosaic = "无码" if any(keyword in res.title for keyword in ["無碼", "無修正", "Uncensored"]) else "有码"
         if res.trailer.startswith("//"):
             res.trailer = "https:" + res.trailer
