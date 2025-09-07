@@ -1,7 +1,6 @@
 # TODO
 
-- [ ] dmm trailer
-- [ ] 修改某些字段为枚举: soft_link, main_mode
+- [ ] 实现 [#668](https://github.com/sqzw-x/mdcx/issues/668)
 - [ ] 在 rjsf 中处理 json schema 中的 propertyNames 以使用下拉框选择
 - [ ] browser log / 改进日志系统
-- [ ] 从字幕包补全中文字幕后文件移动似乎有问题
+- [ ] 改进图片下载日志

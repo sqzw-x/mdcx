@@ -1,3 +1,21 @@
+## 新增
+
+* 新增 NFO 字段 `<{site_name}id>`, 取代原 `<url>` 字段, 二者有以下区别:
+  * 每个成功的来源均会产生相应字段, 如 javdbid, dmmid 等
+  * 该字段可能仅包含 ID 而非完整 URL, 以便后续从自定义 URL 模板重新生成, 如 `<javdbid>5nq9</javdbid>` 而非 `<url>https://javdb.com/v/5nq9</url>`
+
+## 修复
+
+* 修复剩余任务列表的内容错误
+
+# v2 变更日志
+
+> 自 220250903 版本升级的用户无须阅读以下内容
+
+这是 220* 版本的第一个正式发布
+
+相对于 [120250810](https://github.com/sqzw-x/mdcx/releases/tag/120250810) 版本有以下变化
+
 ## 重大变更
 
 * mdcx 现在使用 JSON 作为配置文件格式, 原 ini 配置可正常读取, 会被自动转换为 JSON;
@@ -27,6 +45,16 @@ ini 配置文件现在是只读的, 所有对配置的更改都将**仅写入 JS
 <details>
 <summary>Full Changelog</summary>
 
+233ccd3 feat: 添加 external_id 字段及其聚合; 移除 javdbid/url 字段
+059309b CI: 当且仅当 tag 为 220*创建正式版本
+a8b8d06 fix: biome mem leak
+451c85a fix: 不对 digital thumb url 进行替换
+dc9ccf6 fix: remain list 和 success list 混淆 (fix #669)
+e2fe71c feat: GenericBaseCrawler 内封装浏览器请求方法
+93a16c0 chore: format
+6092119 chore: 修改默认配置不启用搜图
+5929005 chore: v2 changelog
+50a5204 chore: update CONTRIBUTING.md
 54b1481 CI: remove unused environment variable
 cd79039 CI: 使用 220* 版本号创建正式发布
 ca4dea3 Ready for version 220250903
@@ -151,7 +179,7 @@ d15bd8b fix: CrawlersResult 未正确设置 number 字段
 d0b7f19 doc: add uv sync and pre-commit install to CONTRIBUTING.md
 d3ade91 CI: add lint workflow
 077ac5a chore!: add ruff lint rules and fix lint errors
-9b60a55 fix: not await _get_gfriends_actor_data (fix #524)
+9b60a55 fix: not await_get_gfriends_actor_data (fix #524)
 7b1df6e chore: add some type hints
 fe3990c refactor: 区分 qt 和其它部分的 signal 调用
 3d39257 chore
@@ -172,7 +200,7 @@ d59ab45 fix: 主界面右侧标题多余的横线
 5055df5 使用 CrawlTask dataclass 作为 crawler 输入
 daf3cdd update README and add CONTRIBUTING.md
 6bcd986 refactor!: 重组项目结构；初步消除 json data；添加 project.toml (#513)
-72b2219 fix: missing return in_get_folder_path
+72b2219 fix: missing return in _get_folder_path
 1b2886f CI: fix github var
 84b85e2 fix: cut_window (close #500)
 3e829a3 CI: use input tag for release action
