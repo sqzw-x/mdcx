@@ -8,7 +8,7 @@ import zhconv
 
 from ..base.translate import deepl_translate, google_translate, llm_translate, youdao_translate
 from ..base.web import get_actorname, get_yesjav_title
-from ..config.enums import FieldRule, Language, NfoInclude, TagInclude
+from ..config.enums import FieldRule, Language, TagInclude
 from ..config.manager import manager
 from ..config.models import Translator
 from ..config.resources import resources
@@ -205,31 +205,30 @@ async def translate_actor(res: CrawlersResult):
     if xml_actor is not None and len(xml_actor) == 0:
         return res
 
-    # 未知演员，返回
-    actor = res.actor
-    if NfoInclude.ACTOR_ALL in manager.config.nfo_include_new:
-        actor = res.all_actor
-    if actor == manager.config.actor_no_name:
-        return res
-
-    # 查询映射表
-    actor_list = actor.split(",")
-    actor_new_list = []
-    actor_href_list = []
-    actor_language = manager.config.get_field_config(CrawlerResultFields.ACTORS).language
-    for each_actor in actor_list:
-        if each_actor:
-            actor_data = resources.get_actor_data(each_actor)
-            new_actor = actor_data.get(actor_language)
-            if new_actor not in actor_new_list:
-                actor_new_list.append(new_actor)
-                if actor_data.get("href"):
-                    actor_href_list.append(actor_data.get("href"))
-    res.actor = ",".join(actor_new_list)
-    if NfoInclude.ACTOR_ALL in manager.config.nfo_include_new:
-        res.all_actor = ",".join(actor_new_list)
+    map_actor_names(res)
+    map_actor_names(res, True)
 
     return res
+
+
+def map_actor_names(res: CrawlersResult, all_actors=False):
+    actors = res.all_actors if all_actors else res.actors
+    field_name = CrawlerResultFields.ALL_ACTORS if all_actors else CrawlerResultFields.ACTORS
+    lang = manager.config.get_field_config(field_name).language
+    # 查询映射表
+    mapped = []
+    for name in actors:
+        if not name:
+            continue
+        actor_data = resources.get_actor_data(name)
+        mapped_name = actor_data.get(lang)
+        if mapped_name not in mapped:
+            mapped.append(mapped_name)
+
+    if all_actors:
+        res.all_actors = mapped
+    else:
+        res.actors = mapped
 
 
 async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie_number: str):
