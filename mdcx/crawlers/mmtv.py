@@ -267,6 +267,10 @@ async def main(
                     "mosaic": mosaic,
                     "wanted": "",
                 }
+                if dic["number"].startswith("fc2-ppv"):
+                    num = dic["number"].split()[-1]
+                    dic["number"] = "FC2-" + num
+                    dic["country"] = "JP"
                 debug_info = "数据获取成功！"
                 LogBuffer.info().write(web_info + debug_info)
 

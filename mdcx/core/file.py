@@ -606,6 +606,7 @@ async def get_file_info_v2(file_path: Path, copy_sub: bool = True) -> FileInfo:
 
         # 查找本地字幕文件
         cnword_list = manager.config.cnword_char
+        cnword_list = [x for x in cnword_list if x]  # 强制去空值
         if "-C." in str(cnword_list).upper():
             cnword_list.append("-C ")
         sub_type_list = manager.config.sub_type  # 本地字幕后缀

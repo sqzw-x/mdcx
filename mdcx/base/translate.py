@@ -3,7 +3,7 @@ import hashlib
 import random
 import time
 from typing import Literal, cast
-from urllib.parse import unquote
+from urllib.parse import unquote, quote
 
 from ..config.manager import manager
 from ..signals import signal
@@ -78,29 +78,26 @@ async def youdao_translate(title: str, outline: str):
 
 
 async def _deepl_translate(text: str, source_lang: Literal["JA", "EN"] = "JA") -> str | None:
-    """调用 DeepL API 翻译文本"""
+    """调用 DeepLX API 翻译文本"""
     if not text:
         return ""
 
-    deepl_key = manager.config.translate_config.deepl_key
-    if not deepl_key:
+    deeplx_url = manager.config.translate_config.deepl_key  # 这里存放的是 DeepLX 的 URL
+    if not deeplx_url:
         return None
 
-    # 确定 API URL, 免费版本的 key 包含 ":fx" 后缀，付费版本的 key 不包含 ":fx" 后缀
-    deepl_url = "https://api-free.deepl.com" if ":fx" in deepl_key else "https://api.deepl.com"
-    url = f"{deepl_url}/v2/translate"
-    # 构造请求头
-    headers = {"Content-Type": "application/json", "Authorization": f"DeepL-Auth-Key {deepl_key}"}
-    # 构造请求体
-    data = {"text": [text], "source_lang": source_lang, "target_lang": "ZH"}
+    url = f"{deeplx_url.rstrip('/')}"
+    headers = {"Content-Type": "application/json"}
+    data = {"text": text, "source_lang": source_lang, "target_lang": "ZH"}
+
     res, error = await manager.computed.async_client.post_json(url, json_data=data, headers=headers)
     if res is None:
-        signal.add_log(f"DeepL API 请求失败: {error}")
+        signal.add_log(f"DeepLX API 请求失败: {error}")
         return None
-    if "translations" in res and len(res["translations"]) > 0:
-        return res["translations"][0]["text"]
+    if "data" in res:
+        return res["data"]  # 直接返回字符串
     else:
-        signal.add_log(f"DeepL API 返回数据异常: {res}")
+        signal.add_log(f"DeepLX API 返回数据异常: {res}")
         return None
 
 
@@ -138,12 +135,14 @@ async def llm_translate(title: str, outline: str, target_language: str = "简体
 async def _google_translate(msg: str) -> tuple[str | None, str]:
     if not msg:
         return "", ""
-    msg_unquote = unquote(msg)
+    msg_unquote = quote(msg)
     url = f"https://translate.google.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q={msg_unquote}"
     response, error = await manager.computed.async_client.get_json(url)
     if response is None:
         return None, error
-    return "".join([sen[0] for sen in response[0]]), ""
+    translated = "".join([sen[0] for sen in response[0]])
+    translated = translated.replace("＃", "#")
+    return translated, ""
 
 
 async def google_translate(title: str, outline: str) -> tuple[str, str, str | None]:
