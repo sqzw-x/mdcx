@@ -151,3 +151,34 @@ async def google_translate(title: str, outline: str) -> tuple[str, str, str | No
     if r1 is None or r2 is None:
         return "", "", f"google 翻译失败! {e1} {e2}"
     return r1, r2, None
+
+
+async def _ollama_translate(text: str, target_language: str = "简体中文") -> str | None:
+    """调用 Ollama 本地大模型翻译文本"""
+    if not text:
+        return ""
+    
+    # 检查模型是否可用
+    if not await manager.computed.ollama_client.check_model_available(manager.config.translate_config.ollama_model):
+        signal.add_log(f"⚠️ Ollama 模型 {manager.config.translate_config.ollama_model} 不可用，请确保 Ollama 服务正在运行且模型已下载")
+        return None
+    
+    prompt = manager.config.translate_config.ollama_prompt.replace("{content}", text).replace(
+        "{lang}", target_language
+    )
+    
+    return await manager.computed.ollama_client.ask(
+        model=manager.config.translate_config.ollama_model,
+        prompt=prompt,
+        temperature=manager.config.translate_config.ollama_temperature,
+        max_try=manager.config.translate_config.ollama_max_try,
+        log_fn=signal.add_log,
+    )
+
+
+async def ollama_translate(title: str, outline: str, target_language: str = "简体中文"):
+    """Ollama 本地大模型翻译接口"""
+    r1, r2 = await asyncio.gather(_ollama_translate(title, target_language), _ollama_translate(outline, target_language))
+    if r1 is None or r2 is None:
+        return "", "", "Ollama 翻译失败! 请检查 Ollama 服务是否运行以及模型是否可用"
+    return r1, r2, None

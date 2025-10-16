@@ -236,10 +236,11 @@ class Translator(Enum):
     GOOGLE = "google"
     DEEPL = "deepl"
     LLM = "llm"
+    OLLAMA = "ollama"
 
     @classmethod
     def names(cls):
-        return ["有道", "谷歌", "Deepl", "LLM"]
+        return ["有道", "谷歌", "Deepl", "LLM", "Ollama"]
 
 
 class ReadMode(Enum):

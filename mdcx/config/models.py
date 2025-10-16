@@ -56,7 +56,7 @@ def str_to_list(v: str | list[Any] | None, sep: Literal[",", "|"] = ",", unique:
 
 class TranslateConfig(BaseModel):
     translate_by: list[Translator] = Field(
-        default_factory=lambda: [Translator.YOUDAO, Translator.GOOGLE, Translator.DEEPL, Translator.LLM],
+        default_factory=lambda: [Translator.YOUDAO, Translator.GOOGLE, Translator.DEEPL, Translator.LLM, Translator.OLLAMA],
         title="翻译服务",
     )
     deepl_key: str = Field(default="", title="Deepl密钥")
@@ -71,10 +71,24 @@ class TranslateConfig(BaseModel):
     llm_max_req_sec: float = Field(default=1, title="LLM 每秒最大请求数")
     llm_max_try: int = Field(default=5, title="LLM 最大尝试次数")
     llm_temperature: float = Field(default=0.2, title="LLM 温度")
+    
+    # Ollama 配置
+    ollama_url: HttpUrl = Field(default=HttpUrl("http://localhost:11434"), title="Ollama API Host")
+    ollama_model: str = Field(default="qwen2.5:7b", title="Ollama 模型名称")
+    ollama_prompt: str = Field(
+        default="请将以下文本翻译为{lang}。只输出翻译结果，不要任何解释。\n{content}",
+        title="Ollama 提示词",
+    )
+    ollama_read_timeout: int = Field(default=120, title="Ollama 读取超时 (秒)", description="本地模型生成耗时较长, 建议设置较大值")
+    ollama_max_req_sec: float = Field(default=0.5, title="Ollama 每秒最大请求数")
+    ollama_max_try: int = Field(default=3, title="Ollama 最大尝试次数")
+    ollama_temperature: float = Field(default=0.3, title="Ollama 温度")
 
     def model_post_init(self, context) -> None:
         if self.llm_max_req_sec <= 0:
             self.llm_max_req_sec = 1
+        if self.ollama_max_req_sec <= 0:
+            self.ollama_max_req_sec = 0.5
 
 
 class SiteConfig(BaseModel):

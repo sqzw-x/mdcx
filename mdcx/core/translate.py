@@ -6,7 +6,7 @@ import traceback
 
 import zhconv
 
-from ..base.translate import deepl_translate, google_translate, llm_translate, youdao_translate
+from ..base.translate import deepl_translate, google_translate, llm_translate, ollama_translate, youdao_translate
 from ..base.web import get_actorname, get_yesjav_title
 from ..config.enums import FieldRule, Language, TagInclude
 from ..config.manager import manager
@@ -292,6 +292,8 @@ async def translate_title_outline(json_data: CrawlersResult, cd_part: str, movie
                 t, o, r = await youdao_translate(trans_title, trans_outline)
             elif each == Translator.LLM:  # 使用 llm 翻译
                 t, o, r = await llm_translate(trans_title, trans_outline)
+            elif each == Translator.OLLAMA:  # 使用 ollama 翻译
+                t, o, r = await ollama_translate(trans_title, trans_outline)
             elif each == Translator.DEEPL:  # 使用deepl翻译
                 t, o, r = await deepl_translate(trans_title, trans_outline, "JA")
             else:  # 使用 google 翻译

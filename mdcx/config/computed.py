@@ -2,7 +2,7 @@ import re
 
 import httpx
 
-from ..llm import LLMClient
+from ..llm import LLMClient, OllamaClient
 from ..manual import ManualConfig
 from ..signals import signal
 from ..utils import executor, get_random_headers
@@ -24,6 +24,13 @@ class Computed:
             proxy=proxy,
             timeout=httpx.Timeout(config.timeout, read=config.translate_config.llm_read_timeout),
             rate=(max(config.translate_config.llm_max_req_sec, 1), max(1, 1 / config.translate_config.llm_max_req_sec)),
+        )
+
+        # 初始化 Ollama 客户端
+        self.ollama_client = OllamaClient(
+            base_url=config.translate_config.ollama_url.unicode_string(),
+            timeout=httpx.Timeout(config.timeout, read=config.translate_config.ollama_read_timeout),
+            rate=(max(config.translate_config.ollama_max_req_sec, 0.1), max(1, 1 / config.translate_config.ollama_max_req_sec)),
         )
 
         self.async_client = AsyncWebClient(
