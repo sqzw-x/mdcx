@@ -231,8 +231,21 @@ class BuildManager:
             f"dist/{self.app_name}.dmg",
             f"dist/{self.app_name}.app",
         ]
-        self._run_command(cmd, error_msg="DMG 文件创建失败")
-        logger.info(f"✅ DMG 文件创建成功! 耗时: {int(time.time() - dmg_start)}秒")
+        
+        # 重试机制：解决 GitHub Actions macOS runner 中的 "Resource busy" 问题
+        # 参考: https://github.com/actions/runner-images/issues/7522
+        max_tries = 10
+        for attempt in range(1, max_tries + 1):
+            if attempt > 1:
+                logger.warning(f"重试创建 DMG 文件 (尝试 {attempt}/{max_tries})...")
+                time.sleep(2)  # 等待 2 秒后重试
+            
+            result = self._run_command(cmd, error_msg=None)
+            if result is not False:
+                logger.info(f"✅ DMG 文件创建成功! 耗时: {int(time.time() - dmg_start)}秒")
+                break
+        else:
+            raise BuildError(f"DMG 文件创建失败: 重试 {max_tries} 次后仍然失败")
 
         # 验证DMG文件
         dmg_path = Path(f"dist/{self.app_name}.dmg")
