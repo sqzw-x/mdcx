@@ -2189,6 +2189,10 @@ class MyMAinWindow(QMainWindow):
             self.Ui.label_javdb_cookie_result.setText(tips)
             return tips
         # self.Ui.pushButton_check_javdb_cookie.setEnabled(False)
+        if "fc2ppvdb_session" in input_cookie:
+            tips = "✅ 作为 FC2PPVDB Cookie 使用"
+            self.Ui.label_javdb_cookie_result.setText(tips)
+            return tips
         tips = "✅ 连接正常！"
         header = {"cookie": input_cookie}
         javdb_url = manager.config.get_site_url(Website.JAVDB, "https://javdb.com") + "/v/D16Q5?locale=zh"

@@ -254,6 +254,12 @@ class FileScraper:
         if not reduced.year and (r := re.search(r"\d{4}", reduced.release)):
             reduced.year = r.group()
 
+        # 处理 mosaic
+        for site, result in all_res.items():
+            if mosaic := result.mosaic:
+                reduced.mosaic = mosaic
+                break
+
         # 使用 actors 字段补全 all_actors, 理想情况下前者应该是后者的子集
         # 对 actors 的所有后处理都需要同样地应用到 all_actors
         reduced.all_actors = list(dict.fromkeys(chain(reduced.all_actors, reduced.actors)))
@@ -394,6 +400,10 @@ class FileScraper:
         if appoint_number:
             number = appoint_number
         res.number = number  # 此处设置
+
+        # 从res获取mosaic
+        if res.mosaic == "无码":
+            wuma = True
 
         # 马赛克
         if leak:
