@@ -523,6 +523,7 @@ class Website(Enum):
     DAHLIA = "dahlia"
     GETCHU_DMM = "getchu_dmm"
     OFFICIAL = "official"
+    THEJAVDB_API = "thejavdb_api"
 
 
 class Language(Enum):

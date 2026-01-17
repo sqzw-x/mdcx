@@ -1660,6 +1660,7 @@ class MyMAinWindow(QMainWindow):
   <li>mywife</li>
   <li>prestige</li>
   <li>theporndb</li>
+  <li>thejavdb_api</li>
   <li>xcity</li>
   <li>dahlia</li>
   <li>getchu_dmm</li>
@@ -1983,7 +1984,8 @@ class MyMAinWindow(QMainWindow):
                 "mgstage": ["https://www.mgstage.com", ""],
                 "getchu": ["http://www.getchu.com", ""],
                 "theporndb": ["https://api.theporndb.net", ""],
-                "avsox": [executor.run(get_avsox_domain()), ""],
+            "thejavdb_api": ["https://api.thejavdb.net", ""],
+            "avsox": [executor.run(get_avsox_domain()), ""],
                 "xcity": ["https://xcity.jp", ""],
                 "7mmtv": ["https://7mmtv.sx", ""],
                 "mdtv": ["https://www.mdpjzip.xyz", ""],
@@ -2048,6 +2050,7 @@ class MyMAinWindow(QMainWindow):
             net_info["airav_cc"][0] += "/playon.aspx?hid=44733"
             net_info["javlibrary"][0] += "/cn/?v=javme2j2tu"
             net_info["kin8"][0] += "/moviepages/3681/index.html"
+            net_info["thejavdb_api"][0] += "/v1/movies?q=SSIS-001"
 
             for name, each in net_info.items():
                 host_address = each[0].replace("https://", "").replace("http://", "").split("/")[0]
